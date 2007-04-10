@@ -1,11 +1,10 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -91,7 +90,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
             }
 
             @Override
-            public void handleFutureFailure(ExecutionException e) {
+            public void handleExecutionException(ExecutionException e) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping failed to: " + addr, e);
                 }
@@ -128,9 +127,9 @@ class PassiveDHTNodeRouteTable implements RouteTable {
      */
     private synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
-        boolean removed = bucket.removeActiveContact(nodeId);
+        boolean removed = bucket.remove(nodeId);
 
-        if (removed) {
+        if(removed) {
             Contact mrs = bucket.getMostRecentlySeenCachedContact();
             if (mrs != null) {
                 removed = bucket.removeCachedContact(mrs.getNodeID());
@@ -138,9 +137,6 @@ class PassiveDHTNodeRouteTable implements RouteTable {
                 
                 bucket.addActiveContact(mrs);
             }
-        } else {
-            removed = bucket.removeCachedContact(nodeId);
-            assert (removed == true);
         }
     }
     
@@ -179,7 +175,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.get(nodeId);
     }
 
-    public synchronized List<Contact> getActiveContacts() {
+    public synchronized Collection<Contact> getActiveContacts() {
         return delegate.getActiveContacts();
     }
 
@@ -191,11 +187,11 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.getBuckets();
     }
 
-    public synchronized List<Contact> getCachedContacts() {
+    public synchronized Collection<Contact> getCachedContacts() {
         return delegate.getCachedContacts();
     }
 
-    public synchronized List<Contact> getContacts() {
+    public synchronized Collection<Contact> getContacts() {
         return delegate.getContacts();
     }
 
@@ -203,7 +199,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.getLocalNode();
     }
 
-    public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
+    public synchronized Collection<KUID> getRefreshIDs(boolean bootstrapping) {
         return delegate.getRefreshIDs(bootstrapping);
     }
 
@@ -231,7 +227,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.select(nodeId);
     }
     
-    public synchronized List<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
+    public synchronized Collection<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
         return delegate.select(nodeId, count, aliveContacts);
     }
     

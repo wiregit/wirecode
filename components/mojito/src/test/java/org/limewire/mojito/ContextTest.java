@@ -2,6 +2,7 @@ package org.limewire.mojito;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -72,7 +73,7 @@ public class ContextTest extends MojitoTestCase {
                 if (i != index) {
                     Context dht = (Context)dhts.get(i);
                     RouteTable routeTable = dht.getRouteTable();
-                    List<Contact> nodes = routeTable.getContacts();
+                    Collection<Contact> nodes = routeTable.getContacts();
                     boolean flag = false;
                     for (Contact node : nodes) {
                         if (node.isShutdown()) {

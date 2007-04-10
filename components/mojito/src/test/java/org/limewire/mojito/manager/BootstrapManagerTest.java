@@ -124,14 +124,14 @@ public class BootstrapManagerTest extends MojitoTestCase {
         RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
         for(int i= 1; i < 5; i++) {
-            node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 
                     0, Contact.DEFAULT_FLAG);
             rt.add(node);
         }
         //add good node
-        node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN,
+        node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.ZERO,
                 BOOTSTRAP_DHT.getLocalNodeID(),
                 BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
@@ -148,12 +148,12 @@ public class BootstrapManagerTest extends MojitoTestCase {
         RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
         for(int i= 1; i < 100; i++) {
-            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i));
             rt.add(node);
         }
-        node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+        node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(),
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
@@ -16,16 +16,13 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.dht.DHTControllerStub;
-import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class LimeDHTBootstrapperTest extends DHTTestCase {
     
     private static Context dhtContext;
     
-    private LimeDHTBootstrapper bootstrapper;
+    private DHTBootstrapperImpl bootstrapper;
     
     public LimeDHTBootstrapperTest(String name) {
         super(name);
@@ -43,10 +40,9 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
-        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht), 
-                new DHTEventDispatcherStub());
+        bootstrapper = new DHTBootstrapperImpl(new DHTControllerStub(dht));
         dhtContext = (Context)dht;
-        dhtContext.bind(new InetSocketAddress("localhost", 2000));
+        dhtContext.bind(new InetSocketAddress(2000));
         dhtContext.start();
     }
 
@@ -64,20 +60,25 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
         Thread.sleep(300);
         assertTrue((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
-        //now emulate reception of a DHT node from the Gnutella network
+        
+        // Now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue("ping future should be cancelled", future.isCancelled());
+        
         Thread.sleep(200);
         future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
-        assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
+        assertFalse("Should not be waiting", bootstrapper.isWaitingForNodes());
+        
         //should be bootstrapping
         assertTrue(dhtContext.isBootstrapping() || dhtContext.isBootstrapped());
+        
         //now try adding more hosts -- should keep them but not bootstrap
         for(int i = 0; i < 30; i++) {
             bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
         }
         assertFalse(bootstrapper.isWaitingForNodes());
         assertFalse(future.isCancelled());
+        
         //finish bootstrap
         future.get();
         assertTrue(dhtContext.isBootstrapped());
@@ -107,7 +108,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //only first hex counts
         KUID id = KUID.createWithHexString("03ED9650238A6C576C987793C01440A0EA91A1FB");
-        Contact localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, id, 0, false);
+        Contact localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         
         bootstrapper.bootstrap();
@@ -118,7 +119,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //change first hex. Should point to last elem of the list
         id = KUID.createWithHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB");
-        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, id, 0, false);
+        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         addr = (InetSocketAddress) bootstrapper.getSimppHost();
         address = addr.getHostName();

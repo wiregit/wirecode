@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.DHTBackendException;
+import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.StatsResponse;
@@ -44,6 +45,10 @@ public class StatsResponseHandler extends AbstractResponseHandler<StatsResult> {
         super(context);
     }
     
+    @Override
+    protected void start() throws DHTException {
+    }
+
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         if (LOG.isTraceEnabled()) {

@@ -39,12 +39,12 @@ public class PingRequestImpl extends AbstractRequestMessage
 
     public PingRequestImpl(Context context,
             Contact contact, MessageID messageId) {
-        super(context, OpCode.PING_REQUEST, contact, messageId);
+        super(context, OpCode.PING_REQUEST, contact, messageId, Version.ZERO);
     }
     
     public PingRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.PING_REQUEST, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.PING_REQUEST, src, messageId, msgVersion, in);
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {

@@ -46,14 +46,14 @@ public class StatsResponseImpl extends AbstractResponseMessage
 
     public StatsResponseImpl(Context context, 
             Contact contact, MessageID messageId, byte[] statistics) {
-        super(context, OpCode.STATS_RESPONSE, contact, messageId);
+        super(context, OpCode.STATS_RESPONSE, contact, messageId, Version.ZERO);
 
         this.statistics = statistics;
     }
 
     public StatsResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.STATS_RESPONSE, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_RESPONSE, src, messageId, msgVersion, in);
         
         byte[] s = in.readStatistics();
         

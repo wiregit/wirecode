@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -7,18 +7,20 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.db.DHTValueFactory;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
@@ -34,9 +36,7 @@ import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.dht.DHTManagerStub;
-import com.limegroup.gnutella.dht.DHTTestCase;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController.RandomNodeAdder;
+import com.limegroup.gnutella.dht.AbstractDHTController.RandomNodeAdder;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class AbstractDHTControllerTest extends DHTTestCase {
@@ -80,8 +80,9 @@ public class AbstractDHTControllerTest extends DHTTestCase {
                 controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
             }
             Thread.sleep(500);
+            
             //should have started the Random node adder
-            RandomNodeAdder nodeAdder = controller.getRandomNodeAdder();
+            RandomNodeAdder nodeAdder = (RandomNodeAdder)PrivilegedAccessor.getValue(controller, "dhtNodeAdder");
             assertNotNull(nodeAdder);
             assertTrue("Node adder should be running", nodeAdder.isRunning());
             //should have pinged all hosts
@@ -119,7 +120,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void bind(SocketAddress address) throws IOException {}
 
-        public DHTFuture<FindValueResult> get(KUID key) {
+        public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
             return null;
         }
 
@@ -156,7 +157,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         }
 
         public Version getVersion() {
-            return Version.UNKNOWN;
+            return Version.ZERO;
         }
 
         public boolean isBootstrapping() {
@@ -244,11 +245,15 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public Collection<DHTValueEntity> getValues() {
+        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
         }
 
-        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+        public DHTValueEntityPublisher getDHTValueEntityPublisher() {
+            return null;
+        }
+
+        public DHTValueFactory getDHTValueFactory() {
             return null;
         }
 
@@ -256,7 +261,17 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
+        public void setDHTValueEntityPublisher(DHTValueEntityPublisher x) {
+        }
+
+        public void setDHTValueFactory(DHTValueFactory valueFactory) {
+        }
+
         public void setKeyPair(KeyPair keyPair) {
+        }
+
+        public DHTFuture<FindValueResult> get(EntityKey entityKey) {
+            return null;
         }
     }
 }

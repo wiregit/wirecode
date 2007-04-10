@@ -21,10 +21,11 @@ package org.limewire.mojito.manager;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +33,9 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.handler.response.AbstractResponseHandler;
@@ -49,7 +52,7 @@ import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
@@ -68,7 +71,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * must have the same valueId!
      */
     public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
-        StoreTask task = new StoreTask(context, values);
+        StoreProcess task = new StoreProcess(values);
         StoreFuture future = new StoreFuture(task);
         
         context.getDHTExecutorService().execute(future);
@@ -83,7 +86,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         Entry<Contact, SecurityToken> entry 
             = new EntryImpl<Contact, SecurityToken>(node, securityToken);
-        StoreTask task = new StoreTask(context, entry, values);
+        StoreProcess task = new StoreProcess(entry, values);
         
         StoreFuture future = new StoreFuture(task);
         context.getDHTExecutorService().execute(future);
@@ -95,35 +98,35 @@ public class StoreManager extends AbstractManager<StoreResult> {
      */
     private class StoreFuture extends DHTFutureTask<StoreResult> {
         
-        public StoreFuture(Callable<StoreResult> callable) {
-            super(callable);
+        public StoreFuture(DHTTask<StoreResult> task) {
+            super(context, task);
         }
     }
     
     /**
-     * A store operation is a two step operation. The first step is finding 
-     * the k-closest Nodes and the second step is the actual storing. This 
-     * class combines both operations to a single Callable.
+     * 
      */
-    private static class StoreTask implements Callable<StoreResult> {
+    private class StoreProcess implements DHTTask<StoreResult> {
+        
+        private final List<DHTTask> tasks = new ArrayList<DHTTask>();
+        
+        private boolean cancelled = false;
+        
+        private DHTTask.Callback<StoreResult> callback;
         
         private final KUID valueId;
-        
-        private final Context context;
         
         private final Entry<? extends Contact, ? extends SecurityToken> node;
         
         private final Collection<? extends DHTValueEntity> values;
         
-        public StoreTask(Context context, Collection<? extends DHTValueEntity> values) {
-            this(context, null, values);
+        public StoreProcess(Collection<? extends DHTValueEntity> values) {
+            this(null, values);
         }
         
-        public StoreTask(Context context,
-                Entry<? extends Contact, ? extends SecurityToken> node,
+        public StoreProcess(Entry<? extends Contact, ? extends SecurityToken> node,
                 Collection<? extends DHTValueEntity> values) {
             
-            this.context = context;
             this.values = values;
             this.node = node;
             
@@ -150,59 +153,118 @@ public class StoreManager extends AbstractManager<StoreResult> {
             
             this.valueId = valueId;
         }
-        
-        public StoreResult call() throws InterruptedException, DHTException {
-            Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path = null;
+
+        public long getLockTimeout() {
+            return NetworkSettings.STORE_TIMEOUT.getValue();
+        }
+
+        public void start(DHTTask.Callback<StoreResult> callback) {
+            this.callback = callback;
             
             // Regular store operation
             if (node == null) {
-                // Do a lookup for the k-closest Nodes where we're
-                // going to store the value
-                LookupResponseHandler handler = createLookupResponseHandler();
+                findNearestNodes();
                 
-                // Use only alive Contacts from the RouteTable
-                handler.setSelectAliveNodesOnly(true);
-                
-                path = CollectionUtils.getCollection(
-                            ((LookupResult)handler.call()).getEntryPath());
-            
             // Get the SecurityToken and store the value(s) 
             // at the given Node 
             } else if (node.getValue() == null
                     && KademliaSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
-                GetSecurityTokenHandler handler 
-                    = new GetSecurityTokenHandler(context, node.getKey());
-                SecurityToken securityToken = handler.call().getSecurityToken();
+                doGetSecurityToken();
                 
-                if (securityToken == null) {
-                    throw new DHTException("Coult not get SecurityToken from " + node);
-                }
-                
-                Entry<Contact, SecurityToken> entry 
-                    = new EntryImpl<Contact, SecurityToken>(node.getKey(), securityToken);
-                path = Collections.singleton(entry);
-          
-            // Store the value(s) and the given Node
             } else {
-                path = Collections.singleton(node);
+                doStoreOnPath(Collections.singleton(node));
             }
-            
-            // And store the values along the path
-            StoreResponseHandler storeHandler 
-                = new StoreResponseHandler(context, path, values);
-            
-            return storeHandler.call();
         }
         
-        private LookupResponseHandler createLookupResponseHandler() {
-            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
-                return new FindNodeResponseHandler(context, valueId);
-            } else {
-                FindValueResponseHandler handler 
-                    = new FindValueResponseHandler(context, valueId);
+        private void findNearestNodes() {
+            DHTTask.Callback<LookupResult> c = new DHTTask.Callback<LookupResult>() {
+                public void setReturnValue(LookupResult value) {
+                    handleNearestNodes(value);
+                }
                 
-                return handler;
+                public void setException(Throwable t) {
+                    callback.setException(t);
+                }
+            };
+            
+            // Do a lookup for the k-closest Nodes where we're
+            // going to store the value
+            LookupResponseHandler<LookupResult> handler = createLookupResponseHandler();
+            
+            // Use only alive Contacts from the RouteTable
+            handler.setSelectAliveNodesOnly(true);
+            
+            start(handler, c);
+        }
+        
+        private void handleNearestNodes(LookupResult value) {
+            doStoreOnPath(value.getEntryPath());
+        }
+        
+        private void doGetSecurityToken() {
+            DHTTask.Callback<GetSecurityTokenResult> c = new DHTTask.Callback<GetSecurityTokenResult>() {
+                public void setReturnValue(GetSecurityTokenResult value) {
+                    handleSecurityToken(value);
+                }
+                
+                public void setException(Throwable t) {
+                    callback.setException(t);
+                }
+            };
+            
+            GetSecurityTokenHandler handler 
+                = new GetSecurityTokenHandler(context, node.getKey());
+            
+            start(handler, c);
+        }
+        
+        private void handleSecurityToken(GetSecurityTokenResult result) {
+            SecurityToken securityToken = result.getSecurityToken();
+            if (securityToken == null) {
+                callback.setException(new DHTException("Coult not get SecurityToken from " + node));
+            } else {
+                Entry<Contact, SecurityToken> entry 
+                    = new EntryImpl<Contact, SecurityToken>(node.getKey(), securityToken);
+                
+                doStoreOnPath(Collections.singleton(entry));
             }
+        }
+        
+        private void doStoreOnPath(Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path) {
+            // And store the values along the path
+            StoreResponseHandler handler 
+                = new StoreResponseHandler(context, path, values);
+            start(handler, callback);
+        }
+        
+        private <T> void start(DHTTask<T> task, 
+                DHTTask.Callback<T> c) {
+            synchronized (tasks) {
+                if (!cancelled) {
+                    tasks.add(task);
+                    task.start(c);
+                }
+            }
+        }
+        
+        public void cancel() {
+            synchronized (tasks) {
+                cancelled = true;
+                for (DHTTask<?> task : tasks) {
+                    task.cancel();
+                }
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        private LookupResponseHandler<LookupResult> createLookupResponseHandler() {
+            LookupResponseHandler<? extends LookupResult> handler = null;
+            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+                handler = new FindNodeResponseHandler(context, valueId);
+            } else {
+                handler = new FindValueResponseHandler(context, valueId, DHTValueType.ANY);
+            }
+            return (LookupResponseHandler<LookupResult>)handler;
         }
     }
     
@@ -238,7 +300,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
             } else {
                 Collection<KUID> noKeys = Collections.emptySet();
                 return context.getMessageHelper()
-                    .createFindValueRequest(node.getContactAddress(), node.getNodeID(), noKeys);
+                    .createFindValueRequest(node.getContactAddress(), node.getNodeID(), noKeys, DHTValueType.ANY);
             }
         }
         

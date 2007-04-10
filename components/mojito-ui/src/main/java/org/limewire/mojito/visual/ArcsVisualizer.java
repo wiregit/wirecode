@@ -35,6 +35,7 @@ import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.messages.DHTMessage.OpCode;
 
 
 @SuppressWarnings("serial")
@@ -88,6 +89,34 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         context.getMessageDispatcher().addMessageDispatcherListener(arcs);
         return arcs;
+    }
+    
+    public static Stroke getStrokeForOpCode(OpCode opcode) {
+        switch(opcode) {
+            case PING_REQUEST:
+            case PING_RESPONSE:
+                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                        BasicStroke.JOIN_ROUND, 10.0f, 
+                        new float[]{ 2f, 2f }, (float)Math.random() * 10f);
+            case FIND_NODE_REQUEST:
+            case FIND_NODE_RESPONSE:
+                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                        BasicStroke.JOIN_ROUND, 10.0f, 
+                        new float[]{ 1f, 5f, 5f }, (float)Math.random() * 10f);
+                
+            case FIND_VALUE_REQUEST:
+            case FIND_VALUE_RESPONSE:
+                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                        BasicStroke.JOIN_ROUND, 10.0f, 
+                        new float[]{ 5f, 5f }, (float)Math.random() * 10f);
+            case STORE_REQUEST:
+            case STORE_RESPONSE:
+                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                        BasicStroke.JOIN_ROUND, 10.0f, 
+                        new float[]{ 5f, 3f }, (float)Math.random() * 10f);
+            default:
+                return ONE_PIXEL_STROKE;
+        }
     }
     
     private final Object lock = new Object();
@@ -185,16 +214,17 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             return;
         }
         
+        OpCode opcode = evt.getMessage().getOpCode();
         boolean request = (evt.getMessage() instanceof RequestMessage);
         synchronized (lock) {
-            painter.handle(type, nodeId, request);
+            painter.handle(type, nodeId, opcode, request);
         }
     }
     
     private static interface Painter {
         public void paint(Component c, Graphics2D g);
         
-        public void handle(EventType type, KUID nodeId, boolean request);
+        public void handle(EventType type, KUID nodeId, OpCode opcode, boolean request);
         
         public void clear();
     }
@@ -235,9 +265,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             g2.fill(dot);
         }
         
-        public void handle(EventType type, KUID nodeId, boolean request) {
+        public void handle(EventType type, KUID nodeId, OpCode opcode, boolean request) {
             synchronized (nodes) {
-                nodes.add(new ArcNode(dot, type, nodeId, request));
+                nodes.add(new ArcNode(dot, type, nodeId, opcode, request));
             }
         }
         
@@ -256,6 +286,8 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final KUID nodeId;
         
+        private final OpCode opcode;
+        
         private final boolean request;
         
         private final long timeStamp = System.currentTimeMillis();
@@ -264,11 +296,18 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final Ellipse2D.Double circle = new Ellipse2D.Double();
         
-        public ArcNode(Ellipse2D.Double dot, EventType type, KUID nodeId, boolean request) {
+        private final Ellipse2D.Double prxDot = new Ellipse2D.Double();
+        
+        private final Stroke stroke;
+        
+        public ArcNode(Ellipse2D.Double dot, EventType type, KUID nodeId, OpCode opcode, boolean request) {
             this.dot = dot;
             this.type = type;
             this.nodeId = nodeId;
+            this.opcode = opcode;
             this.request = request;
+            
+            this.stroke = getStrokeForOpCode(opcode);
             
             if (nodeId == null) {
                 assert (request && type.equals(EventType.MESSAGE_SEND));
@@ -354,8 +393,13 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 }
             }
 
+            Point2D.Double corner = new Point2D.Double(
+                    localhost.x + 2 * dot.width, localhost.y + 2 * dot.height);
+            
+            this.prxDot.setFrameFromCenter(localhost, corner);
+            
             Shape shape = null;
-            if (!dot.contains(width/2d, nodeY)) {
+            if (!prxDot.contains(width/2d, nodeY)) {
                 arc.setArc(arcX, arcY, bow, distance, start, extent, Arc2D.OPEN);
                 shape = arc;
             } else {
@@ -366,10 +410,14 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             if (shape != null) {
-                g.setStroke(ONE_PIXEL_STROKE);
+                g.setStroke(stroke);
                 g.setColor(new Color(red, green, blue, alpha()));
                 g.draw(shape);
             }
+            
+            //g.setStroke(ONE_PIXEL_STROKE);
+            //g.setColor(Color.red);
+            //g.draw(prxDot);
         }
         
         private void paintLine(Point2D.Double localhost, double width, double height, Graphics2D g) {
@@ -436,13 +484,13 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             g2.fill(dot);
         }
         
-        public void handle(EventType type, KUID nodeId, boolean request) {
+        public void handle(EventType type, KUID nodeId, OpCode opcode, boolean request) {
             if (nodeId == null) {
                 return;
             }
             
             synchronized (nodes) {
-                nodes.add(new CurveNode(dot, type, nodeId, request));
+                nodes.add(new CurveNode(dot, type, nodeId, opcode, request));
             }
         }
         
@@ -463,6 +511,8 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final KUID nodeId;
         
+        private final OpCode opcode;
+        
         private final boolean request;
         
         private final int noise;
@@ -477,11 +527,18 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final Ellipse2D.Double circle = new Ellipse2D.Double();
         
-        public CurveNode(Ellipse2D.Double dot, EventType type, KUID nodeId, boolean request) {
+        private final Ellipse2D.Double prxDot = new Ellipse2D.Double();
+        
+        private final Stroke stroke;
+        
+        public CurveNode(Ellipse2D.Double dot, EventType type, KUID nodeId, OpCode opcode, boolean request) {
             this.dot = dot;
             this.type = type;
             this.nodeId = nodeId;
+            this.opcode = opcode;
             this.request = request;
+            
+            this.stroke = getStrokeForOpCode(opcode);
             
             int noise = GENERATOR.nextInt(50);
             if (GENERATOR.nextBoolean()) {
@@ -538,9 +595,13 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             remote.setLocation(dx, dy);
             
+            Point2D.Double corner = new Point2D.Double(
+                    localhost.x + 3 * dot.width, localhost.y + 3 * dot.height);
+            
+            this.prxDot.setFrameFromCenter(localhost, corner);
             
             Shape shape = null;
-            if (!dot.contains(remote)) {
+            if (!prxDot.contains(remote)) {
                 point.setLocation(cx+noise, cy+noise);
                 curve.setCurve(localhost, point, remote);
                 shape = curve;
@@ -552,10 +613,14 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             if (shape != null) {
-                g2.setStroke(ONE_PIXEL_STROKE);
+                g2.setStroke(stroke);
                 g2.setColor(new Color(red, green, blue, alpha()));
                 g2.draw(shape);
             }
+            
+            //g2.setStroke(ONE_PIXEL_STROKE);
+            //g2.setColor(Color.red);
+            //g2.draw(prxDot);
             
             return System.currentTimeMillis() - timeStamp >= DURATION;
         }
@@ -574,7 +639,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         EventType type = null;
         KUID nodeId = null;
         
-        final int sleep = 1000;
+        final int sleep = 100;
         
         while(true) {
             
@@ -586,7 +651,10 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 type = EventType.MESSAGE_SEND;
             }
             
-            arcs.painter.handle(type, nodeId, true);
+            OpCode opcode = OpCode.valueOf(1 + generator.nextInt(OpCode.values().length-1));
+            //OpCode opcode = OpCode.FIND_NODE_REQUEST;
+            
+            arcs.painter.handle(type, nodeId, opcode, true);
             
             // Sleep a bit...
             //Thread.sleep(sleep);
@@ -595,9 +663,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             // Send every now an then a response
             if (generator.nextBoolean()) {
                 if (type.equals(EventType.MESSAGE_SEND)) {
-                    arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, false);
+                    arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, opcode, false);
                 } else {
-                    arcs.painter.handle(EventType.MESSAGE_SEND, nodeId, false);
+                    arcs.painter.handle(EventType.MESSAGE_SEND, nodeId, opcode, false);
                 }
             }
         }

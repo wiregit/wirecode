@@ -20,8 +20,8 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +67,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         KUID lookupId = request.getLookupID();
         Contact node = request.getContact();
         
-        List<Contact> nodes = Collections.emptyList();
+        Collection<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
                 nodes = ContactUtils.sort(

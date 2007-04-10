@@ -19,8 +19,8 @@
 
 package org.limewire.mojito.routing;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -38,11 +38,10 @@ import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 
-
 /**
- * The BucketRefresher refreshes in periodical intervals 
- * every Bucket that hasn't been touched for a certain amout
- * of time and refreshes it.
+ * The BucketRefresher goes in periodic intervals through all Buckets
+ * and refreshes every Bucket that hasn't been touched for a certain
+ * amount of time.
  */
 public class BucketRefresher implements Runnable {
     
@@ -64,7 +63,7 @@ public class BucketRefresher implements Runnable {
     public void start() {
         synchronized (refreshTask) {
             if (future == null) {
-                long delay = BucketRefresherSettings.RANDOM_REFRESHER_DELAY.getValue();
+                long delay = BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getValue();
                 long initialDelay = delay;
                 
                 if (BucketRefresherSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
@@ -180,7 +179,7 @@ public class BucketRefresher implements Runnable {
          * Starts the refresh
          */
         public synchronized boolean refresh() {
-            List<KUID> list = context.getRouteTable().getRefreshIDs(false);
+            Collection<KUID> list = context.getRouteTable().getRefreshIDs(false);
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " + list.size() + " Buckets to refresh");
@@ -222,7 +221,7 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
             
             if (!next()) {
@@ -230,12 +229,12 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.debug("CancellationException", e);
             stop();
         }
         
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.debug("CancellationException", e);
             stop();
         }

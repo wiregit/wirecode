@@ -20,6 +20,7 @@
 package org.limewire.mojito.db;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -33,6 +34,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
@@ -110,6 +112,8 @@ public class DHTValueManager implements Runnable {
         
         private Iterator<DHTValueEntity> values = null;
         
+        private DHTFutureListener<StoreResult> listener = null;
+        
         private DHTFuture<StoreResult> future = null;
         
         /**
@@ -132,17 +136,67 @@ public class DHTValueManager implements Runnable {
         }
         
         /**
+         * Removes all expired DHTValueEntities from the Database
+         */
+        private void removeExpired(Collection<? extends DHTValueEntity> entities) {
+            Database database = context.getDatabase();
+            synchronized (database) {
+                for (DHTValueEntity entity : entities) {
+                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(entity + " is expired!");
+                        }
+                        
+                        database.remove(entity.getKey(), entity.getSecondaryKey());
+                        databaseStats.EXPIRED_VALUES.incrementStat();
+                    }
+                }
+            }
+        }
+        
+        /**
          * Starts the republishing
          */
         public synchronized void republish() {
-            Database database = context.getDatabase();
-            Collection<DHTValueEntity> c = database.values();
             
-            if (LOG.isInfoEnabled()) {
-                LOG.info(context.getName() + " has " + c.size() + " DHTValues to process");
+            Database database = context.getDatabase();
+            synchronized (database) {
+                // Remove all values that have expired
+                removeExpired(database.values());
             }
             
-            values = c.iterator();
+            // Do not publish values if we're not bootstrapped!
+            if (!context.isBootstrapped()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is not bootstrapped");
+                }
+                
+                stop();
+                return;
+            }
+            
+            // And publish the local values
+            DHTValueEntityPublisher valueEntityPublisher = context.getDHTValueEntityPublisher();
+            Collection<DHTValueEntity> valuesToPublish = valueEntityPublisher.getValuesToPublish();
+            if (valuesToPublish == null) {
+                valuesToPublish = Collections.emptyList();
+            }
+            
+            // The DHTValueEntityPublisher may implement the DHTFutureListener
+            // interface in which case we're adding it to the DHTFuture as well.
+            if (valueEntityPublisher instanceof DHTFutureListener) {
+                listener = (DHTFutureListener<StoreResult>)valueEntityPublisher;
+            } else {
+                listener = null;
+            }
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " has " 
+                        + valuesToPublish.size() + " DHTValues to process");
+            }
+            
+            values = valuesToPublish.iterator();
+            
             next();
         }
         
@@ -158,8 +212,8 @@ public class DHTValueManager implements Runnable {
             }
             
             while(values.hasNext()) {
-                DHTValueEntity value = values.next();
-                if (manage(value)) {
+                DHTValueEntity entry = values.next();
+                if (publish(entry)) {
                     return true;
                 }
             }
@@ -170,63 +224,30 @@ public class DHTValueManager implements Runnable {
         /**
          * Publishes or expires the given DHTValue
          */
-        private boolean manage(DHTValueEntity entity) {
+        private boolean publish(DHTValueEntity entity) {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
-            Database database = context.getDatabase();
-            synchronized(database) {
-                
-                if (!database.contains(entity.getKey(), entity.getSecondaryKey())) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(entity + " is no longer stored in our database");
-                    }
-                    return false;
-                }
-                
-                if (entity.isLocalValue()) {
-                    if (!entity.isRepublishingRequired()) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(entity + " does not require republishing");
-                        }
-                        return false;
-                    }
-                } else {
-                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(entity + " is expired!");
-                        }
-                        
-                        database.remove(entity.getKey(), entity.getSecondaryKey());
-                        databaseStats.EXPIRED_VALUES.incrementStat();
-                        return false;
-                    }
-                }
-            }
-            
-            // Do not publish local values if we're not bootstrapped or
-            // are bootstrapping.
-            if (!context.isBootstrapped() || context.isBootstrapping()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " is not bootstrapped");
-                }
-                
-                return false;
-            }
-            
             databaseStats.REPUBLISHED_VALUES.incrementStat();
             
             future = context.store(entity);
             future.addDHTFutureListener(this);
+            
+            if (listener != null) {
+                future.addDHTFutureListener(listener);
+            }
+            
             return true;
         }
         
         public void handleFutureSuccess(StoreResult result) {
+            
             if (LOG.isInfoEnabled()) {
-                if (result.getNodes().isEmpty()) {
-                    LOG.info("Failed to store " + result.getValues());
-                } else {
+                Collection<? extends Contact> nodes = result.getNodes();
+                if (!nodes.isEmpty()) {
                     LOG.info(result);
+                } else {
+                    LOG.info("Failed to store " + result.getValues());
                 }
             }
             
@@ -235,7 +256,7 @@ public class DHTValueManager implements Runnable {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
 
             if (!(e.getCause() instanceof DHTException)) {
@@ -247,12 +268,12 @@ public class DHTValueManager implements Runnable {
             }
         }
 
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.debug("CancellationException", e);
             stop();
         }
         
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.debug("InterruptedException", e);
             stop();
         }   

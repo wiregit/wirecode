@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.CommonUtils;
 
@@ -493,7 +495,7 @@ public class RouteTableTest extends MojitoTestCase {
             SocketAddress src = new InetSocketAddress("localhost", PORT+i);
             KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
             Vendor vendor = Vendor.UNKNOWN;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
             int instanceId = 0;
             int flags = Contact.DEFAULT_FLAG;
@@ -619,7 +621,7 @@ public class RouteTableTest extends MojitoTestCase {
             KUID key = entry.getKey();
             KUID[] nodeIds = entry.getValue();
             
-            List<Contact> nodes = routeTable.select(key, K);
+            List<Contact> nodes = CollectionUtils.toList(routeTable.select(key, K));
             assertEquals(nodeIds.length, nodes.size());
             
             // Checks also the order
@@ -638,7 +640,7 @@ public class RouteTableTest extends MojitoTestCase {
      * designs!
      */
     public void testRouteTableVsPatricia() throws Exception {
-        List<Contact> nodes = routeTable.getActiveContacts();
+        Collection<Contact> nodes = routeTable.getActiveContacts();
         PatriciaTrie<KUID, Contact> trie = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
         
         for (Contact node : nodes) {
@@ -652,7 +654,7 @@ public class RouteTableTest extends MojitoTestCase {
             KUID key = entry.getKey();
             KUID[] nodeIds = entry.getValue();
             
-            List<Contact> nodes1 = routeTable.select(key, K);
+            List<Contact> nodes1 = CollectionUtils.toList(routeTable.select(key, K));
             assertEquals(nodeIds.length, nodes1.size());
             
             List<Contact> nodes2 = TrieUtils.select(trie, key, K);
@@ -679,7 +681,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> liveContacts = new ArrayList<Contact>();
         for(int i = 0; i < 10; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
             liveContacts.add(node);
@@ -688,7 +690,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> deadContacts = new ArrayList<Contact>();;
         for(int i = 0; i < 400; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
             node.handleFailure();
             node.handleFailure();
@@ -700,7 +702,7 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         //test select only alive nodes
-        List<Contact> nodes = routeTable.select(KUID.createRandomID(), 500, true);
+        Collection<Contact> nodes = routeTable.select(KUID.createRandomID(), 500, true);
         assertNotContains(nodes, routeTable.getLocalNode());
         assertEquals(10, nodes.size());
         
@@ -731,7 +733,7 @@ public class RouteTableTest extends MojitoTestCase {
         int port = 3000;
         for(String nodeId : NODE_IDS) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createWithHexString(nodeId),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createWithHexString(nodeId),
                     new InetSocketAddress("localhost", port++), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
         }
@@ -741,7 +743,7 @@ public class RouteTableTest extends MojitoTestCase {
         
         // Select a random non-local Contact
         Random generator = new Random();
-        List<Contact> active = routeTable.getActiveContacts();
+        List<Contact> active = CollectionUtils.toList(routeTable.getActiveContacts());
         Contact node = null;
         for(int i = 0; i < 10 && node == null; i++) {
             int rand = generator.nextInt(active.size());

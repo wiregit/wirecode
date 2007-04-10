@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Contact;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
  * Controls this DHT node. 
@@ -44,14 +46,19 @@ public interface DHTController {
     public void addPassiveDHTNode(SocketAddress hostAddress);
     
     /**
+     * Adds the given Contact to the local RouteTable
+     */
+    public void addContact(Contact node);
+    
+    /**
      * Sends the updated capabilities to our connections (Gnutella)
      */
     public void sendUpdatedCapabilities();
     
     /**
-     * Returns whether this Node is an active Node or not
+     * Returns the mode of the DHTController
      */
-    public boolean isActiveNode();
+    public DHTMode getDHTMode();
     
     /**
      * Returns whether this Node is running or not
@@ -79,7 +86,6 @@ public interface DHTController {
      * NOTE: This is for internal use only and should be used only
      * within the dht.impl package. The DHT should not be handled directly
      * by external classes.
-     * 
      */
     public MojitoDHT getMojitoDHT();
 }

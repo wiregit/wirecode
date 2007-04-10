@@ -104,7 +104,6 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
     @Override
     protected synchronized void start() throws DHTException {
-        super.start();
         
         if (!pinger.hasNext()) {
             throw new DHTException("No hosts to ping");

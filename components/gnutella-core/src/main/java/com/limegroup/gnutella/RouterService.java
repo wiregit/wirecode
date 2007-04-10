@@ -47,7 +47,9 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -268,10 +270,14 @@ public class RouterService {
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
 
     /**
-     * Initialize the class that manages the DHT.
+     * The DHTManager that manages the DHT and its various modes
      */
-    private static DHTManager dhtManager = 
-        new LimeDHTManager(ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+    private static DHTManager dhtManager;
+    
+    /**
+     * The AltLocFinder utilitizes the DHT to find Alternate Locations
+     */
+    private static AltLocFinder altLocFinder;
     
     private static MessageDispatcher messageDispatcher;
     
@@ -372,6 +378,10 @@ public class RouterService {
 		RouterService.callback = callback;
         fileManager.addFileEventListener(callback);
         RouterService.setMessageRouter(router);
+        
+        dhtManager = new DHTManagerImpl(
+                ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+        altLocFinder = new AltLocFinder(dhtManager);
         
         manager.addEventListener(callback);
         manager.addEventListener(dhtManager);
@@ -650,6 +660,13 @@ public class RouterService {
      */
     public static DHTManager getDHTManager() {
         return dhtManager;
+    }
+    
+    /**
+     * Accessor for the <tt>AltLocFinder</tt> instance.
+     */
+    public static AltLocFinder getAltLocFinder() {
+        return altLocFinder;
     }
     
 	/**
@@ -1796,15 +1813,18 @@ public class RouterService {
     public static boolean isDHTNode() {
         if(dhtManager != null) {
             return dhtManager.isRunning();
-        } else return false;
+        } 
+        return false;
     }
     
     /**
-     * Tells whether this node is *actively* connected to the DHT,
-     * i.e. is part of the global DHT routing table 
+     * Returns the current mode of the DHT
      */
-    public static boolean isActiveDHTNode() {
-        return dhtManager.isActiveNode();
+    public static DHTMode getDHTMode() {
+        if (dhtManager != null) {
+            return dhtManager.getDHTMode();
+        }
+        return DHTMode.INACTIVE;
     }
     
     /**
@@ -1816,7 +1836,9 @@ public class RouterService {
         if(dhtManager != null) {
             return (dhtManager.isRunning()
                     && dhtManager.isBootstrapped());
-        } else return false;
+        }
+        
+        return false;
     }
     
 	/**
@@ -2073,11 +2095,11 @@ public class RouterService {
         return NIODispatcher.instance().getNumPendingTimeouts();
     }
     
-    public static void startDHT(boolean activeMode) {
-        dhtManager.start(activeMode);
+    public static void startDHT(DHTMode mode) {
+        getDHTManager().start(mode);
     }
     
     public static void shutdownDHT() {
-        dhtManager.stop();
+        getDHTManager().stop();
     }
 }

@@ -5,10 +5,10 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -24,7 +24,7 @@ import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
@@ -98,15 +98,15 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
-            KUID lookupId, Collection<KUID> keys) {
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
         return new FindValueRequestWireImpl(
-                delegate.createFindValueRequest(src, dst, lookupId, keys));
+                delegate.createFindValueRequest(src, dst, lookupId, keys, valueType));
     }
 
     public FindValueResponse createFindValueResponse(Contact src, Contact dst, 
-            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
+            MessageID messageId, float requestLoad, Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
         return new FindValueResponseWireImpl(
-                delegate.createFindValueResponse(src, dst, messageId, keys, values, requestLoad));
+                delegate.createFindValueResponse(src, dst, messageId, requestLoad, entities, secondaryKeys));
     }
 
     public PingRequest createPingRequest(Contact src, SocketAddress dst) {
@@ -137,7 +137,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public StoreResponse createStoreResponse(Contact src, Contact dst, 
-            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
+            MessageID messageId, Collection<StoreStatusCode> status) {
         return new StoreResponseWireImpl(
                 delegate.createStoreResponse(src, dst, messageId, status));
     }

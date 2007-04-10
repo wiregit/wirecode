@@ -235,16 +235,23 @@ public class ManagedConnection extends Connection
     private volatile long _busyTime = -1;
 
     /**
-     * whether this connection is a push proxy for somebody
+     * Whether this connection is a push proxy for me
      */
-    private volatile boolean _pushProxy;
+    private volatile boolean myPushProxy;
 
-    /** The class wide static counter for the number of udp connect back 
+    /**
+     * Whether I am a push proxy for this connection
+     */
+    private volatile boolean pushProxyFor;
+    
+    /** 
+     * The class wide static counter for the number of udp connect back 
      *  request sent.
      */
     private static int _numUDPConnectBackRequests = 0;
 
-    /** The class wide static counter for the number of tcp connect back 
+    /** 
+     * The class wide static counter for the number of tcp connect back 
      *  request sent.
      */
     private static int _numTCPConnectBackRequests = 0;
@@ -1108,7 +1115,7 @@ public class ManagedConnection extends Connection
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(),
                               RouterService.getMessageRouter()._clientGUID)) {
-                _pushProxy = true;
+                myPushProxy = true;
             }
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
@@ -1360,11 +1367,27 @@ public class ManagedConnection extends Connection
         _lastQRPTableSent = qrt;
     }
 
-    
-    public boolean isPushProxy() {
-        return _pushProxy;
+    /**
+     * Returns whether or not this connection is a push proxy for me
+     */
+    public boolean isMyPushProxy() {
+        return myPushProxy;
     }
 
+    /**
+     * Returns whether or not I'm a push proxy for this connection
+     */
+    public boolean isPushProxyFor() {
+        return pushProxyFor;
+    }
+    
+    /**
+     * Sets whether or not I'm a push proxy for this connection
+     */
+    public void setPushProxyFor(boolean pushProxyFor) {
+        this.pushProxyFor = pushProxyFor;
+    }
+    
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}

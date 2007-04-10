@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.File;
 import java.net.InetSocketAddress;
@@ -24,9 +24,9 @@ import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTTestCase;
+import com.limegroup.gnutella.dht.PassiveDHTNodeController;
+import com.limegroup.gnutella.dht.PassiveDHTNodeRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -60,12 +60,12 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testNodesPersistence() throws Exception{
-        int numPersistedNodes = DHTSettings.NUM_PERSISTED_NODES.getValue();
+        int numPersistedNodes = DHTSettings.MAX_PERSISTED_NODES.getValue();
         DHTSettings.PERSIST_DHT.setValue(true);
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         try {
             Context context = (Context) controller.getMojitoDHT();
             Contact localContact = context.getLocalNode();
@@ -82,7 +82,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             Thread.sleep(5000);
             controller.stop();
             //now nodeID should have changed and we should have persisted SOME nodes
-            controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+            controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
             assertNotEquals(nodeID, context.getLocalNodeID());
@@ -103,7 +103,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //   Total: 22 Nodes
         
         PassiveDHTNodeController controller = new PassiveDHTNodeController(
-                Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         try {
@@ -115,7 +115,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             // Bootstrap the 20 Nodes from the one Bootstrap Node
             MojitoDHT dht = null;
             for(int i = 0; i < 20; i++) {
-                dht = MojitoFactory.createDHT("Mojito-"+i, Vendor.UNKNOWN, Version.UNKNOWN);
+                dht = MojitoFactory.createDHT("Mojito-"+i, Vendor.UNKNOWN, Version.ZERO);
                 int port = 2000+i;
                 dht.bind(port);
                 dht.start();

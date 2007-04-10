@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,8 +26,7 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -39,7 +38,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * and local database. 
  * 
  */
-class ActiveDHTNodeController extends AbstractDHTController {
+public class ActiveDHTNodeController extends AbstractDHTController {
     
     /**
      * The file to persist this Mojito DHT
@@ -48,15 +47,15 @@ class ActiveDHTNodeController extends AbstractDHTController {
     
     public ActiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher);
+        super(vendor, version, dispatcher, DHTMode.ACTIVE);
     }
     
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         
-        if (DHTSettings.PERSIST_DHT.getValue() && 
-                FILE.exists() && FILE.isFile()) {
+        if (DHTSettings.PERSIST_DHT.getValue() 
+                && FILE.exists() && FILE.isFile()) {
             ObjectInputStream in = null;
             try {
                 in = new ObjectInputStream(
@@ -64,40 +63,20 @@ class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureInputStream(
                                 new FileInputStream(FILE))));
                 
-                RouteTable routeTable = (RouteTable)in.readObject();
-                Database database = (Database)in.readObject();
-
-                dht.setRouteTable(routeTable);
-                dht.setDatabase(database);
-                
+                int routeTableVersion = in.readInt();
+                if (routeTableVersion >= getRouteTableVersion()) {
+                    RouteTable routeTable = (RouteTable)in.readObject();
+                    Database database = (Database)in.readObject();
+    
+                    dht.setRouteTable(routeTable);
+                    dht.setDatabase(database);
+                }
             } catch (Throwable ignored) {
             } finally {
                 IOUtils.close(in);
             }
         }
         return dht;
-    }
-
-
-    /**
-     * @see AbstractDHTController.start
-     * 
-     * Adds the following precondition to start an active DHT node: 
-     * We are not an ultrapeer while excluding ultrapeers from the active network
-     * 
-     */
-    @Override
-    public void start() {
-        //if we want to connect actively, we should be active DHT capable
-        if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !DHTSettings.ACTIVE_DHT_CAPABLE.getValue()) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize ACTIVE DHT - node is not DHT active capable");
-            }
-            return;
-        }
-        
-        super.start();
     }
 
     @Override
@@ -119,6 +98,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureOutputStream(
                                 new FileOutputStream(FILE))));
                 
+                out.writeInt(getRouteTableVersion());
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
                     out.writeObject(dht.getDatabase());
@@ -129,10 +109,6 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 IOUtils.close(out);
             }
         }
-    }
-    
-    public boolean isActiveNode() {
-        return true;
     }
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {

@@ -107,7 +107,7 @@ public final class DatabaseSettings extends MojitoProps {
      * computation of the value request load
      */
     public static final FloatSetting VALUE_REQUEST_LOAD_SMOOTHING_FACTOR 
-        = FACTORY.createFloatSetting("value_request_load_smoothing_factor", 1/4f);
+        = FACTORY.createFloatSetting("value_request_load_smoothing_factor", 0.25f);
     
     /**
      * The delay (in sec) after which we null back the value request load

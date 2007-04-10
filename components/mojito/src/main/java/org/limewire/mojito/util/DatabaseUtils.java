@@ -19,10 +19,13 @@
 
 package org.limewire.mojito.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -40,11 +43,6 @@ public class DatabaseUtils {
      * Returns the expiration time of the given DHTValue
      */
     public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
-        // Local DHTValues don't expire
-        if (entity.isLocalValue()) {
-            return Long.MAX_VALUE;
-        }
-        
         KUID primaryKey = entity.getKey();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
@@ -85,7 +83,18 @@ public class DatabaseUtils {
     /**
      * 
      */
-    public static boolean isRepublishingRequired(long lastRepublishingTime, int locationCount) {
+    public static boolean isPublishingRequired(DHTValueEntity entity) {
+        return isPublishingRequired(entity.getPublishTime(), entity.getLocations().size());
+    }
+    
+    /**
+     * 
+     */
+    public static boolean isPublishingRequired(long lastRepublishingTime, int locationCount) {
+        if (lastRepublishingTime <= 0L || locationCount <= 0) {
+            return true;
+        }
+        
         long t = ((locationCount 
                 * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());
@@ -97,5 +106,36 @@ public class DatabaseUtils {
         long time = lastRepublishingTime + nextPublishTime;
         
         return System.currentTimeMillis() >= time;
+    }
+
+    public static boolean isDHTValueType(DHTValueType valueType, DHTValueEntity entity) {
+        return valueType.equals(DHTValueType.ANY) 
+                || valueType.equals(entity.getValue().getValueType());
+    }
+
+    public static Collection<? extends DHTValueEntity> filter(DHTValueType valueType, 
+            Collection<? extends DHTValueEntity> entities) {
+        
+        if (valueType.equals(DHTValueType.ANY)) {
+            return entities;
+        }
+        
+        List<DHTValueEntity> filtered = new ArrayList<DHTValueEntity>(entities.size());
+        for (DHTValueEntity entity : entities) {
+            if (isDHTValueType(valueType, entity)) {
+                filtered.add(entity);
+            }
+        }
+        return filtered;
+    }
+    
+    public static DHTValueEntity getFirstEntityFor(DHTValueType valueType, 
+            Collection<? extends DHTValueEntity> entities) {
+        for (DHTValueEntity entity : entities) {
+            if (isDHTValueType(valueType, entity)) {
+                return entity;
+            }
+        }
+        return null;
     }
 }

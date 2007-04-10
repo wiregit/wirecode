@@ -26,7 +26,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.util.DatabaseUtils;
 
 /**
  * The default implementation of DHTValueEntity
@@ -264,21 +263,6 @@ public class DHTValueEntityImpl implements DHTValueEntity {
     }
     
     /**
-     * Returns true if this value needs to be republished
-     */
-    public boolean isRepublishingRequired() {
-        if (!isLocalValue()) {
-            return false;
-        }
-        
-        if (publishTime == 0L) {
-            return true;
-        }
-        
-        return DatabaseUtils.isRepublishingRequired(publishTime, getLocations().size());
-    }
-    
-    /**
      * Creates a new DHTValueEntity with the given new creator
      * if this is a local value
      */
@@ -302,7 +286,9 @@ public class DHTValueEntityImpl implements DHTValueEntity {
         buffer.append("Primary Key: ").append(getKey()).append("\n");
         buffer.append("Secondary Key: ").append(getSecondaryKey()).append("\n");
         buffer.append("Local: ").append(isLocalValue()).append("\n");
-        buffer.append("Locations: ").append(getLocations()).append("\n");
+        buffer.append("Locations[").append(getLocations().size()).append("]: ")
+            .append(getLocations()).append("\n");
+        
         buffer.append("Creation time: ").append(getCreationTime()).append("\n");
         buffer.append("Publish time: ").append(getPublishTime()).append("\n");
         buffer.append("---\n").append(getValue()).append("\n");

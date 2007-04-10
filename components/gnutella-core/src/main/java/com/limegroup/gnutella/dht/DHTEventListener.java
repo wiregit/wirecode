@@ -2,8 +2,13 @@ package com.limegroup.gnutella.dht;
 
 import java.util.EventListener;
 
-public interface DHTEventListener extends EventListener{
+/**
+ * An interface to listen for DHTEvents
+ */
+public interface DHTEventListener extends EventListener {
     
+    /**
+     * Called for DHT events
+     */
     public void handleDHTEvent(DHTEvent evt);
-
 }

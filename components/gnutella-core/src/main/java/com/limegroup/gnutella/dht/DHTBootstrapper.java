@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 /**
  * The DHT Bootstrapper bootstraps this DHT node to the network
  */
-public interface DHTBootstrapper {
+interface DHTBootstrapper {
     
     /**
      * Bootstraps this node to the network.

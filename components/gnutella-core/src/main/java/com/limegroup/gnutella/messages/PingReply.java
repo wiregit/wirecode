@@ -27,6 +27,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
@@ -1032,15 +1033,15 @@ public class PingReply extends Message implements Serializable, IpPort {
         byte[] payload = new byte[3];
         
         // put version
-        int version = RouterService.getDHTManager().getVersion().shortValue();
+        DHTManager manager = RouterService.getDHTManager();
+        int version = manager.getVersion().shortValue();
+        
         ByteOrder.short2beb((short)version, payload, 0);
         
         if(RouterService.isMemberOfDHT()) {
-            if(RouterService.isActiveDHTNode()) {
-                payload[2] = DHTMode.ACTIVE.toByte();
-            } else { //passive node
-                payload[2] = DHTMode.PASSIVE.toByte();
-            }
+            DHTMode mode = manager.getDHTMode();
+            assert (mode != null);
+            payload[2] = mode.toByte();
         } else {
             payload[2] = DHTMode.INACTIVE.toByte();
         }

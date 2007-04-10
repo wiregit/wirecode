@@ -223,7 +223,7 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
             KUID nodeId = KUID.createWithHexString(id);
             SocketAddress addr = new InetSocketAddress("localhost", 5000);
             routeTable.add(ContactFactory.createLiveContact(
-                    addr, Vendor.UNKNOWN, Version.UNKNOWN, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+                    addr, Vendor.UNKNOWN, Version.ZERO, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}
     	
     	assertEquals(490, routeTable.size());

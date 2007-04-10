@@ -17,39 +17,42 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.result;
-
-import java.util.Collection;
-
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.util.CollectionUtils;
-
+package org.limewire.mojito.concurrent;
 
 /**
- * The result of a GetValue operation
+ * A DHTTask is an asynchronous non-blocking Task
  */
-public class GetValueResult implements Result {
+public interface DHTTask<T> {
     
-    private final Contact node;
+    /**
+     * The maximum amount of time an
+     */
+    public long getLockTimeout();
     
-    private final Collection<? extends DHTValueEntity> values;
+    /**
+     * Starts the DHTTask
+     */
+    public void start(Callback<T> callback);
     
-    public GetValueResult(Contact node,
-            Collection<? extends DHTValueEntity> values) {
-        this.node = node;
-        this.values = values;
-    }
+    /**
+     * Cancels the DHTTask
+     */
+    public void cancel();
     
-    public Contact getContact() {
-        return node;
-    }
-    
-    public Collection<? extends DHTValueEntity> getValues() {
-        return values;
-    }
-    
-    public String toString() {
-        return CollectionUtils.toString(values);
+    /**
+     * 
+     */
+    public static interface Callback<T> {
+
+        /**
+         * Setter for the return value
+         */
+        public void setReturnValue(T value);
+        
+        
+        /**
+         * Setter for an Exception
+         */
+        public void setException(Throwable t);
     }
 }

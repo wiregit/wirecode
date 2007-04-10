@@ -30,7 +30,14 @@ public class Version implements Serializable, Comparable<Version> {
 
     private static final long serialVersionUID = -4652316695244961502L;
 
-    public static final Version UNKNOWN = new Version(0);
+    /** 
+     * An array of cached Versions. Make it bigger if necessary.
+     */
+    private static final Version[] VERSIONS = new Version[10];
+    
+    public static final int LENGTH = 2;
+    
+    public static final Version ZERO = new Version(0);
     
     private final int version;
     
@@ -80,11 +87,6 @@ public class Version implements Serializable, Comparable<Version> {
     public String toString() {
         return getMajor() + "." + getMinor();
     }
-    
-    /** 
-     * An array of cached Versions. Make it bigger if necessary.
-     */
-    private static final Version[] VERSIONS = new Version[10];
     
     /**
      * Returns a Version object for the given version number

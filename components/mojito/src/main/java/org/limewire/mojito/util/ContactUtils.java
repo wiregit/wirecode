@@ -294,18 +294,20 @@ public final class ContactUtils {
      * Returns the most recently seen contact from the list.
      * Use ContactUtils.sort() prior to calling this Method!
      */
-    public static <T extends Contact> Contact getMostRecentlySeen(List<T> nodes) {
-        assert (nodes.get(0).getTimeStamp() >= nodes.get(nodes.size()-1).getTimeStamp());
-        return nodes.get(0);
+    public static <T extends Contact> Contact getMostRecentlySeen(Collection<T> nodes) {
+        List<T> list = CollectionUtils.toList(nodes);
+        assert (list.get(0).getTimeStamp() >= list.get(nodes.size()-1).getTimeStamp());
+        return list.get(0);
     }
 
     /**
      * Returns the least recently seen contact from the list.
      * Use ContactUtils.sort() prior to calling this Method!
      */
-    public static <T extends Contact> Contact getLeastRecentlySeen(List<T> nodes) {
-        assert (nodes.get(nodes.size()-1).getTimeStamp() <= nodes.get(0).getTimeStamp());
-        return nodes.get(nodes.size()-1);
+    public static <T extends Contact> Contact getLeastRecentlySeen(Collection<T> nodes) {
+        List<T> list = CollectionUtils.toList(nodes);
+        assert (list.get(nodes.size()-1).getTimeStamp() <= list.get(0).getTimeStamp());
+        return list.get(nodes.size()-1);
     }
 
     /**
@@ -313,16 +315,17 @@ public final class ContactUtils {
      * least recently seen and returns a sub-list with at most
      * count number of elements.
      */
-    public static <T extends Contact> List<T> sort(List<T> nodes, int count) {
+    public static <T extends Contact> Collection<T> sort(Collection<T> nodes, int count) {
         return sort(nodes).subList(0, Math.min(count, nodes.size()));
     }
 
     /**
      * Sorts the Contacts from most recently seen to least recently seen
      */
-    public static <T extends Contact> List<T> sort(List<T> nodes) {
-        Collections.sort(nodes, CONTACT_MRS_COMPARATOR);
-        return nodes;
+    public static <T extends Contact> List<T> sort(Collection<T> nodes) {
+        List<T> list = CollectionUtils.toList(nodes);
+        Collections.sort(list, CONTACT_MRS_COMPARATOR);
+        return list;
     }
 
     /**
@@ -331,8 +334,9 @@ public final class ContactUtils {
      * 
      * Used when loading the routing table if our nodeID has changed
      */
-    public static <T extends Contact> List<T> sortAliveToFailed(List<T> nodes) {
-        Collections.sort(nodes, CONTACT_ALIVE_TO_FAILED_COMPARATOR);
-        return nodes;
+    public static <T extends Contact> List<T> sortAliveToFailed(Collection<T> nodes) {
+        List<T> list = CollectionUtils.toList(nodes);
+        Collections.sort(list, CONTACT_ALIVE_TO_FAILED_COMPARATOR);
+        return list;
     }
 }

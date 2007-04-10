@@ -172,7 +172,7 @@ class BucketNode implements Bucket {
         return nodeTrie.select(nodeId);
     }
     
-    public List<Contact> select(KUID nodeId, int count) {
+    public Collection<Contact> select(KUID nodeId, int count) {
         return TrieUtils.select(nodeTrie, nodeId, count);
     }
     

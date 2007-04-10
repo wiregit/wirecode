@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -24,25 +24,13 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.dht.DHTBootstrapper;
-import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTNodeFetcher;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.EventDispatcher;
 
-/**
- * The LimeDHTBootstrapper is a LimeWire specific implementation of DHTBootstrapper. 
- * It tries to bootstrap the DHT Node based on information it gathers over the 
- * Gnutella Network. 
- */
-class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
+class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
-    private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
+    private static final Log LOG = LogFactory.getLog(DHTBootstrapperImpl.class);
     
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
@@ -88,15 +76,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      */
     private final Object lock = new Object();
     
-    /**
-     * The DHT event dispatcher
-     */
-    private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
-    
-    public LimeDHTBootstrapper(DHTController controller, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+    public DHTBootstrapperImpl(DHTController controller) {
         this.controller = controller;
-        this.dispatcher = dispatcher;
     }
     
     /**
@@ -214,7 +195,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
             
             pingFuture = getMojitoDHT().findActiveContact();
-            pingFuture.addDHTFutureListener(new PongListener());
+            pingFuture.addDHTFutureListener(new PongListener(pingFuture));
             
             triedRouteTable = true;
             fromRouteTable = true;
@@ -255,7 +236,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             it.remove();
             
             pingFuture = getMojitoDHT().ping(addr);
-            pingFuture.addDHTFutureListener(new PongListener());
+            pingFuture.addDHTFutureListener(new PongListener(pingFuture));
         }
     }
     
@@ -265,7 +246,6 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      */
     private void finish() {
         controller.sendUpdatedCapabilities();
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.CONNECTED));
     }
     
     /**
@@ -300,7 +280,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    SocketAddress getSimppHost() {
+    SocketAddress getSimppHost(){
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
         List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
 
@@ -348,8 +328,19 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      * 2) check the hosts Set for other Nodes and ping 'em
      */
     private class PongListener implements DHTFutureListener<PingResult> {
+        
+        private final DHTFuture<PingResult> myFuture;
+        
+        public PongListener(DHTFuture<PingResult> myFuture) {
+            this.myFuture = myFuture;
+        }
+        
         public void handleFutureSuccess(PingResult result) {
             synchronized (lock) {
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 pingFuture = null;
 
                 // Stop the DHTNodeFetcher, we don't need it anymore
@@ -362,8 +353,12 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             synchronized (lock) {
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 pingFuture = null;
                 
                 if (ExceptionUtils.isCausedBy(e, DHTException.class)) {
@@ -390,23 +385,33 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             // will restart the bootstrapping. Otherwise see
             // if there are entries in the hosts Set
             if (nodeFetcher == null) {
-                nodeFetcher = new DHTNodeFetcher(LimeDHTBootstrapper.this);
+                nodeFetcher = new DHTNodeFetcher(DHTBootstrapperImpl.this);
                 nodeFetcher.start();
             } else {
                 bootstrap();
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Cancelled", e);
+                
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 stop();
             }
         }
 
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Interrupted", e);
+                
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 stop();
             }
         }
@@ -424,10 +429,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
 
                 ResultType type = result.getResultType();
                 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Future success type: " + type);
-                }
-                
+                LOG.debug("Future success type: "+ type);
                 switch(type) {
                     case BOOTSTRAP_SUCCEEDED:
                         finish();
@@ -443,7 +445,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             synchronized (lock) {
                 LOG.error("ExecutionException", e);
                 
@@ -455,14 +457,14 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Cancelled", e);
                 stop();
             }
         }
 
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Interrupted", e);
                 stop();

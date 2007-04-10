@@ -90,7 +90,7 @@ public interface Bucket extends Serializable {
     /**
      * Returns the 'count' best matching Contacts for the provided KUID
      */
-    public List<Contact> select(KUID nodeId, int count);
+    public Collection<Contact> select(KUID nodeId, int count);
 
     /**
      * Removes the Contact that has the provided KUID

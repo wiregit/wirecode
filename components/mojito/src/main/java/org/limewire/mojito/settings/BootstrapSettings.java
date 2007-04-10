@@ -19,13 +19,23 @@
 
 package org.limewire.mojito.settings;
 
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 
 public class BootstrapSettings extends MojitoProps {
     
     private BootstrapSettings() {}
     
+    /**
+     * 
+     */
     public static final FloatSetting IS_BOOTSTRAPPED_RATIO
         = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
                 0.5f, "is_bootstrapped_ratio", 0f, 1.0f);
+    
+    /**
+     * 
+     */
+    public static final BooleanSetting REFRESH_ALL_BUCKETS
+        = FACTORY.createRemoteBooleanSetting("", true, "");
 }

@@ -2,22 +2,33 @@ package com.limegroup.gnutella.dht;
 
 import java.util.EventObject;
 
+/**
+ * DHTEvents are fired for DHT state changes
+ */
 public class DHTEvent extends EventObject {
     
-    public static enum EventType {
+    public static enum Type {
         STARTING,
         CONNECTED,
         STOPPED;
     }
     
-    private final EventType type;
+    private final Type type;
 
-    public DHTEvent(Object source, EventType type) {
+    public DHTEvent(DHTController source, Type type) {
         super(source);
         this.type = type;
     }
 
-    public EventType getType() {
+    public DHTController getDHTController() {
+        return (DHTController)getSource();
+    }
+    
+    public Type getType() {
         return type;
+    }
+    
+    public String toString() {
+        return type.toString();
     }
 }

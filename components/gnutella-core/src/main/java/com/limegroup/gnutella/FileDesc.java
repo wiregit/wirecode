@@ -90,6 +90,11 @@ public class FileDesc implements FileDetails {
 	 */
 	private int _attemptedUploads;
 	
+    /**
+     * The time when the last attempt was made to upload this file
+     */
+    private long lastAttemptedUploadTime = System.currentTimeMillis();
+    
 	/** 
 	 * The number of times this file has had completed uploads
 	 */
@@ -350,15 +355,23 @@ public class FileDesc implements FileDetails {
      * Increase & return the new attempted uploads
      * @return the new attempted upload count
      */    
-    public int incrementAttemptedUploads() {
+    public synchronized int incrementAttemptedUploads() {
+        lastAttemptedUploadTime = System.currentTimeMillis();
         return ++_attemptedUploads;
     }
     
     /** 
      * @return the current attempted uploads
      */
-    public int getAttemptedUploads() {
+    public synchronized int getAttemptedUploads() {
         return _attemptedUploads;
+    }
+    
+    /**
+     * Returns the time when the last upload attempt was made
+     */
+    public synchronized long getLastAttemptedUploadTime() {
+        return lastAttemptedUploadTime;
     }
     
     /**

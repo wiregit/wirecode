@@ -22,6 +22,7 @@ package org.limewire.mojito.messages;
 import java.util.Collection;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueType;
 
 
 /**
@@ -34,4 +35,10 @@ public interface FindValueRequest extends LookupRequest {
      * is looking for
      */
     public Collection<KUID> getSecondaryKeys();
+    
+    /**
+     * Returns the type of the value the remote Node
+     * is looking for
+     */
+    public DHTValueType getDHTValueType();
 }

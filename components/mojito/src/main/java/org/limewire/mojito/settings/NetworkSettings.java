@@ -35,7 +35,7 @@ public final class NetworkSettings extends MojitoProps {
      * before giving up
      */
     public static final LongSetting TIMEOUT
-        = FACTORY.createRemoteLongSetting("TIMEOUT", 10000L, "timeout", 10L, 30000L);
+        = FACTORY.createRemoteLongSetting("TIMEOUT", 10L*1000L, "timeout", 10L, 30L*1000L);
     
     /**
      * A multiplication factor for the RTT.
@@ -94,4 +94,20 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final BooleanSetting ALLOCATE_NEW_BUFFER
         = FACTORY.createBooleanSetting("ALLOCATE_NEW_BUFFER", false);
+    
+    /**
+     * The maximum amount of time the bootstrapping process can take
+     * before it's interrupted
+     */
+    public static final LongSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+                4L*60L*1000L, "bootstrap_timeout", 60L*1000L, 10L*60L*1000L);
+    
+    /**
+     * The maximum amount of tume the store process can take
+     * before it's interrupted
+     */
+    public static final LongSetting STORE_TIMEOUT
+        = FACTORY.createRemoteLongSetting("STORE_TIMEOUT", 
+                4L*60L*1000L, "store_timeout", 60L*1000L, 10L*60L*1000L);
 }

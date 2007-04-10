@@ -53,11 +53,11 @@ public class FixedDHTFuture<T> implements DHTFuture<T> {
             T value = get();
             listener.handleFutureSuccess(value);
         } catch (ExecutionException e) {
-            listener.handleFutureFailure(e);
+            listener.handleExecutionException(e);
         } catch (CancellationException e) {
-            listener.handleFutureCancelled(e);
+            listener.handleCancellationException(e);
         } catch (InterruptedException e) {
-            listener.handleFutureInterrupted(e);
+            listener.handleInterruptedException(e);
         }
     }
 

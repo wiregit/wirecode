@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -50,6 +50,22 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
+    /**
+     * An array of Messages this MessageHandler supports
+     */
+    private static final Class[] UDP_MESSAGE_TYPES = {
+        PingRequestWireImpl.class,
+        PingResponseWireImpl.class,
+        StoreRequestWireImpl.class,
+        StoreResponseWireImpl.class,
+        FindNodeRequestWireImpl.class,
+        FindNodeResponseWireImpl.class,
+        FindValueRequestWireImpl.class,
+        FindValueResponseWireImpl.class,
+        StatsRequestWireImpl.class,
+        StatsResponseWireImpl.class
+    };
+    
     private volatile boolean running = false;
     
     private volatile boolean bound = false;
@@ -63,28 +79,15 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
                 new MessageFactoryWire(context.getMessageFactory()));
         
         // Register the Message type
-        LimeDHTMessageParser parser = new LimeDHTMessageParser(
+        MessageParserDelegate parser = new MessageParserDelegate(
                 context.getMessageFactory());
         
         MessageFactory.setParser((byte)DHTMessage.F_DHT_MESSAGE, parser);
-        
-        // Install the Message handlers
-        MessageRouter messageRouter = RouterService.getMessageRouter();
-        messageRouter.setUDPMessageHandler(PingRequestWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(PingResponseWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(StoreRequestWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(StoreResponseWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindNodeRequestWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindNodeResponseWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindValueRequestWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindValueResponseWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(StatsRequestWireImpl.class, this);
-        messageRouter.setUDPMessageHandler(StatsResponseWireImpl.class, this);
     }
 
     @Override
     protected boolean allow(DHTMessage message) {
-        //blocking is already done in NIODispatcher
+        // Host blocking is already done in NIODispatcher
         return true;
     }
 
@@ -100,15 +103,27 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
+        // Install the Message handlers
+        MessageRouter messageRouter = RouterService.getMessageRouter();
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+            messageRouter.setUDPMessageHandler(clazz, this);
+        }
+        
         running = true;
         super.start();
     }
     
     @Override
-    public void stop() {
+    public synchronized void stop() {
         running = false;
         super.stop();
+        
+        // Remove the Message handlers
+        MessageRouter messageRouter = RouterService.getMessageRouter();
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+            messageRouter.setUDPMessageHandler(clazz, null);
+        }
     }
 
     @Override

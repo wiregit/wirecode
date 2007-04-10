@@ -19,6 +19,15 @@ public class IpPortImpl implements IpPort {
     }
     
     /**
+     * Constructs a new IpPort using the given addr & port.
+     */
+    public IpPortImpl(InetAddress addr, int port) {
+        this.addr = addr;
+        this.addrString = addr.getHostName();
+        this.port = port;
+    }
+    
+    /**
      * Constructs a new IpPort using the given addr, host & port.
      */
     public IpPortImpl(InetAddress addr, String host, int port) {

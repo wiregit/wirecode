@@ -262,10 +262,7 @@ public class DatabaseImpl implements Database {
     public synchronized float getRequestLoad(KUID valueId, boolean incrementLoad) {
         DHTValueEntityBag bag = database.get(valueId);
         if (bag != null) {
-            if (incrementLoad) {
-                bag.incrementRequestLoad();
-            }
-            return bag.getRequestLoad();
+            return bag.getRequestLoad(incrementLoad);
         }
         return 0f;
     }

@@ -37,6 +37,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -886,7 +887,7 @@ public final class MessageRouterTest extends LimeTestCase {
     	}
     }
     
-    private static class TestDHTManager implements DHTManager{
+    private static class TestDHTManager implements DHTManager {
 
         public List<IpPort> getActiveDHTNodes(int maxNodes){
             LinkedList<IpPort> ipps = new LinkedList<IpPort>();
@@ -914,13 +915,15 @@ public final class MessageRouterTest extends LimeTestCase {
 
         public MojitoDHT getMojitoDHT() { return null; }
 
-        public boolean isActiveNode() { return false; }
+        public DHTMode getDHTMode() { 
+            return null; 
+        }
 
         public boolean isRunning() { return true; }
 
         public void stop() {}
 
-        public void start(boolean activeMode) {}
+        public void start(DHTMode mode) {}
         
         public boolean isBootstrapped() {
             return false;
@@ -933,7 +936,7 @@ public final class MessageRouterTest extends LimeTestCase {
         }
         
         public Version getVersion() {
-            return Version.UNKNOWN;
+            return Version.ZERO;
         }
 
         public void addEventListener(DHTEventListener listener) {
@@ -943,6 +946,9 @@ public final class MessageRouterTest extends LimeTestCase {
         }
 
         public void removeEventListener(DHTEventListener listener) {
+        }
+
+        public void handleDHTContactsMessage(DHTContactsMessage msg) {
         }
     }
 }

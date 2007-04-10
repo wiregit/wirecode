@@ -27,16 +27,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -236,13 +236,41 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     /**
-     * Writes the given Contact to the OutputStream
+     * Writes the given StatusCode to the OutputStream
      */
-    public void writeStoreStatus(Collection<? extends Entry<KUID, Status>> status) throws IOException {
-        writeCollectionSize(status);
-        for (Entry<KUID, Status> e : status) {
-            writeKUID(e.getKey());
-            writeByte(e.getValue().toByte());
+    public void writeStatusCode(StatusCode statusCode) throws IOException {
+        writeShort(statusCode.shortValue());
+        writeDHTString(statusCode.getDescription());
+    }
+    
+    /**
+     * Writes the given String to the OutputStream. This is different
+     * from writeUTF(String) which writes the String in the so called
+     * Modified-UTF format!
+     */
+    private void writeDHTString(String str) throws IOException {
+        if (str == null) {
+            writeShort(0);
+        } else {
+            byte[] b = str.getBytes("UTF-8");
+            if (b.length > 0xFFFF) {
+                throw new IOException("String is too big");
+            }
+            
+            writeShort(b.length);
+            write(b);
+        }
+    }
+    
+    /**
+     * Writes the given Collection of StoreStatusCode(s) to the OutputStream
+     */
+    public void writeStoreStatusCodes(Collection<StoreStatusCode> statusCodes) throws IOException {
+        writeCollectionSize(statusCodes);
+        for (StoreStatusCode statusCode : statusCodes) {
+            writeKUID(statusCode.getPrimaryKey());
+            writeKUID(statusCode.getSecondaryKey());
+            writeStatusCode(statusCode.getStatusCode());
         }
     }
     

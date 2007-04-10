@@ -35,7 +35,7 @@ import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.util.DatabaseUtils;
 
 public class DHTValueTest extends MojitoTestCase {
     
@@ -69,22 +69,22 @@ public class DHTValueTest extends MojitoTestCase {
         try {
             for (int i = 0; i < 2*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", 2000 + i));
+                dht.bind(new InetSocketAddress(2000 + i));
                 dht.start();
                 
                 if (i > 0) {
-                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
+                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
                 } else {
                     first = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            MojitoUtils.bootstrap(first, new InetSocketAddress("localhost", 2000+1)).get();
+            first.bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             KUID key = KUID.createRandomID();
             DHTValueType type = DHTValueType.TEST;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             byte[] b = "Hello World".getBytes();
             
             long time = System.currentTimeMillis();
@@ -95,19 +95,16 @@ public class DHTValueTest extends MojitoTestCase {
             // Pre-Condition
             assertEquals(0, value.getLocations().size());
             assertEquals(0L, value.getPublishTime());
-            assertTrue(value.isRepublishingRequired());
+            assertTrue(DatabaseUtils.isPublishingRequired(value));
             
             // Store...
             StoreResult result = ((Context)first).store(value).get();
             
             // Post-Condition
-            assertEquals(0, result.getFailed().size());
-            assertEquals(result.getValues().size(), result.getSucceeded().size());
-            
-            assertSame(value, result.getSucceeded().iterator().next());
+            assertSame(value, result.getValues().iterator().next());
             assertEquals(k, value.getLocations().size());
             assertGreaterThanOrEquals(time, value.getPublishTime());
-            assertFalse(value.isRepublishingRequired());
+            assertFalse(DatabaseUtils.isPublishingRequired(value));
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {

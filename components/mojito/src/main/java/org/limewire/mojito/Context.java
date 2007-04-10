@@ -31,11 +31,9 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -46,11 +44,14 @@ import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.impl.DHTValueEntityImpl;
-import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.db.impl.DefaultDHTValueEntityPublisher;
+import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -66,7 +67,6 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.GetValueResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.BucketRefresher;
@@ -88,7 +88,6 @@ import org.limewire.mojito.statistics.RoutingStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.SecurityToken;
 
@@ -107,6 +106,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private final String name;
     
     private final DHTValueManager valueManager;
+    
+    private volatile boolean bucketRefresherDisabled = false;
     private final BucketRefresher bucketRefresher;
     
     private final PingManager pingManager;
@@ -136,6 +137,12 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The provider interface to create SecurityTokens */
     private volatile SecurityToken.TokenProvider tokenProvider;
     
+    /** The factory we're using to create DHTValues */
+    private volatile DHTValueFactory valueFactory;
+    
+    /** A handle to the DHTValueEntityPublisher */
+    private volatile DHTValueEntityPublisher valueEntityPublisher;
+    
     /**
      * Constructor to create a new Context
      */
@@ -159,6 +166,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.AddressSecurityTokenProvider();
+        valueFactory = new DefaultDHTValueFactory();
+        valueEntityPublisher = new DefaultDHTValueEntityPublisher(this);
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -273,7 +282,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         setLocalNodeID(newID);
-        purgeDatabase(true);
+        purgeDatabase();
     }
     
     /**
@@ -402,7 +411,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         this.routeTable = routeTable;
         
         if (database != null) {
-            purgeDatabase(true);
+            purgeDatabase();
+        } else {
+            valueEntityPublisher.changeContact(getLocalNode());
         }
     }
 
@@ -455,7 +466,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         this.database = database;
-        purgeDatabase(remove);
+        purgeDatabase();
     }
     
     /**
@@ -466,36 +477,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * 
      * @param remove Whether or not to remove non local DHTValues
      */
-    private void purgeDatabase(boolean remove) {
-        synchronized (database) {
-            Contact localNode = getLocalNode();
-            
-            // Get a copy of all values
-            Collection<DHTValueEntity> values 
-                = new ArrayList<DHTValueEntity>(database.values());
-            
-            // Clear the Database
-            database.clear();
-            
-            // And re-add everything
-            for (DHTValueEntity entity : values) {
-                // If it's a local value then make sure we're the
-                // creator of the value
-                if (entity.isLocalValue()) {
-                    database.store(entity.changeCreator(localNode));
-                    
-                // We're assuming the Node IDs are totally random so
-                // chances are slim to none that we're responseible 
-                // for the values again. Even if we are there's no way
-                // to test it until we've fully re-bootstrapped in
-                // which case the other guys will send us the values
-                // anyways as from there perspective we're just a new
-                // node.
-                } else if (!remove && !DatabaseUtils.isExpired(getRouteTable(), entity)) {
-                    database.store(entity);
-                }
-            }
-        }
+    private void purgeDatabase() {
+        // We're assuming the Node IDs are totally random so
+        // chances are slim to none that we're responseible 
+        // for the values again. Even if we are there's no way
+        // to test it until we've fully re-bootstrapped in
+        // which case the other guys will send us the values
+        // anyways as from their perspective we're just a new
+        // node.
+        database.clear();
+        
+        // Notify the DHTValueEnityPublisher that our Contact
+        // information changed
+        valueEntityPublisher.changeContact(getLocalNode());
     }
     
     /*
@@ -549,6 +543,26 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     public void setHostFilter(HostFilter hostFilter) {
         database.setHostFilter(hostFilter);
         messageDispatcher.setFilter(hostFilter);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#setDHTValueFactory(org.limewire.mojito.db.DHTValueFactory)
+     */
+    public synchronized void setDHTValueFactory(DHTValueFactory valueFactory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch DHTValueFactory while " + getName() + " is running");
+        }
+        
+        this.valueFactory = valueFactory;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getDHTValueFactory()
+     */
+    public DHTValueFactory getDHTValueFactory() {
+        return valueFactory;
     }
     
     /**
@@ -646,6 +660,44 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     /*
      * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#setDHTValueEntityPublisher(org.limewire.mojito.db.DHTValueEntityPublisher)
+     */
+    public void setDHTValueEntityPublisher(DHTValueEntityPublisher valueEntityPublisher) {
+        if (valueEntityPublisher == null) {
+            valueEntityPublisher = new DefaultDHTValueEntityPublisher(this);
+        }
+        
+        this.valueEntityPublisher = valueEntityPublisher;
+        valueEntityPublisher.changeContact(getLocalNode());
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getDHTValueEntityPublisher()
+     */
+    public DHTValueEntityPublisher getDHTValueEntityPublisher() {
+        return valueEntityPublisher;
+    }
+    
+    /**
+     * Sets whether or not the BucketRefresher should be disabled
+     */
+    public synchronized void setBucketRefresherDisabled(boolean bucketRefresherDisabled) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot disable BucketRefresher while " + getName() + " is running");
+        }
+        this.bucketRefresherDisabled = bucketRefresherDisabled;
+    }
+    
+    /**
+     * Returns whether or not the BucketRefresher is disabled
+     */
+    public boolean isBucketRefresherDisabled() {
+        return bucketRefresherDisabled;
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isRunning()
      */
     public boolean isRunning() {
@@ -677,6 +729,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public boolean isBootstrapped() {
         return isRunning() && bootstrapManager.isBootstrapped();
+    }
+    
+    /**
+     * 
+     */
+    public synchronized void setBootstrapped(boolean bootstrapped) {
+        bootstrapManager.setBootstrapped(bootstrapped);
     }
     
     /*
@@ -765,7 +824,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         estimator = new DHTSizeEstimator();
         messageDispatcher.start();
-        bucketRefresher.start();
+        
+        if (!isBucketRefresherDisabled()) {
+            bucketRefresher.start();
+        }
+        
         valueManager.start();
     }
     
@@ -806,7 +869,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
+            Collection<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
             
             synchronized (messageDispatcher.getOutputQueueLock()) {
                 for (Contact node : nodes) {
@@ -850,9 +913,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     private Set<Contact> getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
-        List<Contact> contactList = getRouteTable().getActiveContacts();
-        Collections.sort(contactList, ContactUtils.CONTACT_MRS_COMPARATOR);
-        nodes.addAll(contactList);
+        Collection<Contact> active = getRouteTable().getActiveContacts();
+        active = ContactUtils.sort(active);
+        nodes.addAll(active);
         nodes.remove(getLocalNode());
         return nodes;
     }
@@ -868,7 +931,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Tries to ping a Set of hosts
      */
-    public DHTFuture<PingResult> ping(Set<SocketAddress> hosts) {
+    public DHTFuture<PingResult> ping(Set<? extends SocketAddress> hosts) {
         return pingManager.pingAddresses(hosts);
     }
     
@@ -916,36 +979,28 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
     }
     
-    /** 
-     * Starts a value lookup for the given KUID 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#get(org.limewire.mojito.KUID, org.limewire.mojito.db.DHTValueType)
      */
-    public DHTFuture<FindValueResult> get(KUID key) {
+    public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
         throwExceptionIfNotBootstrapped("get()");
-        return findValueManager.lookup(key);
+        return findValueManager.lookup(key, valueType);
     }
     
-    /** 
-     * Retrieve all DHTValues from the remote Node that are 
-     * stored under the given valueId and nodeIds
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#get(org.limewire.mojito.db.EntityKey)
      */
-    public DHTFuture<GetValueResult> get(Contact node, KUID valueId, KUID nodeId) {
-        return get(node, valueId, Collections.singleton(nodeId));
-    }
-    
-    /** 
-     * Retrieve all DHTValues from the remote Node that are 
-     * stored under the given valueId and nodeIds
-     */
-    public DHTFuture<GetValueResult> get(Contact node, 
-            KUID valueId, Collection<KUID> nodeIds) {
-        return getValueManager.get(node, valueId, nodeIds);
+    public DHTFuture<FindValueResult> get(EntityKey entityKey) {
+        return getValueManager.get(entityKey);
     }
     
     /** 
      * Starts a Node lookup for the given KUID 
      */
     public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
-        return findNodeManager.lookup(lookupId);
+        return findNodeManager.lookup(lookupId, null);
     }
     
     /*
@@ -954,6 +1009,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTFuture<BootstrapResult> bootstrap(Contact node) {
         return bootstrapManager.bootstrap(node);
+    }
+    
+    /**
+     * A helper method to create DHTValueEntities
+     */
+    public DHTValueEntity createDHTValueEntity(KUID key, DHTValue value) {
+        return valueFactory.createDHTValueEntity(getLocalNode(), getLocalNode(), key, value, true);
     }
     
     /*
@@ -969,23 +1031,28 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+        return put(createDHTValueEntity(key, value));
+    }
+    
+    /**
+     * @param entity The value to store
+     * @param immediateStore Whether or not to store the value immediately
+     */
+    public DHTFuture<StoreResult> put(DHTValueEntity entity) {
         if (!isRunning()) {
             throw new IllegalStateException(getName() + " is not running");
         }
         
-        DHTValueEntity entity = new DHTValueEntityImpl(
-                getLocalNode(), getLocalNode(), key, value, true);
-        database.store(entity);
-        
         // If we're bootstrapped then store the value immediately
+        // or let the DHTValueManager do its work
         if (isBootstrapped()) {
             return store(entity);
             
         // And if we're not bootstrapped then return a fake Future
         // and let the DHTValueManager do its work once we're bootstrapped
         } else {
-            Exception ex = new NotBootstrappedException(
-                    getName(), value.isEmpty() ? "remove()" : "put()");
+            String operation = entity.getValue().isEmpty() ? "remove()" : "put()";
+            Exception ex = new NotBootstrappedException(getName(), operation);
             return new FixedDHTFuture<StoreResult>(ex);
         }
     }
@@ -996,7 +1063,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTFuture<StoreResult> remove(KUID key) {
         // To remove a KeyValue you just store an empty value!
-        return put(key, DHTValueImpl.EMPTY_VALUE);
+        return put(key, DHTValue.EMPTY_VALUE);
     }
     
     /** 
@@ -1023,25 +1090,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             Collection<? extends DHTValueEntity> values) {
         
         return storeManager.store(node, securityToken, values);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#keySet()
-     */
-    public Set<KUID> keySet() {
-        return getDatabase().keySet();
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#getValues()
-     */
-    public Collection<DHTValueEntity> getValues() {
-        Database database = getDatabase();
-        synchronized (database) {
-            return new ArrayList<DHTValueEntity>(database.values());
-        }
     }
     
     /*

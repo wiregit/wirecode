@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,6 +9,8 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TimerTask;
@@ -19,26 +21,33 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.db.impl.DHTValuePublisherProxy;
+import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
+import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTBootstrapper;
-import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTFilterDelegate;
-import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.LimeDHTValueFactory;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
+import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -62,7 +71,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * 
  * The current implementation is specific to the Mojito DHT. 
  */
-abstract class AbstractDHTController implements DHTController {
+public abstract class AbstractDHTController implements DHTController {
     
     private static final String PUBLIC_KEY 
         = "D6FQQAAAAAAAAAAAAHYQCDX6AAAAALRQFQBBIR75ZTOX67BIDUQXP25SBSH"
@@ -102,8 +111,23 @@ abstract class AbstractDHTController implements DHTController {
      */
     private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
     
+    /**
+     * The mode of this DHTController
+     */
+    private final DHTMode mode;
+    
+    /**
+     * Get and save the current RouteTable version
+     */
+    private final int routeTableVersion = DHTSettings.ROUTETABLE_VERSION.getValue();
+    
     public AbstractDHTController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            DHTMode mode) {
+        
+        this.dispatcher = dispatcher;
+        this.mode = mode;
+        
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
@@ -113,7 +137,8 @@ abstract class AbstractDHTController implements DHTController {
                 return new ManagedThread(runnable);
             }
         });
-        dht.setHostFilter(new DHTFilterDelegate());
+        dht.setHostFilter(new FilterDelegate());
+        dht.setDHTValueFactory(new LimeDHTValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -126,14 +151,79 @@ abstract class AbstractDHTController implements DHTController {
         } catch (IOException e) {
             LOG.error("IOException", e);
         }
+
+        DHTValuePublisherProxy proxy = new DHTValuePublisherProxy();
+        proxy.add(new AltLocPublisher(dht));
         
-        this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
-        this.dispatcher = dispatcher;
+        // There's no point in publishing my push proxies if I'm
+        // not a passive leaf Node (ultrapeers and active nodes
+        // do not push proxies as they're not firewalled).
+        if (mode.isPassiveLeaf()) {
+            proxy.add(new PushProxiesPublisher(dht));
+        }
+        
+        dht.setDHTValueEntityPublisher(proxy);
+        
+        this.bootstrapper = new DHTBootstrapperImpl(this);
+        
+        // If we're an Ultrapeer we want to notify our firewalled
+        // leafs about every new Contact
+        if (RouterService.isActiveSuperNode()) {
+            dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
+                public void handleRouteTableEvent(RouteTableEvent event) {
+                    switch(event.getEventType()) {
+                        case ADD_ACTIVE_CONTACT:
+                        case ADD_CACHED_CONTACT:
+                        case UPDATE_CONTACT:
+                            Contact node = event.getContact();
+                            forwardContact(node);
+                            break;
+                    }
+                }
+            });
+        }
         
         DHTStatsManager.clear();
     }
 
+    /**
+     * Returns the current RouteTable version
+     */
+    protected final int getRouteTableVersion() {
+        return routeTableVersion;
+    }
+    
+    /**
+     * A factory method to create MojitoDHTs
+     */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
+    
+    private void forwardContact(Contact node) {
+        if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
+            return;
+        }
+        
+        DHTContactsMessage msg = new DHTContactsMessage(node);
+        ConnectionManager cm = RouterService.getConnectionManager();
+        List<ManagedConnection> list = cm.getInitializedClientConnections();
+        for (ManagedConnection mc : list) {
+            if (mc.isPushProxyFor()
+                    && mc.remoteHostIsPassiveLeafNode() > -1) {
+                mc.send(msg);
+            }
+        }
+    }
+    
+    public DHTMode getDHTMode() {
+        return mode;
+    }
+
+    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+        return Collections.emptyList();
+    }
+
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
     
     /**
      * Start the Mojito DHT and connects it to the network in either passive mode
@@ -159,8 +249,13 @@ abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
-            bootstrapper.bootstrap();
-            dispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
+            
+            // Bootstrap only if we're not a passive leaf node
+            if (!getDHTMode().isPassiveLeaf()) {
+                bootstrapper.bootstrap();
+            }
+            
+            dispatcher.dispatchEvent(new DHTEvent(this, Type.STARTING));
         } catch (IOException err) {
             LOG.error("IOException", err);
             ErrorService.error(err);
@@ -180,7 +275,7 @@ abstract class AbstractDHTController implements DHTController {
         dhtNodeAdder.stop();
         dht.close();
         
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
     }
     
     /**
@@ -205,11 +300,15 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (dht.isBootstrapped()) {
-            return;
+        if (!dht.isBootstrapped()) {
+            bootstrapper.addPassiveNode(hostAddress);
         }
-        
-        bootstrapper.addPassiveNode(hostAddress);
+    }
+    
+    public void addContact(Contact node) {
+        if (getDHTMode().isPassiveLeaf()) {
+            getMojitoDHT().getRouteTable().add(node);
+        }
     }
     
     /**
@@ -220,12 +319,11 @@ abstract class AbstractDHTController implements DHTController {
      * @param excludeLocal true to exclude the local node
      * @return A list of DHT <tt>IpPorts</tt>
      */
-    protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
-        Context dhtContext = (Context)dht; 
-        List<Contact> nodes = ContactUtils.sort(
-                dhtContext.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
+    protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal) {
+        Collection<Contact> nodes = ContactUtils.sort(
+                dht.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
         
-        KUID localNode = dhtContext.getLocalNodeID();
+        KUID localNode = dht.getLocalNodeID();
         List<IpPort> ipps = new ArrayList<IpPort>();
         for(Contact cn : nodes) {
             if(excludeLocal && cn.getNodeID().equals(localNode)) {
@@ -264,13 +362,8 @@ abstract class AbstractDHTController implements DHTController {
         
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
-    }
-    
-    /**
-     * Returns the RandomNodeAdder instance. For testing only!
-     */
-    RandomNodeAdder getRandomNodeAdder() {
-        return dhtNodeAdder;
+        
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**
@@ -376,6 +469,22 @@ abstract class AbstractDHTController implements DHTController {
             }
             dhtNodes.clear();
             isRunning = false;
+        }
+    }
+    
+    /**
+     * A Host Filter that delegates to RouterService's filter
+     */
+    private static class FilterDelegate implements HostFilter {
+        
+        public boolean allow(DHTMessage message) {
+            SocketAddress addr = message.getContact().getContactAddress();
+            return RouterService.getIpFilter().allow(addr);
+        }
+
+        public void ban(SocketAddress addr) {
+            RouterService.getIpFilter().ban(addr);
+            RouterService.reloadIPFilter();
         }
     }
 }

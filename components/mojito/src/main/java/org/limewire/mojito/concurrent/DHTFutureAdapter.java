@@ -31,21 +31,21 @@ public class DHTFutureAdapter<T> implements DHTFutureListener<T> {
      * (non-Javadoc)
      * @see com.limegroup.mojito.concurrent.DHTFutureListener#handleFutureCancelled(java.util.concurrent.CancellationException)
      */
-    public void handleFutureCancelled(CancellationException e) {
+    public void handleCancellationException(CancellationException e) {
     }
 
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.concurrent.DHTFutureListener#handleFutureFailure(java.util.concurrent.ExecutionException)
      */
-    public void handleFutureFailure(ExecutionException e) {
+    public void handleExecutionException(ExecutionException e) {
     }
 
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.concurrent.DHTFutureListener#handleFutureInterrupted(java.lang.InterruptedException)
      */
-    public void handleFutureInterrupted(InterruptedException e) {        
+    public void handleInterruptedException(InterruptedException e) {        
     }
 
     /*

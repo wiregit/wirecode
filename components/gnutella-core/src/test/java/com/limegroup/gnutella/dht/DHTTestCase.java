@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
@@ -40,12 +41,18 @@ public abstract class DHTTestCase extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        //setup bootstrap node
+        
+        // Setup bootstrap node
         BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
-        InetSocketAddress addr = new InetSocketAddress(BOOTSTRAP_DHT_PORT);
-        BOOTSTRAP_DHT.bind(addr);
+        BOOTSTRAP_DHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
         BOOTSTRAP_DHT.start();
         DHT_LIST.add(BOOTSTRAP_DHT);
+        
+        /*ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.FORCED_PORT.setValue(PORT);
+        
+        assertEquals("unexpected port", PORT, 
+                 ConnectionSettings.PORT.getValue());*/
         
         ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -57,30 +64,29 @@ public abstract class DHTTestCase extends LimeTestCase {
                 new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {"127.*.*.*", "18.239.0.*"});
+                
         ConnectionSettings.PORT.setValue(PORT);
-        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         assertEquals("unexpected port", PORT, 
                 ConnectionSettings.PORT.getValue());
+                
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-        //dht settings:
+        
+        // Dht Settings
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         
         NetworkSettings.TIMEOUT.setValue(500);
-        
-        // Nothing should take longer than 1.5 seconds. If we start seeing
-        // LockTimeoutExceptions on the loopback then check this Setting!
-        ContextSettings.WAIT_ON_LOCK.setValue(1500); 
+        NetworkSettings.BOOTSTRAP_TIMEOUT.setValue(500);
+        NetworkSettings.STORE_TIMEOUT.setValue(500);
     }
     
     public static void globalTearDown() throws Exception {
-        for(MojitoDHT dht : DHT_LIST) {
-            dht.close();
-        }
+        close(DHT_LIST);
         RouterService.shutdown();
     }
 
@@ -97,6 +103,12 @@ public abstract class DHTTestCase extends LimeTestCase {
                     Contact.DEFAULT_FLAG,
                     State.UNKNOWN);
             rt.add(node);
+        }
+    }
+    
+    protected static void close(Collection<? extends MojitoDHT> dhts) {
+        for (MojitoDHT dht : dhts) {
+            dht.close();
         }
     }
 }

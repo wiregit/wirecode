@@ -51,7 +51,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
             float requestLoad,
             Collection<? extends DHTValueEntity> entities, 
             Collection<KUID> secondaryKeys) {
-        super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
+        super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId, Version.ZERO);
         
         this.requestLoad = requestLoad;
         this.entities = entities;
@@ -59,11 +59,11 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     }
 
     public FindValueResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, msgVersion, in);
         
         this.requestLoad = in.readFloat();
-        this.entities = in.readDHTValueEntities(getContact());
+        this.entities = in.readDHTValueEntities(getContact(), context.getDHTValueFactory());
         this.secondaryKeys = in.readKUIDs();
     }
     

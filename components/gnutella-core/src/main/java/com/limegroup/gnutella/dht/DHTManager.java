@@ -1,26 +1,22 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
  * The DHT Manager interface currently defines method to start, stop and perform
  * operations related to the maintenance of the DHT (bootstrapping, etc.).
- * It also takes care of switching an active DHT node to a passive DHT node 
- * and vice versa.
- * 
- * TODO: The manager will later expose the methods to use the DHT, i.e. store 
- * and retrieve values.
+ * It also takes care of switching between different DHT modes.
  */
 public interface DHTManager extends ConnectionLifecycleListener, 
         EventDispatcher<DHTEvent, DHTEventListener>{
@@ -36,15 +32,14 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * 
          * @see NodeAssigner.java
          */
-        INACTIVE(0x00),
+        INACTIVE(0x00, new byte[]{ 'I', 'D', 'H', 'T' }),
         
         /**
          * A DHT Node is ACTIVE mode if it's a full participant
          * of the DHT, e.g. a non-firewalled Gnutella leave node
          * with a sufficiently stable connection.
-         * 
          */
-        ACTIVE(0x01),
+        ACTIVE(0x01, new byte[]{ 'A', 'D', 'H', 'T' }),
         
         /**
          * A DHT Node is in PASSIVE mode if it's connected to
@@ -52,26 +47,78 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * Thus, a passive node never receives requests from the DHT 
          * and does necessarily have an accurate knowledge of the DHT
          * structure. However, it can perform queries and requests stores.
-         * 
          */
-        PASSIVE(0x02);
+        PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' }),
+        
+        /**
+         * The PASSIVE_LEAF mode is very similar to PASSIVE mode with
+         * two major differences:
+         * 
+         * 1) A passive leaf has a fixed size LRU Map as its RouteTable.
+         *    That means it has almost no knowledge of the global DHT
+         *    RouteTable and depends entirely on an another peer (Ultrapeer)
+         *    that feeds it continiously with fresh contacts.
+         *    
+         * 2) A passive leaf node does not perform any Kademlia maintenance
+         *    operations!
+         */
+        PASSIVE_LEAF(0x03, new byte[]{ 'L', 'D', 'H', 'T' });
         
         public static final byte DHT_MODE_MASK = 0x0F;
         
-        private byte mode;
+        private final int mode;
         
-        private static Map<DHTMode, byte[]> capabilitiesVMMap = 
-            new EnumMap<DHTMode, byte[]>(DHTMode.class);
+        private final byte[] capabilityName;
         
-        private DHTMode(int state) {
-            this.mode = (byte)(state & 0xFF);
+        private DHTMode(int mode, byte[] capabilityName) {
+            assert (capabilityName.length == 4);
+            this.mode = mode;
+            this.capabilityName = capabilityName;
         }
         
         /**
          * Returns the mode as byte
          */
         public byte toByte() {
-            return mode;
+            return (byte)(mode & 0xFF);
+        }
+        
+        /**
+         * Returns true if the Node is inactive (it's DHT capable but 
+         * it's not running)
+         */
+        public boolean isInactive() {
+            return (this == INACTIVE);
+        }
+        
+        /**
+         * Returns true if the Node is in active mode
+         */
+        public boolean isActive() {
+            return (this == ACTIVE);
+        }
+        
+        /**
+         * Returns true if the Node is in passive mode
+         */
+        public boolean isPassive() {
+            return (this == PASSIVE);
+        }
+        
+        /**
+         * Returns true if the Node is in passive leaf mode
+         */
+        public boolean isPassiveLeaf() {
+            return (this == PASSIVE_LEAF);
+        }
+        
+        /**
+         * Returns the VM capability name
+         */
+        public byte[] getCapabilityName() {
+            byte[] copy = new byte[capabilityName.length];
+            System.arraycopy(capabilityName, 0, copy, 0, copy.length);
+            return copy;
         }
         
         private static final DHTMode[] MODES;
@@ -84,15 +131,13 @@ public interface DHTManager extends ConnectionLifecycleListener,
                 assert (MODES[index] == null);
                 MODES[index] = m;
             }
-            capabilitiesVMMap.put(ACTIVE, new byte[]{ 'A', 'D', 'H', 'T' });
-            capabilitiesVMMap.put(PASSIVE, new byte[]{ 'P', 'D', 'H', 'T' });
         }
         
         /**
          * Returns a DHTMode enum for the given mode and null
          * if no such DHTMode exists.
          */
-        public static DHTMode valueOf(byte mode) {
+        public static DHTMode valueOf(int mode) {
             int index = (mode & 0xFF) % MODES.length;
             DHTMode s = MODES[index];
             if (s.mode == mode) {
@@ -100,16 +145,12 @@ public interface DHTManager extends ConnectionLifecycleListener,
             }
             return null;
         }
-        
-        public static byte[] getCapabilitiesVMBytes(DHTMode mode) {
-            return capabilitiesVMMap.get(mode);
-        }
     }
     
     /**
      * Starts the DHT Node either in active or passive mode.
      */
-    public void start(boolean activeMode);
+    public void start(DHTMode mode);
 
     /**
      * Stops the DHT Node
@@ -139,9 +180,9 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public List<IpPort> getActiveDHTNodes(int maxNodes);
 
     /**
-     * Returns whether this Node is an active Node or not
+     * Returns the mode of the DHT
      */
-    public boolean isActiveNode();
+    public DHTMode getDHTMode();
     
     /**
      * Returns whether this Node is running
@@ -159,6 +200,11 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public boolean isWaitingForNodes();
     
     /**
+     * Returns the MojitoDHT instance (null if Node is running in inactive mode!)
+     */
+    public MojitoDHT getMojitoDHT();
+    
+    /**
      * Returns the Vendor code of this Node
      */
     public Vendor getVendor();
@@ -167,4 +213,12 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * Returns the Vendor code of this Node
      */
     public Version getVersion();
+    
+    /**
+     * Callback to notify the manager about new DHT Contacts that
+     * were exchanged over regular Gnutella messages.
+     * 
+     * @see com.limegroup.gnutella.messages.vendor.DHTContactsMessage
+     */
+    public void handleDHTContactsMessage(DHTContactsMessage msg);
 }

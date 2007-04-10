@@ -32,7 +32,7 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -118,7 +118,7 @@ public class Main {
         RouterService.preGuiInit();
         service.start();
         
-        LimeDHTManager manager = (LimeDHTManager)RouterService.getDHTManager();
+        DHTManager manager = RouterService.getDHTManager();
         MojitoDHT dht = manager.getMojitoDHT();
         if (addr != null) {
             dht.bind(new InetSocketAddress(addr, port));

@@ -1,7 +1,8 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Test;
@@ -19,10 +20,6 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -59,13 +56,15 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        
         try {
             Context context = (Context) controller.getMojitoDHT();
             KUID nodeID = context.getLocalNodeID();
             RouteTable rt = context.getRouteTable();
             //fill the routing table a bit
             fillRoutingTable(rt, 10);
+            
             //add one more
             KUID kuid = KUID.createRandomID();
             RemoteContact node = new RemoteContact(
@@ -78,15 +77,17 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                     Contact.DEFAULT_FLAG,
                     State.UNKNOWN);
             rt.add(node);
+            
             controller.start();
             controller.stop();
-            controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+            
+            controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
             //should have the same nodeID as before
             assertEquals(nodeID, context.getLocalNodeID());
             //should have persisted the routetable
-            List<Contact> contacts = rt.getContacts();
+            Collection<Contact> contacts = rt.getContacts();
             assertEquals(12, contacts.size()); //11 + localnode
             assertTrue(contacts.contains(node));
         } finally {
@@ -96,7 +97,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         try {
             controller.start();
@@ -111,5 +112,36 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         } finally {
             controller.stop();
         }
+    }
+    
+    public void testResetRouteTable() {
+        DHTSettings.PERSIST_DHT.setValue(true);
+        
+        File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
+        dhtFile.delete();
+        
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        
+        Contact localNode1 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
+        controller.stop();
+        
+        controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        Contact localNode2 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
+        controller.stop();
+        
+        assertEquals(localNode1.getNodeID(), localNode2.getNodeID());
+        
+        DHTSettings.ROUTETABLE_VERSION.setValue(1);
+        controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        Contact localNode3 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
+        controller.stop();
+        
+        assertNotEquals(localNode1.getNodeID(), localNode3.getNodeID());
     }
 }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +29,7 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -48,7 +48,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * session, and accuracy of the contacts in the RT is not guaranteed when a node 
  * is passive (as it does not get contacted by the DHT).   
  */
-class PassiveDHTNodeController extends AbstractDHTController{
+public class PassiveDHTNodeController extends AbstractDHTController {
     
     /**
      * The file to persist the list of host
@@ -58,22 +58,23 @@ class PassiveDHTNodeController extends AbstractDHTController{
     /**
      * A RouteTable for passive Nodes
      */
-    private PassiveDHTNodeRouteTable limeDHTRouteTable;
+    private PassiveDHTNodeRouteTable routeTable;
     
     public PassiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher);
+        super(vendor, version, dispatcher, DHTMode.PASSIVE);
     }
     
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
-        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
+        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveUltrapeerDHT", vendor, version);
         
-        limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
-        dht.setRouteTable(limeDHTRouteTable);
+        routeTable = new PassiveDHTNodeRouteTable(dht);
+        dht.setRouteTable(routeTable);
         
         // Load the small list of MRS Nodes for bootstrap
-        if (FILE.exists() && FILE.isFile()) {
+        if (DHTSettings.PERSIST_DHT.getValue()
+                && FILE.exists() && FILE.isFile()) {
             ObjectInputStream ois = null;
             try {
                 ois = new ObjectInputStream(
@@ -81,9 +82,12 @@ class PassiveDHTNodeController extends AbstractDHTController{
                                 new SecureInputStream(
                                     new FileInputStream(FILE))));
                 
-                Contact node = null;
-                while((node = (Contact)ois.readObject()) != null){
-                    limeDHTRouteTable.add(node);
+                int routeTableVersion = ois.readInt();
+                if (routeTableVersion >= getRouteTableVersion()) {
+                    Contact node = null;
+                    while((node = (Contact)ois.readObject()) != null){
+                        routeTable.add(node);
+                    }
                 }
             } catch (Throwable ignored) {
             } finally {
@@ -93,8 +97,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         return dht;
     }
-
-
+    
     /**
      * This method first adds the given host to the list of bootstrap nodes and 
      * then adds it to this passive node's routing table.
@@ -115,7 +118,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         if(LOG.isDebugEnabled()) {
             LOG.debug("Adding host: "+addr+" to leaf dht nodes");
         }
-        limeDHTRouteTable.addLeafDHTNode(host, port);
+        routeTable.addLeafDHTNode(host, port);
     }
     
     protected SocketAddress removeLeafDHTNode(String host, int port) {
@@ -123,7 +126,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             return null;
         }
         
-        SocketAddress removed = limeDHTRouteTable.removeLeafDHTNode(host, port);
+        SocketAddress removed = routeTable.removeLeafDHTNode(host, port);
 
         if(LOG.isDebugEnabled() && removed != null) {
             LOG.debug("Removed host: "+removed+" from leaf dht nodes");
@@ -144,7 +147,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             FILE.delete();
         }
         
-        List<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
+        Collection<Contact> contacts = routeTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
             ObjectOutputStream oos = null;
             try {
@@ -153,8 +156,10 @@ class PassiveDHTNodeController extends AbstractDHTController{
                                 new SecureOutputStream(
                                     new FileOutputStream(FILE))));
                 
+                oos.writeInt(getRouteTableVersion());
+                
                 // Sort by MRS and save only some Nodes
-                contacts = ContactUtils.sort(contacts, DHTSettings.NUM_PERSISTED_NODES.getValue());
+                contacts = ContactUtils.sort(contacts, DHTSettings.MAX_PERSISTED_NODES.getValue());
                 
                 KUID localNodeID = getMojitoDHT().getLocalNodeID();
                 for(Contact node : contacts) {
@@ -172,10 +177,6 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 IOUtils.close(oos);
             }
         }
-    }
-    
-    public boolean isActiveNode() {
-        return false;
     }
 
     /**

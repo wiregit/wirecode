@@ -20,11 +20,16 @@
 package org.limewire.mojito.util;
 
 import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.limewire.mojito.settings.KademliaSettings;
 
@@ -45,6 +50,26 @@ public final class CollectionUtils {
         }
         
         return new LinkedHashSet<T>(c);
+    }
+    
+    /**
+     * Converts the given Collection to a List (if it isn't
+     * already a List)
+     */
+    public static <T> List<T> toList(Collection<T> c) {
+        if (c instanceof List) {
+            return (List<T>)c;
+        }
+        
+        return new ArrayList<T>(c);
+    }
+    
+    public static <K, V> Map<K, V> toMap(Collection<? extends Entry<K, V>> c) {
+        Map<K, V> map = new LinkedHashMap<K, V>();
+        for (Entry<K, V> entry : c) {
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
     }
     
     /**
