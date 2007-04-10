@@ -869,13 +869,13 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 // if we were still trying to get a locale connection
                 // and this one matches, allow it, 'cause no one else matches.
                 // (we would have turned _needPref off if someone matched.)
-                if(_needPref && checkLocale(hr.getLocalePref())) {
-                    _needPref = false;
+//                if(_needPref && checkLocale(hr.getLocalePref())) {
+//                    _needPref = false;
                     return HandshakeStatus.OK;
-                }
+//                }
                 
                 // don't allow it.
-                return HandshakeStatus.TOO_MANY_UPS;
+//                return HandshakeStatus.TOO_MANY_UPS;
             }
 		} else if (hr.isLeaf() || leaf) {
 		    // no leaf connections if we're a leaf.

@@ -52,6 +52,7 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
         }
         if (!handleWrite()) {
             encoder.complete();
+            finished();
         }
     }
     
@@ -64,13 +65,14 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     }
 
     public boolean isOpen() {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     public abstract void initialize() throws IOException;
     
     public abstract boolean handleWrite() throws IOException;
+
+    public abstract void finished() throws IOException;
 
     public void handleIOException(IOException iox) {
         throw new UnsupportedOperationException();

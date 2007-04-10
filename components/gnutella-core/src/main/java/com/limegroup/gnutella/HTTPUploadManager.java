@@ -228,6 +228,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * uploader from the GUI. (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
     public void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
+        System.out.println("cleaning up finished.");
         if (LOG.isTraceEnabled())
             LOG.trace(uploader + " cleaning up finished.");
 
@@ -1011,13 +1012,17 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (session != null) {
             HTTPUploader uploader = session.getUploader();
             if (uploader != null) {
+                if (uploader.getState() == Uploader.INTERRUPTED || uploader.getState() == Uploader.COMPLETE) {
+                    return;
+                }
+                
                 boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                 slotManager.cancelRequest(session);
                 if (stillInQueue)
                     uploader.setState(Uploader.INTERRUPTED);
                 else
                     uploader.setState(Uploader.COMPLETE);
-                removeFromList(uploader);
+                cleanupFinishedUploader(uploader, uploader.getStartTime());
 
                 System.out.println("session closed");
             }

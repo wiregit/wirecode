@@ -110,6 +110,10 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             }
         }
 
+        @Override
+        public void finished() throws IOException {
+        }
+
     }
 
 }

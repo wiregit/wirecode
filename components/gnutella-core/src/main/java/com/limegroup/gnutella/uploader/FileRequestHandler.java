@@ -28,6 +28,7 @@ import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -250,8 +251,8 @@ public class FileRequestHandler implements HttpRequestHandler {
                     .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
         }
 
-        response.setEntity(new FileResponseEntity(uploader, fd));
-        uploader.setState(Uploader.CONNECTING);
+        response.setEntity(new FileResponseEntity(context, uploader, fd));
+        uploader.setState(Uploader.UPLOADING);
 
         if (uploader.getUploadEnd() - uploader.getUploadBegin() < uploader
                 .getFileSize()) {
@@ -264,6 +265,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     private void handleTHEXRequest(HttpRequest request, HttpResponse response,
             HttpContext context, HTTPUploader uploader, FileDesc fd)
             throws HttpException, IOException {
+        uploader.setState(Uploader.UPDATE_FILE);
         new THEXRequestHandler(uploader, fd).handle(request, response, context);
     }
 

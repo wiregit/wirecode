@@ -10,11 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import org.apache.http.protocol.HttpContext;
 import org.limewire.http.AbstractHttpNIOEntity;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.http.HttpContextParams;
 
 public class FileResponseEntity extends AbstractHttpNIOEntity {
 
@@ -34,11 +35,14 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
 
     private long remaining;
 
+    private HttpContext context;
+
     private static int BUFFER_SIZE = 512;
 
-    private FileResponseEntity(HTTPUploader uploader) {
+    private FileResponseEntity(HttpContext context, HTTPUploader uploader) {
+        this.context = context;
         this.uploader = uploader;
-
+        
         setContentType(Constants.FILE_MIME_TYPE);
 
         begin = uploader.getUploadBegin();
@@ -47,14 +51,14 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         remaining = length;
     }
     
-    public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
-        this(uploader);
+    public FileResponseEntity(HttpContext context, HTTPUploader uploader, FileDesc fd) {
+        this(context, uploader);
         
         this.fd = fd;
     }
 
     public FileResponseEntity(HTTPUploader uploader, File file) {
-        this(uploader);
+        this(null, uploader);
         
         this.file = file;
     }
@@ -78,13 +82,25 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
                 throw new IOException("Could not skip to begin offset: " + skipped + " < " + begin);
             }
         }
+
+        HttpContextParams.getIOSession(context).setThrottle(true);
         
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
         buffer.flip(); 
     }
     
     @Override
+    public void finished() throws IOException {
+        in.close();
+    }
+    
+    @Override
     public boolean handleWrite() throws IOException {
+        System.out.println("FileRepsonseEntity: write");
+        if (buffer == null) {
+            return false;
+        }
+        
         if (buffer.hasRemaining()) {
              int written = write(buffer);
              uploader.addAmountUploaded(written);

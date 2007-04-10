@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.http;
 
 import org.apache.http.protocol.HttpContext;
+import org.limewire.http.HttpIOSession;
 
 import com.limegroup.gnutella.FileDetails;
 
@@ -11,6 +12,8 @@ public class HttpContextParams {
     public final static String ALT_LOC_TRACKER = "org.limewire.altloctracker";
 
     public final static String LOCAL = "org.limewire.local";
+
+    private static final String IO_SESSION = "org.limewire.iosession";
 
     public static FileDetails getFileDetails(final HttpContext context) {
         return (FileDetails) context.getAttribute(FILE_DETAILS);
@@ -35,6 +38,14 @@ public class HttpContextParams {
 
     public static void setLocal(final HttpContext context, final boolean local) {
         context.setAttribute(LOCAL, local);
+    }
+
+    public static void setIOSession(HttpContext context, HttpIOSession session) {
+        context.setAttribute(IO_SESSION, session);
+    }
+    
+    public static HttpIOSession getIOSession(HttpContext context) {
+        return (HttpIOSession) context.getAttribute(IO_SESSION);
     }
 
 }

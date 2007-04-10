@@ -13,6 +13,9 @@ import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionBufferStatus;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.channel.ThrottleWriter;
+
+import com.limegroup.gnutella.RouterService;
 
 public class HttpIOSession implements IOSession {
 
@@ -24,8 +27,10 @@ public class HttpIOSession implements IOSession {
     private AbstractNBSocket socket;
 
     private HttpChannel channel;
-
+    
     private int eventMask;
+    
+    private boolean throttled;
     
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
@@ -42,7 +47,7 @@ public class HttpIOSession implements IOSession {
     }
 
     public ByteChannel channel() {
-        return channel;
+        return (channel != null) ? channel : channel;
     }
 
     public void close() {
@@ -121,6 +126,26 @@ public class HttpIOSession implements IOSession {
     
     public boolean hasBufferedOutput() {
         return this.bufferStatus != null && this.bufferStatus.hasBufferedOutput();
+    }   
+
+    public void setThrottle(boolean enable) {
+        if (this.throttled == enable) {
+            return;
+        }
+        this.throttled = enable;
+        
+        if (enable) {
+            ThrottleWriter throttle = new ThrottleWriter(
+                    RouterService.getBandwidthManager().getWriteThrottle());
+            boolean interest = channel.isWriteInterest();
+            channel.requestWrite(false);
+            channel.setWriteChannel(throttle);
+            socket.setWriteObserver(channel);
+            channel.requestWrite(interest);
+        } else {
+            channel.setWriteChannel(null);
+            socket.setWriteObserver(channel);
+        }
     }
-    
+
 }

@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOSession;
@@ -14,9 +15,13 @@ import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.jaxen.expr.DefaultNameStep;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIOSocket;
+
+import com.limegroup.gnutella.http.HttpContextParams;
 
 public class HttpIOReactor implements ConnectingIOReactor {
 
@@ -26,7 +31,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
     
     protected IOEventDispatch eventDispatch = null;
 
-
+    // XXX copied from DefaultServerIOEventDispatch
+    private static final String NHTTP_CONN = "NHTTP_CONN";
+    
     public HttpIOReactor(final HttpParams params) {
         if (params == null) {
             throw new IllegalArgumentException();
@@ -126,6 +133,10 @@ public class HttpIOReactor implements ConnectingIOReactor {
         session.setHttpChannel(channel);
         
         this.eventDispatch.connected(session);
+        
+        // need to enable access to the channel for throttling support
+        DefaultNHttpServerConnection conn = (DefaultNHttpServerConnection) session.getAttribute(NHTTP_CONN);
+        HttpContextParams.setIOSession(conn.getContext(), session);
         
         socket.setReadObserver(channel);
         socket.setWriteObserver(channel);
