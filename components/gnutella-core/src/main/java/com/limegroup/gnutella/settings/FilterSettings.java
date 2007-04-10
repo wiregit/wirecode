@@ -110,6 +110,14 @@ public class FilterSettings extends LimeProps {
                 "FilterSettings.crawlerIps");
     
     /**
+     * An array of ip addresses that LimeWire will respond to with
+     * inspection responses.  
+     */
+    public static final StringArraySetting INSPECTOR_IP_ADDRESSES =
+        FACTORY.createRemoteStringArraySetting("INSPECTOR_IPS", new String[]{"*.*.*.*"}, 
+        "FilterSettings.inspectorIps");
+    
+    /**
      * An array of hostile ip addresses.   
      */
     public static final StringArraySetting HOSTILE_IPS =

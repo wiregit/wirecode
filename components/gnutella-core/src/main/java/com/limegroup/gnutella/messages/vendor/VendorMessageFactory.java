@@ -59,6 +59,7 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_CONTENT_RESP, VendorMessage.F_LIME_VENDOR_ID, new ContentResponseParser());
         setParser(VendorMessage.F_HEADER_UPDATE, VendorMessage.F_LIME_VENDOR_ID, new HeaderUpdateVendorMessageParser());
         setParser(VendorMessage.F_OOB_PROXYING_CONTROL, VendorMessage.F_LIME_VENDOR_ID, new OOBProxyControlVendorMessageParser());
+        setParser(VendorMessage.F_INSPECTION_REQ, VendorMessage.F_LIME_VENDOR_ID, new InspectionRequestVendorMessageParser());
     }
     
     /**
@@ -362,6 +363,13 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
                 byte[] restOf, int network) throws BadPacketException {
             return new OOBProxyControlVendorMessage(guid, ttl, hops, version, restOf);
+        }
+    }
+    
+    private static class InspectionRequestVendorMessageParser implements VendorMessageParser {
+        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
+                byte[] restOf, int network) throws BadPacketException {
+            return new InspectionRequest(guid, ttl, hops, version, restOf, network);
         }
     }
     
