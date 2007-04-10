@@ -239,6 +239,7 @@ public class NodeAssigner {
             return;
         }
         
+        // If we're already an Ultrapeer then don't bother
         if (RouterService.isSupernode()) {
             return;
         }
@@ -297,15 +298,8 @@ public class NodeAssigner {
             return;
         } 
         
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Node will not try to become an ultrapeer");
-        }
-        //here: we are not an ultrapeer and will not try to connect as one
-        //maybe a demotion from ultrapeer to leaf --> disconnect the DHT if it is the case
-        if (RouterService.isDHTNode() 
-                && (RouterService.getDHTMode() != DHTMode.ACTIVE)) {
-            NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
-            RouterService.shutdownDHT();
         }
     }
     
@@ -450,9 +444,16 @@ public class NodeAssigner {
             mode = DHTMode.ACTIVE;
         }
         
-        // Ultrapeers may always start in passive mode
-        // Everybody else is accepted with a certain likelihood
-        if ((isUltrapeer || acceptDHTNode()) && (mode != current)) {
+        // We switch the mode if:
+        // The current mode is different from the new mode AND we're either
+        //   an Ultrapeer or get selected with a certain likehood.
+        // OR the current mode is _not_ INACTIVE and the new mode is INACTIVE
+        //   as we always want to allow to shut down the DHT! This can happen
+        //   if an Ultrapeer is demoted to a Leaf and does not fulfil the
+        //   requirements to be an ACTIVE or PASSIVE_LEAF node or if certain
+        //   modes are forcibly disabled.
+        if (((mode != current) && (isUltrapeer || acceptDHTNode()))
+                || (current != DHTMode.INACTIVE && mode == DHTMode.INACTIVE)) {
             switchDHTMode(current, mode);
         }
         
@@ -511,6 +512,8 @@ public class NodeAssigner {
         long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
+        // TODO: I'm not sure if it's really necessary to be an ULTRAPEER_OS
+        // for PASSIVE_LEAF
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
