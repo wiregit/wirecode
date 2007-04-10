@@ -128,7 +128,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         Contact localNode2 = controller.getMojitoDHT().getLocalNode();
         controller.stop();
         
-        assertEquals(localNode1, localNode2);
+        assertEquals(localNode1.getNodeID(), localNode2.getNodeID());
         
         DHTSettings.ROUTETABLE_VERSION.setValue(1);
         controller = new ActiveDHTNodeController(
@@ -136,6 +136,6 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         Contact localNode3 = controller.getMojitoDHT().getLocalNode();
         controller.stop();
         
-        assertNotEquals(localNode1, localNode3);
+        assertNotEquals(localNode1.getNodeID(), localNode3.getNodeID());
     }
 }

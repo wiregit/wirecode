@@ -105,6 +105,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                 }
                 out.flush();
             } catch (IOException ignored) {
+                ignored.printStackTrace();
             } finally {
                 IOUtils.close(out);
             }
