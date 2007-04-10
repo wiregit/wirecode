@@ -1,14 +1,11 @@
 package org.limewire.inspection;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.limewire.inspection.Inspectable.InspectableForSize;
-import org.limewire.inspection.Inspectable.InspectablePrimitive;
 
 
 public class InspectionUtils {
@@ -32,11 +29,11 @@ public class InspectionUtils {
      * @return the object pointed to by the last field, or an Exception
      * object if such was thrown trying to get it.
      */
-    public static String inspectValue(String encodedField) {
+    public static String inspectValue(String encodedField) throws InspectionException {
         try {
             StringTokenizer t = new StringTokenizer(encodedField, ",");
             if (t.countTokens() < 2)
-                return "invalid field";
+                throw new InspectionException();
             // the first token better be fully qualified class name
             List<Annotation> annotations = new ArrayList<Annotation>();
             Object instance =
@@ -45,7 +42,9 @@ public class InspectionUtils {
                 instance = getValue(instance, t.nextToken(), annotations);
             return inspect(instance, annotations);
         } catch (Throwable e) {
-            return e.toString();
+            if (e instanceof InspectionException)
+                throw (InspectionException)e;
+            throw new InspectionException(e);
         }
     }
 
@@ -58,7 +57,7 @@ public class InspectionUtils {
      * @return a String representation taken either from Inspectable.inspect(),
      * String.valueOf or size() depending on the annotation or type of the field.
      */
-    private static String inspect(Object o, List<Annotation> annotations) {
+    private static String inspect(Object o, List<Annotation> annotations) throws Exception {
         if (o instanceof Inspectable) {
             Inspectable i = (Inspectable) o;
             return i.inspect();
@@ -69,19 +68,11 @@ public class InspectionUtils {
                 return String.valueOf(o);
 
             if (a instanceof InspectableForSize) {
-                try {
-                    Method m = o.getClass().getMethod("size", new Class[0]);
-                    return m.invoke(o, new Object[0]).toString();
-                }  catch (NoSuchMethodException nsme) {
-                    return "cannot find method size() for class "+o.getClass();
-                } catch (IllegalAccessException iae) {
-                    return "cannot invoke size on class "+o.getClass();
-                } catch (InvocationTargetException ite) {
-                    return "invoking size failed on class "+o.getClass();
-                }
+                Method m = o.getClass().getMethod("size", new Class[0]);
+                return m.invoke(o, new Object[0]).toString();
             }
         }
-        return "object of class "+o.getClass()+" is not inspectable";
+        throw new InspectionException();
     }
     
     /**

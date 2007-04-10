@@ -1,12 +1,11 @@
 package org.limewire.inspection;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.inspection.Inspectable.InspectableForSize;
-import org.limewire.inspection.Inspectable.InspectablePrimitive;
 import org.limewire.util.BaseTestCase;
 
 public class InspectionUtilsTest extends BaseTestCase {
@@ -40,24 +39,48 @@ public class InspectionUtilsTest extends BaseTestCase {
                 InspectionUtils.inspectValue(
                         "org.limewire.inspection.TestClass2,reference1,reference2," +
                         "reference1,reference2,reference1,reference2,reference"));
-        String invalid = InspectionUtils.inspectValue("org.limewire.inspection.TestClass");
-        assertEquals("invalid field", invalid);
-        String notFound = InspectionUtils.inspectValue("org.limewire.not.existing.class,a");
-        assertTrue(notFound.contains("Exception"));
-        String methodNotFound = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,wrongField");
-        assertTrue(methodNotFound.contains("Exception"));
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.TestClass");
+            fail("invalid value");
+        } catch (InspectionException expcted){}
+        
+        try {
+            InspectionUtils.inspectValue("org.limewire.not.existing.class,a");
+            fail("class should not exist");
+        } catch (InspectionException expcted){}
+        
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.TestClass,wrongField");
+            fail("field should not be found");
+        } catch (InspectionException expcted){}
+    }
+    
+    public void testStaticMembersTraversed() throws Exception {
+        TestClass t = new TestClass();
+        TestClass2 t2 = new TestClass2();
+        TestClass.reference2 = t2;
+        TestClass.reference1 = t;
+        TestClass2.reference1 = t;
+        t.reference = t2;
+        t2.reference = new InspectableClass("test");
+        
+        /*
+         * traverse
+         * t1 -> self reference(static) -> t2 -> t1(static) -> t2 (static) -> t1 ->t2 -> Inspectable
+         */
+        assertEquals("test",
+                InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,reference,reference1,reference,reference"));
     }
     
     public void testInspectablePrimitive() throws Exception {
-        String notInspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference2");
-        assertTrue(notInspectable.contains("not inspectable"));
-        
         TestClass t = new TestClass();
         t.memberString = "a";
         t.inspectableString = "b";
         TestClass.reference1 = t;
-        notInspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,memberString");
-        assertTrue(notInspectable.contains("not inspectable"));
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,memberString");
+            fail("should not be inspectable");
+        } catch (InspectionException expcted){}
         
         String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableString");
         assertEquals("b", inspectable);
@@ -74,11 +97,40 @@ public class InspectionUtilsTest extends BaseTestCase {
         t.inspectableList.add(new Object());
         TestClass.reference1 = t;
         
-        String notInspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,memberList");
-        assertTrue(notInspectable.contains("not inspectable"));
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,memberList");
+            fail("should not be inspectable for size");
+        } catch (InspectionException expcted){}
         
         String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableList");
         assertEquals("2",inspectable);
+    }
+    
+    public void testBoxing() throws Exception {
+        PrivateInts t = new PrivateInts(1,2);
+        PrivateInts.self = t;
+        
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,memberInt");
+            fail("should not be inspectable");
+        } catch (InspectionException expcted){}
+        
+        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
+        assertEquals("2",inspectable);
+    }
+    
+    /**
+     * tests that the field access is modified only for the internally
+     * used Field object.
+     */
+    public void testAccess() throws Exception {
+        PrivateInts t = new PrivateInts(1,2);
+        PrivateInts.self = t;
+        Field f = t.getClass().getDeclaredField("inspectableInt");
+        assertFalse(f.isAccessible());
+        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
+        assertEquals("2",inspectable);
+        assertFalse(f.isAccessible());
     }
 }
 
@@ -118,5 +170,17 @@ class InspectableClass implements Inspectable {
     }
     public String inspect() {
         return s;
+    }
+}
+
+@SuppressWarnings("unused")
+class PrivateInts {
+    static PrivateInts self;
+    private int memberInt;
+    @InspectablePrimitive
+    private int inspectableInt;
+    PrivateInts(int a, int b) {
+        memberInt = a;
+        inspectableInt = b;
     }
 }
