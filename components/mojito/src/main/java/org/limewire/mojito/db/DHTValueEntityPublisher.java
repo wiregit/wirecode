@@ -21,7 +21,6 @@ package org.limewire.mojito.db;
 
 import java.util.Collection;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
@@ -38,23 +37,6 @@ import org.limewire.mojito.routing.Contact;
  * DHTValueEntities.
  */
 public interface DHTValueEntityPublisher {
-    
-    /**
-     * Returns a DHTValueEntity for the given KUID or null if
-     * no such DHTValueEntity exists
-     * 
-     * TODO: I think we don't need this method anymore but I'm leaving
-     * it for now
-     */
-    public Collection<DHTValueEntity> get(KUID primaryKey);
-    
-    /**
-     * Returns all DHTValueEntities
-     * 
-     * TODO: I think we don't need this method anymore but I'm leaving
-     * it for now
-     */
-    public Collection<DHTValueEntity> getValues();
     
     /**
      * Returns all DHTValueEntities that need to be published now

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,62 +43,6 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
     public AltLocPublisher(MojitoDHT dht) {
         this.dht = dht;
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
-     */
-    public Collection<DHTValueEntity> get(KUID primaryKey) {
-        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
-            return Collections.emptySet();
-        }
-        
-        DHTValueEntity entity = values.get(primaryKey);
-        if (entity != null) {
-            return Collections.singleton(entity);
-        }
-        return Collections.emptySet();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValues()
-     */
-    public Collection<DHTValueEntity> getValues() {
-        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
-            return Collections.emptySet();
-        }
-        
-        FileManager fileManager = RouterService.getFileManager();
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-        
-        // Turn the FileDesc-Array to a Map<KUID, FileDesc>
-        Map<KUID, FileDesc> current = new HashMap<KUID, FileDesc>();
-        for (FileDesc fd : fds) {
-            if (!(fd instanceof IncompleteFileDesc)) {
-                KUID key = KUIDUtils.toKUID(fd.getSHA1Urn());
-                current.put(key, fd);
-            }
-        }
-        
-        synchronized (values) {
-            DHTValueFactory valueFactory = dht.getDHTValueFactory();
-            
-            // For each key that is not in the values map
-            // create a new DHTValueEntity.
-            for (KUID key : current.keySet()) {
-                if (!values.containsKey(key)) {
-                    DHTValueEntity entity = valueFactory.createDHTValueEntity(
-                            dht.getLocalNode(), dht.getLocalNode(), key, 
-                            AltLocDHTValueImpl.SELF, true);
-                    
-                    values.put(key, entity);
-                }
-            }
-            
-            return new ArrayList<DHTValueEntity>(values.values());
-        }
-    }
 
     /*
      * (non-Javadoc)
@@ -109,11 +54,35 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         }
         
         FileManager fileManager = RouterService.getFileManager();
+        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
+        
+        DHTValueFactory valueFactory = dht.getDHTValueFactory();
+        
+        // List of DHTValueEntities we're going to publish
         List<DHTValueEntity> publish = new ArrayList<DHTValueEntity>();
         
         synchronized (values) {
-            Collection<DHTValueEntity> entities = getValues();
-            for (DHTValueEntity entity : entities) {
+            
+            // Step One: Add every new FileDesc to the Map
+            for (FileDesc fd : fds) {
+                if (!(fd instanceof IncompleteFileDesc)) {
+                    KUID key = KUIDUtils.toKUID(fd.getSHA1Urn());
+                    if (!values.containsKey(key)) {
+                        DHTValueEntity entity = valueFactory.createDHTValueEntity(
+                                dht.getLocalNode(), dht.getLocalNode(), key, 
+                                AltLocDHTValueImpl.SELF, true);
+                        
+                        values.put(key, entity);
+                    }
+                }
+            }
+            
+            // Step Two: Remove every DHTValueEntity that is no longer
+            // associated with a FileDesc (i.e. the FileDesc was deleted)
+            // and create a List of DHTValueEntities that are rare and
+            // must be republished
+            for (Iterator<DHTValueEntity> it = values.values().iterator(); it.hasNext(); ) {
+                DHTValueEntity entity = it.next();
                 KUID primaryKey = entity.getKey();
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
@@ -126,7 +95,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
                 // from the DHT.
                 if (fd == null) {
                     entity.setValue(DHTValue.EMPTY_VALUE);
-                    values.remove(primaryKey);
+                    it.remove();
                 }
                 
                 // Publish only rare FileDescs and removed entities
@@ -168,7 +137,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
     public String toString() {
         StringBuilder buffer = new StringBuilder("AltLocPublisher: ");
         synchronized (values) {
-            buffer.append(CollectionUtils.toString(getValues()));
+            buffer.append(CollectionUtils.toString(values.values()));
         }
         return buffer.toString();
     }

@@ -23,12 +23,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
@@ -64,37 +62,6 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
         }
         
         proxy.remove(publisher);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
-     */
-    public Collection<DHTValueEntity> get(KUID primaryKey) {
-        List<DHTValueEntity> entities = new ArrayList<DHTValueEntity>();
-        synchronized (proxy) {
-            for (DHTValueEntityPublisher publisher : proxy) {
-                Collection<DHTValueEntity> c = publisher.get(primaryKey);
-                if (c != null) {
-                    entities.addAll(c);
-                }
-            }
-        }
-        return entities;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
-     */
-    public Collection<DHTValueEntity> getValues() {
-        Collection<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
-        synchronized (proxy) {
-            for (DHTValueEntityPublisher publisher : proxy) {
-                values.addAll(publisher.getValues());
-            }
-        }
-        return values;
     }
     
     /*
