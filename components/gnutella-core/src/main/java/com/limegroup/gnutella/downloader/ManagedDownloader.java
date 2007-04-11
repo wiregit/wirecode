@@ -933,51 +933,60 @@ public class ManagedDownloader extends AbstractDownloader
      *  |__|
      */
     private void sendRequery() {
-        if (RouterService.isMemberOfDHT() 
-                && (firstQueryAttempt || alreadyTriedGnutella)
-                && DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()) {
-            sendDHTQuery();
+        if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
+                && RouterService.isMemberOfDHT() 
+                && (firstQueryAttempt || alreadyTriedGnutella)) {
+            
+            if (sendDHTQuery()) {
+                firstQueryAttempt = false;
+            }
         } else if (!alreadyTriedGnutella) {
-            sendGnutellaQuery();
+            if (sendGnutellaQuery()) {
+                alreadyTriedGnutella = true;
+            }
         }
     }
     
     /**
      * Sends a DHT Query
      */
-    private void sendDHTQuery() {
+    private boolean sendDHTQuery() {
         if (manager.sendDHTQuery(this)) {
-            firstQueryAttempt = false;
             lastQuerySent = System.currentTimeMillis();
             numDHTQueries++;
             setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+            return true;
         } else {
             lastQuerySent = -1;
+            return false;
         }
     }
     
     /**
      * Sends a Gnutella Query
      */
-    private void sendGnutellaQuery() {
+    private boolean sendGnutellaQuery() {
         // If we don't have stable connections, wait until we do.
-        if(!hasStableConnections()) {
-            lastQuerySent = -1; // mark as wanting to requery.
-            setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
-        } else {
+        if (hasStableConnections()) {
             try {
                 QueryRequest qr = newRequery(numGnutellaQueries);
                 if(manager.sendQuery(this, qr)) {
-                    alreadyTriedGnutella = true;
                     lastQuerySent = System.currentTimeMillis();
                     numGnutellaQueries++;
                     setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                    return true;
                 } else {
                     lastQuerySent = -1; // mark as wanting to requery.
+                    return false;
                 }
             } catch(CantResumeException cre) {
-                // oh well.
+                LOG.debug("CantResumeException", cre);
+                return false;
             }
+        } else {
+            lastQuerySent = -1; // mark as wanting to requery.
+            setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
+            return false;
         }
     }
     
