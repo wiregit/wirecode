@@ -128,7 +128,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             assertFalse(key.isFor(InetAddress.getLocalHost(), 4544));
 
             // wait for grace period to be over
-            Thread.sleep(100);
+            Thread.sleep(200);
 
             assertFalse(key.isFor(InetAddress.getLocalHost(), 4545));
 
@@ -148,7 +148,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
         }
 
         public long getGracePeriod() {
-            return 100;
+            return 200;
         }
         
         public synchronized void waitForRotation() throws InterruptedException {
