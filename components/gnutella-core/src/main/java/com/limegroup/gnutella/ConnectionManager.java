@@ -406,6 +406,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
+        //if(true)
+            //return true;
         return !NetworkUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
@@ -2258,18 +2260,31 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         /** Does nothing right now. */
         public void finish() {
         }
+        
+        /** Returns true if we are able to make a connection attempt to this host. */
+        private boolean isConnectableHost(IpPort host) {
+            return RouterService.getIpFilter().allow(host)
+                && !isConnectedTo(host.getAddress()) 
+                && !isConnectingTo(host);
+        }
 
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint incoming) {
             assert incoming != null;
             
             // If this was an invalid endpoint, try again.
-            while(!RouterService.getIpFilter().allow(incoming.getAddress()) 
-              || isConnectedTo(incoming.getAddress()) || isConnectingTo(incoming)) {
+            while(!isConnectableHost(incoming)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Ignoring unconnectable host: " + incoming);
                 incoming = _catcher.getAnEndpointImmediate(this);
-                if(incoming == null)
+                if(incoming == null) {
+                    LOG.debug("No hosts available, waiting on a new one...");
                     return; // if we didn't get one immediate, the callback is scheduled
+                }
             }
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("Starting fetch for connectable host: " + incoming);
 
             this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
