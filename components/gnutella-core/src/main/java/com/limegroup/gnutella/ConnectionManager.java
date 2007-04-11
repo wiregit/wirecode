@@ -306,8 +306,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(String hostname, int portnum) throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum);
+    public ManagedConnection createConnectionBlocking(String hostname, int portnum, ConnectType type) throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum, type);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c, null);
@@ -320,10 +320,10 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
     public void createConnectionAsynchronously(
-            String hostname, int portnum) {
+            String hostname, int portnum, ConnectType type) {
 
 		Runnable outgoingRunner =
-			new OutgoingConnector(new ManagedConnection(hostname, portnum),
+			new OutgoingConnector(new ManagedConnection(hostname, portnum, type),
 								  true);
         // Initialize and loop for messages on another thread.
 
@@ -2213,9 +2213,9 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      */
     private class ConnectionFetcher implements GnetConnectObserver, HostCatcher.EndpointObserver {
         // set if this connectionfetcher is a preferencing fetcher
-        private boolean _pref = false;
-        private ManagedConnection connection;
-        private Endpoint endpoint;
+        private final boolean _pref;
+        private volatile ManagedConnection connection;
+        private volatile Endpoint endpoint;
         private volatile boolean stoppedEarly = false;
 
         public ConnectionFetcher() {
@@ -2260,18 +2260,18 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         }
 
         /** Callback that an endpoint is available for connecting. */
-        public void handleEndpoint(Endpoint endpoint) {
-            Assert.that(endpoint != null);
+        public void handleEndpoint(Endpoint incoming) {
+            assert incoming != null;
             
             // If this was an invalid endpoint, try again.
-            if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
-                || isConnectedTo(endpoint.getAddress())
-                || isConnectingTo(endpoint)) {
-                _catcher.getAnEndpoint(this);
-                return;
+            while(!RouterService.getIpFilter().allow(incoming.getAddress()) 
+              || isConnectedTo(incoming.getAddress()) || isConnectingTo(incoming)) {
+                incoming = _catcher.getAnEndpointImmediate(this);
+                if(incoming == null)
+                    return; // if we didn't get one immediate, the callback is scheduled
             }
 
-            this.endpoint = endpoint;
+            this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
             connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);

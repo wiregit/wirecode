@@ -13,6 +13,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -74,7 +75,7 @@ public class Main implements ActivityCallback, ErrorCallback {
                         int port=6346;
                         if (commands.length>=3)
                             port=Integer.parseInt(commands[2]);
-                        RouterService.connectToHostBlocking(commands[1], port);
+                        RouterService.connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
                     } catch (IOException e) {
                         System.out.println("Couldn't establish connection.");
                     } catch (NumberFormatException e) {

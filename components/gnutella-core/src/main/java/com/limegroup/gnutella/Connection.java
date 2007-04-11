@@ -272,6 +272,7 @@ public class Connection implements IpPort {
         _port = port;
         OUTGOING = true;
         _connectType = connectType;
+        _sslTracker = SSLUtils.EmptyTracker.instance(); // default to an empty tracker to avoid NPEs
 		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -882,18 +883,18 @@ public class Connection implements IpPort {
     
     /** Returns the percentage lost from outgoing SSL transformations. */
     public float getSentLostFromSSL() {
-        if( !isSSLEnabled() || _sslTracker == null || _sslTracker.getWrittenBytesConsumed() == 0 )
+        if( !isSSLEnabled() || _sslTracker.getWrittenBytesConsumed() == 0 )
             return 0;
         else
-            return 1-((float)_sslTracker.getWrittenBytesProduced() / (float)_sslTracker.getWrittenBytesConsumed());
+            return 1-(float)_sslTracker.getWrittenBytesConsumed() / (float)_sslTracker.getWrittenBytesProduced();
     }
     
     /** Returns the percentage lost from incoming SSL transformations. */
     public float getReadLostFromSSL() {
-        if( !isSSLEnabled() || _sslTracker == null || _sslTracker.getReadBytesProduced() == 0 )
+        if( !isSSLEnabled() || _sslTracker.getReadBytesProduced() == 0 )
             return 0;
         else
-            return 1-((float)_sslTracker.getReadBytesConsumed() / (float)_sslTracker.getReadBytesProduced());
+            return 1-(float)_sslTracker.getReadBytesProduced() / (float)_sslTracker.getReadBytesConsumed();
     }
 
    /**

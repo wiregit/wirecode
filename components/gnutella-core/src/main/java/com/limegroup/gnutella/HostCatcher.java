@@ -976,9 +976,7 @@ public class HostCatcher {
         observer.handleEndpoint(p);
     }
 
-    /**
-     * Passes the next available endpoint to the EndpointObserver.
-     */
+    /** Passes the next available endpoint to the EndpointObserver. */
     public void getAnEndpoint(EndpointObserver observer) {
         Endpoint p;
         
@@ -992,6 +990,28 @@ public class HostCatcher {
         
         if(p != null)
             observer.handleEndpoint(p);
+    }
+    
+    /**
+     * Passes the next available endpoint to the EndpointObserver.
+     * If an Endpoint is immediately available, it is returned immediately
+     * instead of using the observer's callback.  That is, the callback will
+     * only be used if an endpoint is not immediately available.
+     * This is useful to prevent stack overflows when many endpoints are
+     * attempted in response to endpoints not being usable.
+     */
+    public Endpoint getAnEndpointImmediate(EndpointObserver observer) {
+        Endpoint p;
+        
+        // We can only lock around endpoint retrieval & _catchersWaiting,
+        // we don't want to expose our lock to the observer.
+        synchronized(this) {
+            p = getAnEndpointInternal();
+            if(p == null)
+                _catchersWaiting.add(observer);    
+        }
+        
+        return p;
     }
     
     /** Removes an oberserver from wanting to get an endpoint. */

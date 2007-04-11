@@ -80,6 +80,7 @@ import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -841,9 +842,9 @@ public class RouterService {
      * @return a connection to the request host
      * @exception IOException the connection failed
      */
-    public static ManagedConnection connectToHostBlocking(String hostname, int portnum)
+    public static ManagedConnection connectToHostBlocking(String hostname, int portnum, ConnectType type)
 		throws IOException {
-        return manager.createConnectionBlocking(hostname, portnum);
+        return manager.createConnectionBlocking(hostname, portnum, type);
     }
 
     /**
@@ -851,7 +852,7 @@ public class RouterService {
      * Returns immediately without blocking.  If hostname would connect
      * us to ourselves, returns immediately.
      */
-    public static void connectToHostAsynchronously(String hostname, int portnum) {
+    public static void connectToHostAsynchronously(String hostname, int portnum, ConnectType type) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
@@ -875,7 +876,7 @@ public class RouterService {
         }
 
         if (!acceptor.isBannedIP(cIP)) {
-            manager.createConnectionAsynchronously(hostname, portnum);
+            manager.createConnectionAsynchronously(hostname, portnum, type);
 		}
     }
     

@@ -384,7 +384,7 @@ public class ExtendedEndpoint extends Endpoint {
         
         out.write(FIELD_SEPARATOR);
         if(tlsCapable)
-            out.write(1);
+            out.write("1");
         out.write(FIELD_SEPARATOR);
         out.write(EOL);
     }

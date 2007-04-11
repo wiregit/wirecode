@@ -95,7 +95,7 @@ public class SSLUtils {
         }
     }
     
-    private static class EmptyTracker implements SSLBandwidthTracker {
+    public static class EmptyTracker implements SSLBandwidthTracker {
         private static final EmptyTracker instance = new EmptyTracker();
         public static final EmptyTracker instance() { return instance; }
         private EmptyTracker() {}
