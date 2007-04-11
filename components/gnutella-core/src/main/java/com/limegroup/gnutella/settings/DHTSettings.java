@@ -160,12 +160,10 @@ public class DHTSettings extends LimeProps {
     
     /**
      * Setting for the time at which point a file is considered rare
-     * 
-     * TODO: Set default and min value
      */
     public static final LongSetting RARE_FILE_TIME
         = FACTORY.createRemoteLongSetting("RARE_FILE_TIME", 
-                0L, "rare_file_time", 0L, 24L*60L*60L*1000L);
+                3L*60L*60L*1000L, "rare_file_time", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
     
     /**
      * Whether or not AlternativeLocations should be published.
