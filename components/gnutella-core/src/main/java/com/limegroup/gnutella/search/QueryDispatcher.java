@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.InspectableForSize;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
@@ -27,6 +29,7 @@ public final class QueryDispatcher implements Runnable {
 	/**
 	 * <tt>Map</tt> of outstanding queries.  
 	 */
+    @InspectableForSize
 	private final Map<GUID, QueryHandler> QUERIES = new HashMap<GUID, QueryHandler>();
 
 	/**
@@ -34,6 +37,7 @@ public final class QueryDispatcher implements Runnable {
 	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
 	 * it's ever iterated over.  
 	 */
+    @InspectableForSize
 	private final List<QueryHandler> NEW_QUERIES =
         Collections.synchronizedList(new LinkedList<QueryHandler>());
 
@@ -53,6 +57,7 @@ public final class QueryDispatcher implements Runnable {
      * Whether or not processing is already active.  If it is, we don't start it up again
      * when adding new queries.
      */
+    @InspectablePrimitive
     private boolean _active;
     
 
