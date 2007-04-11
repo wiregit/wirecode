@@ -18,6 +18,7 @@ public class InspectionRequestHandler extends RestrictedResponder {
     protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
         assert msg instanceof InspectionRequest;
         InspectionResponse r = new InspectionResponse((InspectionRequest)msg);
-        handler.reply(r);
+        if (r.shouldBeSent())
+            handler.reply(r);
     }
 }

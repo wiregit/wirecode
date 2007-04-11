@@ -4,10 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.DeflaterOutputStream;
 
 import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.InspectionUtils;
+import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
@@ -17,7 +18,7 @@ public class InspectionResponse extends VendorMessage {
     
     private static final int VERSION = 1;
     public InspectionResponse(InspectionRequest request) {
-        super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
+        super(F_LIME_VENDOR_ID, F_INSPECTION_RESP, VERSION,
                 derivePayload(request));
     }
     
@@ -36,13 +37,19 @@ public class InspectionResponse extends VendorMessage {
         
         // since the inspected values may contain any character, bencoding is safest
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DeflaterOutputStream dos = new DeflaterOutputStream(baos);
         try {
-            GZIPOutputStream gzos = new GZIPOutputStream(baos);
-            BEncoder.encodeDict(gzos, responses);
-            gzos.flush();
+            BEncoder.encodeDict(dos, responses);
+            dos.flush();
         } catch (IOException impossible) {
             ErrorService.error(impossible);
+        } finally {
+            IOUtils.close(dos);
         }
         return baos.toByteArray();
+    }
+    
+    public boolean shouldBeSent() {
+        return getPayload().length > 0;
     }
 }
