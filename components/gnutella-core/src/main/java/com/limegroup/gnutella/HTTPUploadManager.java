@@ -19,7 +19,6 @@ import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
@@ -159,6 +158,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 File file = new File(CommonUtils.getUserSettingsDir(),
                         "update.xml");
                 uploader.setFile(file);
+                uploader.setState(Uploader.UPDATE_FILE);
+                
                 // TODO set mime-type to Constants.QUERYREPLY_MIME_TYPE?
                 response.setEntity(new FileResponseEntity(uploader, file));
             }
@@ -398,7 +399,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * nothing if 'shouldShowInGUI' is false.
      */
     public void addToGUI(HTTPUploader uploader) {
-
+        if (uploader.isVisible()) {
+            return;
+        }
+        
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
         UploadStat.ATTEMPTED.incrementStat();
@@ -407,7 +411,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // it decide what to do with it - will act depending on it's
         // state
         RouterService.getCallback().addUpload(uploader);
-
+        uploader.setVisible(true);
+        
         if (!uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null) {
@@ -908,7 +913,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     throw new RuntimeException(e);
                 }
             }
-            session = new UploadSession(getSlotManager(), host);
+            session = new UploadSession(getSlotManager(), host, HttpContextParams.getIOSession(context));
             context.setAttribute(SESSION_KEY, session);
         }
         return session;
@@ -922,11 +927,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     public HTTPUploader getOrCreateUploader(HttpContext context,
             UploadType type, String filename) {
-        return getOrCreateUploader(context, type, filename, -1);
-    }
-
-    public HTTPUploader getOrCreateUploader(HttpContext context,
-            UploadType type, String filename, int index) {
         UploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
         if (uploader != null) {
@@ -950,15 +950,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
                 cleanupFinishedUploader(uploader, uploader.getStartTime());
 
-                uploader = new HTTPUploader(filename, session, index);
+                uploader = new HTTPUploader(filename, session);
             }
         } else {
-            uploader = new HTTPUploader(filename, session, index);
+            uploader = new HTTPUploader(filename, session);
         }
 
         uploader.setUploadType(type);
         session.setUploader(uploader);
-        addToGUI(uploader);
         return uploader;
     }
 
@@ -1015,6 +1014,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 if (uploader.getState() == Uploader.INTERRUPTED || uploader.getState() == Uploader.COMPLETE) {
                     return;
                 }
+                
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Closing session for " + session.getHost());
                 
                 boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                 slotManager.cancelRequest(session);

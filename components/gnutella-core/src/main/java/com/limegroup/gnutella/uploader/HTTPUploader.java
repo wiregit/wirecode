@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import org.limewire.collection.Interval;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
@@ -31,10 +30,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     private long startTime = -1;
 
-    private boolean accepted;
+    private boolean visible;
 
-    public HTTPUploader(String fileName, UploadSession session, int index) {
-        super(fileName, session, index);
+    public HTTPUploader(String fileName, UploadSession session) {
+        super(fileName, session);
     }
 
     @Override
@@ -63,8 +62,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     public void stop() {
-        // FIXME
-
+        getSession().getIOSession().close();
     }
 
     /**
@@ -184,16 +182,16 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         this.startTime = startTime;
     }
 
-    /**
-     * Returns true, if this upload's queue status has been set to accepted.
-     * TODO move to session
-     */
-    public boolean isAccepted() {
-        return accepted;
+    public boolean isPartial() {
+        return getUploadEnd() - getUploadBegin() < getFileSize();
     }
 
-    public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
+    public boolean isVisible() {
+        return visible;
     }
-
+    
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    
 }

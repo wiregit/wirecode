@@ -20,24 +20,26 @@ import com.limegroup.gnutella.RouterService;
 public class HttpIOSession implements IOSession {
 
     private final Map<String, Object> attributes;
-    
+
     private SessionBufferStatus bufferStatus;
+
     private int socketTimeout;
 
     private AbstractNBSocket socket;
 
     private HttpChannel channel;
-    
+
     private int eventMask;
-    
+
     private boolean throttled;
-    
+
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
             throw new IllegalArgumentException();
         }
-        
-        this.attributes = Collections.synchronizedMap(new HashMap<String, Object>());
+
+        this.attributes = Collections
+                .synchronizedMap(new HashMap<String, Object>());
         this.socketTimeout = 0;
         this.socket = socket;
     }
@@ -52,6 +54,8 @@ public class HttpIOSession implements IOSession {
 
     public void close() {
         socket.close();
+        // XXX is this call required or did socket.close() already shutdown the
+        // channel?
         channel.shutdown();
     }
 
@@ -94,11 +98,11 @@ public class HttpIOSession implements IOSession {
     public int getEventMask() {
         return eventMask;
     }
-    
+
     public void setEventMask(int ops) {
         updateEventMask(ops);
     }
-    
+
     private void updateEventMask(int ops) {
         if (isClosed()) {
             return;
@@ -109,10 +113,22 @@ public class HttpIOSession implements IOSession {
     }
 
     public void setEvent(int op) {
+//        if ((op & EventMask.READ) != 0) {
+//            System.out.println("read on");
+//        }
+//        if ((op & EventMask.WRITE) != 0) {
+//            System.out.println("write on");
+//        }
         updateEventMask(eventMask | op);
     }
-    
+
     public void clearEvent(int op) {
+//        if ((op & EventMask.READ) != 0) {
+//            System.out.println("read off");
+//        }
+//        if ((op & EventMask.WRITE) != 0) {
+//            System.out.println("write off");
+//        }
         updateEventMask(eventMask & ~op);
     }
 
@@ -121,29 +137,30 @@ public class HttpIOSession implements IOSession {
     }
 
     public boolean hasBufferedInput() {
-        return this.bufferStatus != null && this.bufferStatus.hasBufferedInput();
+        return this.bufferStatus != null
+                && this.bufferStatus.hasBufferedInput();
     }
-    
+
     public boolean hasBufferedOutput() {
-        return this.bufferStatus != null && this.bufferStatus.hasBufferedOutput();
-    }   
+        return this.bufferStatus != null
+                && this.bufferStatus.hasBufferedOutput();
+    }
 
     public void setThrottle(boolean enable) {
         if (this.throttled == enable) {
             return;
         }
         this.throttled = enable;
-        
+
         if (enable) {
-            ThrottleWriter throttle = new ThrottleWriter(
-                    RouterService.getBandwidthManager().getWriteThrottle());
+            ThrottleWriter throttle = new ThrottleWriter(RouterService
+                    .getBandwidthManager().getWriteThrottle());
             boolean interest = channel.isWriteInterest();
             channel.requestWrite(false);
             channel.setWriteChannel(throttle);
             socket.setWriteObserver(channel);
             channel.requestWrite(interest);
         } else {
-            channel.setWriteChannel(null);
             socket.setWriteObserver(channel);
         }
     }

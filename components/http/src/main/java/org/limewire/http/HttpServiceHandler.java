@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.9 $
- * $Date: 2007-03-30 19:54:24 $
+ * $Revision: 1.1.2.10 $
+ * $Date: 2007-04-11 20:52:10 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -33,7 +33,6 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.InetAddress;
 
 import org.apache.http.ConnectionReuseStrategy;

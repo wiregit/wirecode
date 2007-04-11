@@ -38,7 +38,7 @@ public abstract class AbstractUploader implements Uploader {
 
     private String userAgent;
 
-    private final String _filename;
+    private final String filename;
 
     private int _stateNum = CONNECTING;
 
@@ -78,11 +78,10 @@ public abstract class AbstractUploader implements Uploader {
     /** The upload type of this uploader. */
     private UploadType _uploadType;
 
-    public AbstractUploader(String fileName, UploadSession session, int index) {
+    public AbstractUploader(String fileName, UploadSession session) {
         this.session = session;
-        _filename = fileName;
-        this.index = index;
-        amountUploaded = 0;
+        this.filename = fileName;
+
         reinitialize();
     }
 
@@ -182,7 +181,7 @@ public abstract class AbstractUploader implements Uploader {
 
     // implements the Uploader interface
     public String getFileName() {
-        return _filename;
+        return this.filename;
     }
 
     // implements the Uploader interface

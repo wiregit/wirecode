@@ -2,6 +2,8 @@ package com.limegroup.gnutella.uploader;
 
 import java.net.InetAddress;
 
+import org.limewire.http.HttpIOSession;
+
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
@@ -26,9 +28,12 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
 
     private QueueStatus queueStatus = QueueStatus.UNKNOWN;
 
-    public UploadSession(UploadSlotManager slotManager, InetAddress host) {
+    private HttpIOSession ioSession;
+
+    public UploadSession(UploadSlotManager slotManager, InetAddress host, HttpIOSession ioSession) {
         this.slotManager = slotManager;
         this.host = host;
+        this.ioSession = ioSession;
     }
 
     public void setUploader(HTTPUploader uploader) {
@@ -69,8 +74,11 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
     }
 
     public void measureBandwidth() {
-        // TODO Auto-generated method stub
-        
+        HTTPUploader uploader = getUploader();
+        if (uploader != null) {
+            // this will invoke UploadSession.measureBandwidth(int);
+            uploader.measureBandwidth();
+        }
     }
 
     public QueueStatus getQueueStatus() {
@@ -95,4 +103,13 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         return queueStatus == QueueStatus.QUEUED;
     }
 
+    public HttpIOSession getIOSession() {
+        return ioSession;
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getName() + "[host=" + getHost() + ",queueStatus=" + queueStatus + "]";
+    }
+    
 }

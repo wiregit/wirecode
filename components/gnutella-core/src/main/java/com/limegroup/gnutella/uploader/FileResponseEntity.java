@@ -10,15 +10,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.apache.http.protocol.HttpContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.http.AbstractHttpNIOEntity;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.http.HttpContextParams;
 
 public class FileResponseEntity extends AbstractHttpNIOEntity {
 
+    private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
+    
     private HTTPUploader uploader;
 
     private FileDesc fd;
@@ -35,12 +37,9 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
 
     private long remaining;
 
-    private HttpContext context;
+    private static int BUFFER_SIZE = 2048;
 
-    private static int BUFFER_SIZE = 512;
-
-    private FileResponseEntity(HttpContext context, HTTPUploader uploader) {
-        this.context = context;
+    private FileResponseEntity(HTTPUploader uploader) {
         this.uploader = uploader;
         
         setContentType(Constants.FILE_MIME_TYPE);
@@ -51,14 +50,14 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         remaining = length;
     }
     
-    public FileResponseEntity(HttpContext context, HTTPUploader uploader, FileDesc fd) {
-        this(context, uploader);
+    public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
+        this(uploader);
         
         this.fd = fd;
     }
 
     public FileResponseEntity(HTTPUploader uploader, File file) {
-        this(null, uploader);
+        this(uploader);
         
         this.file = file;
     }
@@ -70,6 +69,9 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
 
     @Override
     public void initialize() throws IOException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Initializing upload of " + fd.getFileName() + " [begin=" + begin + ",length=" + length + "]");
+
         if (fd != null) {
             in = fd.createInputStream();
         } else {
@@ -83,20 +85,22 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             }
         }
 
-        HttpContextParams.getIOSession(context).setThrottle(true);
+        uploader.getSession().getIOSession().setThrottle(true);
         
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        buffer.flip(); 
+        // don't write on the first call to handleWrite
+        buffer.limit(0); 
     }
     
     @Override
     public void finished() throws IOException {
         in.close();
+        
+        uploader.getSession().getIOSession().setThrottle(false);
     }
     
     @Override
     public boolean handleWrite() throws IOException {
-        System.out.println("FileRepsonseEntity: write");
         if (buffer == null) {
             return false;
         }
@@ -106,6 +110,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
              uploader.addAmountUploaded(written);
              if (buffer.hasRemaining()) {
                  return true;
+             } else if (remaining == 0) {
+                 return false;
              }
         }
  
@@ -113,11 +119,13 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         int read = in.read(buffer.array(), 0, (int) Math.min(buffer.remaining(), remaining));
         remaining -= read;
         
-        buffer.flip();
+        if (LOG.isTraceEnabled())
+            LOG.debug("Uploading " + fd.getFileName() + " [read=" + read + ",remaining=" + remaining + "]");
+        
         buffer.limit(read);
         int written = write(buffer);
         uploader.addAmountUploaded(written);
-        return remaining > 0;
+        return remaining > 0 || buffer.hasRemaining();
     }
 
 }

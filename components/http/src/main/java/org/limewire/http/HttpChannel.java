@@ -10,9 +10,6 @@ import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
-import org.limewire.nio.channel.ThrottleWriter;
-
-import com.limegroup.gnutella.RouterService;
 
 /**
  * A read/write channel implementation that forwards all requests received from
@@ -70,7 +67,6 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void handleRead() throws IOException {
-        System.out.println("HttpChannel: read");
         if (!readInterest) {
             return;
         }
@@ -108,7 +104,6 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public boolean handleWrite() throws IOException {
-        System.out.println("HttpChannel: write");
         if (!writeInterest) {
             return false;
         }

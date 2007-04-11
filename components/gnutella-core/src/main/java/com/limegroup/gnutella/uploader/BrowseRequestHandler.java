@@ -22,7 +22,6 @@ import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.SentMessageHandler;
-import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -50,6 +49,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             // FIXME add to list of uploads?
             response.setStatusCode(HttpStatus.SC_OK);
         }
+        sessionManager.addToGUI(uploader);
     }
 
     public class BrowseResponseEntity extends AbstractHttpNIOEntity {

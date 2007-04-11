@@ -12,8 +12,6 @@ import org.limewire.http.AbstractHttpNIOEntity;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.UploaderTest;
-import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexWriter;
 
@@ -42,7 +40,7 @@ public class THEXRequestHandler implements HttpRequestHandler {
         // see CORE-174
         //response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
         
-        uploader.setState(Uploader.UPDATE_FILE);
+        uploader.setState(Uploader.THEX_REQUEST);
         
         response.setStatusCode(HttpStatus.SC_OK);
         response.setEntity(new THEXResponseEntity(uploader, tree));

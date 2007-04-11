@@ -15,4 +15,6 @@ public interface HTTPUploadSessionManager {
 
     void addAcceptedUploader(HTTPUploader uploader);
 
+    void addToGUI(HTTPUploader uploader);
+    
 }

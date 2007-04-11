@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +12,6 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
-import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -25,16 +23,13 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
-import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
-import com.limegroup.gnutella.util.URLDecoder;
 
 public class FileRequestHandler implements HttpRequestHandler {
 
@@ -58,14 +53,17 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Handling upload request: " + request.getRequestLine().getUri());
+        
         FileRequest fileRequest = null;
-        HTTPUploader uploader;
+        HTTPUploader uploader = null;
 
         // parse request
         try {
             String uri = request.getRequestLine().getUri();
-            if (isURNGet(uri)) {
-                fileRequest = parseURNGet(uri);
+            if (FileRequestParser.isURNGet(uri)) {
+                fileRequest = FileRequestParser.parseURNGet(uri);
                 if (fileRequest == null) {
                     uploader = sessionManager.getOrCreateUploader(context,
                             UploadType.INVALID_URN, "Invalid URN query");
@@ -73,7 +71,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                     response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 }
             } else {
-                fileRequest = parseTraditionalGet(uri);
+                fileRequest = FileRequestParser.parseTraditionalGet(uri);
                 assert fileRequest != null;
             }
         } catch (IOException e) {
@@ -86,7 +84,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (fileRequest != null) {
             FileDesc fd = getFileDesc(fileRequest);
             if (fd != null) {
-                findFileAndProcessHeaders(request, response, context,
+                uploader = findFileAndProcessHeaders(request, response, context,
                         fileRequest, fd);
             } else {
                 uploader = sessionManager.getOrCreateUploader(context,
@@ -95,9 +93,12 @@ public class FileRequestHandler implements HttpRequestHandler {
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
         }
+        
+        assert uploader != null;
+        sessionManager.addToGUI(uploader);
     }
 
-    private void findFileAndProcessHeaders(HttpRequest request,
+    private HTTPUploader findFileAndProcessHeaders(HttpRequest request,
             HttpResponse response, HttpContext context,
             FileRequest fileRequest, FileDesc fd) throws IOException,
             HttpException {
@@ -110,9 +111,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         uploader.setIndex(fileRequest.index);
         uploader.setState(Uploader.CONNECTING);
 
-        boolean thexRequest = HTTPConstants.NAME_TO_THEX
-                .equals(fileRequest.serviceID);
-        if (thexRequest) {
+        if (fileRequest.isThexRequest()) {
             // XXX reset range to size of THEX tree
             uploader.setUploadBegin(0);
             uploader.setUploadEnd(fd.getHashTree().getOutputLength());
@@ -129,20 +128,20 @@ public class FileRequestHandler implements HttpRequestHandler {
             processor.process(request, context);
         } catch (ProblemReadingHeaderException e) {
             handleMalformedRequest(response, uploader);
-            return;
+            return uploader;
         } catch (FreeloaderUploadingException e) {
             handleFreeLoader(request, response, context, uploader);
         }
 
-        if (!validateHeaders(uploader, thexRequest)) {
+        if (!validateHeaders(uploader, fileRequest.isThexRequest())) {
             uploader.setState(Uploader.FILE_NOT_FOUND);
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-            return;
+            return uploader;
         }
 
         if (!uploader.validateRange()) {
             handleInvalidRange(response, uploader, fd);
-            return;
+            return uploader;
         }
 
         // start upload
@@ -155,6 +154,8 @@ public class FileRequestHandler implements HttpRequestHandler {
         } else {
             handleFileUpload(context, request, response, uploader, fd);
         }
+        
+        return uploader;
     }
 
     private void handleMalformedRequest(HttpResponse response,
@@ -167,7 +168,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     private void handleFileUpload(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
-        if (!uploader.isAccepted()) {
+        if (!uploader.getSession().isAccepted()) {
             QueueStatus queued = sessionManager.enqueue(context, request,
                     response);
             switch (queued) {
@@ -187,13 +188,12 @@ public class FileRequestHandler implements HttpRequestHandler {
             case ACCEPTED:
             case BYPASS: // TODO reset session poll state?
                 sessionManager.addAcceptedUploader(uploader);
-                uploader.setAccepted(true);
                 break;
             }
 
         }
 
-        if (uploader.isAccepted()) {
+        if (uploader.getSession().isAccepted()) {
             handleAccept(context, request, response, uploader, fd);
         }
     }
@@ -251,11 +251,10 @@ public class FileRequestHandler implements HttpRequestHandler {
                     .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
         }
 
-        response.setEntity(new FileResponseEntity(context, uploader, fd));
+        response.setEntity(new FileResponseEntity(uploader, fd));
         uploader.setState(Uploader.UPLOADING);
 
-        if (uploader.getUploadEnd() - uploader.getUploadBegin() < uploader
-                .getFileSize()) {
+        if (uploader.isPartial()) {
             response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
         } else {
             response.setStatusCode(HttpStatus.SC_OK);
@@ -327,111 +326,6 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
-    /**
-     * Returns whether or not the get request for the specified line is a URN
-     * request.
-     * 
-     * @param requestLine the <tt>String</tt> to parse to check whether it's
-     *        following the URN request syntax as specified in HUGE v. 0.93
-     * @return <tt>true</tt> if the request is a valid URN request,
-     *         <tt>false</tt> otherwise
-     */
-    private boolean isURNGet(final String requestLine) {
-        int slash1Index = requestLine.indexOf("/");
-        int slash2Index = requestLine.indexOf("/", slash1Index + 1);
-        if ((slash1Index == -1) || (slash2Index == -1)) {
-            return false;
-        }
-        String idString = requestLine.substring(slash1Index + 1, slash2Index);
-        return idString.equalsIgnoreCase("uri-res");
-        // return requestLine.startsWith("/uri-res/");
-    }
-
-    /**
-     * Parses the get line for a URN request, throwing an exception if there are
-     * any errors in parsing.
-     * 
-     * If we do not have the URN, we request a HttpRequestLine whose index is
-     * BAD_URN_QUERY_INDEX. It is up to HTTPUploader to properly read the index
-     * and set the state to FILE_NOT_FOUND.
-     * 
-     * @param requestLine the <tt>String</tt> instance containing the get
-     *        request
-     * @return a new <tt>RequestLine</tt> instance containing all of the data
-     *         for the get request
-     * @throws IOException
-     */
-    private FileRequest parseURNGet(final String requestLine)
-            throws IOException {
-        URN urn = URN.createSHA1UrnFromHttpRequest(requestLine + " HTTP/1.1");
-
-        // Parse the service identifier, whether N2R, N2X or something
-        // we cannot satisfy. URI scheme names are not case-sensitive.
-        String serviceId;
-        String requestUpper = requestLine.toUpperCase(Locale.US);
-        if (requestUpper.indexOf(HTTPConstants.NAME_TO_THEX) > 0) {
-            serviceId = HTTPConstants.NAME_TO_THEX;
-        } else if (requestUpper.indexOf(HTTPConstants.NAME_TO_RESOURCE) > 0) {
-            serviceId = HTTPConstants.NAME_TO_RESOURCE;
-        } else {
-            if (LOG.isWarnEnabled())
-                LOG.warn("Invalid URN query: " + requestLine);
-            return null;
-        }
-
-        FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
-        if (desc == null) {
-            UploadStat.UNKNOWN_URN_GET.incrementStat();
-            return null;
-        }
-
-        UploadStat.URN_GET.incrementStat();
-        return new FileRequest(desc.getIndex(), desc.getFileName(), serviceId);
-    }
-
-    /**
-     * Performs the parsing for a traditional HTTP Gnutella get request,
-     * returning a new <tt>RequestLine</tt> instance with the data for the
-     * request.
-     * 
-     * @param requestLine the HTTP get request string
-     * @return a new <tt>FileRequest</tt> instance for the request or
-     *         <code>null</code> if the request is malformed
-     */
-    private FileRequest parseTraditionalGet(final String requestLine)
-            throws IOException {
-        try {
-            int index = -1;
-
-            // file information part: /get/0/sample.txt
-            String fileName = null;
-
-            int g = requestLine.indexOf("/get/");
-
-            // find the next "/" after the "/get/", the number in between is the
-            // index
-            int d = requestLine.indexOf("/", (g + 5));
-
-            // get the index
-            String str_index = requestLine.substring((g + 5), d);
-            index = java.lang.Integer.parseInt(str_index);
-            // get the filename, which should be right after
-            // the "/", and before the next " ".
-            try {
-                fileName = URLDecoder.decode(requestLine.substring(d + 1));
-            } catch (IllegalArgumentException e) {
-                fileName = requestLine.substring(d + 1);
-            }
-            UploadStat.TRADITIONAL_GET.incrementStat();
-
-            return new FileRequest(index, fileName);
-        } catch (NumberFormatException e) {
-            throw new IOException();
-        } catch (IndexOutOfBoundsException e) {
-            throw new IOException();
-        }
-    }
-
     private FileDesc getFileDesc(FileRequest request) {
         FileManager fm = RouterService.getFileManager();
         FileDesc fd = null;
@@ -471,6 +365,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private boolean validateHeaders(HTTPUploader uploader, boolean thexRequest) {
         FileDesc fd = uploader.getFileDesc();
+        
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
         if (fd != null && urn != null && !fd.containsUrn(urn)) {
@@ -502,28 +397,6 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         return true;
-    }
-
-    private class FileRequest {
-
-        public FileRequest(int index, String filename, String serviceID) {
-            this.index = index;
-            this.filename = filename;
-            this.serviceID = serviceID;
-        }
-
-        public FileRequest(int index, String filename) {
-            this(index, filename, null);
-        }
-
-        String filename;
-
-        int index;
-
-        // TODO only used to determine if this is a THEX request, make this an
-        // enum?
-        String serviceID;
-
     }
 
 }

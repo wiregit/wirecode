@@ -1,27 +1,20 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.DefaultHttpRequestFactory;
 import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
-import org.apache.http.message.BasicRequestLine;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -33,13 +26,11 @@ import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
-import org.limewire.http.HttpIOSession;
 import org.limewire.http.HttpResponseListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.ServerConnectionEventListener;
 
-import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -84,7 +75,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
                 8 * 1024);
         this.params.setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true);
-        this.params.setParameter(HttpProtocolParams.USER_AGENT, LimeWireUtils
+        this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER, LimeWireUtils
                 .getHttpServer());
 
         this.registry = new HttpRequestHandlerRegistry();
@@ -184,11 +175,13 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         }
 
         public void fatalIOException(NHttpServerConnection conn, IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
         public void fatalProtocolException(NHttpServerConnection conn,
                 HttpException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
