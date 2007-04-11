@@ -14,15 +14,26 @@ import org.limewire.service.ErrorService;
 import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.gnutella.util.DataUtils;
 
+/**
+ * Response for an inspection request.
+ */
 public class InspectionResponse extends VendorMessage {
     
     private static final int VERSION = 1;
+    
+    /**
+     * Creates a response for the provided inspection request.
+     */
     public InspectionResponse(InspectionRequest request) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_RESP, VERSION,
                 derivePayload(request));
     }
     
     private static byte[] derivePayload(InspectionRequest request) {
+        /*
+         * The format is a deflated bencoded mapping from
+         * the inspected fields to their values.
+         */
         Map<String, String> responses = 
             new HashMap<String, String>(request.getRequestedFields().length);
         
@@ -48,7 +59,11 @@ public class InspectionResponse extends VendorMessage {
         }
         return baos.toByteArray();
     }
-    
+
+    /**
+     * @return true if this response contains anything and 
+     * should be sent.
+     */
     public boolean shouldBeSent() {
         return getPayload().length > 0;
     }

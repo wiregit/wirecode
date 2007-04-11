@@ -10,6 +10,12 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 
+/**
+ * Message requesting inspection for specified values.
+ * 
+ * Note this is very LimeWire-specific, so other vendors will
+ * almost certainly have no use for supporting this message.
+ */
 public class InspectionRequest extends VendorMessage {
     
     private static final int VERSION = 1;
@@ -34,6 +40,10 @@ public class InspectionRequest extends VendorMessage {
         this.requested = requested.split(";"); 
     }
     
+    /**
+     * @param requested requested fields for inspection.  
+     * See <tt>InspectionUtils</tt> for description of the format.
+     */
     public InspectionRequest(String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
                 derivePayload(requested));
@@ -45,6 +55,10 @@ public class InspectionRequest extends VendorMessage {
     }
     
     private static byte [] derivePayload(String... requested) {
+        /*
+         * The selected fields are catenated and put in a compressed
+         * ggep entry.
+         */
         StringBuilder b = new StringBuilder();
         for (String r : requested)
             b.append(r).append(";");

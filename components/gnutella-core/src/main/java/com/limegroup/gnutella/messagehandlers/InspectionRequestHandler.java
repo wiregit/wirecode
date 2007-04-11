@@ -8,6 +8,10 @@ import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
 import com.limegroup.gnutella.settings.FilterSettings;
 
+/**
+ * Handles an incoming InspectionRequest, sending a response
+ * if not empty.
+ */
 public class InspectionRequestHandler extends RestrictedResponder {
 
     public InspectionRequestHandler() {
