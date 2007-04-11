@@ -101,6 +101,9 @@ public class InspectionTest extends ServerSideTestCase {
         
         UDP_ACCESS.receive(pack);
         byte [] data = pack.getData();
+        byte [] guid = new byte[16];
+        System.arraycopy(data,0,guid,0,16);
+        assertEquals(m.getGUID(),guid);
         assertEquals((byte)0x31,data[16]);
         byte vendorId[] = new byte[4];
         System.arraycopy(data,23,vendorId,0,4);

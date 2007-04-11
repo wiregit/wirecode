@@ -12,6 +12,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -27,6 +28,7 @@ public class InspectionResponse extends VendorMessage {
     public InspectionResponse(InspectionRequest request) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_RESP, VERSION,
                 derivePayload(request));
+        setGUID(new GUID(request.getGUID()));
     }
     
     private static byte[] derivePayload(InspectionRequest request) {
