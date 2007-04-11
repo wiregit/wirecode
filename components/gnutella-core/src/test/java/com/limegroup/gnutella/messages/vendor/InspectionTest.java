@@ -15,10 +15,12 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -83,6 +85,42 @@ public class InspectionTest extends ServerSideTestCase {
             tryMessage(request);
             fail("should not receive anything");
         }catch(IOException expected){}
+    }
+    
+    public void testDynamicQuerying() throws Exception {
+        InspectionRequest request = new InspectionRequest(
+                "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES",
+                "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES",
+                "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active");
+        
+        // no queries - lists should be empty, dispatcher inactive
+        Map response = tryMessage(request);
+        assertEquals(response.toString(),3,response.size());
+        assertEquals("false", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
+        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
+        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+        
+        // send a query
+        Message query = QueryRequest.createQuery("asdf");
+        byte []guid = query.getGUID();
+        LEAF[0].send(query);
+        LEAF[0].flush();
+        Thread.sleep(2000);
+        response = tryMessage(request);
+        assertEquals("true", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
+        // there should be an element either in NEW_QUERIES or QUERIES
+        int queries = Integer.valueOf(new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
+        int newQueries = Integer.valueOf(new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+        assertEquals(1,queries + newQueries);
+        
+        // shut off the query
+        LEAF[0].send(new QueryStatusResponse(new GUID(guid), 65535));
+        LEAF[0].flush();
+        Thread.sleep(2000);
+        response = tryMessage(request);
+        assertEquals("false", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
+        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
+        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
     }
     
     private Map tryMessage(Message m) throws Exception {

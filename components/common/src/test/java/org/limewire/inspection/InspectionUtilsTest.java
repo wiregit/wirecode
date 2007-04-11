@@ -2,12 +2,14 @@ package org.limewire.inspection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
+@SuppressWarnings("unchecked")
 public class InspectionUtilsTest extends BaseTestCase {
     public InspectionUtilsTest(String name) {
         super(name);
@@ -87,7 +89,7 @@ public class InspectionUtilsTest extends BaseTestCase {
     }
     
     
-    @SuppressWarnings("unchecked")
+    
     public void testInspectableForSize() throws Exception {
         TestClass t = new TestClass();
         t.memberList = new ArrayList();
@@ -131,6 +133,12 @@ public class InspectionUtilsTest extends BaseTestCase {
         String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
         assertEquals("2",inspectable);
         assertFalse(f.isAccessible());
+    }
+    
+    public void testSyncCollection() throws Exception {
+        SyncList.l = Collections.synchronizedList(new ArrayList());
+        SyncList.l.add(new Object());
+        assertEquals(String.valueOf(SyncList.l.size()),InspectionUtils.inspectValue("org.limewire.inspection.SyncList,l"));
     }
 }
 
@@ -183,4 +191,9 @@ class PrivateInts {
         memberInt = a;
         inspectableInt = b;
     }
+}
+
+class SyncList {
+    @InspectableForSize
+    static List l;
 }

@@ -69,6 +69,7 @@ public class InspectionUtils {
 
             if (a instanceof InspectableForSize) {
                 Method m = o.getClass().getMethod("size", new Class[0]);
+                m.setAccessible(true);
                 return m.invoke(o, new Object[0]).toString();
             }
         }
