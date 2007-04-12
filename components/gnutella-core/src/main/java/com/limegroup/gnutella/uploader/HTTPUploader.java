@@ -32,6 +32,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     private boolean visible;
 
+    private String method;
+    
     public HTTPUploader(String fileName, UploadSession session) {
         super(fileName, session);
     }
@@ -192,6 +194,14 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+    
+    public void setMethod(String method) {
+        this.method = method;
     }
     
 }

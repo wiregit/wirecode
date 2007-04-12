@@ -65,7 +65,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             if (FileRequestParser.isURNGet(uri)) {
                 fileRequest = FileRequestParser.parseURNGet(uri);
                 if (fileRequest == null) {
-                    uploader = sessionManager.getOrCreateUploader(context,
+                    uploader = sessionManager.getOrCreateUploader(request, context,
                             UploadType.INVALID_URN, "Invalid URN query");
                     uploader.setState(Uploader.FILE_NOT_FOUND);
                     response.setStatusCode(HttpStatus.SC_NOT_FOUND);
@@ -76,7 +76,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         } catch (IOException e) {
             handleMalformedRequest(response, sessionManager
-                    .getOrCreateUploader(context, UploadType.MALFORMED_REQUEST,
+                    .getOrCreateUploader(request, context, UploadType.MALFORMED_REQUEST,
                             "Malformed Request"));
         }
 
@@ -87,7 +87,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 uploader = findFileAndProcessHeaders(request, response, context,
                         fileRequest, fd);
             } else {
-                uploader = sessionManager.getOrCreateUploader(context,
+                uploader = sessionManager.getOrCreateUploader(request, context,
                         UploadType.SHARED_FILE, fileRequest.filename);
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
@@ -105,7 +105,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // create uploader
         UploadType type = (FileManager.isForcedShare(fd)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
-        HTTPUploader uploader = sessionManager.getOrCreateUploader(context,
+        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context,
                 type, fd.getFileName());
         uploader.setFileDesc(fd);
         uploader.setIndex(fileRequest.index);
@@ -121,7 +121,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader));
-        if (!uploader.getFileName().startsWith("LIMEWIRE")) {
+        if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
         try {
@@ -129,8 +129,11 @@ public class FileRequestHandler implements HttpRequestHandler {
         } catch (ProblemReadingHeaderException e) {
             handleMalformedRequest(response, uploader);
             return uploader;
-        } catch (FreeloaderUploadingException e) {
-            handleFreeLoader(request, response, context, uploader);
+        } 
+        
+        if (UserAgentHeaderInterceptor.isFreeloader(uploader.getUserAgent())) {
+            sessionManager.handleFreeLoader(request, response, context, uploader);
+            return uploader;
         }
 
         if (!validateHeaders(uploader, fileRequest.isThexRequest())) {
@@ -266,13 +269,6 @@ public class FileRequestHandler implements HttpRequestHandler {
             throws HttpException, IOException {
         uploader.setState(Uploader.UPDATE_FILE);
         new THEXRequestHandler(uploader, fd).handle(request, response, context);
-    }
-
-    private void handleFreeLoader(HttpRequest request, HttpResponse response,
-            HttpContext context, HTTPUploader uploader) throws HttpException,
-            IOException {
-        uploader.setState(Uploader.FREELOADER);
-        new FreeLoaderRequestHandler().handle(request, response, context);
     }
 
     private void handleInvalidRange(HttpResponse response,

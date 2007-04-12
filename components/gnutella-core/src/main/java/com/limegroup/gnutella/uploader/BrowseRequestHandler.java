@@ -38,7 +38,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         UploadStat.BROWSE_HOST.incrementStat();
-        HTTPUploader uploader = sessionManager.getOrCreateUploader(context,
+        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context,
                 UploadType.BROWSE_HOST, "Browse-File");
         uploader.setState(Uploader.BROWSE_HOST);
         if (!HttpCoreUtils.hasHeader(request, "Accept",
