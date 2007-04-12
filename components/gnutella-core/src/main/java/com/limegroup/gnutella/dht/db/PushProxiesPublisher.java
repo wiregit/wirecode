@@ -17,7 +17,8 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
- * This class has currently no practical use-case.
+ * The PushProxiesPublisher publishes Push Proxy information for 
+ * the localhost in the DHT
  */
 public class PushProxiesPublisher implements DHTValueEntityPublisher {
     
