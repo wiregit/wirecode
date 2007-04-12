@@ -403,6 +403,10 @@ public final class NetworkUtils {
         return ret;
     }
     
+    public static int getClassC(InetAddress addr) {
+        return getMaskedIP(addr, 0xFFFFFF00);
+    }
+    
     public static int getMaskedIP(InetAddress addr, int netmask) {
         return ByteOrder.beb2int(addr.getAddress(),0) & netmask;
     }
