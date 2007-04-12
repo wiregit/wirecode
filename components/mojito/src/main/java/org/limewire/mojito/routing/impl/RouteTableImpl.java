@@ -682,6 +682,10 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> select(final KUID nodeId, final int count, 
             final boolean activeContacts) {
         
+        if (count == 0) {
+            return Collections.emptyList();
+        }
+        
         final int maxNodeFailures = RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue();
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
@@ -700,6 +704,11 @@ public class RouteTableImpl implements RouteTable {
                 }
                 
                 for(Contact node : list) {
+                    
+                    // Exit the loop if done
+                    if (nodes.size() >= count) {
+                        return SelectStatus.EXIT;
+                    }
                     
                     // Ignore all non-alive Contacts if only
                     // active Contacts are requested.
@@ -724,18 +733,13 @@ public class RouteTableImpl implements RouteTable {
                     }
                     
                     nodes.add(node);
-                    
-                    // Exit the loop if done
-                    if (nodes.size() >= count) {
-                        return SelectStatus.EXIT;
-                    }
                 }
                 
                 return SelectStatus.CONTINUE;
             }
         });
         
-        assert (nodes.size() <= count);
+        assert (nodes.size() <= count) : "Expected " + count + " or less elements but is " + nodes.size();
         return nodes;
     }
     
