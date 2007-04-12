@@ -517,7 +517,8 @@ public class HostCatcher {
                         addUDPHostCache(e);
                     else {
                         synchronized(this) {
-                            addPermanent(e);
+                            if (!addPermanent(e))
+                                continue;
                             restoredHosts.add(e);
                         }
                         endpointAdded();
