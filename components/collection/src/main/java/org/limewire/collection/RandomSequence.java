@@ -45,7 +45,7 @@ public class RandomSequence implements Iterable<Integer> {
         
         do {
             seed = (a * seed + 3 ) & pow2;
-        } while (seed >= end);
+        } while (seed >= end || seed < 0);
         return (int)seed;
     }
     
