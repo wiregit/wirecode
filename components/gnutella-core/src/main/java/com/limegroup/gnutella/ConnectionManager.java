@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -1295,7 +1297,11 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
-        _classCNetworks.add(NetworkUtils.getClassC(c.getInetAddress()));
+        try {
+            _classCNetworks.add(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
+        } catch (UnknownHostException uhe) {
+            // this will cause the connection to fail, ignore
+        }
     }
 
     /**
@@ -1596,6 +1602,11 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             newConnections.remove(c);
             _connections = Collections.unmodifiableList(newConnections);
         }
+        
+        // 1c) Remove from list of class C networks
+        try {
+            _classCNetworks.remove(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
+        } catch (UnknownHostException ignore){}
 
         // 2) Ensure that the connection is closed.  This must be done before
         // step (3) to ensure that dead connections are not added to the route
@@ -1612,9 +1623,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(c);
-        
-        // 6) Remove from list of class C networks
-        _classCNetworks.remove(NetworkUtils.getClassC(c.getInetAddress()));
     }
     
     /**
