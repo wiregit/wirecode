@@ -49,7 +49,12 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.RouteTableUtils;
 
+/**
+ * The BootstrapManager manages the bootstrap process and determinates
+ * whether or not the local Node is bootstrapped.
+ */
 public class BootstrapManager extends AbstractManager<BootstrapResult> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
@@ -99,6 +104,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
     }
     
+    /**
+     * Tries to bootstrap the local Node from the given Contact
+     */
     public DHTFuture<BootstrapResult> bootstrap(Contact node) {
         if (node == null) {
             throw new NullPointerException("Contact is null");
@@ -123,6 +131,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         return future;
     }
     
+    /**
+     * Tries to bootstrap the local Node from any of the given SocketAddresses
+     */
     public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> dst) {
         if (dst == null) {
             throw new NullPointerException("Set<SocketAddress> is null");
@@ -143,9 +154,6 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         return future;
     }
     
-    /**
-     * 
-     */
     private class BootstrapFuture extends DHTFutureTask<BootstrapResult> {
 
         public BootstrapFuture(DHTTask<BootstrapResult> task) {
@@ -422,25 +430,21 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         private void determinateIfBootstrapped() {
             boolean bootstrapped = false;
             
-            RouteTable routeTable = context.getRouteTable();
-            synchronized (routeTable) {
-                routeTable.purge();
-                Collection<Contact> active = routeTable.getActiveContacts();
-                int alive = 0;
-                for (Contact node : active) {
-                    if (node.isAlive()) {
-                        alive++;
-                    }
-                }
-                
-                // Check what percentage of the Contacts is alive
-                float ratio = ((float)alive)/((float)active.size());
-                if (ratio >= BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue()) {
-                    bootstrapped = true;
-                }
+            // Check what percentage of the Contacts are alive
+            if (purgeAndGetPercenetage() 
+                    >= BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue()) {
+                bootstrapped = true;
             }
             
             bootstrapped(bootstrapped);
+        }
+        
+        private float purgeAndGetPercenetage() {
+            RouteTable routeTable = context.getRouteTable();
+            synchronized (routeTable) {
+                routeTable.purge();
+                return RouteTableUtils.getPercentageOfAliveContacts(routeTable);
+            }
         }
         
         private void bootstrapped(boolean bootstrapped) {
