@@ -13,8 +13,9 @@ import java.util.NoSuchElementException;
  * Thx to Cyclonus for the pow2 hint
  */
 public class RandomSequence {
-    private final int end, pow2, a;
-    private int seed;
+    private final int end;
+    private final long pow2, a;
+    private long seed;
     
     public RandomSequence(int end) {
         this.end = end;
@@ -26,10 +27,10 @@ public class RandomSequence {
             return;
         }
         
-        int pow = 1;
+        long pow = 1;
         while (pow < end)
             pow <<= 1;
-        pow2 = pow;
+        pow2 = pow - 1;
         a = (((int)(Math.random() * (pow2 >> 2))) << 2) + 1;
         seed = (int)(Math.random() * end);
     }
@@ -42,9 +43,9 @@ public class RandomSequence {
             return 0;
         
         do {
-            seed = (a * seed + 3 ) % pow2;
-        } while (seed >= end);
-        return seed;
+            seed = (a * seed + 3 ) & pow2;
+        } while (seed >= end || seed < 0);
+        return (int)seed;
     }
     
     public Iterator iterator() {
