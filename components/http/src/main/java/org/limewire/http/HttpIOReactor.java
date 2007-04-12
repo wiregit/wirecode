@@ -15,11 +15,8 @@ import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.jaxen.expr.DefaultNameStep;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
-import org.limewire.nio.NIOSocket;
 
 import com.limegroup.gnutella.http.HttpContextParams;
 

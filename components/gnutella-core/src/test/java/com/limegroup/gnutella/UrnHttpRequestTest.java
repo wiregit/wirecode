@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
-import java.rmi.server.RemoteObjectInvocationHandler;
 
 import junit.framework.Test;
 
