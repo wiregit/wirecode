@@ -602,9 +602,4 @@ public class ExtendedEndpoint extends Endpoint {
                 return 0;
         }
     }
-
-    public boolean equals(Object other) {
-        return super.equals(other);
-        //TODO: implement
-    }
 }

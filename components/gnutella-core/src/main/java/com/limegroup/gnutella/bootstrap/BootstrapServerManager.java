@@ -347,8 +347,8 @@ public class BootstrapServerManager {
                 //(See HostCatcher.expire)
 
                 //we don't know locale of host so using Endpoint
-                RouterService.getHostCatcher().add(host, 
-                                                   HostCatcher.CACHE_PRIORITY);
+                if(RouterService.getIpFilter().allow(host))
+                    RouterService.getHostCatcher().add(host, HostCatcher.CACHE_PRIORITY);
                 responses++;
                 _responsesAdded++;
             } catch (IllegalArgumentException bad) { 

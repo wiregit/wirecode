@@ -18,11 +18,11 @@ import org.limewire.util.StringUtils;
  */
 public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
 
-    static final long serialVersionUID = 4686711693494625070L; 
+    private static final long serialVersionUID = 4686711693494625070L; 
     
     private InetAddress addr = null;
     private String hostname = null;
-    int port = 0;
+    private int port = 0;
     /** Number of files at the host, or -1 if unknown */
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */

@@ -2,7 +2,6 @@ package org.limewire.collection;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * A variant of <tt>FixedSizeArrayHashMap</tt> that allows iterations over
@@ -22,8 +21,8 @@ public class RandomOrderHashMap<K, V> extends FixedSizeArrayHashMap<K, V> {
         super(maxSize, initialCapacity, loadFactor);
     }
 
-    public RandomOrderHashMap(int initialCapacity) {
-        super(initialCapacity);
+    public RandomOrderHashMap(int maxCapacity) {
+        super(maxCapacity);
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -168,13 +170,13 @@ public class HostCatcher {
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
-    private final Map<ExtendedEndpoint, ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
+    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
         new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
     
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Map<ExtendedEndpoint, ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
+    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
         new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
     
     /**
@@ -290,6 +292,9 @@ public class HostCatcher {
      * Stop ranking if we have this many connections.
      */
     private static final int MAX_CONNECTIONS = 5;
+    
+    /** A RND to share to find random hosts. */
+    private final Random RND = new Random();
     
     /**
      * Whether or not hosts have been added since we wrote to disk.
@@ -445,10 +450,15 @@ public class HostCatcher {
             return false;
 
         int size;
-        if(RouterService.isSupernode())
-            size = FREE_ULTRAPEER_SLOTS_SET.size();
-        else
-            size = FREE_LEAF_SLOTS_SET.size();
+        if(RouterService.isSupernode()) {
+            synchronized(this) {
+                size = FREE_ULTRAPEER_SLOTS_SET.size();
+            }
+        } else {
+            synchronized(this) {
+                size = FREE_LEAF_SLOTS_SET.size();
+            }
+        }
 
         int preferred = RouterService.getConnectionManager().
             getPreferredConnectionCount();
@@ -487,7 +497,9 @@ public class HostCatcher {
     
                 //Is it a normal endpoint?
                 try {
-                    add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
+                    ExtendedEndpoint ep = ExtendedEndpoint.read(line);
+                    if(isValidHost(ep))
+                        add(ep, NORMAL_PRIORITY);
                 } catch (ParseException pe) {
                     continue;
                 }
@@ -866,8 +878,7 @@ public class HostCatcher {
     private synchronized boolean removePermanent(ExtendedEndpoint e) {
         boolean removed1=permanentHosts.remove(e);
         boolean removed2=permanentHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Queue "+removed1+" but set "+removed2);
+        assert removed1==removed2 : "Queue "+removed1+" but set "+removed2;
         if(removed1)
             dirty = true;
         return removed1;
@@ -907,7 +918,7 @@ public class HostCatcher {
             return false;
 
         //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(addr))
+        if (!RouterService.getIpFilter().allow(addr))
             return false;  
         
         synchronized(this) {
@@ -935,11 +946,14 @@ public class HostCatcher {
         else
             p = new Endpoint(ipp.getAddress(), ipp.getPort());
         
-        ExtendedEndpoint ee = ENDPOINT_SET.get(p);
-        if(ee == null)
-            ee = FREE_ULTRAPEER_SLOTS_SET.get(p);
-        if(ee == null)
-            ee = FREE_LEAF_SLOTS_SET.get(p);
+        ExtendedEndpoint ee;
+        synchronized(this) {
+            ee = ENDPOINT_SET.get(p);
+            if(ee == null)
+                ee = FREE_ULTRAPEER_SLOTS_SET.get(p);
+            if(ee == null)
+                ee = FREE_LEAF_SLOTS_SET.get(p);
+        }
         
         if(ee == null)
             return false;
@@ -1120,7 +1134,7 @@ public class HostCatcher {
             ExtendedEndpoint removed=ENDPOINT_SET.remove(e);
             
             //check that e actually was in set.
-            Assert.that(removed == e, "Rep. invariant for HostCatcher broken.");
+            assert removed == e : "Rep. invariant for HostCatcher broken.";
             return e;
         } else {
             return null;
@@ -1132,7 +1146,7 @@ public class HostCatcher {
      * tries to return an endpoint that matches the locale of this client
      * from the passed in set.
      */
-    private ExtendedEndpoint preferenceWithLocale(Map<ExtendedEndpoint, ExtendedEndpoint> base) {
+    private ExtendedEndpoint preferenceWithLocale(RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
         ExtendedEndpoint ret = null;
@@ -1150,10 +1164,11 @@ public class HostCatcher {
             }
         }
         
-        if (ret == null) 
-            ret = base.keySet().iterator().next();
+        if (ret == null)
+            ret = base.getKeyAt(RND.nextInt(base.size()));
         
-        base.remove(ret);
+        Object removed = base.remove(ret);
+        assert ret == removed : "Key: " + ret + ", value: " + removed;
         return ret;
     }
 
@@ -1324,26 +1339,26 @@ public class HostCatcher {
                     if (e.equals(iter2.next()))
                         continue outer;
                 }
-                Assert.that(false, "Couldn't find "+e+" in queue");
+                throw new IllegalStateException("Couldn't find "+e+" in queue");
             }
             for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
                 Object e=iter.next();
-                Assert.that(e instanceof ExtendedEndpoint);
-                Assert.that(ENDPOINT_SET.containsKey(e));
+                assert e instanceof ExtendedEndpoint;
+                assert ENDPOINT_SET.containsKey(e);
             }
         
             //Check permanentHosts === permanentHostsSet
             for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
                 Object o=iter.next();
-                Assert.that(o instanceof ExtendedEndpoint);
-                Assert.that(permanentHostsSet.contains(o));
+                assert o instanceof ExtendedEndpoint;
+                assert permanentHostsSet.contains(o);
             }
             for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
                 Object e=iter.next();
-                Assert.that(e instanceof ExtendedEndpoint);
-                Assert.that(permanentHosts.contains(e),
+                assert e instanceof ExtendedEndpoint;
+                assert permanentHosts.contains(e) :
                             "Couldn't find "+e+" from "
-                            +permanentHostsSet+" in "+permanentHosts);
+                            +permanentHostsSet+" in "+permanentHosts;
             }
         }
     }

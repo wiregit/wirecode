@@ -112,10 +112,6 @@ public class FixedSizeArrayHashMapTest extends BaseTestCase {
         } catch(IndexOutOfBoundsException expected) {}
     }
     
-    public void testRemoveEqualObjects() throws Exception {
-        
-    }
-
     /**
      * tests that creating from a collection that's larger than
      * the capacity will happen in fifo order.
