@@ -2,9 +2,7 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -17,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -161,11 +158,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  LOCKING: obtain this. */
     private final List<ConnectionFetcher> _fetchers =
         new ArrayList<ConnectionFetcher>();
-    /** 
-     * Set of class C networks that we are connecting or connected to
-     * LOCKING: this 
-     */
-    private final IntSet _classCNetworks = new IntSet(); 
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
@@ -543,15 +535,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         }
     }
 
-    /**
-     * @return if there is already a connection established or establishing
-     * to a host in the same class C network as the provided host.
-     */
-    private boolean isConnectingToClassC(IpPort host) {
-        return ConnectionSettings.FILTER_CLASS_C.getValue() && 
-        _classCNetworks.contains(NetworkUtils.getClassC(host.getInetAddress()));
-    }
-    
     /**
      * @return the number of connections, which is greater than or equal
      *  to the number of initialized connections.
@@ -1297,11 +1280,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
-        try {
-            _classCNetworks.add(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
-        } catch (UnknownHostException uhe) {
-            // this will cause the connection to fail, ignore
-        }
     }
 
     /**
@@ -1602,11 +1580,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             newConnections.remove(c);
             _connections = Collections.unmodifiableList(newConnections);
         }
-        
-        // 1c) Remove from list of class C networks
-        try {
-            _classCNetworks.remove(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
-        } catch (UnknownHostException ignore){}
 
         // 2) Ensure that the connection is closed.  This must be done before
         // step (3) to ensure that dead connections are not added to the route
@@ -1982,9 +1955,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 continue;
             }
         }
-        _catcher.add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
-                NetworkUtils.filterOnePerClassC(hosts) :
-                    hosts);        
+        _catcher.add(hosts);        
     }
 
 
@@ -2287,27 +2258,16 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         public void finish() {
         }
 
-        /** Returns true if we are able to make a connection attempt to this host. */
-        private boolean isConnectableHost(IpPort host) {
-            return RouterService.getIpFilter().allow(host)
-                && !isConnectedTo(host.getAddress()) 
-                && !isConnectingTo(host)
-                && (!isShieldedLeaf() || !isConnectingToClassC(host));
-        }
-        
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint endpoint) {
             Assert.that(endpoint != null);
             
             // If this was an invalid endpoint, try again.
-            while(!isConnectableHost(endpoint)) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Ignoring unconnectable host: " + endpoint);
-                endpoint = _catcher.getAnEndpointImmediate(this);
-                if(endpoint == null) {
-                    LOG.debug("No hosts available, waiting on a new one...");
-                    return; // if we didn't get one immediate, the callback is scheduled
-                }
+            if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
+                || isConnectedTo(endpoint.getAddress())
+                || isConnectingTo(endpoint)) {
+                _catcher.getAnEndpoint(this);
+                return;
             }
 
             this.endpoint = endpoint;
