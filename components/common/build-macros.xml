@@ -313,6 +313,7 @@
 	    	    <sysproperty key="junit.test.hidetestname"		 value="${hidetestname}"/>
 	            <sysproperty key="junit.test.ignoreErrorService" value="${ignoreErrorService}"/>
 	            <jvmarg value="-Xmx512M"/>
+	        	<jvmarg value="-ea"/>
 	    		
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
 	    		

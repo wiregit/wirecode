@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.RandomAccess;
 import java.util.Set;
 
 
@@ -19,7 +18,7 @@ import java.util.Set;
  * 
  * It does not support the null element.
  */
-public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements RandomAccess {
+public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements RandomAccessMap<K, V> {
 
     private Buffer<Map.Entry<K, V>> buf;
     
@@ -100,13 +99,17 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
         if(existing == null) {
             // eject oldest element if size reached
             Map.Entry<K, V> removed = buf.add(new FixedEntry<K, V>(key, value));
-            if(removed != null)
-                super.remove(removed.getKey());
+            if(removed != null) {
+                Object removedValue = super.remove(removed.getKey());
+                assert removedValue == removed.getValue();
+            }
         } else {
             // refresh this element.
             FixedEntry<K, V> e = new FixedEntry<K, V>(key, value);
-            buf.remove(e);
-            buf.add(e);
+            boolean removed = buf.remove(e);
+            assert removed;
+            Object ejected = buf.add(e);
+            assert ejected == null;
         }
         
         return existing;
@@ -116,7 +119,8 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
     public V remove(Object key) {
         V removed = super.remove(key);
         if(removed != null) {
-            buf.remove(new FixedEntry<Object, V>(key, removed));
+            boolean success = buf.remove(new FixedEntry<Object, V>(key, removed));
+            assert success;
         }
         return removed;
     }
@@ -146,7 +150,7 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
         @Override
         public boolean equals(Object obj) {
             FixedEntry e = (FixedEntry)obj;
-            return key == e.key && value == e.value;
+            return key.equals(e.key) && value.equals(e.value);
         }
         
         @Override
