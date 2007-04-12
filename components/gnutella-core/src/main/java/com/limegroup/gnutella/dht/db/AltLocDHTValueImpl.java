@@ -170,7 +170,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         
         @Override
         public boolean isFirewalled() {
-            return RouterService.acceptedIncomingConnection();
+            return !RouterService.acceptedIncomingConnection();
         }
 
         @Override
