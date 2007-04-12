@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -159,9 +159,11 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  LOCKING: obtain this. */
     private final List<ConnectionFetcher> _fetchers =
         new ArrayList<ConnectionFetcher>();
-    /** Set of class C networks that we are connecting or connected to */
-    private final Set<Integer> _classCNetworks = 
-        Collections.synchronizedSet(new HashSet<Integer>());
+    /** 
+     * Set of class C networks that we are connecting or connected to
+     * LOCKING: this 
+     */
+    private final IntSet _classCNetworks = new IntSet(); 
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
@@ -539,6 +541,15 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         }
     }
 
+    /**
+     * @return if there is already a connection established or establishing
+     * to a host in the same class C network as the provided host.
+     */
+    boolean isConnectingToClassC(IpPort host) {
+        return ConnectionSettings.FILTER_CLASS_C.getValue() && 
+        _classCNetworks.contains(NetworkUtils.getClassC(host.getInetAddress()));
+    }
+    
     /**
      * @return the number of connections, which is greater than or equal
      *  to the number of initialized connections.
@@ -1284,6 +1295,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
+        _classCNetworks.add(NetworkUtils.getClassC(c.getInetAddress()));
     }
 
     /**
@@ -2272,9 +2284,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             return RouterService.getIpFilter().allow(host)
                 && !isConnectedTo(host.getAddress()) 
                 && !isConnectingTo(host)
-                && (!ConnectionSettings.FILTER_CLASS_C.getValue() ||
-                        !isShieldedLeaf() ||
-                        _classCNetworks.add(NetworkUtils.getClassC(host.getInetAddress())));
+                && (!isShieldedLeaf() || !isConnectingToClassC(host));
         }
         
         /** Callback that an endpoint is available for connecting. */
@@ -2320,7 +2330,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             cleanupBrokenFetchedConnection(connection);            
             _catcher.doneWithConnect(endpoint, false);
             _catcher.expireHost(endpoint);
-            _classCNetworks.remove(NetworkUtils.getClassC(endpoint.getInetAddress()));
         }
         
         /** Callback that handshaking failed. */
