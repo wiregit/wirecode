@@ -81,6 +81,13 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final BooleanSetting LOCAL_IS_PRIVATE =
 		FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
+    
+    /**
+     * Whether to filter incoming/outgoing pongs by class C network.
+     * Necessary for testing.
+     */
+    public static final BooleanSetting FILTER_CLASS_C =
+        FACTORY.createBooleanSetting("FILTER_CLASS_C", true);
 	
 	/**
 	 * Whether to allow duplicate incoming connections.  Necessary for testing.

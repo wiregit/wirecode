@@ -15,7 +15,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.util.ByteOrder;
 
@@ -380,6 +382,33 @@ public final class NetworkUtils {
     	}
     	
     	return Collections.unmodifiableList(ret);
+    }
+    
+    public static <T extends IpPort>Collection<T> filterOnePerClassC(Collection<T> c) {
+        return filterUnique(c, 0xFFFFFF00);
+    }
+    
+    /**
+     * Filters unique ips based on a netmask.
+     */
+    public static <T extends IpPort>Collection<T> filterUnique(Collection<T> c, int netmask) {
+        ArrayList<T> ret = new ArrayList<T>(c.size());
+        Set<Integer> ips = new HashSet<Integer>();
+        for (T ip : c) {
+            if (ips.add( getMaskedIP(ip.getInetAddress(), netmask) ))
+                ret.add(ip);
+            
+        }
+        ret.trimToSize();
+        return ret;
+    }
+    
+    public static int getClassC(InetAddress addr) {
+        return getMaskedIP(addr, 0xFFFFFF00);
+    }
+    
+    public static int getMaskedIP(InetAddress addr, int netmask) {
+        return ByteOrder.beb2int(addr.getAddress(),0) & netmask;
     }
     
     /**

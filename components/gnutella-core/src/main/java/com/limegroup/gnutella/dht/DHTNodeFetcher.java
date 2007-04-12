@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dht;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
@@ -22,6 +24,7 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -254,7 +257,9 @@ public class DHTNodeFetcher {
         }
         
         PingReply reply = (PingReply) m;
-        List<IpPort> list = reply.getPackedDHTIPPorts();
+        Collection<IpPort> list = ConnectionSettings.FILTER_CLASS_C.getValue() ?
+            NetworkUtils.filterOnePerClassC(reply.getPackedDHTIPPorts()) :
+                reply.getPackedDHTIPPorts();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Received ping reply from "+reply.getAddress());

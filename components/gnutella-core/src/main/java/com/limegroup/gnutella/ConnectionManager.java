@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -158,6 +159,9 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  LOCKING: obtain this. */
     private final List<ConnectionFetcher> _fetchers =
         new ArrayList<ConnectionFetcher>();
+    /** Set of class C networks that we are connecting or connected to */
+    private final Set<Integer> _classCNetworks = 
+        Collections.synchronizedSet(new HashSet<Integer>());
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
@@ -1596,6 +1600,9 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(c);
+        
+        // 6) Remove from list of class C networks
+        _classCNetworks.remove(NetworkUtils.getClassC(c.getInetAddress()));
     }
     
     /**
@@ -1955,7 +1962,9 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 continue;
             }
         }
-        _catcher.add(hosts);        
+        _catcher.add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
+                NetworkUtils.filterOnePerClassC(hosts) :
+                    hosts);        
     }
 
 
@@ -2258,16 +2267,29 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         public void finish() {
         }
 
+        /** Returns true if we are able to make a connection attempt to this host. */
+        private boolean isConnectableHost(IpPort host) {
+            return RouterService.getIpFilter().allow(host)
+                && !isConnectedTo(host.getAddress()) 
+                && !isConnectingTo(host)
+                && (!ConnectionSettings.FILTER_CLASS_C.getValue() ||
+                        !isShieldedLeaf() ||
+                        _classCNetworks.add(NetworkUtils.getClassC(host.getInetAddress())));
+        }
+        
         /** Callback that an endpoint is available for connecting. */
         public void handleEndpoint(Endpoint endpoint) {
             Assert.that(endpoint != null);
             
             // If this was an invalid endpoint, try again.
-            if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
-                || isConnectedTo(endpoint.getAddress())
-                || isConnectingTo(endpoint)) {
-                _catcher.getAnEndpoint(this);
-                return;
+            while(!isConnectableHost(endpoint)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Ignoring unconnectable host: " + endpoint);
+                endpoint = _catcher.getAnEndpointImmediate(this);
+                if(endpoint == null) {
+                    LOG.debug("No hosts available, waiting on a new one...");
+                    return; // if we didn't get one immediate, the callback is scheduled
+                }
             }
 
             this.endpoint = endpoint;
@@ -2298,6 +2320,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             cleanupBrokenFetchedConnection(connection);            
             _catcher.doneWithConnect(endpoint, false);
             _catcher.expireHost(endpoint);
+            _classCNetworks.remove(NetworkUtils.getClassC(endpoint.getInetAddress()));
         }
         
         /** Callback that handshaking failed. */

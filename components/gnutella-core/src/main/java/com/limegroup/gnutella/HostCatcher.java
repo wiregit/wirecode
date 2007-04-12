@@ -28,7 +28,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
-import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.collection.FixedSizeSortedList;
+import org.limewire.collection.IntSet;
+import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomOrderHashSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -129,6 +131,11 @@ public class HostCatcher {
      */
     public static final int NORMAL_PRIORITY = 0;
     
+    /**
+     * netmask for pongs that we accept and send.
+     */
+    public static final int PONG_MASK = 0xFFFFFF00;
+    
     private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {
             public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
@@ -194,10 +201,26 @@ public class HostCatcher {
      * INVARIANT: permanentHosts contains no duplicates and contains exactly
      *  the same elements and permanentHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue<ExtendedEndpoint> permanentHosts=
-        new FixedsizePriorityQueue<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
+    private final FixedSizeSortedList<ExtendedEndpoint> permanentHosts=
+        new FixedSizeSortedList<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
+    private final Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
+    
+    /**
+     * List of the hosts that were restored from disk.
+     * INVARIANT: a subset of permanentHosts.  
+     * LOCKING: this
+     */
+    private final List<ExtendedEndpoint> restoredHosts=
+        new FixedSizeSortedList<ExtendedEndpoint>(
+                ExtendedEndpoint.priorityComparator(),
+                PERMANENT_SIZE);
+    
+    /** 
+     * Partition view of the list of restored hosts.
+     */
+    private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
+        new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
 
     
     /** The GWebCache bootstrap system. */
@@ -366,11 +389,14 @@ public class HostCatcher {
      */
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
+        List<Endpoint> l; 
         synchronized(this) {
-            List<Endpoint> l = new ArrayList<Endpoint>(ENDPOINT_SET);
-            Collections.shuffle(l);
-            rank(l); 
+            l = new ArrayList<Endpoint>(ENDPOINT_SET.size()+restoredHosts.size()); 
+            l.addAll(ENDPOINT_SET);
+            l.addAll(restoredHosts);
         }
+        Collections.shuffle(l);
+        rank(l); 
     }
     
     /**
@@ -401,6 +427,7 @@ public class HostCatcher {
         hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
         hosts.addAll(FREE_LEAF_SLOTS_SET);
         hosts.addAll(ENDPOINT_SET);
+        hosts.addAll(restoredHosts);
         return hosts;
     }
     
@@ -415,9 +442,12 @@ public class HostCatcher {
      */
     public synchronized List<ExtendedEndpoint> getDHTSupportEndpoint(int minVersion) {
         List<ExtendedEndpoint> hostsList = new ArrayList<ExtendedEndpoint>();
+        IntSet classC = new IntSet();
         for(ExtendedEndpoint host : getAllHosts()) {
             if(host.supportsDHT() 
-                    && host.getDHTVersion() >= minVersion) {
+                    && host.getDHTVersion() >= minVersion &&
+                    (!ConnectionSettings.FILTER_CLASS_C.getValue() ||
+                    classC.add(NetworkUtils.getMaskedIP(host.getInetAddress(), PONG_MASK)))) {
                 hostsList.add(host);
             }
         }
@@ -428,7 +458,7 @@ public class HostCatcher {
     /**
      * Determines if UDP Pongs need to be sent out.
      */
-    private boolean needsPongRanking() {
+    private synchronized boolean needsPongRanking() {
         if(RouterService.isFullyConnected())
             return false;
         int have = RouterService.getConnectionManager().
@@ -481,9 +511,18 @@ public class HostCatcher {
                     continue;
                 } catch (ParseException ignore) { }
     
-                //Is it a normal endpoint?
                 try {
-                    add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
+                    ExtendedEndpoint e = ExtendedEndpoint.read(line); 
+                    if(e.isUDPHostCache())
+                        addUDPHostCache(e);
+                    else {
+                        synchronized(this) {
+                            if (!addPermanent(e))
+                                continue;
+                            restoredHosts.add(e);
+                        }
+                        endpointAdded();
+                    }
                 } catch (ParseException pe) {
                     continue;
                 }
@@ -608,8 +647,12 @@ public class HostCatcher {
         
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
-        rank(pr.getPackedIPPorts());
-        for(IpPort ipp : pr.getPackedIPPorts()) {
+        Collection<IpPort> packed = 
+            ConnectionSettings.FILTER_CLASS_C.getValue() ?
+                    NetworkUtils.filterOnePerClassC(pr.getPackedIPPorts()) :
+                        pr.getPackedIPPorts();
+        rank(packed);
+        for(IpPort ipp : packed) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             if(isValidHost(ep))
                 add(ep, GOOD_PRIORITY);
@@ -799,7 +842,7 @@ public class HostCatcher {
             //Add to permanent list, regardless of whether it's actually in queue.
             //Note that this modifies e.
             addPermanent(e);
-            
+
             if (! (ENDPOINT_SET.contains(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
@@ -810,7 +853,7 @@ public class HostCatcher {
                 if (ejected!=null) {
                     ENDPOINT_SET.remove(ejected);
                 }         
-                
+
             }
         }
         
@@ -965,6 +1008,28 @@ public class HostCatcher {
             observer.handleEndpoint(p);
     }
     
+    /**
+     * Passes the next available endpoint to the EndpointObserver.
+     * If an Endpoint is immediately available, it is returned immediately
+     * instead of using the observer's callback.  That is, the callback will
+     * only be used if an endpoint is not immediately available.
+     * This is useful to prevent stack overflows when many endpoints are
+     * attempted in response to endpoints not being usable.
+     */
+    public Endpoint getAnEndpointImmediate(EndpointObserver observer) {
+        Endpoint p;
+        
+        // We can only lock around endpoint retrieval & _catchersWaiting,
+        // we don't want to expose our lock to the observer.
+        synchronized(this) {
+            p = getAnEndpointInternal();
+            if(p == null)
+                _catchersWaiting.add(observer);    
+        }
+        
+        return p;
+    }
+    
     /** Removes an oberserver from wanting to get an endpoint. */
     public synchronized void removeEndpointObserver(EndpointObserver observer) {
         _catchersWaiting.remove(observer);
@@ -1065,15 +1130,21 @@ public class HostCatcher {
             FREE_LEAF_SLOTS_SET.remove(ee);
             return ee;
         } 
-        if (! ENDPOINT_QUEUE.isEmpty()) {
+        else if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e= ENDPOINT_QUEUE.extractMax();
             boolean ok=ENDPOINT_SET.remove(e);
-            
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
-        } else {
+        } 
+        else if (!restoredHosts.isEmpty()) {
+            // highest partition has highest uptimes
+            List<ExtendedEndpoint> best = uptimePartitions.getLastPartition();
+            ExtendedEndpoint e = best.remove((int)(Math.random() * best.size()));
+            return e;
+        }
+        else {
             return null;
         }
     }
@@ -1116,7 +1187,7 @@ public class HostCatcher {
      */
     public synchronized int getNumHosts() {
         return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
-            FREE_ULTRAPEER_SLOTS_SET.size();
+            FREE_ULTRAPEER_SLOTS_SET.size()+restoredHosts.size();
     }
 
     /**
@@ -1185,13 +1256,17 @@ public class HostCatcher {
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
         Set<IpPort> hosts = new HashSet<IpPort>(num);
+        IntSet masked = new IntSet();
         
         Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
+        boolean filter = ConnectionSettings.FILTER_CLASS_C.getValue();
         if(locales != null) {
             for(ExtendedEndpoint e : locales) {
                 if(hosts.size() >= num)
                     break;
-                if(base.contains(e))
+                if(base.contains(e) && 
+                        (!filter ||
+                        masked.add(NetworkUtils.getMaskedIP(e.getInetAddress(), PONG_MASK))))
                     hosts.add(e);
             }
         }
@@ -1199,7 +1274,8 @@ public class HostCatcher {
         for(IpPort ipp : base) {
             if(hosts.size() >= num)
                 break;
-            hosts.add(ipp);
+            if (!filter || masked.add(NetworkUtils.getMaskedIP(ipp.getInetAddress(), PONG_MASK)))
+                hosts.add(ipp);
         }
         
         return hosts;

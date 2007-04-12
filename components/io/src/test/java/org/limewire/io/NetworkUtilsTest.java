@@ -4,6 +4,9 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
@@ -102,6 +105,20 @@ public class NetworkUtilsTest extends BaseTestCase {
         addr0[0] = (byte)0;
         assertTrue("should not be considered close", 
                    !NetworkUtils.isCloseIP(addr0, addr1));
+    }
+    
+    public void testFilterUnique() throws Exception {
+        List<IpPortImpl> l = new ArrayList<IpPortImpl>();
+        l.add(new IpPortImpl("1.1.1.1",2));
+        l.add(new IpPortImpl("1.1.1.2",2));
+        l.add(new IpPortImpl("1.1.1.3",2));
+        l.add(new IpPortImpl("1.1.2.3",2));
+        
+        Collection<IpPortImpl> ret = NetworkUtils.filterUnique(l, 0xFF000000);
+        assertEquals(1, ret.size());
+        assertEquals(1, NetworkUtils.filterUnique(l, 0xFFFF0000).size());
+        assertEquals(2, NetworkUtils.filterUnique(l, 0xFFFFFF00).size());
+        assertEquals(4, NetworkUtils.filterUnique(l, 0xFFFFFFFF).size());
     }
 
     /**

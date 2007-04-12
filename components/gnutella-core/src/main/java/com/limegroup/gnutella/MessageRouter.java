@@ -976,11 +976,11 @@ public abstract class MessageRouter {
             return;
         }
 
-        // also add the sender of the pong if different from the host
-        // described in the reply...
+        // do not process the pong if different from the host
+        // described in the reply 
         if((reply.getPort() != port) || 
            (!reply.getInetAddress().equals(address))) {
-            UNICASTER.addUnicastEndpoint(address, port);
+            return;
 		}
         
         // normal pong processing...
