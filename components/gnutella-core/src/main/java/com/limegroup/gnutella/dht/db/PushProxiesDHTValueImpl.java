@@ -13,6 +13,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
@@ -71,11 +72,19 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
      * Constructor to create a PushProxiesDHTValue for the localhost
      */
     private PushProxiesDHTValueImpl() {
-        this.version = VERSION;
-        this.features = 0;
-        this.fwtVersion = 0;
-        this.port = -1;
-        this.proxies = null;
+        this(VERSION, 0, 0, -1, null);
+    }
+    
+    /**
+     * Constructor for testing purposes
+     */
+    PushProxiesDHTValueImpl(Version version, int features, 
+            int fwtVersion, int port, Set<? extends IpPort> proxies) {
+        this.version = version;
+        this.features = features;
+        this.fwtVersion = fwtVersion;
+        this.port = port;
+        this.proxies = proxies;
     }
     
     /**
@@ -100,6 +109,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             this.features = in.readInt();
             this.fwtVersion = in.readInt();
             this.port = in.readUnsignedShort();
+            
+            if (!NetworkUtils.isValidPort(port)) {
+                throw new DHTValueException("Illegal port: " + port);
+            }
             
             Set<IpPort> proxies = new IpPortSet();
             int size = in.readInt();

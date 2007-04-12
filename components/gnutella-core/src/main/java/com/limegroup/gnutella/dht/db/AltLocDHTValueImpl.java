@@ -49,10 +49,18 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
      * Constructor to create an AltLocDHTValue for the localhost
      */
     private AltLocDHTValueImpl() {
-        this.version = VERSION;
-        this.guid = null;
-        this.port = -1;
-        this.firewalled = true;
+        this(VERSION, null, -1, true);
+    }
+    
+    /**
+     * Constructor for testing purposes
+     */
+    AltLocDHTValueImpl(Version version, byte[] guid, 
+            int port, boolean firewalled) {
+        this.version = version;
+        this.guid = guid;
+        this.port = port;
+        this.firewalled = firewalled;
     }
     
     /**
