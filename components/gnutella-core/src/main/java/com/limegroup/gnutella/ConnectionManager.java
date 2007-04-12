@@ -512,7 +512,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *
      * @return true if this is probably connected to <tt>host</tt>
      */
-    private boolean isConnectedTo(String hostName) {
+    boolean isConnectedTo(String hostName) {
         //A list of all connections, both initialized and
         //uninitialized, leaves and unrouted. 
         for(ManagedConnection mc : getConnections()) {
@@ -526,7 +526,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      * Returns true if we're currently attempting to connect to a particular host.
      * This checks both the Ip & Port.
      */
-    private boolean isConnectingTo(IpPort host) {
+    boolean isConnectingTo(IpPort host) {
         synchronized(this) {
             for(ConnectionFetcher next : _fetchers) {
                 IpPort them = next.getIpPort();
