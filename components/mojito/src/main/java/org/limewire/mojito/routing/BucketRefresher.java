@@ -235,7 +235,7 @@ public class BucketRefresher implements Runnable {
         }
         
         public void handleInterruptedException(InterruptedException e) {
-            LOG.debug("CancellationException", e);
+            LOG.debug("InterruptedException", e);
             stop();
         }
     }
