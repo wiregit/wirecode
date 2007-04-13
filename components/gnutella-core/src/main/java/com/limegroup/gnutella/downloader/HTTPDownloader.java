@@ -1682,7 +1682,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	    }
         
         // Close in the NIO thread, so everything stays there.
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 IOUtils.close(_socket);
             }

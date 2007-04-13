@@ -11,7 +11,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -319,7 +319,7 @@ abstract class AbstractDHTController implements DHTController {
         
         private final Set<SocketAddress> dhtNodes;
         
-        private TimerTask timerTask;
+        private ScheduledFuture<?>  timerTask;
         
         private boolean isRunning;
         
@@ -372,7 +372,7 @@ abstract class AbstractDHTController implements DHTController {
         
         synchronized void stop() {
             if(timerTask != null) {
-                timerTask.cancel();
+                timerTask.cancel(true);
             }
             dhtNodes.clear();
             isRunning = false;

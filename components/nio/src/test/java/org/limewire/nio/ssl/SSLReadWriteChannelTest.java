@@ -103,12 +103,12 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
         final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
                 clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
                 serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
             }
-        });
+        }).get();
         
         Pipe clientToServer = Pipe.open();
         Pipe serverToClient = Pipe.open();
@@ -131,7 +131,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final ByteBuffer clientRead = ByteBuffer.allocate(100);
         final ByteBuffer serverRead = ByteBuffer.allocate(100);
         for(int i = 0; i < 10; i++) {
-            NIODispatcher.instance().invokeAndWait(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
                 public void run() {
                     try {
                         clientChannel.read(clientRead);
@@ -142,7 +142,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
                         throw new RuntimeException(iox);
                     }
                 }
-            });
+            }).get();
             Thread.sleep(100);
         }
         
@@ -184,11 +184,11 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final Socket accepted = server.accept();
         
         // Wrap the channel around the accepted socket.
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
                 channel.initialize(accepted.getRemoteSocketAddress(), new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, testServer, false);
             }
-        });
+        }).get(); // wait for this to complete.
         channel.setReadChannel(new IRWrapper(accepted.getInputStream()));
         channel.setWriteChannel(new IWWrapper(accepted.getOutputStream()));
        
@@ -214,7 +214,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final ByteBuffer channelRead = ByteBuffer.allocate(100);
         // Try short pumps of data until the handshake is complete.
         for(int i = 0; i < 10; i++) {
-            NIODispatcher.instance().invokeAndWait(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
                 public void run() {
                     try {
                         channel.read(channelRead);
@@ -223,7 +223,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
                         throw new RuntimeException(iox);
                     }
                 }
-            });
+            }).get();
             Thread.sleep(100);
         }
 

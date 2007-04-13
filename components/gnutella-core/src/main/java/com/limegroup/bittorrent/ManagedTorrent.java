@@ -7,11 +7,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -56,10 +56,8 @@ BTLinkListener {
 	private static final ExecutorService DEFAULT_DISK_INVOKER = 
 		ExecutorsHelper.newProcessingQueue("ManagedTorrent");
 	
-	/** 
-	 * the executor of tasks involving network io. 
-	 */
-	private final SchedulingThreadPool networkInvoker;
+	/** the executor of tasks involving network io. */
+	private final ScheduledExecutorService networkInvoker;
 	
 	/** 
 	 * Executor that changes the state of this torrent and does 
@@ -125,7 +123,7 @@ BTLinkListener {
 	 */
 	public ManagedTorrent(TorrentContext context, 
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher,
-			SchedulingThreadPool networkInvoker) {
+			ScheduledExecutorService networkInvoker) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
@@ -333,7 +331,7 @@ BTLinkListener {
 				_connectionFetcher.shutdown();
 			}
 		};
-		networkInvoker.invokeLater(closer);
+		networkInvoker.execute(closer);
 		
 		dispatchEvent(TorrentEvent.Type.STOPPED); 
 		
@@ -497,7 +495,7 @@ BTLinkListener {
 				linkManager.sendHave(have);
 			}
 		};
-		networkInvoker.invokeLater(haveNotifier);
+		networkInvoker.execute(haveNotifier);
 		
 		if (_folder.isComplete()) {
 			LOG.info("file is complete");
@@ -648,7 +646,7 @@ BTLinkListener {
 				_peers.clear();
 			}
 		};
-		networkInvoker.invokeLater(r);
+		networkInvoker.execute(r);
 		
 		// save the files to the destination folder
 		try {
@@ -911,7 +909,7 @@ BTLinkListener {
 	 * @return the <tt>SchedulingThreadPool</tt> executing network-
 	 * related tasks
 	 */
-	public SchedulingThreadPool getScheduler() {
+	public ScheduledExecutorService getNetworkScheduledExecutorService() {
 		return networkInvoker;
 	}
 	

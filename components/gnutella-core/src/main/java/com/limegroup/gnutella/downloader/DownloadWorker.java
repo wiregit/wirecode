@@ -635,7 +635,7 @@ public class DownloadWorker {
                     }
                 }
                 
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         incrementState(null);
                     }

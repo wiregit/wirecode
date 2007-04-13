@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -110,7 +110,7 @@ public class NodeAssigner {
     /**
      * The node assigner's timer task
      */
-    private TimerTask timer;
+    private ScheduledFuture<?>  timer;
 
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
@@ -156,7 +156,7 @@ public class NodeAssigner {
     
     public void stop() {
         if(timer != null) {
-            timer.cancel();
+            timer.cancel(true);
         }
     }
     

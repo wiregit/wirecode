@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -59,7 +59,7 @@ public class DHTNodeFetcher {
     /**
      * The Runnable that requests DHT hosts.
      */
-    private TimerTask fetcherTask = null;
+    private ScheduledFuture<?>  fetcherTask = null;
     
     /**
      * A lock for the TimerTask
@@ -223,7 +223,7 @@ public class DHTNodeFetcher {
     public void stop() {
         synchronized (fetcherTaskLock) {
             if (fetcherTask != null) {
-                fetcherTask.cancel();
+                fetcherTask.cancel(true);
                 fetcherTask = null;
             }
         }

@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
@@ -77,14 +77,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     /** Thread pool used to dispatch file manager events. These involve disk IO 
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
-    private SchedulingThreadPool threadPool;
+    private ScheduledExecutorService threadPool;
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
 	public void initialize(FileManager fileManager
             , ConnectionDispatcher dispatcher
-            , SchedulingThreadPool threadPool) {
+            , ScheduledExecutorService threadPool) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
@@ -278,7 +278,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
             		fileManager.addFileForSession(f);
             }
         };
-        threadPool.invokeLater(r);
+        threadPool.execute(r);
     }
     
     /**
@@ -300,7 +300,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
                 	f.setLastModified(System.currentTimeMillis());
             }
         };
-        threadPool.invokeLater(r);
+        threadPool.execute(r);
     }
     
     

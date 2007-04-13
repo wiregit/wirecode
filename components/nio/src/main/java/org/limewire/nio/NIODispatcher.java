@@ -17,17 +17,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.nio.observer.AcceptChannelObserver;
 import org.limewire.nio.observer.ConnectObserver;
@@ -79,15 +79,7 @@ public class NIODispatcher implements Runnable {
     private static final NIODispatcher INSTANCE = new NIODispatcher();
     public static final NIODispatcher instance() { return INSTANCE; }
     
-    private final SchedulingThreadPool SCHEDULER =
-    	new MyThreadPool();
-    
-    private final TransportListener TRANSPORT_LISTENER = 
-    	new MyTransportListener();
-    
-    /**
-     * Constructs the sole NIODispatcher, starting its thread.
-     */
+    /** Constructs the sole NIODispatcher, starting its thread. */
     private NIODispatcher() {
         boolean failed = false;
         try {
@@ -102,6 +94,8 @@ public class NIODispatcher implements Runnable {
         } else {
             dispatchThread = null;
         }
+        
+        EXECUTOR = new NIOExecutorService(dispatchThread);
     }
     
     /**
@@ -122,6 +116,12 @@ public class NIODispatcher implements Runnable {
     /** Queue lock. */
     private final Object Q_LOCK = new Object();
     
+    /** A listener to notify the NIO thread when a selector has a pending event. */
+    private final TransportListener TRANSPORT_LISTENER = new MyTransportListener();
+    
+    /** An ExecutorService that invokes runnables on the NIO thread. */
+    private final ScheduledExecutorService EXECUTOR;
+    
     /**
      * A map of classes of SelectableChannels to the Selector that should
      * be used to register that channel with.
@@ -135,7 +135,8 @@ public class NIODispatcher implements Runnable {
     /** The invokeLater queue. */
     private Collection <Runnable> LATER = new LinkedList<Runnable>();
     
-    private final BlockingQueue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
+    /** A queue of DelayedRunnables to process tasks. */
+    private final BlockingQueue<ScheduledFutureTask> DELAYED = new DelayQueue<ScheduledFutureTask>();
     
     /** The throttle queue. */
     private final List <NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
@@ -187,7 +188,7 @@ public class NIODispatcher implements Runnable {
         if(Thread.currentThread() == dispatchThread)
             THROTTLE.add(t);
         else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     THROTTLE.add(t);
                 }
@@ -323,7 +324,7 @@ public class NIODispatcher implements Runnable {
             POLLERS.add(newSelector);
             OTHER_SELECTORS.put(channelClass, newSelector);
         } else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     POLLERS.add(newSelector);
                     OTHER_SELECTORS.put(channelClass, newSelector);
@@ -340,7 +341,7 @@ public class NIODispatcher implements Runnable {
             POLLERS.remove(selector);
             OTHER_SELECTORS.remove(selector);
         } else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     POLLERS.remove(selector);
                     OTHER_SELECTORS.remove(selector);
@@ -349,78 +350,25 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Invokes the method in the NIODispatch thread. */
-   public void invokeLater(Runnable runner) {
-        if(Thread.currentThread() == dispatchThread) {
-            runner.run();
-        } else 
-            invokeReallyLater(runner);
+    /**
+     * Retrieves the ExecutorService this NIODispatcher uses to
+     * run things on the NIO Thread.
+     * If tasks are submitted for execution while already on the NIO thread,
+     * the task will be immediately run.  Otherwise,
+     * the tasks will be scheduled for running as soon as possible on the
+     * NIO Thread.
+     */
+    public ScheduledExecutorService getScheduledExecutorService() {
+        return EXECUTOR;
     }
-   
-   /** Same as invokeLater, except forces the Runnable to be done later on. */
-   public void invokeReallyLater(Runnable runner) {
+    
+    /** Submits the runnable for execution later, even if the current thread is the NIO thread. */
+    public void executeLaterAlways(Runnable runner) {
         synchronized(Q_LOCK) {
             LATER.add(runner);
         }
         wakeup();
     }
-   
-   /**
-    * Invokes a Runnable that will run as soon as possible.
-    * The returned Future can be used to cancel the Runnable from running.
-    * Attempting to call 'get' on the Future will return null.
-    */
-   public Future<?> submit(Runnable runner) {
-       FutureTask<?> ft = new FutureTask<Object>(runner, null);
-       invokeLater(ft);
-       return ft;
-   }
-   
-   /**
-    * Invokes a Callable that will run as soon as possible.
-    * The returned Future can be used to cancel the Runnable from running,
-    * and retrieve the result, after it finishes.
-    */
-   public <T> Future<T> submit(Callable<T> caller) {
-       FutureTask<T> ft = new FutureTask<T>(caller);
-       invokeLater(ft);
-       return ft;
-   }
-   
-   /**
-    * Invokes a Runnable at some point in the future, and returns
-    * a Future that can be used to cancel the Runnable from running.
-    */
-   public Future<?> submit(Runnable runner, long delay) {
-	   DelayedRunnable ret = new DelayedRunnable(runner, delay);
-	   DELAYED.add(ret);
-	   wakeup();
-	   return ret;
-   }
-   
-   /** Invokes the method in the NIODispatcher thread & returns after it ran. */
-   public void invokeAndWait(final Runnable runner) throws InterruptedException {
-       if(Thread.currentThread() == dispatchThread) {
-           runner.run();
-       } else {
-           Runnable waiter = new Runnable() {
-               public void run() {
-                   runner.run();
-                   synchronized(this) {
-                       notify();
-                   }
-               }
-           };
-           
-           synchronized(waiter) {
-               synchronized(Q_LOCK) {
-                   LATER.add(waiter);
-               }
-               wakeup();
-               waiter.wait();
-           }
-       }
-   }
     
     /** Gets the underlying attachment for the given SelectionKey's attachment. */
     public IOErrorObserver attachment(Object proxyAttachment) {
@@ -1024,20 +972,64 @@ public class NIODispatcher implements Runnable {
         public ProcessingException(Throwable t) { super(t); }
     }
     
-    public SchedulingThreadPool getSchedulingThreadPool() {
-    	return SCHEDULER;
-    }
-    
-    private static class MyThreadPool implements SchedulingThreadPool {
+    private static class NIOExecutorService extends AbstractExecutorService implements ScheduledExecutorService {
+        private final Thread nioThread;
+        
+        private NIOExecutorService(Thread nioThread) {
+            this.nioThread = nioThread;
+        }
+        
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            Thread.sleep(unit.toMillis(timeout));
+            return false;
+        }
 
-		public Future invokeLater(Runnable r, long delay) {
-			return instance().submit(r, delay);
-		}
+        public boolean isShutdown() {
+            return false;
+        }
 
-		public void invokeLater(Runnable runner) {
-			instance().invokeLater(runner);
-		}
-    	
+        public boolean isTerminated() {
+            return false;
+        }
+
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void execute(Runnable command) {
+            if(Thread.currentThread() == nioThread) {
+                command.run();
+            } else {
+                instance().executeLaterAlways(command);
+            }
+        }
+
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+           ScheduledFutureTask<?> ret = new ScheduledFutureTask<Object>(command, null, unit.toNanos(delay));
+           instance().DELAYED.add(ret);
+           instance().wakeup();
+           return ret;
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            ScheduledFutureTask<V> ret = new ScheduledFutureTask<V>(callable, unit.toNanos(delay));
+            instance().DELAYED.add(ret);
+            instance().wakeup();
+            return ret;
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+        
     }
 
     public TransportListener getTransportListener() {

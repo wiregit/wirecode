@@ -57,10 +57,12 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     private WriteObserver writeWanter;
     /** True if handshaking indicated we need to immediately perform a wrap. */
     private volatile boolean needsHandshakeWrap = false;
+    /** True if handshaking indicated we need to immediately perform an unwrap. */
+    private volatile boolean needsHandshakeUnwrap = false;
     /** True if a read finished and data was still buffered. */
     private volatile boolean readDataLeft = false;
     /** True only after a single read has been performed. */
-    private AtomicBoolean firstReadDone = new AtomicBoolean(false);
+    private final AtomicBoolean firstReadDone = new AtomicBoolean(false);
     
     /* Statistic gathering variables. */
     private volatile long readConsumed;
@@ -244,6 +246,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      */
     private boolean processHandshakeResult(boolean reading, boolean writing, HandshakeStatus hs) {
         needsHandshakeWrap = false;
+        needsHandshakeUnwrap = false;
         switch(hs) {
         case NEED_TASK:
             needTask();
@@ -251,14 +254,15 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         case NEED_WRAP:
             needsHandshakeWrap = true;
             writeSink.interestWrite(this, true);
-            readSink.interestRead(true);
+            readSink.interestRead(false);
             return writing;
         case NEED_UNWRAP:
+            needsHandshakeUnwrap = true;
             readSink.interestRead(true);
             writeSink.interestWrite(null, false);
             // If we had previously buffered read data, force a read.
             if(readDataLeft && !reading)
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         try {
                             read(BufferUtils.getEmptyBuffer());
@@ -404,7 +408,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
         
         if(shutdown) {
-            NIODispatcher.instance().invokeLater(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                 public void run() {
                     ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
                     if(readIncoming != null)
@@ -455,7 +459,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     public void interestRead(boolean status) {
         synchronized(readInterestLock) {
             readInterest = status;
-            readSink.interestRead(status);
+            readSink.interestRead(needsHandshakeUnwrap || status);
         }
     }
 

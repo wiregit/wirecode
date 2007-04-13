@@ -319,15 +319,13 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
     /**
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
-    public void createConnectionAsynchronously(
-            String hostname, int portnum, ConnectType type) {
-
-		Runnable outgoingRunner =
-			new OutgoingConnector(new ManagedConnection(hostname, portnum, type),
-								  true);
-        // Initialize and loop for messages on another thread.
-
-		ThreadExecutor.startThread(outgoingRunner, "OutgoingConnectionThread");
+    public void createConnectionAsynchronously(String hostname, int portnum, ConnectType type) {
+        ManagedConnection mc = new ManagedConnection(hostname, portnum, type);
+        try {
+            initializeExternallyGeneratedConnection(mc, new IncomingGNetObserver(mc));
+        } catch(IOException iox) {
+            mc.close(); // ensure it's closed.
+        }
     }
 
 
@@ -406,8 +404,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
-        //if(true)
-            //return true;
+        if(true)
+            return true;
         return !NetworkUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
@@ -2126,8 +2124,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections created through createConnectionAsynchronously and
-     * createConnectionBlocking
+     * ManagedConnections created by createConnectionBlocking
      */
     private class OutgoingConnector implements Runnable {
         private final ManagedConnection _connection;
@@ -2166,6 +2163,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 		if(conn.isGUESSUltrapeer())
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
+        if(LOG.isDebugEnabled())
+            LOG.debug("Looping for messages with conn: " + conn);
 		// this can throw IOException
 		conn.loopForMessages();
 	}
@@ -2175,12 +2174,14 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      * Not as robust as ConnectionFetcher because less accounting is needed.
      */
     private class IncomingGNetObserver implements GnetConnectObserver {
-        private ManagedConnection connection;
+        private final ManagedConnection connection;
         IncomingGNetObserver(ManagedConnection connection) {
             this.connection = connection;
         }
 
         public void handleConnect() {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Completing IncomingGNetObserver.handleConnect for: " + connection);
             try {
                 if(completeInitializeExternallyGeneratedConnection(connection))
                     startConnection(connection);
@@ -2198,6 +2199,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         }
 
         public void shutdown() {
+            LOG.debug("Shutting down IncomingGNetobserver for: " + connection);
             cleanupBrokenExternallyGeneratedConnection(connection);
         }
         

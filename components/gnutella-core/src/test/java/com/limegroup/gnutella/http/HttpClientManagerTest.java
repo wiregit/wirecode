@@ -142,7 +142,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         final Object nioLock = new Object();
         try {
             try {
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         synchronized(nioLock) {
                             try {
@@ -167,7 +167,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         }
         
         try {
-            NIODispatcher.instance().invokeLater(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                 public void run() {
                     synchronized(nioLock) {
                         try {

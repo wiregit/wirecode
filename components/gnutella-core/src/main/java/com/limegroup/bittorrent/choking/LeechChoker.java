@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.NECallable;
-import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
@@ -24,7 +24,7 @@ class LeechChoker extends Choker {
 	private static final Comparator<Chokable> DOWNLOAD_SPEED_COMPARATOR = 
 		new SpeedComparator(true);
 	
-	LeechChoker(NECallable<List<? extends Chokable>> chokables, SchedulingThreadPool invoker) {
+	LeechChoker(NECallable<List<? extends Chokable>> chokables, ScheduledExecutorService invoker) {
 		super(chokables, invoker);
 	}
 

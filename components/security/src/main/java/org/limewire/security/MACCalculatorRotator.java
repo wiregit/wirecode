@@ -1,6 +1,7 @@
 package org.limewire.security;
 
-import org.limewire.concurrent.SchedulingThreadPool;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that hides the rotation of private keys.
@@ -8,7 +9,7 @@ import org.limewire.concurrent.SchedulingThreadPool;
 class MACCalculatorRotator implements MACCalculatorRepository {
     private final SettingsProvider provider;
     private final MACCalculatorFactory factory;
-    private final SchedulingThreadPool scheduler;
+    private final ScheduledExecutorService scheduler;
     private MACCalculator current, old;
     private final Runnable rotator, expirer;
 
@@ -18,7 +19,7 @@ class MACCalculatorRotator implements MACCalculatorRepository {
      * @param provider a <tt>SettingsProvider</tt>.  The change period must be bigger
      * than the grace period. 
      */
-    MACCalculatorRotator(SchedulingThreadPool scheduler, 
+    MACCalculatorRotator(ScheduledExecutorService scheduler, 
             MACCalculatorFactory factory, 
             SettingsProvider provider) {
         this.provider = provider;
@@ -59,8 +60,8 @@ class MACCalculatorRotator implements MACCalculatorRepository {
             old = current;
             current = newKQ;
         }
-        scheduler.invokeLater(rotator, provider.getChangePeriod());
-        scheduler.invokeLater(expirer, provider.getGracePeriod());
+        scheduler.schedule(rotator, provider.getChangePeriod(), TimeUnit.MILLISECONDS);
+        scheduler.schedule(expirer, provider.getGracePeriod(), TimeUnit.MILLISECONDS);
     }
     
     private synchronized void expireOld() {

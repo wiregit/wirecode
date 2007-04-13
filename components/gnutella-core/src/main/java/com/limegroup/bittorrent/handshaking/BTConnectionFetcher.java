@@ -9,12 +9,12 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.nio.AbstractNBSocket;
@@ -95,7 +95,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 */
 	private volatile int _triedHosts;
 	
-	BTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
+	BTConnectionFetcher(ManagedTorrent torrent, ScheduledExecutorService scheduler) {
 		_torrent = torrent;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19

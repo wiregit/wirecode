@@ -1,21 +1,21 @@
 package org.limewire.concurrent;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.SimpleTimer;
+import junit.framework.Test;
+
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorCallbackStub;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BaseTestCase;
-
-import junit.framework.Test;
 
 
 /**
  * Unit tests for SimpleTimer
  */
 public class SimpleTimerTest extends BaseTestCase {
-    
+        
     private long T=100;
             
 	public SimpleTimerTest(String name) {
@@ -37,18 +37,18 @@ public class SimpleTimerTest extends BaseTestCase {
         TimerTestTask a=new TimerTestTask("a");
         TimerTestTask b=new TimerTestTask("b");
         long start=System.currentTimeMillis();
-        t.schedule(a, 2*T, 2*T);
+        t.scheduleWithFixedDelay(a, 2*T, 2*T, TimeUnit.MILLISECONDS);
         sleep(T);
-        t.schedule(b, 2*T, 3*T);
+        t.scheduleWithFixedDelay(b, 2*T, 3*T, TimeUnit.MILLISECONDS);
         sleep(8*T+T/2);
-        t.cancel();
+        t.shutdown();
         sleep(3*T);  //to check that cancel really worked
 
         a.checkMatch(start+2*T, 4, 2*T);
         b.checkMatch(start+3*T, 3, 3*T);
 
         try {
-            t.schedule(new TimerTestTask("c"), 0, T);
+            t.scheduleWithFixedDelay(new TimerTestTask("c"), 0, T, TimeUnit.MILLISECONDS);
             fail("illegalstateexception should have been thrown");
         } catch (IllegalStateException pass) { }
     }
@@ -59,11 +59,11 @@ public class SimpleTimerTest extends BaseTestCase {
         TimerTestTask b=new TimerTestTask("b2");
         TimerTestTask a=new TimerTestTask("a2");
         long start=System.currentTimeMillis();
-        t.schedule(b, 3*T, 3*T);
+        t.scheduleWithFixedDelay(b, 3*T, 3*T, TimeUnit.MILLISECONDS);
         sleep(T);
-        t.schedule(a, T, 2*T);
+        t.scheduleWithFixedDelay(a, T, 2*T, TimeUnit.MILLISECONDS);
         sleep(8*T+T/2);
-        t.cancel();
+        t.shutdown();
         sleep(3*T);  //to check that cancel really worked
 
         a.checkMatch(start+2*T, 4, 2*T);
@@ -77,11 +77,11 @@ public class SimpleTimerTest extends BaseTestCase {
         long start=System.currentTimeMillis();
         for (int i=0; i<tasks.length; i++) {
             tasks[i]=new TimerTestTask("T"+i);
-            t.schedule(tasks[i], 0, 4*T);
+            t.scheduleWithFixedDelay(tasks[i], 0, 4*T, TimeUnit.MILLISECONDS);
         }
 
         sleep(5*T);
-        t.cancel();
+        t.shutdown();
 
         for (int i=0; i<tasks.length; i++) {
             tasks[i].checkMatch(start, 2, 4*T);
@@ -95,9 +95,9 @@ public class SimpleTimerTest extends BaseTestCase {
             SimpleTimer t = new SimpleTimer(false);
             ErrorService.setErrorCallback(now);
             TimerTestTask a = new TimerTestTask("a3", true);
-            t.schedule(a, T, 2*T);
+            t.scheduleWithFixedDelay(a, T, 2*T, TimeUnit.MILLISECONDS);
             sleep(T+T/2);
-            t.cancel();
+            t.shutdown();
             sleep(3*T);
             
             assertEquals( 1, now.getExceptionCount() );

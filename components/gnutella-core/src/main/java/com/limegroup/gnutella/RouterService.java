@@ -15,12 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
@@ -824,14 +825,14 @@ public class RouterService {
      * @exception IllegalArgumentException delay or period negative
      * @see org.limewire.concurrent.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public static TimerTask schedule(Runnable task, long delay, long period) {
-        return SimpleTimer.sharedTimer().schedule(task, delay, period);
+    public static ScheduledFuture<?> schedule(Runnable task, long delay, long period) {
+        return SimpleTimer.sharedTimer().scheduleWithFixedDelay(task, delay, period, TimeUnit.MILLISECONDS);
     }
     
     /**
-     * @return an object that can be used as a <tt>SchedulingThreadPool</tt>
+     * @return an object that can be used as a <tt>getScheduledExecutorService</tt>
      */
-    public static SchedulingThreadPool getSchedulingThreadPool() {
+    public static ScheduledExecutorService getScheduledExecutorService() {
     	return SimpleTimer.sharedTimer();
     }
 

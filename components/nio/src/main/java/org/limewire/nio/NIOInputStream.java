@@ -138,7 +138,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
             source.shutdown();
         
         if(buffer != null) {
-            NIODispatcher.instance().invokeLater(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                 public void run() {
                     NIODispatcher.instance().getBufferCache().release(buffer);
                 }

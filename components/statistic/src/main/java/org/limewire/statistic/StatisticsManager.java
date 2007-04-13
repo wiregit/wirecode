@@ -2,6 +2,7 @@ package org.limewire.statistic;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.SimpleTimer;
 
@@ -47,7 +48,7 @@ public final class StatisticsManager implements Runnable {
 	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
 	private StatisticsManager() {
-		SimpleTimer.sharedTimer().schedule(this, 0, 1000);
+		SimpleTimer.sharedTimer().scheduleWithFixedDelay(this, 0, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	/**

@@ -12,6 +12,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -380,7 +381,7 @@ public class NIODispatcherTest extends BaseTestCase {
     public void testSchedulingTasks() throws Exception {
     	// first get a ref to the dispatch thread
     	final AtomicReference<Thread>t = new AtomicReference<Thread>();
-    	NIODispatcher.instance().invokeLater(new Runnable() {
+    	NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
     		public void run() {
     			t.set(Thread.currentThread());
     		}
@@ -390,13 +391,13 @@ public class NIODispatcherTest extends BaseTestCase {
     		Thread.sleep(10);
     	
     	final CountDownLatch executed = new CountDownLatch(1);
-    	java.util.concurrent.Future f = NIODispatcher.instance().submit(new Runnable() {
+    	Future<?> f = NIODispatcher.instance().getScheduledExecutorService().schedule(new Runnable() {
     		public void run() {
     			// should be executed on the dispatch thread
     			assertSame(t.get(), Thread.currentThread());
     			executed.countDown();
     		}
-    	}, 500);
+    	}, 500, TimeUnit.MILLISECONDS);
 
     	// and not get executed until the timeout elapses
     	assertFalse(executed.await(480,TimeUnit.MILLISECONDS));

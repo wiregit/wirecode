@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -20,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
@@ -95,12 +96,12 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final HttpExecutor executor;
     
     /** executor to run delayed tasks on. */
-    private final SchedulingThreadPool scheduler;
+    private final ScheduledExecutorService scheduler;
   
     public PushDownloadManager(PushedSocketHandler downloadAcceptor, 
     		MessageRouter router,
     		HttpExecutor executor,
-    		SchedulingThreadPool scheduler,
+            ScheduledExecutorService scheduler,
     		SocketProcessor processor) {
     	this.downloadAcceptor = downloadAcceptor;
     	this.router = router;
@@ -187,8 +188,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
             // schedule the failover tcp pusher, which will run
             // if we don't get a response from the UDP push
             // within the UDP_PUSH_FAILTIME timeframe
-            scheduler.invokeLater(
-                new PushFailoverRequestor(file, guid, observer), UDP_PUSH_FAILTIME);
+            scheduler.schedule(
+                new PushFailoverRequestor(file, guid, observer), UDP_PUSH_FAILTIME, TimeUnit.MILLISECONDS);
         }
 
         sendPushUDP(file,guid);

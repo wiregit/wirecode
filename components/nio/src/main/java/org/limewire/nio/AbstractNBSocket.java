@@ -136,7 +136,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * in reading is turned on.
      */
     public final void setReadObserver(final ChannelReadObserver newReader) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 ReadObserver oldReader = reader;
                 try {
@@ -167,9 +167,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
-                    reader.handleRead(); // read up any buffered data from the current reader chain.
-                                         // this is done here (in addition to above) because elements
-                                         // from the base read-channel might have buffered data.
+                    if(isConnected())
+                        reader.handleRead(); // read up any buffered data from the current reader chain.
+                                             // this is done here (in addition to above) because elements
+                                             // from the base read-channel might have buffered data.
                     source.interestRead(true);
                 } catch(IOException iox) {
                     shutdown();
@@ -193,7 +194,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * write, then an IllegalStateException is thrown.
      */
     public final void setWriteObserver(final ChannelWriter newWriter) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 try {
                     if(writer.handleWrite())
@@ -330,12 +331,12 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             
             if(getChannel().connect(addr)) {
                 // Make sure connecting callbacks are always on the NIO thread.
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         try {
                             observer.handleConnect(AbstractNBSocket.this);
                         } catch(IOException iox) {
-                            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+                            NIODispatcher.instance().executeLaterAlways(new Runnable() {
                                 public void run() {
                                     shutdown();
                                 }
@@ -349,7 +350,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 return false;
             }
         } catch(IOException failed) {
-            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+            NIODispatcher.instance().executeLaterAlways(new Runnable() {
                 public void run() {
                     shutdown();
                 }
@@ -392,7 +393,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             };
             
-            Future<InputStream> future = NIODispatcher.instance().submit(callable);
+            Future<InputStream> future = NIODispatcher.instance().getScheduledExecutorService().submit(callable);
             try {
                 return future.get();
             } catch(ExecutionException ee) {
@@ -469,7 +470,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(shutdownObserver != null)
             shutdownObserver.shutdown();
         
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(nioOutputStream != null)
                     nioOutputStream.shutdown();

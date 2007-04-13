@@ -3,12 +3,12 @@ package org.limewire.nio.channel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
-
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
@@ -51,12 +51,12 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     
     /** Constructs a new DelayedBufferWriter whose buffer is the given size and delay. */
     public DelayedBufferWriter(int size, long delay) {
-    	this(size, delay, NIODispatcher.instance().getSchedulingThreadPool());
+    	this(size, delay, NIODispatcher.instance().getScheduledExecutorService());
     }
     
-    DelayedBufferWriter(int size, long delay, SchedulingThreadPool scheduler) {
+    DelayedBufferWriter(int size, long delay, ScheduledExecutorService scheduler) {
     	buf = ByteBuffer.allocate(size);
-    	this.delay = delay;
+    	this.delay = TimeUnit.MILLISECONDS.toNanos(delay);
     	this.interester = new Periodic(
     			new Interester(),
     			scheduler);
@@ -146,7 +146,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
                     buffer.limit(oldLimit);
                 }
             } else {
-                flush(System.currentTimeMillis());
+                flush(System.nanoTime());
                 if (!buf.hasRemaining()) 
                     break;
             }
@@ -165,7 +165,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
         if (upper != null)
             upper.handleWrite();
         
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
         if (lastFlushTime == 0)
             lastFlushTime = now;
         if (now - lastFlushTime > delay) 
@@ -184,7 +184,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
         			return false;
         		else {
         			// otherwise schedule a flushing event.
-        			interester.rescheduleIfLater(lastFlushTime + delay - now);
+        			interester.rescheduleIfLater(TimeUnit.NANOSECONDS.toMillis(lastFlushTime + delay - now));
         		}
         	}
         } 
@@ -200,7 +200,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
      * @return true if the buffer is now empty
      */
     public boolean flush() throws IOException {
-    	flush(System.currentTimeMillis());
+    	flush(System.nanoTime());
     	return !hasBufferedData();
     }
     

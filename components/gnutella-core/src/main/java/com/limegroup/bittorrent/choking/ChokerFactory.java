@@ -1,9 +1,9 @@
 package com.limegroup.bittorrent.choking;
 
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.NECallable;
-import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
 
@@ -18,7 +18,7 @@ public class ChokerFactory {
 	protected ChokerFactory() {}
 	
 	public Choker getChoker(NECallable<List<? extends Chokable>> chokables,
-			SchedulingThreadPool invoker,
+			ScheduledExecutorService invoker,
 			boolean seed) {
 		return seed ? new SeedChoker(chokables, invoker) : new LeechChoker(chokables, invoker);
 	}

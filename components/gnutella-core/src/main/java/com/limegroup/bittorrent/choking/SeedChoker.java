@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.NECallable;
-import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
 
@@ -30,7 +30,7 @@ class SeedChoker extends Choker {
 	private int unchokesSinceLast;
 	
 	SeedChoker(NECallable<List<? extends Chokable>> chokables,
-			SchedulingThreadPool invoker) {
+			ScheduledExecutorService invoker) {
 		super(chokables, invoker);
 		round = Integer.MIN_VALUE;
 	}
