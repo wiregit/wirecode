@@ -349,4 +349,41 @@ public class SettingTest extends BaseTestCase {
         assertFalse("containing null should be ok", setting.contains(null));
         assertEquals("Expected index of -1", setting.indexOf(null), -1);
     }
+    
+    public void testProbabilisticBoolean() throws Exception {
+        File f = new File("testSettings.props");
+        f.deleteOnExit();
+        SettingsFactory factory = new SettingsFactory(f);
+        int yes = 0;
+        int no = 0;
+        ProbabilisticBooleanSetting s = factory.createProbabilisticBooleanSetting("a", 0);
+        for (int i = 0; i < 1000; i++) {
+            s.setValue(0f);
+            if (s.getBoolean()) yes++; 
+            else  no++;
+        }
+        assertEquals(0, yes);
+        assertEquals(1000, no);
+        
+        yes = 0; no = 0;
+        for (int i = 0; i < 1000; i++) {
+            s.setValue(1.0f);
+            if (s.getBoolean()) yes++; 
+            else  no++;
+        }
+        
+        assertEquals(1000, yes);
+        assertEquals(0, no);
+        
+        yes = 0; no = 0;
+        for (int i = 0; i < 1000; i++) {
+            s.setValue(0.8f);
+            if (s.getBoolean()) yes++; 
+            else  no++;
+        }
+        
+        // should be more yes than no but still some no's
+        assertGreaterThan(0, no);
+        assertGreaterThan(no, yes);
+    }
 }
