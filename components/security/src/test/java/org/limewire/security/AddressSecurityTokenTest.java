@@ -117,14 +117,15 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
             MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
 
-	    long start = System.currentTimeMillis();
-	    InetAddress address = InetAddress.getLocalHost();
-	    System.out.println((System.currentTimeMillis() - start));
+            InetAddress address = InetAddress.getLocalHost();
 
+            settings.notified = false;
             AddressSecurityToken key = new AddressSecurityToken(address, 4545);
 
-            // wait for secret key change
-            Thread.sleep(450);
+            // wait for secret key change, this relies on the implementation
+            // detail that when the rotation is run the setting provider is queried
+            // for its values, thus we can wake up when that happens
+            settings.waitForRotation();
 
             // key should still be valid
             assertTrue(key.isFor(address, 4545));
@@ -132,7 +133,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             assertFalse(key.isFor(address, 4544));
 
             // wait for grace period to be over
-            Thread.sleep(200);
+            Thread.sleep(250);
 
             assertFalse(key.isFor(address, 4545));
 
@@ -143,10 +144,10 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     
     private static class NotifyingSettingsProvider implements SettingsProvider {
 
-        boolean notifyed = false;
+        boolean notified = false;
         
         public synchronized long getChangePeriod() {
-            notifyed = true;
+            notified = true;
             notify();
             return 400;
         }
@@ -156,7 +157,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
         }
         
         public synchronized void waitForRotation() throws InterruptedException {
-            while (!notifyed) {
+            while (!notified) {
                 wait();
             }
         }
