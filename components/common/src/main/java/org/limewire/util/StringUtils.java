@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 
 /** Various static routines for manipulating strings.*/
@@ -181,8 +180,7 @@ public class StringUtils {
      * Exactly like split(s, Character.toString(delimiter))
      */
     public static String[] split(String s, char delimiter) {
-        //Character.toString only available in Java 1.4+
-        return split(s, delimiter+"");
+        return split(s, Character.toString(delimiter));
     }
 
     /** 
@@ -201,24 +199,18 @@ public class StringUtils {
     public static String[] split(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
-        List<String> buf = new ArrayList<String>();        
+        List<String> tokens = new ArrayList<String>();        
         while (tokenizer.hasMoreTokens())
-            buf.add(tokenizer.nextToken());
+            tokens.add(tokenizer.nextToken());
 
-        //Copy from buffer to array.
-        String[] ret = new String[buf.size()];
-        for (int i = 0; i < ret.length; i++)
-            ret[i] = buf.get(i);
-
-        return ret;
+        return (String[])tokens.toArray(new String[0]);
     }
 
     /**
      * Exactly like splitNoCoalesce(s, Character.toString(delimiter))
      */
     public static String[] splitNoCoalesce(String s, char delimiter) {
-        //Character.toString only available in Java 1.4+
-        return splitNoCoalesce(s, delimiter+"");
+        return splitNoCoalesce(s, Character.toString(delimiter));
     }
 
     /**
@@ -241,7 +233,7 @@ public class StringUtils {
     public static String[] splitNoCoalesce(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters, true);
-        Vector<String> buf = new Vector<String>(); 
+        List<String> tokens = new ArrayList<String>(); 
         //True if last token was a delimiter.  Initialized to true to force
         //an empty string if s starts with a delimiter.
         boolean gotDelimiter=true; 
@@ -251,24 +243,19 @@ public class StringUtils {
             if (token.length()==1 && delimiters.indexOf(token)>=0) {
                 //If so, add blank only if last token was a delimiter.
                 if (gotDelimiter)
-                    buf.add("");
+                    tokens.add("");
                 gotDelimiter=true;
             } else {
                 //If not, add "real" token.
-                buf.add(token);
+                tokens.add(token);
                 gotDelimiter=false;
             }            
         }
         //Add trailing empty string UNLESS s is the empty string.
-        if (gotDelimiter && !buf.isEmpty())
-            buf.add("");
+        if (gotDelimiter && !tokens.isEmpty())
+            tokens.add("");
 
-        //Copy from buffer to array.
-        String[] ret = new String[buf.size()];
-        for(int i=0; i<buf.size(); i++)
-            ret[i] = buf.get(i);
-
-        return ret;
+        return (String[])tokens.toArray(new String[0]);
     }
 
     /**
