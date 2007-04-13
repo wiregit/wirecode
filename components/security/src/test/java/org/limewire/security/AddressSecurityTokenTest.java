@@ -117,20 +117,24 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
             MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
 
-            AddressSecurityToken key = new AddressSecurityToken(InetAddress.getLocalHost(), 4545);
+	    long start = System.currentTimeMillis();
+	    InetAddress address = InetAddress.getLocalHost();
+	    System.out.println((System.currentTimeMillis() - start));
+
+            AddressSecurityToken key = new AddressSecurityToken(address, 4545);
 
             // wait for secret key change
             Thread.sleep(450);
 
             // key should still be valid
-            assertTrue(key.isFor(InetAddress.getLocalHost(), 4545));
+            assertTrue(key.isFor(address, 4545));
             // different port
-            assertFalse(key.isFor(InetAddress.getLocalHost(), 4544));
+            assertFalse(key.isFor(address, 4544));
 
             // wait for grace period to be over
             Thread.sleep(200);
 
-            assertFalse(key.isFor(InetAddress.getLocalHost(), 4545));
+            assertFalse(key.isFor(address, 4545));
 
         } finally {
             MACCalculatorRepositoryManager.setDefaultRepositoryManager(previous);
