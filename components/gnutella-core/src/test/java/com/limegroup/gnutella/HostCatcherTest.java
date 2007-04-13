@@ -1,14 +1,22 @@
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -17,10 +25,16 @@ import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class HostCatcherTest extends LimeTestCase {  
@@ -38,7 +52,6 @@ public class HostCatcherTest extends LimeTestCase {
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
-    
     public static void globalSetUp() throws Exception {
         new RouterService( new ActivityCallbackStub() );
     }
@@ -56,7 +69,7 @@ public class HostCatcherTest extends LimeTestCase {
         hc = new HostCatcher();
         hc.initialize();		
     }
-
+    
     /**
      * Test the method for putting hosts on probation.
      * 
@@ -799,7 +812,93 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(9, hostList.size());
         assertTrue(hostList.get(0).getAddress().endsWith(".100"));
     }
+
+    public void testPingTagging() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
+        // tell hostcatcher about one node
+        File tmp=new File(CommonUtils.getUserSettingsDir(), "gnutella.net" );
+        FileWriter out=new FileWriter(tmp);
+        out.write("127.0.0.1:6000,26694,1176133322250,1176133334390,,en,,,");    
+        out.flush();
+        out.close();
+        DatagramSocket s = new DatagramSocket(6000);
+        s.setSoTimeout(3000);
+        PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
+        PrivilegedAccessor.setValue(RouterService.class, "manager",new
+                ConnectionManagerStub() {
+            @Override
+            public boolean isFullyConnected() {
+                return false;
+            }
+            @Override
+            public List<ManagedConnection> getInitializedConnections() {
+                return Collections.emptyList();
+            }
+            @Override
+            public int getPreferredConnectionCount() {
+                return 1;
+            }
+        });
+        
+        // make it send udp pings
+        RouterService.getAcceptor().init();
+        RouterService.getAcceptor().start();
+        RouterService.getMessageRouter().initialize();
+        hc.expire();
+        hc.read(tmp);
+        hc.sendUDPPings();
+        
+        // empty the hostcatcher
+        StubEndpointObserver seo = new StubEndpointObserver();
+        assertNotNull(hc.getAnEndpointImmediate(seo));
+        assertNull(hc.getAnEndpointImmediate(seo));
+        hc.removeEndpointObserver(seo);
+        
+        // receive the ping
+        DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
+        s.receive(p);
+        PingRequest ping = (PingRequest) MessageFactory.read(new ByteArrayInputStream(p.getData()));
+        assertNotNull(ping);
+
+        
+        // this ping should be tagged
+        byte [] expectedGUID = UDPService.instance().getSolicitedGUID().bytes();
+        assertNotEquals(expectedGUID, ping.getGUID());
+        
+        // if a pong is sent from the same host, it will be processed
+        byte [] payload = new byte[14];
+        ByteOrder.short2leb((short)6000, payload, 0);
+        System.arraycopy(InetAddress.getByName("127.0.0.1").getAddress(),0,payload,2,4);
+        PingReply pong = 
+            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.N_UDP);
+        UDPService.instance().processMessage(pong, 
+                new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6000));
+        
+        // the pong guid should now be restored to the solicited guid
+        assertEquals(expectedGUID,pong.getGUID());
+        
+        Thread.sleep(1000);
+        Endpoint e = hc.getAnEndpointImmediate(new StubEndpointObserver());
+        assertNotNull(e);
+        assertEquals("127.0.0.1",e.getAddress());
+        assertEquals(6000, e.getPort());
+        
+        // however if a pong with the same guid arrives from
+        // another address, it will be ignored
+        System.arraycopy(InetAddress.getByName("127.0.0.2").getAddress(),0,payload,2,4);
+        pong = 
+            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.N_UDP);
+        UDPService.instance().processMessage(pong, 
+                new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 6000));
+        
+        // the guid of this pong will not be restored correctly
+        assertNotEquals(expectedGUID,pong.getGUID());
+        Thread.sleep(1000);
+        assertEquals(0,hc.getNumHosts());
+        
+        tmp.delete();
+    }
    
     private static class StubGWebBootstrapper extends BootstrapServerManager {
         private boolean fetched = false;
