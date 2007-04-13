@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.10 $
- * $Date: 2007-04-11 20:52:10 $
+ * $Revision: 1.1.2.11 $
+ * $Date: 2007-04-13 16:41:07 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -49,7 +49,6 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.http.ProtocolException;
 import org.apache.http.UnsupportedHttpVersionException;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.NHttpServerConnection;
@@ -322,6 +321,9 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         try {
             // LW
             if (connState.getOutputState() == ServerConnState.RESPONSE_NO_BODY) {
+                // XXX part of the response may still be in the buffer
+                responseHeadersSent(conn, conn.getHttpResponse());
+
                 encoder.complete();
             } else {
                 // Update connection state
@@ -340,8 +342,8 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 connState.resetOutput();
                 
                 // LW
-                connectionListener.responseContentSent(conn, conn
-                        .getHttpResponse());
+                // XXX part of the response may still be in the buffer
+                responseBodySent(conn, conn.getHttpResponse());
                 
                 if (!this.connStrategy.keepAlive(response, context)) {
                     conn.close();
@@ -465,23 +467,21 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
         // LW
         boolean head = conn.getHttpRequest() != null && "HEAD".equals(conn.getHttpRequest().getRequestLine().getMethod());
-        if (!head && response.getEntity() != null) {
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                if (entity instanceof HttpNIOEntity) {
-                    connState.setEntity((HttpNIOEntity) entity);
-                } else {                    
-                    OutputStream outstream = new ContentOutputStream(buffer);
-                    entity.writeTo(outstream);
-                    outstream.flush();
-                    outstream.close();
-                }
+        HttpEntity entity = response.getEntity();
+        if (!head && entity != null) {
+            if (entity instanceof HttpNIOEntity) {
+                connState.setEntity((HttpNIOEntity) entity);
+            } else {                    
+                OutputStream outstream = new ContentOutputStream(buffer);
+                entity.writeTo(outstream);
+                outstream.flush();
+                outstream.close();
             }
         } else {
             connState.setOutputState(ServerConnState.RESPONSE_NO_BODY);
         }
     }
-
+    
     static class ServerConnState {
         
         public static final int READY                      = 0;
@@ -586,17 +586,17 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         return connectionListener;
     }
 
-    public void responseContentSent(DefaultNHttpServerConnection conn,
+    public void responseBodySent(NHttpServerConnection conn,
             HttpResponse response) {
         if (connectionListener != null) {
-            connectionListener.responseContentSent(conn, response);
+            connectionListener.responseBodySent(conn, response);
         }
     }
     
-    public void responseSent(DefaultNHttpServerConnection conn,
+    public void responseHeadersSent(NHttpServerConnection conn,
             HttpResponse response) {
         if (connectionListener != null) {
-            connectionListener.responseSent(conn, response);
+            connectionListener.responseHeadersSent(conn, response);
         }
     }    
     

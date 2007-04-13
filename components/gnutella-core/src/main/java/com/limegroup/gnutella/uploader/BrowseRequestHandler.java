@@ -46,7 +46,6 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
         } else {
             response.setEntity(new BrowseResponseEntity(uploader));
-            // FIXME add to list of uploads?
             response.setStatusCode(HttpStatus.SC_OK);
         }
         sessionManager.addToGUI(uploader);

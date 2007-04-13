@@ -35,6 +35,7 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
@@ -50,7 +51,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
-        UploadManager, HttpResponseListener, HTTPUploadSessionManager {
+        UploadManager, HTTPUploadSessionManager {
 
     private final static String SESSION_KEY = "org.limewire.session";
 
@@ -135,13 +136,15 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
 
+    private ResponseListener responseListener = new ResponseListener();
+    
     public HTTPUploadManager(HTTPAcceptor acceptor,
             UploadSlotManager slotManager) {
         this.acceptor = acceptor;
         this.slotManager = slotManager;
 
         FileUtils.addFileLocker(this);
-        acceptor.addResponseListener(this);
+        acceptor.addResponseListener(responseListener);
 
         inititalizeHandlers();
     }
@@ -246,7 +249,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * open 4) Increments the completed uploads in the FileDesc 5) Removes the
      * uploader from the GUI. (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
-    public void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
+    public void cleanupFinishedUploader(HTTPUploader uploader) {
         System.out.println("cleaning up finished.");
         if (LOG.isTraceEnabled())
             LOG.trace(uploader + " cleaning up finished.");
@@ -258,15 +261,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         long finishTime = System.currentTimeMillis();
         synchronized (this) {
             // Report how quickly we uploaded the data.
-            if (startTime > 0) {
-                reportUploadSpeed(finishTime - startTime, uploader
+            if (uploader.getStartTime() > 0) {
+                reportUploadSpeed(finishTime - uploader.getStartTime(), uploader
                         .getTotalAmountUploaded());
             }
             removeFromList(uploader);
             forceAllowedUploads.remove(uploader);
         }
-
-        // uploader.closeFileStreams();
 
         switch (state) {
         case HTTPUploader.COMPLETE:
@@ -862,7 +863,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     slotManager.requestDone(session);
                 }
 
-                cleanupFinishedUploader(uploader, uploader.getStartTime());
+                cleanupFinishedUploader(uploader);
 
                 uploader = new HTTPUploader(filename, session);
             }
@@ -870,8 +871,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             uploader = new HTTPUploader(filename, session);
         }
 
-        uploader.setMethod(request.getRequestLine().getMethod());
-        uploader.setUploadType(type);
+        String method = request.getRequestLine().getMethod();
+        uploader.setMethod(method);
+        uploader.setUploadType("HEAD".equals(method) ? UploadType.HEAD_REQUEST : type);
         session.setUploader(uploader);
         return uploader;
     }
@@ -901,56 +903,56 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return session.getQueueStatus();
     }
 
-    public void responseSent(NHttpServerConnection conn, HttpResponse response) {
-        UploadSession session = getSession(conn.getContext());
-        if (session != null) {
-            // HTTPUploader uploader = session.getUploader();
-            // assert uploader != null;
-            // if (response.getEntity() == null) {
-            // // not sending a body
-            // boolean stillInQueue = slotManager.positionInQueue(session) > -1;
-            // slotManager.cancelRequest(session);
-            // if (stillInQueue)
-            // uploader.setState(Uploader.INTERRUPTED);
-            // else
-            // uploader.setState(Uploader.COMPLETE);
-            // System.out.println("complete");
-            // removeFromList(uploader);
-            // }
-        }
-    }
-
-    public void sessionClosed(NHttpServerConnection conn) {
-        UploadSession session = getSession(conn.getContext());
-        if (session != null) {
-            HTTPUploader uploader = session.getUploader();
-            if (uploader != null) {
-                if (uploader.getState() == Uploader.INTERRUPTED || uploader.getState() == Uploader.COMPLETE) {
-                    return;
-                }
-                
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Closing session for " + session.getHost());
-                
-                boolean stillInQueue = slotManager.positionInQueue(session) > -1;
-                slotManager.cancelRequest(session);
-                if (stillInQueue)
-                    uploader.setState(Uploader.INTERRUPTED);
-                else
-                    uploader.setState(Uploader.COMPLETE);
-                cleanupFinishedUploader(uploader, uploader.getStartTime());
-
-                System.out.println("session closed");
-            }
-        }
-    }
-    
     /** For testing. */
     public void cleanup() {
         for (HTTPUploader uploader : _activeUploadList.toArray(new HTTPUploader[0])) {
             slotManager.cancelRequest(uploader.getSession());
             removeFromList(uploader);
         }
+    }
+
+    private class ResponseListener implements HttpResponseListener {
+        
+        public void connectionOpened(NHttpServerConnection conn) {
+        }
+
+        public void connectionClosed(NHttpServerConnection conn) {
+            UploadSession session = getSession(conn.getContext());
+            if (session != null) {
+                HTTPUploader uploader = session.getUploader();
+                if (uploader != null) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("Closing session for " + session.getHost());
+                    
+                    boolean stillInQueue = slotManager.positionInQueue(session) > -1;
+                    slotManager.cancelRequest(session);
+                    if (stillInQueue)
+                        uploader.setState(Uploader.INTERRUPTED);
+                    else
+                        uploader.setState(Uploader.COMPLETE);
+                    cleanupFinishedUploader(uploader);
+                    session.setUploader(null);
+                }
+            }
+        }
+        
+        public void responseSent(NHttpServerConnection conn, HttpResponse response) {
+            UploadSession session = getSession(conn.getContext());
+            if (session != null) {
+                HTTPUploader uploader = session.getUploader();
+                if (uploader != null) {
+                    uploader.setState(Uploader.COMPLETE);
+                    //cleanupFinishedUploader(uploader);
+                }
+                
+                if (session.getQueueStatus() != QueueStatus.QUEUED) {
+                    session.getIOSession().setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
+                } else {
+                    session.getIOSession().setSocketTimeout(UploadSession.MAX_POLL_TIME);
+                }
+            }
+        }       
+
     }
     
 }

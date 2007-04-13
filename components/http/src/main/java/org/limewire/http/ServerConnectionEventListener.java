@@ -18,8 +18,8 @@ public interface ServerConnectionEventListener {
 
     void connectionTimeout(NHttpServerConnection conn);
 
-    void responseSent(NHttpServerConnection conn, HttpResponse response);
+    void responseBodySent(NHttpServerConnection conn, HttpResponse httpResponse);
 
-    void responseContentSent(NHttpServerConnection conn, HttpResponse httpResponse);
+    void responseHeadersSent(NHttpServerConnection conn, HttpResponse response);
 
 }

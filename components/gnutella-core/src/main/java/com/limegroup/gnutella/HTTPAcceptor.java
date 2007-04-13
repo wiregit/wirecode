@@ -75,8 +75,8 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
                 8 * 1024);
         this.params.setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true);
-        this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER, LimeWireUtils
-                .getHttpServer());
+        this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
+                LimeWireUtils.getHttpServer());
 
         this.registry = new HttpRequestHandlerRegistry();
         this.connectionListener = new ConnectionEventListener();
@@ -125,7 +125,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
                 .getRequestLine().getHttpVersion(), HttpStatus.SC_OK, context);
         response.getParams().setDefaults(this.params);
 
-        //HttpContextParams.setLocal(context, true);
+        // HttpContextParams.setLocal(context, true);
         context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
         context.setAttribute(HttpExecutionContext.HTTP_RESPONSE, response);
 
@@ -142,8 +142,6 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
         }
 
-        
-        
         return response;
     }
 
@@ -163,14 +161,22 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
                     .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
-                listener.sessionClosed(conn);
+                listener.connectionClosed(conn);
             }
         }
 
         public void connectionOpen(NHttpServerConnection conn) {
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+                    .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.connectionOpened(conn);
+            }
         }
 
         public void connectionTimeout(NHttpServerConnection conn) {
+            // should never happen since LimeWire will close the socket on
+            // timeouts
+            // which will trigger a connectionClosed() event
             throw new RuntimeException();
         }
 
@@ -185,17 +191,16 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             throw new RuntimeException(e);
         }
 
-        public void responseContentSent(NHttpServerConnection conn,
+        public void responseBodySent(NHttpServerConnection conn,
                 HttpResponse response) {
-            // HttpResponseListener[] listeners =
-            // HTTPAcceptor.this.responseListeners
-            // .toArray(new HttpResponseListener[0]);
-            // for (HttpResponseListener listener : listeners) {
-            // listener.responseSent(conn, response);
-            // }
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+                    .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.responseSent(conn, response);
+            }
         }
 
-        public void responseSent(NHttpServerConnection conn,
+        public void responseHeadersSent(NHttpServerConnection conn,
                 HttpResponse response) {
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
                     .toArray(new HttpResponseListener[0]);

@@ -4,21 +4,25 @@
 package org.limewire.http;
 
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.channels.ByteChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionBufferStatus;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.Throttle;
 import org.limewire.nio.channel.ThrottleWriter;
-
-import com.limegroup.gnutella.RouterService;
 
 public class HttpIOSession implements IOSession {
 
+    private static final Log LOG = LogFactory.getLog(HttpIOSession.class);
+    
     private final Map<String, Object> attributes;
 
     private SessionBufferStatus bufferStatus;
@@ -31,7 +35,7 @@ public class HttpIOSession implements IOSession {
 
     private int eventMask;
 
-    private boolean throttled;
+    private ThrottleWriter throttleWriter;
 
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
@@ -134,6 +138,13 @@ public class HttpIOSession implements IOSession {
 
     public void setSocketTimeout(int timeout) {
         this.socketTimeout = timeout;
+        if (socket != null) {
+            try {
+                socket.setSoTimeout(timeout);
+            } catch (SocketException e) {
+                LOG.warn("Could not set socket timeout", e);
+            }
+        }
     }
 
     public boolean hasBufferedInput() {
@@ -146,18 +157,17 @@ public class HttpIOSession implements IOSession {
                 && this.bufferStatus.hasBufferedOutput();
     }
 
-    public void setThrottle(boolean enable) {
-        if (this.throttled == enable) {
+    public synchronized void setThrottle(Throttle throttle) {
+        boolean enable = (throttle != null);
+        if (enable == (this.throttleWriter != null)) {
             return;
         }
-        this.throttled = enable;
 
         if (enable) {
-            ThrottleWriter throttle = new ThrottleWriter(RouterService
-                    .getBandwidthManager().getWriteThrottle());
+            this.throttleWriter = new ThrottleWriter(throttle);
             boolean interest = channel.isWriteInterest();
             channel.requestWrite(false);
-            channel.setWriteChannel(throttle);
+            channel.setWriteChannel(this.throttleWriter);
             socket.setWriteObserver(channel);
             channel.requestWrite(interest);
         } else {

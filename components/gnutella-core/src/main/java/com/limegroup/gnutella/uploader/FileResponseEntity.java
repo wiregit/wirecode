@@ -16,6 +16,7 @@ import org.limewire.http.AbstractHttpNIOEntity;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.RouterService;
 
 public class FileResponseEntity extends AbstractHttpNIOEntity {
 
@@ -85,7 +86,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             }
         }
 
-        uploader.getSession().getIOSession().setThrottle(true);
+        uploader.getSession().getIOSession().setThrottle(RouterService
+                .getBandwidthManager().getWriteThrottle());
         
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
         // don't write on the first call to handleWrite
@@ -96,7 +98,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     public void finished() throws IOException {
         in.close();
         
-        uploader.getSession().getIOSession().setThrottle(false);
+        uploader.getSession().getIOSession().setThrottle(null);
     }
     
     @Override

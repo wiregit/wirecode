@@ -51,7 +51,6 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
             initialize();
         }
         if (!handleWrite()) {
-            assert encoder.isCompleted();
             encoder.complete();
             finished();
         }

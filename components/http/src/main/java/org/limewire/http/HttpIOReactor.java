@@ -18,9 +18,9 @@ import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 
-import com.limegroup.gnutella.http.HttpContextParams;
-
 public class HttpIOReactor implements ConnectingIOReactor {
+
+    public static final String IO_SESSION_KEY = "org.limewire.iosession";
 
     static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
     
@@ -133,7 +133,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
         
         // need to enable access to the channel for throttling support
         DefaultNHttpServerConnection conn = (DefaultNHttpServerConnection) session.getAttribute(NHTTP_CONN);
-        HttpContextParams.setIOSession(conn.getContext(), session);
+        conn.getContext().setAttribute(IO_SESSION_KEY, session);
         
         socket.setReadObserver(channel);
         socket.setWriteObserver(channel);
