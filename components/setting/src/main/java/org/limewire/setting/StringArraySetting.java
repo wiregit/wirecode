@@ -74,12 +74,13 @@ public class StringArraySetting extends Setting {
         }
         
         StringBuilder buffer = new StringBuilder();
-        
-        for(int i = 0; i < src.length; i++) {
-            buffer.append(src[i]);
-            if (i < src.length-1) { buffer.append(';'); }
+        for(String str : src) {
+            buffer.append(str).append(';');
         }
-            
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
+        }
         return buffer.toString();
     }
 

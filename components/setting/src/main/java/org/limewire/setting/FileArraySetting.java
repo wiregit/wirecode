@@ -160,13 +160,13 @@ public class FileArraySetting extends Setting {
         }
         
         StringBuilder buffer = new StringBuilder();
-        
-        for(int i = 0; i < src.length; i++) {
-            buffer.append(src[i].getAbsolutePath());
-            if (i < src.length-1)
-                buffer.append(';');
+        for(File file : src) {
+            buffer.append(file.getAbsolutePath()).append(';');
         }
-            
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
+        }  
         return buffer.toString();
     }
 

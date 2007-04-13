@@ -1,7 +1,6 @@
 package org.limewire.setting;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -63,10 +62,12 @@ public class StringSetSetting extends Setting {
             return "";
         
         StringBuilder buffer = new StringBuilder();
-        for(Iterator<String> i = src.iterator(); i.hasNext(); ) {
-            buffer.append(i.next());
-            if (i.hasNext())
-                buffer.append(';');
+        for (String str : src) {
+            buffer.append(str).append(';');
+        }
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
         }
         return buffer.toString();
     }

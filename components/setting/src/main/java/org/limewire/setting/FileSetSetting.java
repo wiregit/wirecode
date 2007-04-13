@@ -125,12 +125,13 @@ public class FileSetSetting extends Setting {
             return "";
         
         StringBuilder buffer = new StringBuilder();
-        for(Iterator<? extends File> i = src.iterator(); i.hasNext(); ) {
-            buffer.append(i.next().getAbsolutePath());
-            if (i.hasNext())
-                buffer.append(';');
+        for(File file : src) {
+            buffer.append(file.getAbsolutePath()).append(';');
         }
-            
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
+        }  
         return buffer.toString();
     }
 
