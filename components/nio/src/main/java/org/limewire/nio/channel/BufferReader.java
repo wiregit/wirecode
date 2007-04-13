@@ -21,19 +21,19 @@ public class BufferReader implements InterestScatteringByteChannel {
         return BufferUtils.transfer(buffer, dst, false);
     }
 
-    public void close() {
-    }
-
-    public boolean isOpen() {
-        return true;
-    }
-
     public long read(ByteBuffer[] dsts) throws IOException {
         return BufferUtils.transfer(buffer, dsts, 0, dsts.length, false);
     }
 
     public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
         return BufferUtils.transfer(buffer, dsts, offset, length, false);
+    }
+
+    public void close() {
+    }
+
+    public boolean isOpen() {
+        return true;
     }
     
 }

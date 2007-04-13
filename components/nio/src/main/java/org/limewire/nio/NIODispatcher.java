@@ -310,11 +310,6 @@ public class NIODispatcher implements Runnable {
         handler.shutdown();
     }
     
-    /** Attaches the given attachment to the SelectionKey. */
-    public void attach(SelectionKey key, IOErrorObserver attachment) {
-        key.attach(new Attachment(attachment));
-    }
-    
     /**
      * Registers a new Selector that should be used when SelectableChannels
      * assignable from the given class are registered.
