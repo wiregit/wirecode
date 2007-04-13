@@ -714,6 +714,10 @@ public final class SettingsFactory implements Iterable<Setting> {
         setting.reload();
         //remote related checks...
         if(remoteKey != null) {
+            if (remoteKeyToSetting.containsKey(remoteKey)) {
+                throw new IllegalArgumentException("duplicate setting remoteKey: " + remoteKey);
+            }
+            
             String remoteValue = remoteManager.getUnloadedValueFor(remoteKey);
             if(remoteValue != null)
                 setting.setValue(remoteValue);
