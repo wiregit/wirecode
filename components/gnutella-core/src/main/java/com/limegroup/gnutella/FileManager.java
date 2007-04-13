@@ -101,6 +101,11 @@ public abstract class FileManager {
     
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
 
+    /**
+     * delay between qrp updates should the simpp words change.
+     * Not final for testing.
+     */
+    private static long QRP_DELAY = 60 * 60 * 1000;
      
     /** List of event listeners for FileManagerEvents. */
     private volatile CopyOnWriteArrayList<FileEventListener> eventListeners =
@@ -1956,7 +1961,6 @@ public abstract class FileManager {
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
     protected synchronized void buildQRT() {
-
         _queryRouteTable = new QueryRouteTable();
         if (SearchSettings.SEND_LIME_RESPONSES.getBoolean()) {
             for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
@@ -2315,7 +2319,6 @@ public abstract class FileManager {
         }
         
         public synchronized void simppUpdated(int newVersion) {
-            
             if (buildInProgress)
                 return;
             
@@ -2326,7 +2329,7 @@ public abstract class FileManager {
             // any change in words?
             if (newWords.containsAll(qrpWords) && qrpWords.containsAll(newWords)) 
                 return;
-
+            
             qrpWords.clear();
             qrpWords.addAll(newWords);
 
@@ -2342,7 +2345,7 @@ public abstract class FileManager {
                         _needRebuild = true;
                     }
                 }
-            }, (int)(Math.random() * 60 * 60 * 1000), 0);
+            }, (int)(Math.random() * QRP_DELAY), 0);
         }
         
         public synchronized void cancelRebuild() {
