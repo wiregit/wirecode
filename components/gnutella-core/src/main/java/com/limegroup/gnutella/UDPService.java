@@ -467,7 +467,7 @@ public class UDPService implements ReadWriteObserver {
         send(buffer, ip, port, false);
     }
     
-    private void mutateGUID(byte[] guid, InetAddress ip, int port) {
+    public static void mutateGUID(byte[] guid, InetAddress ip, int port) {
     	byte [] qk = QueryKey.getQueryKey(ip, port, PING_GENERATOR).getBytes();
     	for (int i = 0; i < qk.length; i++)
     		guid[i] =(byte)(guid[i] ^ qk[i]);
