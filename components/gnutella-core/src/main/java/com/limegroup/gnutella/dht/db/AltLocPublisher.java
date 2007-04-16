@@ -147,7 +147,8 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
      * Returns true if the FileDesc is considered rare
      */
     private static boolean isRareFile(FileDesc fd) {
-        if (fd.getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
+        if (fd.getAttemptedUploads() < DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()
+                || fd.getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
             return false;
         }
         
