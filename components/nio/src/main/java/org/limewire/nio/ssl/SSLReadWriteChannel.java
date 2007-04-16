@@ -449,7 +449,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
 
     public boolean isOpen() {
-        return readSink.isOpen() && writeSink.isOpen();
+        return readSink != null && readSink.isOpen() && writeSink != null && writeSink.isOpen();
     }
 
     public void handleIOException(IOException iox) {
@@ -488,5 +488,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     /** Returns the total number of bytes that this has consumed while wrapping writes. */
     long getWrittenBytesConsumed() {
         return writeConsumed;
+    }
+    
+    /** Returns the SSLSession this channel uses. */
+    SSLSession getSession() {
+        return engine != null ? engine.getSession() : null;
     }
 }

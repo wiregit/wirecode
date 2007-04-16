@@ -1004,7 +1004,7 @@ public class NIODispatcher implements Runnable {
         }
 
         public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-           ScheduledFutureTask<?> ret = new ScheduledFutureTask<Object>(command, null, unit.toNanos(delay));
+           ScheduledFutureTask<?> ret = new ScheduledFutureTask<Void>(command, null, unit.toNanos(delay));
            instance().DELAYED.add(ret);
            instance().wakeup();
            return ret;
