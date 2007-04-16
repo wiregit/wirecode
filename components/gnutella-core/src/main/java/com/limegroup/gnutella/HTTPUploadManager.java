@@ -137,14 +137,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
 
     private ResponseListener responseListener = new ResponseListener();
-    
+
     public HTTPUploadManager(HTTPAcceptor acceptor,
             UploadSlotManager slotManager) {
         this.acceptor = acceptor;
         this.slotManager = slotManager;
 
         FileUtils.addFileLocker(this);
-        
+
         if (acceptor != null) {
             acceptor.addResponseListener(responseListener);
         }
@@ -165,19 +165,21 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                         UploadType.UPDATE_FILE, "Update-File Request");
 
                 BasicHeaderProcessor processor = new BasicHeaderProcessor();
-                processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
+                processor.addInterceptor(new UserAgentHeaderInterceptor(
+                        uploader));
                 processor.process(request, context);
-                if (UserAgentHeaderInterceptor.isFreeloader(uploader.getUserAgent())) {
+                if (UserAgentHeaderInterceptor.isFreeloader(uploader
+                        .getUserAgent())) {
                     handleFreeLoader(request, response, context, uploader);
                 } else {
                     File file = new File(CommonUtils.getUserSettingsDir(),
-                    "update.xml");
+                            "update.xml");
                     uploader.setFile(file);
                     uploader.setState(Uploader.UPDATE_FILE);
 
                     // TODO set mime-type to Constants.QUERYREPLY_MIME_TYPE?
                     response.setEntity(new FileResponseEntity(uploader, file));
-                }                
+                }
                 addToGUI(uploader);
             }
         });
@@ -197,7 +199,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 UploadStat.FILE_NOT_FOUND.incrementStat();
-                
+
                 response.setReasonPhrase("Feature Not Active");
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
@@ -211,7 +213,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 UploadStat.MALFORMED_REQUEST.incrementStat();
-                
+
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             }
         });
@@ -270,8 +272,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         synchronized (this) {
             // Report how quickly we uploaded the data.
             if (uploader.getStartTime() > 0) {
-                reportUploadSpeed(finishTime - uploader.getStartTime(), uploader
-                        .getTotalAmountUploaded());
+                reportUploadSpeed(finishTime - uploader.getStartTime(),
+                        uploader.getTotalAmountUploaded());
             }
             removeFromList(uploader);
             forceAllowedUploads.remove(uploader);
@@ -324,7 +326,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (uploader.isVisible()) {
             return;
         }
-        
+
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
         UploadStat.ATTEMPTED.incrementStat();
@@ -334,7 +336,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // state
         RouterService.getCallback().addUpload(uploader);
         uploader.setVisible(true);
-        
+
         if (!uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null) {
@@ -801,7 +803,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     throw new RuntimeException(e);
                 }
             }
-            session = new UploadSession(getSlotManager(), host, HttpContextParams.getIOSession(context));
+            session = new UploadSession(getSlotManager(), host,
+                    HttpContextParams.getIOSession(context));
             context.setAttribute(SESSION_KEY, session);
         }
         return session;
@@ -813,13 +816,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return session;
     }
 
-    public HTTPUploader getOrCreateUploader(HttpRequest request, HttpContext context,
-            UploadType type, String filename) {
+    public HTTPUploader getOrCreateUploader(HttpRequest request,
+            HttpContext context, UploadType type, String filename) {
         UploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
         if (uploader != null) {
             if (!uploader.getFileName().equals(filename)
-                    || !uploader.getMethod().equals(request.getRequestLine().getMethod())) {
+                    || !uploader.getMethod().equals(
+                            request.getRequestLine().getMethod())) {
                 // start new file
                 slotManager.requestDone(session);
 
@@ -851,7 +855,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         String method = request.getRequestLine().getMethod();
         uploader.setMethod(method);
-        uploader.setUploadType("HEAD".equals(method) ? UploadType.HEAD_REQUEST : type);
+        uploader.setUploadType("HEAD".equals(method) ? UploadType.HEAD_REQUEST
+                : type);
         session.setUploader(uploader);
         return uploader;
     }
@@ -867,7 +872,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             HttpResponse response) {
         UploadSession session = getSession(context);
         assert !session.isAccepted();
-        
+
         if (shouldBypassQueue(request, session.getUploader())) {
             session.setQueueStatus(QueueStatus.BYPASS);
         } else if (HttpContextParams.isLocal(context)) {
@@ -884,14 +889,15 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     /** For testing. */
     public void cleanup() {
-        for (HTTPUploader uploader : _activeUploadList.toArray(new HTTPUploader[0])) {
+        for (HTTPUploader uploader : _activeUploadList
+                .toArray(new HTTPUploader[0])) {
             slotManager.cancelRequest(uploader.getSession());
             removeFromList(uploader);
         }
     }
 
     private class ResponseListener implements HttpResponseListener {
-        
+
         public void connectionOpened(NHttpServerConnection conn) {
         }
 
@@ -902,35 +908,43 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 if (uploader != null) {
                     if (LOG.isDebugEnabled())
                         LOG.debug("Closing session for " + session.getHost());
-                    
+
                     boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                     slotManager.cancelRequest(session);
-                    if (stillInQueue)
+                    if (stillInQueue) {
+                        assert uploader.getState() == Uploader.QUEUED;
                         uploader.setState(Uploader.INTERRUPTED);
-                    else
+                    } else if (uploader.getState() != Uploader.COMPLETE) {
+                        // the complete state may have been set by
+                        // responseSent() already
                         uploader.setState(Uploader.COMPLETE);
+                    }
                     cleanupFinishedUploader(uploader);
                     session.setUploader(null);
                 }
             }
         }
-        
-        public void responseSent(NHttpServerConnection conn, HttpResponse response) {
+
+        public void responseSent(NHttpServerConnection conn,
+                HttpResponse response) {
             UploadSession session = getSession(conn.getContext());
             if (session != null) {
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null) {
                     uploader.setState(Uploader.COMPLETE);
                 }
-                
+
                 if (session.getQueueStatus() != QueueStatus.QUEUED) {
-                    session.getIOSession().setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
+                    session.getIOSession().setSocketTimeout(
+                            SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
+                                    .getValue());
                 } else {
-                    session.getIOSession().setSocketTimeout(UploadSession.MAX_POLL_TIME);
+                    session.getIOSession().setSocketTimeout(
+                            UploadSession.MAX_POLL_TIME);
                 }
             }
-        }       
+        }
 
     }
-    
+
 }

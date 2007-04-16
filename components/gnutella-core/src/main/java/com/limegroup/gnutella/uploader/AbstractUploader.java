@@ -91,11 +91,7 @@ public abstract class AbstractUploader implements Uploader {
     public AbstractUploader(String fileName, UploadSession session) {
         this.session = session;
         this.filename = fileName;
-
-        // XXX it is really bad to call this public method from the constructor
-        reinitialize();
-
-        firstReply = true;
+        this.firstReply = true;
     }
 
     /**
@@ -105,8 +101,8 @@ public abstract class AbstractUploader implements Uploader {
      * @param params the parameter list to change to.
      */
     public void reinitialize() {
-        state = CONNECTING;
-        nodePort = 0;
+        setState(CONNECTING);
+        nodePort = -1;
         totalAmountUploadedBefore = 0;
         if (!ignoreTotalAmountUploaded) {
             totalAmountUploaded += amountUploaded;
@@ -132,7 +128,8 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public void setState(int state) {
-        this.lastTransferState = state;
+        assert this.state != state;
+        this.lastTransferState = this.state;
         this.state = state;
     }
 

@@ -114,7 +114,6 @@ public class FileRequestHandler implements HttpRequestHandler {
                 context, type, fd.getFileName());
         uploader.setFileDesc(fd);
         uploader.setIndex(fileRequest.index);
-        uploader.setState(Uploader.CONNECTING);
 
         if (fileRequest.isThexRequest()) {
             // XXX reset range to size of THEX tree
