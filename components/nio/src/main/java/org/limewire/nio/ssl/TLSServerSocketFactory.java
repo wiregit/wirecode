@@ -10,6 +10,11 @@ import org.limewire.nio.observer.AcceptObserver;
 public class TLSServerSocketFactory extends NBServerSocketFactory {
 
     @Override
+    public TLSNIOServerSocket createServerSocket() throws IOException {
+        return new TLSNIOServerSocket();
+    }
+
+    @Override
     public TLSNIOServerSocket createServerSocket(AcceptObserver observer)
             throws IOException {
         return new TLSNIOServerSocket(observer);

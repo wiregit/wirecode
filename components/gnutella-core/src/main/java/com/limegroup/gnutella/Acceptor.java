@@ -752,7 +752,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
          * @throws IOException if there was an error starting TLS
          */
         private void startTLS() throws IOException {
-            if(!SSLUtils.isTLSEnabled(client) && SSLUtils.isTLSCapable(client)) {
+            if(!SSLUtils.isTLSEnabled(client) && SSLUtils.isStartTLSCapable(client)) {
                 LOG.debug("Attempting to start TLS");
                 buffer.flip();
                 AbstractNBSocket socket = SSLUtils.startTLS(client, buffer);

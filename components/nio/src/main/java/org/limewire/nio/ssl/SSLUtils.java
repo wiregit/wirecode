@@ -48,13 +48,13 @@ public class SSLUtils {
         return TLS_CONTEXT.get();
     }
     
-    /** Returns true is the given socket is already TLS-enabled. */
+    /** Returns true is the given socket is already using TLS. */
     public static boolean isTLSEnabled(Socket socket) {
         return socket instanceof TLSNIOSocket;
     }
     
     /** Returns true if we are capable of performing a startTLS operation on this socket. */
-    public static boolean isTLSCapable(Socket socket) {
+    public static boolean isStartTLSCapable(Socket socket) {
         return socket instanceof AbstractNBSocket;
     }
     
@@ -86,7 +86,11 @@ public class SSLUtils {
         }
     }
     
-    /** Returns a tracker for the given socket. */
+    /**
+     * Returns a tracker for the given socket.
+     * If no SSL exchanges are performed on the socket, the returned
+     * tracker will always report 0 bytes produced and consumed.
+     */
     public static SSLBandwidthTracker getSSLBandwidthTracker(Socket socket) {
         if(socket instanceof TLSNIOSocket) {
            return new SSLChannelTracker(((TLSNIOSocket)socket).getSSLChannel());
