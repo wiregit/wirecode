@@ -201,7 +201,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         }
 
-        if (uploader.getSession().isAccepted()) {
+        if (uploader.getSession().canUpload()) {
             handleAccept(context, request, response, uploader, fd);
         }
     }

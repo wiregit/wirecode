@@ -866,7 +866,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public QueueStatus enqueue(HttpContext context, HttpRequest request,
             HttpResponse response) {
         UploadSession session = getSession(context);
-
+        assert !session.isAccepted();
+        
         if (shouldBypassQueue(request, session.getUploader())) {
             session.setQueueStatus(QueueStatus.BYPASS);
         } else if (HttpContextParams.isLocal(context)) {

@@ -90,6 +90,10 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         updatePollTime(status);
     }
 
+    public boolean canUpload() {
+        return queueStatus == QueueStatus.ACCEPTED || queueStatus == QueueStatus.BYPASS;
+    }
+
     public boolean isAccepted() {
         return queueStatus == QueueStatus.ACCEPTED;
     }
