@@ -453,22 +453,22 @@ public class ManagedDownloader extends AbstractDownloader
      * Influenced by the type of downloader & whether or not it was started
      * from disk or from scratch.
      */
-    private int numGnutellaQueries;
+    private volatile int numGnutellaQueries;
     
     /**
      * The number of DHT queries already done for this downloader.
      */
-    private int numDHTQueries;
+    private volatile int numDHTQueries;
     
     /**
      * Flag for whether or not this is the first query attempt
      */
-    private boolean firstQueryAttempt = true;
+    private volatile boolean firstQueryAttempt = true;
     
     /**
      * Flag for whether or not we've already tried to query Gnutella
      */
-    private boolean alreadyTriedGnutella = false;
+    private volatile boolean alreadyTriedGnutella = false;
     
     /**
      * Whether or not we've sent a GUESS query.
@@ -951,7 +951,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Sends a DHT Query
      */
     private boolean sendDHTQuery() {
-        if (manager.sendDHTQuery(this)) {
+        if (manager.sendDHTQuery(getSHA1Urn())) {
             lastQuerySent = System.currentTimeMillis();
             numDHTQueries++;
             setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);

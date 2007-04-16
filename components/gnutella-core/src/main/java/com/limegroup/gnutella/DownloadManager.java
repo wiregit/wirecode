@@ -1140,15 +1140,14 @@ public class DownloadManager implements BandwidthTracker {
      * Attempts to send a DHT requery to provide the given downloader with 
      * more sources to download.
      */
-    public synchronized boolean sendDHTQuery(ManagedDownloader requerier) {
+    public synchronized boolean sendDHTQuery(URN urn) {
         long elapsed = System.currentTimeMillis() - lastDHTRequeryTime;
         if (elapsed < DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()) {
             return false;
         }
         
-        URN sha1 = requerier.getSHA1Urn();
         AltLocFinder finder = RouterService.getAltLocFinder();
-        if (finder.findAltLocs(sha1)) {
+        if (finder.findAltLocs(urn)) {
             lastDHTRequeryTime = System.currentTimeMillis();
             return true;
         }
