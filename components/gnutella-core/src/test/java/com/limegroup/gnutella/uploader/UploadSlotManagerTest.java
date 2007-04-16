@@ -2,7 +2,7 @@ package com.limegroup.gnutella.uploader;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -259,8 +259,40 @@ public class UploadSlotManagerTest extends LimeTestCase {
 		assertEquals(lowListener.length - SLOTS, manager.getNumQueuedResumable());
 	}
 	
-	private static class UploadSlotUserAdapter implements UploadSlotUser {
-		
+	public void testMeasureBandwidth() throws Exception {
+	    UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
+	    UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+	    UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+
+        // add two high listeners, all low listeners should get queued
+	    UploadSlotUserAdapter user1 = new UploadSlotUserAdapter(100);
+        assertEquals(0, manager.pollForSlot(user1, false, false));
+        for (int i = 0; i < 40; i++) {
+            manager.measureBandwidth();
+            Thread.sleep(90);
+        }
+        float bw = manager.getMeasuredBandwidth();
+        assertGreaterThan(0.9f, bw);	    
+        assertLessThan(1.1f, bw);
+        bw = manager.getAverageBandwidth();
+        assertGreaterThan(0.9f, bw);        
+        assertLessThan(1.1f, bw);
+	}
+	
+	
+	private static class UploadSlotUserAdapter extends BandwidthTrackerImpl implements UploadSlotUser {
+
+	    private int bandwidth;
+	    
+	    private int transfered;
+	    
+        public UploadSlotUserAdapter(int bandwidth) {
+	        this.bandwidth = bandwidth;
+	    }
+
+	    public UploadSlotUserAdapter() {
+	    }
+	    
 		boolean releaseSlot;
 		public String getHost() {
 			return null;
@@ -269,16 +301,12 @@ public class UploadSlotManagerTest extends LimeTestCase {
 		public void releaseSlot() {
 			releaseSlot = true;
 		}
+
+        public void measureBandwidth() {
+            transfered += bandwidth;
+            measureBandwidth(transfered);
+        }
 		
-		public float getAverageBandwidth() {
-			return 0;
-		}
-		
-		public float getMeasuredBandwidth() throws InsufficientDataException {
-			return 0;
-		}
-		
-		public void measureBandwidth() {}
 	}
 	
 	private static class UploadSlotListenerAdapter 
