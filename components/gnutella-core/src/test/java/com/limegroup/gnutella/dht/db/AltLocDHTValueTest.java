@@ -49,7 +49,7 @@ public class AltLocDHTValueTest extends DHTTestCase {
         // Get the raw bytes
         byte[] serialized = baos.toByteArray();
         
-        // Serialize it
+        // De-serialize it
         AltLocDHTValue value2 = null;
         try {
             value2 = (AltLocDHTValue)AltLocDHTValueImpl

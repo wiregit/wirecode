@@ -10,7 +10,6 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
@@ -66,7 +65,7 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         // Get the raw bytes
         byte[] serialized = baos.toByteArray();
         
-        // Serialize it
+        // De-serialize it
         PushProxiesDHTValue value2 = null;
         try {
             value2 = (PushProxiesDHTValue)PushProxiesDHTValueImpl
@@ -84,31 +83,5 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
                 value2.getPushProxies().iterator().next().getInetAddress());
         assertEquals(value1.getPushProxies().iterator().next().getPort(), 
                 value2.getPushProxies().iterator().next().getPort());
-        
-        // Screw around the with raw data
-        serialized[0] = (byte)~serialized[0]; // change the futures
-        serialized[4] = (byte)~serialized[4]; // change the fwtVersion
-        serialized[9] = (byte)~serialized[9]; // change the lower byte of the port
-        
-        PushProxiesDHTValue value3 = null;
-        try {
-            value3 = (PushProxiesDHTValue)PushProxiesDHTValueImpl
-                        .createFromData(Version.ZERO, serialized);
-        } catch (DHTValueException err) {
-            fail("DHTValueException", err);
-        }
-        
-        // And nothing should match
-        assertNotEquals(value1.getFeatures(), value3.getFeatures());
-        assertNotEquals(value1.getFwtVersion(), value3.getFwtVersion());
-        assertNotEquals(value1.getPort(), value3.getPort());
-        
-        // And this should fail!
-        serialized[10] = 2; // 2 proxies
-        try {
-            DHTValue value = PushProxiesDHTValueImpl.createFromData(Version.ZERO, serialized);
-            fail("Should have failed: " + value);
-        } catch (DHTValueException expected) {
-        }
     }
 }
