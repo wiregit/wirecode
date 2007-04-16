@@ -1,21 +1,19 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.GGEP;
 
 /**
  * An implementation of AltLocDHTValue
@@ -29,6 +27,12 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
      */
     public static final DHTValue SELF = new AltLocForSelf();
     
+    private static final String CLIENT_ID = "client-id";
+    
+    private static final String PORT = "port";
+    
+    private static final String FIREWALLED = "firewalled";
+    
     private final Version version;
     
     private final byte[] guid;
@@ -36,6 +40,8 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     private final int port;
     
     private final boolean firewalled;
+    
+    private final byte[] data;
     
     /**
      * Creates an AltLocDHTValue from the given data
@@ -46,21 +52,14 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
     
     /**
-     * Constructor to create an AltLocDHTValue for the localhost
-     */
-    private AltLocDHTValueImpl() {
-        this(VERSION, null, -1, true);
-    }
-    
-    /**
      * Constructor for testing purposes
      */
-    AltLocDHTValueImpl(Version version, byte[] guid, 
-            int port, boolean firewalled) {
+    AltLocDHTValueImpl(Version version, byte[] guid, int port, boolean firewalled) {
         this.version = version;
         this.guid = guid;
         this.port = port;
         this.firewalled = firewalled;
+        this.data = serialize(this);
     }
     
     /**
@@ -76,22 +75,54 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         }
         
         this.version = version;
+        this.data = data;
         
-        DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
         try {
-            this.guid = new byte[16];
-            in.readFully(guid);
-            this.port = in.readUnsignedShort();
-            this.firewalled = in.readBoolean();
-        } catch (IOException err) {
+            GGEP ggep = new GGEP(data, 0);
+            this.guid = ggep.get(CLIENT_ID);
+            
+            if (guid == null) {
+                throw new DHTValueException("No such element: " + PORT);
+            }
+            
+            if (guid.length != 16) {
+                throw new DHTValueException("Illegal GUID length: " + guid.length);
+            }
+            
+            this.port = getPortFromGGEP(ggep);
+            
+            byte[] firewalled = ggep.get(FIREWALLED);
+            if (firewalled == null) {
+                throw new DHTValueException("No such element: " + FIREWALLED);
+            }
+            
+            if (firewalled.length != 1) {
+                throw new DHTValueException("Illegal Firewalled length: " + firewalled.length);
+            }
+            
+            this.firewalled = (firewalled[0] != 0);
+            
+        } catch (BadGGEPBlockException err) {
             throw new DHTValueException(err);
-        } finally {
-            IOUtils.close(in);
+        }
+    }
+    
+    private static int getPortFromGGEP(GGEP ggep) throws DHTValueException {
+        byte[] portBytes = ggep.get(PORT);
+        if (portBytes == null) {
+            throw new DHTValueException("No such element: " + PORT);
         }
         
+        if (portBytes.length != 2) {
+            throw new DHTValueException("Illegal number of bytes for Port: " + portBytes.length);
+        }
+        
+        int port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
         if (!NetworkUtils.isValidPort(port)) {
             throw new DHTValueException("Illegal port: " + port);
         }
+        
+        return port;
     }
     
     public int getPort() {
@@ -107,11 +138,13 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
     
     public byte[] getValue() {
-        return value();
+        byte[] copy = new byte[data.length];
+        System.arraycopy(data, 0, copy, 0, data.length);
+        return copy;
     }
 
     public void write(OutputStream out) throws IOException {
-        out.write(getValue());
+        out.write(data);
     }
 
     public DHTValueType getValueType() {
@@ -143,45 +176,60 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         return buffer.toString();
     }
     
-    private byte[] value() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(baos);
-        try {
-            out.write(getGUID());
-            out.writeShort(getPort());
-            out.writeBoolean(isFirewalled());
-        } catch (IOException err) {
-            // Impossible
-            throw new RuntimeException(err);
-        } finally {
-            IOUtils.close(out);
-        }
-        return baos.toByteArray();
+    static byte[] serialize(AltLocDHTValue value) {
+        GGEP ggep = new GGEP();
+        
+        ggep.put(CLIENT_ID, value.getGUID());
+        
+        byte[] port = new byte[2];
+        ByteOrder.short2beb((short)value.getPort(), port, 0);
+        ggep.put(PORT, port);
+        
+        byte[] firewalled = { (byte)(value.isFirewalled() ? 1 : 0) };
+        ggep.put(FIREWALLED, firewalled);
+        
+        return ggep.toByteArray();
     }
     
     /**
      * An AltLocDHTValue for the localhost
      */
-    private static class AltLocForSelf extends AltLocDHTValueImpl {
+    private static class AltLocForSelf implements AltLocDHTValue {
         
         private static final long serialVersionUID = 8101291047246461600L;
         
-        @Override
+        public byte[] getValue() {
+            return serialize(this);
+        }
+
+        public DHTValueType getValueType() {
+            return ALT_LOC;
+        }
+
+        public Version getVersion() {
+            return VERSION;
+        }
+
+        public boolean isEmpty() {
+            return false;
+        }
+
+        public void write(OutputStream out) throws IOException {
+            out.write(getValue());
+        }
+
         public int getPort() {
             return RouterService.getPort();
         }
         
-        @Override
         public byte[] getGUID() {
             return RouterService.getMyGUID();
         }
         
-        @Override
         public boolean isFirewalled() {
             return !RouterService.acceptedIncomingConnection();
         }
-
-        @Override
+        
         public boolean isAltLocForSelf() {
             return true;
         }
