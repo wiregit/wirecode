@@ -275,6 +275,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         // reset the poll interval to allow subsequent requests right away
         uploader.getSession().updatePollTime(QueueStatus.BYPASS);
         
+        // do not count THEX transfers towards the 
+        uploader.setIgnoreTotalAmountUploaded(true);
+        
         HashTree tree = fd.getHashTree();
         assert tree != null;
 

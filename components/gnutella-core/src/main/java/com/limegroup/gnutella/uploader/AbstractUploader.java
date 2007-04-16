@@ -40,6 +40,8 @@ public abstract class AbstractUploader implements Uploader {
     /** The number of bytes transfered for the current request. */
     private long amountUploaded;
 
+    private boolean ignoreTotalAmountUploaded;
+
     private long fileSize;
 
     private int index;
@@ -106,7 +108,10 @@ public abstract class AbstractUploader implements Uploader {
         state = CONNECTING;
         nodePort = 0;
         totalAmountUploadedBefore = 0;
-        totalAmountUploaded += amountUploaded;
+        if (!ignoreTotalAmountUploaded) {
+            totalAmountUploaded += amountUploaded;
+        }
+        ignoreTotalAmountUploaded = false;
         amountUploaded = 0;
         firstReply = false;
     }
@@ -119,12 +124,11 @@ public abstract class AbstractUploader implements Uploader {
      */
     public void setFileDesc(FileDesc fd) throws IOException {
         if (LOG.isDebugEnabled())
-            LOG.debug("trying to set the fd for uploader " + this + " with "
-                    + fd);
+            LOG.debug("Setting file description for " + this + ": " + fd);
         fileDesc = fd;
-        fileSize = fd.getFileSize();
         forcedShare = FileManager.isForcedShare(fd);
         priorityShare = FileManager.isApplicationSpecialShare(fd.getFile());
+        setFileSize(fd.getFileSize());
     }
 
     public void setState(int state) {
@@ -268,7 +272,9 @@ public abstract class AbstractUploader implements Uploader {
      * Implements the Uploader interface.
      */
     public long getTotalAmountUploaded() {
-        if (totalAmountUploadedBefore > 0)
+        if (ignoreTotalAmountUploaded)
+            return amountUploaded;
+        else if (totalAmountUploadedBefore > 0)
             return totalAmountUploadedBefore + amountUploaded;
         else
             return totalAmountUploaded + amountUploaded;
@@ -351,6 +357,14 @@ public abstract class AbstractUploader implements Uploader {
 
     public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public boolean getIgnoreTotalAmountUploaded() {
+        return ignoreTotalAmountUploaded;
+    }
+
+    public void setIgnoreTotalAmountUploaded(boolean ignoreTotalAmountUploaded) {
+        this.ignoreTotalAmountUploaded = ignoreTotalAmountUploaded;
     }
 
 }
