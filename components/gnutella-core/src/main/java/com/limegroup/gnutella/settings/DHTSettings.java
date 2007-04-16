@@ -166,6 +166,13 @@ public class DHTSettings extends LimeProps {
                 3L*60L*60L*1000L, "rare_file_time", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
     
     /**
+     * 
+     */
+    public static final IntSetting RARE_FILE_COMPLETED_UPLOADS
+        = FACTORY.createRemoteIntSetting("RARE_FILE_COMPLETED_UPLOADS", 
+                1, "rare_file_completed_uploads", 0, Integer.MAX_VALUE);
+    
+    /**
      * Whether or not AlternativeLocations should be published.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
