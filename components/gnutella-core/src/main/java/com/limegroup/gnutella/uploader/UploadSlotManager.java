@@ -266,7 +266,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	public synchronized void measureBandwidth() {
 		float bw = getTotalBandwidth();
 		sessionAverage = ((sessionAverage * numMeasures) + bw) / (++numMeasures);
-		bandwidth.add(getTotalBandwidth());
+		bandwidth.add(bw);
 	}
 	
 	public synchronized float getMeasuredBandwidth() throws InsufficientDataException {
