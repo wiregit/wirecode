@@ -4,6 +4,7 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,6 +120,10 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
  
         buffer.clear();
         int read = in.read(buffer.array(), 0, (int) Math.min(buffer.remaining(), remaining));
+        if (read == -1) {
+            throw new EOFException("Unexpected end of input stream");
+        }
+        
         remaining -= read;
         
         if (LOG.isTraceEnabled())

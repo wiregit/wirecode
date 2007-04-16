@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.11 $
- * $Date: 2007-04-13 16:41:07 $
+ * $Revision: 1.1.2.12 $
+ * $Date: 2007-04-16 16:09:58 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -230,7 +230,6 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         }
         
         // LW
-        System.out.println("connection closed");
         if (connectionListener != null) {
             connectionListener.connectionClosed(conn);
         }
@@ -338,12 +337,16 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
             
             if (encoder.isCompleted()) {
+                boolean notify = (connState.getOutputState() == ServerConnState.RESPONSE_BODY_STREAM);
+                
                 connState.setOutputState(ServerConnState.RESPONSE_BODY_DONE);
                 connState.resetOutput();
                 
                 // LW
-                // XXX part of the response may still be in the buffer
-                responseBodySent(conn, conn.getHttpResponse());
+                if (notify) {
+                    // XXX part of the response may still be in the buffer
+                    responseBodySent(conn, conn.getHttpResponse());
+                }
                 
                 if (!this.connStrategy.keepAlive(response, context)) {
                     conn.close();

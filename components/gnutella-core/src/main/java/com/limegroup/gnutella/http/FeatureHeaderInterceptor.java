@@ -92,7 +92,7 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             return false;
 
         try {
-            uploader.setTotalAmountReadBefore(Integer.parseInt(header.getValue()));
+            uploader.setTotalAmountUploadedBefore(Integer.parseInt(header.getValue()));
         } catch (NumberFormatException e) {
         }
 

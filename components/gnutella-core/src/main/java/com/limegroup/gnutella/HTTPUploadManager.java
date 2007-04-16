@@ -144,7 +144,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         this.slotManager = slotManager;
 
         FileUtils.addFileLocker(this);
-        acceptor.addResponseListener(responseListener);
+        
+        if (acceptor != null) {
+            acceptor.addResponseListener(responseListener);
+        }
 
         inititalizeHandlers();
     }
@@ -193,6 +196,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         HttpRequestHandler notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
+                UploadStat.FILE_NOT_FOUND.incrementStat();
+                
                 response.setReasonPhrase("Feature Not Active");
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
@@ -205,6 +210,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
+                UploadStat.MALFORMED_REQUEST.incrementStat();
+                
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             }
         });
@@ -213,6 +220,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
             HttpContext context, HTTPUploader uploader) throws HttpException,
             IOException {
+        UploadStat.FREELOADER.incrementStat();
+
         uploader.setState(Uploader.FREELOADER);
         freeLoaderRequestHandler.handle(request, response, context);
     }
@@ -250,9 +259,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * uploader from the GUI. (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
     public void cleanupFinishedUploader(HTTPUploader uploader) {
-        System.out.println("cleaning up finished.");
         if (LOG.isTraceEnabled())
-            LOG.trace(uploader + " cleaning up finished.");
+            LOG.trace("Cleaning uploader " + uploader);
 
         int state = uploader.getState();
         int lastState = uploader.getLastTransferState();
@@ -334,40 +342,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 RouterService.getCallback()
                         .handleSharedFileUpdate(fd.getFile());
             }
-        }
-    }
-
-    protected void updateStatistics(HTTPUploader uploader) throws IOException {
-        switch (uploader.getState()) {
-        case HTTPUploader.UNAVAILABLE_RANGE:
-            UploadStat.UNAVAILABLE_RANGE.incrementStat();
-            break;
-        case HTTPUploader.FILE_NOT_FOUND:
-            UploadStat.FILE_NOT_FOUND.incrementStat();
-            break;
-        case HTTPUploader.FREELOADER:
-            UploadStat.FREELOADER.incrementStat();
-            break;
-        case HTTPUploader.LIMIT_REACHED:
-            UploadStat.LIMIT_REACHED.incrementStat();
-            break;
-        case HTTPUploader.QUEUED:
-            UploadStat.QUEUED.incrementStat();
-            break;
-        case HTTPUploader.BANNED_GREEDY:
-            UploadStat.BANNED.incrementStat();
-            break;
-        case HTTPUploader.CONNECTING:
-            // uploader.setState(Uploader.UPLOADING);
-            UploadStat.UPLOADING.incrementStat();
-            break;
-        case HTTPUploader.THEX_REQUEST:
-            UploadStat.THEX.incrementStat();
-            break;
-        case HTTPUploader.COMPLETE:
-        case HTTPUploader.INTERRUPTED:
-            Assert.that(false, "invalid state in doSingleUpload");
-            break;
         }
     }
 
@@ -866,8 +840,12 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 cleanupFinishedUploader(uploader);
 
                 uploader = new HTTPUploader(filename, session);
+            } else {
+                // reuse existing uploader object
+                uploader.reinitialize();
             }
         } else {
+            // first request for this session
             uploader = new HTTPUploader(filename, session);
         }
 
@@ -942,7 +920,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null) {
                     uploader.setState(Uploader.COMPLETE);
-                    //cleanupFinishedUploader(uploader);
                 }
                 
                 if (session.getQueueStatus() != QueueStatus.QUEUED) {

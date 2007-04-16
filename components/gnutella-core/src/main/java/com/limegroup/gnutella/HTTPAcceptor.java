@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
@@ -20,6 +23,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
@@ -31,6 +35,8 @@ import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.ServerConnectionEventListener;
 
+import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -87,6 +93,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new LimeResponseConnControl());
+        processor.addInterceptor(new HeaderStatisticTracker());
 
         responseFactory = new DefaultHttpResponseFactory();
 
@@ -110,6 +117,11 @@ public class HTTPAcceptor implements ConnectionAcceptor {
      * Incoming HTTP requests.
      */
     public void acceptConnection(String word, Socket socket) {
+        if ("GET".equals(word))
+            HTTPStat.GET_REQUESTS.incrementStat();
+        else if ("HEAD".equals(word))
+            HTTPStat.HEAD_REQUESTS.incrementStat();
+
         reactor.acceptConnection(word, socket);
     }
 
@@ -211,4 +223,22 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
     }
 
+    /**
+     * 
+     * XXX iterating over all headers is rather inefficient since the size
+     * of the headers is known in DefaultNHttpServerConnection.submitResponse() 
+     * but can't be easily made accessible  
+     */
+    private class HeaderStatisticTracker implements HttpResponseInterceptor {
+
+        public void process(HttpResponse response, HttpContext context)
+                throws HttpException, IOException {
+            for (Iterator it = response.headerIterator(); it.hasNext(); ) {
+                Header header = (Header) it.next();
+                BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.getName().length() + 2 + header.getValue().length());
+            }
+        }
+
+    }
+    
 }

@@ -28,8 +28,16 @@ public abstract class AbstractUploader implements Uploader {
 
     private final UploadSession session;
 
+    /** The number of bytes that were transferred in previous sessions. */
     private long totalAmountUploadedBefore;
 
+    /**
+     * The number of bytes transfered by all requests represented by this
+     * Uploader.
+     */
+    private long totalAmountUploaded;
+
+    /** The number of bytes transfered for the current request. */
     private long amountUploaded;
 
     private long fileSize;
@@ -40,11 +48,11 @@ public abstract class AbstractUploader implements Uploader {
 
     private final String filename;
 
-    private int _stateNum = CONNECTING;
+    private int state = CONNECTING;
 
-    private int _lastTransferStateNum;
+    private int lastTransferState;
 
-    private boolean _firstReply = true;
+    private boolean firstReply;
 
     private boolean chatEnabled;
 
@@ -53,7 +61,7 @@ public abstract class AbstractUploader implements Uploader {
     /**
      * True if this is a forcibly shared network file.
      */
-    private boolean isForcedShare = false;
+    private boolean forcedShare = false;
 
     /**
      * True if this is an uploader with high priority.
@@ -76,13 +84,16 @@ public abstract class AbstractUploader implements Uploader {
     private int nodePort = -1;
 
     /** The upload type of this uploader. */
-    private UploadType _uploadType;
+    private UploadType uploadType;
 
     public AbstractUploader(String fileName, UploadSession session) {
         this.session = session;
         this.filename = fileName;
 
+        // XXX it is really bad to call this public method from the constructor
         reinitialize();
+
+        firstReply = true;
     }
 
     /**
@@ -92,10 +103,12 @@ public abstract class AbstractUploader implements Uploader {
      * @param params the parameter list to change to.
      */
     public void reinitialize() {
-        _stateNum = CONNECTING;
+        state = CONNECTING;
         nodePort = 0;
         totalAmountUploadedBefore = 0;
+        totalAmountUploaded += amountUploaded;
         amountUploaded = 0;
+        firstReply = false;
     }
 
     /**
@@ -110,22 +123,20 @@ public abstract class AbstractUploader implements Uploader {
                     + fd);
         fileDesc = fd;
         fileSize = fd.getFileSize();
-
-        isForcedShare = FileManager.isForcedShare(fileDesc);
-        priorityShare = FileManager.isApplicationSpecialShare(fileDesc
-                .getFile());
+        forcedShare = FileManager.isForcedShare(fd);
+        priorityShare = FileManager.isApplicationSpecialShare(fd.getFile());
     }
 
     public void setState(int state) {
-        _lastTransferStateNum = _stateNum;
-        _stateNum = state;
+        this.lastTransferState = state;
+        this.state = state;
     }
 
     /**
      * Returns the queued position if queued.
      */
     public int getQueuePosition() {
-        if (_lastTransferStateNum != QUEUED || _stateNum == INTERRUPTED)
+        if (lastTransferState != QUEUED || state == INTERRUPTED)
             return -1;
         else
             return session.positionInQueue();
@@ -138,15 +149,18 @@ public abstract class AbstractUploader implements Uploader {
      * @param amount the number of bytes that have been uploaded
      */
     void setAmountUploaded(long amount) {
-        int newData = (int) (amount - amountUploaded);
-        if (newData > 0) {
+        addAmountUploaded((int) (amount - amountUploaded));
+    }
+
+    public void addAmountUploaded(int written) {
+        if (written > 0) {
             if (isForcedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
-                        .addData(newData);
+                        .addData(written);
             else
-                BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+                BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(written);
         }
-        amountUploaded = amount;
+        amountUploaded += written;
     }
 
     /**
@@ -157,7 +171,7 @@ public abstract class AbstractUploader implements Uploader {
      *         <tt>false</tt> otherwise
      */
     public boolean isInactive() {
-        switch (_stateNum) {
+        switch (state) {
         case COMPLETE:
         case INTERRUPTED:
             return true;
@@ -168,10 +182,7 @@ public abstract class AbstractUploader implements Uploader {
 
     // implements the Uploader interface
     public long getFileSize() {
-        if (_stateNum == THEX_REQUEST)
-            return fileDesc.getHashTree().getOutputLength();
-        else
-            return fileSize;
+        return fileSize;
     }
 
     // implements the Uploader interface
@@ -186,12 +197,12 @@ public abstract class AbstractUploader implements Uploader {
 
     // implements the Uploader interface
     public int getState() {
-        return _stateNum;
+        return state;
     }
 
     // implements the Uploader interface
     public int getLastTransferState() {
-        return _lastTransferStateNum;
+        return lastTransferState;
     }
 
     // implements the Uploader interface
@@ -219,7 +230,7 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public boolean isForcedShare() {
-        return isForcedShare;
+        return forcedShare;
     }
 
     // uploader with high priority?
@@ -228,7 +239,7 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     protected boolean isFirstReply() {
-        return _firstReply;
+        return firstReply;
     }
 
     public InetAddress getNodeAddress() {
@@ -250,10 +261,6 @@ public abstract class AbstractUploader implements Uploader {
         return amountUploaded;
     }
 
-    public void addAmountUploaded(int written) {
-        amountUploaded += written;
-    }
-
     /**
      * The total amount of bytes that this upload and all previous uploaders
      * have transferred on this socket in this file-exchange.
@@ -261,7 +268,10 @@ public abstract class AbstractUploader implements Uploader {
      * Implements the Uploader interface.
      */
     public long getTotalAmountUploaded() {
-        return totalAmountUploadedBefore + amountUploaded;
+        if (totalAmountUploadedBefore > 0)
+            return totalAmountUploadedBefore + amountUploaded;
+        else
+            return totalAmountUploaded + amountUploaded;
     }
 
     /**
@@ -277,7 +287,8 @@ public abstract class AbstractUploader implements Uploader {
 
     public void measureBandwidth() {
         // FIXME type conversion
-        session.measureBandwidth((int) getTotalAmountUploaded());
+        int written = (int) (totalAmountUploaded + amountUploaded);
+        session.measureBandwidth(written);
     }
 
     public float getMeasuredBandwidth() throws InsufficientDataException {
@@ -293,33 +304,33 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public UploadType getUploadType() {
-        return _uploadType;
+        return uploadType;
     }
 
     public void setUploadType(UploadType type) {
-        _uploadType = type;
+        uploadType = type;
     }
 
     public void setBrowseEnabled(boolean browseEnabled) {
         this.browseEnabled = browseEnabled;
     }
-    
+
     public void setChatEnabled(boolean chatEnabled) {
         this.chatEnabled = chatEnabled;
     }
-    
+
     public void setNodeAddress(InetAddress nodeAddress) {
         this.nodeAddress = nodeAddress;
     }
-    
+
     public void setNodePort(int nodePort) {
         this.nodePort = nodePort;
     }
-    
-    public void setTotalAmountReadBefore(int totalAmountReadBefore) {
+
+    public void setTotalAmountUploadedBefore(int totalAmountReadBefore) {
         this.totalAmountUploadedBefore = totalAmountReadBefore;
     }
-    
+
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
@@ -327,19 +338,13 @@ public abstract class AbstractUploader implements Uploader {
     public void setIndex(int index) {
         this.index = index;
     }
-    
-    // overrides Object.toString
-    public String toString() {
-        return "<" + getHost() + ":" + index + ">";
-        // return "HTTPUploader:\r\n"+
-        // "File Name: "+_fileName+"\r\n"+
-        // "Host Name: "+_hostName+"\r\n"+
-        // "Port: "+_port+"\r\n"+
-        // "File Size: "+_fileSize+"\r\n"+
-        // "State: "+_state;
 
+    public String toString() {
+        return getClass().getName() + "[host=" + getHost() + ",index=" + index
+                + ",filename=" + filename + ",state=" + state
+                + ",lastTransferState=" + lastTransferState + "]";
     }
-    
+
     public UploadSession getSession() {
         return session;
     }
@@ -347,5 +352,5 @@ public abstract class AbstractUploader implements Uploader {
     public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
-    
+
 }

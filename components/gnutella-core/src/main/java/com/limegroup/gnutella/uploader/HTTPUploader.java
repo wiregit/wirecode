@@ -43,6 +43,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         super.reinitialize();
 
         requestedURN = null;
+        uploadBegin = 0;
+        uploadEnd = 0;
+        containedRangeRequest = false;
+        method = null;
     }
 
     @Override

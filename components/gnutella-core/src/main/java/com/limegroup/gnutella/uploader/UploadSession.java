@@ -86,13 +86,8 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
     }
     
     public void setQueueStatus(QueueStatus status) {
-        this.queueStatus  = status;
-        
-        if (status == QueueStatus.ACCEPTED || status == QueueStatus.BYPASS) {
-            lastPollTime = 0;
-        } else if (status == QueueStatus.QUEUED) {
-            lastPollTime = System.currentTimeMillis();
-        }
+        this.queueStatus = status;
+        updatePollTime(status);
     }
 
     public boolean isAccepted() {
@@ -103,6 +98,14 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         return queueStatus == QueueStatus.QUEUED;
     }
 
+    public void updatePollTime(QueueStatus status) {
+        if (status == QueueStatus.ACCEPTED || status == QueueStatus.BYPASS) {
+            lastPollTime = 0;
+        } else if (status == QueueStatus.QUEUED) {
+            lastPollTime = System.currentTimeMillis();
+        }        
+    }
+    
     public HttpIOSession getIOSession() {
         return ioSession;
     }
@@ -111,5 +114,5 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
     public String toString() {
         return getClass().getName() + "[host=" + getHost() + ",queueStatus=" + queueStatus + "]";
     }
-    
+
 }
