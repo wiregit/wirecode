@@ -166,7 +166,8 @@ public class DHTSettings extends LimeProps {
                 3L*60L*60L*1000L, "rare_file_time", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
     
     /**
-     * 
+     * The number of times a file must have been uploaded before it's considered 
+     * rare. This make sure we don't upload every file.
      */
     public static final IntSetting RARE_FILE_COMPLETED_UPLOADS
         = FACTORY.createRemoteIntSetting("RARE_FILE_COMPLETED_UPLOADS", 
