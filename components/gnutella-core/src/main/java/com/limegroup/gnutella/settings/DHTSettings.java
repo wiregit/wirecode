@@ -20,10 +20,10 @@ public class DHTSettings extends LimeProps {
      * Setting for wether or not the DHT should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    // Was DHTSettings.DisableDHT
+    // Was DHTSettings.DisableDHT // 4.13.1 & 4.13.2
     public static final BooleanSetting DISABLE_DHT_NETWORK 
         = FACTORY.createRemoteBooleanSetting("DISABLE_DHT_NETWORK", 
-                true, "disable_dht_network");
+                true, "DHT.DisableNetwork");
     
     /**
      * Setting for wether or not the DHT should be active at all.
@@ -35,45 +35,46 @@ public class DHTSettings extends LimeProps {
      * Setting to force DHT capability
      * WARNING: FOR TESTING ONLY -- DO NOT CHANGE
      */
-    // Was DHTSettings.ForceDHTConnect
+    // Was DHT.ForceDHTConnect
     public static final BooleanSetting FORCE_DHT_CONNECT 
         = FACTORY.createRemoteBooleanSetting("FORCE_DHT_CONNECT", 
-                false, "force_dht_connect");
+                false, "DHT.ForceConnect");
     
     /**
      * A settable list of bootstrap hosts in the host:port format
      */
     public static final StringArraySetting DHT_BOOTSTRAP_HOSTS 
         = FACTORY.createRemoteStringArraySetting("DHT_BOOTSTRAP_HOSTS", 
-                new String[0], "dht_bootstrap_hosts");
+                new String[0], "DHT.BootstrapHosts");
 
     /**
+     * Version of serialized RouteTable
      * 
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final IntSetting ROUTETABLE_VERSION
         = FACTORY.createRemoteIntSetting("ROUTETABLE_VERSION", 
-                0, "routetable_version", 0, Integer.MAX_VALUE);
+                0, "DHT.RouteTableVersion", 0, Integer.MAX_VALUE);
 
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
      * as an ACTIVE node.
      * WARNING: DO NOT MANUALLY CHANGE THIS 
      */
-    // Was DHTSettings.MinDHTAvgUptime
+    // Was DHT.MinDHTAvgUptime
     public static final LongSetting MIN_ACTIVE_DHT_AVERAGE_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "min_active_dht_average_uptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinActiveAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
      * as an ACTIVE node.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    // Was DHTSettings.MinDHTInitialUptime
+    // Was DHT.MinDHTInitialUptime
     public static final LongSetting MIN_ACTIVE_DHT_INITIAL_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "min_active_dht_initial_uptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinActiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
@@ -82,7 +83,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "min_passive_leaf_dht_average_uptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinPassiveLeafAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
@@ -91,7 +92,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "min_passive_leaf_dht_initial_uptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinPassiveLeafInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
      * Setting for whether or not an ultrapeer can join the DHT in active mode.
@@ -104,10 +105,10 @@ public class DHTSettings extends LimeProps {
      * Setting for the probability to switch from DHT node to Ultrapeer node
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    // Was DHTSettings.DHTToUltrapeerProbability
-    public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY 
-        = FACTORY.createRemoteFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 
-                0.5F, "dht_to_ultrapeer_probability", 0F, 1F);
+    // Was DHT.DHTToUltrapeerProbability
+    public static final FloatSetting SWITCH_TO_ULTRAPEER_PROBABILITY 
+        = FACTORY.createRemoteFloatSetting("SWITCH_TO_ULTRAPEER_PROBABILITY", 
+                0.5F, "DHT.SwitchToUltrapeerProbability", 0F, 1F);
     
     /**
      * Setting for whether or not the DHT should be persisted on disk
@@ -120,50 +121,51 @@ public class DHTSettings extends LimeProps {
      * (used for initial bootstrapping)
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    // Was DHTSettings.DHTAcceptProbability
+    // Was DHT.DHTAcceptProbability
     public static final FloatSetting DHT_ACCEPT_PROBABILITY 
         = FACTORY.createRemoteFloatSetting("DHT_ACCEPT_PROBABILITY", 
-                1F, "dht_accept_probability", 0F, 1F);
+                1F, "DHT.AcceptProbability", 0F, 1F);
     
     /**
      * Setting for the delay between DHT node fetcher runs
      */
-    // Was DHTSettings.DHTNodeFetcherTime
+    // Was DHT.DHTNodeFetcherTime
     //30 minutes for now
     public static final LongSetting DHT_NODE_FETCHER_TIME 
         = FACTORY.createRemoteLongSetting("DHT_NODE_FETCHER_TIME", 
-                30L*60L*1000L, "dht_node_fetcher_time", 60L*1000L, 60L*60L*1000L); 
+                30L*60L*1000L, "DHT.NodeFetcherTime", 60L*1000L, 60L*60L*1000L); 
     
     /**
      * The maximum amount of time for which we will ping the network for DHT nodes
      */
-    // Was DHTSettings.MaxNodeFetcherTime
+    // Was DHT.MaxNodeFetcherTime
     public static final LongSetting MAX_DHT_NODE_FETCHER_TIME 
         = FACTORY.createRemoteLongSetting("MAX_DHT_NODE_FETCHER_TIME", 30L*1000L, 
-                "max_dht_node_fetcher_time", 0L, 5L*60L*1000L);
+                "DHT.MaxNodeFetcherTime", 0L, 5L*60L*1000L);
     
     /**
      * Setting for the delay between DHT random node adder runs
      */
-    // Was DHTSettings.DHTNodeAdderDelay
+    // Was DHT.DHTNodeAdderDelay
     // 30 Minutes for now
     public static final LongSetting DHT_NODE_ADDER_DELAY
         = FACTORY.createRemoteLongSetting("DHT_NODE_ADDER_DELAY", 
-                30L*60L*1000L, "dht_node_adder_delay", 30L*1000L, 24L*60L*60L*1000L);
+                30L*60L*1000L, "DHT.NodeAdderDelay", 30L*1000L, 24L*60L*60L*1000L);
     
     /**
      * Setting for the number of persisted DHT nodes if this node is a passive DHT node
      * (it will not persist the entire RT)
      */
     public static final IntSetting MAX_PERSISTED_NODES 
-        = FACTORY.createIntSetting("MAX_PERSISTED_NODES", 40);
+        = FACTORY.createRemoteIntSetting("MAX_PERSISTED_NODES", 
+                40, "DHT.MaxPersistNodes", 0, 1024);
     
     /**
      * Setting for the time at which point a file is considered rare
      */
     public static final LongSetting RARE_FILE_TIME
         = FACTORY.createRemoteLongSetting("RARE_FILE_TIME", 
-                3L*60L*60L*1000L, "rare_file_time", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
+                3L*60L*60L*1000L, "DHT.RareFileTime", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
     
     /**
      * The minumum number of upload attempts before a file is considered
@@ -171,7 +173,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final IntSetting RARE_FILE_ATTEMPTED_UPLOADS
         = FACTORY.createRemoteIntSetting("RARE_FILE_ATTEMPTED_UPLOADS", 
-                1, "rare_file_attempted_uploads", 0, Integer.MAX_VALUE);
+                1, "DHT.RareFileAttemptedUploads", 0, Integer.MAX_VALUE);
     
     /**
      * The number of times a file must have been uploaded before it's considered 
@@ -179,7 +181,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final IntSetting RARE_FILE_COMPLETED_UPLOADS
         = FACTORY.createRemoteIntSetting("RARE_FILE_COMPLETED_UPLOADS", 
-                0, "rare_file_completed_uploads", 0, Integer.MAX_VALUE);
+                0, "DHT.RareFileCompletedUploads", 0, Integer.MAX_VALUE);
     
     /**
      * Whether or not AlternativeLocations should be published.
@@ -187,28 +189,28 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting PUBLISH_ALT_LOCS
         = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
-                false, "publish_alt_locs");
+                false, "DHT.PublishAltLocs");
     
     /**
      * Whether or not DHT querying is enabled 
      */
     public static final BooleanSetting ENABLE_DHT_ALT_LOC_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_ALT_LOC_QUERIES", 
-                false, "enable_dht_alt_loc_queries");
+                false, "DHT.EnableAltLocQueries");
     
     /**
      * The maximum number of DHT requery attempts
      */
     public static final IntSetting MAX_DHT_ALT_LOC_QUERY_ATTEMPTS
         = FACTORY.createRemoteIntSetting("MAX_DHT_ALT_LOC_QUERY_ATTEMPTS", 
-                1, "max_dht_alt_loc_query_attempts", 1, Integer.MAX_VALUE);
+                1, "DHT.MaxAltLocQueryAttempts", 1, Integer.MAX_VALUE);
     
     /**
      * The minimum time between two DHT requeries
      */
     public static final LongSetting TIME_BETWEEN_DHT_ALT_LOC_QUERIES
         = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_ALT_LOC_QUERIES", 
-                5L*60L*1000L, "time_between_dht_alt_loc_queries", 30L*1000L, 24L*60L*60L*1000L);
+                5L*60L*1000L, "DHT.TimeBetweenAltLocQueries", 30L*1000L, 24L*60L*60L*1000L);
     
     /**
      * Setting for whether or not the passive DHT mode should be active at all.
@@ -216,7 +218,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting ENABLE_PASSIVE_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_DHT_MODE", 
-                false, "enable_passive_dht_mode");
+                false, "DHT.EnablePassiveMode");
     
     /**
      * Setting for whether or not the passive leaf DHT mode should be active at all.
@@ -224,7 +226,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting ENABLE_PASSIVE_LEAF_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_LEAF_DHT_MODE", 
-                false, "enable_passive_leaf_dht_mode");
+                false, "DHT.EnablePassiveLeafMode");
     
     /**
      * Whether or not PushProxies should be published.
@@ -232,14 +234,14 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting PUBLISH_PUSH_PROXIES
         = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
-                false, "publish_push_proxies");
+                false, "DHT.PublishPushProxies");
     
     /**
      * Whether or not we query for PushProxies
      */
     public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_PUSH_PROXY_QUERIES", 
-                false, "enable_push_proxy_queries");
+                false, "DHT.EnablePushProxyQueries");
     
     /**
      * This setting is storing the most recent DHT mode for debugging purposes.
