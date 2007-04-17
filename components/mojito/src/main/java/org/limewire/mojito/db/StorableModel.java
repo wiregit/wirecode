@@ -19,21 +19,28 @@
 
 package org.limewire.mojito.db;
 
-import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import java.util.Collection;
+
+import org.limewire.mojito.result.StoreResult;
 
 /**
- * A factory interface to create DHTValues
+ * The StorableModel provides an interface for StorablePublisher
  */
-public interface DHTValueFactory {
+public interface StorableModel {
     
     /**
-     * Creates a DHTValue
-     * 
-     * @param type The type of the value
-     * @param version The version of the value
-     * @param value The actual value
+     * Returns all Storables that need to be published now
      */
-    public DHTValue createDHTValue(DHTValueType type, 
-            Version version, byte[] value) throws DHTValueException;
+    public Collection<Storable> getStorables();
+    
+    /**
+     * Called for every successful STORE
+     */
+    public void handleStoreResult(Storable value, StoreResult result);
+    
+    /**
+     * Notifies the StorableModel that the local Contact's
+     * contact information changed (Node ID, external Address).
+     */
+    public void handleContactChange();
 }

@@ -1,22 +1,3 @@
-/*
- * Mojito Distributed Hash Table (Mojito DHT)
- * Copyright (C) 2006-2007 LimeWire LLC
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 package org.limewire.mojito.db;
 
 import java.util.Collection;
@@ -39,34 +20,32 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.service.ErrorService;
 
-
 /**
- * The DHTValueManager periodically publishes all local DHTValues 
- * and evicts expired ones.
+ * The StorablePublisher publishes Storeable values in the DHT
  */
-public class DHTValueManager implements Runnable {
+public class StorablePublisher implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(DHTValueManager.class);
+    private static final Log LOG = LogFactory.getLog(StorablePublisher.class);
     
     private final Context context;
-    
-    private final RepublishTask republishTask = new RepublishTask();
     
     private final DatabaseStatisticContainer databaseStats;
     
     private ScheduledFuture future;
     
-    public DHTValueManager(Context context) {
+    private final PublishTask publishTask = new PublishTask();
+    
+    public StorablePublisher(Context context) {
         this.context = context;
         
         databaseStats = context.getDatabaseStats();
     }
     
     /**
-     * Starts the DHTValueManager
+     * Starts the DHTValuePublisher
      */
     public void start() {
-        synchronized (republishTask) {
+        synchronized (publishTask) {
             if (future == null) {
                 long delay = DatabaseSettings.VALUE_PUBLISHER_PERIOD.getValue();
                 long initialDelay = delay;
@@ -78,35 +57,39 @@ public class DHTValueManager implements Runnable {
     }
     
     /**
-     * Stops the DHTValueManager
+     * Stops the DHTValuePublisher
      */
     public void stop() {
-        synchronized (republishTask) {
+        synchronized (publishTask) {
             if (future != null) {
                 future.cancel(true);
                 future = null;
+                
+                publishTask.stop();
             }
-            
-            republishTask.stop();
         }
     }
     
     public void run() {
-        synchronized (republishTask) {
-            // Do not publish values if we're not bootstrapped
-            // or we're currently bootstrapping
-            if (context.isBootstrapped() 
-                    && !context.isBootstrapping()) {
+        
+        // Do not publish values if we're not bootstrapped!
+        if (context.isBootstrapped() 
+                && !context.isBootstrapping()) {
+            if (publishTask.isDone()) {
                 
-                // Republish but make sure the task from the previous
-                // run() has finished as we don't want parallel republishing
-                if (republishTask.isDone()) {
-                    republishTask.start();
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " begins with publishing");
                 }
                 
-            } else {
-                republishTask.stop();
+                publishTask.start();
             }
+        } else {
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " is not bootstrapped");
+            }
+            
+            publishTask.stop();
         }
     }
     
@@ -116,11 +99,9 @@ public class DHTValueManager implements Runnable {
      * continues with the next DHTValue until all DHTValues have
      * been republished
      */
-    private class RepublishTask implements DHTFutureListener<StoreResult> {
+    private class PublishTask {
         
-        private Iterator<DHTValueEntity> values = null;
-        
-        private DHTFutureListener<StoreResult> listener = null;
+        private Iterator<Storable> values = null;
         
         private DHTFuture<StoreResult> future = null;
         
@@ -147,20 +128,12 @@ public class DHTValueManager implements Runnable {
          * Starts the republishing
          */
         public synchronized void start() {
+            assert (isDone());
             
-            // And publish the local values
-            DHTValueEntityPublisher valueEntityPublisher = context.getDHTValueEntityPublisher();
-            Collection<DHTValueEntity> valuesToPublish = valueEntityPublisher.getValuesToPublish();
+            StorableModelManager modelManager = context.getStorableModelManager();
+            Collection<Storable> valuesToPublish = modelManager.getStorables();
             if (valuesToPublish == null) {
                 valuesToPublish = Collections.emptyList();
-            }
-            
-            // The DHTValueEntityPublisher may implement the DHTFutureListener
-            // interface in which case we're adding it to the DHTFuture as well.
-            if (valueEntityPublisher instanceof DHTFutureListener) {
-                listener = (DHTFutureListener<StoreResult>)valueEntityPublisher;
-            } else {
-                listener = null;
             }
             
             if (LOG.isInfoEnabled()) {
@@ -185,8 +158,8 @@ public class DHTValueManager implements Runnable {
             }
             
             while(values.hasNext()) {
-                DHTValueEntity entry = values.next();
-                if (publish(entry)) {
+                Storable storable = values.next();
+                if (publish(storable)) {
                     return true;
                 }
             }
@@ -197,35 +170,47 @@ public class DHTValueManager implements Runnable {
         /**
          * Publishes or expires the given DHTValue
          */
-        private boolean publish(DHTValueEntity entity) {
+        private boolean publish(Storable storable) {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
             databaseStats.REPUBLISHED_VALUES.incrementStat();
             
-            future = context.store(entity);
-            future.addDHTFutureListener(this);
-            
-            if (listener != null) {
-                future.addDHTFutureListener(listener);
-            }
-            
+            future = context.store(DHTValueEntity.createFromStorable(context, storable));
+            future.addDHTFutureListener(new StoreResultHandler(storable));
             return true;
         }
+    }
+    
+    private class StoreResultHandler implements DHTFutureListener<StoreResult> {
         
-        public void handleFutureSuccess(StoreResult result) {
+        private final Storable storable;
+        
+        private StoreResultHandler(Storable storable) {
+            this.storable = storable;
+        }
+        
+        public void handleFutureSuccess(final StoreResult result) {
             
             if (LOG.isInfoEnabled()) {
-                Collection<? extends Contact> nodes = result.getNodes();
-                if (!nodes.isEmpty()) {
+                Collection<? extends Contact> locations = result.getLocations();
+                if (!locations.isEmpty()) {
                     LOG.info(result);
                 } else {
                     LOG.info("Failed to store " + result.getValues());
                 }
             }
             
-            if (!next()) {
-                stop();
+            storable.handleStoreResult(result);
+            
+            context.getDHTExecutorService().execute(new Runnable() {
+                public void run() {
+                    context.getStorableModelManager().handleStoreResult(storable, result);
+                }
+            });
+            
+            if (!publishTask.next()) {
+                publishTask.stop();
             }
         }
         
@@ -236,19 +221,19 @@ public class DHTValueManager implements Runnable {
                 ErrorService.error(e);
             }
             
-            if (!next()) {
-                stop();
+            if (!publishTask.next()) {
+                publishTask.stop();
             }
         }
 
         public void handleCancellationException(CancellationException e) {
             LOG.debug("CancellationException", e);
-            stop();
+            publishTask.stop();
         }
         
         public void handleInterruptedException(InterruptedException e) {
             LOG.debug("InterruptedException", e);
-            stop();
-        }   
+            publishTask.stop();
+        }
     }
 }
