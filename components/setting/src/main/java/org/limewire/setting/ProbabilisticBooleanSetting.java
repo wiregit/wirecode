@@ -2,6 +2,10 @@ package org.limewire.setting;
 
 import java.util.Properties;
 
+/**
+ * A setting that holds a boolean value that is determined
+ * based on a provided float probability. 
+ */
 public class ProbabilisticBooleanSetting extends FloatSetting {
     
     private volatile boolean value;
