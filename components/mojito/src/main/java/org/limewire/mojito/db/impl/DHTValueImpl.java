@@ -120,14 +120,14 @@ public class DHTValueImpl implements DHTValue {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof DHTValueImpl)) {
+        } else if (!(o instanceof DHTValue)) {
             return false;
         }
         
-        DHTValueImpl other = (DHTValueImpl)o;
-        return valueType.equals(other.valueType)
-                    && version.equals(other.version)
-                    && Arrays.equals(value, other.value);
+        DHTValue other = (DHTValue)o;
+        return valueType.equals(other.getValueType())
+                    && version.equals(other.getVersion())
+                    && Arrays.equals(value, other.getValue());
     }
     
     public String toString() {
