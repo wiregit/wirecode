@@ -23,6 +23,11 @@ public interface PushProxiesDHTValue extends DHTValue {
     public static final Version VERSION = Version.valueOf(0);
     
     /**
+     * The Client ID of the Gnutella Node
+     */
+    public byte[] getGUID();
+    
+    /**
      * The Port number of the Gnutella Node
      */
     public int getPort();

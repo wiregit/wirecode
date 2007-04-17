@@ -45,6 +45,8 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
      */
     public static final DHTValue FOR_SELF = new PushProxiesForSelf();
     
+    private static final String CLIENT_ID = "client-id";
+    
     private static final String FWT_VERSION = "fwt-version";
     
     private static final String FEATURES = "features";
@@ -57,6 +59,11 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
      * The version of the value
      */
     private final Version version;
+    
+    /**
+     * 
+     */
+    private final byte[] guid;
     
     /**
      * Gnutella features bit-field
@@ -95,9 +102,11 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     /**
      * Constructor for testing purposes
      */
-    PushProxiesDHTValueImpl(Version version, int features, int fwtVersion, 
+    PushProxiesDHTValueImpl(Version version, byte[] guid, 
+            int features, int fwtVersion, 
             int port, Set<? extends IpPort> proxies) {
         this.version = version;
+        this.guid = guid;
         this.features = features;
         this.fwtVersion = fwtVersion;
         this.port = port;
@@ -125,6 +134,11 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         try {
             GGEP ggep = new GGEP(data, 0);
             
+            this.guid = ggep.getBytes(CLIENT_ID);
+            if (guid.length != 16) {
+                throw new DHTValueException("Illegal GUID length: " + guid.length);
+            }
+            
             this.features = ggep.getInt(FEATURES);
             this.fwtVersion = ggep.getInt(FWT_VERSION);
             
@@ -141,6 +155,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             Set<IpPort> proxies = new IpPortSet();
             while(in.available() > 0) {
                 int length = in.readUnsignedByte();
+                
+                if (length != 6 && length != 18) {
+                    throw new IOException("Illegal IP:Port length: " + length);
+                }
                 
                 byte[] addr = new byte[length-2];
                 in.readFully(addr);
@@ -192,6 +210,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         out.write(data);
     }
 
+    public byte[] getGUID() {
+        return guid;
+    }
+    
     public int getFeatures() {
         return features;
     }
@@ -214,6 +236,7 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     
     static byte[] serialize(PushProxiesDHTValue value) {
         GGEP ggep = new GGEP();
+        ggep.put(CLIENT_ID, value.getGUID());
         ggep.put(FEATURES, value.getFeatures());
         ggep.put(FWT_VERSION, value.getFwtVersion());
         
@@ -279,6 +302,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             out.write(getValue());
         }
 
+        public byte[] getGUID() {
+            return RouterService.getMyGUID();
+        }
+        
         public int getFeatures() {
             return PushEndpointForSelf.instance().getFeatures();
         }
