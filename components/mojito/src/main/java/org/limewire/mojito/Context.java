@@ -49,6 +49,7 @@ import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.DatabaseCleaner;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.db.impl.DefaultDHTValueEntityPublisher;
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
@@ -106,6 +107,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private final String name;
     
     private final DHTValueManager valueManager;
+    private final DatabaseCleaner databaseCleaner;
     
     private volatile boolean bucketRefresherDisabled = false;
     private final BucketRefresher bucketRefresher;
@@ -182,7 +184,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         messageHelper = new MessageHelper(this);
         valueManager = new DHTValueManager(this);
-
+        databaseCleaner = new DatabaseCleaner(this);
+        
         bucketRefresher = new BucketRefresher(this);
         
         pingManager = new PingManager(this);
@@ -830,6 +833,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         valueManager.start();
+        databaseCleaner.start();
     }
     
     /*
@@ -851,6 +855,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         // Stop the Bucket refresher and the value manager
         bucketRefresher.stop();
         valueManager.stop();
+        databaseCleaner.stop();
         
         // Shutdown the local Node
         Contact localNode = getLocalNode();

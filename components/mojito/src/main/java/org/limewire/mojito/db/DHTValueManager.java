@@ -37,7 +37,6 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.service.ErrorService;
 
 
@@ -69,7 +68,7 @@ public class DHTValueManager implements Runnable {
     public void start() {
         synchronized (republishTask) {
             if (future == null) {
-                long delay = DatabaseSettings.REPUBLISH_PERIOD.getValue();
+                long delay = DatabaseSettings.VALUE_PUBLISHER_PERIOD.getValue();
                 long initialDelay = delay;
                 
                 future = context.getDHTExecutorService()
@@ -94,10 +93,19 @@ public class DHTValueManager implements Runnable {
     
     public void run() {
         synchronized (republishTask) {
-            // Republish but make sure the task from the previous
-            // run() has finished as we don't want parallel republishing
-            if (republishTask.isDone()) {
-                republishTask.republish();
+            // Do not publish values if we're not bootstrapped
+            // or we're currently bootstrapping
+            if (context.isBootstrapped() 
+                    && !context.isBootstrapping()) {
+                
+                // Republish but make sure the task from the previous
+                // run() has finished as we don't want parallel republishing
+                if (republishTask.isDone()) {
+                    republishTask.start();
+                }
+                
+            } else {
+                republishTask.stop();
             }
         }
     }
@@ -136,44 +144,9 @@ public class DHTValueManager implements Runnable {
         }
         
         /**
-         * Removes all expired DHTValueEntities from the Database
-         */
-        private void removeExpired(Collection<? extends DHTValueEntity> entities) {
-            Database database = context.getDatabase();
-            synchronized (database) {
-                for (DHTValueEntity entity : entities) {
-                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(entity + " is expired!");
-                        }
-                        
-                        database.remove(entity.getKey(), entity.getSecondaryKey());
-                        databaseStats.EXPIRED_VALUES.incrementStat();
-                    }
-                }
-            }
-        }
-        
-        /**
          * Starts the republishing
          */
-        public synchronized void republish() {
-            
-            Database database = context.getDatabase();
-            synchronized (database) {
-                // Remove all values that have expired
-                removeExpired(database.values());
-            }
-            
-            // Do not publish values if we're not bootstrapped!
-            if (!context.isBootstrapped()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " is not bootstrapped");
-                }
-                
-                stop();
-                return;
-            }
+        public synchronized void start() {
             
             // And publish the local values
             DHTValueEntityPublisher valueEntityPublisher = context.getDHTValueEntityPublisher();

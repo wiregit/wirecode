@@ -98,9 +98,16 @@ public final class DatabaseSettings extends MojitoProps {
     /**
      * The period of the DHTValueManager
      */
-    public static final LongSetting REPUBLISH_PERIOD
-        = FACTORY.createRemoteLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
-                "republish_period", 5L*60L*1000L, 60L*60L*1000L);
+    public static final LongSetting VALUE_PUBLISHER_PERIOD
+        = FACTORY.createRemoteLongSetting("VALUE_PUBLISHER_PERIOD", 5L*60L*1000L, 
+                "value_publisher_period", 5L*60L*1000L, 60L*60L*1000L);
+    
+    /**
+     * The period of the DatabaseCleaner
+     */
+    public static final LongSetting DATABASE_CLEANER_PERIOD
+        = FACTORY.createRemoteLongSetting("DATABASE_CLEANER_PERIOD", 5L*60L*1000L, 
+                "database_cleaner_period", 5L*60L*1000L, 60L*60L*1000L);
     
     /**
      * The *alpha* factor for the Exponentially Moving Average (EMA) 
