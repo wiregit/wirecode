@@ -79,7 +79,7 @@ public class StorableModelManager {
                 
                 if (storables == null) {
                     if (LOG.isErrorEnabled()) {
-                        LOG.error("The getStorabled() method of " + model + " returned null!");
+                        LOG.error(model + " returned a null Collection");
                     }
                     continue;
                 }
