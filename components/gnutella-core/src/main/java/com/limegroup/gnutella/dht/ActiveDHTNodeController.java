@@ -54,7 +54,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         
-        if (DHTSettings.PERSIST_DHT.getValue() 
+        if (DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.getValue() 
                 && FILE.exists() && FILE.isFile()) {
             ObjectInputStream in = null;
             try {
@@ -66,10 +66,23 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                 int routeTableVersion = in.readInt();
                 if (routeTableVersion >= getRouteTableVersion()) {
                     RouteTable routeTable = (RouteTable)in.readObject();
-                    Database database = (Database)in.readObject();
-    
-                    dht.setRouteTable(routeTable);
-                    dht.setDatabase(database);
+                    
+                    // Do not set the RouteTable here!!! Make sure the Database
+                    // base is not corrupt!!!
+                    
+                    Database database = null;
+                    if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
+                        database = (Database)in.readObject();
+                    }
+                    
+                    // The Database depends on the RouteTable. So if the RouteTable 
+                    // is null then there's no point in setting the Database! 
+                    if (routeTable != null) {
+                        dht.setRouteTable(routeTable);
+                        if (database != null) {
+                            dht.setDatabase(database);
+                        }
+                    }
                 }
             } catch (Throwable ignored) {
             } finally {
@@ -90,7 +103,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
         //Notify our ultrapeers that we disconnected
         sendUpdatedCapabilities();
         
-        if (DHTSettings.PERSIST_DHT.getValue()) {
+        if (DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.getValue()) {
             ObjectOutputStream out = null;
             try {
                 out = new ObjectOutputStream(
@@ -101,7 +114,12 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                 out.writeInt(getRouteTableVersion());
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
-                    out.writeObject(dht.getDatabase());
+                    
+                    Database database = null;
+                    if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
+                        database = dht.getDatabase();
+                    }
+                    out.writeObject(database);
                 }
                 out.flush();
             } catch (IOException ignored) {

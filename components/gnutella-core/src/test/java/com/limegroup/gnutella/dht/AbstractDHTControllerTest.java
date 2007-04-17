@@ -66,7 +66,8 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     }
     
     public void testRandomNodeAdder() throws Exception {
-        DHTSettings.PERSIST_DHT.setValue(false);
+        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
+        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_ADDER_DELAY, "value", 50L);
         

@@ -20,36 +20,34 @@
 package org.limewire.mojito.db;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.DatabaseUtils;
+import org.limewire.util.PrivilegedAccessor;
 
-public class DHTValueTest extends MojitoTestCase {
-    
-    /*static {
-        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }*/
+public class StorableTest extends MojitoTestCase {
 
-    public DHTValueTest(String name) {
+    public StorableTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(DHTValueTest.class);
+        return buildTestSuite(StorableTest.class);
     }
     
     public static void main(String[] args) {
@@ -62,8 +60,11 @@ public class DHTValueTest extends MojitoTestCase {
         setLocalIsPrivate(false);
     }
 
-    public void testLocationCount() throws Exception {
+    public void testStorableModel() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        
+        final long period = 100L;
+        PrivilegedAccessor.setValue(DatabaseSettings.STORABLE_PUBLISHER_PERIOD, "value", new Long(100));
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         MojitoDHT first = null;
@@ -90,36 +91,50 @@ public class DHTValueTest extends MojitoTestCase {
             
             long time = System.currentTimeMillis();
             
-            Context context = (Context)first;
+            final Object lock1 = new Object();
+            final Object lock2 = new Object();
             
-            final Object lock = new Object();
             final Storable storable = new Storable(key, new DHTValueImpl(type, version, b));
+            final AtomicBoolean publisherDidRun = new AtomicBoolean(false);
             
-            // Pre-Condition
-            assertEquals(0, storable.getLocationCount());
-            assertEquals(0L, storable.getPublishTime());
-            assertTrue(DatabaseUtils.isPublishingRequired(storable));
-            
-            // Store...
-            DHTFuture<StoreResult> future = context.store(storable);
-            future.addDHTFutureListener(new DHTFutureAdapter<StoreResult>() {
-                @Override
-                public void handleFutureSuccess(StoreResult result) {
-                    storable.handleStoreResult(result);
-                    synchronized (lock) {
-                        lock.notifyAll();
+            first.getStorableModelManager().addStorableModel(type, new StorableModel() {
+                public Collection<Storable> getStorables() {
+                    synchronized (lock1) {
+                        try {
+                            if (!publisherDidRun.get()) {
+                                publisherDidRun.set(true);
+                                return Collections.singleton(storable);
+                            } else {
+                                return Collections.emptySet();
+                            }
+                        } finally {
+                            lock1.notifyAll();
+                        }
                     }
+                }
+                
+                public void handleStoreResult(Storable value, StoreResult result) {
+                    synchronized (lock2) {
+                        lock2.notifyAll();
+                    }
+                }
+                
+                public void handleContactChange() {
                 }
             });
             
-            future.get();
-            synchronized (lock) {
-                if (storable.getLocationCount() == 0L) {
-                    lock.wait(1000L);
-                }
+            synchronized (lock1) {
+                // Wait for getStorables() call
+                lock1.wait(1000L);
             }
             
-            // Post-Condition
+            assertTrue(publisherDidRun.get());
+            
+            synchronized (lock2) {
+                // Wait for handleStoreResult()
+                lock2.wait(1000L);
+            }
+            
             assertEquals(k, storable.getLocationCount());
             assertGreaterThanOrEquals(time, storable.getPublishTime());
             assertFalse(DatabaseUtils.isPublishingRequired(storable));

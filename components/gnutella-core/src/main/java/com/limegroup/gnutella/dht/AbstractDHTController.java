@@ -121,11 +121,22 @@ public abstract class AbstractDHTController implements DHTController {
     /**
      * Get and save the current RouteTable version
      */
-    private final int routeTableVersion = DHTSettings.ROUTETABLE_VERSION.getValue();
+    private final int routeTableVersion;
     
     public AbstractDHTController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
             DHTMode mode) {
+        
+        switch(mode) {
+            case ACTIVE:
+                routeTableVersion = DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.getValue();
+                break;
+            case PASSIVE:
+                routeTableVersion = DHTSettings.PASSIVE_DHT_ROUTETABLE_VERSION.getValue();
+                break;
+            default:
+                routeTableVersion = -1;
+        }
         
         this.dispatcher = dispatcher;
         this.mode = mode;
@@ -166,7 +177,7 @@ public abstract class AbstractDHTController implements DHTController {
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
-        if (mode.isPassiveLeaf()) {
+        if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
                     PushProxiesDHTValue.PUSH_PROXIES, new PushProxiesPublisher());
         }

@@ -77,7 +77,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         // Dht Settings
-        DHTSettings.PERSIST_DHT.setValue(false);
+        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
+        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         
         NetworkSettings.TIMEOUT.setValue(500);

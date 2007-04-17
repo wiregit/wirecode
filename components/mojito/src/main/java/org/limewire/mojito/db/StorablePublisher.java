@@ -47,7 +47,7 @@ public class StorablePublisher implements Runnable {
     public void start() {
         synchronized (publishTask) {
             if (future == null) {
-                long delay = DatabaseSettings.VALUE_PUBLISHER_PERIOD.getValue();
+                long delay = DatabaseSettings.STORABLE_PUBLISHER_PERIOD.getValue();
                 long initialDelay = delay;
                 
                 future = context.getDHTExecutorService()
@@ -142,7 +142,6 @@ public class StorablePublisher implements Runnable {
             }
             
             values = valuesToPublish.iterator();
-            
             next();
         }
         

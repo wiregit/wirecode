@@ -45,7 +45,9 @@ public class LimeDHTManagerTest extends DHTTestCase {
     }
     
     public void testLimeDHTManager() throws Exception{
-        DHTSettings.PERSIST_DHT.setValue(true);
+        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
+        DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
+        
         TestExecutor executor = new TestExecutor();
         DHTManagerImpl manager = new DHTManagerImpl(executor);
         

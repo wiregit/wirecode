@@ -73,7 +73,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
         dht.setRouteTable(routeTable);
         
         // Load the small list of MRS Nodes for bootstrap
-        if (DHTSettings.PERSIST_DHT.getValue()
+        if (DHTSettings.PERSIST_PASSIVE_DHT_ROUTETABLE.getValue()
                 && FILE.exists() && FILE.isFile()) {
             ObjectInputStream ois = null;
             try {
@@ -85,7 +85,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                 int routeTableVersion = ois.readInt();
                 if (routeTableVersion >= getRouteTableVersion()) {
                     Contact node = null;
-                    while((node = (Contact)ois.readObject()) != null){
+                    while((node = (Contact)ois.readObject()) != null) {
                         routeTable.add(node);
                     }
                 }
@@ -142,39 +142,37 @@ public class PassiveDHTNodeController extends AbstractDHTController {
         
         super.stop();
         
-        // Delete the previous file
-        if (FILE.exists()) {
-            FILE.delete();
-        }
-        
-        Collection<Contact> contacts = routeTable.getActiveContacts(); 
-        if (contacts.size() >= 2) {
-            ObjectOutputStream oos = null;
-            try {
-                oos = new ObjectOutputStream(
-                            new BufferedOutputStream(
-                                new SecureOutputStream(
-                                    new FileOutputStream(FILE))));
-                
-                oos.writeInt(getRouteTableVersion());
-                
-                // Sort by MRS and save only some Nodes
-                contacts = ContactUtils.sort(contacts, DHTSettings.MAX_PERSISTED_NODES.getValue());
-                
-                KUID localNodeID = getMojitoDHT().getLocalNodeID();
-                for(Contact node : contacts) {
-                    if(!node.getNodeID().equals(localNodeID)) {
-                        oos.writeObject(node);
+        if (DHTSettings.PERSIST_PASSIVE_DHT_ROUTETABLE.getValue()) {
+            Collection<Contact> contacts = routeTable.getActiveContacts(); 
+            if (contacts.size() >= 2) {
+                ObjectOutputStream oos = null;
+                try {
+                    oos = new ObjectOutputStream(
+                                new BufferedOutputStream(
+                                    new SecureOutputStream(
+                                        new FileOutputStream(FILE))));
+                    
+                    oos.writeInt(getRouteTableVersion());
+                    
+                    // Sort by MRS and save only some Nodes
+                    contacts = ContactUtils.sort(contacts, 
+                            DHTSettings.MAX_PERSISTED_NODES.getValue());
+                    
+                    KUID localNodeID = getMojitoDHT().getLocalNodeID();
+                    for(Contact node : contacts) {
+                        if(!node.getNodeID().equals(localNodeID)) {
+                            oos.writeObject(node);
+                        }
                     }
+                    
+                    // EOF Terminator
+                    oos.writeObject(null);
+                    oos.flush();
+                    
+                } catch (IOException ignored) {
+                } finally {
+                    IOUtils.close(oos);
                 }
-                
-                // EOF Terminator
-                oos.writeObject(null);
-                oos.flush();
-                
-            } catch (IOException ignored) {
-            } finally {
-                IOUtils.close(oos);
             }
         }
     }

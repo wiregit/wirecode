@@ -51,7 +51,9 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testPersistence() throws Exception{
-        DHTSettings.PERSIST_DHT.setValue(true);
+        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
+        DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
+        
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
@@ -115,7 +117,8 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testResetRouteTable() {
-        DHTSettings.PERSIST_DHT.setValue(true);
+        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
+        DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
         
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
@@ -135,7 +138,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         
         assertEquals(localNode1.getNodeID(), localNode2.getNodeID());
         
-        DHTSettings.ROUTETABLE_VERSION.setValue(1);
+        DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.setValue(1);
         controller = new ActiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         Contact localNode3 = controller.getMojitoDHT().getLocalNode();

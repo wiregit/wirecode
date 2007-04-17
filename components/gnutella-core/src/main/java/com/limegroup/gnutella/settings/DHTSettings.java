@@ -52,10 +52,19 @@ public class DHTSettings extends LimeProps {
      * 
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    public static final IntSetting ROUTETABLE_VERSION
-        = FACTORY.createRemoteIntSetting("ROUTETABLE_VERSION", 
-                0, "DHT.RouteTableVersion", 0, Integer.MAX_VALUE);
+    public static final IntSetting ACTIVE_DHT_ROUTETABLE_VERSION
+        = FACTORY.createRemoteIntSetting("ACTIVE_DHT_ROUTETABLE_VERSION", 
+                0, "DHT.ActiveRouteTableVersion", 0, Integer.MAX_VALUE);
 
+    /**
+     * Version of serialized RouteTable
+     * 
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final IntSetting PASSIVE_DHT_ROUTETABLE_VERSION
+        = FACTORY.createRemoteIntSetting("PASSIVE_DHT_ROUTETABLE_VERSION", 
+                0, "DHT.PassiveRouteTableVersion", 0, Integer.MAX_VALUE);
+    
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
      * as an ACTIVE node.
@@ -111,12 +120,6 @@ public class DHTSettings extends LimeProps {
                 0.5F, "DHT.SwitchToUltrapeerProbability", 0F, 1F);
     
     /**
-     * Setting for whether or not the DHT should be persisted on disk
-     */
-    public static final BooleanSetting PERSIST_DHT 
-        = FACTORY.createBooleanSetting("PERSIST_DHT", true);
-    
-    /**
      * Probabilistic logic for whether or not the node should join the DHT
      * (used for initial bootstrapping)
      * WARNING: DO NOT MANUALLY CHANGE THIS
@@ -158,7 +161,28 @@ public class DHTSettings extends LimeProps {
      */
     public static final IntSetting MAX_PERSISTED_NODES 
         = FACTORY.createRemoteIntSetting("MAX_PERSISTED_NODES", 
-                40, "DHT.MaxPersistNodes", 0, 1024);
+                40, "DHT.MaxPersistedNodes", 0, 1024);
+    
+    /**
+     * Setting for whether or not the RouteTable should be persisted on disk
+     */
+    public static final BooleanSetting PERSIST_ACTIVE_DHT_ROUTETABLE
+        = FACTORY.createRemoteBooleanSetting("PERSIST_ACTIVE_DHT_ROUTETABLE", 
+                true, "DHTSettings.PersistActiveRouteTable");
+    
+    /**
+     * Setting for whether or not the passive RouteTable should be persisted on disk
+     */
+    public static final BooleanSetting PERSIST_PASSIVE_DHT_ROUTETABLE
+        = FACTORY.createRemoteBooleanSetting("PERSIST_PASSIVE_DHT_ROUTETABLE", 
+                true, "DHTSettings.PersistPassiveRouteTable");
+    
+    /**
+     * Setting for whether or not the Database should be persisted on disk
+     */
+    public static final BooleanSetting PERSIST_DHT_DATABASE
+        = FACTORY.createRemoteBooleanSetting("PERSIST_DHT_DATABASE", 
+                true, "DHTSettings.PersistDatabase");
     
     /**
      * Setting for the time at which point a file is considered rare

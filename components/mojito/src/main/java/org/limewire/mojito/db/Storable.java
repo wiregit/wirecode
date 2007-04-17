@@ -86,6 +86,8 @@ public class Storable {
         if (locationCount < 0) {
             throw new IllegalArgumentException("LocationCount is negative: " + locationCount);
         }
+        
+        this.locationCount = locationCount;
     }
     
     /**
