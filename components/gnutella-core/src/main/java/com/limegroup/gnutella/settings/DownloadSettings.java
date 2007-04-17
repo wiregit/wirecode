@@ -105,6 +105,6 @@ public class DownloadSettings extends LimeProps {
     /** Whether to report disk problems to the bug server */
     public static final ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
         FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", 0f, 
-                "DownloadSettings.reportDisk", 0f, 1f);
+                "DownloadSettings.reportDiskProblems", 0f, 1f);
         
 }
