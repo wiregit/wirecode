@@ -2,6 +2,7 @@ package org.limewire.statistic;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.IntBuffer;
+import org.limewire.inspection.Inspectable;
 import org.limewire.service.ErrorService;
 
 
@@ -19,7 +21,7 @@ import org.limewire.service.ErrorService;
  * history for the given statistic, providing access to the average
  * value, the maximum value, etc.
  */
-public abstract class AbstractStatistic implements Statistic {
+public abstract class AbstractStatistic implements Statistic, Inspectable {
 
 	/**
 	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
@@ -226,4 +228,14 @@ public abstract class AbstractStatistic implements Statistic {
 			}
 		}
 	}
+    
+    public String inspect() {
+        StringWriter w = new StringWriter();
+        try {
+            storeStats(w);
+        } catch (IOException iox) {
+            return iox.toString();
+        }
+        return w.toString();
+    }
 }
