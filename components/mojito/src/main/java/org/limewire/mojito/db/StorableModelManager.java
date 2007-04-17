@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.result.StoreResult;
 
@@ -34,6 +36,8 @@ import org.limewire.mojito.result.StoreResult;
  */
 public class StorableModelManager {
     
+    private static final Log LOG = LogFactory.getLog(StorableModelManager.class);
+    
     private final Map<DHTValueType, StorableModel> models 
         = Collections.synchronizedMap(new HashMap<DHTValueType, StorableModel>());
     
@@ -41,6 +45,14 @@ public class StorableModelManager {
      * Registers a StorableModel under the given DHTValueType.
      */
     public StorableModel addStorableModel(DHTValueType valueType, StorableModel model) {
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
+        if (model == null) {
+            throw new NullPointerException("StorableModel is null");
+        }
+        
         return models.put(valueType, model);
     }
     
@@ -49,6 +61,10 @@ public class StorableModelManager {
      * given DHTValueType.
      */
     public StorableModel removeStorableModel(DHTValueType valueType) {
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
         return models.remove(valueType);
     }
     
@@ -58,8 +74,32 @@ public class StorableModelManager {
     Collection<Storable> getStorables() {
         List<Storable> values = new ArrayList<Storable>();
         synchronized (models) {
-            for (StorableModel src : models.values()) {
-                values.addAll(src.getStorables());
+            for (StorableModel model : models.values()) {
+                Collection<Storable> storables = model.getStorables();
+                
+                if (storables == null) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("The getStorabled() method of " + model + " returned null!");
+                    }
+                    continue;
+                }
+                
+                for (Storable storable : storables) {
+                    if (storable == null) {
+                        if (LOG.isErrorEnabled()) {
+                            if (LOG.isErrorEnabled()) {
+                                LOG.error(model + " returned a Collection with a null element");
+                            }
+                        }
+                        
+                        // The StorableModel implementation is incorrect!
+                        // Do not continue with adding the remaining non 
+                        // null elements!
+                        break;
+                    }
+                    
+                    values.add(storable);
+                }
             }
         }
         return values;

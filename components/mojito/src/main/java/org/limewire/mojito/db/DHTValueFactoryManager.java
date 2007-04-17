@@ -39,6 +39,14 @@ public class DHTValueFactoryManager {
      * Adds a new DHTValueFactory
      */
     public DHTValueFactory addDHTValueFactory(DHTValueType valueType, DHTValueFactory factory) {
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
+        if (factory == null) {
+            throw new NullPointerException("DHTValueFactory is null");
+        }
+        
         return factories.put(valueType, factory);
     }
     
@@ -46,6 +54,10 @@ public class DHTValueFactoryManager {
      * Removes a DHTValueFactory that is registed under the given DHTValueType
      */
     public DHTValueFactory removeDHTValueFactory(DHTValueType valueType) {
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
         return factories.remove(valueType);
     }
     
@@ -54,6 +66,10 @@ public class DHTValueFactoryManager {
      * if none exists
      */
     public DHTValueFactory getDHTValueFactory(DHTValueType valueType) {
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
         DHTValueFactory factory = factories.get(valueType);
         
         if (factory != null) {
