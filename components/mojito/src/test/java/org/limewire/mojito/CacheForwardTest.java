@@ -208,7 +208,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
                 for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
-                    assertEquals(valueId, dhtValue.getKey());
+                    assertEquals(valueId, dhtValue.getPrimaryKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -265,7 +265,7 @@ public class CacheForwardTest extends MojitoTestCase {
                     assertEquals(1, dht.getDatabase().getKeyCount());
                     assertEquals(1, dht.getDatabase().getValueCount());
                     for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
-                        assertEquals(valueId, dhtValue.getKey());
+                        assertEquals(valueId, dhtValue.getPrimaryKey());
                         assertEquals(value, dhtValue.getValue());
                         assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                         assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -278,7 +278,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
             for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
-                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
@@ -313,7 +313,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
             for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
-                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
@@ -352,7 +352,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
             for (DHTValueEntity dhtValue : middle.getDatabase().values()) {
-                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
@@ -407,7 +407,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(1, furthest.getDatabase().getKeyCount());
             assertEquals(1, furthest.getDatabase().getValueCount());
             for (DHTValueEntity dhtValue : furthest.getDatabase().values()) {
-                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 

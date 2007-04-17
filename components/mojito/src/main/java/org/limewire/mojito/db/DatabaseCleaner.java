@@ -85,7 +85,7 @@ public class DatabaseCleaner implements Runnable {
                         LOG.trace(entity + " is expired!");
                     }
                     
-                    database.remove(entity.getKey(), entity.getSecondaryKey());
+                    database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     databaseStats.EXPIRED_VALUES.incrementStat();
                 }
             }

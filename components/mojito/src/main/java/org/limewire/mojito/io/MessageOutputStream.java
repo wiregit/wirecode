@@ -97,7 +97,7 @@ public class MessageOutputStream extends DataOutputStream {
      */
     public void writeDHTValueEntity(DHTValueEntity entity) throws IOException {
         writeContact(entity.getCreator());
-        entity.getKey().write(this);
+        entity.getPrimaryKey().write(this);
         writeDHTValue(entity.getValue());
     }
     

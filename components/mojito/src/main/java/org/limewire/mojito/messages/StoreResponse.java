@@ -75,7 +75,7 @@ public interface StoreResponse extends ResponseMessage {
         private final StatusCode statusCode;
         
         public StoreStatusCode(DHTValueEntity entity, StatusCode statusCode) {
-            this(entity.getKey(), entity.getSecondaryKey(), statusCode);
+            this(entity.getPrimaryKey(), entity.getSecondaryKey(), statusCode);
         }
         
         public StoreStatusCode(KUID primaryKey, KUID secondaryKey, StatusCode statusCode) {
@@ -89,7 +89,7 @@ public interface StoreResponse extends ResponseMessage {
          * given DHTValueEntity
          */
         public boolean isFor(DHTValueEntity entity) {
-            return primaryKey.equals(entity.getKey())
+            return primaryKey.equals(entity.getPrimaryKey())
                     && secondaryKey.equals(entity.getSecondaryKey());
         }
         

@@ -114,7 +114,7 @@ public class DHTValueEntityBag implements Serializable {
             throw new NullPointerException("DHTValueEntity is null");
         }
         
-        if (!primaryKey.equals(entity.getKey())) {
+        if (!primaryKey.equals(entity.getPrimaryKey())) {
             throw new IllegalArgumentException();
         }
         

@@ -142,10 +142,10 @@ public class StoreManager extends AbstractManager<StoreResult> {
             if (node == null) {
                 for (DHTValueEntity value : values) {
                     if (valueId == null) {
-                        valueId = value.getKey();
+                        valueId = value.getPrimaryKey();
                     }
                     
-                    if (!valueId.equals(value.getKey())) {
+                    if (!valueId.equals(value.getPrimaryKey())) {
                         throw new IllegalArgumentException("All DHTValues must have the same Value ID");
                     }
                 }

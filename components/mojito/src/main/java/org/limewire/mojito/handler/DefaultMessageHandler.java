@@ -227,7 +227,7 @@ public class DefaultMessageHandler {
                     Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     for (DHTValueEntity entity : bag.values()) {
                         //System.out.println("REMOVING: " + entity + "\n");
-                        database.remove(entity.getKey(), entity.getSecondaryKey());
+                        database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     }
                     databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
                 }

@@ -44,7 +44,7 @@ public class DatabaseUtils {
      * Returns the expiration time of the given DHTValue
      */
     public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
-        KUID primaryKey = entity.getKey();
+        KUID primaryKey = entity.getPrimaryKey();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         Collection<Contact> nodes = routeTable.select(primaryKey, k, false);

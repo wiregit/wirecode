@@ -178,7 +178,7 @@ public class DatabaseImpl implements Database {
         }
         
         if (entity.getValue().isEmpty()) {
-            return remove(entity.getKey(), entity.getSecondaryKey()) != null;
+            return remove(entity.getPrimaryKey(), entity.getSecondaryKey()) != null;
         } else {
             return add(entity);
         }
@@ -189,7 +189,7 @@ public class DatabaseImpl implements Database {
      * true if the operation succeeded.
      */
     public synchronized boolean add(DHTValueEntity entity) {
-        KUID valueId = entity.getKey();
+        KUID valueId = entity.getPrimaryKey();
         DHTValueEntityBag bag = database.get(valueId);
         
         if (bag == null) {
@@ -273,7 +273,7 @@ public class DatabaseImpl implements Database {
      * if possible
      */
     private boolean allowStore(DHTValueEntity entity) {
-        DHTValueEntityBag bag = database.get(entity.getKey());
+        DHTValueEntityBag bag = database.get(entity.getPrimaryKey());
         
         // TODO: exclude signed value also
         if (bag == null && !entity.isLocalValue()) {
@@ -332,7 +332,7 @@ public class DatabaseImpl implements Database {
         // Remove all values by this contact
         for(DHTValueEntity entity: values()) {
             if(entity.getCreator().equals(contact)) {
-                remove(entity.getKey(), entity.getSecondaryKey());
+                remove(entity.getPrimaryKey(), entity.getSecondaryKey());
             }
         }
         

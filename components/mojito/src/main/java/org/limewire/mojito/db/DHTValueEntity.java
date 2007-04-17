@@ -130,7 +130,7 @@ public class DHTValueEntity implements Serializable {
     /**
      * Returns the primary key of this value
      */
-    public KUID getKey() {
+    public KUID getPrimaryKey() {
         return primaryKey;
     }
     
@@ -192,7 +192,7 @@ public class DHTValueEntity implements Serializable {
         }
         
         DHTValueEntity other = (DHTValueEntity)o;
-        return primaryKey.equals(other.getKey())
+        return primaryKey.equals(other.getPrimaryKey())
                     && secondaryKey.equals(other.getSecondaryKey());
     }
     
@@ -204,7 +204,7 @@ public class DHTValueEntity implements Serializable {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Creator: ").append(getCreator()).append("\n");
         buffer.append("Sender: ").append(getSender()).append("\n");
-        buffer.append("Primary Key: ").append(getKey()).append("\n");
+        buffer.append("Primary Key: ").append(getPrimaryKey()).append("\n");
         buffer.append("Secondary Key: ").append(getSecondaryKey()).append("\n");
         buffer.append("Creation time: ").append(getCreationTime()).append("\n");
         buffer.append("---\n").append(getValue()).append("\n");
