@@ -14,7 +14,7 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
+import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
@@ -67,10 +67,10 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Store a DHTValue
             KUID key = KUID.createRandomID();
-            DHTValue value = DefaultDHTValueFactory.FACTORY.createDHTValue(
+            DHTValue value = new DHTValueImpl(
                     DHTValueType.BINARY, Version.ZERO, "Hello World".getBytes());
             StoreResult result = dhts.get(0).put(key, value).get();
-            assertEquals(k, result.getNodes().size());
+            assertEquals(k, result.getLocations().size());
             
             // Create a passive leaf Node
             passiveLeaf = MojitoFactory.createDHT("PassiveLeaf");

@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueEntityPublisher;
-import org.limewire.mojito.db.DHTValueFactory;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.db.Storable;
+import org.limewire.mojito.db.StorableModel;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
@@ -34,22 +32,12 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * the number of query hits instead of upload attempts or even
  * keeping track of the file activities over multiple sessions.
  */
-public class AltLocPublisher implements DHTValueEntityPublisher {
+public class AltLocPublisher implements StorableModel {
     
-    private final MojitoDHT dht;
+    private final Map<KUID, Storable> values 
+        = Collections.synchronizedMap(new HashMap<KUID, Storable>());
     
-    private final Map<KUID, DHTValueEntity> values 
-        = Collections.synchronizedMap(new HashMap<KUID, DHTValueEntity>());
-    
-    public AltLocPublisher(MojitoDHT dht) {
-        this.dht = dht;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToPublish()
-     */
-    public Collection<DHTValueEntity> getValuesToPublish() {
+    public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
             return Collections.emptySet();
         }
@@ -57,23 +45,19 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         FileManager fileManager = RouterService.getFileManager();
         FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
         
-        DHTValueFactory valueFactory = dht.getDHTValueFactory();
-        
-        // List of DHTValueEntities we're going to publish
-        List<DHTValueEntity> publish = new ArrayList<DHTValueEntity>();
+        // List of Storables we're going to publish
+        List<Storable> publish = new ArrayList<Storable>();
         
         synchronized (values) {
             
             // Step One: Add every new FileDesc to the Map
             for (FileDesc fd : fds) {
                 if (!(fd instanceof IncompleteFileDesc)) {
-                    KUID key = KUIDUtils.toKUID(fd.getSHA1Urn());
-                    if (!values.containsKey(key)) {
-                        DHTValueEntity entity = valueFactory.createDHTValueEntity(
-                                dht.getLocalNode(), dht.getLocalNode(), key, 
-                                AltLocDHTValueImpl.SELF, true);
+                    KUID primaryKey = KUIDUtils.toKUID(fd.getSHA1Urn());
+                    if (!values.containsKey(primaryKey)) {
                         
-                        values.put(key, entity);
+                        values.put(primaryKey, new Storable(
+                                primaryKey, AltLocDHTValueImpl.SELF));
                     }
                 }
             }
@@ -82,9 +66,9 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
             // associated with a FileDesc (i.e. the FileDesc was deleted)
             // and create a List of DHTValueEntities that are rare and
             // must be republished
-            for (Iterator<DHTValueEntity> it = values.values().iterator(); it.hasNext(); ) {
-                DHTValueEntity entity = it.next();
-                KUID primaryKey = entity.getKey();
+            for (Iterator<Storable> it = values.values().iterator(); it.hasNext(); ) {
+                Storable storable = it.next();
+                KUID primaryKey = storable.getPrimaryKey();
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
@@ -95,46 +79,36 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
                 // which will effectively remove the key-value mapping 
                 // from the DHT.
                 if (fd == null) {
-                    entity.setValue(DHTValue.EMPTY_VALUE);
+                    storable = new Storable(primaryKey, DHTValue.EMPTY_VALUE);
                     it.remove();
                 }
                 
                 // Publish only rare FileDescs and removed entities
                 // respectively
-                if (fd == null || (isRareFile(fd) && DatabaseUtils.isPublishingRequired(entity))) {
-                    publish.add(entity);
+                if (fd == null || (isRareFile(fd) && DatabaseUtils.isPublishingRequired(storable))) {
+                    publish.add(storable);
                 }
             }
         }
         
         return publish;
     }
-
-    public void changeContact(Contact node) {
-        synchronized (values) {
-            DHTValueFactory valueFactory = dht.getDHTValueFactory();
-            
-            // Get a copy of the current values
-            Collection<DHTValueEntity> entities 
-                = new ArrayList<DHTValueEntity>(values.values());
-            
-            // Clear the Map
-            values.clear();
-            
-            // Rebuild the Map with the new local Contact
-            // information
-            for (DHTValueEntity entity : entities) {
-                KUID primaryKey = entity.getKey();
-                
-                entity = valueFactory.createDHTValueEntity(
-                        dht.getLocalNode(), dht.getLocalNode(), primaryKey, 
-                        AltLocDHTValueImpl.SELF, true);
-                
-                values.put(primaryKey, entity);
-            }
-        }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.StorableModel#handleStoreResult(org.limewire.mojito.db.Storable, org.limewire.mojito.result.StoreResult)
+     */
+    public void handleStoreResult(Storable storable, StoreResult result) {
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.StorableModel#handleContactChange()
+     */
+    public void handleContactChange() {
+        
+    }
+
     public String toString() {
         StringBuilder buffer = new StringBuilder("AltLocPublisher: ");
         synchronized (values) {

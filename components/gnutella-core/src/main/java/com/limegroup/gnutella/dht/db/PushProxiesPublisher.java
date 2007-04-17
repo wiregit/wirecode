@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueEntityPublisher;
-import org.limewire.mojito.db.DHTValueFactory;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.db.Storable;
+import org.limewire.mojito.db.StorableModel;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.DatabaseUtils;
 
 import com.limegroup.gnutella.GUID;
@@ -20,17 +18,11 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * The PushProxiesPublisher publishes Push Proxy information for 
  * the localhost in the DHT
  */
-public class PushProxiesPublisher implements DHTValueEntityPublisher {
+public class PushProxiesPublisher implements StorableModel {
     
-    private final MojitoDHT dht;
+    private Storable localhost = null;
     
-    private DHTValueEntity localhost = null;
-    
-    public PushProxiesPublisher(MojitoDHT dht) {
-        this.dht = dht;
-    }
-    
-    private synchronized DHTValueEntity getPushProxyForSelf() {
+    private synchronized Storable getPushProxyForSelf() {
         if (RouterService.acceptedIncomingConnection()) {
             return null;
         }
@@ -39,35 +31,45 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
             GUID guid = new GUID(RouterService.getMyGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
             
-            DHTValueFactory valueFactory = dht.getDHTValueFactory();
-            localhost = valueFactory.createDHTValueEntity(
-                    dht.getLocalNode(), 
-                    dht.getLocalNode(), 
-                    primaryKey, 
-                    PushProxiesDHTValueImpl.FOR_SELF, 
-                    true);
+            localhost = new Storable(
+                    primaryKey, PushProxiesDHTValueImpl.FOR_SELF);
         }
         
         return localhost;
     }
     
-    public Collection<DHTValueEntity> getValuesToPublish() {
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValuePublisherModel#getPublishableEntities()
+     */
+    public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
             return Collections.emptySet();
         }
         
-        DHTValueEntity localhost = getPushProxyForSelf();
+        Storable localhost = getPushProxyForSelf();
         if (localhost != null 
                 && DatabaseUtils.isPublishingRequired(localhost)) {
             return Collections.singleton(localhost);
         }
         return Collections.emptySet();
     }
-    
-    public synchronized void changeContact(Contact node) {
-        this.localhost = null;
+
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValuePublisherModel#published(org.limewire.mojito.db.PublishableEntity)
+     */
+    public void handleStoreResult(Storable storable, StoreResult result) {
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.StorableModel#handleContactChange()
+     */
+    public synchronized void handleContactChange() {
+        this.localhost = null;
+    }
+
     public String toString() {
         StringBuilder buffer = new StringBuilder("PushProxiesPublisher: ");
         buffer.append(getPushProxyForSelf());
