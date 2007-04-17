@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
 
 /**
@@ -102,8 +103,8 @@ public class DownloadSettings extends LimeProps {
                 "PREVIEWABLE_EXTENSIONS");
     
     /** Whether to report disk problems to the bug server */
-    public static final BooleanSetting REPORT_DISK_PROBLEMS =
-        FACTORY.createRemoteBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", false, 
-                "DownloadSettings.reportDisk");
+    public static final ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
+        FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", 0f, 
+                "DownloadSettings.reportDisk", 0f, 1f);
         
 }

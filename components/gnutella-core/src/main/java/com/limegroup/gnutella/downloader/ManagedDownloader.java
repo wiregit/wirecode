@@ -696,14 +696,14 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     private void reportDiskProblem(IOException cause) {
-        if (DownloadSettings.REPORT_DISK_PROBLEMS.getValue()) {
+        if (DownloadSettings.REPORT_DISK_PROBLEMS.getBoolean()) {
             if (!(cause instanceof DiskException))
                 cause = new DiskException(cause);
             ErrorService.error(cause);
         }
     }
     private void reportDiskProblem(String cause) {
-        if (DownloadSettings.REPORT_DISK_PROBLEMS.getValue())
+        if (DownloadSettings.REPORT_DISK_PROBLEMS.getBoolean())
             ErrorService.error(new DiskException(cause));
     }
     
