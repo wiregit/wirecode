@@ -94,8 +94,9 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		word.append("BitTorrent");
 		dispatcher.addConnectionAcceptor(
 				this,
-				new String[]{word.toString()},
-				false,false);
+				false,
+				false,
+				word.toString());
         
         FileUtils.addFileLocker(this);
 		

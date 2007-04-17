@@ -277,9 +277,10 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
         RouterService.getConnectionDispatcher().
         addConnectionAcceptor(this,
-        		new String[]{ConnectionSettings.CONNECT_STRING_FIRST_WORD,"LIMEWIRE"},
         		false,
-        		false);
+        		false,
+        		ConnectionSettings.CONNECT_STRING_FIRST_WORD,
+                "LIMEWIRE");
         
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
@@ -404,8 +405,6 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
-        if(true)
-            return true;
         return !NetworkUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&

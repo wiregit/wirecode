@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -17,13 +18,14 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
@@ -549,7 +551,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         try {
             ip = InetAddress.getByName(NetworkUtils.ip2string(ipBytes));
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
         byte[] extensions = null;
         if(ggep != null) {
@@ -588,9 +590,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         try {
             return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Message.N_UNKNOWN);
         } catch (BadPacketException e) {
-            // cannot happen
-            assert false;
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -873,6 +873,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                     packedIPs = NetworkUtils.unpackIps(data);
                 } catch(BadGGEPPropertyException bad) {
                 } catch(InvalidDataException bpe) {}
+                
+                if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS)) {
+                    try {
+                        byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS);
+                        packedIPs = decoratePackedIPs(data, packedIPs);
+                    } catch(BadGGEPPropertyException bad) {
+                    }
+                }
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS)) {
@@ -917,6 +925,55 @@ public class PingReply extends Message implements Serializable, IpPort {
         DHT_VERSION = dhtVersion;
         DHT_MODE = dhtMode;
         TLS_CAPABLE = tlsCapable;
+    }
+    
+    /** Iterates through the hosts and sets TLS data if the data indicated the host supports TLS. */
+    private static List<IpPort> decoratePackedIPs(byte[] tlsData, List<IpPort> hosts) {
+        if(tlsData.length == 0)
+            return hosts;
+        
+        List<IpPort> decorated = null; 
+        int i = 0;
+        int bit = 0x80;
+        int hostIdx = 0;
+        for(IpPort next : hosts) {
+            if((tlsData[i] & bit) == bit) {
+                ExtendedEndpoint ep = new ExtendedEndpoint(next.getInetAddress(), next.getPort());
+                ep.setTLSCapable(true);
+                if(decorated == null) {
+                    decorated = new ArrayList<IpPort>(hosts.size());
+                    decorated.addAll(hosts.subList(0, hostIdx)); // add all prior hosts.
+                }
+                decorated.add(ep);
+            } else if(decorated != null) {
+                decorated.add(next); // preserve decorated
+            }
+            
+            if(bit == 0x1) {
+                i++;
+                bit = 0x80;
+            } else {
+                bit >>>= 1;
+            }
+            
+            // If we've gone past the end of however much is stored,
+            // we're done.
+            if(i >= tlsData.length) {
+                // add the rest of the hosts to the decorated list if necessary
+                if(decorated != null && hostIdx+1 < hosts.size())
+                    decorated.addAll(hosts.subList(hostIdx+1, hosts.size()));
+                break;
+            }
+            
+            hostIdx++;
+        }
+        
+        if(decorated != null) {
+            assert decorated.size() == hosts.size() : "decorated: " + decorated + ", hosts: " + hosts;
+            return decorated;
+        } else {
+            return hosts;
+        }
     }
 
 
@@ -1019,31 +1076,50 @@ public class PingReply extends Message implements Serializable, IpPort {
         return ggep;
     }
     
+    /**
+     * Returns a byte[] of data that indicates if the hosts are TLS capable.
+     * If no hosts are capable, this returns an empty array.
+     * Otherwise, it returns a byte[] where each bit in the array
+     * corresponds to the element (in order) of the hosts.  If the bit
+     * is on, that host supports TLS.
+     * 
+     * For example, if this is supplied the hosts:
+     *  1.2.3.4:5, 5.4.3.2.1:1, and 2.3.4.5:6
+     * and the first and third hosts are TLS capable,
+     * then this will return a single byte of:
+     *  10100000
+     * 
+     */ 
     private static byte[] getTLSData(Collection<? extends IpPort> hosts) {
         HostCatcher catcher = RouterService.getHostCatcher();
         if(catcher == null)
             return DataUtils.EMPTY_BYTE_ARRAY;
         
         byte[] b = new byte[(int)Math.ceil((hosts.size() / 8d))];
+        //int lastIndexSet = 0;
         boolean found = false;
         int i = 0;
-        int bit = 0;
+        int bit = 0x80;
         for(IpPort ipp : hosts) {
             if(catcher.isHostTLSCapable(ipp)) {
                 found = true;
                 b[i] |= bit;
+          //      lastIndexSet = i;
             }
-            if(bit == 0x80) {
+            if(bit == 0x01) {
                 i++;
-                bit = 0;
+                bit = 0x80;
             } else {
-                bit <<= 1;
+                bit >>>= 1;
             }
         }
-        if(!found)
+        
+        if(!found) {
             return DataUtils.EMPTY_BYTE_ARRAY;
-        else
+        } else {
+            // TODO: reduce size of byte[] to only the # of indexes required
             return b;
+        }
     }
 
     /**
@@ -1356,10 +1432,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
                                  newPayload, null, IP, getNetwork());
         } catch (BadPacketException e) {
-            // cannot happen
-            ErrorService.error(e);
-            assert false;
-            return null;
+            throw new IllegalStateException(e);
         }
     }
     

@@ -41,10 +41,23 @@ public class ConnectionDispatcher {
     	}
     }
 
+    /**
+     * Associates the given ConnectionAcceptor with the given words.
+     * If localOnly is true, non-local-host sockets will be closed
+     * when using the word.  Otherwise, localhost sockets will be
+     * forbidden from using the word.
+     * If blocking is true, a new thread will be spawned when calling
+     * acceptor.acceptConnection.
+     * 
+     * @param acceptor The ConnectionAcceptor to call acceptConnection on
+     * @param localOnly True if localhost connections are required, false if none allowed
+     * @param blocking True if the acceptor may block on I/O after acceptConnection is called
+     * @param words The list of words to associate with this ConnectionAcceptor
+     */
     public void addConnectionAcceptor(ConnectionAcceptor acceptor,
-    		String [] words,
     		boolean localOnly,
-    		boolean blocking) {
+    		boolean blocking,
+    		String... words) {
     	Delegator d = new Delegator(acceptor, localOnly, blocking);
     	synchronized(protocols) {
     		for (int i = 0; i < words.length; i++) {
@@ -55,7 +68,8 @@ public class ConnectionDispatcher {
     	}
     }
     
-    public void removeConnectionAcceptor(String [] words) {
+    /** Removes any ConnectionAcceptors from being associated with the given words. */
+    public void removeConnectionAcceptor(String... words) {
     	synchronized(protocols) {
             protocols.keySet().removeAll(Arrays.asList(words));
     		longestWordSize = 0;
@@ -109,7 +123,7 @@ public class ConnectionDispatcher {
      * supposed to be local, and whether the reading should happen
      * in a new thread or not.
      */
-    private class Delegator {
+    private static class Delegator {
     	private final ConnectionAcceptor acceptor;
     	private final boolean localOnly, blocking;
     	

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -664,6 +665,27 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(4, uhc.getSize());
     }
     
+    public void testImmediateEndpointObserverNoHosts() throws Exception {
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(0, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        assertNull(hc.getAnEndpointImmediate(observer));
+        assertNull(observer.getEndpoint());
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        assertEquals(p, observer.getEndpoint());
+    }
+    
+    public void testImmediateEndpointObserverWithHosts() throws Exception {
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(1, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        assertEquals(p, hc.getAnEndpointImmediate(observer));
+        assertNull(observer.getEndpoint());
+    }
+    
     public void testAsyncEndpointObserver() throws Exception {
         StubEndpointObserver observer = new StubEndpointObserver();
         assertEquals(0, hc.getNumHosts());
@@ -741,6 +763,44 @@ public class HostCatcherTest extends LimeTestCase {
         hostList = hc.getDHTSupportEndpoint(2);
         assertEquals(9, hostList.size());
         assertEquals("18.239.0.100", hostList.get(0).getAddress());
+    }
+    
+    public void testIsTLSCapable() throws Exception {
+        assertEquals(0, hc.getNumHosts());
+        ExtendedEndpoint p = new ExtendedEndpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("231.123.254.1", 1)));
+        assertFalse(hc.isHostTLSCapable(p));
+        
+        p = new ExtendedEndpoint("21.81.1.1", 1);
+        p.setTLSCapable(true);
+        hc.add(p, true);
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("21.81.1.1", 1)));
+        assertTrue(hc.isHostTLSCapable(p));
+        
+        // Hand-craft a PingReply w/ TLS IPPs to see if they're added as
+        // TLS capable hosts.
+        assertEquals(2, hc.getNumHosts());
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        // mark the second & third items as TLS
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
+        ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
+            0, 0, false, ggep);
+        hc.add(pr);
+        assertEquals(7, hc.getNumHosts());
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("1.1.1.1:1")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.2.3.4:2")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("3.4.2.3:3")));
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("254.0.0.3:4")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.0.1.0:1")));
     }
         
    

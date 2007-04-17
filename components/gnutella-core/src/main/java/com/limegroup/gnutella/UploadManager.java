@@ -248,9 +248,9 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
     	this.slotManager = slotManager;
     	RouterService.getConnectionDispatcher().addConnectionAcceptor(
     			this,
-    			new String[]{"GET","HEAD"},
     			false,
-    			true);
+    			true,
+    			"GET","HEAD");
         FileUtils.addFileLocker(this);
     }
     

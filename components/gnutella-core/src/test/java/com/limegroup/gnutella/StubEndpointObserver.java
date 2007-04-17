@@ -14,7 +14,7 @@ public class StubEndpointObserver implements EndpointObserver {
         wait(time);
     }
 
-    public Endpoint getEndpoint() {
+    public synchronized Endpoint getEndpoint() {
         return endpoint;
     }
 

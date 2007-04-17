@@ -297,9 +297,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
         RouterService.getConnectionDispatcher().
         addConnectionAcceptor(this,
-        		new String[]{"CONNECT","\n\n"},
         		false,
-        		false);
+        		false,
+        		"CONNECT","\n\n");
         _started = true;
     }
 	

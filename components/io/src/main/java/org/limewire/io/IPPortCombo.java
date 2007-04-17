@@ -31,7 +31,7 @@ public class IPPortCombo implements IpPort {
     
     /**
      * Constructor used for data read from the network.
-     * Throws BadPacketException on errors.
+     * Throws InvalidDataException on errors.
      */
     private IPPortCombo(byte[] networkData) throws InvalidDataException {
         if (networkData.length != 6)

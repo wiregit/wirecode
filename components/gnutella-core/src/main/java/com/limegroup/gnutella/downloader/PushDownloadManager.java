@@ -113,9 +113,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
     /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
     public void initialize(ConnectionDispatcher dispatcher) {
     	dispatcher.addConnectionAcceptor(this,
-    			new String[]{"GIV"},
     			false,
-    			true);
+    			true,
+    			"GIV");
     }
     
     /**

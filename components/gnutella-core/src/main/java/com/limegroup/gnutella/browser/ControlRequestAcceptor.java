@@ -14,9 +14,9 @@ public class ControlRequestAcceptor implements ConnectionAcceptor {
 	
 	public void register(ConnectionDispatcher dispatcher) {
 		dispatcher.addConnectionAcceptor(this,
-				new String[]{"MAGNET","TORRENT"},
 				true,
-				true);
+				true,
+				"MAGNET","TORRENT");
 	}
 	
 	public void acceptConnection(String word, Socket sock) {

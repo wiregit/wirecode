@@ -622,11 +622,15 @@ public class HostCatcher {
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
-        // if the pong carried packed IP/Ports, add those as their own
-        // endpoints.
+        // if the pong carried packed IP/Ports, add those as their own endpoints.
         rank(pr.getPackedIPPorts());
-        for(IpPort ipp : pr.getPackedIPPorts()) {
-            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+        for(IpPort ipp : pr.getPackedIPPorts()) {            
+            ExtendedEndpoint ep;
+            if(ipp instanceof ExtendedEndpoint)
+                ep = (ExtendedEndpoint)ipp;
+            else
+                ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            
             if(isValidHost(ep))
                 add(ep, GOOD_PRIORITY);
         }
