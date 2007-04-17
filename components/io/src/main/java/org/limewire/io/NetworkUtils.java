@@ -474,6 +474,15 @@ public final class NetworkUtils {
     }
     
     /**
+     * Retuens the IP:Port as byte array.
+     * 
+     * This method is IPv6 compliant
+     */
+    public static byte[] getBytes(IpPort ipp) {
+        return getBytes(ipp.getInetAddress(), ipp.getPort());
+    }
+    
+    /**
      * Returns the IP:Port as byte array.
      * 
      * This method is IPv6 compliant

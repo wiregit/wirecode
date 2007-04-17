@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -30,17 +33,7 @@ import com.limegroup.gnutella.messages.GGEP;
  *   <features>1</features>
  *   <fwt-version>1.0</fwt-version>
  *   <port>5000</port>
- *   <proxies>
- *     <proxy-count>5</proxy-count>
- *     <proxy-0>
- *       <ip-address>1.2.3.4</ip-address>
- *       <port>6000</port>
- *     </proxy-0>
- *     <proxy-1>
- *       <ip-address>4.3.2.1</ip-address>
- *       <port>7000</port>
- *     </proxy-1>
- *   </proxies>
+ *   <proxies>1.2.3.4:2000,localhost:3000</proxies>
  * </ggep>
  */
 public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
@@ -56,15 +49,9 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     
     private static final String FEATURES = "features";
     
-    private static final String IP_ADDRESS = "ip-address";
-    
     private static final String PORT = "port";
     
     private static final String PROXIES = "proxies";
-    
-    private static final String PROXY_COUNT = "proxy-count";
-    
-    private static final String PROXY = "proxy-"; // proxy-0, proxy-99, ...
     
     /**
      * The version of the value
@@ -140,33 +127,31 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             
             this.features = ggep.getInt(FEATURES);
             this.fwtVersion = ggep.getInt(FWT_VERSION);
-            this.port = getPortFromGGEP(ggep);
             
-            GGEP proxiesGGEP = new GGEP(ggep.get(PROXIES), 0);
-            if (proxiesGGEP == null) {
-                throw new DHTValueException("No such element: " + PROXIES);
+            byte[] portBytes = ggep.getBytes(PORT);
+            this.port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
+            if (!NetworkUtils.isValidPort(port)) {
+                throw new DHTValueException("Illegal port: " + port);
             }
             
-            int count = proxiesGGEP.getInt(PROXY_COUNT);
+            byte[] proxiesBytes = ggep.getBytes(PROXIES);
+            ByteArrayInputStream bais = new ByteArrayInputStream(proxiesBytes);
+            DataInputStream in = new DataInputStream(bais);
             
             Set<IpPort> proxies = new IpPortSet();
-            for (int i = 0; i < count; i++) {
-                String proxyKey = PROXY + i;
+            while(in.available() > 0) {
+                int length = in.readUnsignedByte();
                 
-                byte[] element = proxiesGGEP.get(proxyKey);
-                if (element == null) {
-                    throw new DHTValueException("No such element: " + proxyKey);
+                byte[] addr = new byte[length-2];
+                in.readFully(addr);
+                
+                int port = in.readUnsignedShort();
+                
+                if (!NetworkUtils.isValidPort(port)) {
+                    throw new DHTValueException("Illegal port: " + port);
                 }
                 
-                GGEP proxyGGEP = new GGEP(element, 0);
-                
-                byte[] proxyAddr = proxyGGEP.get(IP_ADDRESS);
-                if (proxyAddr == null) {
-                    throw new DHTValueException("No such element: " + IP_ADDRESS);
-                }
-                int proxyPort = getPortFromGGEP(proxyGGEP);
-                
-                proxies.add(new IpPortImpl(InetAddress.getByAddress(proxyAddr), proxyPort));
+                proxies.add(new IpPortImpl(InetAddress.getByAddress(addr), port));
             }
             
             this.proxies = proxies;
@@ -179,25 +164,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             
         } catch (UnknownHostException err) {
             throw new DHTValueException(err);
+            
+        } catch (IOException err) {
+            throw new DHTValueException(err);
         }
-    }
-    
-    private static int getPortFromGGEP(GGEP ggep) throws DHTValueException {
-        byte[] portBytes = ggep.get(PORT);
-        if (portBytes == null) {
-            throw new DHTValueException("No such element: " + PORT);
-        }
-        
-        if (portBytes.length != 2) {
-            throw new DHTValueException("Illegal number of bytes for Port: " + portBytes.length);
-        }
-        
-        int port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
-        if (!NetworkUtils.isValidPort(port)) {
-            throw new DHTValueException("Illegal port: " + port);
-        }
-        
-        return port;
     }
     
     public byte[] getValue() {
@@ -251,27 +221,35 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         ByteOrder.short2beb((short)value.getPort(), port, 0);
         ggep.put(PORT, port);
         
-        GGEP proxiesGGEP = new GGEP();
-        Set<? extends IpPort> proxies = value.getPushProxies();
-        proxiesGGEP.put(PROXY_COUNT, proxies.size());
-        
-        int index = 0;
-        for (IpPort proxy : proxies) {
-            GGEP proxyGGEP = new GGEP();
-            
-            byte[] proxyAddr = proxy.getInetAddress().getAddress();
-            proxyGGEP.put(IP_ADDRESS, proxyAddr);
-            
-            byte[] proxyPort = new byte[2];
-            ByteOrder.short2beb((short)proxy.getPort(), proxyPort, 0);
-            proxyGGEP.put(PORT, proxyPort);
-            
-            String proxyKey = PROXY + Integer.toString(index++);
-            proxiesGGEP.put(proxyKey, proxyGGEP.toByteArray());
+        try {
+            Set<? extends IpPort> proxies = value.getPushProxies();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            for (IpPort proxy : proxies) {
+                byte[] ipp = NetworkUtils.getBytes(proxy);
+                assert (ipp.length == 6 || ipp.length == 18);
+                baos.write(ipp.length);
+                baos.write(ipp);
+            }
+            baos.close();
+            ggep.put(PROXIES, baos.toByteArray());
+        } catch (IOException err) {
+            // Impossible
+            throw new RuntimeException(err);
         }
         
-        ggep.put(PROXIES, proxiesGGEP.toByteArray());
         return ggep.toByteArray();
+    }
+    
+    static String toString(PushProxiesDHTValue value) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("Features=").append(value.getFeatures()).append("\n");
+        buffer.append("FWTVersion=").append(value.getFwtVersion()).append("\n");
+        buffer.append("PushProxies=").append(value.getPushProxies()).append("\n");
+        return buffer.toString();
+    }
+    
+    public String toString() {
+        return toString(this);
     }
     
     /**
@@ -319,6 +297,10 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         
         public boolean isPushProxiesForSelf() {
             return true;
+        }
+        
+        public String toString() {
+            return PushProxiesDHTValueImpl.toString(this);
         }
     }
 }

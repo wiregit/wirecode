@@ -3,13 +3,13 @@ package com.limegroup.gnutella.dht.db;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
@@ -34,9 +34,10 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         int fwtVersion = 2;
         int port = 1234;
         
-        Set<? extends IpPort> proxies = null;
+        Set<IpPort> proxies = new IpPortSet();
         try {
-            proxies = Collections.singleton(new IpPortImpl("localhost", 4321));
+            proxies.add(new IpPortImpl("localhost", 4321));
+            proxies.add(new IpPortImpl("localhost", 3333));
         } catch (UnknownHostException err) {
             fail("UnknownHostException", err);
         }
@@ -48,7 +49,7 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         assertEquals(futures, value1.getFeatures());
         assertEquals(fwtVersion, value1.getFwtVersion());
         assertEquals(port, value1.getPort());
-        assertEquals(1, value1.getPushProxies().size());
+        assertEquals(2, value1.getPushProxies().size());
         assertEquals(proxies.iterator().next().getInetAddress(), 
                 value1.getPushProxies().iterator().next().getInetAddress());
         assertEquals(proxies.iterator().next().getPort(), 
@@ -78,7 +79,7 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         assertEquals(value1.getFeatures(), value2.getFeatures());
         assertEquals(value1.getFwtVersion(), value2.getFwtVersion());
         assertEquals(value1.getPort(), value2.getPort());
-        assertEquals(1, value2.getPushProxies().size());
+        assertEquals(2, value2.getPushProxies().size());
         assertEquals(value1.getPushProxies().iterator().next().getInetAddress(), 
                 value2.getPushProxies().iterator().next().getInetAddress());
         assertEquals(value1.getPushProxies().iterator().next().getPort(), 

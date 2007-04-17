@@ -13,6 +13,7 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 
 /**
@@ -79,50 +80,31 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         
         try {
             GGEP ggep = new GGEP(data, 0);
-            this.guid = ggep.get(CLIENT_ID);
             
-            if (guid == null) {
-                throw new DHTValueException("No such element: " + PORT);
-            }
-            
+            this.guid = ggep.getBytes(CLIENT_ID);
             if (guid.length != 16) {
                 throw new DHTValueException("Illegal GUID length: " + guid.length);
             }
             
-            this.port = getPortFromGGEP(ggep);
-            
-            byte[] firewalled = ggep.get(FIREWALLED);
-            if (firewalled == null) {
-                throw new DHTValueException("No such element: " + FIREWALLED);
+            byte[] portBytes = ggep.getBytes(PORT);
+            this.port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
+            if (!NetworkUtils.isValidPort(port)) {
+                throw new DHTValueException("Illegal port: " + port);
             }
             
+            byte[] firewalled = ggep.getBytes(FIREWALLED);
             if (firewalled.length != 1) {
                 throw new DHTValueException("Illegal Firewalled length: " + firewalled.length);
             }
             
             this.firewalled = (firewalled[0] != 0);
             
+        } catch (BadGGEPPropertyException err) {
+            throw new DHTValueException(err);
+            
         } catch (BadGGEPBlockException err) {
             throw new DHTValueException(err);
         }
-    }
-    
-    private static int getPortFromGGEP(GGEP ggep) throws DHTValueException {
-        byte[] portBytes = ggep.get(PORT);
-        if (portBytes == null) {
-            throw new DHTValueException("No such element: " + PORT);
-        }
-        
-        if (portBytes.length != 2) {
-            throw new DHTValueException("Illegal number of bytes for Port: " + portBytes.length);
-        }
-        
-        int port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
-        if (!NetworkUtils.isValidPort(port)) {
-            throw new DHTValueException("Illegal port: " + port);
-        }
-        
-        return port;
     }
     
     public int getPort() {
