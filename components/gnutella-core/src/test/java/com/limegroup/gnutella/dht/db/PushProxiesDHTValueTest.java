@@ -13,6 +13,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.dht.DHTTestCase;
 
 public class PushProxiesDHTValueTest extends DHTTestCase {
@@ -30,6 +31,7 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
     }
     
     public void testSerialization() {
+        byte[] guid = GUID.makeGuid();
         int futures = 1;
         int fwtVersion = 2;
         int port = 1234;
@@ -44,8 +46,9 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         
         PushProxiesDHTValue value1 
             = new PushProxiesDHTValueImpl(Version.ZERO, 
-                    futures, fwtVersion, port, proxies);
+                    guid, futures, fwtVersion, port, proxies);
         
+        assertEquals(guid, value1.getGUID());
         assertEquals(futures, value1.getFeatures());
         assertEquals(fwtVersion, value1.getFwtVersion());
         assertEquals(port, value1.getPort());
@@ -76,6 +79,7 @@ public class PushProxiesDHTValueTest extends DHTTestCase {
         }
         
         // Should be equal
+        assertEquals(value1.getGUID(), value2.getGUID());
         assertEquals(value1.getFeatures(), value2.getFeatures());
         assertEquals(value1.getFwtVersion(), value2.getFwtVersion());
         assertEquals(value1.getPort(), value2.getPort());
