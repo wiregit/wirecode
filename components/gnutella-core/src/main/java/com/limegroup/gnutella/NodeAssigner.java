@@ -548,6 +548,6 @@ public class NodeAssigner {
      * See DHTSetting.DHT_TO_ULTRAPEER_PROBABILITY for more info!
      */
     private static boolean acceptUltrapeer() {
-        return (Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue());
+        return (Math.random() < DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.getValue());
     }
 }

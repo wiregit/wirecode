@@ -166,7 +166,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         setUltrapeerCapabilities();
-        DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
+        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         ULTRAPEER.setAcceptsUltrapeers(true);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24*3600*1000));
@@ -179,7 +179,7 @@ public class NodeAssignerTest extends LimeTestCase {
         setDHTCapabilities();
         ROUTER_SERVICE.start();
         sleep();
-        DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(0);
+        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
         ULTRAPEER.setAcceptsUltrapeers(false);
         connect();
         sleep();
@@ -188,7 +188,7 @@ public class NodeAssignerTest extends LimeTestCase {
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
-        DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
+        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(2000);
