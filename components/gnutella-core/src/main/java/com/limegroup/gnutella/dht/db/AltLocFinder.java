@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -281,7 +282,16 @@ public class AltLocFinder {
                 }
             }
 
+            // Compare the GUIDs from the AltLoc and PushProxy value!
+            // They should be the same!
             byte[] guid = this.guid.bytes();
+            if (!Arrays.equals(guid, pushProxies.getGUID())) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("The AltLoc and PushProxy GUIDs do not match!");
+                }
+                return;
+            }
+            
             Set<? extends IpPort> proxies = pushProxies.getPushProxies();
             int features = pushProxies.getFeatures();
             int fwtVersion = pushProxies.getFwtVersion();
