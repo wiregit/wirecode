@@ -65,7 +65,7 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
         return securityToken;
     }
 
-    public Collection<? extends DHTValueEntity> getDHTValues() {
+    public Collection<? extends DHTValueEntity> getDHTValueEntities() {
         return values;
     }
 

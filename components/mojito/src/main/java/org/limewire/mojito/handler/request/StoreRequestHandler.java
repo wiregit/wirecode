@@ -81,7 +81,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        Collection<? extends DHTValueEntity> values = request.getDHTValues();
+        Collection<? extends DHTValueEntity> values = request.getDHTValueEntities();
         
         List<StoreStatusCode> status 
             = new ArrayList<StoreStatusCode>(values.size());
