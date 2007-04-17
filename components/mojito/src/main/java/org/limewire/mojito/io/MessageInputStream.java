@@ -37,6 +37,7 @@ import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
+import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
@@ -106,17 +107,18 @@ public class MessageInputStream extends DataInputStream {
      * 
      * @param sender The Contact that send us the DHTValue
      */
-    public DHTValueEntity readDHTValueEntity(Contact sender, DHTValueFactory factory) throws IOException {
+    public DHTValueEntity readDHTValueEntity(Contact sender, DHTValueFactoryManager factoryManager) throws IOException {
         Contact creator = readContact();
-        KUID valueId = readKUID();
-        DHTValue value = readDHTValue(factory);
-        return factory.createDHTValueEntity(creator, sender, valueId, value, false);
+        KUID primaryKey = readKUID();
+        DHTValue value = readDHTValue(factoryManager);
+        
+        return DHTValueEntity.createFromRemote(creator, sender, primaryKey, value);
     }
     
     /**
      * Reads a DHTValue from the InputStream 
      */
-    private DHTValue readDHTValue(DHTValueFactory factory) throws IOException {
+    private DHTValue readDHTValue(DHTValueFactoryManager factoryManager) throws IOException {
         DHTValueType valueType = readValueType();
         Version version = readVersion();
         
@@ -127,13 +129,15 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
+        DHTValueFactory factory = factoryManager.getDHTValueFactory(valueType);
+        assert (factory != null);
         return factory.createDHTValue(valueType, version, data);
     }
     
     /**
      * Reads multiple DHTValues from the InputStream 
      */
-    public List<DHTValueEntity> readDHTValueEntities(Contact sender, DHTValueFactory factory) throws IOException {
+    public List<DHTValueEntity> readDHTValueEntities(Contact sender, DHTValueFactoryManager factoryManager) throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
@@ -141,7 +145,7 @@ public class MessageInputStream extends DataInputStream {
         
         DHTValueEntity[] entities = new DHTValueEntity[size];
         for(int i = 0; i < entities.length; i++) {
-            entities[i] = readDHTValueEntity(sender, factory);
+            entities[i] = readDHTValueEntity(sender, factoryManager);
         }
         return Arrays.asList(entities);
     }

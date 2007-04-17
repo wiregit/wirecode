@@ -9,7 +9,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -58,8 +57,8 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         
         Contact creator = routeTable.getLocalNode();
         KUID valueId = creator.getNodeID().invert();
-        DHTValueEntity value = new DHTValueEntityImpl(creator, creator, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes()), false);
+        DHTValueEntity value = DHTValueEntity.createFromRemote(creator, creator, valueId, 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes()));
         
         long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));

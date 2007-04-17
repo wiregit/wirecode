@@ -195,7 +195,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // Store the value
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
-            assertEquals(k, evt.getNodes().size());
+            assertEquals(k, evt.getLocations().size());
             
             // Give everybody time to process the store request
             Thread.sleep(waitForNodes);
@@ -203,7 +203,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // And check the initial state
             Context closest = null;
             Context furthest = null;
-            for (Contact remote : evt.getNodes()) {
+            for (Contact remote : evt.getLocations()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
@@ -258,7 +258,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 fail(buffer.toString());
             }
             
-            for (Contact remote : evt.getNodes()) {
+            for (Contact remote : evt.getLocations()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 
                 if (dht != furthest) {
@@ -326,7 +326,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // nearest Node above
             Context middle = null;
             int index = 0;
-            for (Contact node : evt.getNodes()) {
+            for (Contact node : evt.getLocations()) {
                 if (index == k/2) {
                     middle = (Context)dhts.get(node.getNodeID());
                     break;
@@ -375,8 +375,8 @@ public class CacheForwardTest extends MojitoTestCase {
             // First step: Get the current furthest Nodes
             index = 0;
             furthest = null;
-            for (Contact node : evt.getNodes()) {
-                if (index == evt.getNodes().size()-2) {
+            for (Contact node : evt.getLocations()) {
+                if (index == evt.getLocations().size()-2) {
                     furthest = (Context)dhts.get(node.getNodeID());
                     break;
                 }
@@ -428,7 +428,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // If the creator is a member of the k-closest Nodes then
             // make sure we're counting it as well
-            for (Contact node : evt.getNodes()) {
+            for (Contact node : evt.getLocations()) {
                 if (node.getNodeID().equals(creator.getLocalNodeID())) {
                     count++;
                     break;

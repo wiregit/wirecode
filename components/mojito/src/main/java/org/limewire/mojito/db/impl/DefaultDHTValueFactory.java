@@ -19,25 +19,20 @@
 
 package org.limewire.mojito.db.impl;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 
+/**
+ * The DefaultDHTValueFactory creates DHTValues for unknown
+ * DHTValueTypes.
+ */
 public class DefaultDHTValueFactory implements DHTValueFactory {
     
-    public static final DHTValueFactory FACTORY = new DefaultDHTValueFactory();
-    
-    public DHTValue createDHTValue(DHTValueType type, Version version, byte[] value) throws DHTValueException {
+    public DHTValue createDHTValue(DHTValueType type, 
+            Version version, byte[] value) throws DHTValueException {
         return new DHTValueImpl(type, version, value);
-    }
-
-    public DHTValueEntity createDHTValueEntity(Contact creator, Contact sender, 
-            KUID primaryKey, DHTValue value, boolean localValue) {
-        return new DHTValueEntityImpl(creator, sender, primaryKey, value, localValue);
     }
 }

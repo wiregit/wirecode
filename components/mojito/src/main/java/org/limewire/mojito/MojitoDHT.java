@@ -28,10 +28,10 @@ import java.security.KeyPair;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntityPublisher;
-import org.limewire.mojito.db.DHTValueFactory;
+import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -219,25 +219,14 @@ public interface MojitoDHT {
     public Database getDatabase();
     
     /**
-     * Setter to replace the default DHTValueFactory
+     * Returns the DHTValueFactoryManager
      */
-    public void setDHTValueFactory(DHTValueFactory valueFactory);
+    public DHTValueFactoryManager getDHTValueFactoryManager();
     
     /**
-     * Returns the DHTValueFactory that is used to create
-     * DHTValues
+     * Returns the StorableModelManager
      */
-    public DHTValueFactory getDHTValueFactory();
-    
-    /**
-     * Setter to install a custom DHTValueEntityPublisher
-     */
-    public void setDHTValueEntityPublisher(DHTValueEntityPublisher publisher);
-    
-    /**
-     * Returns the current DHTValueEntityPublisher
-     */
-    public DHTValueEntityPublisher getDHTValueEntityPublisher();
+    public StorableModelManager getStorableModelManager();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use

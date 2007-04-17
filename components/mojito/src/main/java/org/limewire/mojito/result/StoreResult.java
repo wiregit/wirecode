@@ -25,6 +25,7 @@ import java.util.Map;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.CollectionUtils;
 
 
 /**
@@ -32,14 +33,14 @@ import org.limewire.mojito.routing.Contact;
  */
 public class StoreResult implements Result {
     
-    private final Map<Contact, Collection<StoreStatusCode>> nodes;
+    private final Map<Contact, Collection<StoreStatusCode>> locations;
     
     private final Collection<? extends DHTValueEntity> values;
 
-    public StoreResult(Map<Contact, Collection<StoreStatusCode>> nodes, 
+    public StoreResult(Map<Contact, Collection<StoreStatusCode>> locations, 
             Collection<? extends DHTValueEntity> values) {
         
-        this.nodes = nodes;
+        this.locations = locations;
         this.values = values;
     }
     
@@ -47,8 +48,8 @@ public class StoreResult implements Result {
      * Returns a Collection Nodes where the DHTValue(s) were
      * stored
      */
-    public Collection<? extends Contact> getNodes() {
-        return nodes.keySet();
+    public Collection<? extends Contact> getLocations() {
+        return locations.keySet();
     }
     
     /**
@@ -62,16 +63,10 @@ public class StoreResult implements Result {
         StringBuilder buffer = new StringBuilder();
         
         buffer.append("VALUES").append("\n");
-        int i = 0;
-        for (DHTValueEntity value : getValues()) {
-            buffer.append("  ").append(i++).append(": ").append(value).append("\n");
-        }
+        buffer.append(CollectionUtils.toString(getValues()));
         
-        buffer.append("NODES:").append("\n");
-        i = 0;
-        for (Contact node : getNodes()) {
-            buffer.append("  ").append(i++).append(": ").append(node).append("\n");
-        }
+        buffer.append("LOCATIONS:").append("\n");
+        buffer.append(CollectionUtils.toString(getLocations()));
         return buffer.toString();
     }
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -83,15 +84,15 @@ public class DatabaseUtils {
     /**
      * 
      */
-    public static boolean isPublishingRequired(DHTValueEntity entity) {
-        return isPublishingRequired(entity.getPublishTime(), entity.getLocations().size());
+    public static boolean isPublishingRequired(Storable storable) {
+        return isPublishingRequired(storable.getPublishTime(), storable.getLocationCount());
     }
     
     /**
      * 
      */
-    public static boolean isPublishingRequired(long lastRepublishingTime, int locationCount) {
-        if (lastRepublishingTime <= 0L || locationCount <= 0) {
+    public static boolean isPublishingRequired(long publishingTime, int locationCount) {
+        if (publishingTime <= 0L || locationCount <= 0) {
             return true;
         }
         
@@ -103,7 +104,7 @@ public class DatabaseUtils {
         long nextPublishTime = Math.max(t, 
                 DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
         
-        long time = lastRepublishingTime + nextPublishTime;
+        long time = publishingTime + nextPublishTime;
         
         return System.currentTimeMillis() >= time;
     }

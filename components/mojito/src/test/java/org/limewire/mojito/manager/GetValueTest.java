@@ -14,7 +14,7 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
+import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -63,7 +63,7 @@ public class GetValueTest extends MojitoTestCase {
             Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
-            DHTValue value = DefaultDHTValueFactory.FACTORY.createDHTValue(
+            DHTValue value = new DHTValueImpl(
                     DHTValueType.TEXT, Version.ZERO, "Hello World".getBytes());
             first.put(valueId, value).get();
             

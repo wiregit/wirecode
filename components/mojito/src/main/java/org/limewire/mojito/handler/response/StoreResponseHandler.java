@@ -210,15 +210,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
         
-        for (DHTValueEntity entity : entities) {
-            KUID secondaryKey = entity.getSecondaryKey();
-            Collection<Contact> nodes = locations.get(secondaryKey);
-            if (nodes == null) {
-                nodes = Collections.emptySet();
-            }
-            entity.setLocations(nodes);
-        }
-        
         if (processList.size() == 1) {
             StoreProcess process = processList.get(0);
             if (process.getException() != null) {
@@ -233,7 +224,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
         
-        setReturnValue(new StoreResult(map, entities));
+        StoreResult result = new StoreResult(map, entities);
+        /*for (DHTValueEntity entity : entities) {
+            entity.handleStoreResult(result);
+        }*/
+        
+        setReturnValue(result);
     }
     
     /**

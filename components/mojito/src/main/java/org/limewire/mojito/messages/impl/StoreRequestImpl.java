@@ -57,7 +57,8 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
         super(context, OpCode.STORE_REQUEST, src, messageId, msgVersion, in);
         
         this.securityToken = in.readSecurityToken();
-        this.values = in.readDHTValueEntities(getContact(), context.getDHTValueFactory());
+        this.values = in.readDHTValueEntities(getContact(), 
+                context.getDHTValueFactoryManager());
     }
     
     public SecurityToken getSecurityToken() {

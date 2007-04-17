@@ -63,7 +63,8 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, msgVersion, in);
         
         this.requestLoad = in.readFloat();
-        this.entities = in.readDHTValueEntities(getContact(), context.getDHTValueFactory());
+        this.entities = in.readDHTValueEntities(getContact(), 
+                context.getDHTValueFactoryManager());
         this.secondaryKeys = in.readKUIDs();
     }
     

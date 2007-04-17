@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.impl.DHTValueImpl;
@@ -139,8 +139,8 @@ public class CommandHandler {
     
     public static void publisher(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
-        DHTValueEntityPublisher pusbliher = dht.getDHTValueEntityPublisher();
-        buffer.append(pusbliher.toString());
+        StorableModelManager modelManager = dht.getStorableModelManager();
+        buffer.append(modelManager.toString());
         out.println(buffer);
     }
     
