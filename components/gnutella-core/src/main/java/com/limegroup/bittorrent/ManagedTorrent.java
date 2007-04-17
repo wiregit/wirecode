@@ -293,7 +293,7 @@ BTLinkListener {
 			state.set(TorrentState.DISK_PROBLEM);
 		}
 		stopImpl();
-		if (BittorrentSettings.REPORT_DISK_PROBLEMS.getValue())
+		if (BittorrentSettings.REPORT_DISK_PROBLEMS.getBoolean())
 		    ErrorService.error(e);
 	}
 	

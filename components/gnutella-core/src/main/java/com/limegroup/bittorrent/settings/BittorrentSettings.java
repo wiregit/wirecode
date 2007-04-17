@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.settings;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 
 import com.limegroup.gnutella.settings.LimeProps;
 
@@ -67,7 +68,7 @@ public class BittorrentSettings extends LimeProps {
     /**
      * Whether to report Disk problems to the bug server
      */
-    public static BooleanSetting REPORT_DISK_PROBLEMS =
-        FACTORY.createRemoteBooleanSetting("REPORT_BT_DISK_PROBLEMS", 
-                false, "BTSettings.reportDisk");
+    public static ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
+        FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_BT_DISK_PROBLEMS", 
+                0f, "BTSettings.reportDiskProblems",0f,1f);
 }
