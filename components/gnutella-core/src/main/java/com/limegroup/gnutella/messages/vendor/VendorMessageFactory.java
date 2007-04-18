@@ -60,6 +60,7 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_HEADER_UPDATE, VendorMessage.F_LIME_VENDOR_ID, new HeaderUpdateVendorMessageParser());
         setParser(VendorMessage.F_OOB_PROXYING_CONTROL, VendorMessage.F_LIME_VENDOR_ID, new OOBProxyControlVendorMessageParser());
         setParser(VendorMessage.F_INSPECTION_REQ, VendorMessage.F_LIME_VENDOR_ID, new InspectionRequestVendorMessageParser());
+        setParser(VendorMessage.F_ADVANCED_TOGGLE, VendorMessage.F_LIME_VENDOR_ID, new AdvancedStatsToggleVendorMessageParser());
     }
     
     /**
@@ -370,6 +371,13 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
                 byte[] restOf, int network) throws BadPacketException {
             return new InspectionRequest(guid, ttl, hops, version, restOf, network);
+        }
+    }
+    
+    private static class AdvancedStatsToggleVendorMessageParser implements VendorMessageParser {
+        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
+                byte[] restOf, int network) throws BadPacketException {
+            return new AdvancedStatsToggle(guid, ttl, hops, version, restOf, network);
         }
     }
     

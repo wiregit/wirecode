@@ -362,6 +362,25 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         testWrite(ack);
         testRead(req);
     }
+    
+    public void testAdvancedToggleVM() throws Exception {
+        // just test parsing
+        AdvancedStatsToggle ast = new AdvancedStatsToggle(1000);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ast.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        AdvancedStatsToggle ast2 = (AdvancedStatsToggle) MessageFactory.read(bais);
+        assertFalse(ast2.shutOffNow());
+        assertEquals(1000,ast2.getTime());
+        
+        // negative time only sets a flag
+        ast = new AdvancedStatsToggle(-1000);
+        baos = new ByteArrayOutputStream();
+        ast.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        ast2 = (AdvancedStatsToggle) MessageFactory.read(bais);
+        assertTrue(ast2.shutOffNow());
+    }
 
 
     private void testWrite(VendorMessage vm) throws Exception {

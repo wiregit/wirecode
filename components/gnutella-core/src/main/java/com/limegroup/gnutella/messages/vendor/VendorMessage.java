@@ -44,6 +44,7 @@ public abstract class VendorMessage extends Message {
     public static final int F_CONTENT_RESP = 29;
     public static final int F_INSPECTION_REQ = 30;
     public static final int F_INSPECTION_RESP = 31;
+    public static final int F_ADVANCED_TOGGLE = 32;
 
 
     

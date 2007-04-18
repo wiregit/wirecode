@@ -30,6 +30,12 @@ public final class StatisticsManager implements Runnable {
 	 * recorded.
 	 */
 	private volatile boolean _recordAdvancedStatistics;
+    
+    /**
+     * Boolean for whether or not advanced statistics were
+     * turned on manually.
+     */
+    private volatile boolean _recordAdvancedStatisticsManual;
 
 	/**
 	 * Constant for the <tt>StatisticsManager</tt> isntance.
@@ -95,6 +101,18 @@ public final class StatisticsManager implements Runnable {
 	public void setRecordAdvancedStats(boolean record) {
 		_recordAdvancedStatistics = record;
 	}
+    
+    public void setRecordAdvancedStatsManual(boolean record) {
+        _recordAdvancedStatisticsManual = record;
+        setRecordAdvancedStats(record);
+    }
+    
+    /**
+     * @return true if the user manually turned on advanced statistics.
+     */
+    public boolean getRecordAdvancedStatsManual() {
+        return _recordAdvancedStatisticsManual;
+    }
 
 	/**
 	 * Accessor for whether or not advanced statistics should be recorded.

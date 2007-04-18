@@ -37,6 +37,7 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.GiveStatsVMHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
@@ -51,6 +52,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -512,6 +514,7 @@ public abstract class MessageRouter {
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, new InspectionRequestHandler());
+        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
