@@ -114,7 +114,7 @@ public class FilterSettings extends LimeProps {
      * inspection responses.  
      */
     public static final StringArraySetting INSPECTOR_IP_ADDRESSES =
-        FACTORY.createRemoteStringArraySetting("INSPECTOR_IPS", new String[]{"*.*.*.*"}, 
+        FACTORY.createRemoteStringArraySetting("INSPECTOR_IPS", new String[0], 
         "FilterSettings.inspectorIps");
     
     /**

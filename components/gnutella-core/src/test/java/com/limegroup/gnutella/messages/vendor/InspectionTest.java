@@ -59,6 +59,7 @@ public class InspectionTest extends ServerSideTestCase {
                 new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {InetAddress.getLocalHost().getHostAddress(),"127.*.*.*"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.*.*.*"});
     }
     
     @InspectablePrimitive
