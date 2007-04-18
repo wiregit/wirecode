@@ -7,13 +7,13 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * Factory to create AltLocDHTValues
+ * Factory to create AltLocValues
  */
 public class AltLocValueFactory implements DHTValueFactory {
 
     public DHTValue createDHTValue(DHTValueType type, 
             Version version, byte[] value) throws DHTValueException {
         
-        return AltLocDHTValueImpl.createFromData(version, value);
+        return AltLocValue.createFromData(version, value);
     }
 }

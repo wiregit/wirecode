@@ -32,7 +32,7 @@ public class PushProxiesPublisher implements StorableModel {
             KUID primaryKey = KUIDUtils.toKUID(guid);
             
             localhost = new Storable(
-                    primaryKey, PushProxiesDHTValueImpl.FOR_SELF);
+                    primaryKey, PushProxiesValue.FOR_SELF);
         }
         
         return localhost;

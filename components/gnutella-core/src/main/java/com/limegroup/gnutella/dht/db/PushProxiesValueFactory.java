@@ -7,13 +7,13 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * Factory to create PushProxiesDHTValues
+ * Factory to create PushProxiesValues
  */
 public class PushProxiesValueFactory implements DHTValueFactory {
 
     public DHTValue createDHTValue(DHTValueType type, 
             Version version, byte[] value) throws DHTValueException {
         
-        return PushProxiesDHTValueImpl.createFromData(version, value);
+        return PushProxiesValue.createFromData(version, value);
     }
 }

@@ -11,14 +11,14 @@ import org.limewire.mojito.routing.Version;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.dht.DHTTestCase;
 
-public class AltLocDHTValueTest extends DHTTestCase {
+public class AltLocValueTest extends DHTTestCase {
     
-    public AltLocDHTValueTest(String name) {
+    public AltLocValueTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(AltLocDHTValueTest.class);
+        return buildTestSuite(AltLocValueTest.class);
     }
     
     public static void main(String[] args) {
@@ -30,7 +30,7 @@ public class AltLocDHTValueTest extends DHTTestCase {
         int port = 1234;
         boolean firewalled = true;
         
-        AltLocDHTValue value1 = new AltLocDHTValueImpl(
+        AltLocValue value1 = AltLocValue.createAltLocValue(
                 Version.ZERO, guid, port, firewalled);
         
         assertEquals(guid, value1.getGUID());
@@ -49,10 +49,9 @@ public class AltLocDHTValueTest extends DHTTestCase {
         byte[] serialized = baos.toByteArray();
         
         // De-serialize it
-        AltLocDHTValue value2 = null;
+        AltLocValue value2 = null;
         try {
-            value2 = (AltLocDHTValue)AltLocDHTValueImpl
-                        .createFromData(Version.ZERO, serialized);
+            value2 = AltLocValue.createFromData(Version.ZERO, serialized);
         } catch (DHTValueException err) {
             fail("DHTValueException", err);
         }

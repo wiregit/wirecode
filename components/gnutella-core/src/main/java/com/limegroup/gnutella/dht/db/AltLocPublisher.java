@@ -57,14 +57,14 @@ public class AltLocPublisher implements StorableModel {
                     if (!values.containsKey(primaryKey)) {
                         
                         values.put(primaryKey, new Storable(
-                                primaryKey, AltLocDHTValueImpl.SELF));
+                                primaryKey, AltLocValue.SELF));
                     }
                 }
             }
             
-            // Step Two: Remove every DHTValueEntity that is no longer
+            // Step Two: Remove every Storable that is no longer
             // associated with a FileDesc (i.e. the FileDesc was deleted)
-            // and create a List of DHTValueEntities that are rare and
+            // and create a List of Storable that are rare and
             // must be republished
             for (Iterator<Storable> it = values.values().iterator(); it.hasNext(); ) {
                 Storable storable = it.next();

@@ -59,7 +59,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(urn);
-            DHTFuture<FindValueResult> future = dht.get(key, AltLocDHTValue.ALT_LOC);
+            DHTFuture<FindValueResult> future = dht.get(key, AltLocValue.ALT_LOC);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key));
             return true;
         }
@@ -87,7 +87,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(guid);
-            DHTFuture<FindValueResult> future = dht.get(key, PushProxiesDHTValue.PUSH_PROXIES);
+            DHTFuture<FindValueResult> future = dht.get(key, PushProxiesValue.PUSH_PROXIES);
             future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key, altLocEntity));
             return true;
         }
@@ -119,7 +119,7 @@ public class AltLocFinder {
             }
             
             for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.equals(AltLocDHTValue.ALT_LOC)) {
+                if (!entityKey.equals(AltLocValue.ALT_LOC)) {
                     continue;
                 }
                     
@@ -139,11 +139,11 @@ public class AltLocFinder {
 
         private void handleDHTValueEntity(DHTValueEntity entity) {
             DHTValue value = entity.getValue();
-            if (!(value instanceof AltLocDHTValue)) {
+            if (!(value instanceof AltLocValue)) {
                 return;
             }
             
-            AltLocDHTValue altLoc = (AltLocDHTValue)value;
+            AltLocValue altLoc = (AltLocValue)value;
             
             // If the AltLoc is firewalled then do a lookup for
             // its PushProxies
@@ -236,7 +236,7 @@ public class AltLocFinder {
             }
             
             for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.equals(PushProxiesDHTValue.PUSH_PROXIES)) {
+                if (!entityKey.equals(PushProxiesValue.PUSH_PROXIES)) {
                     continue;
                 }
                     
@@ -257,14 +257,14 @@ public class AltLocFinder {
         private void handleDHTValueEntity(DHTValueEntity entity) {
 
             DHTValue value = entity.getValue();
-            if (!(value instanceof PushProxiesDHTValue)) {
+            if (!(value instanceof PushProxiesValue)) {
                 return;
             }
             
             Contact creator = entity.getCreator();
             InetAddress addr = ((InetSocketAddress)creator).getAddress();
             
-            PushProxiesDHTValue pushProxies = (PushProxiesDHTValue)value;
+            PushProxiesValue pushProxies = (PushProxiesValue)value;
             
             // Make some sanity checks
             if (altLocEntity != null) {

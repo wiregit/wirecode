@@ -41,11 +41,11 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.dht.db.AltLocDHTValue;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.AltLocValue;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesDHTValue;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
+import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -154,10 +154,10 @@ public abstract class AbstractDHTController implements DHTController {
         dht.setHostFilter(new FilterDelegate());
         
         dht.getDHTValueFactoryManager().addDHTValueFactory(
-                AltLocDHTValue.ALT_LOC, new AltLocValueFactory());
+                AltLocValue.ALT_LOC, new AltLocValueFactory());
         
         dht.getDHTValueFactoryManager().addDHTValueFactory(
-                PushProxiesDHTValue.PUSH_PROXIES, new PushProxiesValueFactory());
+                PushProxiesValue.PUSH_PROXIES, new PushProxiesValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -172,14 +172,14 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         dht.getStorableModelManager().addStorableModel(
-                AltLocDHTValue.ALT_LOC, new AltLocPublisher());
+                AltLocValue.ALT_LOC, new AltLocPublisher());
         
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
         if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
-                    PushProxiesDHTValue.PUSH_PROXIES, new PushProxiesPublisher());
+                    PushProxiesValue.PUSH_PROXIES, new PushProxiesPublisher());
         }
         
         this.bootstrapper = new DHTBootstrapperImpl(this);
