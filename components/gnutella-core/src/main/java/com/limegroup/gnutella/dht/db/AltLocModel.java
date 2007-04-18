@@ -32,7 +32,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * the number of query hits instead of upload attempts or even
  * keeping track of the file activities over multiple sessions.
  */
-public class AltLocPublisher implements StorableModel {
+public class AltLocModel implements StorableModel {
     
     private final Map<KUID, Storable> values 
         = Collections.synchronizedMap(new HashMap<KUID, Storable>());

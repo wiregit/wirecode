@@ -41,10 +41,10 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.AltLocModel;
 import com.limegroup.gnutella.dht.db.AltLocValue;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
+import com.limegroup.gnutella.dht.db.PushProxiesModel;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
@@ -172,14 +172,14 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         dht.getStorableModelManager().addStorableModel(
-                AltLocValue.ALT_LOC, new AltLocPublisher());
+                AltLocValue.ALT_LOC, new AltLocModel());
         
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
         if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
-                    PushProxiesValue.PUSH_PROXIES, new PushProxiesPublisher());
+                    PushProxiesValue.PUSH_PROXIES, new PushProxiesModel());
         }
         
         this.bootstrapper = new DHTBootstrapperImpl(this);

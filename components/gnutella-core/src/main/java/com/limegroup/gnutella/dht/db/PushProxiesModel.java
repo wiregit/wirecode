@@ -18,7 +18,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * The PushProxiesPublisher publishes Push Proxy information for 
  * the localhost in the DHT
  */
-public class PushProxiesPublisher implements StorableModel {
+public class PushProxiesModel implements StorableModel {
     
     private Storable localhost = null;
     
