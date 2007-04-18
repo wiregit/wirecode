@@ -87,14 +87,14 @@ public class FindValueResult extends LookupResult {
     }
 
     /**
-     * 
+     * Returns the values that were found
      */
     public Collection<? extends DHTValueEntity> getEntities() {
         return entities;
     }
     
     /**
-     * 
+     * Returns the EntityKeys that were found
      */
     public Collection<? extends EntityKey> getEntityKeys() {
         return entityKeys;
