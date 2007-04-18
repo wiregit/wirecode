@@ -63,7 +63,6 @@ public class StorableTest extends MojitoTestCase {
     public void testStorableModel() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        final long period = 100L;
         PrivilegedAccessor.setValue(DatabaseSettings.STORABLE_PUBLISHER_PERIOD, "value", new Long(100));
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
