@@ -25,7 +25,7 @@ import org.limewire.mojito.routing.Version;
 /**
  * A factory interface to create DHTValues
  */
-public interface DHTValueFactory {
+public interface DHTValueFactory<T extends DHTValue> {
     
     /**
      * Creates a DHTValue
@@ -34,6 +34,6 @@ public interface DHTValueFactory {
      * @param version The version of the value
      * @param value The actual value
      */
-    public DHTValue createDHTValue(DHTValueType type, 
+    public T createDHTValue(DHTValueType type, 
             Version version, byte[] value) throws DHTValueException;
 }
