@@ -119,8 +119,8 @@ public final class NetworkSettings extends MojitoProps {
      * 
      * Warning: Changing this Setting may cause weird effects!
      */
-    public static final BooleanSetting DROP_RESPONES_IF_FIREWALLED
-        = FACTORY.createBooleanSetting("DROP_RESPONES_IF_FIREWALLED", true);
+    public static final BooleanSetting DROP_RESPONE_IF_FIREWALLED
+        = FACTORY.createBooleanSetting("DROP_RESPONE_IF_FIREWALLED", true);
     
     /**
      * Setting for whether or not REQUEST messages should be dropped is
@@ -128,6 +128,6 @@ public final class NetworkSettings extends MojitoProps {
      * 
      * Warning: Changing this Setting may cause weird effects!
      */
-    public static final BooleanSetting DROP_REQUESTS_IF_FIREWALLED
-        = FACTORY.createBooleanSetting("DROP_REQUESTS_IF_FIREWALLED", true);
+    public static final BooleanSetting DROP_REQUEST_IF_FIREWALLED
+        = FACTORY.createBooleanSetting("DROP_REQUEST_IF_FIREWALLED", true);
 }

@@ -570,7 +570,7 @@ public abstract class MessageDispatcher {
             // a hint that it doesn't want to be contacted. Anyways, it
             // is a bug on the other side (a Mojito compatible impl).
             if (node.isFirewalled() 
-                    && NetworkSettings.DROP_RESPONES_IF_FIREWALLED.getValue()) {
+                    && NetworkSettings.DROP_RESPONE_IF_FIREWALLED.getValue()) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Dropping " + message + " because sender is firewalled");
                 }
@@ -634,7 +634,7 @@ public abstract class MessageDispatcher {
             // A Node that is marked as firewalled must not respond
             // to REQUESTS!
             if (context.getLocalNode().isFirewalled()
-                    && NetworkSettings.DROP_REQUESTS_IF_FIREWALLED.getValue()) {
+                    && NetworkSettings.DROP_REQUEST_IF_FIREWALLED.getValue()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Local Node is firewalled, dropping " + message);
                 }
