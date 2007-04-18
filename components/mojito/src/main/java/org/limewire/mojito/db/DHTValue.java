@@ -32,7 +32,7 @@ public interface DHTValue extends Serializable {
      * and storing an empty value in the DHT will remove an
      * existing value from the DHT
      */
-    public static final DHTValue EMPTY_VALUE = new EmptyDHTValue();
+    public static final DHTValue EMPTY_VALUE = new EmptyValue();
     
     /**
      * Returns the type of the value
@@ -50,7 +50,7 @@ public interface DHTValue extends Serializable {
     public byte[] getValue();
 
     /**
-     * 
+     * Writes the value to the OutputStream
      */
     public void write(OutputStream out) throws IOException;
 
@@ -62,13 +62,13 @@ public interface DHTValue extends Serializable {
     /**
      * An implementation of DHTValue that has no payload
      */
-    static final class EmptyDHTValue implements DHTValue {
+    static final class EmptyValue implements DHTValue {
         
         private static final long serialVersionUID = 4690500560328936523L;
 
         private static final byte[] EMPTY = new byte[0];
         
-        private EmptyDHTValue() {
+        private EmptyValue() {
         }
         
         public byte[] getValue() {

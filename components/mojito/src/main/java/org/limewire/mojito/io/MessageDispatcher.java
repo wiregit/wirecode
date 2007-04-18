@@ -257,7 +257,7 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * 
+     * Returns whether or not the MessageDispatcher is bound to a Socket
      */
     public abstract boolean isBound();
     
