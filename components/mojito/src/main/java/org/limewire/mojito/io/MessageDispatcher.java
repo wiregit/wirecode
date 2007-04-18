@@ -563,6 +563,20 @@ public abstract class MessageDispatcher {
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
             
+            // The remote Node thinks it's firewalled but it responded 
+            // for some odd reason which it shouldn't regardless if it
+            // is really firewalled (it didn't receive our request in
+            // first place) or pretends to be firewalled in which is
+            // a hint that it doesn't want to be contacted. Anyways, it
+            // is a bug on the other side (a Mojito compatible impl).
+            if (node.isFirewalled() 
+                    && NetworkSettings.DROP_RESPONES_IF_FIREWALLED.getValue()) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Dropping " + message + " because sender is firewalled");
+                }
+                return;
+            }
+
             // Check the SecurityToken in the MessageID to figure out
             // whether or not we have ever sent a Request to that Host!
             if (messageId.isTaggingSupported()
@@ -616,7 +630,11 @@ public abstract class MessageDispatcher {
             processResponse(receipt, response);
             
         } else if (message instanceof RequestMessage) {
-            if (context.getLocalNode().isFirewalled()) {
+            
+            // A Node that is marked as firewalled must not respond
+            // to REQUESTS!
+            if (context.getLocalNode().isFirewalled()
+                    && NetworkSettings.DROP_REQUESTS_IF_FIREWALLED.getValue()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Local Node is firewalled, dropping " + message);
                 }
