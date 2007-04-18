@@ -1,11 +1,5 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import org.limewire.service.ErrorService;
-
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
@@ -16,7 +10,7 @@ import com.limegroup.gnutella.messages.GGEP;
  * Note this is very LimeWire-specific, so other vendors will
  * almost certainly have no use for supporting this message.
  */
-public class InspectionRequest extends VendorMessage {
+public class InspectionRequest extends RoutableGGEPMessage {
     
     private static final int VERSION = 1;
     static final String INSPECTION_KEY = "I";
@@ -29,10 +23,7 @@ public class InspectionRequest extends VendorMessage {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_INSPECTION_REQ, version, payload, network);
         String requested;
         try {
-            GGEP ggep = new GGEP(payload,0,null);
             requested = ggep.getString(INSPECTION_KEY);
-        } catch (BadGGEPBlockException bad) {
-            throw new BadPacketException();
         } catch (BadGGEPPropertyException bad) {
             throw new BadPacketException();
         }
@@ -46,7 +37,7 @@ public class InspectionRequest extends VendorMessage {
      */
     public InspectionRequest(String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
-                derivePayload(requested));
+                deriveGGEP(requested));
         this.requested = requested;
     }
 
@@ -54,7 +45,7 @@ public class InspectionRequest extends VendorMessage {
         return requested;
     }
     
-    private static byte [] derivePayload(String... requested) {
+    private static GGEP deriveGGEP(String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.
@@ -70,12 +61,6 @@ public class InspectionRequest extends VendorMessage {
         
         GGEP g = new GGEP();
         g.putCompressed(INSPECTION_KEY, ret.getBytes());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            g.write(baos);
-        } catch (IOException impossible) {
-            ErrorService.error(impossible);
-        }
-        return baos.toByteArray();
+        return g;
     }
 }
