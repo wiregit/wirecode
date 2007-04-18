@@ -79,13 +79,21 @@ public abstract class MessageDispatcher {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
+    /**
+     * The receive buffer size for the Socket
+     */
     protected static final int RECEIVE_BUFFER_SIZE 
         = NetworkSettings.RECEIVE_BUFFER_SIZE.getValue();
     
+    /**
+     * The send buffer size for the Socket
+     */
     protected static final int SEND_BUFFER_SIZE 
         = NetworkSettings.SEND_BUFFER_SIZE.getValue();
     
-    /** The maximum size of a serialized Message we can send */
+    /** 
+     * The maximum size of a serialized Message we can send 
+     */
     private static final int MAX_MESSAGE_SIZE
         = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
     
@@ -1041,6 +1049,10 @@ public abstract class MessageDispatcher {
                 requestHandler = storeHandler;
             } else if (request instanceof StatsRequest) {
                 requestHandler = statsHandler;
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("There is no handler for " + request);
+                }
             }
             
             if (requestHandler != null) {
