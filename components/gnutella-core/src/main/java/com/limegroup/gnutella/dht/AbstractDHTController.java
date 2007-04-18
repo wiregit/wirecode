@@ -153,10 +153,10 @@ public abstract class AbstractDHTController implements DHTController {
         
         dht.setHostFilter(new FilterDelegate());
         
-        dht.getDHTValueFactoryManager().addDHTValueFactory(
+        dht.getDHTValueFactoryManager().addValueFactory(
                 AltLocValue.ALT_LOC, new AltLocValueFactory());
         
-        dht.getDHTValueFactoryManager().addDHTValueFactory(
+        dht.getDHTValueFactoryManager().addValueFactory(
                 PushProxiesValue.PUSH_PROXIES, new PushProxiesValueFactory());
         
         try {
