@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
+import org.limewire.mojito.exceptions.DHTValueException;
+import org.limewire.mojito.routing.Version;
 
 /**
  * The DHTValueFactoryManager manages DHTValueFactories
@@ -77,5 +79,27 @@ public class DHTValueFactoryManager {
         }
         
         return defaultFactory;
+    }
+    
+    /**
+     * Creates a DHTValue from the given arguments. This
+     * method takes care of empty values!
+     */
+    public DHTValue createDHTValue(DHTValueType valueType, 
+            Version version, byte[] value) throws DHTValueException {
+        
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
+        if (version == null) {
+            throw new NullPointerException("Version is null");
+        }
+        
+        if (value == null || value.length == 0) {
+            return defaultFactory.createDHTValue(valueType, version, value);
+        }
+        
+        return getDHTValueFactory(valueType).createDHTValue(valueType, version, value);
     }
 }

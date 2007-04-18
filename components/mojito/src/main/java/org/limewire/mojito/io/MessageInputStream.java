@@ -36,7 +36,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
@@ -129,9 +128,7 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        DHTValueFactory factory = factoryManager.getDHTValueFactory(valueType);
-        assert (factory != null);
-        return factory.createDHTValue(valueType, version, data);
+        return factoryManager.createDHTValue(valueType, version, data);
     }
     
     /**
