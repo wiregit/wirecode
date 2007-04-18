@@ -26,11 +26,11 @@ import java.util.Map;
  */
 public class EntryImpl<K,V> implements Map.Entry<K,V> {
     
-    private K key;
+    private final K key;
     
     private V value;
     
-    private boolean immutable;
+    private final boolean immutable;
     
     public EntryImpl(K key, V value) {
         this(key, value, false);

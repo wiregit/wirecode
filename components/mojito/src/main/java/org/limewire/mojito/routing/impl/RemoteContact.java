@@ -133,8 +133,8 @@ public class RemoteContact implements Contact {
             int port = ((InetSocketAddress)contactAddress).getPort();
             if (port == 0) {
                 if (!isFirewalled()) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(ContactUtils.toString(nodeId, sourceAddress) 
                                 + " contact address is set to Port 0 but it is not marked as firewalled");
                     }
                 }

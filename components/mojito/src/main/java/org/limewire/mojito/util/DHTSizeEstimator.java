@@ -114,8 +114,8 @@ public class DHTSizeEstimator {
         
         if (remoteSize.compareTo(BigInteger.ZERO) < 0
                 || remoteSize.compareTo(MAXIMUM) > 0) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(remoteSize + " is an illegal argument");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(remoteSize + " is an illegal argument");
             }
             return;
         }

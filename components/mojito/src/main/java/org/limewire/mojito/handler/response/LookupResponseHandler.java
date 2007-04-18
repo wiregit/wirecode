@@ -353,12 +353,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         Contact contact = message.getContact();
         
         Integer hop = hopMap.remove(contact.getNodeID());
-        if (hop == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Hop counter is messed up for " + contact);
-            }
-            hop = new Integer(0);
-        }
+        assert (hop != null);
         
         currentHop = hop.intValue();
         
@@ -448,12 +443,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         }
         
         Integer hop = hopMap.remove(nodeId);
-        if (hop == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Hop counter is messed up for " + ContactUtils.toString(nodeId, dst));
-            }
-            hop = new Integer(0);
-        }
+        assert (hop != null);
         
         if (routeTableNodes.contains(nodeId)) {
             routeTableFailureCount++;

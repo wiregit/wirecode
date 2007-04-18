@@ -188,8 +188,8 @@ public class LocalContact implements Contact {
      */
     public synchronized boolean setExternalAddress(SocketAddress externalSocketAddress) {
         if (externalSocketAddress == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Argument is null");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SocketAddress is null");
             }
             return false;
         }
@@ -223,8 +223,10 @@ public class LocalContact implements Contact {
         if (!NetworkUtils.isSameAddressSpace(
                         externalAddress, currentAddress)) {
             
-            if (LOG.isErrorEnabled()) {
-                LOG.error("The current external address " + currentAddress 
+            // The remote Node tries to set our external address
+            // to an address that's from a different address space?
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("The current external address " + currentAddress 
                         + " is from a different IP address space than " + externalAddress);
             }
             return false;

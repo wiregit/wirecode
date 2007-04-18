@@ -44,7 +44,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.security.SecurityToken;
-import org.limewire.service.ErrorService;
 
 
 /**
@@ -147,23 +146,14 @@ public class DefaultMessageHandler {
         
         KUID nodeId = node.getNodeID();
         if (context.isLocalNodeID(nodeId)) {
-            if (message instanceof PingResponse) {
-            	// This is expected if there's a Node ID collision
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Looks like our NodeID collides with " + node);
-            	}
-            } else {
-                // This is unexpected. The MessageDispatcher should have
-                // caught it!
-                
-                String msg = "Received a " + message + " message from " + node 
-                    + ". This message should have never gotten so far!";
-                
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(msg);
-            	}
-                
-                ErrorService.error(new IllegalArgumentException(msg));
+            
+            // This is expected if there's a Node ID collision
+            assert (message instanceof PingResponse) 
+                : "Expected a PingResponse but got a " + message.getClass()
+                    + " from " + message.getContact();
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Looks like our NodeID collides with " + node);
             }
             
             return;
