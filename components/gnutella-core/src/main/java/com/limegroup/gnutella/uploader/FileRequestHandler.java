@@ -258,7 +258,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                     .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
         }
 
-        response.setEntity(new FileResponseEntity(uploader, fd));
+        response.setEntity(new FileResponseEntity(uploader, fd.getFile()));
         uploader.setState(Uploader.UPLOADING);
 
         if (uploader.isPartial()) {

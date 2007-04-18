@@ -35,13 +35,15 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     }
 
     public void interest(WriteObserver observer, boolean status) {
+        assert observer == this;
+        
         if (encoder == null) {
             return;
         }
         if (status) {
             encoder.requestOutput();
         } else {
-            //encoder.suspendOutput();
+            encoder.suspendOutput();
         }
     }
 
