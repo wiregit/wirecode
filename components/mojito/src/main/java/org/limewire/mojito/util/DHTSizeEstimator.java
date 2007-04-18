@@ -192,11 +192,14 @@ public class DHTSizeEstimator {
         // Get the average of the local estimations
         BigInteger localSize = BigInteger.ZERO;
         localSizeHistory.add(estimatedSize);
-        if (localSizeHistory.size() 
-                > ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
+        
+        // Adjust the size of the List. The Setting is SIMPP-able
+        // and may change!
+        int maxLocalHistorySize = ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue();
+        while(localSizeHistory.size() > maxLocalHistorySize) {
             localSizeHistory.remove(0);
         }
-
+        
         if (!localSizeHistory.isEmpty()) {
             BigInteger localSizeSum = BigInteger.ZERO;
             for (BigInteger size : localSizeHistory) {
@@ -217,9 +220,9 @@ public class DHTSizeEstimator {
                 BigInteger[] remote = remoteSizeSet.toArray(new BigInteger[0]);
                 
                 // Skip the smallest and largest values
-                // TODO: skip the 3 smallest and biggest values (breaks the unit test)
                 int count = 1;
-                for (int i = 1; i < (remote.length-1); i++) {
+                int skip = ContextSettings.SKIP_REMOTE_ESTIMATES.getValue();
+                for (int i = skip; i < (remote.length-skip); i++) {
                     combinedSize = combinedSize.add(remote[i]);
                     count++;
                 }

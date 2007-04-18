@@ -35,7 +35,7 @@ public class BootstrapSettings extends MojitoProps {
      */
     public static final FloatSetting IS_BOOTSTRAPPED_RATIO
         = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
-                0.5f, "is_bootstrapped_ratio", 0f, 1.0f);
+                0.5f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
     
     /**
      * Enabled or disables the second part of the bootstrapping process that
@@ -43,5 +43,5 @@ public class BootstrapSettings extends MojitoProps {
      */
     public static final BooleanSetting REFRESH_ALL_BUCKETS
         = FACTORY.createRemoteBooleanSetting("REFRESH_ALL_BUCKETS", 
-                true, "refresh_all_buckets");
+                true, "Mojito.RefreshAllBuckets");
 }

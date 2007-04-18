@@ -35,7 +35,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final IntSetting MAX_CACHE_SIZE
         = FACTORY.createRemoteIntSetting("MAX_CACHE_SIZE", 16, 
-                "max_cache_size", 1, 256);
+                "Mojito.MaxCacheSize", 1, 256);
     
     /**
      * The maximum number of failures a node may have before beeing completely
@@ -44,7 +44,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final IntSetting MAX_ACCEPT_NODE_FAILURES 
         = FACTORY.createRemoteIntSetting("MAX_ACCEPT_NODE_FAILURES", 20, 
-                "max_accept_node_failures", 4, 200);
+                "Mojito.MaxAcceptNodeFailures", 4, 200);
     
     /**
      * The maximum number of errors that may occur before an
@@ -52,7 +52,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final IntSetting MAX_ALIVE_NODE_FAILURES
         = FACTORY.createRemoteIntSetting("MAX_ALIVE_NODE_FAILURES", 4, 
-                "max_alive_node_failures", 4, 10);
+                "Mojito.MaxAliveNodeFailures", 4, 10);
    
     /**
      * The maximum number of errors that may occur before an
@@ -60,7 +60,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final IntSetting MAX_UNKNOWN_NODE_FAILURES
         = FACTORY.createRemoteIntSetting("MAX_UNKNOWN_NODE_FAILURES", 2, 
-                "max_unknown_node_failures", 2, 10);
+                "Mojito.MaxUnknownNodeFailures", 2, 10);
     
     /**
      * The minimum time that must pass since the last successful contact 
@@ -68,28 +68,30 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final LongSetting MIN_RECONNECTION_TIME
         = FACTORY.createRemoteLongSetting("MIN_RECONNECTION_TIME", 30L*1000L, 
-                "min_reconnect_time", 0L, 5L*60L*1000L);
+                "Mojito.MinReconnectTime", 0L, 5L*60L*1000L);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step.
      * Also known as parameter B
      */
     public static final IntSetting DEPTH_LIMIT
-        = FACTORY.createRemoteIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
+        = FACTORY.createRemoteIntSetting("DEPTH_LIMIT", 
+                4, "Mojito.DepthLimit", 1, 16);
     
     /**
      * The period of the Bucket freshness
      */
     public static final LongSetting BUCKET_REFRESH_PERIOD
         = FACTORY.createRemoteLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, 
-                "bucket_refresh_period", 10L*60L*1000L, 2L*60L*60L*1000L);
+                "Mojito.BucketRefreshPeriod", 10L*60L*1000L, 2L*60L*60L*1000L);
     
     /**
      * A minimum time (in sec) to pass before pinging the least recently
      * seen node of a bucket again
      */
     public static final LongSetting BUCKET_PING_LIMIT
-        = FACTORY.createLongSetting("BUCKET_PING_LIMIT", 30L * 1000L);
+        = FACTORY.createRemoteLongSetting("BUCKET_PING_LIMIT", 30L*1000L,
+                "Mojito.BucketPingLimit", 5L*1000L, 5L*60L*1000L);
     
     /**
      * The maximum number of consecutive failures that may occur
@@ -98,5 +100,6 @@ public final class RouteTableSettings extends MojitoProps {
      * kill our RouteTable).
      */
     public static final IntSetting MAX_CONSECUTIVE_FAILURES
-        = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
+        = FACTORY.createRemoteIntSetting("MAX_CONSECUTIVE_FAILURES", 100,
+                "Mojito.MaxConsecutiveFailures", 0, Integer.MAX_VALUE-1);
 }

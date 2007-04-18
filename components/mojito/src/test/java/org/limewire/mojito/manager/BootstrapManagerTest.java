@@ -48,7 +48,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
     }
     
     private static void setSettings() {
-        NetworkSettings.TIMEOUT.setValue(200);
+        NetworkSettings.DEFAULT_TIMEOUT.setValue(200);
         NetworkSettings.MIN_TIMEOUT_RTT.setValue(200);
     }
     

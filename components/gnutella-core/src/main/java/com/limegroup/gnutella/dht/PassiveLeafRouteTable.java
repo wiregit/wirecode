@@ -21,6 +21,8 @@ import org.limewire.mojito.util.FixedSizeHashMap;
 
 class PassiveLeafRouteTable implements RouteTable {
     
+    private static final long serialVersionUID = 2378400850935282184L;
+
     private final Bucket bucket;
     
     private final Contact localNode;

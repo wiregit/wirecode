@@ -235,13 +235,13 @@ public class DatabaseImpl implements Database {
                         if (numKeys <= 1) {
                             hostValuesMap.remove(iaddr);
                             
-                        } else if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                        } else if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
                             // The host went over the limit, thus either he is trying
                             // to legitimately remove a value, in which case we give him a chance
                             // or this method is called from the ban() method, in which case the 
                             // host should be filtered out by the HostFilter anyways
                             hostValuesMap.put(iaddr, 
-                                    DatabaseSettings.MAX_KEY_PER_IP.getValue()-1);
+                                    DatabaseSettings.MAX_KEYS_PER_IP.getValue()-1);
                         } else {
                             
                             numKeys--;
@@ -304,9 +304,9 @@ public class DatabaseImpl implements Database {
                 numKeys++;
                 hostValuesMap.put(iaddr, numKeys);
                 
-                if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
                     
-                    if(numKeys > DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                    if(numKeys > DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue()) {
                         // Banning will also remove the host from the Map
                         banContact(creator);
                     }

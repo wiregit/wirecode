@@ -126,7 +126,7 @@ public class CollisionTest extends MojitoTestCase {
     
     public void testReplace() throws Exception {
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
-        NetworkSettings.TIMEOUT.setValue(100L);
+        NetworkSettings.DEFAULT_TIMEOUT.setValue(100L);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
         MojitoDHT bootstrap = null, original = null, replacement = null;
@@ -168,7 +168,7 @@ public class CollisionTest extends MojitoTestCase {
             replacement.start();
             MojitoUtils.bootstrap(replacement, bootstrap.getContactAddress()).get();
             
-            Thread.sleep(5L * NetworkSettings.TIMEOUT.getValue());
+            Thread.sleep(5L * NetworkSettings.DEFAULT_TIMEOUT.getValue());
             
             nodes = ((Context)bootstrap).getRouteTable().getContacts();
             map = new HashMap<KUID, SocketAddress>();

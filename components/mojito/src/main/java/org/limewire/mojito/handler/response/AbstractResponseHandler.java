@@ -114,7 +114,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      */
     public void setTimeout(long timeout) {
         if (timeout < 0L) {
-            this.timeout = NetworkSettings.TIMEOUT.getValue();
+            this.timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
         } else {
             this.timeout = timeout;
         }

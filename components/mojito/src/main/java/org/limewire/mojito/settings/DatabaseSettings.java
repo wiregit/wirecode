@@ -36,14 +36,14 @@ public final class DatabaseSettings extends MojitoProps {
      */
     public static final IntSetting MAX_DATABASE_SIZE
         = FACTORY.createRemoteIntSetting("MAX_DATABASE_SIZE", 16384, 
-                "max_database_size", 8192, 65536);
+                "Mojito.MaxDatabaseSize", 32, 65536);
     
     /**
      * The maximum number of Values per Key a single Node can store
      */
     public static final IntSetting MAX_VALUES_PER_KEY
         = FACTORY.createRemoteIntSetting("MAX_VALUES_PER_KEY", 5, 
-                "max_values_per_key", 1, 10);
+                "Mojito.MaxValuesPerKey", 1, 10);
     
     /**
      * The maximum number of keys a single IP can store in the DHT.
@@ -61,24 +61,24 @@ public final class DatabaseSettings extends MojitoProps {
      * 
      * Considering even NAT'd addresses, this should be enough
      */
-    public static final IntSetting MAX_KEY_PER_IP
-        = FACTORY.createRemoteIntSetting("MAX_KEY_PER_IP", 5, 
-                "max_key_per_ip", 1, Integer.MAX_VALUE - 1);
+    public static final IntSetting MAX_KEYS_PER_IP
+        = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP", 5, 
+                "Mojito.MaxKeysPerIP", 1, Integer.MAX_VALUE - 1);
     
     /**
      * The limit after which the host gets banned. 
      * @see MAX_KEY_PER_IP
      */
-    public static final IntSetting MAX_KEY_PER_IP_BAN_LIMIT
-    = FACTORY.createRemoteIntSetting("MAX_KEY_PER_IP_BAN_LIMIT", 50, 
-            "max_key_per_ip_ban_limit", 1, Integer.MAX_VALUE - 1);
+    public static final IntSetting MAX_KEYS_PER_IP_BAN_LIMIT
+    = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP_BAN_LIMIT", 50, 
+            "Mojito.MaxKeysPerIPBanLimit", 1, Integer.MAX_VALUE - 1);
     
     /**
      * The time after a non-local value expires
      */
     public static final LongSetting VALUE_EXPIRATION_TIME
         = FACTORY.createRemoteLongSetting("VALUE_EXPIRATION_TIME", 60L*60L*1000L, 
-                "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L);
+                "Mojito.ValueExpirationTime", 30L*60L*1000L, 24L*60L*60L*1000L);
     
     /**
      * The lower bound republishing interval for a DHTValue. That
@@ -93,35 +93,35 @@ public final class DatabaseSettings extends MojitoProps {
      */
     public static final LongSetting VALUE_REPUBLISH_INTERVAL
         = FACTORY.createRemoteLongSetting("VALUE_REPUBLISH_INTERVAL", 30L*60L*1000L, 
-                "value_republish_interval", 3L*60L*1000L, 24L*60L*60L*1000L);
+                "Mojito.ValueRepublishInterval", 3L*60L*1000L, 24L*60L*60L*1000L);
     
     /**
      * The period of the StorablePublisher
      */
     public static final LongSetting STORABLE_PUBLISHER_PERIOD
         = FACTORY.createRemoteLongSetting("STORABLE_PUBLISHER_PERIOD", 5L*60L*1000L, 
-                "storable_publisher_period", 5L*60L*1000L, 60L*60L*1000L);
+                "Mojito.StorablePublisherPeriod", 5L*60L*1000L, 60L*60L*1000L);
     
     /**
      * The period of the DatabaseCleaner
      */
     public static final LongSetting DATABASE_CLEANER_PERIOD
         = FACTORY.createRemoteLongSetting("DATABASE_CLEANER_PERIOD", 5L*60L*1000L, 
-                "database_cleaner_period", 5L*60L*1000L, 60L*60L*1000L);
+                "Mojito.DatabaseCleanerPeriod", 5L*60L*1000L, 60L*60L*1000L);
     
     /**
      * The *alpha* factor for the Exponentially Moving Average (EMA) 
      * computation of the value request load
      */
     public static final FloatSetting VALUE_REQUEST_LOAD_SMOOTHING_FACTOR 
-        = FACTORY.createFloatSetting("value_request_load_smoothing_factor", 0.25f);
+        = FACTORY.createFloatSetting("VALUE_REQUEST_LOAD_SMOOTHING_FACTOR", 0.25f);
     
     /**
      * The delay (in sec) after which we null back the value request load
      */
     // 1 minute
     public static final IntSetting VALUE_REQUEST_LOAD_NULLING_DELAY
-        = FACTORY.createIntSetting("value_request_load_nulling_delay", 60); 
+        = FACTORY.createIntSetting("VALUE_REQUEST_LOAD_NULLING_DELAY", 60); 
     
     /**
      * Whether or not to delete a DHTValue from the Database if we're
@@ -130,5 +130,5 @@ public final class DatabaseSettings extends MojitoProps {
      */
     public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
         = FACTORY.createRemoteBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, 
-                "delete_value_if_furthest_node");
+                "Mojito.DeleteValueIfFurthestNode");
 }

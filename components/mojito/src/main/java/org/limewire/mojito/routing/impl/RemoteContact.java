@@ -236,7 +236,7 @@ public class RemoteContact implements Contact {
     
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
-        long timeout = NetworkSettings.TIMEOUT.getValue();
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
         if(rtt <= 0L || !isAlive()) {
             return timeout;
         } else {

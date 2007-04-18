@@ -42,6 +42,6 @@ public class BucketRefresherSettings extends MojitoProps {
      */
     public static final LongSetting BUCKET_REFRESHER_DELAY
         = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_DELAY", 1L*60L*1000L, 
-                "bucket_refresher_delay", 1L*60L*1000L, 2L*60L*60L*1000L);
+                "Mojito.BucketRefresherDelay", 1L*60L*1000L, 2L*60L*60L*1000L);
 
 }

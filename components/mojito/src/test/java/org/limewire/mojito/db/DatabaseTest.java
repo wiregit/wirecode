@@ -449,7 +449,7 @@ public class DatabaseTest extends MojitoTestCase {
     }
     
     public void testFloodDatabase() {
-        DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.setValue(10);
+        DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.setValue(10);
         Database db = new DatabaseImpl();
         HostFilterStub filter = new HostFilterStub();
         db.setHostFilter(filter);
@@ -466,7 +466,7 @@ public class DatabaseTest extends MojitoTestCase {
 
         DHTValueEntity value = null;
         //should allow x direct values
-        for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
+        for(int i = 0; i < DatabaseSettings.MAX_KEYS_PER_IP.getValue(); i++) {
             value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
                         new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             
@@ -503,7 +503,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), 
                 new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
-        for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
+        for(int i = 0; i <= DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue(); i++) {
             value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
                     new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             db.store(value);

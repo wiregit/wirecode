@@ -38,47 +38,51 @@ public class ContextSettings extends MojitoProps {
      * The time interval to compute the locally estimated Network size
      */
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
-        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L*1000L);
+        = FACTORY.createRemoteLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L*1000L,
+                "Mojito.EstimateNetworkSizeEvery", 1000L, 5L*60L*1000L);
     
     /**
      * The time interval in which the estimated Network size can be updated
      */
     public static final LongSetting UPDATE_NETWORK_SIZE_EVERY
-        = FACTORY.createLongSetting("UPDATE_NETWORK_SIZE_EVERY", 5L*1000L);
+        = FACTORY.createRemoteLongSetting("UPDATE_NETWORK_SIZE_EVERY", 5L*1000L,
+                "Mojito.UpdateNetworkSizeEvery", 5L*1000L, 5L*60L*1000L);
     
     /**
      * The maximum number of locally estimated Network sizes to
      * keep in Memory and to use as basis for the local estimation.
      */
     public static final IntSetting MAX_LOCAL_HISTORY_SIZE
-        = FACTORY.createIntSetting("MAX_LOCAL_HISTORY_SIZE", 20);
+        = FACTORY.createRemoteIntSetting("MAX_LOCAL_HISTORY_SIZE", 20,
+                "Mojito.MaxLocalHistorySize", 1, 100);
     
     /**
      * The maximum number of remotely estimated Network sizes to
      * keep in Memory and to use as basis for the local estimation.
      */
     public static final IntSetting MAX_REMOTE_HISTORY_SIZE
-        = FACTORY.createIntSetting("MAX_REMOTE_HISTORY_SIZE", 10);
+        = FACTORY.createRemoteIntSetting("MAX_REMOTE_HISTORY_SIZE", 10,
+                "Mojito.MaxRemoteHistorySize", 0, 100);
     
     /**
      * Whether or not to estimate the Network size
      */
     public static final BooleanSetting COUNT_REMOTE_SIZE
-        = FACTORY.createRemoteBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
+        = FACTORY.createRemoteBooleanSetting("COUNT_REMOTE_SIZE", 
+                true, "Mojito.CountRemoteSize");
+    
+    /**
+     * The number smallest and biggest DHT size estimates to skip
+     */
+    public static final IntSetting SKIP_REMOTE_ESTIMATES
+        = FACTORY.createRemoteIntSetting("SKIP_REMOTE_ESTIMATES", 1, 
+                "Mojito.SkipRemoteEstimates", 0, Integer.MAX_VALUE);
     
     /**
      * The name of the master key file
      */
     public static final StringSetting MASTER_KEY
         = FACTORY.createStringSetting("MASTER_KEY", "public.key");
-    
-    /**
-     * The maximum time a Node may stay inactive before
-     * the Node ID becomes invalid a new ID is generated.
-     */
-    public static final LongSetting NODE_ID_TIMEOUT
-        = FACTORY.createRemoteLongSetting("NODE_ID_TIMEOUT", 14L*24L*60L*60L*1000L, 
-                "node_id_timeout", 0L, 14L*24L*60L*60L*1000L);
     
     /**
      * The maximum time to wait on an Object
