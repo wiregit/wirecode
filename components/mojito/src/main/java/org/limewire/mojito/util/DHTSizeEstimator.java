@@ -85,11 +85,10 @@ public class DHTSizeEstimator {
                 (System.currentTimeMillis() - localEstimateTime) 
                     >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
             
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-
-            // TODO only live nodes?
             KUID localNodeId = routeTable.getLocalNode().getNodeID();
-            Collection<Contact> nodes = routeTable.select(localNodeId, k, false);
+            Collection<Contact> nodes = routeTable.select(localNodeId, 
+                    KademliaSettings.REPLICATION_PARAMETER.getValue(), 
+                    ContextSettings.ESTIMATE_WITH_LIVE_NODES_ONLY.getValue());
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();
@@ -121,8 +120,12 @@ public class DHTSizeEstimator {
         }
         
         remoteSizeHistory.add(remoteSize);
-        if (remoteSizeHistory.size() 
-                > ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
+        
+        // Adjust the size of the List. The Setting is SIMPP-able
+        // and may change!
+        int maxRemoteHistorySize = ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue();
+        while(remoteSizeHistory.size() > maxRemoteHistorySize
+                && !remoteSizeHistory.isEmpty()) {
             remoteSizeHistory.remove(0);
         }
     }
@@ -196,7 +199,8 @@ public class DHTSizeEstimator {
         // Adjust the size of the List. The Setting is SIMPP-able
         // and may change!
         int maxLocalHistorySize = ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue();
-        while(localSizeHistory.size() > maxLocalHistorySize) {
+        while(localSizeHistory.size() > maxLocalHistorySize
+                && !localSizeHistory.isEmpty()) {
             localSizeHistory.remove(0);
         }
         
@@ -222,7 +226,7 @@ public class DHTSizeEstimator {
                 // Skip the smallest and largest values
                 int count = 1;
                 int skip = ContextSettings.SKIP_REMOTE_ESTIMATES.getValue();
-                for (int i = skip; i < (remote.length-skip); i++) {
+                for (int i = skip; (skip >= 0) && (i < (remote.length-skip)); i++) {
                     combinedSize = combinedSize.add(remote[i]);
                     count++;
                 }

@@ -57,6 +57,14 @@ public class ContextSettings extends MojitoProps {
                 "Mojito.MaxLocalHistorySize", 1, 100);
     
     /**
+     * Wether or not only live Nodes should be used to estimate the
+     * DHT size
+     */
+    public static final BooleanSetting ESTIMATE_WITH_LIVE_NODES_ONLY
+        = FACTORY.createRemoteBooleanSetting("ESTIMATE_WITH_LIVE_NODES_ONLY", false, 
+                "Mojito.EstimateWithLiveNodesOnly");
+    
+    /**
      * The maximum number of remotely estimated Network sizes to
      * keep in Memory and to use as basis for the local estimation.
      */
