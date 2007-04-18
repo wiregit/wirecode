@@ -256,6 +256,10 @@ public class ApplicationSettings extends LimeProps {
     public static final FileSetting LAST_FILECHOOSER_DIRECTORY =
         FACTORY.createFileSetting("LAST_FILECHOOSER_DIR", new File("")).setAlwaysSave(true);
     
+    /** Whether collecting and reporting usage stats is allowed */
+    public static final BooleanSetting USAGE_STATS =
+        FACTORY.createBooleanSetting("USAGE_STATS", false);
+    
     /**
      * Gets the current language setting.
      */
