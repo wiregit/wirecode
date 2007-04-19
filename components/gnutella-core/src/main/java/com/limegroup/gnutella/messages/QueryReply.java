@@ -434,7 +434,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
-        boolean supportsTLS = ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue();
+        boolean supportsTLS = ConnectionSettings.TLS_INCOMING.getValue();
         _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

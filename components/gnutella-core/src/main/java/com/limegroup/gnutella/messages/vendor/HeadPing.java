@@ -91,39 +91,33 @@ public class HeadPing extends VendorMessage {
 		
 		//parse the urn string.
 		String urnStr = new String(payload,1,41);
-		
-		
 		if (!URN.isUrn(urnStr))
-			throw new BadPacketException("udp head request did not contain an urn");
-		
-		URN urn = null;
+			throw new BadPacketException("udp head request did not contain an urn");		
 		try {
-			urn = URN.createSHA1Urn(urnStr);
-		}catch(IOException oops) {
+			_urn = URN.createSHA1Urn(urnStr);
+		} catch(IOException oops) {
 			throw new BadPacketException("failed to parse an urn");
-		}finally {
-			_urn = urn;
 		}
 		
 		// parse the GGEP if any
-		GGEP g = null;
 		if ((_features  & GGEP_PING) == GGEP_PING) {
 			if (payload.length < 43)
 				throw new BadPacketException("no ggep was found.");
 			try {
-				g = new GGEP(payload, 42, null);
+				_ggep = new GGEP(payload, 42, null);
 			} catch (BadGGEPBlockException bpx) {
 				throw new BadPacketException("invalid ggep block");
 			}
 		}
-		_ggep = g;
 		
 		// extract the client guid if any
 		GUID clientGuid = null;
 		if (_ggep != null) {
-			try {
-				clientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
-			} catch (BadGGEPPropertyException noGuid) {}
+            if(_ggep.hasKey(GGEP_PUSH)) {
+    			try {
+    				clientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
+    			} catch (BadGGEPPropertyException noGuid) {}
+            }
         } 
 		
 		_clientGUID=clientGuid;
@@ -222,10 +216,6 @@ public class HeadPing extends VendorMessage {
 	public boolean requestsFWTPushLocs() {
 		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
 	}
-    
-    public boolean isTLSCapable() {
-        return (_features & TLS) == TLS;
-    }
 	
 	public byte getFeatures() {
 		return _features;

@@ -2288,7 +2288,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 LOG.debug("Starting fetch for connectable host: " + incoming);
 
             this.endpoint = incoming;
-            ConnectType type = endpoint.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+            ConnectType type = endpoint.isTLSCapable() && ConnectionSettings.TLS_OUTGOING.getValue() ? 
+                                        ConnectType.TLS : ConnectType.PLAIN;
             connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();

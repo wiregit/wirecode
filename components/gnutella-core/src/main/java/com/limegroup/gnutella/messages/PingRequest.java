@@ -24,12 +24,14 @@ import com.limegroup.gnutella.util.DataUtils;
 
 public class PingRequest extends Message {
 
-    /**
-     * various flags related to the SCP ggep field
-     */
+    /* various flags related to the SCP ggep field */
+    /** Mask for where leaf/ultrapeer requests are. */
     public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
+    /** If we're requesting leaf hosts. */
     public static final byte SCP_LEAF = 0x0;
+    /** If we're requesting ultrapeer hosts. */
     public static final byte SCP_ULTRAPEER = 0x1;
+    /** If we support incoming TLS. */
     public static final byte SCP_TLS = 0x2;
     
     
@@ -166,7 +168,7 @@ public class PingRequest extends Message {
         else
             data[0] = SCP_LEAF;
         
-        if(ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
+        if(ConnectionSettings.TLS_INCOMING.getValue())
             data[0] |= SCP_TLS; // add our support for TLS.
         
         return data;

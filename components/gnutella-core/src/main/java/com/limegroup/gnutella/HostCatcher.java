@@ -32,6 +32,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
+import org.limewire.io.HostInfo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
@@ -626,10 +627,17 @@ public class HostCatcher {
         rank(pr.getPackedIPPorts());
         for(IpPort ipp : pr.getPackedIPPorts()) {            
             ExtendedEndpoint ep;
-            if(ipp instanceof ExtendedEndpoint)
+            if(ipp instanceof ExtendedEndpoint) {
                 ep = (ExtendedEndpoint)ipp;
-            else
+            } else {
                 ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+                if(ipp instanceof HostInfo) {
+                    // When more items other than TLS are added to HostInfo,
+                    // it would make more sense to make this something like:
+                    // ep.addHostInfo(ipp);
+                    ep.setTLSCapable(((HostInfo)ipp).isTLSCapable());
+                }
+            }
             
             if(isValidHost(ep))
                 add(ep, GOOD_PRIORITY);
@@ -940,15 +948,14 @@ public class HostCatcher {
         return true;
     }
     
-    /**
-     * Returns true if the given IpPort is TLS-capable.
-     */
+    /** Returns true if the given IpPort is TLS-capable. */
     public boolean isHostTLSCapable(IpPort ipp) {
-        Endpoint p;
-        if(ipp instanceof Endpoint)
-            p = (Endpoint)ipp;
-        else
-            p = new Endpoint(ipp.getAddress(), ipp.getPort());
+        if(ipp instanceof HostInfo)
+            return ((HostInfo)ipp).isTLSCapable();
+        
+        // No need to check if it's an endpoint already, because all Endpoints
+        // already implement HostInfo.
+        Endpoint p = new Endpoint(ipp.getAddress(), ipp.getPort());
         
         ExtendedEndpoint ee;
         synchronized(this) {
@@ -1017,15 +1024,16 @@ public class HostCatcher {
      * only be used if an endpoint is not immediately available.
      * This is useful to prevent stack overflows when many endpoints are
      * attempted in response to endpoints not being usable.
+     * 
+     * If the observer is null and no endpoint is available, this will
+     * simply return null and schedule no future callback.
      */
     public Endpoint getAnEndpointImmediate(EndpointObserver observer) {
         Endpoint p;
         
-        // We can only lock around endpoint retrieval & _catchersWaiting,
-        // we don't want to expose our lock to the observer.
         synchronized(this) {
             p = getAnEndpointInternal();
-            if(p == null)
+            if(p == null && observer != null)
                 _catchersWaiting.add(observer);    
         }
         

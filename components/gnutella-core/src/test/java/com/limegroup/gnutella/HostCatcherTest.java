@@ -778,6 +778,10 @@ public class HostCatcherTest extends LimeTestCase {
         assertTrue(hc.isHostTLSCapable(new IpPortImpl("21.81.1.1", 1)));
         assertTrue(hc.isHostTLSCapable(p));
         
+        p = new ExtendedEndpoint("1.2.3.101", 1);
+        p.setTLSCapable(true);
+        assertTrue(hc.isHostTLSCapable(p));
+        
         // Hand-craft a PingReply w/ TLS IPPs to see if they're added as
         // TLS capable hosts.
         assertEquals(2, hc.getNumHosts());
@@ -801,6 +805,37 @@ public class HostCatcherTest extends LimeTestCase {
         assertTrue(hc.isHostTLSCapable(new IpPortImpl("3.4.2.3:3")));
         assertFalse(hc.isHostTLSCapable(new IpPortImpl("254.0.0.3:4")));
         assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.0.1.0:1")));
+
+        // The order of these checks are a little stricter than necessary
+        Endpoint ep = hc.getAnEndpointImmediate(null);
+        assertEquals("254.0.0.3", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("3.4.2.3", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.2.3.4", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.1.1.1", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("21.81.1.1", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("231.123.254.1", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.0.1.0", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        assertNull(hc.getAnEndpointImmediate(null));
     }
         
    

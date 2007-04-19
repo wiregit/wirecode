@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import org.limewire.io.HostInfo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
@@ -16,7 +17,7 @@ import org.limewire.util.StringUtils;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
+public class Endpoint implements Cloneable, HostInfo, IpPort, java.io.Serializable {
 
     private static final long serialVersionUID = 4686711693494625070L; 
     

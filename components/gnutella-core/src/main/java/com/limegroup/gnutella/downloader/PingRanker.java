@@ -29,7 +29,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
@@ -296,8 +295,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (RouterService.acceptedIncomingConnection() ||
                 RouterService.getUdpService().canDoFWT())
             flags |= HeadPing.PUSH_ALTLOCS;
-        if (ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
-            flags |= HeadPing.TLS;
         return flags;
     }
     

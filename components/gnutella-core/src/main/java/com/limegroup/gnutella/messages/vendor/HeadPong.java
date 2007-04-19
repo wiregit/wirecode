@@ -163,7 +163,10 @@ public class HeadPong extends VendorMessage {
     private boolean _tlsCapable;
 	
 	/**
-	 * creates a message object with data from the network.
+	 * Creates a message object with data from the network.
+     * 
+     * This will correctly set the fields of this HeadPong, as opposed
+     * to the other constructor.
 	 */
 	protected HeadPong(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
@@ -235,7 +238,15 @@ public class HeadPong extends VendorMessage {
 	}
 	
 	/**
-	 * creates a message object as a response to a udp head request.
+     * Constructs a message to send in response to the Ping.
+     * 
+     * NOTE: This will NOT set the fields of this class correctly.
+     *       This constructor is intended ONLY for sending the reply
+     *       through the network.  To access a HeadPong with the
+     *       fields set correctly, you can write this to a ByteArrayOutputStream
+     *       and reparse the resulting bytes through MessageFactory,
+     *       which will construct a HeadPong with the network constructor,
+     *       where the fields are correctly set.
 	 */
 	public HeadPong(HeadPing ping) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, VERSION,
@@ -263,8 +274,9 @@ public class HeadPong extends VendorMessage {
 		try {
     		byte features = ping.getFeatures();
     		features &= ~HeadPing.GGEP_PING;
+            // turn TLS off and turn it back on only if we allow it.
             features &= ~HeadPing.TLS;
-            if(ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
+            if(ConnectionSettings.TLS_INCOMING.getValue())
                 features |= HeadPing.TLS;
     		daos.write(features);
     		if (LOG.isDebugEnabled())

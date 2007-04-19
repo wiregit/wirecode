@@ -29,6 +29,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -176,8 +177,19 @@ public class HeadTest extends LimeTestCase {
 		PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager",_um);
 		
 		PACKET_SIZE = ((Integer)PrivilegedAccessor.getValue(HeadPong.class,"PACKET_SIZE")).intValue();
-		
-	}
+    }
+    
+    /** Test TLS response. */
+    public void testTLSPong() throws Exception {
+        HeadPing ping = new HeadPing(_notHave); // this is just so we can generate a HeadPong
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        HeadPong pong = reparse(new HeadPong(ping));
+        assertTrue(pong.isTLSCapable());
+        
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        pong = reparse(new HeadPong(ping));
+        assertFalse(pong.isTLSCapable());
+    }
 	
 	/**
 	 * tests the scenario where the file cannot be found.

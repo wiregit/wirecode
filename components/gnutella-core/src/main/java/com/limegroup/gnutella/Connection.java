@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.CompressingOutputStream;
+import org.limewire.io.HostInfo;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -98,7 +99,7 @@ import com.limegroup.gnutella.util.Sockets.ConnectType;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort {
+public class Connection implements IpPort, HostInfo {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -819,7 +820,7 @@ public class Connection implements IpPort {
      * is enabled for sending on this connection.
      */
     public long getBytesSent() {
-        if(isSSLEnabled())
+        if(isTLSCapable())
             return _sslTracker.getWrittenBytesProduced();
         else if(isWriteDeflated())
             return _compressedBytesSent;
@@ -842,7 +843,7 @@ public class Connection implements IpPort {
      * is enabled for receiving on this connection.
      */
     public long getBytesReceived() {
-        if(isSSLEnabled())
+        if(isTLSCapable())
             return _sslTracker.getReadBytesConsumed();
         else if(isReadDeflated())
             return _compressedBytesReceived;
@@ -883,7 +884,7 @@ public class Connection implements IpPort {
     
     /** Returns the percentage lost from outgoing SSL transformations. */
     public float getSentLostFromSSL() {
-        if( !isSSLEnabled() || _sslTracker.getWrittenBytesConsumed() == 0 )
+        if( !isTLSCapable() || _sslTracker.getWrittenBytesConsumed() == 0 )
             return 0;
         else
             return 1-(float)_sslTracker.getWrittenBytesConsumed() / (float)_sslTracker.getWrittenBytesProduced();
@@ -891,7 +892,7 @@ public class Connection implements IpPort {
     
     /** Returns the percentage lost from incoming SSL transformations. */
     public float getReadLostFromSSL() {
-        if( !isSSLEnabled() || _sslTracker.getReadBytesProduced() == 0 )
+        if( !isTLSCapable() || _sslTracker.getReadBytesProduced() == 0 )
             return 0;
         else
             return 1-(float)_sslTracker.getReadBytesProduced() / (float)_sslTracker.getReadBytesConsumed();
@@ -1290,7 +1291,7 @@ public class Connection implements IpPort {
      * Returns true if this connection is using SSL/TLS.
      * @return
      */
-    public boolean isSSLEnabled() {
+    public boolean isTLSCapable() {
         return _connectType == ConnectType.TLS;
     }
 

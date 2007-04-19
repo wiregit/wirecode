@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.limewire.io.HostInfo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -43,7 +44,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable, IpPort {
+public class PingReply extends Message implements Serializable, IpPort, HostInfo {
     
     /**
      * The list of extra Gnutella ip/ports contained in this reply.
@@ -1004,7 +1005,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
         
         // add our support of TLS
-        if(ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
+        if(ConnectionSettings.TLS_INCOMING.getValue())
             ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;
@@ -1062,11 +1063,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         if(gnutHosts != null && !gnutHosts.isEmpty()) {
             ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(gnutHosts));
-            if(ConnectionSettings.TLS_ALLOWED.getValue()) {
-                byte[] data = getTLSData(gnutHosts);
-                if(data.length != 0)
-                    ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
-            }
+            byte[] data = getTLSData(gnutHosts);
+            if(data.length != 0)
+                ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
         }
         
         if(dhtHosts != null && !dhtHosts.isEmpty()) {

@@ -66,7 +66,7 @@ public class TLSConnectionTest extends LimeTestCase {
 
     public void testTLSConnectionBlockingConnect() throws Exception {
         Connection c = new Connection("localhost", PORT, ConnectType.TLS);
-        assertTrue(c.isSSLEnabled());
+        assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());
         assertEquals(0, c.getUncompressedBytesReceived());
@@ -86,7 +86,7 @@ public class TLSConnectionTest extends LimeTestCase {
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);
-        assertTrue(mc.isSSLEnabled());
+        assertTrue(mc.isTLSCapable());
         
         PingRequest pr = PingRequest.createUDPPing();
         mc.send(pr);
@@ -105,7 +105,7 @@ public class TLSConnectionTest extends LimeTestCase {
     
     public void testTLSConnectionNonBlockingConnect() throws Exception {
         Connection c = new Connection("localhost", PORT, ConnectType.TLS);
-        assertTrue(c.isSSLEnabled());
+        assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());
         assertEquals(0, c.getUncompressedBytesReceived());
@@ -127,7 +127,7 @@ public class TLSConnectionTest extends LimeTestCase {
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);
-        assertTrue(mc.isSSLEnabled());
+        assertTrue(mc.isTLSCapable());
         
         PingRequest pr = PingRequest.createUDPPing();
         mc.send(pr);

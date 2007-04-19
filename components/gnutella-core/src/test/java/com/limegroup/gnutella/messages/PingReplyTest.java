@@ -324,8 +324,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
     public void testBasicGGEP() throws Exception {
-        ConnectionSettings.TLS_ALLOWED.setValue(true);
-        ConnectionSettings.INCOMING_TLS_ENABLED.setValue(true);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         
         // create a pong
         PingReply pr = 
@@ -347,8 +346,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(7, pong.getVendorMinorVersion());
         assertTrue(pong.isTLSCapable());
         // make sure it's still capable if we turn our settings off.
-        ConnectionSettings.TLS_ALLOWED.setValue(false);
-        ConnectionSettings.INCOMING_TLS_ENABLED.setValue(false);
+        ConnectionSettings.TLS_INCOMING.setValue(false);
         assertTrue(pong.isTLSCapable());
         
         // And try creating a new pong w/o TLS.
@@ -361,8 +359,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pong=(PingReply)m;
         assertFalse(pong.isTLSCapable());
         // make sure it's still off if we turn our settings on.
-        ConnectionSettings.TLS_ALLOWED.setValue(true);
-        ConnectionSettings.INCOMING_TLS_ENABLED.setValue(true);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         assertFalse(pong.isTLSCapable());
     }
 
@@ -527,7 +524,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoTLS() throws Exception {
-        ConnectionSettings.INCOMING_TLS_ENABLED.setValue(false);
+        ConnectionSettings.TLS_INCOMING.setValue(false);
         PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
                                       0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -891,15 +888,24 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testTLSPackedIPPorts() throws Exception {
         List l = new LinkedList();
         
+        // every % 6 add an endpoint that directly implements HostInfo,
+        // every % 3 add an endpoint that doesn't, but give HostCatcher a capable
         for(int i = 1; i < 11; i++) {
-            l.add(new IpPortImpl("1.2.3." + i, i+1));
-            if(i % 3 == 0) {
+            if(i % 6 == 0) {
                 ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
                 ep.setTLSCapable(true);
-                RouterService.getHostCatcher().add(ep, true);
+                l.add(ep);
+                assertTrue(RouterService.getHostCatcher().isHostTLSCapable(ep));
+            } else {
+                l.add(new IpPortImpl("1.2.3." + i, i+1));
+                if(i % 3 == 0) {
+                    ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
+                    ep.setTLSCapable(true);
+                    RouterService.getHostCatcher().add(ep, true);
+                }
+                
+                assertEquals(i%3==0, RouterService.getHostCatcher().isHostTLSCapable(new IpPortImpl("1.2.3." + i, i+1)));
             }
-            
-            assertEquals(i%3==0, RouterService.getHostCatcher().isHostTLSCapable(new IpPortImpl("1.2.3." + i, i+1)));
         }
         
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, l, null);
@@ -954,6 +960,30 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(4, ipp.getPort());
         assertNotInstanceof(ExtendedEndpoint.class, ipp);
         
+        //  and make sure we can read from network data.
+        out = new ByteArrayOutputStream();
+        pr.write(out);
+        pr = (PingReply)MessageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
         
     }
     

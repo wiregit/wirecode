@@ -31,23 +31,6 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    public void setUp() {
-        // runs before every testX method
-    }
-    
-    public void tearDown() {
-        // runs after every testX method
-    }
-    
-    public static void globalSetUp() {
-        // runs before the first testX
-    }
-    
-    public static void globalTearDown() {
-        // runs after the last textX
-    }
-
 
     //TODO: test other parts of ping!
 
@@ -239,24 +222,48 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         PingRequest pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         
+        // Test +UP +TLS
         UltrapeerSettings.MIN_CONNECT_TIME.setValue(0);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         assertTrue(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
         byte[] data = pr.getSupportsCachedPongData();
         assertEquals(0x1, data[0] & 0x1);
+        assertEquals(0x2, data[0] & 0x2);
         
+        // +UP -TLS
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        assertTrue(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        data = pr.getSupportsCachedPongData();
+        assertEquals(0x1, data[0] & 0x1);
+        assertEquals(0x0, data[0] & 0x2);
+        
+        // Test -UP +TLS
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         assertFalse(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
         assertEquals(0x0, data[0] & 0x1);
+        assertEquals(0x2, data[0] & 0x2);
+        
+        // Test -UP -TLS
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        assertFalse(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        data = pr.getSupportsCachedPongData();
+        assertEquals(0x0, data[0] & 0x1);
+        assertEquals(0x0, data[0] & 0x2);
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         pr = PingRequest.createUDPPing();
