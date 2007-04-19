@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
+import org.limewire.util.BEncoder;
 import org.limewire.util.BufferUtils;
 
 
@@ -38,33 +39,17 @@ public abstract class Token<T> {
     /** The normal ACSII text encoding to use in bencoding for BitTorrent. */
     protected static final String ASCII = "ISO-8859-1";
 
-    /** Identifies a bencoded number. */
-    protected static final byte I;
-    /** Identifies a bencoded dictionary. */
-    protected static final byte D;
-    /** Identifies a bencoded list. */
-    protected static final byte L;
-    /** Marks the end of something in bencoding. */
-    protected static final byte E;
+
 
     // When parsing ASCII charcters, ZERO and NINE are used to see if a character like '5' is between them, and thus a number
     protected static final byte ZERO, NINE;
 
     static {
-
-    	byte i = 0;
-        byte d = 0;
-        byte l = 0;
-        byte e = 0;
         byte zero = 0;
         byte nine = 0;
 
         try {
 
-        	i = "i".getBytes(ASCII)[0];
-            d = "d".getBytes(ASCII)[0];
-            l = "l".getBytes(ASCII)[0];
-            e = "e".getBytes(ASCII)[0];
             zero = "0".getBytes(ASCII)[0];
             nine = "9".getBytes(ASCII)[0];
 
@@ -73,10 +58,6 @@ public abstract class Token<T> {
         	// TODO: connect to the error service
         }
 
-        I = i;
-        D = d;
-        L = l;
-        E = e;
         ZERO = zero;
         NINE = nine;
     }
@@ -173,13 +154,13 @@ public abstract class Token<T> {
     	if (read == -1)
     	    throw new EOFException("Could not read next Token");
         
-        if (b[0] == I)
+        if (b[0] == BEncoder.I)
             return new BELong(chan);
-        else if (b[0] == D)
+        else if (b[0] == BEncoder.D)
             return new BEDictionary(chan);
-        else if (b[0] == L)
+        else if (b[0] == BEncoder.L)
             return new BEList(chan);
-        else if (b[0] == E)
+        else if (b[0] == BEncoder.E)
             return Token.TERMINATOR;
         else if (b[0] >= ZERO && b[0] <= NINE)
             return new BEString(b[0], chan);

@@ -2,9 +2,10 @@ package com.limegroup.bittorrent.bencoding;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+
+import org.limewire.util.BEncoder;
 
 /**
  * A bencoding Token that represents a string element of bencoded data.
@@ -48,17 +49,7 @@ class BEString extends Token<byte[]> {
     /** Empty Buffer to point a reference at. */
     private static final ByteBuffer EMPTY_STRING = ByteBuffer.allocate(0);
 
-    /** Separates the length from the string in the data of a bencoded string. */
-    final static byte COLON;
-    static {
-        byte colon = 0;
-        try {
-            colon = ":".getBytes(ASCII)[0];
-        } catch (UnsupportedEncodingException impossible) {
-            // hook to ErrorService
-        }
-        COLON = colon;
-    }
+    
 
     /**
      * Makes a new BEString Token ready to parse bencoded string data 
@@ -117,7 +108,7 @@ class BEString extends Token<byte[]> {
     	 */
 
     	if (sizeToken == null)
-            sizeToken = new BELong(chan, COLON, firstSizeByte);
+            sizeToken = new BELong(chan, BEncoder.COLON, firstSizeByte);
     	
         sizeToken.handleRead();
         

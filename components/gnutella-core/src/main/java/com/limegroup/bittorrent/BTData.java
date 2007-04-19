@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.service.ErrorService;
+import org.limewire.util.BEncoder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.security.SHA1;
 

@@ -1,14 +1,16 @@
-package com.limegroup.bittorrent.bencoding;
+package org.limewire.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+
 /**
- * Convert Java objects into bencoded data for BitTorrent.
+ * Convert Java objects into bencoded data.
  * 
  * Call BEncoder.encode(OutputStream, Object) to bencode a given Object and write the bencoded data to the given OutputStream.
  * 
@@ -26,6 +28,46 @@ import java.util.TreeMap;
  */
 public class BEncoder {
 
+    /** Identifies a bencoded number. */
+    public static final byte I;
+    /** Identifies a bencoded dictionary. */
+    public static final byte D;
+    /** Identifies a bencoded list. */
+    public static final byte L;
+    /** Marks the end of something in bencoding. */
+    public static final byte E;
+    /** Separates the length from the string in the data of a bencoded string. */
+    public final static byte COLON;
+    
+    private static final String ASCII = "ISO-8859-1";
+    
+    static {
+        byte i = 0;
+        byte d = 0;
+        byte l = 0;
+        byte e = 0;
+        byte colon = 0;
+
+        try {
+
+            i = "i".getBytes(ASCII)[0];
+            d = "d".getBytes(ASCII)[0];
+            l = "l".getBytes(ASCII)[0];
+            e = "e".getBytes(ASCII)[0];
+            colon = ":".getBytes(ASCII)[0];
+
+        } catch (UnsupportedEncodingException impossible) {
+
+            // TODO: connect to the error service
+        }
+
+        COLON = colon;
+        I = i;
+        D = d;
+        L = l;
+        E = e;
+    }
+    
 	// Prevents anyone from making a BEncoder object
     private BEncoder() {}
 
@@ -40,8 +82,8 @@ public class BEncoder {
      */
     public static void encodeByteArray(OutputStream output, byte[] b) throws IOException {
         String length = String.valueOf(b.length);
-        output.write(length.getBytes(Token.ASCII));
-        output.write(BEString.COLON);
+        output.write(length.getBytes(ASCII));
+        output.write(COLON);
         output.write(b);
     }
 
@@ -56,9 +98,9 @@ public class BEncoder {
      */
     public static void encodeInt(OutputStream output, Number n) throws IOException {
         String numerals = String.valueOf(n.longValue());
-        output.write(Token.I);
-        output.write(numerals.getBytes(Token.ASCII));
-        output.write(Token.E);
+        output.write(I);
+        output.write(numerals.getBytes(ASCII));
+        output.write(E);
     }
 
     /**
@@ -70,10 +112,10 @@ public class BEncoder {
      * @param list   A Java List object to bencode and write
      */
     public static void encodeList(OutputStream output, List<?> list) throws IOException {
-        output.write(Token.L);
+        output.write(L);
         for(Object next : list) 
             encode(output, next);
-        output.write(Token.E);
+        output.write(E);
     }
 
     /**
@@ -102,12 +144,12 @@ public class BEncoder {
         for(Map.Entry<?, ?> entry : map.entrySet())
             sorted.put(entry.getKey().toString(), entry.getValue());
 
-    	output.write(Token.D);
+    	output.write(D);
         for(Map.Entry<String, Object> entry : sorted.entrySet()) {
-            encodeByteArray(output, entry.getKey().getBytes(Token.ASCII));
+            encodeByteArray(output, entry.getKey().getBytes(ASCII));
             encode(output, entry.getValue());
         }
-    	output.write(Token.E);
+    	output.write(E);
     }
 
     /**
@@ -131,7 +173,7 @@ public class BEncoder {
     	else if (object instanceof Number)
     		encodeInt(output, (Number)object);
     	else if (object instanceof String)
-    		encodeByteArray(output, ((String)object).getBytes(Token.ASCII));
+    		encodeByteArray(output, ((String)object).getBytes(ASCII));
     	else if (object instanceof byte[])
     		encodeByteArray(output, (byte[])object);
     	else

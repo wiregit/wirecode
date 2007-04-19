@@ -186,6 +186,8 @@ public final class ServerSideGiveStatsVMTest extends LimeTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {localIP,"127.*.*.*"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(
+                new String[] {localIP,"127.*.*.*"});
         ConnectionSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella

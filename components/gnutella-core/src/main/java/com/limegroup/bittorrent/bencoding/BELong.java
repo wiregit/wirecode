@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
+import org.limewire.util.BEncoder;
+
 /**
  * A token used for the parsing of a Long value.
  */
@@ -41,7 +43,7 @@ class BELong extends Token<Long> {
      * character.
      */
     BELong(ReadableByteChannel chan) {
-        this(chan, E, (byte)0);
+        this(chan, BEncoder.E, (byte)0);
     }
 
     /**

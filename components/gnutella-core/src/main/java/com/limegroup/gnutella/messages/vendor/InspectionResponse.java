@@ -10,8 +10,8 @@ import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.InspectionUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.BEncoder;
 
-import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.util.DataUtils;
 
