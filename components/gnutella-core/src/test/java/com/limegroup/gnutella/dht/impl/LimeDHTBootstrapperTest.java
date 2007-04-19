@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.Future;
 
 import junit.framework.Test;
 
@@ -59,16 +58,18 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         dhtContext.close();
     }
     
-    public void testAddBootstrapHost() throws Exception{
+    public void testCancelIfUsingRouteTable() throws Exception {
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         
         // Should be bootstrapping from the RouteTable
         DHTFuture<PingResult> pingFuture = null;
         synchronized (bootstrapper) {
             bootstrapper.bootstrap();
-            pingFuture = (DHTFuture<PingResult>)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
             
+            pingFuture = (DHTFuture<PingResult>)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
             assertNotNull(pingFuture);
+            
+            // Should use the RouteTable
             assertTrue(((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable")).booleanValue());
             
             // Now emulate reception of a DHT node from the Gnutella network
@@ -82,15 +83,36 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
             assertNotNull(pingFuture);
             assertFalse("Ping future should NOT be cancelled", pingFuture.isCancelled());
         }
-        
-        // Wait for the Ping to finish
-        Contact node = pingFuture.get().getContact();
+    }
+    
+    public void testDontCancelIfUsingHostList() throws Exception {
+        // Try bootstrapping of hostlist and see if it cancels (it should not)
+        DHTFuture<PingResult> pingFuture = null;
+        synchronized (bootstrapper) {
+            bootstrapper.bootstrap();
+            assertTrue("Should be waiting", bootstrapper.isWaitingForNodes());
+            
+            bootstrapper.addBootstrapHost(new InetSocketAddress("localhost", 5000));
+            
+            pingFuture = (DHTFuture<PingResult>)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+            assertNotNull("Should be pinging", pingFuture);
+            
+            // Shouldn't use the RouteTable
+            assertFalse(((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable")).booleanValue());
+            
+            // Now emulate reception of a DHT node from the Gnutella network
+            // It should NOT cancel the existing pingFuture 
+            bootstrapper.addBootstrapHost(new InetSocketAddress("localhost", 6000));
+            assertFalse("Ping future should NOT be cancelled", pingFuture.isCancelled());
+        }
+    }
+    
+    public void testDontCancelIfBootstrapping() throws Exception {
+        Contact node = dhtContext.ping(
+                BOOTSTRAP_DHT.getContactAddress()).get().getContact();
         
         DHTFuture<BootstrapResult> bootstrapFuture = null;
         synchronized (bootstrapper) {
-            // Mark the local Node as not bootstrapped
-            dhtContext.getBootstrapManager().setBootstrapped(false);
-            
             // Invoke bootstrap manually
             PrivilegedAccessor.invokeMethod(bootstrapper, "bootstrapFromContact", 
                     new Contact[]{ node }, new Class[]{Contact.class});
@@ -111,28 +133,13 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
             // The bootstrapFuture should keep going
             assertFalse(bootstrapper.isWaitingForNodes());
             assertFalse(bootstrapFuture.isCancelled());
+            
+            // Finish bootstrap
+            bootstrapFuture.get();
+            
+            // And we should be bootstrapped
+            assertTrue(dhtContext.isBootstrapped());
         }
-        
-        // Finish bootstrap
-        bootstrapFuture.get();
-        
-        // And we should be bootstrapped
-        assertTrue(dhtContext.isBootstrapped());
-    }
-    
-    public void testNotCancelBootstrap() throws Exception {
-        //now try bootstrapping of hostlist and see if it cancels (it should not)
-        bootstrapper.bootstrap();
-        Thread.sleep(100);
-        assertTrue("Should be waiting", bootstrapper.isWaitingForNodes());
-        bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",5000));
-        Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
-        assertNotNull("Should be pinging", future);
-        assertFalse((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
-        Thread.sleep(100);
-        //now add other host: it should not cancel the previous attempt
-        bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",6000));
-        assertFalse(future.isCancelled());
     }
     
     public void testGetSimppHosts() throws Exception{
