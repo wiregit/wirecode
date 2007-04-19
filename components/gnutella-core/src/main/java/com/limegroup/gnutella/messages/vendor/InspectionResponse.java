@@ -36,12 +36,13 @@ public class InspectionResponse extends VendorMessage {
          * The format is a deflated bencoded mapping from
          * the inspected fields to their values.
          */
-        Map<String, String> responses = 
-            new HashMap<String, String>(request.getRequestedFields().length);
+        String [] requested = request.getRequestedFields();
+        Map<Integer, Object> responses = 
+            new HashMap<Integer, Object>(requested.length);
         
-        for (String requested : request.getRequestedFields()) {
+        for (int i = 0; i < requested.length; i++) {
             try {
-                responses.put(requested, InspectionUtils.inspectValue(requested));
+                responses.put(i, InspectionUtils.inspectValue(requested[i]));
             } catch (InspectionException skip){}
         }
         
@@ -52,7 +53,14 @@ public class InspectionResponse extends VendorMessage {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DeflaterOutputStream dos = new DeflaterOutputStream(baos);
         try {
-            BEncoder.encodeDict(dos, responses);
+            try {
+                BEncoder.getEncoder(dos, false, "UTF-8").encodeDict(responses);
+            } catch (Throwable bencoding) {
+                // a BEInspectable returned invalid object - report the error.
+                String msg = bencoding.toString();
+                String ret = "d5:error"+msg.length()+":"+msg+"e";
+                dos.write(ret.getBytes());
+            }
             dos.flush();
         } catch (IOException impossible) {
             ErrorService.error(impossible);

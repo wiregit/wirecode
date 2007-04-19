@@ -393,7 +393,7 @@ public class BEncodeTest extends LimeTestCase {
         m2.put("key11",l);
         // this finishes the fancy object
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BEncoder.encodeDict(baos,m);
+        BEncoder.getEncoder(baos).encodeDict(m);
         
         String s = new String(baos.toByteArray(),Token.ASCII);
         String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee";
@@ -435,13 +435,13 @@ public class BEncodeTest extends LimeTestCase {
     public void testUTF16() throws Exception {
         // a string with some utf16 characters
         String original = new String("A" + "\u00ea" + "\u00f1" + 
-                 "\u00fc" +"\u10001"+ "C");
+                 "\u00fc" +"\u1000"+ "C");
         List<String> l = new ArrayList<String>(1);
         l.add(original);
         
         // first try to encode with ascii
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BEncoder.encodeList(baos, l);
+        BEncoder.getEncoder(baos).encodeList(l);
         chan.setBytes(baos.toByteArray());
         Token t = Token.getNextToken(chan);
         t.handleRead();
@@ -449,12 +449,12 @@ public class BEncodeTest extends LimeTestCase {
         assertEquals(Token.LIST, t.getType());
         List parsed = (List)t.getResult();
         byte [] parsedByte = (byte [])parsed.get(0);
-        assertNotEquals(original, new String(parsedByte)); // the strings don't match
-        assertNotEquals(original, new String(parsedByte,"UTF-16")); // not even if we know the encoding
+        assertNotEquals(original, StringUtils.getASCIIString(parsedByte)); // the strings don't match
+        assertNotEquals(original, new String(parsedByte,"UTF-8")); // not even if we know the encoding
         
         // then try to encode with UTF-16
         baos = new ByteArrayOutputStream();
-        BEncoder.encodeList(baos, l, "UTF-16");
+        BEncoder.getEncoder(baos, false, "UTF-8").encodeList(l);
         chan.setBytes(baos.toByteArray());
         t = Token.getNextToken(chan);
         t.handleRead();
@@ -462,8 +462,8 @@ public class BEncodeTest extends LimeTestCase {
         assertEquals(Token.LIST, t.getType());
         parsed = (List)t.getResult();
         parsedByte = (byte [])parsed.get(0);
-        assertNotEquals(original, new String(parsedByte)); // the strings don't match with ascii
-        assertEquals(original, new String(parsedByte,"UTF-16")); // but if we know the encoding they do
+        assertNotEquals(original, StringUtils.getASCIIString(parsedByte)); // the strings don't match with ascii
+        assertEquals(original, new String(parsedByte,"UTF-8")); // but if we know the encoding they do
     }
     
     private static class StringByte  {

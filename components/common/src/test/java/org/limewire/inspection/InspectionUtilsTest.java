@@ -84,7 +84,7 @@ public class InspectionUtilsTest extends BaseTestCase {
             fail("should not be inspectable");
         } catch (InspectionException expcted){}
         
-        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableString");
+        String inspectable = (String)InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableString");
         assertEquals("b", inspectable);
     }
     
@@ -104,7 +104,7 @@ public class InspectionUtilsTest extends BaseTestCase {
             fail("should not be inspectable for size");
         } catch (InspectionException expcted){}
         
-        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableList");
+        String inspectable = (String)InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,inspectableList");
         assertEquals("2",inspectable);
     }
     
@@ -117,7 +117,7 @@ public class InspectionUtilsTest extends BaseTestCase {
             fail("should not be inspectable");
         } catch (InspectionException expcted){}
         
-        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
+        String inspectable = (String)InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
         assertEquals("2",inspectable);
     }
     
@@ -130,7 +130,7 @@ public class InspectionUtilsTest extends BaseTestCase {
         PrivateInts.self = t;
         Field f = t.getClass().getDeclaredField("inspectableInt");
         assertFalse(f.isAccessible());
-        String inspectable = InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
+        String inspectable = (String)InspectionUtils.inspectValue("org.limewire.inspection.PrivateInts,self,inspectableInt");
         assertEquals("2",inspectable);
         assertFalse(f.isAccessible());
     }
@@ -176,7 +176,7 @@ class InspectableClass implements Inspectable {
     InspectableClass(String s) {
         this.s = s;
     }
-    public String inspect() {
+    public Object inspect() {
         return s;
     }
 }

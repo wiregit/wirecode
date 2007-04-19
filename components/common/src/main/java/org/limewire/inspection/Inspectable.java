@@ -7,7 +7,7 @@ package org.limewire.inspection;
  */
 public interface Inspectable {
     /**
-     * @return a descriptive string for this object.
+     * @return a descriptive object for the target object.
      */
-    public String inspect();
+    public Object inspect();
 }

@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.ByteOrder;
 
@@ -75,7 +79,8 @@ public class InspectionTest extends ServerSideTestCase {
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
         Map response = tryMessage(request);
         assertEquals(1, response.size());
-        assertEquals("a",new String((byte[])response.get("com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue")));
+        System.out.println(response);
+        assertEquals("a",new String((byte[])response.get("0")));
         
     }
 
@@ -97,9 +102,9 @@ public class InspectionTest extends ServerSideTestCase {
         // no queries - lists should be empty, dispatcher inactive
         Map response = tryMessage(request);
         assertEquals(response.toString(),3,response.size());
-        assertEquals("false", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
-        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
-        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+        assertEquals("false", new String((byte[])response.get("2")));
+        assertEquals("0",new String((byte[])response.get("0")));
+        assertEquals("0",new String((byte[])response.get("1")));
         
         // send a query
         Message query = QueryRequest.createQuery("asdf");
@@ -108,10 +113,10 @@ public class InspectionTest extends ServerSideTestCase {
         LEAF[0].flush();
         Thread.sleep(2000);
         response = tryMessage(request);
-        assertEquals("true", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
+        assertEquals("true", new String((byte[])response.get("2")));
         // there should be an element either in NEW_QUERIES or QUERIES
-        int queries = Integer.valueOf(new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
-        int newQueries = Integer.valueOf(new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+        int queries = Integer.valueOf(new String((byte[])response.get("0")));
+        int newQueries = Integer.valueOf(new String((byte[])response.get("1")));
         assertEquals(1,queries + newQueries);
         
         // shut off the query
@@ -119,9 +124,21 @@ public class InspectionTest extends ServerSideTestCase {
         LEAF[0].flush();
         Thread.sleep(2000);
         response = tryMessage(request);
-        assertEquals("false", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
-        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
-        assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+        assertEquals("false", new String((byte[])response.get("2")));
+        assertEquals("0",new String((byte[])response.get("0")));
+        assertEquals("0",new String((byte[])response.get("1")));
+    }
+    
+    public void testBEncoded() throws Exception {
+        BEObject valid = new BEObject();
+        BEObject.self = valid;
+        InspectionRequest request = new InspectionRequest("com.limegroup.gnutella.messages.vendor.BEObject,self");
+        Map m = tryMessage(request);
+        assertEquals(1, m.size());
+        Map contained = (Map)m.get("0");
+        List l = (List) contained.get("some list");
+        assertEquals(new Long(5), contained.get("some field"));
+        assertFalse(contained.containsKey("wrong type"));
     }
     
     private Map tryMessage(Message m) throws Exception {
@@ -164,5 +181,17 @@ public class InspectionTest extends ServerSideTestCase {
         int numInflated = in.inflate(inflated);
         String s = new String(inflated,0, numInflated);
         return (Map)Token.parse(s.getBytes());
+    }
+    
+}
+@SuppressWarnings("unchecked")
+class BEObject implements Inspectable {
+    static BEObject self;
+    public Object inspect() {
+        Map m = new HashMap();
+        m.put("empty list",new ArrayList());
+        m.put("some field",5);
+        m.put("wrong type", new BEObject());
+        return m;
     }
 }
