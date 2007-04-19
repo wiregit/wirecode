@@ -95,7 +95,7 @@ public class NodeAssigner {
     /**
      * Variable for the last time we attempted to become an Ultrapeer.
      */
-    private static long _lastUltrapeerAttempt = 0L;
+    private static volatile long _lastUltrapeerAttempt = 0L;
 
     /**
      * Number of times we've tried to become an Ultrapeer.
