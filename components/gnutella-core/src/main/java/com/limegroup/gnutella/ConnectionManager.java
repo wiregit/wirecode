@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
@@ -2470,4 +2471,25 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         return count;
     }
     
+}
+
+/** 
+ * a class that uses the Inspection framework to provide the same functionality
+ * as the former GetStatsVM.
+ */
+class LegacyConnectionStats implements Inspectable {
+    public static final Object REFERENCE = new LegacyConnectionStats();
+    public Object inspect() {
+        List<ManagedConnection> conns = 
+            RouterService.getConnectionManager().getConnections();
+        List<Object> ret = new ArrayList<Object>(conns.size() * 4);
+        for(ManagedConnection mc : conns) {
+            ret.add(mc.toString());
+            ret.add(mc.getNumMessagesReceived());
+            ret.add(mc.getNumReceivedMessagesDropped());
+            ret.add(mc.getNumMessagesSent());
+            ret.add(mc.getNumSentMessagesDropped());
+        }
+        return ret;
+    }
 }
