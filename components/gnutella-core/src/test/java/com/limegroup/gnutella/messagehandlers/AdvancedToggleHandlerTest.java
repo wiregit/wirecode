@@ -10,6 +10,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -25,8 +26,9 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     static InetSocketAddress addr;
     
     public void setUp() throws Exception {
+        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.0.0.1"});
         ApplicationSettings.USAGE_STATS.setValue(true);
-        addr = new InetSocketAddress(InetAddress.getLocalHost(), 1000);
+        addr = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 1000);
         StatisticsManager.instance().setRecordAdvancedStatsManual(false);
         PrivilegedAccessor.setValue(AdvancedToggleHandler.class, "MAX_TIME", 60 * 60 * 1000);
     }
