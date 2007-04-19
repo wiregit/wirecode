@@ -32,6 +32,7 @@ import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Class that performs the logic of downloading a file from a single host.
@@ -730,7 +731,8 @@ public class DownloadWorker {
                 LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
             _connectObserver = observer;
             try {
-                Socket socket = Sockets.connect(new InetSocketAddress(_rfd.getHost(), _rfd.getPort()), NORMAL_CONNECT_TIME, observer);
+                ConnectType type = _rfd.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+                Socket socket = Sockets.connect(new InetSocketAddress(_rfd.getHost(), _rfd.getPort()), NORMAL_CONNECT_TIME, observer, type);
                 if(!observer.isShutdown())
                     observer.setSocket(socket);
             } catch (IOException iox) {
@@ -1534,7 +1536,7 @@ public class DownloadWorker {
             //LOG.debug(_rfd + " -- Handling connect from PushConnector");
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
             try {
-               dl.connectTCP(0);
+               dl.initializeTCP();
                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
             } catch(IOException iox) {
                 //LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
@@ -1622,7 +1624,7 @@ public class DownloadWorker {
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
             try {
-                dl.connectTCP(0); // already connected, timeout doesn't matter.
+                dl.initializeTCP(); // already connected, timeout doesn't matter.
             } catch(IOException iox) {
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;

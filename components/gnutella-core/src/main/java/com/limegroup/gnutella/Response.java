@@ -604,7 +604,8 @@ public class Response {
                  data.getVendorCode(),
                  data.getPushProxies(),
                  getCreateTime(),
-                 data.getFWTVersionSupported()
+                 data.getFWTVersionSupported(),
+                 data.isTLSCapable()
                 );
             cachedRFD = rfd;
             return rfd;

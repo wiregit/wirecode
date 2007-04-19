@@ -472,6 +472,7 @@ public class HeadPong extends VendorMessage {
         rfd.setQueueStatus(getQueueStatus());
         rfd.setAvailableRanges(getRanges());
         rfd.setSerializeProxies();
+        rfd.setTLSCapable(isTLSCapable());
     }
     
 	/**

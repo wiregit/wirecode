@@ -166,7 +166,8 @@ public class BrowseHostHandler {
         		new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
         				_serventID.bytes(), 0, false, 0, false,
         				null, null,false,true,"", proxies,
-        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0);
+        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0,
+        				false); // TODO: could make true if we want to do FW-FW w/ TLS (need to add infrastructure) 
         	// register with the map so i get notified about a response to my
         	// Push.
         	synchronized (_pushedHosts) {

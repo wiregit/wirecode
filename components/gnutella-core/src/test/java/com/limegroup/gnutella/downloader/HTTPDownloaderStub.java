@@ -38,7 +38,7 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 
 
 	}
-	public void connectTCP(int timeout) throws IOException {
+	public void initializeTCP() throws IOException {
 
 	}
 	public void consumeBodyIfNecessary() {

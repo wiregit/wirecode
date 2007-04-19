@@ -4,7 +4,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -69,10 +68,8 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -273,38 +270,46 @@ public class HTTPDownloader implements BandwidthTracker {
     
 
     /**
-     * Creates an uninitialized client-side normal download.  Call 
-     * connectTCP and connectHTTP() on this before any other methods.  
-     * Non-blocking.
+     * Allows subclasses to construct the class without an initialized
+     * socket.
      *
      * @param rfd complete information for the file to download, including
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
-     * @param start the place to start reading from the network and writing to 
-     *  the file
-     * @param stop the last byte to read+1
+     *  @param inNetwork true if this download is for an in-network downloader
      */
-	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile, inNetwork);
+	protected HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
+        this(null, rfd, incompleteFile, inNetwork, false);
 	}	
 
 	/**
-     * Creates an uninitialized server-side push download. connectTCP() and 
-     * connectHTTP() on this before any other methods.  Non-blocking.
+     * Constructs an HTTPDownloader with the given socket.
+     * If the socket was a PUSH socket, the GIV must have already been
+     * read off it.
      * 
-     * @param socket the socket to download from.  The "GIV..." line must
-     *  have been read from socket.  HTTP headers may not have been read or 
-     *  buffered -- this can be <tt>null</tt>
+     * You must call initializeTCP prior to connectHTTP.
+     * 
+     * @param socket the socket to download from.
      * @param rfd complete information for the file to download, including
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
+     * @param inNetwork true if this is for an in-network downloader.
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
+        this(socket, rfd, incompleteFile, inNetwork, true);
+    }
+    
+    /**
+     * Constructs this HTTPDownloader with all the necessary parameters.
+     * If requireSocket is true, the socket parameter must be non-null.
+     */
+    private HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork, boolean requireSocket) {
         if(rfd == null)
             throw new NullPointerException("null rfd");
+        if(requireSocket && socket == null)
+            throw new NullPointerException("null socket");
         
         _rfd=rfd;
         _socket=socket;
@@ -408,22 +413,16 @@ public class HTTPDownloader implements BandwidthTracker {
     ///////////////////////////////// Connection /////////////////////////////
 
     /** 
-     * Initializes this by connecting to the remote host (in the case of a
-     * normal client-side download). Blocks for up to timeout milliseconds 
-     * trying to connect, unless timeout is zero, in which case there is 
-     * no timeout.  This MUST be uninitialized, i.e., connectTCP may not be 
-     * called more than once.
-     * <p>
-     * @param timeout the timeout to use for connecting, in milliseconds,
-     *  or zero if no timeout
-     * @exception IOException could not establish a TCP connection
+     * Initializes the TCP connection by installing readers & writers
+     * on the socket and setting the appropriate keepAlive & soTimeout
+     * socket options.
+     * 
+     * If the TCP connection could not be initialized, this
+     * throws an IOException.
      */
-	public void connectTCP(int timeout) throws IOException {
-        if (_socket == null) {
-            long curTime = System.currentTimeMillis();
-            _socket = Sockets.connect(new InetSocketAddress(_host, _port), timeout);
-            NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
-        }
+	public void initializeTCP() throws IOException {
+        if(_socket == null)
+            throw new IllegalStateException("no socket!");
         
         try {
             _socket.setKeepAlive(true);

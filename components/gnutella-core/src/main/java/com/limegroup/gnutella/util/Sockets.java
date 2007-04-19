@@ -22,7 +22,7 @@ public class Sockets {
                 new SimpleSocketController();
                 
     /** The different ways a connection can be attempted. */
-    public static enum ConnectType {
+    public static enum ConnectType {    
         PLAIN(new NIOSocketFactory()), TLS(new TLSSocketFactory());
         
         private final NBSocketFactory factory;

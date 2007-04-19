@@ -1102,7 +1102,7 @@ public class UploaderTest extends LimeTestCase {
     private static void connectDloader(HTTPDownloader dloader, boolean tcp, 
                                        RemoteFileDesc rfd,boolean queue) throws Exception {  
         if(tcp)
-            dloader.connectTCP(0); //may throw TryAgainLater, etc.
+            dloader.initializeTCP();
         connectHTTP(dloader, 0, rfd.getSize(), queue);
     }
     
@@ -1110,7 +1110,7 @@ public class UploaderTest extends LimeTestCase {
                                                 boolean tcp)
                                                 throws Exception {
         if(tcp)
-            dloader.connectTCP(0);
+            dloader.initializeTCP();
         addThexHeader(dloader);
         return requestHashTree(dloader);
     }
