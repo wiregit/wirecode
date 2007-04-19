@@ -372,6 +372,7 @@ public class BEncodeTest extends LimeTestCase {
         //             key12 -> []}
         //   key2 -> [[[[snake],snake]]]
         //   key3 -> [true,[false,true,false]]}
+        //   key4 -> false
         
         List l = new ArrayList();
         l.add("snake");
@@ -395,6 +396,7 @@ public class BEncodeTest extends LimeTestCase {
         Map m2 = new HashMap();
         m.put("key1",m2);
         m.put("key3",l3);
+        m.put("key4", false);
         
         m2.put("key12",new ArrayList());
         l = new ArrayList();
@@ -409,10 +411,11 @@ public class BEncodeTest extends LimeTestCase {
         m2.put("key11",l);
         // this finishes the fancy object
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BEncoder.getEncoder(baos).encodeDict(m);
+        BEncoder.getEncoder(baos, true, true, Token.ASCII).encodeDict(m);
         
         String s = new String(baos.toByteArray(),Token.ASCII);
-        String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeee4:key3ltlftfeee";
+        System.out.println(s);
+        String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeee4:key3ltlftfee4:key4fe";
         assertEquals(expected, s);
         
         chan.setString(s);
@@ -420,7 +423,7 @@ public class BEncodeTest extends LimeTestCase {
         Token t = Token.getNextToken(chan);
         t.handleRead();
         Map outtest = (Map)t.getResult();
-        assertEquals(3, outtest.size());
+        assertEquals(4, outtest.size());
         Map inner = (Map)outtest.get("key1");
         List empty = (List) inner.get("key12");
         assertTrue(empty.isEmpty());
@@ -455,6 +458,8 @@ public class BEncodeTest extends LimeTestCase {
         assertEquals(Boolean.FALSE,boolListInner.get(0));
         assertEquals(Boolean.TRUE,boolListInner.get(1));
         assertEquals(Boolean.FALSE,boolListInner.get(2));
+        
+        assertEquals(Boolean.FALSE, outtest.get("key4"));
     }
     
     public void testUTF16() throws Exception {

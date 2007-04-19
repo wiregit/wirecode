@@ -225,6 +225,7 @@ public class BEncoder {
         (o instanceof List )||
         (o instanceof Number) ||
         (o instanceof String) ||
-        (o instanceof byte[]);
+        (o instanceof byte[]) ||
+        (o instanceof Boolean);
     }
 }
