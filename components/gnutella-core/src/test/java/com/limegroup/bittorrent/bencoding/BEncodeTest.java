@@ -96,6 +96,13 @@ public class BEncodeTest extends LimeTestCase {
         t = Token.getNextToken(chan);
         assertEquals(Token.DICTIONARY,t.getType());
         assertEquals(1,chan.src.position());
+        
+        // boolean
+        chan.setString("t");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.BOOLEAN, t.getType());
+        assertSame(BEBoolean.TRUE, t);
+        assertEquals(Boolean.TRUE,t.getResult());
     }
     
     /** 
@@ -363,7 +370,8 @@ public class BEncodeTest extends LimeTestCase {
     public void testNested() throws Exception {
         // { key1 -> { key11 -> [badger, badger, 3, [mushroom, mushroom], {}], 
         //             key12 -> []}
-        //   key2 -> [[[[snake],snake]]]}
+        //   key2 -> [[[[snake],snake]]]
+        //   key3 -> [true,[false,true,false]]}
         
         List l = new ArrayList();
         l.add("snake");
@@ -374,11 +382,19 @@ public class BEncodeTest extends LimeTestCase {
         l.add(l2);
         l2 = new ArrayList();
         l2.add(l);
+        List l3 = new ArrayList();
+        List l4 = new ArrayList();
+        l3.add(true);
+        l4.add(false);
+        l4.add(true);
+        l4.add(false);
+        l3.add(l4);
         
         Map m = new HashMap();
         m.put("key2",l2);
         Map m2 = new HashMap();
         m.put("key1",m2);
+        m.put("key3",l3);
         
         m2.put("key12",new ArrayList());
         l = new ArrayList();
@@ -396,7 +412,7 @@ public class BEncodeTest extends LimeTestCase {
         BEncoder.getEncoder(baos).encodeDict(m);
         
         String s = new String(baos.toByteArray(),Token.ASCII);
-        String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee";
+        String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeee4:key3ltlftfeee";
         assertEquals(expected, s);
         
         chan.setString(s);
@@ -404,7 +420,7 @@ public class BEncodeTest extends LimeTestCase {
         Token t = Token.getNextToken(chan);
         t.handleRead();
         Map outtest = (Map)t.getResult();
-        assertEquals(2, outtest.size());
+        assertEquals(3, outtest.size());
         Map inner = (Map)outtest.get("key1");
         List empty = (List) inner.get("key12");
         assertTrue(empty.isEmpty());
@@ -430,14 +446,24 @@ public class BEncodeTest extends LimeTestCase {
         List nestedList3 = (List) nestedList2.get(0);
         assertEquals(1,nestedList3.size());
         assertTrue(nestedList3.contains(new StringByte("snake")));
+        
+        List boolList = (List)outtest.get("key3");
+        assertEquals(2, boolList.size());
+        assertEquals(Boolean.TRUE,boolList.get(0));
+        List boolListInner = (List)boolList.get(1);
+        assertEquals(3, boolListInner.size());
+        assertEquals(Boolean.FALSE,boolListInner.get(0));
+        assertEquals(Boolean.TRUE,boolListInner.get(1));
+        assertEquals(Boolean.FALSE,boolListInner.get(2));
     }
     
     public void testUTF16() throws Exception {
         // a string with some utf16 characters
         String original = new String("A" + "\u00ea" + "\u00f1" + 
                  "\u00fc" +"\u1000"+ "C");
-        List<String> l = new ArrayList<String>(1);
+        List<Object> l = new ArrayList<Object>(2);
         l.add(original);
+        l.add(true);
         
         // first try to encode with ascii
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -454,7 +480,7 @@ public class BEncodeTest extends LimeTestCase {
         
         // then try to encode with UTF-16
         baos = new ByteArrayOutputStream();
-        BEncoder.getEncoder(baos, false, "UTF-8").encodeList(l);
+        BEncoder.getEncoder(baos, false, false, "UTF-8").encodeList(l);
         chan.setBytes(baos.toByteArray());
         t = Token.getNextToken(chan);
         t.handleRead();

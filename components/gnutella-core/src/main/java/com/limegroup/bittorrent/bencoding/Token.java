@@ -35,6 +35,8 @@ public abstract class Token<T> {
     public static final int LIST = 2;
     /** A dictionary Token. */
     public static final int DICTIONARY = 3;
+    /** A boolean Token */
+    public static final int BOOLEAN = 4;
 
     /** The normal ACSII text encoding to use in bencoding for BitTorrent. */
     protected static final String ASCII = "ISO-8859-1";
@@ -164,6 +166,8 @@ public abstract class Token<T> {
             return Token.TERMINATOR;
         else if (b[0] >= ZERO && b[0] <= NINE)
             return new BEString(b[0], chan);
+        else if (b[0] == BEncoder.TRUE || b[0] == BEncoder.FALSE)
+            return b[0] == BEncoder.TRUE ? BEBoolean.TRUE : BEBoolean.FALSE;
         else
             throw new IOException("unrecognized token type " + (char)b[0]);
     }

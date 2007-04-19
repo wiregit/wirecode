@@ -36,6 +36,11 @@ public class BEncoder {
     public static final byte L;
     /** Marks the end of something in bencoding. */
     public static final byte E;
+    
+    /** Markers for true and false tokens */
+    public static final byte TRUE;
+    public static final byte FALSE;
+    
     /** Separates the length from the string in the data of a bencoded string. */
     public final static byte COLON;
     
@@ -47,6 +52,8 @@ public class BEncoder {
         byte l = 0;
         byte e = 0;
         byte colon = 0;
+        byte t = 0;
+        byte f = 0;
 
         try {
 
@@ -55,6 +62,8 @@ public class BEncoder {
             l = "l".getBytes(ASCII)[0];
             e = "e".getBytes(ASCII)[0];
             colon = ":".getBytes(ASCII)[0];
+            t = "t".getBytes(ASCII)[0];
+            f = "f".getBytes(ASCII)[0];
 
         } catch (UnsupportedEncodingException impossible) {
 
@@ -66,23 +75,26 @@ public class BEncoder {
         D = d;
         L = l;
         E = e;
+        TRUE = t;
+        FALSE = f;
     }
     
-    private final boolean fail;
+    private final boolean fail, bool;
     private final String encoding;
     private final OutputStream output;
-    private BEncoder(OutputStream output, boolean fail, String encoding) {
+    private BEncoder(OutputStream output, boolean fail, boolean bool, String encoding) {
         this.fail = fail;
         this.encoding = encoding;
         this.output = output;
+        this.bool = bool;
     }
 
     public static BEncoder getEncoder(OutputStream out) {
-        return new BEncoder(out, false, ASCII);
+        return new BEncoder(out, false, true, ASCII);
     }
     
-    public static BEncoder getEncoder(OutputStream out, boolean fail, String encoding) {
-        return new BEncoder(out, fail, encoding);
+    public static BEncoder getEncoder(OutputStream out, boolean fail, boolean bool, String encoding) {
+        return new BEncoder(out, fail, bool, encoding);
     }
     
     /**
@@ -195,8 +207,17 @@ public class BEncoder {
     		encodeByteArray(((String)object).getBytes(encoding));
     	else if (object instanceof byte[])
     		encodeByteArray((byte[])object);
-    	else if (fail)
+        else if (object instanceof Boolean) 
+            encodeBoolean(((Boolean)object).booleanValue());
+        else if (fail)
     		throw new IllegalArgumentException();
+    }
+    
+    public void encodeBoolean(boolean value) throws IOException {
+        if (bool)
+            output.write(value ? TRUE : FALSE);
+        else 
+            encodeInt(value ? 1 : 0);
     }
     
     private static boolean isValidType(Object o ) {
