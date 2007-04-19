@@ -35,7 +35,11 @@ public class BEncodeTest extends LimeTestCase {
         public boolean closed;
         
         public void setString(String src) {
-            this.src = ByteBuffer.wrap(src.getBytes());
+            setBytes(src.getBytes());
+        }
+        
+        public void setBytes(byte [] bytes) {
+            this.src = ByteBuffer.wrap(bytes);
             closed = false;
         }
 
@@ -59,6 +63,7 @@ public class BEncodeTest extends LimeTestCase {
         }
         
     }
+    
     
     static TestReadChannel chan = new TestReadChannel();
 
@@ -425,6 +430,40 @@ public class BEncodeTest extends LimeTestCase {
         List nestedList3 = (List) nestedList2.get(0);
         assertEquals(1,nestedList3.size());
         assertTrue(nestedList3.contains(new StringByte("snake")));
+    }
+    
+    public void testUTF16() throws Exception {
+        // a string with some utf16 characters
+        String original = new String("A" + "\u00ea" + "\u00f1" + 
+                 "\u00fc" +"\u10001"+ "C");
+        List<String> l = new ArrayList<String>(1);
+        l.add(original);
+        
+        // first try to encode with ascii
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BEncoder.encodeList(baos, l);
+        chan.setBytes(baos.toByteArray());
+        Token t = Token.getNextToken(chan);
+        t.handleRead();
+        assertNotNull(t);
+        assertEquals(Token.LIST, t.getType());
+        List parsed = (List)t.getResult();
+        byte [] parsedByte = (byte [])parsed.get(0);
+        assertNotEquals(original, new String(parsedByte)); // the strings don't match
+        assertNotEquals(original, new String(parsedByte,"UTF-16")); // not even if we know the encoding
+        
+        // then try to encode with UTF-16
+        baos = new ByteArrayOutputStream();
+        BEncoder.encodeList(baos, l, "UTF-16");
+        chan.setBytes(baos.toByteArray());
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        assertNotNull(t);
+        assertEquals(Token.LIST, t.getType());
+        parsed = (List)t.getResult();
+        parsedByte = (byte [])parsed.get(0);
+        assertNotEquals(original, new String(parsedByte)); // the strings don't match with ascii
+        assertEquals(original, new String(parsedByte,"UTF-16")); // but if we know the encoding they do
     }
     
     private static class StringByte  {

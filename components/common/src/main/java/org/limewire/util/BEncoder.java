@@ -104,7 +104,8 @@ public class BEncoder {
     }
 
     /**
-     * Bencodes the given List to the given OutputStream.
+     * Bencodes the given List to the given OutputStream.  Any String objects
+     * are encoded with ASCII.
      * 
      * Writes "l" for list, the bencoded-form of each of the given objects, and then "e" for end.
      * 
@@ -112,14 +113,28 @@ public class BEncoder {
      * @param list   A Java List object to bencode and write
      */
     public static void encodeList(OutputStream output, List<?> list) throws IOException {
+        encodeList(output, list, ASCII);
+    }
+    
+    /**
+     * Bencodes the given List to the given OutputStream.
+     * 
+     * Writes "l" for list, the bencoded-form of each of the given objects, and then "e" for end.
+     * 
+     * @param output An OutputStream for this method to write bencoded data to
+     * @param list   A Java List object to bencode and write
+     * @param encoding the encoding to apply to string objects.
+     */
+    public static void encodeList(OutputStream output, List<?> list, String encoding) throws IOException {
         output.write(L);
         for(Object next : list) 
-            encode(output, next);
+            encode(output, next, encoding);
         output.write(E);
     }
 
     /**
-     * Bencodes the given Map to the given OutputStream.
+     * Bencodes the given Map to the given OutputStream.  Any String objects
+     * are encoded using ASCII.
      * 
      * Writes a bencoded dictionary, which is a list of keys and values which looks like this:
      * 
@@ -138,18 +153,26 @@ public class BEncoder {
      * @param map The Java Map object to bencode and write
      */
     public static void encodeDict(OutputStream output, Map<?, ?> map) throws IOException {
+        encodeDict(output, map, ASCII);
+    }
+    
+    /**
+     * Bencodes the given Map to the given OutputStream.
+     * @param encoding the encoding to apply to String objects.
+     */
+    public static void encodeDict(OutputStream output, Map<?, ?> map, String encoding) throws IOException {
 
-    	// The BitTorrent specification requires that dictionary keys are sorted in alphanumeric order
-    	SortedMap<String, Object> sorted = new TreeMap<String, Object>();
+        // The BitTorrent specification requires that dictionary keys are sorted in alphanumeric order
+        SortedMap<String, Object> sorted = new TreeMap<String, Object>();
         for(Map.Entry<?, ?> entry : map.entrySet())
             sorted.put(entry.getKey().toString(), entry.getValue());
 
-    	output.write(D);
+        output.write(D);
         for(Map.Entry<String, Object> entry : sorted.entrySet()) {
-            encodeByteArray(output, entry.getKey().getBytes(ASCII));
-            encode(output, entry.getValue());
+            encodeByteArray(output, entry.getKey().getBytes(encoding));
+            encode(output, entry.getValue(), encoding);
         }
-    	output.write(E);
+        output.write(E);
     }
 
     /**
@@ -165,7 +188,7 @@ public class BEncoder {
      * @throws IOException              If there was a problem reading from the OutputStream.
      *         IllegalArgumentException If you pass an object that isn't a Map, List, Number, String, or byte array.
      */
-    private static void encode(OutputStream output, Object object) throws IOException {
+    private static void encode(OutputStream output, Object object, String encoding) throws IOException {
     	if (object instanceof Map)
     		encodeDict(output, (Map)object);
     	else if (object instanceof List)
@@ -173,7 +196,7 @@ public class BEncoder {
     	else if (object instanceof Number)
     		encodeInt(output, (Number)object);
     	else if (object instanceof String)
-    		encodeByteArray(output, ((String)object).getBytes(ASCII));
+    		encodeByteArray(output, ((String)object).getBytes(encoding));
     	else if (object instanceof byte[])
     		encodeByteArray(output, (byte[])object);
     	else
