@@ -10,7 +10,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -95,8 +94,6 @@ public class ReplyHandlerStub implements ReplyHandler {
     public int getPort() {
         return 6346;
     }
-
-    public void handleStatisticVM(StatisticVendorMessage svm) { }
 
     public void handleSimppVM(SimppVM svm) { }
 

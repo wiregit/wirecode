@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -2482,13 +2484,14 @@ class LegacyConnectionStats implements Inspectable {
     public Object inspect() {
         List<ManagedConnection> conns = 
             RouterService.getConnectionManager().getConnections();
-        List<Object> ret = new ArrayList<Object>(conns.size() * 4);
+        Map<String,Map<String,Number>> ret = new HashMap<String,Map<String,Number>>(conns.size() * 4);
         for(ManagedConnection mc : conns) {
-            ret.add(mc.toString());
-            ret.add(mc.getNumMessagesReceived());
-            ret.add(mc.getNumReceivedMessagesDropped());
-            ret.add(mc.getNumMessagesSent());
-            ret.add(mc.getNumSentMessagesDropped());
+            Map<String, Number> data = new HashMap<String, Number>(4);
+            data.put("r",mc.getNumMessagesReceived());
+            data.put("rd",mc.getNumReceivedMessagesDropped());
+            data.put("s",mc.getNumMessagesSent());
+            data.put("sd",mc.getNumSentMessagesDropped());
+            ret.put(mc.toString(), data);
         }
         return ret;
     }

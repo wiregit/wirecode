@@ -29,8 +29,8 @@ public abstract class VendorMessage extends Message {
     public static final int F_OOB_PROXYING_CONTROL = 13;
     public static final int F_PUSH_PROXY_REQ = 21;
     public static final int F_PUSH_PROXY_ACK = 22;
-    public static final int F_GIVE_STATS = 14;
-    public static final int F_STATISTICS = 15;
+    public static final int F_GIVE_STATS = 14; // deprecated
+    public static final int F_STATISTICS = 15; // deprecated
     public static final int F_CRAWLER_PING = 5;
     public static final int F_CRAWLER_PONG = 6;
     public static final int F_SIMPP_REQ = 16;

@@ -39,7 +39,6 @@ import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
-import com.limegroup.gnutella.messagehandlers.GiveStatsVMHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
@@ -54,7 +53,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -476,9 +474,6 @@ public abstract class MessageRouter {
         OOBHandler oobHandler = new OOBHandler(this);
         RouterService.schedule(oobHandler, CLEAR_TIME, CLEAR_TIME);
         
-        // handler for Give Stats VMs
-        GiveStatsVMHandler gsvmHandler = new GiveStatsVMHandler();
-        
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
         setMessageHandler(QueryRequest.class, new QueryRequestHandler());
@@ -492,7 +487,6 @@ public abstract class MessageRouter {
         setMessageHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
         setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
         setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
-        setMessageHandler(GiveStatsVendorMessage.class, gsvmHandler);
         setMessageHandler(HeadPing.class, new HeadPingHandler());
         setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
         setMessageHandler(SimppVM.class, new SimppVMHandler());
@@ -508,7 +502,6 @@ public abstract class MessageRouter {
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
-        setUDPMessageHandler(GiveStatsVendorMessage.class, gsvmHandler);
         setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());

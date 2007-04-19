@@ -229,7 +229,7 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 		}
 	}
     
-    public String inspect() {
+    public Object inspect() {
         StringWriter w = new StringWriter();
         try {
             storeStats(w);

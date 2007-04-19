@@ -10,7 +10,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 
 /**
  * An interface for those things that handle replies and thus are placed
@@ -153,11 +152,6 @@ public interface ReplyHandler extends IpPort {
      */
     public String getLocalePref();
 
-    /**
-     * Handles StatisticVendorMessage using this ReplyHandler
-     */ 
-    public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
-    
     /**
      * Just sends whatever message we ask it to.
      */
