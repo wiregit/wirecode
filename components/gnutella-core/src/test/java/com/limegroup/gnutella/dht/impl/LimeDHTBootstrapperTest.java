@@ -10,6 +10,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.BootstrapResult;
+import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
@@ -59,27 +61,62 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     
     public void testAddBootstrapHost() throws Exception{
         fillRoutingTable(dhtContext.getRouteTable(), 2);
-        //should be bootstrapping from routing table
-        bootstrapper.bootstrap();
-        DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
-        Thread.sleep(300);
-        assertTrue((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
-        //now emulate reception of a DHT node from the Gnutella network
-        bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
-        assertTrue("ping future should be cancelled", future.isCancelled());
-        Thread.sleep(200);
-        future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
-        assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
-        //should be bootstrapping
-        assertTrue(dhtContext.isBootstrapping() || dhtContext.isBootstrapped());
-        //now try adding more hosts -- should keep them but not bootstrap
-        for(int i = 0; i < 30; i++) {
-            bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
+        
+        // Should be bootstrapping from the RouteTable
+        DHTFuture<PingResult> pingFuture = null;
+        synchronized (bootstrapper) {
+            bootstrapper.bootstrap();
+            pingFuture = (DHTFuture<PingResult>)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+            
+            assertNotNull(pingFuture);
+            assertTrue(((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable")).booleanValue());
+            
+            // Now emulate reception of a DHT node from the Gnutella network
+            // It should cancel the existing pingFuture and create a new 
+            // Future for the Contact we've just added
+            bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
+            assertTrue("Ping future should be cancelled", pingFuture.isCancelled());
+            
+            // Get a handle of the new DHTFuture
+            pingFuture = (DHTFuture<PingResult>)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+            assertNotNull(pingFuture);
+            assertFalse("Ping future should NOT be cancelled", pingFuture.isCancelled());
         }
-        assertFalse(bootstrapper.isWaitingForNodes());
-        assertFalse(future.isCancelled());
-        //finish bootstrap
-        future.get();
+        
+        // Wait for the Ping to finish
+        Contact node = pingFuture.get().getContact();
+        
+        DHTFuture<BootstrapResult> bootstrapFuture = null;
+        synchronized (bootstrapper) {
+            // Mark the local Node as not bootstrapped
+            dhtContext.getBootstrapManager().setBootstrapped(false);
+            
+            // Invoke bootstrap manually
+            PrivilegedAccessor.invokeMethod(bootstrapper, "bootstrapFromContact", 
+                    new Contact[]{ node }, new Class[]{Contact.class});
+            
+            // Get the handle of the bootstrapFuture
+            bootstrapFuture = (DHTFuture<BootstrapResult>)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
+            assertNotNull(bootstrapFuture);
+            assertFalse("Should not be waiting", bootstrapper.isWaitingForNodes());
+            
+            // We should be bootstrapping
+            assertTrue(dhtContext.isBootstrapping());
+            
+            // Now try adding more hosts
+            for(int i = 0; i < 30; i++) {
+                bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
+            }
+            
+            // The bootstrapFuture should keep going
+            assertFalse(bootstrapper.isWaitingForNodes());
+            assertFalse(bootstrapFuture.isCancelled());
+        }
+        
+        // Finish bootstrap
+        bootstrapFuture.get();
+        
+        // And we should be bootstrapped
         assertTrue(dhtContext.isBootstrapped());
     }
     
@@ -111,7 +148,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         
         bootstrapper.bootstrap();
-        InetSocketAddress addr = (InetSocketAddress) bootstrapper.getSimppHost();
+        InetSocketAddress addr = (InetSocketAddress)PrivilegedAccessor.invokeMethod(bootstrapper, "getSimppHost", new Object[0]);
         String address = addr.getHostName();
         int port = addr.getPort();
         assertEquals(address+":"+port, hosts[0]);
@@ -120,7 +157,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         id = KUID.createWithHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB");
         localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
-        addr = (InetSocketAddress) bootstrapper.getSimppHost();
+        addr = (InetSocketAddress)PrivilegedAccessor.invokeMethod(bootstrapper, "getSimppHost", new Object[0]);
         address = addr.getHostName();
         port = addr.getPort();
         assertEquals(address+":"+port, hosts[2]);
