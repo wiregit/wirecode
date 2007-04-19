@@ -6,12 +6,15 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.BandwidthThrottle;
 import org.limewire.io.ThrottledOutputStream;
 import org.limewire.nio.NBThrottle;
@@ -120,7 +123,8 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver, SentMessageHandler, Shutdownable {
+	implements ReplyHandler, MessageReceiver, SentMessageHandler, Shutdownable,
+    Inspectable {
     
     private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
@@ -1548,5 +1552,27 @@ public class ManagedConnection extends Connection
             close();
             observer.handleNoGnutellaOk(code, msg);
         }
+    }
+    
+    public Map<String,Object> inspect() {
+        // get all kinds of data
+        Map<String, Object> data = super.inspect();
+        data.put("hfm",getHopsFlowMax());
+        data.put("mdb",getMeasuredDownstreamBandwidth());
+        data.put("mub",getMeasuredUpstreamBandwidth());
+        data.put("qrpft",getNextQRPForwardTime());
+        data.put("nmr",getNumMessagesReceived());
+        data.put("nms",getNumMessagesSent());
+        data.put("nqr",getNumQueryReplies());
+        data.put("nrmd",getNumReceivedMessagesDropped());
+        data.put("nsmd",getNumSentMessagesDropped());
+        data.put("qrteu",getQueryRouteTableEmptyUnits());
+        data.put("qrtpf",getQueryRouteTablePercentFull());
+        data.put("qrts", getQueryRouteTableSize());
+        data.put("betqr",isBusyEnoughToTriggerQRTRemoval());
+        data.put("bl",isBusyLeaf());
+        data.put("k", isKillable());
+        data.put("pp",isPushProxy());
+        return data;
     }
 }

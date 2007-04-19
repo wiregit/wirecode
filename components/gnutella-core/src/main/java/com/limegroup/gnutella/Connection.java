@@ -9,6 +9,8 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
@@ -17,6 +19,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -93,7 +96,7 @@ import com.limegroup.gnutella.util.Sockets;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort {
+public class Connection implements IpPort, Inspectable {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -1564,6 +1567,20 @@ public class Connection implements IpPort {
         }
     }
 
+    public Map<String,Object> inspect() {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("br",getBytesReceived());
+        data.put("bs",getBytesSent());
+        data.put("ct",getConnectionTime());
+        data.put("lp",getListeningPort());
+        data.put("lpref",getLocalePref());
+        data.put("ubr",getUncompressedBytesReceived());
+        data.put("ubs",getUncompressedBytesSent());
+        data.put("ua", getUserAgent());
+        data.put("v",getVersion());
+        return data;
+    }
+    
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is
     // travelling through is the same.

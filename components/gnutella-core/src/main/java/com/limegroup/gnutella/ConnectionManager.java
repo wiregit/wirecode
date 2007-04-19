@@ -2484,15 +2484,9 @@ class LegacyConnectionStats implements Inspectable {
     public Object inspect() {
         List<ManagedConnection> conns = 
             RouterService.getConnectionManager().getConnections();
-        Map<String,Map<String,Number>> ret = new HashMap<String,Map<String,Number>>(conns.size() * 4);
-        for(ManagedConnection mc : conns) {
-            Map<String, Number> data = new HashMap<String, Number>(4);
-            data.put("r",mc.getNumMessagesReceived());
-            data.put("rd",mc.getNumReceivedMessagesDropped());
-            data.put("s",mc.getNumMessagesSent());
-            data.put("sd",mc.getNumSentMessagesDropped());
-            ret.put(mc.toString(), data);
-        }
+        Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
+        for(ManagedConnection mc : conns) 
+            ret.put(mc.getAddress()+":"+mc.getPort(), mc.inspect());
         return ret;
     }
 }
