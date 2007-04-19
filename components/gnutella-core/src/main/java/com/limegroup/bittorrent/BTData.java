@@ -230,7 +230,7 @@ public class BTData {
         // we decoded it. This is intended that way by the protocol.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            BEncoder.getEncoder(baos, true, "UTF-8").encodeDict(infoMap);
+            BEncoder.getEncoder(baos, true, false, "UTF-8").encodeDict(infoMap);
         } catch (IOException ioe) {
             ErrorService.error(ioe);
         }

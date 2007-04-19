@@ -54,7 +54,7 @@ public class InspectionResponse extends VendorMessage {
         DeflaterOutputStream dos = new DeflaterOutputStream(baos);
         try {
             try {
-                BEncoder.getEncoder(dos, false, "UTF-8").encodeDict(responses);
+                BEncoder.getEncoder(dos, false, true,"UTF-8").encodeDict(responses);
             } catch (Throwable bencoding) {
                 // a BEInspectable returned invalid object - report the error.
                 String msg = bencoding.toString();
