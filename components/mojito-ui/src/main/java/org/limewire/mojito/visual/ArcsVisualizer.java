@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -143,27 +144,23 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         thread.setDaemon(true);
         thread.start();
         
+        // Make sure the JPanel is focusable or it won't fire 
+        // FocusEvent and Component's hasFocus() method returns 
+        // always false
+        setFocusable(true);
+        
         addMouseListener(new MouseAdapter() {
             
-            private volatile boolean frameHadFocus = false;
+            private volatile boolean hadFocus = false;
             
             @Override
             public void mousePressed(MouseEvent e) {
-                frameHadFocus = false;
-                Component comp = e.getComponent();
-                while(comp != null) {
-                    if (comp instanceof Frame) {
-                        frameHadFocus = comp.hasFocus();
-                        break;
-                    }
-                    
-                    comp = comp.getParent();
-                }
+                hadFocus = e.getComponent().hasFocus();
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!frameHadFocus) {
+                if (!hadFocus) {
                     return;
                 }
                 
