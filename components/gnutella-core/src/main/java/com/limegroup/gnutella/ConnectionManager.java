@@ -2480,13 +2480,29 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
  * as the former GetStatsVM.
  */
 class LegacyConnectionStats implements Inspectable {
-    public static final Object REFERENCE = new LegacyConnectionStats();
+    public static final Object LEAF = new LegacyConnectionStats(true);
+    public static final Object UP = new LegacyConnectionStats(false);
+    
+    /** Whether to report only leaf connections or only up connections */
+    private final boolean leaf;
+    private LegacyConnectionStats(boolean leaf) {
+        this.leaf = leaf;
+    }
+    
     public Object inspect() {
         List<ManagedConnection> conns = 
             RouterService.getConnectionManager().getConnections();
+        
         Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
-        for(ManagedConnection mc : conns) 
+        for(ManagedConnection mc : conns) {
+            if (RouterService.getConnectionManager().isSupernode()) {
+                if (leaf && mc.isSupernodeSupernodeConnection())
+                    continue;
+                if (!leaf && mc.isSupernodeClientConnection())
+                    continue;
+            }
             ret.put(mc.getAddress()+":"+mc.getPort(), mc.inspect());
+        }
         return ret;
     }
 }
