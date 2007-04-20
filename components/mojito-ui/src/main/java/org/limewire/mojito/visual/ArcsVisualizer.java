@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -143,8 +144,29 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         thread.start();
         
         addMouseListener(new MouseAdapter() {
+            
+            private volatile boolean frameHadFocus = false;
+            
+            @Override
+            public void mousePressed(MouseEvent e) {
+                frameHadFocus = false;
+                Component comp = e.getComponent();
+                while(comp != null) {
+                    if (comp instanceof Frame) {
+                        frameHadFocus = comp.hasFocus();
+                        break;
+                    }
+                    
+                    comp = comp.getParent();
+                }
+            }
+
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (!frameHadFocus) {
+                    return;
+                }
+                
                 synchronized (lock) {
                     painter.clear();
                     
