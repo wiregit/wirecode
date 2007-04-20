@@ -24,6 +24,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -79,7 +80,6 @@ public class InspectionTest extends ServerSideTestCase {
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
         Map response = tryMessage(request);
         assertEquals(1, response.size());
-        System.out.println(response);
         assertEquals("a",new String((byte[])response.get("0")));
         
     }
@@ -139,6 +139,42 @@ public class InspectionTest extends ServerSideTestCase {
         List l = (List) contained.get("some list");
         assertEquals(new Long(5), contained.get("some field"));
         assertFalse(contained.containsKey("wrong type"));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testConnectionManager() throws Exception {
+        // send a lot of messages through the UP connection
+        for (int i = 0; i < 10; i++)
+            ULTRAPEER[0].send(QueryRequest.createQuery("asdf"));
+        ULTRAPEER[0].flush();
+        
+        // send an inspection request
+        InspectionRequest request = new InspectionRequest("com.limegroup.gnutella.LegacyConnectionStats,UP",
+                "com.limegroup.gnutella.LegacyConnectionStats,LEAF");
+        Map m = tryMessage(request);
+        Map leafs = (Map) m.get("1");
+        Map up = (Map) m.get("0");
+        
+        // in test cases, all connections will report same address:port so they overwrite
+        // each other in the maps.
+        assertEquals(1, leafs.size());
+        assertEquals(1, up.size()); 
+        
+        Map leaf1 = (Map) leafs.get("127.0.0.1:6667");
+        Map up1 = (Map) up.get("127.0.0.1:6667");
+        assertGreaterThan(20,leaf1.size()); // should have all kinds of parameters
+        
+        // the parameters reported for the leaf and up should be the same
+        assertTrue(leaf1.keySet().containsAll(up1.keySet()));
+        assertTrue(up1.keySet().containsAll(leaf1.keySet()));
+        
+        // but the values should be different
+        assertFalse(leaf1.values().containsAll(up1.values()));
+        
+        // the number of messages received through the up should be larger than that through the leaf
+        int upReceived = Integer.valueOf(up1.get("nmr").toString());
+        int leafReceived = Integer.valueOf(leaf1.get("nmr").toString());
+        assertGreaterThan(leafReceived, upReceived);
     }
     
     private Map tryMessage(Message m) throws Exception {
