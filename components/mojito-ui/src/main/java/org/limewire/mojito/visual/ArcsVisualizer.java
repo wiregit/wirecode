@@ -51,7 +51,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private static final long DURATION = ATTACK + RELEASE;
     
-    private static final Stroke ONE_PIXEL_STROKE = new BasicStroke(1.0f);
+    private static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
     
     private static final Stroke TWO_PIXEL_STROKE = new BasicStroke(2.0f);
    
@@ -115,7 +115,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                         BasicStroke.JOIN_ROUND, 10.0f, 
                         new float[]{ 5f, 3f }, (float)Math.random() * 10f);
             default:
-                return ONE_PIXEL_STROKE;
+                return DEFAULT_STROKE;
         }
     }
     
@@ -262,6 +262,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             g2.setColor(Color.orange);
             dot.setFrame(x-DOT_SIZE/2d, y-DOT_SIZE/2d, DOT_SIZE, DOT_SIZE);
+            g2.setStroke(DEFAULT_STROKE);
             g2.fill(dot);
         }
         
@@ -421,7 +422,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         }
         
         private void paintLine(Point2D.Double localhost, double width, double height, Graphics2D g) {
-            g.setStroke(ONE_PIXEL_STROKE);
+            g.setStroke(DEFAULT_STROKE);
             g.setColor(new Color(255, 0, 0, alpha()));
             
             double x1 = localhost.x;
@@ -481,6 +482,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             g2.setColor(Color.orange);
+            g2.setStroke(DEFAULT_STROKE);
             g2.fill(dot);
         }
         
