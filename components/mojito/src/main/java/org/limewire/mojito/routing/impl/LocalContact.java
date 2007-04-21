@@ -213,7 +213,7 @@ public class LocalContact implements Contact {
         // PRIVATE IP address. This can happen with a Node that
         // is pinging an another Node that is behind the same
         // NAT router
-        if (NetworkUtils.isPrivateAddress(externalAddress)) {
+        if (ContactUtils.isPrivateAddress(externalAddress)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(externalAddress + " is a PRIVATE address");
             }

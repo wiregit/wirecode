@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -41,6 +40,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
+import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -134,9 +134,7 @@ public class DefaultMessageHandler {
             return;
         }
         
-        // NOTE: NetworkUtils.isPrivateAddress() is checking internally
-        // if ConnectionSettings.LOCAL_IS_PRIVATE is true!
-        if (NetworkUtils.isPrivateAddress(node.getContactAddress())) {
+        if (ContactUtils.isPrivateAddress(node)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(node + " has a private address");
             }

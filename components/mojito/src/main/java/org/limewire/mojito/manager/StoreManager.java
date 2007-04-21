@@ -52,6 +52,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito.util.ContactFilter;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -248,36 +249,22 @@ public class StoreManager extends AbstractManager<StoreResult> {
             if (message instanceof FindNodeResponse) {
                 FindNodeResponse response = (FindNodeResponse)message;
                 
+                Contact sender = response.getContact();
                 Collection<? extends Contact> nodes = response.getNodes();
+                
+                ContactFilter filter = new ContactFilter(context, response.getContact());
+                
+                // We did a FIND_NODE lookup use the info
+                // to fill/update our routing table
                 for(Contact node : nodes) {
                     
-                    if (!ContactUtils.isValidContact(response.getContact(), node)) {
+                    if (!filter.isValidContact(node)) {
                         if (LOG.isInfoEnabled()) {
-                            LOG.info("Dropping invalid Contact " + node);
+                            LOG.info("Dropping invalid Contact " + node + " from " + sender);
                         }
                         continue;
                     }
                     
-                    // Make sure we're not mixing IPv4 and IPv6 addresses.
-                    // See RouteTableImpl.add() for more Info!
-                    if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
-                        
-                        // Log as ERROR so that we're not missing this
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error(node + " is from a different IP address space than local Node");
-                        }
-                        continue;
-                    }
-                    
-                    if (ContactUtils.isLocalContact(context, node, null)) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Dropping local Contact " + node);
-                        }
-                        continue;
-                    }
-                    
-                    // We did a FIND_NODE lookup use the info
-                    // to fill/update our routing table
                     assert (node.isAlive() == false);
                     context.getRouteTable().add(node);
                 }

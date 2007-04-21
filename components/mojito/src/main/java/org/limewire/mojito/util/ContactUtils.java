@@ -19,10 +19,10 @@
  
 package org.limewire.mojito.util;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +37,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.settings.NetworkSettings;
 
 
 /**
@@ -157,6 +158,50 @@ public final class ContactUtils {
     }
     
     /**
+     * Returns true if the Contact has a valid SocketAddress
+     */
+    public static boolean isValidSocketAddress(Contact node) {
+        return NetworkUtils.isValidSocketAddress(node.getContactAddress());
+    }
+    
+    /**
+     * Returns true if the given InetAddress is a private address
+     * 
+     * NOTE: ContactUtils.isPrivateAddress() is checking internally
+     * if NetworkSettings.LOCAL_IS_PRIVATE is true! If you're planning 
+     * to run the DHT on a Local Area Network (LAN) you want to set 
+     * LOCAL_IS_PRIVATE to false!
+     */
+    public static boolean isPrivateAddress(InetAddress addr) {
+        return NetworkUtils.isPrivateAddress(addr.getAddress(), 
+                NetworkSettings.LOCAL_IS_PRIVATE.getValue());
+    }
+    
+    /**
+     * Returns true if the given SocketAddress is a private address
+     * 
+     * NOTE: ContactUtils.isPrivateAddress() is checking internally
+     * if NetworkSettings.LOCAL_IS_PRIVATE is true! If you're planning 
+     * to run the DHT on a Local Area Network (LAN) you want to set 
+     * LOCAL_IS_PRIVATE to false!
+     */
+    public static boolean isPrivateAddress(SocketAddress sa) {
+        return isPrivateAddress(((InetSocketAddress)sa).getAddress());
+    }
+    
+    /**
+     * Returns true if the Contact has a private SocketAddress
+     * 
+     * NOTE: ContactUtils.isPrivateAddress() is checking internally
+     * if NetworkSettings.LOCAL_IS_PRIVATE is true! If you're planning 
+     * to run the DHT on a Local Area Network (LAN) you want to set 
+     * LOCAL_IS_PRIVATE to false!
+     */
+    public static boolean isPrivateAddress(Contact node) {
+        return isPrivateAddress(node.getContactAddress());
+    }
+    
+    /**
      * Checks whether or not 'node' is a valid Contact. Valid 
      * in sense of having a correct IP:Port and depending on
      * the ConnectionSettings.LOCAL_IS_PRIVATE setting whether or
@@ -167,18 +212,14 @@ public final class ContactUtils {
      * @return Whether or not 'node' is a valid Contact
      */
     public static boolean isValidContact(Contact src, Contact node) {
-        if (!NetworkUtils.isValidSocketAddress(node.getContactAddress())) {
+        if (!isValidSocketAddress(node)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(src + " sent us a Contact with an invalid IP:Port " + node);
             }
             return false;
         }
         
-        // NOTE: NetworkUtils.isPrivateAddress() is checking internally
-        // if ConnectionSettings.LOCAL_IS_PRIVATE is true! If you're planning
-        // to run the DHT on a Local Area Network (LAN) you want to set
-        // LOCAL_IS_PRIVATE to false!
-        if (NetworkUtils.isPrivateAddress(node.getContactAddress())) {
+        if (isPrivateAddress(node)) {
             if (src.getNodeID().equals(node.getNodeID())) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(src + " does not know its external address");
@@ -195,30 +236,25 @@ public final class ContactUtils {
         return true;
     }
     
+    /**
+     * Returns true if the given Contact has the same Node ID as the
+     * local Node but a different IP Address.
+     */
+    public static boolean isCollision(Context context, Contact node) {
+        if (context.isLocalNodeID(node.getNodeID())
+                && !context.isLocalContactAddress(node.getContactAddress())) {
+            return true;
+        }
+        return false;
+    }
     
     /**
-     * Checks whether or not 'node' is the local Node and
-     * triggers Node ID collision verification respectively.
+     * Returns true if the given Contact has the same Node ID or the
+     * same IP Address as the local Node
      */
-    public static boolean isLocalContact(Context context, Contact node, 
-            Collection<Contact> collisions) {
+    public static boolean isLocalContact(Context context, Contact node) {
         
         if (context.isLocalNodeID(node.getNodeID())) {
-            // If same address then just skip it
-            if (context.isLocalContactAddress(node.getContactAddress())) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Skipping local Node");
-                }
-            } else { // there might be a NodeID collision
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(node + " seems to collide with " + context.getLocalNode());
-                }
-                
-                if (collisions != null) {
-                    collisions.add(node);
-                }
-            }
-            
             return true;
         }
         
@@ -233,7 +269,8 @@ public final class ContactUtils {
         // as sending the lookup to ourself (loopback).
         if (context.isLocalContactAddress(node.getContactAddress())) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(node + " has the same Contact addess as we do " + context.getLocalNode());
+                LOG.warn(node + " has the same Contact addess as we do " 
+                        + context.getLocalNode());
             }
             
             return true;

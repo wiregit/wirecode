@@ -27,7 +27,6 @@ import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
@@ -146,7 +145,7 @@ public class RemoteContact implements Contact {
                 // If the source address is a PRIVATE address then 
                 // don't use it because the other Node is on the 
                 // same LAN as we are (damn NAT routers!).
-                if (!NetworkUtils.isPrivateAddress(sourceAddress)) {
+                if (!ContactUtils.isPrivateAddress(sourceAddress)) {
                     contactAddress = new InetSocketAddress(
                             ((InetSocketAddress)sourceAddress).getAddress(), port);
                 }

@@ -53,6 +53,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito.util.ContactFilter;
 import org.limewire.security.SecurityToken;
 
 
@@ -381,52 +382,38 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      */
     protected final boolean handleNodeResponse(FindNodeResponse response) {
         Contact sender = response.getContact();
+        
         Collection<? extends Contact> nodes = response.getNodes();
-        for(Contact node : nodes) {
-            
-            if (!ContactUtils.isValidContact(sender, node)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping invalid Contact: " + node);
-                }
-                continue;
-            }
-            
-            // Make sure we're not mixing IPv4 and IPv6 addresses.
-            // See RouteTableImpl.add() for more Info!
-            if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
-                
-                // Log as ERROR so that we're not missing this
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " is from a different IP address space than local Node");
-                }
-                continue;
-            }
-            
-            if (ContactUtils.isLocalContact(context, node, collisions)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping colliding Contact: " + node);
-                }
-                
-                continue;
-            }
-            
-            if (!isQueried(node) 
-                    && !isYetToBeQueried(node)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding " + node + " to the yet-to-be queried list");
-                }
-                
-                addYetToBeQueried(node, currentHop+1);
-                
-                // Add them to the routing table as not alive
-                // contacts. We're likely going to add them
-                // anyways!
-                assert (node.isAlive() == false);
-                context.getRouteTable().add(node);
-            }
-        }
         
         if (!nodes.isEmpty()) {
+            ContactFilter filter = new ContactFilter(context, sender);
+            
+            for(Contact node : nodes) {
+                
+                if (!filter.isValidContact(node)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Dropping invalid Contact " + node + " from " + sender);
+                    }
+                    continue;
+                }
+                
+                if (!isQueried(node) 
+                        && !isYetToBeQueried(node)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Adding " + node + " to the yet-to-be queried list");
+                    }
+                    
+                    addYetToBeQueried(node, currentHop+1);
+                    
+                    // Add them to the routing table as not alive
+                    // contacts. We're likely going to add them
+                    // anyways!
+                    assert (node.isAlive() == false);
+                    context.getRouteTable().add(node);
+                }
+            }
+            
+            collisions.addAll(filter.getCollisions());
             addToResponsePath(response);
         }
         

@@ -94,4 +94,25 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final BooleanSetting ALLOCATE_NEW_BUFFER
         = FACTORY.createBooleanSetting("ALLOCATE_NEW_BUFFER", false);
+    
+    /**
+     * Setting for whether or not private IP Addresses are
+     * considered private.
+     * 
+     * NOTE: If you're planning to run the DHT on a Local Area 
+     * Network (LAN) you want to set LOCAL_IS_PRIVATE to false!
+     */
+    public static final BooleanSetting LOCAL_IS_PRIVATE
+        = FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
+    
+    /**
+     * Setting for whether or not IPs from the same Class C
+     * Network should be filtered
+     * 
+     * NOTE: If you're planning to run the DHT on a Local Area 
+     * Network (LAN) you want to set FILTER_CLASS_C to false!
+     */
+    public static final BooleanSetting FILTER_CLASS_C
+        = FACTORY.createRemoteBooleanSetting("FILTER_CLASS_C", 
+                true, "Mojito.FilterClassC");
 }

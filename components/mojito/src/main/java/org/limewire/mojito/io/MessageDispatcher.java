@@ -385,7 +385,7 @@ public abstract class MessageDispatcher {
         // IPs if it's not permitted. Two Nodes behind the same 
         // NAT using private IPs to communicate with each other
         // would screw up a few things.
-        if (NetworkUtils.isPrivateAddress(dst)) {
+        if (ContactUtils.isPrivateAddress(dst)) {
             String msg = "Private IP:Port " + ContactUtils.toString(nodeId, dst);
             if (LOG.isErrorEnabled()) {
                 LOG.error(msg);

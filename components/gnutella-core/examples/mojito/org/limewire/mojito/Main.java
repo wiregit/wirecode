@@ -1,7 +1,6 @@
 package org.limewire.mojito;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -10,32 +9,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.settings.BucketRefresherSettings;
+import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.MojitoUtils;
-
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.version.UpdateInformation;
 
 public class Main {
     
@@ -59,12 +40,8 @@ public class Main {
             }
         }
         
-        LimeCoreGlue.install();
-        
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.PORT.setValue(port);
-        ConnectionSettings.FORCED_PORT.setValue(port);
+        NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
+        NetworkSettings.FILTER_CLASS_C.setValue(false);
         
         List<MojitoDHT> dhts = standalone(null, port, count);
         //List<MojitoDHT> dhts = limewire(null, port);
@@ -74,8 +51,12 @@ public class Main {
             System.exit(0);
         }
         
-        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+        if (!NetworkSettings.LOCAL_IS_PRIVATE.getValue()) {
             System.out.println("WARNING: LOCAL_IS_PRIVATE is set to false!");
+        }
+        
+        if (!NetworkSettings.FILTER_CLASS_C.getValue()) {
+            System.out.println("WARNING: FILTER_CLASS_C is set to false!");
         }
         
         run(port, dhts, bootstrapHost);
@@ -110,24 +91,6 @@ public class Main {
         }
         
         return dhts;
-    }
-    
-    @SuppressWarnings("unused")
-    private static List<MojitoDHT> limewire(InetAddress addr, int port) throws Exception {
-        RouterService service = new RouterService(new DoNothing());
-        RouterService.preGuiInit();
-        service.start();
-        
-        LimeDHTManager manager = (LimeDHTManager)RouterService.getDHTManager();
-        MojitoDHT dht = manager.getMojitoDHT();
-        if (addr != null) {
-            dht.bind(new InetSocketAddress(addr, port));
-        } else {
-            dht.bind(new InetSocketAddress(port));
-        }
-        //dht.start();
-        
-        return Arrays.asList(dht);
     }
     
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
@@ -279,124 +242,6 @@ public class Main {
             } finally {
                 out.flush();
             }
-        }
-    }
-    
-    private static class DoNothing implements ActivityCallback {
-        
-        public void installationCorrupted() {            
-        }
-
-        public void acceptChat(Chatter ctr) {
-        }
-
-        public void acceptedIncomingChanged(boolean status) {
-        }
-
-        public void addressStateChanged() {
-        }
-
-        public void addUpload(Uploader u) {
-        }
-
-        public void browseHostFailed(GUID guid) {
-        }
-
-        public void chatErrorMessage(Chatter chatter, String str) {
-        }
-
-        public void chatUnavailable(Chatter chatter) {
-        }
-
-        public void componentLoading(String component) {
-        }
-
-        public void connectionClosed(Connection c) {
-        }
-
-        public void connectionInitialized(Connection c) {
-        }
-
-        public void connectionInitializing(Connection c) {
-        }
-
-        public void disconnected() {
-        }
-
-        public void fileManagerLoaded() {
-        }
-
-        public void fileManagerLoading() {
-        }
-
-        public void handleFileEvent(FileManagerEvent evt) {
-        }
-
-        public boolean handleMagnets(MagnetOptions[] magnets) {
-            return false;
-        }
-
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set locs) {
-        }
-
-        public void handleQueryString(String query) {
-        }
-
-        public void handleSharedFileUpdate(File file) {
-        }
-
-        public boolean isQueryAlive(GUID guid) {
-            return false;
-        }
-
-        public void receiveMessage(Chatter chr, String message) {
-        }
-
-        public void removeUpload(Uploader u) {
-        }
-
-        public void restoreApplication() {
-        }
-
-        public void setAnnotateEnabled(boolean enabled) {
-        }
-
-        public void updateAvailable(UpdateInformation info) {
-        }
-
-        public void uploadsComplete() {
-        }
-
-        public boolean warnAboutSharingSensitiveDirectory(File dir) {
-            return false;
-        }
-
-        public void addDownload(Downloader d) {
-        }
-
-        public void downloadsComplete() {
-        }
-
-        public String getHostValue(String key) {
-            return null;
-        }
-
-        public void promptAboutCorruptDownload(Downloader dloader) {
-        }
-
-        public void removeDownload(Downloader d) {
-        }
-
-        public void showDownloads() {
-        }
-
-        public void handleAddressStateChanged() {
-        }
-
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        }
-
-        public void handleTorrent(File torrentFile) {
         }
     }
 }
