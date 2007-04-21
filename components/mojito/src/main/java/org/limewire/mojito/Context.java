@@ -839,7 +839,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         messageDispatcher.close();
         bootstrapManager.setBootstrapped(false);
-        estimator.clear();
+        
+        if (estimator != null) {
+            estimator.clear();
+        }
         
         setExternalPort(0);
     }

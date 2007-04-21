@@ -30,6 +30,64 @@ public class ContextTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    public void testStartWithoutBind() {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        
+        try {
+            dht.start();
+            fail("Start without bind should have failed");
+        } catch (IllegalStateException expected) {
+            
+        } finally {
+            dht.close();
+        }
+    }
+    
+    public void testStartWithBind() throws Exception {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        dht.bind(2000);
+        
+        try {
+            dht.start();
+        } catch (IllegalStateException err) {
+            fail(err);            
+        } finally {
+            dht.close();
+        }
+    }
+    
+    public void testStopWithoutBind() {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        
+        try {
+            dht.stop();
+        } finally {
+            dht.close();
+        }
+    }
+    
+    public void testStopWithoutStart() throws Exception {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        dht.bind(2000);
+        
+        try {
+            dht.stop();
+        } finally {
+            dht.close();
+        }
+    }
+    
+    public void testCloseWithoutBind() {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        dht.close();
+    }
+    
+    public void testCloseWithoutStart() throws Exception {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        dht.bind(2000);
+        dht.close();
+    }
+    
     public void testShutdown() throws Exception {
         setLocalIsPrivate(false);
         
