@@ -71,6 +71,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         
         NetworkSettings.TIMEOUT.setValue(500);
+        NetworkSettings.FILTER_CLASS_C.setValue(false);
+        NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         // Nothing should take longer than 1.5 seconds. If we start seeing
         // LockTimeoutExceptions on the loopback then check this Setting!
