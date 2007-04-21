@@ -202,6 +202,8 @@ public final class NetworkUtils {
     /**
      * Checks if the given address is a private address.
      * 
+     * This method is IPv6 compliant
+     * 
      * @param address the address to check
      * @param localIsPrivate whether or not private addresses are
      *          considered private (in other words this method will
@@ -212,10 +214,18 @@ public final class NetworkUtils {
             return false;
         }
         
-        int addr = ((address[0] & 0xFF) << 24) 
-                 | ((address[1] & 0xFF) << 16);
+        // IPv6 has no private addresses
+        if (!isIPv4CompatibleAddress(address)) {
+            return false;
+        }
         
-        for (int i = 0; i < 7; i++) {
+        // The byte-array is either 4 or 16 bytes long. We work
+        // with the lower 4 bytes [0.0.0...0]1.2.3.4
+        
+        int addr = ((address[/* 0 */ address.length-4] & 0xFF) << 24) 
+                 | ((address[/* 1 */ address.length-3] & 0xFF) << 16);
+        
+        for (int i = 0; i < PRIVATE_ADDRESSES_BYTE.length; i++) {
             if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) 
                     == PRIVATE_ADDRESSES_BYTE[i][1]) {
                 return true;
@@ -602,5 +612,30 @@ public final class NetworkUtils {
     public static boolean isIPv6Compatible(InetAddress address) {
         int length = address.getAddress().length;
         return length == 4 || length == 16;
+    }
+    
+    /**
+     * Returns true if the given byte-array is an IPv4 compatible address
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isIPv4CompatibleAddress(byte[] address) {
+        // Is it a IPv4 address?
+        if (address.length == 4) {
+            return true;
+            
+        // Is it a IPv4 compatible IPv6 address?
+        // (copied from Inet6Address)
+        } else if (address.length == 16 
+                && (address[ 0] == 0x00) && (address[ 1] == 0x00) 
+                && (address[ 2] == 0x00) && (address[ 3] == 0x00) 
+                && (address[ 4] == 0x00) && (address[ 5] == 0x00) 
+                && (address[ 6] == 0x00) && (address[ 7] == 0x00) 
+                && (address[ 8] == 0x00) && (address[ 9] == 0x00) 
+                && (address[10] == 0x00) && (address[11] == 0x00))  {   
+            return true;
+        }
+        
+        return false;  
     }
 }
