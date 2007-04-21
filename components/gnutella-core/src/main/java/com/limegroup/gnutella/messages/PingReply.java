@@ -17,8 +17,8 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -835,7 +835,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     
                     if (NetworkUtils.isValidAddress(myip)) {
                         try{
-                            myIP = NetworkUtils.getByAddress(myip);
+                            myIP = InetAddress.getByAddress(myip);
                             myPort = ByteOrder.ushort2int(ByteOrder.leb2short(data,4));
                             
                             if (NetworkUtils.isPrivateAddress(myIP) ||

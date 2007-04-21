@@ -53,6 +53,11 @@ public final class NetworkUtils {
     private static final byte LOCAL_ADDRESS_BYTE = (byte)127;
     
     /**
+     * Natmask for Class C Networks
+     */
+    public static final int CLASS_C_NETMASK = 0xFFFFFF00;
+    
+    /**
      * Ensure that this class cannot be constructed.
      */
     private NetworkUtils() {}
@@ -186,27 +191,40 @@ public final class NetworkUtils {
     }
 
     /**
-     * Checks to see if the given address is a firewalled address.
+     * Checks if the given address is a private address
      * 
      * @param address the address to check
      */
     public static boolean isPrivateAddress(byte[] address) {
-        if(!LocalSocketAddressService.isLocalAddressPrivate())
+        return isPrivateAddress(address, LocalSocketAddressService.isLocalAddressPrivate());
+    }
+    
+    /**
+     * Checks if the given address is a private address.
+     * 
+     * @param address the address to check
+     * @param localIsPrivate whether or not private addresses are
+     *          considered private (in other words this method will
+     *          always return false if localIsPrivate is false).
+     */
+    public static boolean isPrivateAddress(byte[] address, boolean localIsPrivate) {
+        if (!localIsPrivate) {
             return false;
+        }
         
+        int addr = ((address[0] & 0xFF) << 24) 
+                 | ((address[1] & 0xFF) << 16);
         
-        int addr = ((address[0] & 0xFF) << 24) | 
-        			((address[1] & 0xFF)<< 16);
-        
-        for (int i =0;i< 7;i++){
-            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) ==
-                	PRIVATE_ADDRESSES_BYTE[i][1])
+        for (int i = 0; i < 7; i++) {
+            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) 
+                    == PRIVATE_ADDRESSES_BYTE[i][1]) {
                 return true;
+            }
         }
         
         return false;
     }
-
+    
     /**
      * Utility method for determing whether or not the given 
      * address is private taking an InetAddress object as argument
@@ -384,14 +402,17 @@ public final class NetworkUtils {
     	return Collections.unmodifiableList(ret);
     }
     
-    public static <T extends IpPort>Collection<T> filterOnePerClassC(Collection<T> c) {
-        return filterUnique(c, 0xFFFFFF00);
+    /**
+     * Filters unique IPs based on a Class C Netmask
+     */
+    public static <T extends IpPort> Collection<T> filterOnePerClassC(Collection<T> c) {
+        return filterUnique(c, CLASS_C_NETMASK);
     }
     
     /**
      * Filters unique ips based on a netmask.
      */
-    public static <T extends IpPort>Collection<T> filterUnique(Collection<T> c, int netmask) {
+    public static <T extends IpPort> Collection<T> filterUnique(Collection<T> c, int netmask) {
         ArrayList<T> ret = new ArrayList<T>(c.size());
         Set<Integer> ips = new HashSet<Integer>();
         for (T ip : c) {
@@ -403,19 +424,11 @@ public final class NetworkUtils {
         return ret;
     }
     
-    public static int getClassC(InetAddress addr) {
-        return getMaskedIP(addr, 0xFFFFFF00);
-    }
-    
+    /**
+     * Returns the masked IP as an Integer
+     */
     public static int getMaskedIP(InetAddress addr, int netmask) {
         return ByteOrder.beb2int(addr.getAddress(),0) & netmask;
-    }
-    
-    /**
-     * Returns an InetAddress representing the given IP address.
-     */
-    public static InetAddress getByAddress(byte[] addr) throws UnknownHostException {
-        return InetAddress.getByAddress(addr);
     }
     
     /**
