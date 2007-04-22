@@ -172,7 +172,7 @@ public class DefaultMessageHandler {
             Contact existing = routeTable.get(nodeId);
             
             if (existing == null
-                    || existing.isUnknown()
+                    || !existing.isAlive()
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
@@ -348,7 +348,7 @@ public class DefaultMessageHandler {
         //    the furthest away Node (we).
         } else if (nodes.size() >= k 
                 && context.isLocalNode(furthest)
-                && (existing == null || existing.isUnknown())) {
+                && (existing == null || !existing.isAlive())) {
             
             KUID nodeId = node.getNodeID();
             KUID furthestId = furthest.getNodeID();
