@@ -39,7 +39,6 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.exceptions.DHTException;
-import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
@@ -131,18 +130,6 @@ public class CacheForwardTest extends MojitoTestCase {
         }
     }
     
-    /*public void testCacheForwardLoop() {
-        for (int i = 0; i < 100; i++) {
-            System.out.println("#" + i);
-            try {
-                testCacheForward();
-            } catch (Throwable t) {
-                t.printStackTrace();
-                break;
-            }
-        }
-    }*/
-    
     public void testCacheForward() throws Exception {
         
         final long waitForNodes = 500; // ms
@@ -163,8 +150,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 dht.start();
                 
                 if (i > 0) {
-                    PingResult result = dht.ping(new InetSocketAddress("localhost", PORT)).get();
-                    dht.bootstrap(result.getContact());
+                    dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
                 } else {
                     first = dht;
                 }
@@ -172,8 +158,13 @@ public class CacheForwardTest extends MojitoTestCase {
                 dhts.put(dht.getLocalNodeID(), dht);
             }
             
-            PingResult result = first.ping(new InetSocketAddress("localhost", PORT+1)).get();
-            first.bootstrap(result.getContact()).get();
+            first.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
+            
+            /*for (MojitoDHT dht : dhts.values()) {
+                if (!dht.isBootstrapped()) {
+                    dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
+                }
+            }*/
             
             // Sort all KUIDs by XOR distance and use the Node as 
             // creator that's furthest away from the value ID so
