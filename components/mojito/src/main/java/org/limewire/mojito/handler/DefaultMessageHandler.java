@@ -37,6 +37,7 @@ import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
@@ -170,7 +171,8 @@ public class DefaultMessageHandler {
             // (we are (re)connecting to the network) or a node that is reconnecting
             Contact existing = routeTable.get(nodeId);
             
-            if (existing == null 
+            if (existing == null
+                    || existing.isUnknown()
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
@@ -179,7 +181,7 @@ public class DefaultMessageHandler {
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
                     //of the k closest to the new joining node.
-                    List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
+                    List<Contact> nodes = routeTable.select(nodeId, 2*k, SelectMode.ALL);
                     
                     // Are we one of the K nearest Nodes to the contact?
                     if (containsNodeID(nodes, context.getLocalNodeID())) {
@@ -274,7 +276,7 @@ public class DefaultMessageHandler {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
-        List<Contact> nodes = routeTable.select(valueId, k, false);
+        List<Contact> nodes = routeTable.select(valueId, k, SelectMode.ALIVE_WITH_LOCAL);
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         
@@ -346,8 +348,7 @@ public class DefaultMessageHandler {
         //    the furthest away Node (we).
         } else if (nodes.size() >= k 
                 && context.isLocalNode(furthest)
-                && (existing==null)
-                /*&& !containsNodeID(nodes, node.getNodeID())*/) {
+                && (existing == null || existing.isUnknown())) {
             
             KUID nodeId = node.getNodeID();
             KUID furthestId = furthest.getNodeID();

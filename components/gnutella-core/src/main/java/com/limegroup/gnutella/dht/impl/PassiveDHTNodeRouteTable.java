@@ -231,8 +231,8 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.select(nodeId);
     }
     
-    public synchronized List<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
-        return delegate.select(nodeId, count, aliveContacts);
+    public synchronized List<Contact> select(KUID nodeId, int count, SelectMode mode) {
+        return delegate.select(nodeId, count, mode);
     }
     
     public synchronized void setContactPinger(ContactPinger pinger) {

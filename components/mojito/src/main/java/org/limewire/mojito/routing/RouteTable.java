@@ -35,6 +35,12 @@ import org.limewire.mojito.result.PingResult;
  */
 public interface RouteTable extends Serializable {
     
+    public static enum SelectMode {
+        ALL,
+        ALIVE,
+        ALIVE_WITH_LOCAL;
+    }
+    
     /**
      * Adds a new Contact or if it's already in the RouteTable updates 
      * its contact information.
@@ -64,10 +70,10 @@ public interface RouteTable extends Serializable {
      * 
      * @param nodeId the lookup KUID
      * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)
-     * @param aliveContacts whether or not only alive Contacts should be in the result set
+     * @param mode whether or not only alive Contacts should be in the result set
      * @return list of Contacts sorted by closeness
      */
-    public List<Contact> select(KUID nodeId, int count, boolean aliveContacts);
+    public List<Contact> select(KUID nodeId, int count, SelectMode mode);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided

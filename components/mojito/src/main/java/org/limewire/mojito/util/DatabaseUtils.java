@@ -25,6 +25,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 
@@ -48,7 +49,7 @@ public class DatabaseUtils {
         KUID primaryKey = entity.getKey();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        Collection<Contact> nodes = routeTable.select(primaryKey, k, false);
+        Collection<Contact> nodes = routeTable.select(primaryKey, k, SelectMode.ALL);
         
         long creationTime = entity.getCreationTime();
         long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();

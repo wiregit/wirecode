@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 
@@ -89,7 +90,7 @@ public class DHTSizeEstimator {
 
             // TODO only live nodes?
             KUID localNodeId = routeTable.getLocalNode().getNodeID();
-            List<Contact> nodes = routeTable.select(localNodeId, k, false);
+            List<Contact> nodes = routeTable.select(localNodeId, k, SelectMode.ALL);
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();

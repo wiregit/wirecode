@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
@@ -24,6 +25,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.CommonUtils;
@@ -700,7 +702,7 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         //test select only alive nodes
-        List<Contact> nodes = routeTable.select(KUID.createRandomID(), 500, true);
+        List<Contact> nodes = routeTable.select(KUID.createRandomID(), 500, SelectMode.ALIVE);
         assertNotContains(nodes, routeTable.getLocalNode());
         assertEquals(10, nodes.size());
         
@@ -709,12 +711,12 @@ public class RouteTableTest extends MojitoTestCase {
         //now test probabilistic select:
         //should not get anything:
         RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(5);
-        nodes = routeTable.select(KUID.createRandomID(), 500, false);
+        nodes = routeTable.select(KUID.createRandomID(), 500, SelectMode.ALL);
         assertEquals(11, nodes.size());
         assertContains(nodes, liveContacts.get(0));
         //should get about half of the nodes
         RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(10);
-        nodes = routeTable.select(KUID.createRandomID(), 500, false);
+        nodes = routeTable.select(KUID.createRandomID(), 500, SelectMode.ALL);
         assertGreaterThan(150, nodes.size());
         assertLessThan(250, nodes.size());
         
@@ -767,6 +769,124 @@ public class RouteTableTest extends MojitoTestCase {
         // The local Node should be still there
         assertEquals(localNode, routeTable.select(localNode.getNodeID()));
         assertTrue(localNode == routeTable.select(localNode.getNodeID())); // it should be the same Object
+    }
+    
+    public void testSelectAll() {
+        RouteTable routeTable = new RouteTableImpl();
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i));
+            
+            routeTable.add(node);
+        }
+        
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createLiveContact(
+                    new InetSocketAddress("localhost", 2000 + i),
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i),
+                    0, Contact.DEFAULT_FLAG);
+            
+            routeTable.add(node);
+        }
+        
+        int alive = 0;
+        int unknown = 0;
+        Collection<Contact> nodes = routeTable.select(
+                KUID.createRandomID(), routeTable.size(), SelectMode.ALL);
+        
+        for (Contact node : nodes) {
+            if (node.isAlive()) {
+                alive++;
+            } else if (node.isUnknown()) {
+                unknown++;
+            }
+        }
+        
+        assertEquals(10, alive);
+        assertEquals(11, unknown); // local Node + others
+    }
+    
+    public void testSelectAlive() {
+        RouteTable routeTable = new RouteTableImpl();
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i));
+            
+            routeTable.add(node);
+        }
+        
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createLiveContact(
+                    new InetSocketAddress("localhost", 2000 + i),
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i),
+                    0, Contact.DEFAULT_FLAG);
+            
+            routeTable.add(node);
+        }
+        
+        int alive = 0;
+        int unknown = 0;
+        Collection<Contact> nodes = routeTable.select(
+                KUID.createRandomID(), routeTable.size(), SelectMode.ALIVE);
+        
+        for (Contact node : nodes) {
+            if (node.isAlive()) {
+                alive++;
+            } else if (node.isUnknown()) {
+                unknown++;
+            }
+        }
+        
+        assertEquals(10, alive);
+        assertEquals(0, unknown); // local Node + others
+    }
+    
+    public void testSelectAliveAndLocal() {
+        RouteTable routeTable = new RouteTableImpl();
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i));
+            
+            routeTable.add(node);
+        }
+        
+        for (int i = 0; i < 10; i++) {
+            Contact node = ContactFactory.createLiveContact(
+                    new InetSocketAddress("localhost", 2000 + i),
+                    Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 2000 + i),
+                    0, Contact.DEFAULT_FLAG);
+            
+            routeTable.add(node);
+        }
+        
+        int alive = 0;
+        int unknown = 0;
+        Collection<Contact> nodes = routeTable.select(
+                KUID.createRandomID(), routeTable.size(), SelectMode.ALIVE_WITH_LOCAL);
+        
+        assertContains(nodes, routeTable.getLocalNode());
+        for (Contact node : nodes) {
+            if (node.isAlive()) {
+                alive++;
+            } else if (node.isUnknown()) {
+                unknown++;
+            }
+        }
+        
+        assertEquals(10, alive);
+        assertEquals(1, unknown);
     }
     
     /*public static void main(String[] args) {

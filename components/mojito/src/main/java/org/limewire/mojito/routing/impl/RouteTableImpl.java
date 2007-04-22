@@ -672,7 +672,7 @@ public class RouteTableImpl implements RouteTable {
      * to the given KUID.
      */
     public synchronized List<Contact> select(KUID nodeId, int count) {
-        return select(nodeId, count, false);
+        return select(nodeId, count, SelectMode.ALL);
     }
     
     /*
@@ -680,7 +680,7 @@ public class RouteTableImpl implements RouteTable {
      * @see com.limegroup.mojito.routing.RouteTable#select(com.limegroup.mojito.KUID, int, boolean)
      */
     public synchronized List<Contact> select(final KUID nodeId, final int count, 
-            final boolean activeContacts) {
+            final SelectMode mode) {
         
         if (count == 0) {
             return Collections.emptyList();
@@ -693,7 +693,8 @@ public class RouteTableImpl implements RouteTable {
                 Bucket bucket = entry.getValue();
                 
                 Collection<Contact> list = null;
-                if (activeContacts) {
+                if (mode == SelectMode.ALIVE
+                        || mode == SelectMode.ALIVE_WITH_LOCAL) {
                     // Select all Contacts from the Bucket to compensate
                     // the fact that not all of them will be alive. We're
                     // using Bucket.select() instead of Bucket.getActiveContacts()
@@ -714,7 +715,13 @@ public class RouteTableImpl implements RouteTable {
                     // active Contacts are requested.
                     // We also ignore the local contact here (see LocalContact.isAlive)
                     // because a node will always have himself in the routing table
-                    if (activeContacts && !node.isAlive()) {
+                    if (mode == SelectMode.ALIVE && !node.isAlive()) {
+                        continue;
+                    }
+                    
+                    if (mode == SelectMode.ALIVE_WITH_LOCAL
+                            && !node.isAlive()
+                            && !isLocalNode(node)) {
                         continue;
                     }
                     

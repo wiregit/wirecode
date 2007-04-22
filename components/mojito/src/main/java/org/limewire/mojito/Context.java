@@ -74,6 +74,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
@@ -806,7 +807,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
+            List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, SelectMode.ALIVE);
             
             synchronized (messageDispatcher.getOutputQueueLock()) {
                 for (Contact node : nodes) {

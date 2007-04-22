@@ -50,10 +50,11 @@ import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.ContactFilter;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.mojito.util.ContactFilter;
 import org.limewire.security.SecurityToken;
 
 
@@ -289,9 +290,9 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         if (isSelectAliveNodesOnly()) {
             // Select twice as many Contacts which should guarantee that
             // we've k-closest Nodes at the end of the lookup
-            nodes = context.getRouteTable().select(lookupId, 2 * getResultSetSize(), true);
+            nodes = context.getRouteTable().select(lookupId, 2 * getResultSetSize(), SelectMode.ALIVE);
         } else {
-            nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
+            nodes = context.getRouteTable().select(lookupId, getResultSetSize(), SelectMode.ALL);
         }
         
         // Add the Nodes to the yet-to-be queried List and remember

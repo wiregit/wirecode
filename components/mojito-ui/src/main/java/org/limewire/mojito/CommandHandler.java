@@ -46,6 +46,7 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DHTStats;
@@ -398,7 +399,7 @@ public class CommandHandler {
         out.println("Selecting: " + nodeId);
         
         RouteTable routeTable = ((Context)dht).getRouteTable();
-        out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
+        out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, SelectMode.ALL)));
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
