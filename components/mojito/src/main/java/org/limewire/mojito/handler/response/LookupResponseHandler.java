@@ -382,9 +382,10 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      */
     protected final boolean handleNodeResponse(FindNodeResponse response) {
         Contact sender = response.getContact();
-        
         Collection<? extends Contact> nodes = response.getNodes();
         
+        // Nodes that are currently bootstrapping return
+        // an empty Collection of Contacts! 
         if (!nodes.isEmpty()) {
             ContactFilter filter = new ContactFilter(context, sender);
             
@@ -414,9 +415,12 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
             }
             
             collisions.addAll(filter.getCollisions());
-            addToResponsePath(response);
         }
         
+        // TODO add only if nodes is empty or if there's
+        // at least certain percentage of Contacts is
+        // valid
+        addToResponsePath(response);
         return true;
     }
     
