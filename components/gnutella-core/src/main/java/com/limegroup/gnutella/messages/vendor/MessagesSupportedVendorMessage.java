@@ -222,13 +222,6 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         return supportsMessage(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ);
     }
 
-    /**
-     * @return -1 if the message is not supported, else returns the version of
-     * the message supported.
-     */
-    public int supportsGiveStatsVM() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_GIVE_STATS);
-    }
     
     /**
      * @return -1 if the message isn't supported, else it returns the version 
