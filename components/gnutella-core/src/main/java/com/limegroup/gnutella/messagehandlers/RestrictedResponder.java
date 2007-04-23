@@ -29,7 +29,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     /** an optional verifier to very secure messages */
     private final SecureMessageVerifier verifier;
     /** The last version of the routable message that was routed */
-    private IntWrapper lastRoutedVersion;
+    private IntWrapper lastRoutedVersion = new IntWrapper(0);
     
     public RestrictedResponder(StringArraySetting setting) {
         this(setting, null);
