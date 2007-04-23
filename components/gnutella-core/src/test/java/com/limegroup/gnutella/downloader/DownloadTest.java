@@ -78,36 +78,21 @@ public class DownloadTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(DownloadTest.class);
     
-    /**
-     * Port for the first uploader.
-     */
+    /* ports for the normal uploaders. */
     private static final int PORT_1 = 6321;
-
-    /**
-     * Port for the second uploader.
-     */
     private static final int PORT_2 = 6322;
-
-    /**
-     * Port for the third uploader.
-     */
     private static final int PORT_3 = 6323;
-
-
-    /**
-     * Port for the fourth uploader.
-     */
     private static final int PORT_4 = 6324;
-
-    /**
-     * Port for the fifth uploader.
-     */
     private static final int PORT_5 = 6325;
     
-    
-    /**
-     * ports for the various push proxies
-     */
+    /* ports for TLS uploaders. */
+    private static final int TPORT_1 = 6421;
+    private static final int TPORT_2 = 6422;
+    private static final int TPORT_3 = 6423;
+    private static final int TPORT_4 = 6424;
+    private static final int TPORT_5 = 6425;
+        
+    /* ports for the various push proxies */
     private static final int PPORT_1 = 10001;
     private static final int PPORT_2 = 10002;
     private static final int PPORT_3 = 10003;
@@ -132,6 +117,11 @@ public class DownloadTest extends LimeTestCase {
     private static TestUploader uploader3;
     private static TestUploader uploader4;
     private static TestUploader uploader5;
+    private static TestUploader tlsUploader1;
+    private static TestUploader tlsUploader2;
+    private static TestUploader tlsUploader3;
+    private static TestUploader tlsUploader4;
+    private static TestUploader tlsUploader5;
 	private static DownloadManager dm;// = new DownloadManager();
 	private static final ActivityCallbackStub callback = new MyCallback();
 	private static ManagedDownloader DOWNLOADER = null;
@@ -193,7 +183,7 @@ public class DownloadTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
         DOWNLOADER = null;
         
         dm.clearAllDownloads();
@@ -202,22 +192,24 @@ public class DownloadTest extends LimeTestCase {
         // Don't wait for network connections for testing
         ManagedDownloader.NO_DELAY = true;
         
-        uploader1=new TestUploader("PORT_1", PORT_1);
-        uploader2=new TestUploader("PORT_2", PORT_2);
-        uploader3=new TestUploader("PORT_3", PORT_3);
-        uploader4=new TestUploader("PORT_4", PORT_4);
-        uploader5=new TestUploader("PORT_5", PORT_5);
+        uploader1=new TestUploader("PORT_1", PORT_1, false);
+        uploader2=new TestUploader("PORT_2", PORT_2, false);
+        uploader3=new TestUploader("PORT_3", PORT_3, false);
+        uploader4=new TestUploader("PORT_4", PORT_4, false);
+        uploader5=new TestUploader("PORT_5", PORT_5, false);
+        
+        tlsUploader1=new TestUploader("TPORT_1", TPORT_1, true);
+        tlsUploader2=new TestUploader("TPORT_2", TPORT_2, true);
+        tlsUploader3=new TestUploader("TPORT_3", TPORT_3, true);
+        tlsUploader4=new TestUploader("TPORT_4", TPORT_4, true);
+        tlsUploader5=new TestUploader("TPORT_5", TPORT_5, true);
         
         deleteAllFiles();
         
         dataDir.mkdirs();
         saveDir.mkdirs();
         
-        try {
-            SharingSettings.setSaveDirectory(saveDir);        
-        } catch(IOException e) {
-            fail( "cannot set save directory.", e);
-        }
+        SharingSettings.setSaveDirectory(saveDir);
         
         //Pick random name for file.
         savedFile = new File( saveDir, savedFileName );
@@ -229,7 +221,7 @@ public class DownloadTest extends LimeTestCase {
         TigerTreeCache.instance().purgeTree(TestFile.hash());
     }    
 
-    public void tearDown() {
+    public void tearDown() throws Exception {
 
         uploader1.reset();
         uploader2.reset();
@@ -242,16 +234,25 @@ public class DownloadTest extends LimeTestCase {
         uploader3.stopThread();
         uploader4.stopThread();
         uploader5.stopThread();
+        
+        tlsUploader1.reset();
+        tlsUploader2.reset();
+        tlsUploader3.reset();
+        tlsUploader4.reset();
+        tlsUploader5.reset();
+        
+        tlsUploader1.stopThread();
+        tlsUploader2.stopThread();
+        tlsUploader3.stopThread();
+        tlsUploader4.stopThread();
+        tlsUploader5.stopThread();
 
         deleteAllFiles();
         RouterService.getAltlocManager().purge();
         
-        try {
-            Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-            m.clear();
-        }catch(Exception e){
-            ErrorService.error(e);
-        }
+        Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        m.clear();
+
         // get rid of any pushlocs in the map
         System.runFinalization();
         System.gc();
@@ -311,7 +312,7 @@ public class DownloadTest extends LimeTestCase {
     public void testSimpleDownload10() throws Exception {
         LOG.info("-Testing non-swarmed download...");
         
-        RemoteFileDesc rfd=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd=newRFD(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -319,7 +320,23 @@ public class DownloadTest extends LimeTestCase {
     public void testSimpleDownload11() throws Exception {
         LOG.info("-Testing non-swarmed download...");
         
-        RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleTLSDownload10() throws Exception {
+        LOG.info("-Testing non-swarmed download...");
+        
+        RemoteFileDesc rfd=newRFD(TPORT_1, true);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleTLSDownload11() throws Exception {
+        LOG.info("-Testing non-swarmed download...");
+        
+        RemoteFileDesc rfd=newRFDWithURN(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -331,7 +348,7 @@ public class DownloadTest extends LimeTestCase {
         LOG.info("-Testing chunk allocation in a thex download...");
         
         
-        final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
+        final RemoteFileDesc rfd=newRFDWithURN(PORT_1, false);
         final IncompleteFileManager ifm=dm.getIncompleteFileManager();
         RemoteFileDesc[] rfds = {rfd};
         
@@ -459,8 +476,39 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+        
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        LOG.debug("\tu1: "+u1+"\n");
+        LOG.debug("\tu2: "+u2+"\n");
+        LOG.debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }
+    
+    public void testSimpleTLSSwarm() throws Exception {
+        LOG.info("-Testing swarming from two sources...");
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(TPORT_1, true);
+        RemoteFileDesc rfd2=newRFDWithURN(TPORT_2, true);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -481,7 +529,7 @@ public class DownloadTest extends LimeTestCase {
     public void testSimpleSwarmPush() throws Exception {
         LOG.info("-Testing swarming from two sources, one push...");  
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
        ((PushAltLoc)pushLoc).updateProxies(true);
@@ -511,8 +559,8 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -539,8 +587,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
 
         // Download first from rfd2 so we get its stall
         // and then add in rfd1.
@@ -575,8 +623,8 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -605,11 +653,11 @@ public class DownloadTest extends LimeTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.T3_SPEED_INT);
         final int RATE = 20; // slow to allow swarming
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
-        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
-        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3,100);
-        RemoteFileDesc rfd4 = newRFDWithURN(PORT_4,100);
-        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5,100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, false);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, false);
+        RemoteFileDesc rfd4 = newRFDWithURN(PORT_4, false);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, false);
         RemoteFileDesc pushRFD1 = newRFDPush(PPORT_1,1);
         RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2,2);
         RemoteFileDesc pushRFD3 = newRFDPush(PPORT_3,3);
@@ -652,8 +700,8 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
 
         Downloader download=null;
 
@@ -688,8 +736,8 @@ public class DownloadTest extends LimeTestCase {
         final int RATE=100;
         uploader1.setRate(0.1f);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
@@ -721,8 +769,8 @@ public class DownloadTest extends LimeTestCase {
         final int RATE=300;
         uploader1.setStallHeaders(true); //stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
@@ -750,8 +798,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(SLOW_RATE);
         uploader2.setRate(FAST_RATE);
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -776,9 +824,9 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(25);
         uploader1.setLowChunkOffset(50);
         uploader5.setRate(100); // control, to finish the test.
-        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, false);
         
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
             RouterService.download(rfds,true,null);
@@ -798,8 +846,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setLowChunkOffset(-10);
         uploader5.setRate(100); // control, to finish the test.
         
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, false);
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
@@ -820,8 +868,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setHighChunkOffset(50);
         uploader5.setRate(100); // control, to finish the test.
         
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, false);
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
@@ -841,9 +889,9 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(25);
         uploader1.setHighChunkOffset(-10);
         uploader5.setRate(100); // control, to finish the test.
-        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, false);
         
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
             RouterService.download(rfds,true,null);
@@ -863,7 +911,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(false);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         // the tree will fail, but it'll pick up the content-length
@@ -884,7 +932,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(false);
         uploader1.setSendContentLength(false);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         // should pass after a bit because it retries the host
@@ -904,7 +952,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
@@ -925,7 +973,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setQueueOnThex(true);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
@@ -944,7 +992,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setUseBadThexResponseHeader(true);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
@@ -972,8 +1020,8 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         uploader2.setRate(RATE);
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
         RouterService.download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete();
@@ -1009,8 +1057,8 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setCorruptPercentage(VerifyingFile.MAX_CORRUPTION);
         uploader2.setRate(RATE);
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
         tGenericCorrupt( new RemoteFileDesc[] { rfd1}, new RemoteFileDesc[] {rfd2} );
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -1060,7 +1108,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(getThex);
         uploader1.setSendThexTree(getThex);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100, badSha1);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,badSha1, false);
         
         URN badURN = URN.createSHA1Urn(badSha1);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
@@ -1086,9 +1134,9 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setRate(RATE);
         
         RemoteFileDesc rfd1=
-                         newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+                         newRFDWithURN(PORT_1, TestFile.hash().toString(), false);
         RemoteFileDesc rfd2=
-                         newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+                         newRFDWithURN(PORT_2, TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -1124,9 +1172,9 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=
-                          newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+                          newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
         RemoteFileDesc rfd2=
-                          newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+                          newRFDWithURN(PORT_2,TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -1174,7 +1222,7 @@ public class DownloadTest extends LimeTestCase {
         
         uploader1.setGoodAlternateLocations(alCol);
         
-        RemoteFileDesc rfd = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd = newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
         
         RemoteFileDesc []rfds = {rfd};
         
@@ -1266,8 +1314,8 @@ public class DownloadTest extends LimeTestCase {
         assertFalse(pushRFD.supportsFWTransfer());
         assertTrue(pushRFD.needsPush());
 
-        RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
+        RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,TestFile.hash().toString(), false);
         
         RemoteFileDesc []now={pushRFD};
         HashSet later=new HashSet();
@@ -1340,7 +1388,7 @@ public class DownloadTest extends LimeTestCase {
         
         assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
         
-        RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
+        RemoteFileDesc openRFD = newRFDWithURN(PORT_1, false);
         
         RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 1, 2);
         assertFalse(pushRFD2.supportsFWTransfer());
@@ -1398,8 +1446,8 @@ public class DownloadTest extends LimeTestCase {
         
         uploader1.setGoodAlternateLocations(alc);
         
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
-        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, false);
         
         RemoteFileDesc [] rfds = {rfd1,rfd2};
         
@@ -1437,11 +1485,11 @@ public class DownloadTest extends LimeTestCase {
         uploader2.stopAfter(STOP_AFTER);
         uploader3.setRate(RATE);
         RemoteFileDesc rfd1=
-                        newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+                        newRFDWithURN(PORT_1, TestFile.hash().toString(), false);
         RemoteFileDesc rfd2=
-                        newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+                        newRFDWithURN(PORT_2, TestFile.hash().toString(), false);
         RemoteFileDesc rfd3=
-                        newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+                        newRFDWithURN(PORT_3, TestFile.hash().toString(), false);
         
         RemoteFileDesc[] rfds = {rfd1};
 
@@ -1495,7 +1543,7 @@ public class DownloadTest extends LimeTestCase {
     public void testWeirdAlternateLocations() throws Exception {  
         LOG.info("-Testing AlternateLocation weird...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1};
         
         
@@ -1560,8 +1608,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTree(true);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -1618,8 +1666,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -1677,9 +1725,9 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
         uploader3.setRate(RATE);
-        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
-        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, TestFile.hash().toString(), false);
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, TestFile.hash().toString(), false);
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, TestFile.hash().toString(), false);
         
         //Start with only RFD1.
         RemoteFileDesc[] rfds = {rfd1};
@@ -1738,9 +1786,9 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
         uploader3.setRate(RATE);
-        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
-        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, TestFile.hash().toString(), false);
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, TestFile.hash().toString(), false);
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, TestFile.hash().toString(), false);
         AlternateLocation al1 = AlternateLocation.create(rfd1);
         AlternateLocation al2 = AlternateLocation.create(rfd2);
         AlternateLocation al3 = AlternateLocation.create(rfd3);
@@ -1785,7 +1833,7 @@ public class DownloadTest extends LimeTestCase {
         LOG.info("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         //the queued downloader will resend the query after sleeping,
         //and then it shold complete the download, because TestUploader
@@ -1803,8 +1851,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setTimesBusy(1);
         uploader1.setRate(FAST_RATE);
         uploader2.setRate(SLOW_RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1}; // see note below about why only rfd1
         
         // Interesting odd factoid about the test:
@@ -1859,8 +1907,8 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setBusy(true);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -1897,8 +1945,8 @@ public class DownloadTest extends LimeTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds1 = {rfd1};
         List rfds2 = new LinkedList();
         rfds2.add(rfd2);
@@ -1935,11 +1983,11 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1, rfd2};
         
-        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, false);
         
         ManagedDownloader downloader = null;        
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
@@ -1995,11 +2043,11 @@ public class DownloadTest extends LimeTestCase {
         uploader2.setRate(RATE);
         uploader2.setQueue(true);
         uploader2.unqueue = false; //never unqueue this uploader.
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         RemoteFileDesc[] rfds = {rfd1,rfd2};//one good and one queued
         
-        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, false);
         
         ManagedDownloader downloader = null;
         
@@ -2069,10 +2117,10 @@ public class DownloadTest extends LimeTestCase {
         uploader4.unqueue = false; //never unqueue this uploader.
         uploader4.queuePos=1;
 
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100);
-        RemoteFileDesc rfd4=newRFDWithURN(PORT_4, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, false);
+        RemoteFileDesc rfd4=newRFDWithURN(PORT_4, false);
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
         ManagedDownloader downloader = null;
@@ -2142,9 +2190,9 @@ public class DownloadTest extends LimeTestCase {
         uploader2.unqueue = false; //never unqueue this uploader.
         uploader2.queuePos = 3;//the better one
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, false);
         
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
@@ -2189,7 +2237,7 @@ public class DownloadTest extends LimeTestCase {
     public void testPartialDownloads() throws IOException {
         LOG.info("-Testing partial downloads...");
         uploader1.setPartial(true);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         Downloader downloader = RouterService.download(rfds,false,null);
         waitForBusy(downloader);
@@ -2215,8 +2263,8 @@ public class DownloadTest extends LimeTestCase {
         assertTrue(SourceRanker.getAppropriateRanker() instanceof PingRanker);
         
        // create one source that will actually download and another one to which a headping should be sent 
-       RemoteFileDesc rfd = newRFDWithURN(PORT_1,100);
-       RemoteFileDesc noFile = newRFDWithURN(PORT_2,100);
+       RemoteFileDesc rfd = newRFDWithURN(PORT_1, false);
+       RemoteFileDesc noFile = newRFDWithURN(PORT_2, false);
        
        AlternateLocation toBeDemoted = AlternateLocation.create(noFile);
        
@@ -2255,7 +2303,7 @@ public class DownloadTest extends LimeTestCase {
      * LEAVE AS LAST -- (it does weird things otherwise) */
     public void testContentInvalid() throws Exception {
         LOG.info("-Testing partial downloads...");
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         uploader1.setRate(50);
         
@@ -2396,20 +2444,19 @@ public class DownloadTest extends LimeTestCase {
         assertNull("verifying file should be null", vf);
     }
 
-    private static RemoteFileDesc newRFD(int port, int speed) {
+    private static RemoteFileDesc newRFD(int port, boolean useTLS) {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, null,
-                                  false,false,"",null, -1);
+                                  100, false, 4, false, null, null,
+                                  false,false,"",null, -1, useTLS);
     }
 
-	private static RemoteFileDesc newRFDWithURN(int port, int speed) {
-		return newRFDWithURN(port, speed, null);
+	private static RemoteFileDesc newRFDWithURN(int port, boolean useTLS) {
+		return newRFDWithURN(port, null, useTLS);
 	}
 
-    private static RemoteFileDesc newRFDWithURN(int port, int speed, 
-                                                String urn) {
+    private static RemoteFileDesc newRFDWithURN(int port, String urn, boolean useTLS) {
         Set set = new HashSet();
         try {
             // for convenience, don't require that they pass the urn.
@@ -2424,8 +2471,8 @@ public class DownloadTest extends LimeTestCase {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, set,
-                                  false, false,"",null, -1);
+                                  100, false, 4, false, null, set,
+                                  false, false,"",null, -1, useTLS);
     }
     
     private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{

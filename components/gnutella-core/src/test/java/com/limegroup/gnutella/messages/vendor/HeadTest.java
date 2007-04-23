@@ -43,39 +43,41 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * this class tests the handling of udp head requests and responses.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "unused"})
 public class HeadTest extends LimeTestCase {
 
 	/**
 	 * keep a file manager which shares one complete file and one incomplete file
 	 */
-	static FileManagerStub _fm;
-	static UploadManagerStub _um;
+	private static FileManagerStub _fm;
+    private static UploadManagerStub _um;
 	
 	/**
 	 * two collections of altlocs, one for the complete and one for the incomplete file
 	 */
-	static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete,
+    private static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete,
 		_pushCollection;
 	
 	/**
 	 * URNs for the 3 files that will be requested
 	 */
-	static URN _haveFull,_notHave,_havePartial;
+    private static URN _haveFull,_notHave,_havePartial;
 	
 	/**
 	 * file descs for the partial and complete files
 	 */
-	static IncompleteFileDescStub _partial;
-	static FileDescStub _complete;
+    private static IncompleteFileDescStub _partial;
+    private static FileDescStub _complete;
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-	static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig;
+    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig;
 	
-	static PushEndpoint pe;
+    private static PushEndpoint pe;
 	
-	static int PACKET_SIZE;
+    private static int PACKET_SIZE;
+    
+    private static RemoteFileDesc blankRFD;
 	
 	
 	public HeadTest(String name) {
@@ -179,16 +181,35 @@ public class HeadTest extends LimeTestCase {
 		PACKET_SIZE = ((Integer)PrivilegedAccessor.getValue(HeadPong.class,"PACKET_SIZE")).intValue();
     }
     
+    public void setUp() throws Exception {
+        blankRFD = new RemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false, -1, false, null, null, false, false, null, null, -1, false);
+        assertFalse(blankRFD.isBrowseHostEnabled());
+        assertFalse(blankRFD.isChatEnabled());
+        assertFalse(blankRFD.isBusy());
+        assertFalse(blankRFD.isDownloading());
+        assertFalse(blankRFD.isFirewalled());
+        assertFalse(blankRFD.isPartialSource());
+        assertFalse(blankRFD.isReplyToMulticast());
+        assertFalse(blankRFD.isTLSCapable());
+        assertNull(blankRFD.getPushAddr());
+        assertEquals(0, blankRFD.getPushProxies().size());
+        assertEquals(Integer.MAX_VALUE, blankRFD.getQueueStatus());
+    }
+    
     /** Test TLS response. */
     public void testTLSPong() throws Exception {
         HeadPing ping = new HeadPing(_notHave); // this is just so we can generate a HeadPong
         ConnectionSettings.TLS_INCOMING.setValue(true);
         HeadPong pong = reparse(new HeadPong(ping));
         assertTrue(pong.isTLSCapable());
+        pong.updateRFD(blankRFD);
+        assertTrue(blankRFD.isTLSCapable());
         
         ConnectionSettings.TLS_INCOMING.setValue(false);
         pong = reparse(new HeadPong(ping));
         assertFalse(pong.isTLSCapable());
+        pong.updateRFD(blankRFD);
+        assertFalse(blankRFD.isTLSCapable());
     }
 	
 	/**
@@ -212,7 +233,7 @@ public class HeadTest extends LimeTestCase {
 	 */
 	public void testFirewalled() throws Exception {
 		Acceptor acceptor = RouterService.getAcceptor();
-		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(false));
+		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", Boolean.FALSE);
 		assertFalse(RouterService.acceptedIncomingConnection());
 		
 		HeadPing ping = new HeadPing(_haveFull);
@@ -298,6 +319,14 @@ public class HeadTest extends LimeTestCase {
 		
 		assertNull(pong.getRanges());
 		assertNotNull(pongi.getRanges());
+        
+        pongi.updateRFD(blankRFD);
+        assertTrue(blankRFD.isPartialSource());
+        assertEquals(pongi.getRanges(), blankRFD.getAvailableRanges());
+        
+        pong.updateRFD(blankRFD);
+        assertFalse(blankRFD.isPartialSource());
+        
 		
 		assertTrue(Arrays.equals(_ranges.toBytes(),pongi.getRanges().toBytes()));
 		
@@ -318,30 +347,43 @@ public class HeadTest extends LimeTestCase {
 	 * tests various values for the queue rank
 	 */
 	public void testQueueStatus() throws Exception {
-		HeadPing ping = new HeadPing(_havePartial);
-		
-		HeadPong pong = reparse(new HeadPong(ping));
-		
+		HeadPing ping = new HeadPing(_havePartial);		
+		HeadPong pong = reparse(new HeadPong(ping));        
 		int allFree =  pong.getQueueStatus();
 		assertLessThan(0,allFree);
+        pong.updateRFD(blankRFD);
+        assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
+        assertFalse(blankRFD.isBusy());
 		
 		_um.setUploadsInProgress(10);
 		pong = reparse(new HeadPong(ping));
 		assertEquals(allFree+10,pong.getQueueStatus());
+        pong.updateRFD(blankRFD);
+        assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
+        assertFalse(blankRFD.isBusy());
 		
 		_um.setNumQueuedUploads(5);
 		pong = reparse(new HeadPong(ping));
 		assertEquals(5,pong.getQueueStatus());
+        pong.updateRFD(blankRFD);
+        assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
+        assertFalse(blankRFD.isBusy());
 		
 		_um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
 		_um.setNumQueuedUploads(0);
 		pong = reparse(new HeadPong(ping));
 		assertEquals(0,pong.getQueueStatus());
+        pong.updateRFD(blankRFD);
+        assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
+        assertFalse(blankRFD.isBusy());
 		
 		_um.setIsBusy(true);
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(new HeadPong(ping));
 		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
+        pong.updateRFD(blankRFD);
+        assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
+        assertTrue(blankRFD.isBusy());
 	}
 	
 	/**
@@ -403,7 +445,7 @@ public class HeadTest extends LimeTestCase {
 			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
 			        		10, GUID.makeGuid(), 10, true, 2, true, null, 
 							   HugeTestUtils.URN_SETS[1],
-                               false,false,"",null, -1);
+                               false,false,"",null, -1, false);
 		
 		Set received = pong1.getAllLocsRFD(dummy);
 		assertEquals(1,received.size());
@@ -438,7 +480,7 @@ public class HeadTest extends LimeTestCase {
 				null,null,
 				false,false,
 				"",
-				null,1);
+				null,1, false);
 		
 		Set rfds = pong.getAllLocsRFD(rfd);
 		
@@ -486,6 +528,7 @@ public class HeadTest extends LimeTestCase {
 		pe = ((PushAltLoc)firewalled).getPushAddress();
         RouterService.getAltlocManager().add(firewalled, null);
 		_pushCollection = RouterService.getAltlocManager().getPush(_havePartial, false);
+        // TODO: does _pushCollection need its size tested?
 	}
 	
 }

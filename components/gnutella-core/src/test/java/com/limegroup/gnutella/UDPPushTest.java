@@ -101,7 +101,7 @@ public class UDPPushTest extends LimeTestCase {
 				doc,urns,
 				false,true,
 				"LIME",
-				proxies,now);
+				proxies,now, false);
 		
 		rfd2 = new RemoteFileDesc(
 				"127.0.0.1",20000,31l,"file2",
@@ -110,7 +110,7 @@ public class UDPPushTest extends LimeTestCase {
 				doc,urns,
 				false,true,
 				"LIME",
-				proxies,now);
+				proxies,now, false);
 		
 		rfdAlt = new RemoteFileDesc(
 				"127.0.0.1",20000,30l,"file1",
@@ -119,7 +119,7 @@ public class UDPPushTest extends LimeTestCase {
 				doc,urns,
 				false,true,
 				"ALT",
-				proxies,now);
+				proxies,now, false);
 		
 		Acceptor acc = RouterService.getAcceptor();
 		PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));

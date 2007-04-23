@@ -91,7 +91,7 @@ public class LegacyRankerTest extends LimeTestCase {
                                   0, "asdf",
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, null,
-                                  false,false,"",null, -1);
+                                  false,false,"",null, -1, false);
     }
 
     private static RemoteFileDesc newRFDWithURN(String host, int speed) {
@@ -107,7 +107,7 @@ public class LegacyRankerTest extends LimeTestCase {
                                   0, "asdf",
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, set,
-                                  false, false,"",null, -1);
+                                  false, false,"",null, -1, false);
     }
 
 }

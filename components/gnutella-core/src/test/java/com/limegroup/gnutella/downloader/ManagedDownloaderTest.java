@@ -315,7 +315,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         ManagedDownloader downloader=null;
         try {
             //Start uploader and download.
-            uploader=new TestUploader("ManagedDownloaderTest", PORT);
+            uploader=new TestUploader("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
             uploader.setSendThexTree(false);
@@ -544,7 +544,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         return new RemoteFileDesc("127.0.0.1", PORT, 13l,
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",null, -1);
+                                  false, false,"",null, -1, false);
     }
     
     private void requestStart(ManagedDownloader dl) throws Exception {

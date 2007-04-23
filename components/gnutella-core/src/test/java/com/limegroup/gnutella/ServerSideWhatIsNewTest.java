@@ -606,7 +606,7 @@ public class ServerSideWhatIsNewTest
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
-        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
         Set urns = new HashSet();
@@ -616,7 +616,7 @@ public class ServerSideWhatIsNewTest
                                                 TestFile.length(), 
                                                 guid, 1, false, 3,
                                                 false, null, urns, false,
-                                                false, "LIME", new HashSet(), -1);
+                                                false, "LIME", new HashSet(), -1, false);
         Downloader downloader = 
             RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
@@ -669,7 +669,7 @@ public class ServerSideWhatIsNewTest
         Long cTime[] = new Long[uploader.length];
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
-            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
+            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i, false);
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
@@ -679,7 +679,7 @@ public class ServerSideWhatIsNewTest
                                          "anita.txt", TestFile.length(), 
                                          guid, 1, false, 3,
                                          false, null, urns, false,
-                                         false, "LIME", new HashSet(), -1);
+                                         false, "LIME", new HashSet(), -1, false);
         }
 
         Downloader downloader = RouterService.download(rfds, false, new GUID(guid));

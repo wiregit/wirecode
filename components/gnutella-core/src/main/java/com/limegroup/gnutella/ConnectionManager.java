@@ -1075,11 +1075,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
     }
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Returns a list of this' initialized connections.
      */
     public List<ManagedConnection> getInitializedConnections() {
         return _initializedConnections;
@@ -1100,11 +1096,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
     }
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Returns a list of this' initialized connections.
      */
     public List<ManagedConnection> getInitializedClientConnections() {
         return _initializedClientConnections;

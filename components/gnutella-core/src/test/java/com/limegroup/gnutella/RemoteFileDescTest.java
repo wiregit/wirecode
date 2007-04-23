@@ -52,7 +52,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
 									   false, null, null, false, false,"",
-                                       null, -1);
+                                       null, -1, false);
 				fail("rfd1 should have received an exception for invalid port: "+
 					 rfd.getPort());
 			} catch(IllegalArgumentException e) {
@@ -74,7 +74,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
 									   false, null, null, false, false,"",
-                                       null, -1);
+                                       null, -1, false);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
 					 validPorts[i], e);
@@ -91,7 +91,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		RemoteFileDesc rfd =
 			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
 							   10, true, 3, true, null, urns, 
-                               false, false,"", null, -1);
+                               false, false,"", null, -1, false);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getHost();
@@ -127,7 +127,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
                 HugeTestUtils.URNS[0].httpStringValue(), 10, 
                 pe.getClientGUID(), 10, true, 2, true, null, 
                 HugeTestUtils.URN_SETS[0],
-                false,true,"",proxies,-1);
+                false,true,"",proxies,-1, false);
 		 
 		 assertTrue(Arrays.equals(pe.getClientGUID(),fwalled.getClientGUID()));
 		 
@@ -136,7 +136,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 							   HugeTestUtils.URNS[1].httpStringValue(), 10, 
 							   GUID.makeGuid(), 10, true, 2, true, null, 
 							   HugeTestUtils.URN_SETS[1],
-                               false,false,"",null, -1);
+                               false,false,"",null, -1, false);
 		 
 		 RemoteFileDesc differentPE = new RemoteFileDesc(fwalled,pe2);
 		 assertTrue(Arrays.equals(pe2.getClientGUID(),differentPE.getClientGUID()));

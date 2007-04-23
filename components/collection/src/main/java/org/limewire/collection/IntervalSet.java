@@ -415,6 +415,24 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         return intervals.toString();
     }
     
+    /** Compares two IntervalSets */
+    public boolean equals(Object o) {
+        if(o == this) {
+            return true;
+        } else if(o instanceof IntervalSet) {
+            IntervalSet s = (IntervalSet)o;
+            if(intervals.size() == s.intervals.size()) {
+                for(int i = 0; i < intervals.size(); i++) {
+                    if(!intervals.get(i).equals(s.intervals.get(i)))
+                        return false;
+                }
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      *
      * @return packed representation of the intervals.

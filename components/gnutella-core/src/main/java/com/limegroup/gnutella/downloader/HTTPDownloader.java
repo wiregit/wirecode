@@ -320,8 +320,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		_amountToRead = 0;
 		_port = rfd.getPort();
 		_host = rfd.getHost();
-		_chatEnabled = rfd.chatEnabled();
-        _browseEnabled = rfd.browseHostEnabled();
+		_chatEnabled = rfd.isChatEnabled();
+        _browseEnabled = rfd.isBrowseHostEnabled();
         _locationsReceived = new HashSet<RemoteFileDesc>();
         _goodLocs = new HashSet<DirectAltLoc>();
         _badLocs = new HashSet<DirectAltLoc>();

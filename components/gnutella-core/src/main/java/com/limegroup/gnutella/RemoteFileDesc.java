@@ -261,8 +261,8 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
 	 * @param size the completed size of this file
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
+	 * @param chat true if the location is chattable
+	 * @param quality the quality of the connection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
 	 * @param browseHost specifies whether or not the remote host supports
@@ -272,9 +272,9 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
 	 * @param replyToMulticast true if its from a reply to a multicast query
 	 * @param firewalled true if the host is firewalled
 	 * @param vendor the vendor of the remote host
-	 * @param timestamp the time this RemoteFileDesc was instantiated
 	 * @param proxies the push proxies for this host
 	 * @param createTime the network-wide creation time of this file
+	 * @param tlsCapable true if the remote host supports TLS
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
      * @throws <tt>NullPointerException</tt> if the host argument is 
@@ -286,10 +286,10 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, 
-                          Set<? extends IpPort> proxies, long createTime) {
+                          Set<? extends IpPort> proxies, long createTime, boolean tlsCapable) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, proxies, createTime, 0, null, false);
+             vendor, proxies, createTime, 0, null, tlsCapable);
     }
 
 	/** 
@@ -359,8 +359,7 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
     
     /**
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE object is passed a new one is created. 
-     * @param tlsCapable TODO
+     * no PE object is passed a new one is created.
      */
     private RemoteFileDesc (String host, int port, long index, String filename,
             int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
@@ -422,7 +421,8 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
 		_replyToMulticast = replyToMulticast;
         _vendor = vendor;
         _creationTime = createTime;
-		
+        _tlsCapable = tlsCapable;
+        
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
@@ -738,8 +738,8 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
     
     public final String getVendor() {return _vendor;}
 
-	public final boolean chatEnabled() {return _chatEnabled;}
-	public final boolean browseHostEnabled() {return _browseHostEnabled;}
+	public final boolean isChatEnabled() {return _chatEnabled;}
+	public final boolean isBrowseHostEnabled() {return _browseHostEnabled;}
 
 	/**
 	 * Returns the "quality" of the remote file in terms of firewalled status,

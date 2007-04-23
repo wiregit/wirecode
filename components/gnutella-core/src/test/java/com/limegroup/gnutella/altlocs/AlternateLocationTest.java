@@ -160,7 +160,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 								   HugeTestUtils.URNS[i].httpStringValue(), 10, 
 								   GUID.makeGuid(), 10, true, 2, true, null, 
 								   HugeTestUtils.URN_SETS[i],
-                                   false,false,"",null, -1);
+                                   false,false,"",null, -1, false);
 
             // just make sure this doesn't throw an exception
 			AlternateLocation loc = AlternateLocation.create(rfd);
@@ -173,7 +173,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
-                                   false,false,"",null, -1);
+                                   false,false,"",null, -1, false);
 
         AlternateLocation.create(rfd);
 
@@ -194,7 +194,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
-                                   false,true,"",proxies,-1);
+                                   false,true,"",proxies,-1, false);
         
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
@@ -247,7 +247,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
-                                   false,true,"",proxies,-1);
+                                   false,true,"",proxies,-1, false);
         
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
@@ -271,7 +271,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
-                                   false,true,"",proxies,-1);
+                                   false,true,"",proxies,-1, false);
 
         AlternateLocation loc = AlternateLocation.create(fwalled);
         

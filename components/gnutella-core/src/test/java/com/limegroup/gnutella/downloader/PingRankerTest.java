@@ -487,7 +487,7 @@ public class PingRankerTest extends LimeTestCase {
                                   0, "asdf",
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, set,
-                                  false, false,"",null, -1);
+                                  false, false,"",null, -1, false);
     }
     
     /**

@@ -13,11 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntPair;
 import org.limewire.collection.RoundRobinQueue;
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.BandwidthThrottle;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
@@ -202,8 +207,9 @@ public class TestUploader extends AssertComparisons {
      * Creates a TestUploader listening on the given port.  Will upload a
      * special test file to any requesters via HTTP.  Non-blocking; starts
      * another thread to do the listening. 
+     * @param tls TODO
      */
-    public TestUploader(String name, final int port) {
+    public TestUploader(String name, final int port, boolean tls) {
         super(name);
 
         // ensure that only local machines can connect!!
@@ -215,10 +221,16 @@ public class TestUploader extends AssertComparisons {
         reset();
         
         try {
-            server = new ServerSocket();
-            //Use Java 1.4's option to reuse a socket address.  This is
-            //important because some client thread may be using the given port
-            //even though no threads are listening on the given socket.
+            if(!tls)
+                server = new ServerSocket();
+            else {
+                SSLContext context = SSLUtils.getTLSContext();
+                SSLServerSocket sslServer = (SSLServerSocket)context.getServerSocketFactory().createServerSocket();
+                sslServer.setEnabledCipherSuites(new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" } );
+                sslServer.setNeedClientAuth(false);
+                sslServer.setWantClientAuth(false);
+                server = sslServer;
+            }
             server.setReuseAddress(true);
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
@@ -230,13 +242,9 @@ public class TestUploader extends AssertComparisons {
         }
         
         //spawn loop();
-        Thread t = new Thread() {
+        Thread t = new ManagedThread() {
             public void run() {
-                try {
-                    loop(port);
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                loop(port);
             }
         };
         t.setDaemon(true);
@@ -249,7 +257,7 @@ public class TestUploader extends AssertComparisons {
         reset();
         LOG.debug("starting to handle request with direct socket given");
         
-        Thread t = new Thread(name) {
+        Thread t = new ManagedThread(name) {
             public void run() {
                 synchronized(TestUploader.this) {
                     try{
@@ -563,7 +571,7 @@ public class TestUploader extends AssertComparisons {
                 LOG.debug("Uploader accepted connection");
                 //spawn thread to handle request
                 final Socket mySocket = socket;
-                Thread runner=new Thread(new SocketHandler(mySocket),name);
+                Thread runner=new ManagedThread(new SocketHandler(mySocket),name);
                 runner.start();
             } catch (IOException e) {
                 LOG.debug("exception in accept", e);
@@ -585,7 +593,8 @@ public class TestUploader extends AssertComparisons {
     
     
     private void handleRequest(Socket socket) throws IOException {
-    	
+        LOG.debug("Handling a request on socket: " + socket);
+        
         //Find the region of the file to upload.  If a Range request is present,
         //use that.  Otherwise, send the whole file.  Skip all other headers.
         //TODO2: Later we should also check the validity of the requests
@@ -604,7 +613,7 @@ public class TestUploader extends AssertComparisons {
         
         while (true) {
             String line=input.readLine();
-            //LOG.debug("read "+line);
+            LOG.debug("read "+line);
             if (firstLine) {
                 if(line != null && !line.equals("")) {
                     requestsReceived++;
@@ -1083,8 +1092,6 @@ public class TestUploader extends AssertComparisons {
                 if(fullRequestsUploaded < totalAmountToUpload)
                     killedByDownloader = true;
                 LOG.debug("Exception in uploader (" + name + ")", e);
-            } catch(Throwable t) {
-                ErrorService.error(t);
             } finally {
                 
                 synchronized(rr) {

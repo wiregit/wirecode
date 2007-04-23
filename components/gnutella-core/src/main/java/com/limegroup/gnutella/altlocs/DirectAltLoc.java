@@ -89,7 +89,7 @@ public class DirectAltLoc extends AlternateLocation {
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   ALT_VENDOR,//Never displayed, and we don't know
-                                  null, -1);
+                                  null, -1, false);
 		
 		return ret;
 	}

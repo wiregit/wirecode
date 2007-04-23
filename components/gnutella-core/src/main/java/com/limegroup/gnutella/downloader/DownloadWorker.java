@@ -727,11 +727,11 @@ public class DownloadWorker {
      */
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
+            ConnectType type = _rfd.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
             if(LOG.isTraceEnabled())
-                LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
+                LOG.trace("WORKER: attempt asynchronous direct connection w/ " + type + " to: " + _rfd);
             _connectObserver = observer;
             try {
-                ConnectType type = _rfd.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
                 Socket socket = Sockets.connect(new InetSocketAddress(_rfd.getHost(), _rfd.getPort()), NORMAL_CONNECT_TIME, observer, type);
                 if(!observer.isShutdown())
                     observer.setSocket(socket);
