@@ -4,7 +4,6 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -586,35 +585,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(7, pong.getVendorMinorVersion());
         assertFalse(pong.isTLSCapable());
     }
-
-    public void testStripGGEP2() throws Exception {
-        byte[] guid=GUID.makeGuid();
-        byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        PingReply pr1 = PingReply.create(guid, (byte)3, 6349, ip,
-                                    13l, 14l, false, 4321, false); 
-        PingReply pr2=(PingReply)pr1.stripExtendedPayload();
-        assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
-        assertEquals(pr1.getHops(), pr2.getHops());
-        assertEquals(pr1.getTTL(), pr2.getTTL());
-        assertEquals(pr1.getFiles(), pr2.getFiles());
-        assertEquals(pr1.getKbytes(), pr2.getKbytes());
-        assertEquals(pr1.getPort(), pr2.getPort());
-        assertEquals(pr1.getInetAddress(), pr2.getInetAddress());
-
-        assertTrue(! pr2.hasGGEPExtension());
-        assertEquals("pong should not have a daily uptime", -1,
-                     pr2.getDailyUptime());
-
-        ByteArrayOutputStream out=new ByteArrayOutputStream();
-        pr2.write(out);
-        assertTrue(out.toByteArray().length==(23+14));
-
-        //Check no aliasing
-        pr1.hop();
-        assertTrue(pr1.getHops()!=pr2.getHops());
-        assertTrue(pr1.getTTL()!=pr2.getTTL());
-    }
-
+    
     public void testPongTooSmall() throws Exception {
         byte[] bytes=new byte[23+25];  //one byte too small
         bytes[16]=Message.F_PING_REPLY;

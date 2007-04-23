@@ -72,19 +72,6 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         //assertTrue("written bytes should be equal", 
         //           Arrays.equals(out.toByteArray(), bytes));
-
-        //3. Test that we can strip the payload out
-        PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
-        assertEquals("unexpected length", 26, pr2.getLength());
-        assertEquals("unexpected hops", pr.getHops(), pr2.getHops());
-        ByteArrayOutputStream out2=new ByteArrayOutputStream();
-        pr2.write(out2);
-        byte[] bytes2=out2.toByteArray();
-        assertEquals("unexpected bytes length", 23+26, bytes2.length);
-        for (int i=0; i<bytes2.length; i++)
-            if (i!=19) //skip payload length
-                assertEquals("byte # " + i + " not equal", bytes[i], bytes2[i]);
-
     }
 
     public void testPushTooSmall() throws Exception {

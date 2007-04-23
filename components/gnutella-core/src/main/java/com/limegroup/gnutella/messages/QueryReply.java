@@ -1162,11 +1162,6 @@ public class QueryReply extends Message implements SecureMessage {
         return clientGUID;
     }
 
-    /** Returns this, because it's always safe to send big replies. */
-    public Message stripExtendedPayload() {
-        return this;
-    }
-
     public String toString() {
         return ("QueryReply::\r\n"+
 				getResultCount()+" hits\r\n"+

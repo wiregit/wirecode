@@ -116,11 +116,11 @@ public class DHTNodeFetcher {
             }
             
             if(LOG.isDebugEnabled()){
-                LOG.debug("Adding active host from HostCatcher: "+ ep.getSocketAddress());
+                LOG.debug("Adding active host from HostCatcher: "+ ep.getInetSocketAddress());
             }
             
             haveActive = true;
-            bootstrapper.addBootstrapHost(ep.getSocketAddress());
+            bootstrapper.addBootstrapHost(ep.getInetSocketAddress());
         }
         
         if(haveActive) { //we have added active hosts already - no need to request

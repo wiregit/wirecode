@@ -2,14 +2,13 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -144,29 +143,6 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(7, bigPing.getTTL());
         assertEquals("bad length", 16, bigPing.getLength());
         //Came this far means its all OK
-    }
-
-    public void testStripNoPayload() {
-        byte[] guid=new byte[16];  guid[0]=(byte)0xFF;        
-        PingRequest pr=new PingRequest(guid, (byte)3, (byte)4);
-        assertEquals(pr, pr.stripExtendedPayload());
-    }
-
-
-    public void testStripPayload() throws Exception  {
-        byte[] guid=new byte[16];  guid[0]=(byte)0xFF;       
-        byte[] payload=new byte[20]; payload[3]=(byte)0xBC;
-        PingRequest pr=new PingRequest(guid, (byte)3, (byte)4, payload);
-        PingRequest pr2=(PingRequest)pr.stripExtendedPayload();
-        assertEquals(pr.getHops(), pr2.getHops());
-        assertEquals(pr.getTTL(), pr2.getTTL());
-        assertTrue(Arrays.equals(pr.getGUID(), pr2.getGUID()));
-        
-        assertEquals(pr2.getTotalLength(),23);
-        ByteArrayOutputStream out=new ByteArrayOutputStream();
-        pr2.write(out);
-        assertEquals(out.toByteArray().length, 23);
-        
     }
     
     public void testAddIP() throws Exception {

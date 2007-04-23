@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.limewire.io.HostInfo;
+import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -44,7 +45,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable, IpPort, HostInfo {
+public class PingReply extends Message implements Serializable, IpPort, Connectable {
     
     /**
      * The list of extra Gnutella ip/ports contained in this reply.
@@ -1415,25 +1416,6 @@ public class PingReply extends Message implements Serializable, IpPort, HostInfo
             return null;
         }
     }
-
-
-    // inherit doc comment from message superclass
-    public Message stripExtendedPayload() {
-        //TODO: if this is too slow, we can alias parts of this, as as the
-        //payload.  In fact we could even return a subclass of PingReply that
-        //simply delegates to this.
-        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(PAYLOAD, 0,
-                         newPayload, 0,
-                         STANDARD_PAYLOAD_SIZE);
-
-        try {
-            return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                                 newPayload, null, IP, getNetwork());
-        } catch (BadPacketException e) {
-            throw new IllegalStateException(e);
-        }
-    }
     
     /**
      * Unzips data about UDP host caches & returns a list of'm.
@@ -1594,6 +1576,10 @@ public class PingReply extends Message implements Serializable, IpPort, HostInfo
      */ 
     public InetAddress getInetAddress() {
         return IP;
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
     }
 
     public InetAddress getMyInetAddress() {

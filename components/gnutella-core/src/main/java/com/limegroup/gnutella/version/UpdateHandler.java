@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.io.HostInfo;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.util.CommonUtils;
@@ -482,8 +482,8 @@ public class UpdateHandler {
                                   IpPort.EMPTY_SET,             // push proxies
                                   0,                            // creation time
                                   0,                            //  firewalled transfer
-                               rh instanceof HostInfo ? 
-                                  ((HostInfo)rh).isTLSCapable() : false );  // tls capability
+                               rh instanceof Connectable ? 
+                                  ((Connectable)rh).isTLSCapable() : false );  // tls capability
     }
     
     /**

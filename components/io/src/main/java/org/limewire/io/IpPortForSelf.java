@@ -3,6 +3,7 @@ package org.limewire.io;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.service.ErrorService;
@@ -54,6 +55,10 @@ public class IpPortForSelf implements IpPort {
 	public int getPort() {
 		return LocalSocketAddressService.getLocalPort();
 	}
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
+    }
 	
 	public String toString() {
 		return getAddress() +":"+getPort();

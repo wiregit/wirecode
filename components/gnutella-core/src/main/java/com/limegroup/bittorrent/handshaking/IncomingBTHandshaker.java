@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.handshaking;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -20,8 +21,7 @@ class IncomingBTHandshaker extends BTHandshaker {
 	private final TorrentManager manager;
 	
 	public IncomingBTHandshaker(AbstractNBSocket sock, TorrentManager manager) {
-		super(new TorrentLocation(sock.getInetAddress(), 
-				sock.getPort(),
+		super(new TorrentLocation((InetSocketAddress)sock.getRemoteSocketAddress(), 
 				new byte[20],
 				new byte[8]), sock);
 		this.manager = manager;

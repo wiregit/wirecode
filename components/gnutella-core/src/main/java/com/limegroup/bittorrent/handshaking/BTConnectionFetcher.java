@@ -285,5 +285,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		public int getPort() {
 			return destination.getPort();
 		}
+        public InetSocketAddress getInetSocketAddress() {
+            return destination.getInetSocketAddress();
+        }
 	}
 }

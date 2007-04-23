@@ -302,7 +302,7 @@ abstract class AbstractDHTController implements DHTController {
             return addr.getPort();
         }
         
-        public SocketAddress getSocketAddress() {
+        public InetSocketAddress getInetSocketAddress() {
             return addr;
         }
     }

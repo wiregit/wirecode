@@ -2,6 +2,7 @@ package org.limewire.io;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,13 @@ public interface IpPort {
      * @return the address of this host as a string
      */
     String getAddress();
+    
+    /**
+     * Accessor for the InetSocketAddress that can describe the IP & Port.
+     * 
+     * @return the InetSocketAddress of this host.
+     */
+    InetSocketAddress getInetSocketAddress();
     
     /**
      * The sole comparator to use for IpPort objects.

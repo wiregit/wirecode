@@ -232,6 +232,10 @@ public final class UDPReplyHandler implements ReplyHandler {
         //This should never happen. But if it does, ignore it and move on
         return;
     }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return addr;
+    }
 
     // inherit doc comment
     public InetAddress getInetAddress() {

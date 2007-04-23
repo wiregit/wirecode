@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.CompressingOutputStream;
-import org.limewire.io.HostInfo;
+import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -99,7 +99,7 @@ import com.limegroup.gnutella.util.Sockets.ConnectType;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort, HostInfo {
+public class Connection implements IpPort, Connectable {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -950,6 +950,18 @@ public class Connection implements IpPort, HostInfo {
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         this._port = port;
+    }
+    
+    /**
+     * Returns the InetSocketAddress of the foreign host this is connected to.
+     * This is a combination of the getInetAddress() & getPort() methods,
+     * it is not the remote socket address (as the listening port may have
+     * been updated by connection headers).
+     * 
+     * @throws IllegalStateException if this is not initialized
+     */
+    public InetSocketAddress getInetSocketAddress() throws IllegalStateException {
+        return new InetSocketAddress(getInetAddress(), getPort());
     }
 
 

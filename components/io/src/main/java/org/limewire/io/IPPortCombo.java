@@ -2,6 +2,7 @@ package org.limewire.io;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.util.ByteOrder;
@@ -14,8 +15,7 @@ import org.limewire.util.ByteOrder;
  *  code review.
  */
 public class IPPortCombo implements IpPort {
-    private final int _port;
-    private final InetAddress _addr;
+    private final InetSocketAddress addr;
     
     public static final String DELIM = ":";
 
@@ -40,19 +40,22 @@ public class IPPortCombo implements IpPort {
         int port = ByteOrder.ushort2int(ByteOrder.leb2short(networkData, 4));
         if (!NetworkUtils.isValidPort(port))
             throw new InvalidDataException("Bad Port: " + port);
-        _port = port;
+        InetAddress host;
         try {
             byte[] a = new byte[4];
             a[0] = networkData[0];
             a[1] = networkData[1];
             a[2] = networkData[2];
             a[3] = networkData[3];
-            _addr = InetAddress.getByAddress(a);
+            host = InetAddress.getByAddress(a);
         } catch(UnknownHostException uhe) {
             throw new InvalidDataException("bad host.");
         }
-        if (!NetworkUtils.isValidAddress(_addr))
-            throw new InvalidDataException("invalid addr: " + _addr);
+        
+        if (!NetworkUtils.isValidAddress(host))
+            throw new InvalidDataException("invalid addr: " + host);
+        
+        this.addr = new InetSocketAddress(host, port);
     }
 
     /**
@@ -63,25 +66,31 @@ public class IPPortCombo implements IpPort {
         throws UnknownHostException, IllegalArgumentException  {
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Bad Port: " + port);
-        _port = port;
-        _addr = InetAddress.getByName(hostAddress);
-        if (!NetworkUtils.isValidAddress(_addr))
-            throw new IllegalArgumentException("invalid addr: " + _addr);
+        
+        InetAddress host = InetAddress.getByName(hostAddress);
+        if (!NetworkUtils.isValidAddress(host))
+            throw new IllegalArgumentException("invalid addr: " + host);
+        
+        addr = new InetSocketAddress(host, port);
     }
 
     // Implements IpPort interface
     public int getPort() {
-        return _port;
+        return addr.getPort();
     }
     
     // Implements IpPort interface
     public InetAddress getInetAddress() {
-        return _addr;
+        return addr.getAddress();
     }
 
     // Implements IpPort interface
     public String getAddress() {
-        return _addr.getHostAddress();
+        return getInetAddress().getHostAddress();
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return addr;
     }
 
     /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
@@ -91,9 +100,9 @@ public class IPPortCombo implements IpPort {
         byte[] retVal = new byte[6];
         
         for (int i=0; i < 4; i++)
-            retVal[i] = _addr.getAddress()[i];
+            retVal[i] = getInetAddress().getAddress()[i];
 
-        ByteOrder.short2leb((short)_port, retVal, 4);
+        ByteOrder.short2leb((short)getPort(), retVal, 4);
 
         return retVal;
     }
@@ -101,7 +110,7 @@ public class IPPortCombo implements IpPort {
     public boolean equals(Object other) {
         if (other instanceof IPPortCombo) {
             IPPortCombo combo = (IPPortCombo) other;
-            return _addr.equals(combo._addr) && (_port == combo._port);
+            return getAddress().equals(combo.getAddress()) && (getPort() == combo.getPort());
         }
         return false;
     }
@@ -109,7 +118,7 @@ public class IPPortCombo implements IpPort {
     // overridden to fulfill contract with equals for hash-based
     // collections
     public int hashCode() {
-        return _addr.hashCode() * _port;
+        return getAddress().hashCode() * getPort();
     }
     
     public String toString() {

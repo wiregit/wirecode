@@ -271,12 +271,6 @@ public abstract class VendorMessage extends Message {
     }
 
     // INHERIT COMMENT
-    public Message stripExtendedPayload() {
-        // doesn't make sense for VendorMessage to strip anything....
-        return this;
-    }
-
-    // INHERIT COMMENT
     public void recordDrop() {
     }
 

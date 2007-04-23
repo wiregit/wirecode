@@ -421,7 +421,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     			if (data.isFWTransfer()) {
     				UDPConnection socket = new UDPConnection();
                     data.getMultiShutdownable().addShutdownable(socket);
-    				socket.connect(data.getFile().getSocketAddress(), 20000, new FWTConnectObserver(processor));
+    				socket.connect(data.getFile().getInetSocketAddress(), 20000, new FWTConnectObserver(processor));
                 }
                 
                 return false; // don't need to process any more methods.

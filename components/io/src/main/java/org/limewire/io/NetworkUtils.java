@@ -69,7 +69,12 @@ public final class NetworkUtils {
      */
     public static boolean isValidAddressAndPort(String addr, int port) {
         return isValidAddress(addr) && isValidPort(port);
-    }    
+    }
+    
+    /** Determines if the given IpPort is valid. */
+    public static boolean isValidIpPort(IpPort ipport) {
+        return isValidAddress(ipport.getAddress()) && isValidPort(ipport.getPort());
+    }
 
 	/**
 	 * Returns whether or not the specified port is within the valid range of

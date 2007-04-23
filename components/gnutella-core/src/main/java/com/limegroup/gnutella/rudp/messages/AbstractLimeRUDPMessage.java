@@ -38,10 +38,6 @@ public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage>
     public void recordDrop() {
     }
 
-    public Message stripExtendedPayload() {
-        return this;
-    }
-
     public OpCode getOpCode() {
         return delegate.getOpCode();
     }

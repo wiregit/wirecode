@@ -751,9 +751,6 @@ public class ManagedConnection extends Connection
      * @modifies the network underlying this
      */
     public void send(Message m) {
-        if (! supportsGGEP())
-            m=m.stripExtendedPayload();
-
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
     	int smh = hopsFlowMax;

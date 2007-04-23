@@ -1,12 +1,14 @@
 package com.limegroup.gnutella;
 
+import org.limewire.io.Connectable;
+
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
  * This interface outlines the basic functionality for a class that 
  * performs uploads.
  */
-public interface Uploader extends BandwidthTracker {
+public interface Uploader extends BandwidthTracker, Connectable {
 
 	public static final int CONNECTING        = 0;
 	public static final int FREELOADER        = 1;

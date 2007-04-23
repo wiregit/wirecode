@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
@@ -1755,13 +1756,13 @@ public class RouterService {
      * @param canDoFWTransfer true if the remote host supports fw transfer
 	 */
 	public static BrowseHostHandler doAsynchronousBrowseHost(
-	  final String host, final int port, GUID guid, GUID serventID, 
+	  final Connectable host, GUID guid, GUID serventID, 
 	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
-                handler.browseHost(host, port, proxies, canDoFWTransfer);
+                handler.browseHost(host, proxies, canDoFWTransfer);
             }
         }, "BrowseHoster" );
         

@@ -7,7 +7,6 @@ import java.io.Serializable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -130,23 +129,6 @@ public class PushRequest extends Message implements Serializable {
 
     public int getPort() {
         return ByteOrder.ushort2int(ByteOrder.leb2short(payload, 24));
-    }
-
-    public Message stripExtendedPayload() {
-        //TODO: if this is too slow, we can alias parts of this, as as the
-        //payload.  In fact we could even return a subclass of PushRequest that
-        //simply delegates to this.
-        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(payload, 0,
-                         newPayload, 0,
-                         STANDARD_PAYLOAD_SIZE);
-        try {
-            return new PushRequest(this.getGUID(), this.getTTL(), this.getHops(),
-                                   newPayload, this.getNetwork());
-        } catch (BadPacketException e) {
-            Assert.that(false, "Standard packet length not allowed!");
-            return null;
-        }
     }
 
 	// inherit doc comment

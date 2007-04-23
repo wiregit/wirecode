@@ -401,7 +401,7 @@ public class FileDesc implements FileDetails {
 				"docs:     "+ _limeXMLDocs);
 	}
 	
-	public InetSocketAddress getSocketAddress() {
+	public InetSocketAddress getInetSocketAddress() {
 		// TODO maybe cache this, even statically
 		try {
 			return new InetSocketAddress(InetAddress.getByAddress

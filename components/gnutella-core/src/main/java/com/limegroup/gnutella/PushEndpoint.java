@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -588,6 +589,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     public int getPort() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getPort() : 6346;
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        IpPort addr = getIpPort();
+        return addr != null ? addr.getInetSocketAddress() : null;
     }
 	
 	/**

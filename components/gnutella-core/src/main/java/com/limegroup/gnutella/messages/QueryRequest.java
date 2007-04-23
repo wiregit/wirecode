@@ -1777,11 +1777,6 @@ public class QueryRequest extends Message implements Serializable{
 	public void recordDrop() {
 		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 	}
-
-    /** Returns this, because it's always safe to send big queries. */
-    public Message stripExtendedPayload() {
-        return this;
-    }
     
     /** Marks this as being an re-originated query. */
     public void originate() {

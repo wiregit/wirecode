@@ -6,32 +6,31 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-
+/** A default implementation of IpPort. */
 public class IpPortImpl implements IpPort {
     
-    private final InetAddress addr;
+    private final InetSocketAddress addr;
     private final String addrString;
-    private final int port;
     
     /** Constructs a new IpPort based on the given SocketAddress. */
     public IpPortImpl(InetSocketAddress addr) {
-        this(addr.getAddress(), addr.getHostName(), addr.getPort());
+        this(addr, addr.getAddress().getHostAddress());
     }
     
-    /**
-     * Constructs a new IpPort using the given addr, host & port.
-     */
-    public IpPortImpl(InetAddress addr, String host, int port) {
+    /** Constructs a new IpPort with the given SocketAddress, explicitly defining the string-addr. */
+    public IpPortImpl(InetSocketAddress addr, String addrString) {
         this.addr = addr;
-        this.addrString = host;
-        this.port = port;
+        this.addrString = addrString;
     }
     
-    /**
-     * Constructs a new IpPort using the given host & port.
-     */
+    /** Constructs a new IpPort using the addr & port. */
+    public IpPortImpl(InetAddress addr, int port) {
+        this(new InetSocketAddress(addr, port));
+    }
+    
+    /** Constructs a new IpPort using the given host & port.*/
     public IpPortImpl(String host, int port) throws UnknownHostException {
-        this(InetAddress.getByName(host), host, port);
+        this(new InetSocketAddress(InetAddress.getByName(host), port), host);
     }
     
     /** Constructs an IpPort using the given host:port */
@@ -51,13 +50,16 @@ public class IpPortImpl implements IpPort {
             }
         }
         
-        this.addr = InetAddress.getByName(host);
+        this.addr = new InetSocketAddress(InetAddress.getByName(host), port);
         this.addrString = host;
-        this.port = port;
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return addr;
     }
     
     public InetAddress getInetAddress() {
-        return addr;
+        return addr.getAddress();
     }
     
     public String getAddress() {
@@ -65,7 +67,7 @@ public class IpPortImpl implements IpPort {
     }
     
     public int getPort() {
-        return port;
+        return addr.getPort();
     }
     
     public String toString() {

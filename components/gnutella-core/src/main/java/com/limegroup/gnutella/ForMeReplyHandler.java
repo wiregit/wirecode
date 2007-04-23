@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
@@ -382,6 +383,10 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             // may want to do something else here if we ever use this!
             return null;
         }
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
     }
     
     public int getPort() {

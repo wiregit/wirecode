@@ -20,7 +20,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
-import org.limewire.io.HostInfo;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
@@ -49,7 +49,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetails {
+public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDetails {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
@@ -218,8 +218,8 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
               rfd.getCreationTime(),        // creation time
               0,                            // firewalled transfer
               null,                         // no PE cause not firewalled
-          ep instanceof HostInfo ? 
-      ((HostInfo)ep).isTLSCapable() : false // TLS capable if ep is.
+          ep instanceof Connectable ? 
+      ((Connectable)ep).isTLSCapable() : false // TLS capable if ep is.
              );
     }
     
@@ -1024,7 +1024,7 @@ public class RemoteFileDesc implements IpPort, HostInfo, Serializable, FileDetai
         return _queueStatus;
     }
 
-	public InetSocketAddress getSocketAddress() {
+	public InetSocketAddress getInetSocketAddress() {
 		InetAddress addr = getInetAddress();
 		if (addr != null) {
 			return new InetSocketAddress(addr, getPort());

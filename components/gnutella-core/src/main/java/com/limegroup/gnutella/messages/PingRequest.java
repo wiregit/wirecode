@@ -197,15 +197,6 @@ public class PingRequest extends Message {
         //Do nothing...there is no payload!
     }
 
-    public Message stripExtendedPayload() {
-        if (payload==null)
-            return this;
-        else
-            return new PingRequest(this.getGUID(), 
-                                   this.getTTL(), 
-                                   this.getHops());
-    }
-
 	// inherit doc comment
 	public void recordDrop() {
 		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);

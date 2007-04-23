@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.MultiRRIterator;
 import org.limewire.io.CountingOutputStream;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.util.StringUtils;
 
@@ -225,7 +227,7 @@ public final class HTTPUploader implements Uploader {
         _headersParsed = false;
         _stateNum = CONNECTING;
         _state = null;
-        _nodePort = 0;
+        _nodePort = -1;
         _supportsQueueing = false;
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
@@ -689,6 +691,34 @@ public final class HTTPUploader implements Uploader {
     public InetAddress getNodeAddress() {return _nodeAddress; }
     
     public int getNodePort() {return _nodePort; }
+
+    /** Returns true if the socket this is on is currently using TLS. */
+    public boolean isTLSCapable() {
+        return SSLUtils.isTLSEnabled(_socket);
+    }
+
+    /** Returns the address of the host that initiated this session. */
+    public String getAddress() {
+        return session.getHost();
+    }
+
+    /** Returns the address of the host that initiated this session. */
+    public InetAddress getInetAddress() {
+        return session.getSocket().getInetAddress();
+    }
+
+    /** Returns the Gnutella Port, if one was provided.  Otherwise, the remote port from the socket. */
+    public int getPort() {
+        if(_nodePort != -1)
+            return _nodePort;
+        else
+            return ((InetSocketAddress)session.getSocket().getRemoteSocketAddress()).getPort();
+    }
+    
+    /** Returns a combination of getInetAddress + getPort. */
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
+    }
     
     /**
      * The amount of bytes that this upload has transferred.

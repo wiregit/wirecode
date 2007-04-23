@@ -32,7 +32,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
-import org.limewire.io.HostInfo;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
@@ -631,11 +631,11 @@ public class HostCatcher {
                 ep = (ExtendedEndpoint)ipp;
             } else {
                 ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-                if(ipp instanceof HostInfo) {
+                if(ipp instanceof Connectable) {
                     // When more items other than TLS are added to HostInfo,
                     // it would make more sense to make this something like:
                     // ep.addHostInfo(ipp);
-                    ep.setTLSCapable(((HostInfo)ipp).isTLSCapable());
+                    ep.setTLSCapable(((Connectable)ipp).isTLSCapable());
                 }
             }
             
@@ -950,8 +950,8 @@ public class HostCatcher {
     
     /** Returns true if the given IpPort is TLS-capable. */
     public boolean isHostTLSCapable(IpPort ipp) {
-        if(ipp instanceof HostInfo)
-            return ((HostInfo)ipp).isTLSCapable();
+        if(ipp instanceof Connectable)
+            return ((Connectable)ipp).isTLSCapable();
         
         // No need to check if it's an endpoint already, because all Endpoints
         // already implement HostInfo.
