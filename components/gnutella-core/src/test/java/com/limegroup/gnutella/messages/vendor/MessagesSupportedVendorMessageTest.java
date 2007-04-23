@@ -38,13 +38,13 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_TCP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_HOPS_FLOW));
-        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),VendorMessage.F_UDP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_LIME_ACK));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_PUSH_PROXY_REQ));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_UDP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_UDP_CONNECT_BACK_REDIR));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
+        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
                                              
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -61,13 +61,13 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmpRead.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_TCP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_HOPS_FLOW));
-        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),VendorMessage.F_UDP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),VendorMessage.F_LIME_ACK));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_PUSH_PROXY_REQ));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_UDP_CONNECT_BACK));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),VendorMessage.F_UDP_CONNECT_BACK_REDIR));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
+        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
     }
 
     public void testNetworkConstructor() throws Exception {
