@@ -313,6 +313,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         LOG.info("test requery progress");
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
+	// TestFile's static initializer does all kinds of expensive stuff
+	// that can cause the http communication to timeout when it's
+	// done lazily
+	TestFile.length();
         try {
             //Start uploader and download.
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
