@@ -846,7 +846,6 @@ public class HostCatcherTest extends LimeTestCase {
         RouterService.getAcceptor().start();
         RouterService.getMessageRouter().initialize();
         hc.expire();
-        hc.read(tmp);
         hc.sendUDPPings();
         
         // empty the hostcatcher

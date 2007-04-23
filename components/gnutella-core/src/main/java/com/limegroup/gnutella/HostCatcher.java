@@ -517,8 +517,7 @@ public class HostCatcher {
                         addUDPHostCache(e);
                     else {
                         synchronized(this) {
-                            if (!addPermanent(e))
-                                continue;
+                            addPermanent(e);
                             restoredHosts.add(e);
                         }
                         endpointAdded();
@@ -1406,7 +1405,7 @@ public class HostCatcher {
             FETCHER.resetFetchTime();
             gWebCache.resetData();
             udpHostCache.resetData();
-            
+            restoredHosts.clear();
             pinger.resetData();
         }
         
