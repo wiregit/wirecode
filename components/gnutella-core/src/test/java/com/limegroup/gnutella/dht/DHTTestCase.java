@@ -66,7 +66,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-        //dht settings:
+        
+        // DHT Settings
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         

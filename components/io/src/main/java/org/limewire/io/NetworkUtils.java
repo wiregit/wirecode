@@ -189,15 +189,6 @@ public final class NetworkUtils {
     public static boolean isPrivate() {
         return isPrivateAddress(LocalSocketAddressService.getLocalAddress());
     }
-
-    /**
-     * Checks if the given address is a private address
-     * 
-     * @param address the address to check
-     */
-    public static boolean isPrivateAddress(byte[] address) {
-        return isPrivateAddress(address, LocalSocketAddressService.isLocalAddressPrivate());
-    }
     
     /**
      * Checks if the given address is a private address.
@@ -209,8 +200,8 @@ public final class NetworkUtils {
      *          considered private (in other words this method will
      *          always return false if localIsPrivate is false).
      */
-    public static boolean isPrivateAddress(byte[] address, boolean localIsPrivate) {
-        if (!localIsPrivate) {
+    public static boolean isPrivateAddress(byte[] address) {
+        if (!LocalSocketAddressService.isLocalAddressPrivate()) {
             return false;
         }
         

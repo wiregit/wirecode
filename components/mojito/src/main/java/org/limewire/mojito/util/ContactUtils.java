@@ -37,7 +37,6 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.settings.NetworkSettings;
 
 
 /**
@@ -173,8 +172,7 @@ public final class ContactUtils {
      * LOCAL_IS_PRIVATE to false!
      */
     public static boolean isPrivateAddress(InetAddress addr) {
-        return NetworkUtils.isPrivateAddress(addr.getAddress(), 
-                NetworkSettings.LOCAL_IS_PRIVATE.getValue());
+        return NetworkUtils.isPrivateAddress(addr.getAddress());
     }
     
     /**
@@ -185,8 +183,8 @@ public final class ContactUtils {
      * to run the DHT on a Local Area Network (LAN) you want to set 
      * LOCAL_IS_PRIVATE to false!
      */
-    public static boolean isPrivateAddress(SocketAddress sa) {
-        return isPrivateAddress(((InetSocketAddress)sa).getAddress());
+    public static boolean isPrivateAddress(SocketAddress address) {
+        return NetworkUtils.isPrivateAddress(address);
     }
     
     /**

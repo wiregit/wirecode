@@ -11,6 +11,8 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
@@ -40,11 +42,24 @@ public class Main {
             }
         }
         
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
+            public byte[] getLocalAddress() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public int getLocalPort() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public boolean isLocalAddressPrivate() {
+                return NetworkSettings.LOCAL_IS_PRIVATE.getValue();
+            }
+        });
+        
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         
         List<MojitoDHT> dhts = standalone(null, port, count);
-        //List<MojitoDHT> dhts = limewire(null, port);
         
         if (dhts.isEmpty()) {
             System.out.println("No Nodes to run");
