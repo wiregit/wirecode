@@ -291,11 +291,13 @@ public class NetworkUtilsTest extends BaseTestCase {
         // Should be an IPv4 compatible addresses
         assertTrue(NetworkUtils.isIPv4CompatibleAddress(addr.getAddress()));
         
-        // 
+        // Create an IPv4 compatible IPv6 address
         byte[] compatible = new byte[16];
         System.arraycopy(addr.getAddress(), 0, compatible, 12, addr.getAddress().length);
         assertTrue(NetworkUtils.isIPv4CompatibleAddress(compatible));
         
+        // Change any bytes from 0 through 11 and it shouldn't
+        // be any longer an IPv4 compatible address
         compatible[10] = (byte)0xFF;
         compatible[11] = (byte)0xFF;
         assertFalse(NetworkUtils.isIPv4CompatibleAddress(compatible));
@@ -305,13 +307,16 @@ public class NetworkUtilsTest extends BaseTestCase {
         InetAddress addr = InetAddress.getByName("192.168.1.0");
         assertTrue(NetworkUtils.isIPv4MappedAddress(addr.getAddress()));
         
+        // Create an IPv4 mapped IPv6 address. We start with
+        // a byte-array that's NOT an IPv4 mapped address!
         byte[] mapped = new byte[16];
         System.arraycopy(addr.getAddress(), 0, mapped, 12, addr.getAddress().length);
         assertFalse(NetworkUtils.isIPv4MappedAddress(mapped));
         
+        // Fix the address and it should be an IPv4 mapped
+        // IPv6 address now!
         mapped[10] = (byte)0xFF;
         mapped[11] = (byte)0xFF;
-        
         assertTrue(NetworkUtils.isIPv4MappedAddress(mapped));
     }
     
