@@ -67,6 +67,9 @@ public class TestUploader extends AssertComparisons {
     private volatile int stopAfter;
     /** This is stopped. */
     private boolean stopped;
+    
+    private Object stoppedLock = new Object();
+    
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
     /** the boundary between stop/start to send corrupt bytes */
@@ -557,7 +560,7 @@ public class TestUploader extends AssertComparisons {
 				InetAddress address = socket.getInetAddress();
                 if (isBannedIP(address.getHostAddress())) {
                     LOG.debug("Banned address -- closing");
-                    server.close();
+                    socket.close();
                     continue;
                 }
                 LOG.debug("Uploader accepted connection");
@@ -867,6 +870,9 @@ public class TestUploader extends AssertComparisons {
                 if (fullRequestsUploaded + amountThisRequest == stopAfter) {
                     
                     stopped=true;
+                    synchronized (stoppedLock) {
+                        stoppedLock.notifyAll();
+                    }
                     out.flush();
                     LOG.debug(name+" stopped at "+(fullRequestsUploaded + amountThisRequest));
                     throw new IOException();
@@ -1056,6 +1062,18 @@ public class TestUploader extends AssertComparisons {
 			return null;
 		}		
 	}
+    
+    public void waitForUploaderToStop() {
+        synchronized (stoppedLock) {
+            while (!stopped) {
+                try {
+                    stoppedLock.wait();
+                }
+                catch (InterruptedException ie) {
+                }
+            }
+        }
+    }
 	
 	private static final RoundRobinQueue rr = new RoundRobinQueue();
 
@@ -1083,6 +1101,7 @@ public class TestUploader extends AssertComparisons {
                 if(fullRequestsUploaded < totalAmountToUpload)
                     killedByDownloader = true;
                 LOG.debug("Exception in uploader (" + name + ")", e);
+//                ErrorService.error(e);
             } catch(Throwable t) {
                 ErrorService.error(t);
             } finally {
