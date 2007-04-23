@@ -8,13 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.io.NetworkUtils;
-import org.limewire.util.BaseTestCase;
-
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 /**
@@ -151,8 +147,8 @@ public class NetworkUtilsTest extends BaseTestCase {
         for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
             address = 
                 InetAddress.getByName(PUBLIC_ADDRESSES[i]).getAddress();
-            assertTrue("should not be a private address"+address,
-                       !NetworkUtils.isPrivateAddress(address));
+            assertFalse("should be a public address"+address,
+                       NetworkUtils.isPrivateAddress(address));
         }
 
         for(int i=0; i<PRIVATE_ADDRESSES.length; i++) {
@@ -263,5 +259,106 @@ public class NetworkUtilsTest extends BaseTestCase {
             assertTrue(res instanceof Inet6Address);
             assertEquals(addr, res);
         }
+    }
+    
+    public void testIsPrivateAddressIPv6() throws UnknownHostException {
+        stubProvider.setLocalAddressPrivate(true);
+        
+        // Private IPv4 mapped address
+        InetAddress addr1 = InetAddress.getByName("[::ffff:192.168.1.0]");
+        assertInstanceof(Inet4Address.class, addr1);
+        assertTrue(NetworkUtils.isPrivateAddress(addr1));
+        
+        // Private IPv4 compatible address
+        InetAddress addr2 = InetAddress.getByName("[::0000:192.168.1.0]");
+        assertInstanceof(Inet6Address.class, addr2);
+        assertTrue(NetworkUtils.isPrivateAddress(addr2));
+        
+        // Public IPv4 mapped address
+        InetAddress addr3 = InetAddress.getByName("[::ffff:216.254.98.132]");
+        assertInstanceof(Inet4Address.class, addr3);
+        assertFalse(NetworkUtils.isPrivateAddress(addr3));
+        
+        // Public IPv4 compatible address
+        InetAddress addr4 = InetAddress.getByName("[::0000:216.254.98.132]");
+        assertInstanceof(Inet6Address.class, addr4);
+        assertFalse(NetworkUtils.isPrivateAddress(addr4));
+    }
+    
+    public void testIsIPv4ComatibleAddress() throws UnknownHostException {
+        InetAddress addr = InetAddress.getByName("192.168.1.0");
+        
+        // Should be an IPv4 compatible addresses
+        assertTrue(NetworkUtils.isIPv4CompatibleAddress(addr.getAddress()));
+        
+        // 
+        byte[] compatible = new byte[16];
+        System.arraycopy(addr.getAddress(), 0, compatible, 12, addr.getAddress().length);
+        assertTrue(NetworkUtils.isIPv4CompatibleAddress(compatible));
+        
+        compatible[10] = (byte)0xFF;
+        compatible[11] = (byte)0xFF;
+        assertFalse(NetworkUtils.isIPv4CompatibleAddress(compatible));
+    }
+    
+    public void testIsIPv4MappedAddress() throws UnknownHostException {
+        InetAddress addr = InetAddress.getByName("192.168.1.0");
+        assertTrue(NetworkUtils.isIPv4MappedAddress(addr.getAddress()));
+        
+        byte[] mapped = new byte[16];
+        System.arraycopy(addr.getAddress(), 0, mapped, 12, addr.getAddress().length);
+        assertFalse(NetworkUtils.isIPv4MappedAddress(mapped));
+        
+        mapped[10] = (byte)0xFF;
+        mapped[11] = (byte)0xFF;
+        
+        assertTrue(NetworkUtils.isIPv4MappedAddress(mapped));
+    }
+    
+    public void testIsSameAddressSpace() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("192.168.1.1");
+        InetAddress addr2 = InetAddress.getByName("192.168.1.2");
+        
+        // Both instances should be IP4
+        assertInstanceof(Inet4Address.class, addr1);
+        assertInstanceof(Inet4Address.class, addr2);
+        
+        // IPv4 with IPv4
+        assertTrue(NetworkUtils.isSameAddressSpace(addr1, addr2));
+        
+        InetAddress addr3 = InetAddress.getByName("[::AAAA:192.168.1.3]");
+        InetAddress addr4 = InetAddress.getByName("[::BBBB:192.168.1.4]");
+        
+        // Both instances should be IPv6
+        assertInstanceof(Inet6Address.class, addr3);
+        assertInstanceof(Inet6Address.class, addr4);
+        
+        // IPv6 with IPv6
+        assertTrue(NetworkUtils.isSameAddressSpace(addr3, addr4));
+        
+        // IPv4 with IPv6
+        assertFalse(NetworkUtils.isSameAddressSpace(addr1, addr3));
+        
+        InetAddress addr5 = InetAddress.getByName("[::0000:192.168.1.5]");
+        InetAddress addr6 = InetAddress.getByName("[::FFFF:192.168.1.6]");
+        
+        // IPv4 compatible addresses are IPv6 instances and IPv4 
+        // mapped addresses are IPv4 instances (see below)
+        
+        // Note: It's not possible to construct an IPv4 mapped address
+        // that is an instance of Inet6Address in Java! The factory 
+        // methods getByName() and getByAddress() return always an 
+        // Inet4Address instance!
+        assertInstanceof(Inet6Address.class, addr5);
+        assertInstanceof(Inet4Address.class, addr6);
+        
+        // IPv4 comatible with IPv4 mapped
+        assertTrue(NetworkUtils.isSameAddressSpace(addr5, addr6));
+        
+        // IPv6 with IPv4 compatible
+        assertTrue(NetworkUtils.isSameAddressSpace(addr3, addr5));
+        
+        // IPv6 with with IPv4 mapped
+        assertFalse(NetworkUtils.isSameAddressSpace(addr3, addr6));
     }
 }

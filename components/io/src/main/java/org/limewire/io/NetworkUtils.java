@@ -35,7 +35,7 @@ public final class NetworkUtils {
     
     /**
      * The list of private addresses.
-     */
+     */ 
     private static final int [][] PRIVATE_ADDRESSES_BYTE =
         new int[][]{
             {0xFF000000,0},
@@ -45,12 +45,6 @@ public final class NetworkUtils {
             {0xFFF00000,(172 << 24) | (16 << 16)},
             {0xFFFF0000,(169 << 24) | (254 << 16)},
             {0xFFFF0000,(192 << 24) | (168 << 16)}};
-    
-    
-    /**
-     * The list of local addresses.
-     */
-    private static final byte LOCAL_ADDRESS_BYTE = (byte)127;
     
     /**
      * Natmask for Class C Networks
@@ -98,6 +92,9 @@ public final class NetworkUtils {
 	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
     }
     
+    /**
+     * Returns whether or not the specified IP is valid.
+     */
     public static boolean isValidAddress(IP ip) {
         int b = ip.addr >> 24;
         return (b != INVALID_ADDRESSES_BYTE[0]) && 
@@ -122,21 +119,27 @@ public final class NetworkUtils {
         }
     }
 	
-	/**
-	 * Returns whether or not the supplied address is a local address.
-	 */
-	public static boolean isLocalAddress(InetAddress addr) {
-	    try {
-	        if( addr.getAddress()[0]==LOCAL_ADDRESS_BYTE )
-	            return true;
-
-            InetAddress address = InetAddress.getLocalHost();
-            return Arrays.equals(address.getAddress(), addr.getAddress());
-        } catch(UnknownHostException e) {
+    /**
+     * Returns true if the InetAddress is any of our local machine addresses
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isLocalAddress(InetAddress addr) {
+        try {
+            return NetworkInterface.getByInetAddress(addr) != null;
+        } catch (SocketException err) {
             return false;
         }
     }
-
+    
+    /**
+     * Returns true if the SocketAddress is any of our local machine addresses
+     */
+    public static boolean isLocalAddress(SocketAddress addr) {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        return !iaddr.isUnresolved() && isLocalAddress(iaddr.getAddress());
+    }
+    
     /**
      * Returns whether or not the two ip addresses share the same
      * first octet in their address.  
@@ -206,7 +209,8 @@ public final class NetworkUtils {
         }
         
         // IPv6 has no private addresses
-        if (!isIPv4CompatibleAddress(address)) {
+        if (!isIPv4CompatibleAddress(address)
+                && !isIPv4MappedAddress(address)) {
             return false;
         }
         
@@ -303,9 +307,6 @@ public final class NetworkUtils {
         return sbuf.toString();
     }
     
-
-
-
     /**
      * If host is not a valid host address, returns false.
      * Otherwise, returns true if connecting to host:port would connect to
@@ -477,21 +478,6 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if the SocketAddress is any of our local machine addresses.
-     */
-    public static boolean isLocalHostAddress(SocketAddress addr) throws SocketException {
-        InetSocketAddress iaddr = (InetSocketAddress)addr;
-        return !iaddr.isUnresolved() && isLocalHostAddress(iaddr.getAddress());
-    }
-    
-    /**
-     * Returns true if the InetAddress is any of our local machine addresses
-     */
-    public static boolean isLocalHostAddress(InetAddress addr) throws SocketException {
-        return NetworkInterface.getByInetAddress(addr) != null;
-    }
-    
-    /**
      * Returns whether or not the specified InetAddress and Port is valid.
      */
     public static boolean isValidSocketAddress(SocketAddress address) {
@@ -522,7 +508,7 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static byte[] getBytes(InetAddress addr, int port) {
-        if (port < 0 || port > 0xFFFF) {
+        if (!isValidPort(port)) {
             throw new IllegalArgumentException("Port out of range: " + port);
         }
         
@@ -562,13 +548,13 @@ public final class NetworkUtils {
                 || (a instanceof Inet6Address && b instanceof Inet6Address)) {
             return true;
             
-        // Is 'b' IPv4 compatible?
+        // Is 'b' IPv4 compatible or mapped?
         } else if (a instanceof Inet4Address && b instanceof Inet6Address) {
-            return ((Inet6Address)b).isIPv4CompatibleAddress();
+            return ((Inet6Address)b).isIPv4CompatibleAddress() || isIPv4MappedAddress(b);
         
-        // Is 'a' IPv4 compatible?
+        // Is 'a' IPv4 compatible or mapped?
         } else if (a instanceof Inet6Address && b instanceof Inet4Address) {
-            return ((Inet6Address)a).isIPv4CompatibleAddress();
+            return ((Inet6Address)a).isIPv4CompatibleAddress() || isIPv4MappedAddress(a);
         }
         
         // No clue! This method works only with known InetAddress
@@ -584,16 +570,19 @@ public final class NetworkUtils {
     public static byte[] getIPv6AddressBytes(InetAddress address) {
         byte[] bytes = address.getAddress();
         switch (bytes.length) {
-        case 16:
-            return bytes;
-        case 4:
-            byte[] result = new byte[16];
-            result[10] = (byte) 0xff;
-            result[11] = (byte) 0xff;
-            System.arraycopy(bytes, 0, result, 12, bytes.length);
-            return result;
-        default:
-            throw new IllegalArgumentException("unhandled address length");
+            case 16:
+                // Return the IPv6 address
+                return bytes;
+            case 4:
+                // Turn the IPv4 address into a IPv4 mapped IPv6
+                // address
+                byte[] result = new byte[16];
+                result[10] = (byte) 0xff;
+                result[11] = (byte) 0xff;
+                System.arraycopy(bytes, 0, result, 12, bytes.length);
+                return result;
+            default:
+                throw new IllegalArgumentException("unhandled address length");
         }
     }
     
@@ -624,6 +613,39 @@ public final class NetworkUtils {
                 && (address[ 6] == 0x00) && (address[ 7] == 0x00) 
                 && (address[ 8] == 0x00) && (address[ 9] == 0x00) 
                 && (address[10] == 0x00) && (address[11] == 0x00))  {   
+            return true;
+        }
+        
+        return false;  
+    }
+    
+    /**
+     * Returns true if the given InetAddress is an IPv4 mapped address
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isIPv4MappedAddress(InetAddress addr) {
+        return isIPv4MappedAddress(addr.getAddress());
+    }
+    
+    /**
+     * Returns true if the given byte-array is an IPv4 mapped address
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isIPv4MappedAddress(byte[] address) {
+        // Is it a IPv4 address?
+        if (address.length == 4) {
+            return true;
+            
+        // Is it a IPv4 mapped IPv6 address?
+        } else if (address.length == 16 
+                && (address[ 0] == 0x00) && (address[ 1] == 0x00) 
+                && (address[ 2] == 0x00) && (address[ 3] == 0x00) 
+                && (address[ 4] == 0x00) && (address[ 5] == 0x00) 
+                && (address[ 6] == 0x00) && (address[ 7] == 0x00) 
+                && (address[ 8] == 0x00) && (address[ 9] == 0x00) 
+                && (address[10] == (byte)0xFF) && (address[11] == (byte)0xFF))  {   
             return true;
         }
         

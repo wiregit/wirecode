@@ -22,7 +22,6 @@ package org.limewire.mojito.util;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -126,31 +125,22 @@ public final class ContactUtils {
      * Returns true if the given Contact's address is any of
      * localhost's addresses
      */
-    public static boolean isLocalHostAddress(Contact node) {
-        try {
-            return NetworkUtils.isLocalHostAddress(node.getContactAddress());
-        } catch (SocketException e) {
-            LOG.error("SocketException", e);
-        }
-        return false;
+    public static boolean isLocalAddress(Contact node) {
+        return NetworkUtils.isLocalAddress(node.getContactAddress());
     }
     
     /**
      * Returns true if the given Contacts have both a localhost address
      */
     public static boolean areLocalContacts(Contact existing, Contact node) {
-        try {
-            // Huh? The addresses are not equal but both belong
-            // obviously to this local machine!?
-            InetSocketAddress newAddress = (InetSocketAddress) node.getContactAddress();
-            InetSocketAddress oldAddress = (InetSocketAddress) existing.getContactAddress();
-            if (NetworkUtils.isLocalHostAddress(newAddress)
-                    && NetworkUtils.isLocalHostAddress(oldAddress)
-                    && newAddress.getPort() == oldAddress.getPort()) {
-                return true;
-            }
-        } catch (SocketException e) {
-            LOG.error("SocketException", e);
+        // Huh? The addresses are not equal but both belong
+        // obviously to this local machine!?
+        InetSocketAddress newAddress = (InetSocketAddress) node.getContactAddress();
+        InetSocketAddress oldAddress = (InetSocketAddress) existing.getContactAddress();
+        if (NetworkUtils.isLocalAddress(newAddress)
+                && NetworkUtils.isLocalAddress(oldAddress)
+                && newAddress.getPort() == oldAddress.getPort()) {
+            return true;
         }
         
         return false;
