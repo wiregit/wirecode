@@ -47,8 +47,7 @@ public abstract class VendorMessage extends Message {
     public static final int F_INSPECTION_REQ = 30;
     public static final int F_INSPECTION_RESP = 31;
     public static final int F_ADVANCED_TOGGLE = 32;
-
-
+    public static final int F_DHT_CONTACTS = 33;
     
     public static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};

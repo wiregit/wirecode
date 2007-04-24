@@ -37,6 +37,16 @@ public class NodeAssignerStat extends AdvancedStatistic {
     public static final Statistic ACTIVE_DHT_DISCONNECTIONS = new NodeAssignerStat();
 
     /**
+     * Statistic for passive leaf DHT assignments
+     */
+    public static final Statistic PASSIVE_LEAF_DHT_ASSIGNMENTS = new NodeAssignerStat();
+    
+    /**
+     * Statistic for passive leaf DHT disconnections
+     */
+    public static final Statistic PASSIVE_LEAF_DHT_DISCONNECTIONS = new NodeAssignerStat();
+    
+    /**
      * Statistic for the number of switches from Active DHT node to ultrapeer (Passive DHT)
      */
     public static final Statistic UP_TO_DHT_SWITCHES = new NodeAssignerStat();

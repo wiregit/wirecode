@@ -31,23 +31,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.StatusCode;
+import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DHTValueEntityImpl;
-import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
@@ -103,21 +102,22 @@ public class MessageInputStream extends DataInputStream {
     }
     
     /**
-     * Reads a DHTValue from the InputStream 
+     * Reads a DHTValueEntity from the InputStream 
      * 
      * @param sender The Contact that send us the DHTValue
      */
-    public DHTValueEntity readDHTValueEntity(Contact sender) throws IOException {
+    public DHTValueEntity readDHTValueEntity(Contact sender, DHTValueFactoryManager factoryManager) throws IOException {
         Contact creator = readContact();
-        KUID valueId = readKUID();
-        DHTValueImpl value = readDHTValue();
-        return new DHTValueEntityImpl(creator, sender, valueId, value, false);
+        KUID primaryKey = readKUID();
+        DHTValue value = readDHTValue(factoryManager);
+        
+        return DHTValueEntity.createFromRemote(creator, sender, primaryKey, value);
     }
     
     /**
-     * 
+     * Reads a DHTValue from the InputStream 
      */
-    private DHTValueImpl readDHTValue() throws IOException {
+    private DHTValue readDHTValue(DHTValueFactoryManager factoryManager) throws IOException {
         DHTValueType valueType = readValueType();
         Version version = readVersion();
         
@@ -128,13 +128,13 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return new DHTValueImpl(valueType, version, data);
+        return factoryManager.createDHTValue(valueType, version, data);
     }
     
     /**
      * Reads multiple DHTValues from the InputStream 
      */
-    public List<DHTValueEntity> readDHTValueEntities(Contact sender) throws IOException {
+    public List<DHTValueEntity> readDHTValueEntities(Contact sender, DHTValueFactoryManager factoryManager) throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
@@ -142,7 +142,7 @@ public class MessageInputStream extends DataInputStream {
         
         DHTValueEntity[] entities = new DHTValueEntity[size];
         for(int i = 0; i < entities.length; i++) {
-            entities[i] = readDHTValueEntity(sender);
+            entities[i] = readDHTValueEntity(sender, factoryManager);
         }
         return Arrays.asList(entities);
     }
@@ -288,22 +288,45 @@ public class MessageInputStream extends DataInputStream {
     }
     
     /**
-     * 
+     * Reads a StatusCode from the InputStream
      */
-    @SuppressWarnings("unchecked")
-    public Collection<Entry<KUID, Status>> readStoreStatus() throws IOException {
-        int size = readUnsignedByte();
-        if (size == 0) {
-            return Collections.emptyList();
+    public StatusCode readStatusCode() throws IOException {
+        return StatusCode.valueOf(readUnsignedShort(), readDHTString());
+    }
+    
+    /**
+     * Reads a String from the InputStream. See 
+     * MessageOutputStrea.writeDHTString()
+     */
+    private String readDHTString() throws IOException {
+        int length = readUnsignedShort();
+        if (length == 0) {
+            return null;
         }
         
-        Entry<KUID, Status>[] entries = new Entry[size];
-        for (int i = 0; i < entries.length; i++) {
-            KUID valueId = readKUID();
-            Status status = Status.valueOf( readUnsignedByte() );
-            entries[i] = new EntryImpl<KUID, Status>(valueId, status);
+        byte[] b = new byte[length];
+        readFully(b);
+        return new String(b, "UTF-8");
+    }
+    
+    /**
+     * Reats and returns a Collection of StoreStatusCode(s)
+     */
+    public Collection<StoreStatusCode> readStoreStatusCodes() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptySet();
         }
-        return Arrays.asList(entries);
+        
+        StoreStatusCode[] status = new StoreStatusCode[size];
+        for (int i = 0; i < size; i++) {
+            KUID primaryKey = readKUID();
+            KUID secondaryKey = readKUID();
+            StatusCode statusCode = readStatusCode();
+            status[i] = new StoreStatusCode(primaryKey, secondaryKey, statusCode);
+        }
+        
+        return Arrays.asList(status);
     }
     
     /**

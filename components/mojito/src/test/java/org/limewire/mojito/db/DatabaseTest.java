@@ -34,7 +34,6 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
-import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.messages.DHTMessage;
@@ -72,9 +71,9 @@ public class DatabaseTest extends MojitoTestCase {
     }
     
     private static DHTValueEntity createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
-        Contact node = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 0, false);
-        return new DHTValueEntityImpl(node, node, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), true);
+        Contact node = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, nodeId, 0, false);
+        return new DHTValueEntity(node, node, valueId, 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), true);
     }
     
     private static DHTValueEntity createDirectDHTValue(byte[] value) {
@@ -84,11 +83,11 @@ public class DatabaseTest extends MojitoTestCase {
     
     private static DHTValueEntity createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact node = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact node = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 nodeId, addr, 0, Contact.DEFAULT_FLAG);
         
-        return new DHTValueEntityImpl(node, node, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), false);
+        return new DHTValueEntity(node, node, valueId, 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), false);
     }
     
     private static DHTValueEntity createIndirectDHTValue(byte[] value) {
@@ -99,13 +98,13 @@ public class DatabaseTest extends MojitoTestCase {
     private static DHTValueEntity createIndirectDHTValue(KUID creatorId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
         
-        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 creatorId, addr, 0, Contact.DEFAULT_FLAG);
-        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 senderId, addr, 0, Contact.DEFAULT_FLAG);  
         
-        return new DHTValueEntityImpl(creator, sender, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), false);
+        return new DHTValueEntity(creator, sender, valueId, 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), false);
     }
     
     public void testLocalAdd() throws Exception {
@@ -117,37 +116,37 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getKey())
+                database.get(value1.getPrimaryKey())
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Neither direct...
         DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
-                value1.getKey(), "Mojito".getBytes());
+                value1.getPrimaryKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getKey())
+                database.get(value2.getPrimaryKey())
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // ...nor indirect values can replace a local value
         DHTValueEntity value3 = createIndirectDHTValue(value1.getSecondaryKey(), 
-                KUID.createRandomID(), value1.getKey(), "Mary".getBytes());
+                KUID.createRandomID(), value1.getPrimaryKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value3.getKey())
+                database.get(value3.getPrimaryKey())
                     .get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Only local values can replace local values
         DHTValueEntity value4 = createLocalDHTValue(value1.getSecondaryKey(), 
-                value1.getKey(), "Tonic".getBytes());
+                value1.getPrimaryKey(), "Tonic".getBytes());
         database.store(value4);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getKey())
+                database.get(value4.getPrimaryKey())
                     .get(value4.getSecondaryKey()).getValue().getValue()));
         
         // Add a new direct value
@@ -156,17 +155,17 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getKey())
+                database.get(value5.getPrimaryKey())
                     .get(value5.getSecondaryKey()).getValue().getValue()));
         
         // local values replace direct values
         DHTValueEntity value6 = createLocalDHTValue(value5.getSecondaryKey(), 
-                value5.getKey(), "Mary".getBytes());
+                value5.getPrimaryKey(), "Mary".getBytes());
         database.store(value6);
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value6.getKey())
+                database.get(value6.getPrimaryKey())
                     .get(value6.getSecondaryKey()).getValue().getValue()));
         
         // Add an indirect value
@@ -175,17 +174,17 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Bloody".getBytes(), 
-                database.get(value7.getKey())
+                database.get(value7.getPrimaryKey())
                     .get(value7.getSecondaryKey()).getValue().getValue()));
         
         // local values replace indirect values
         DHTValueEntity value8 = createLocalDHTValue(value7.getSecondaryKey(), 
-                value7.getKey(), "Lime".getBytes());
+                value7.getPrimaryKey(), "Lime".getBytes());
         database.store(value8);
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Lime".getBytes(), 
-                database.get(value8.getKey())
+                database.get(value8.getPrimaryKey())
                     .get(value8.getSecondaryKey()).getValue().getValue()));
 
     }
@@ -199,7 +198,7 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getKey())
+                database.get(value1.getPrimaryKey())
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Shouldn't change
@@ -209,23 +208,23 @@ public class DatabaseTest extends MojitoTestCase {
         
         // The originator is issuing a direct store request
         DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
-                value1.getKey(), "Mojito".getBytes());
+                value1.getPrimaryKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getKey())
+                database.get(value2.getPrimaryKey())
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // A directly stored value cannot be replaced by
         // an indirect value
         DHTValueEntity value3 = createIndirectDHTValue(value2.getSecondaryKey(), 
-                    KUID.createRandomID(), value2.getKey(), "Tough".getBytes());
+                    KUID.createRandomID(), value2.getPrimaryKey(), "Tough".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value3.getKey())
+                database.get(value3.getPrimaryKey())
                     .get(value3.getSecondaryKey()).getValue().getValue()));
     }
     
@@ -238,37 +237,37 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getKey())
+                database.get(value1.getPrimaryKey())
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Indirect replaces indirect
         DHTValueEntity value2 = createIndirectDHTValue(value1.getSecondaryKey(), 
-                KUID.createRandomID(), value1.getKey(), "Mojito".getBytes());
+                KUID.createRandomID(), value1.getPrimaryKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getKey())
+                database.get(value2.getPrimaryKey())
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // Direct replaces indirect
         DHTValueEntity value3 = createDirectDHTValue(value2.getSecondaryKey(), 
-                value2.getKey(), "Tonic".getBytes());
+                value2.getPrimaryKey(), "Tonic".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value3.getKey())
+                database.get(value3.getPrimaryKey())
                     .get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Indirect shouldn't replace direct
         DHTValueEntity value4 = createIndirectDHTValue(value3.getSecondaryKey(), 
-                KUID.createRandomID(), value3.getKey(), "Mary".getBytes());
+                KUID.createRandomID(), value3.getPrimaryKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getKey())
+                database.get(value4.getPrimaryKey())
                     .get(value4.getSecondaryKey()).getValue().getValue()));
     }
     
@@ -281,27 +280,27 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getKey())
+                database.get(value1.getPrimaryKey())
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Same Key but different originator/sender
         DHTValueEntity value2 = createIndirectDHTValue(KUID.createRandomID(), 
-                KUID.createRandomID(), value1.getKey(), "Tonic".getBytes());
+                KUID.createRandomID(), value1.getPrimaryKey(), "Tonic".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value2.getKey())
+                database.get(value2.getPrimaryKey())
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // Same Key but a different originator
         DHTValueEntity value3 = createDirectDHTValue(KUID.createRandomID(),
-                value1.getKey(), "Mary".getBytes());
+                value1.getPrimaryKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value3.getKey())
+                database.get(value3.getPrimaryKey())
                     .get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Different Key
@@ -310,7 +309,7 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(2, database.getKeyCount());
         assertEquals(4, database.getValueCount());
         assertTrue(Arrays.equals("Olga".getBytes(), 
-                database.get(value4.getKey())
+                database.get(value4.getPrimaryKey())
                     .get(value4.getSecondaryKey()).getValue().getValue()));
     }
     
@@ -323,22 +322,22 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getKey())
+                database.get(value1.getPrimaryKey())
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // It's not possible to remove a value indirectly
         DHTValueEntity value2 = createIndirectDHTValue(value1.getSecondaryKey(), 
-                KUID.createRandomID(), value1.getKey(), new byte[0]);
+                KUID.createRandomID(), value1.getPrimaryKey(), new byte[0]);
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getKey())
+                database.get(value2.getPrimaryKey())
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // But we can remove values directly
         DHTValueEntity value3 = createDirectDHTValue(value1.getSecondaryKey(), 
-                value1.getKey(), new byte[0]);
+                value1.getPrimaryKey(), new byte[0]);
         database.store(value3);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
@@ -349,22 +348,22 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value4.getKey())
+                database.get(value4.getPrimaryKey())
                     .get(value4.getSecondaryKey()).getValue().getValue()));
         
         // A local value cannot be removed
         DHTValueEntity value5 = createDirectDHTValue(value4.getSecondaryKey(), 
-                value4.getKey(), new byte[0]);
+                value4.getPrimaryKey(), new byte[0]);
         database.store(value5);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getKey())
+                database.get(value5.getPrimaryKey())
                     .get(value5.getSecondaryKey()).getValue().getValue()));
         
         // But a local value can remove a local value
         DHTValueEntity value6 = createLocalDHTValue(value4.getSecondaryKey(), 
-                value4.getKey(), new byte[0]);
+                value4.getPrimaryKey(), new byte[0]);
         database.store(value6);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
@@ -406,12 +405,12 @@ public class DatabaseTest extends MojitoTestCase {
                 ContextSettings.getVersion(), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2000));
         
-        DHTValue value = new DHTValueImpl(DHTValueType.BINARY, Version.UNKNOWN, new byte[1]);
-        DHTValueEntity entity1 = new DHTValueEntityImpl(
+        DHTValue value = new DHTValueImpl(DHTValueType.BINARY, Version.ZERO, new byte[1]);
+        DHTValueEntity entity1 = new DHTValueEntity(
                 dht.getLocalNode(), dht.getLocalNode(), key, value, true);
         
-        DHTValueEntity entity2 = new DHTValueEntityImpl(c1, c1, key, value, false);
-        DHTValueEntity entity3 = new DHTValueEntityImpl(c2, c2, key, value, false);
+        DHTValueEntity entity2 = new DHTValueEntity(c1, c1, key, value, false);
+        DHTValueEntity entity3 = new DHTValueEntity(c2, c2, key, value, false);
         
         database.store(entity1);
         database.store(entity2);
@@ -437,7 +436,7 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(3, bag.size());
         
         for (DHTValueEntity e : bag.values()) {
-            database.remove(e.getKey(), e.getSecondaryKey());
+            database.remove(e.getPrimaryKey(), e.getSecondaryKey());
         }
         
         assertEquals(0, database.getKeyCount());
@@ -446,10 +445,11 @@ public class DatabaseTest extends MojitoTestCase {
         
         // The Bag should be gone
         assertNull(database.getBag(key));
+        assertTrue(database.get(key).isEmpty());
     }
     
     public void testFloodDatabase() {
-        DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.setValue(10);
+        DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.setValue(10);
         Database db = new DatabaseImpl();
         HostFilterStub filter = new HostFilterStub();
         db.setHostFilter(filter);
@@ -457,55 +457,55 @@ public class DatabaseTest extends MojitoTestCase {
         //this should accept
         Contact badHost = ContactFactory.createLiveContact(
                 new InetSocketAddress("169.0.1.1", 1111), 
-                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                 new InetSocketAddress("169.0.1.1", 1111), 1, 0);
         
         Contact goodHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), new InetSocketAddress("169.0.1.2", 1111), 1, 0);
 
         DHTValueEntity value = null;
         //should allow x direct values
-        for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
-            value = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                        new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+        for(int i = 0; i < DatabaseSettings.MAX_KEYS_PER_IP.getValue(); i++) {
+            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                        new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             
             assertTrue(db.store(value));
         }
         //and reject after that
-        DHTValueEntity newValue = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+        DHTValueEntity newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should make some space for a new one
-        db.remove(value.getKey(), value.getSecondaryKey());
+        db.remove(value.getPrimaryKey(), value.getSecondaryKey());
         assertTrue(db.store(value));
         
         //should also reject an indirect one coming from the bad host
-        newValue = new DHTValueEntityImpl(badHost, goodHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+        newValue = new DHTValueEntity(badHost, goodHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should not allow more, even if it is coming indirectly        
-        newValue = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);;
+        newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);;
         assertFalse(db.store(newValue));
         
         //but should allow one created by a good host
-        DHTValueEntity goodValue = new DHTValueEntityImpl(goodHost, goodHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+        DHTValueEntity goodValue = new DHTValueEntity(goodHost, goodHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         
         assertTrue(db.store(goodValue));
 
         //test banning now
         badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), 
                 new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
-        for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
-            value = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                    new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+        for(int i = 0; i <= DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue(); i++) {
+            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             db.store(value);
         }
         //should have banned the host
@@ -542,7 +542,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity entity = createLocalDHTValue("Hello World".getBytes());
         database.store(entity);
         
-        KUID primaryKey = entity.getKey();
+        KUID primaryKey = entity.getPrimaryKey();
         
         assertEquals(0f, database.getRequestLoad(primaryKey, true));
         
@@ -567,7 +567,7 @@ public class DatabaseTest extends MojitoTestCase {
         database.clear();
         database.store(entity);
         
-        DHTValueEntityBag bag = database.getBag(entity.getKey());
+        DHTValueEntityBag bag = database.getBag(entity.getPrimaryKey());
         long now = System.currentTimeMillis();
         PrivilegedAccessor.setValue(bag, "lastRequestTime", 
                 now - DatabaseSettings.VALUE_REQUEST_LOAD_NULLING_DELAY.getValue()*1000L);
@@ -578,7 +578,7 @@ public class DatabaseTest extends MojitoTestCase {
         // try a very very large delay
         database.clear();
         database.store(entity);
-        bag = database.getBag(entity.getKey());
+        bag = database.getBag(entity.getPrimaryKey());
         
         PrivilegedAccessor.setValue(bag, "lastRequestTime", 1L);
         load = bag.incrementRequestLoad();

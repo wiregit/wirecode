@@ -144,6 +144,13 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                                         OOBProxyControlVendorMessage.VERSION);
         hashSet.add(smp);
         
+        // DHT Contacts
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                                        F_DHT_CONTACTS,
+                                        DHTContactsMessage.VERSION);
+        
+        hashSet.add(smp);
+        
         return hashSet;
     }
 
@@ -239,6 +246,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     	return supportsMessage(F_LIME_VENDOR_ID, F_CRAWLER_PONG);
     }
     
+    /**
+     * @return -1 if the remote host does not support header updates,
+     * else returns the version
+     */
     public int supportsHeaderUpdate() {
         return supportsMessage(F_LIME_VENDOR_ID,F_HEADER_UPDATE);
     }
@@ -247,6 +258,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         return supportsMessage(F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL);
     }
 
+    /**
+     * @return -1 if the remote host does DHT Conacts exchange,
+     * else return the version
+     */
+    public int supportsDHTContacts() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_DHT_CONTACTS);
+    }
+    
     // override super
     public boolean equals(Object other) {
         // basically two of these messages are the same if the support the same

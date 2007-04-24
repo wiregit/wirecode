@@ -140,7 +140,8 @@ public class MessageReader implements ChannelReadObserver {
                 Message m = MessageFactory.createMessage(header.array(), payload.array(), 
                                                   receiver.getSoftMax(), receiver.getNetwork());
                 receiver.processReadMessage(m);
-            } catch(BadPacketException ignored) {}
+            } catch(BadPacketException ignored) {
+            }
             
             if(read == -1)
                 throw new IOException("eof");

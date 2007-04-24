@@ -82,7 +82,7 @@ import com.limegroup.gnutella.util.Sockets;
  * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager implements ConnectionAcceptor, 
-EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
+        EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener> {
 
     /**
      * Timestamp for the last time the user selected to disconnect.
@@ -1153,7 +1153,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             for(ManagedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;
-                if (currMC.isPushProxy())
+                if (currMC.isMyPushProxy())
                     proxies.add(currMC);
             }
             return proxies;
@@ -2421,6 +2421,10 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      * Registers a listener for ConnectionLifeCycleEvents
      */
     public void addEventListener(ConnectionLifecycleListener listener) {
+        if (listener == null) {
+            throw new NullPointerException("ConnectionLifecycleListener is null");
+        }
+        
         if(!connectionLifeCycleListeners.addIfAbsent(listener)) {
             throw new IllegalArgumentException("Listener "+listener+" already registered");
         }

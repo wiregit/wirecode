@@ -30,12 +30,13 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.db.impl.DHTValueEntityImpl;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.util.DatabaseUtils;
 
 public class DHTValueTest extends MojitoTestCase {
     
@@ -69,45 +70,59 @@ public class DHTValueTest extends MojitoTestCase {
         try {
             for (int i = 0; i < 2*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", 2000 + i));
+                dht.bind(new InetSocketAddress(2000 + i));
                 dht.start();
                 
                 if (i > 0) {
-                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
+                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
                 } else {
                     first = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            MojitoUtils.bootstrap(first, new InetSocketAddress("localhost", 2000+1)).get();
+            first.bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             KUID key = KUID.createRandomID();
             DHTValueType type = DHTValueType.TEST;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             byte[] b = "Hello World".getBytes();
             
             long time = System.currentTimeMillis();
-            DHTValueEntity value = new DHTValueEntityImpl(
-                    first.getLocalNode(), first.getLocalNode(), key, 
-                        new DHTValueImpl(type, version, b), true);
+            
+            Context context = (Context)first;
+            
+            final Object lock = new Object();
+            final Storable storable = new Storable(key, new DHTValueImpl(type, version, b));
             
             // Pre-Condition
-            assertEquals(0, value.getLocations().size());
-            assertEquals(0L, value.getPublishTime());
-            assertTrue(value.isRepublishingRequired());
+            assertEquals(0, storable.getLocationCount());
+            assertEquals(0L, storable.getPublishTime());
+            assertTrue(DatabaseUtils.isPublishingRequired(storable));
             
             // Store...
-            StoreResult result = ((Context)first).store(value).get();
+            DHTFuture<StoreResult> future = context.store(storable);
+            future.addDHTFutureListener(new DHTFutureAdapter<StoreResult>() {
+                @Override
+                public void handleFutureSuccess(StoreResult result) {
+                    storable.handleStoreResult(result);
+                    synchronized (lock) {
+                        lock.notifyAll();
+                    }
+                }
+            });
+            
+            future.get();
+            synchronized (lock) {
+                if (storable.getLocationCount() == 0L) {
+                    lock.wait(1000L);
+                }
+            }
             
             // Post-Condition
-            assertEquals(0, result.getFailed().size());
-            assertEquals(result.getValues().size(), result.getSucceeded().size());
-            
-            assertSame(value, result.getSucceeded().iterator().next());
-            assertEquals(k, value.getLocations().size());
-            assertGreaterThanOrEquals(time, value.getPublishTime());
-            assertFalse(value.isRepublishingRequired());
+            assertEquals(k, storable.getLocationCount());
+            assertGreaterThanOrEquals(time, storable.getPublishTime());
+            assertFalse(DatabaseUtils.isPublishingRequired(storable));
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {

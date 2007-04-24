@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -90,6 +91,11 @@ public class FileDesc implements FileDetails {
 	 */
 	private int _attemptedUploads;
 	
+    /**
+     * The time when the last attempt was made to upload this file
+     */
+    private long lastAttemptedUploadTime = System.currentTimeMillis();
+    
 	/** 
 	 * The number of times this file has had completed uploads
 	 */
@@ -350,15 +356,23 @@ public class FileDesc implements FileDetails {
      * Increase & return the new attempted uploads
      * @return the new attempted upload count
      */    
-    public int incrementAttemptedUploads() {
+    public synchronized int incrementAttemptedUploads() {
+        lastAttemptedUploadTime = System.currentTimeMillis();
         return ++_attemptedUploads;
     }
     
     /** 
      * @return the current attempted uploads
      */
-    public int getAttemptedUploads() {
+    public synchronized int getAttemptedUploads() {
         return _attemptedUploads;
+    }
+    
+    /**
+     * Returns the time when the last upload attempt was made
+     */
+    public synchronized long getLastAttemptedUploadTime() {
+        return lastAttemptedUploadTime;
     }
     
     /**
@@ -421,6 +435,21 @@ public class FileDesc implements FileDetails {
      */
     public boolean isVerified() {
         return RouterService.getContentManager().isVerified(SHA1_URN);
+    }
+
+    /**
+     * Returns true if the FileDesc is considered rare
+     */
+    public boolean isRareFile() {
+        // TODO use Zlatin's RPN
+        if (getAttemptedUploads() < DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()
+                || getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
+            return false;
+        }
+        
+        long time = getLastAttemptedUploadTime();
+        long delta = System.currentTimeMillis() - time;
+        return (delta >= DHTSettings.RARE_FILE_TIME.getValue());
     }
 }
 

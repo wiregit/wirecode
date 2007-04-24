@@ -53,10 +53,12 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     private final MessageID messageId;
     
+    private final Version msgVersion;
+    
     private byte[] payload;
     
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, Contact contact, MessageID messageId) {
+            OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
 
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -70,14 +72,19 @@ abstract class AbstractDHTMessage implements DHTMessage {
             throw new NullPointerException("MessageID is null");
         }
         
+        if (msgVersion == null) {
+            throw new NullPointerException("Version is null");
+        }
+        
         this.context = context;
         this.opcode = opcode;
         this.contact = contact;
         this.messageId = messageId;
+        this.msgVersion = msgVersion;
     }
 
     public AbstractDHTMessage(Context context, OpCode opcode, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -87,11 +94,17 @@ abstract class AbstractDHTMessage implements DHTMessage {
             throw new NullPointerException("MessageID is null");
         }
         
+        if (msgVersion == null) {
+            throw new NullPointerException("Version is null");
+        }
+        
         this.context = context;
         this.opcode = opcode;
         this.messageId = messageId;
+        this.msgVersion = msgVersion;
         
         Vendor vendor = in.readVendor();
+        Version version = in.readVersion();
         KUID nodeId = in.readKUID();
         SocketAddress contactAddress = in.readSocketAddress();
         
@@ -105,8 +118,8 @@ abstract class AbstractDHTMessage implements DHTMessage {
         this.contact = ContactFactory.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, flags);
         
-        int extensions = in.readUnsignedShort();
-        in.skip(extensions);
+        int extensionsLength = in.readUnsignedShort();
+        in.skip(extensionsLength);
     }
     
     public Context getContext() {
@@ -125,6 +138,10 @@ abstract class AbstractDHTMessage implements DHTMessage {
         return messageId;
     }
     
+    public Version getMessageVersion() {
+        return msgVersion;
+    }
+    
     public void write(OutputStream os) throws IOException {
         serialize();
         
@@ -134,7 +151,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         
         messageId.write(out); // 0-15
         out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
-        out.writeVersion(getContact().getVersion()); // 17-18
+        out.writeVersion(getMessageVersion()); //17-18
         
         // Length is in Little-Endian!
         out.write((payload.length      ) & 0xFF); // 19-22
@@ -166,14 +183,19 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
-        out.writeVendor(getContact().getVendor()); // 1-4
-        out.writeKUID(getContact().getNodeID()); // 5-24
-        out.writeSocketAddress(getContact().getContactAddress()); // 25-31
-        out.writeByte(getContact().getInstanceID()); // 32
-        out.writeByte(getContact().getFlags()); // 33
+        out.writeVendor(getContact().getVendor()); // 1-3
+        out.writeVersion(getContact().getVersion()); // 4-5
+        out.writeKUID(getContact().getNodeID()); // 6-25
+        out.writeSocketAddress(getContact().getContactAddress()); // 26-33
+        out.writeByte(getContact().getInstanceID()); // 34
+        out.writeByte(getContact().getFlags()); // 35
         
-        // We don't support any header extensions so write none
-        out.writeShort(0); // 34-35
+        // Write the extended header
+        writeExtendedHeader(out); // 36-
+    }
+    
+    private void writeExtendedHeader(MessageOutputStream out) throws IOException {
+        out.writeShort(0); // 36-37
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;

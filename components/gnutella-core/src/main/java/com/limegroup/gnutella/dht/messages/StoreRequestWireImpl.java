@@ -14,8 +14,8 @@ public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest>
         super(delegate);
     }
 
-    public Collection<? extends DHTValueEntity> getDHTValues() {
-        return delegate.getDHTValues();
+    public Collection<? extends DHTValueEntity> getDHTValueEntities() {
+        return delegate.getDHTValueEntities();
     }
 
     public SecurityToken getSecurityToken() {

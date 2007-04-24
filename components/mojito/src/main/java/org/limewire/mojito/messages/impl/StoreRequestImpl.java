@@ -45,27 +45,27 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
     
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            SecurityToken securityToken,
-            Collection<? extends DHTValueEntity> values) {
-        super(context, OpCode.STORE_REQUEST, contact, messageId);
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
+        super(context, OpCode.STORE_REQUEST, contact, messageId, Version.ZERO);
 
         this.securityToken = securityToken;
         this.values = values;
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_REQUEST, src, messageId, msgVersion, in);
         
         this.securityToken = in.readSecurityToken();
-        this.values = in.readDHTValueEntities(getContact());
+        this.values = in.readDHTValueEntities(getContact(), 
+                context.getDHTValueFactoryManager());
     }
     
     public SecurityToken getSecurityToken() {
         return securityToken;
     }
 
-    public Collection<? extends DHTValueEntity> getDHTValues() {
+    public Collection<? extends DHTValueEntity> getDHTValueEntities() {
         return values;
     }
 

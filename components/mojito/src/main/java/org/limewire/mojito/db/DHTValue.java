@@ -28,6 +28,13 @@ import org.limewire.mojito.routing.Version;
 public interface DHTValue extends Serializable {
 
     /**
+     * An empty value is a value without an actual payload 
+     * and storing an empty value in the DHT will remove an
+     * existing value from the DHT
+     */
+    public static final DHTValue EMPTY_VALUE = new EmptyValue();
+    
+    /**
      * Returns the type of the value
      */
     public DHTValueType getValueType();
@@ -38,28 +45,53 @@ public interface DHTValue extends Serializable {
     public Version getVersion();
 
     /**
-     * 
-     */
-    public void writeValue(OutputStream out) throws IOException;
-
-    /**
      * Returns the actual value (a copy) as bytes
      */
     public byte[] getValue();
 
     /**
-     * Returns the actual value (a copy) as bytes
+     * Writes the value to the OutputStream
      */
-    public byte[] getValue(byte[] dst, int offset, int length);
-
-    /**
-     * Returns the size of the value in bytes
-     */
-    public int size();
+    public void write(OutputStream out) throws IOException;
 
     /**
      * Returns true if this is an empty value
      */
     public boolean isEmpty();
 
+    /**
+     * An implementation of DHTValue that has no payload
+     */
+    static final class EmptyValue implements DHTValue {
+        
+        private static final long serialVersionUID = 4690500560328936523L;
+
+        private static final byte[] EMPTY = new byte[0];
+        
+        private EmptyValue() {
+        }
+        
+        public byte[] getValue() {
+            return EMPTY;
+        }
+        
+        public void write(OutputStream out) throws IOException {
+        }
+
+        public DHTValueType getValueType() {
+            return DHTValueType.BINARY;
+        }
+
+        public Version getVersion() {
+            return Version.ZERO;
+        }
+
+        public boolean isEmpty() {
+            return true;
+        }
+        
+        public String toString() {
+            return "This is an empty DHTValue";
+        }
+    }
 }

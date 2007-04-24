@@ -47,15 +47,15 @@ public class StatsRequestImpl extends AbstractRequestMessage
     
     public StatsRequestImpl(Context context, 
             Contact contact, MessageID messageId, StatisticType request) {
-        super(context, OpCode.STATS_REQUEST, contact, messageId);
+        super(context, OpCode.STATS_REQUEST, contact, messageId, Version.ZERO);
 
         this.request = request;
         this.signature = null;
     }
 
     public StatsRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.STATS_REQUEST, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_REQUEST, src, messageId, msgVersion, in);
         
         this.request = in.readStatisticType();
         this.signature = in.readSignature();

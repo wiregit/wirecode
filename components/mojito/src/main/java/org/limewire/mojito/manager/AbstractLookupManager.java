@@ -22,12 +22,13 @@ package org.limewire.mojito.manager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.concurrent.DHTTask;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.Result;
 
 
@@ -52,20 +53,20 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
     /**
      * Starts a lookup for the given KUID
      */
-    public DHTFuture<V> lookup(KUID lookupId) {
-        return lookup(lookupId, -1);
+    public DHTFuture<V> lookup(KUID lookupId, DHTValueType valueType) {
+        return lookup(lookupId, valueType, -1);
     }
     
     /**
      * Starts a lookup for the given KUID and expects 'count' 
      * number of results
      */
-    private DHTFuture<V> lookup(KUID lookupId, int count) {
+    private DHTFuture<V> lookup(KUID lookupId, DHTValueType valueType, int count) {
         LookupFuture future = null;
         synchronized(futureMap) {
             future = futureMap.get(lookupId);
             if (future == null) {
-                Callable<V> handler = createLookupHandler(lookupId, count);
+                DHTTask<V> handler = createLookupHandler(lookupId, valueType, count);
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
@@ -80,9 +81,10 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
      * A factory method to create LookupResponseHandler(s)
      * 
      * @param lookupId The KUID we're looking for
+     * @param valueType TODO
      * @param count The result set size (i.e. k)
      */
-    protected abstract Callable<V> createLookupHandler(KUID lookupId, int count);
+    protected abstract DHTTask<V> createLookupHandler(KUID lookupId, DHTValueType valueType, int count);
     
     /**
      * A lookup specific implementation of DHTFuture
@@ -91,16 +93,16 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
 
         private final KUID lookupId;
         
-        private final Callable<V> handler;
+        private final DHTTask<V> handler;
         
-        public LookupFuture(KUID lookupId, Callable<V> handler) {
-            super(handler);
+        public LookupFuture(KUID lookupId, DHTTask<V> handler) {
+            super(context, handler);
             this.lookupId = lookupId;
             this.handler = handler;
         }
 
         @Override
-        protected void deregister() {
+        protected void done() {
             futureMap.remove(lookupId);
         }
 

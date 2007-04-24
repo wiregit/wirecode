@@ -41,21 +41,21 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final IntSetting FIND_NODE_PARALLEL_LOOKUPS
         = FACTORY.createRemoteIntSetting("FIND_NODE_PARALLEL_LOOKUPS", 5, 
-                "find_node_parallel_lookups", 1, 15);
+                "Mojito.FindNodeParallelLookups", 1, 15);
     
     /**
      * The number of parallel FIND_VALUE lookups
      */
     public static final IntSetting FIND_VALUE_PARALLEL_LOOKUPS
         = FACTORY.createRemoteIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, 
-                "find_value_parallel_lookups", 1, 30);
+                "Mojito.FindValueParallelLookups", 1, 30);
     
     /**
      * The number of pings to send in parallel
      */
     public static final IntSetting PARALLEL_PINGS
         = FACTORY.createRemoteIntSetting("PARALLEL_PINGS", 15, 
-                "parallel_pings", 1, 30);
+                "Mojito.ParallelPings", 1, 30);
     
     /**
      * The maximum number of ping failures before pinging is
@@ -69,14 +69,14 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
         = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, 
-                "find_node_lookup_timeout", 30L*1000L, 3L*60L*1000L);
+                "Mojito.FindNodeLookupTimeout", 30L*1000L, 3L*60L*1000L);
     
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
         = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, 
-                "find_value_lookup_timeout", 45L*1000L, 4L*60L*1000L);
+                "Mojito.FindValueLookupTimeout", 45L*1000L, 4L*60L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive
@@ -101,9 +101,9 @@ public class KademliaSettings extends MojitoProps {
      * A multiplier that is used to determinate the number
      * of Nodes to where we're sending shutdown messages.
      */
-    public static final IntSetting SHUTDOWN_MULTIPLIER
-        = FACTORY.createRemoteIntSetting("SHUTDOWN_MULTIPLIER", 2, 
-                "shutdown_multiplier", 0, 20);
+    public static final IntSetting SHUTDOWN_MESSAGES_MULTIPLIER
+        = FACTORY.createRemoteIntSetting("SHUTDOWN_MESSAGES_MULTIPLIER", 2, 
+                "Mojito.ShutdownMessagesMultiplier", 0, 20);
     
     /**
      * Whether or not the (k+1)-closest Contact should be

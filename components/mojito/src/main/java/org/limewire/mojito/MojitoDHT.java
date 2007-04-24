@@ -24,14 +24,14 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
-import java.util.Collection;
-import java.util.Set;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueFactoryManager;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -67,12 +67,12 @@ public interface MojitoDHT {
     public Version getVersion();
     
     /**
-     * 
+     * Sets the KeyPair that is used to verify signed messages
      */
     public void setKeyPair(KeyPair keyPair);
     
     /**
-     * 
+     * Returns the KeyPair that is used to verify signed messages
      */
     public KeyPair getKeyPair();
     
@@ -219,13 +219,23 @@ public interface MojitoDHT {
     public Database getDatabase();
     
     /**
+     * Returns the DHTValueFactoryManager
+     */
+    public DHTValueFactoryManager getDHTValueFactoryManager();
+    
+    /**
+     * Returns the StorableModelManager
+     */
+    public StorableModelManager getStorableModelManager();
+    
+    /**
      * Bootstraps the MojitoDHT from the given Contact. Use
      * the ping() methods to find a Contact!
      */
     public DHTFuture<BootstrapResult> bootstrap(Contact node);
     
     /**
-     * 
+     * Bootstraps the MojitoDHT from the given SocketAddress
      */
     public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst);
     
@@ -242,19 +252,14 @@ public interface MojitoDHT {
     public DHTFuture<PingResult> ping(SocketAddress dst);
     
     /**
-     * Returns a Set of all keys in the Database
-     */
-    public Set<KUID> keySet();
-    
-    /**
-     * Returns a Collection of all values in the Database
-     */
-    public Collection<DHTValueEntity> getValues();
-    
-    /**
      * Tries to find the value for the given key
      */
-    public DHTFuture<FindValueResult> get(KUID key);
+    public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType);
+    
+    /**
+     * Tries to get the value of the given EntityKey
+     */
+    public DHTFuture<FindValueResult> get(EntityKey entityKey);
     
     /**
      * Stores the given key, value pair

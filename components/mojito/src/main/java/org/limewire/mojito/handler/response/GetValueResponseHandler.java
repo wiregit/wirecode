@@ -22,10 +22,14 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import org.limewire.mojito.Context;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.exceptions.DHTNoSuchElementException;
@@ -33,36 +37,37 @@ import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.result.GetValueResult;
+import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.DatabaseUtils;
+import org.limewire.security.SecurityToken;
 
 
 /**
  * The GetValueResponseHandler retrieves DHTValues from a remote Node
  */
-public class GetValueResponseHandler extends AbstractResponseHandler<GetValueResult> {
+public class GetValueResponseHandler extends AbstractResponseHandler<FindValueResult> {
         
-    private final Contact node;
-    
-    private final KUID valueId;
-    
-    private final Collection<KUID> nodeIds;
+    private final EntityKey entityKey;
     
     public GetValueResponseHandler(Context context, 
-            Contact node, KUID valueId, Collection<KUID> nodeIds) {
+            EntityKey entityKey) {
         super(context);
         
-        this.node = node;
-        this.valueId = valueId;
-        this.nodeIds = nodeIds;
+        this.entityKey = entityKey;
     }
     
     @Override
     protected void start() throws DHTException {
-        super.start();
+        
+        Contact node = entityKey.getContact();
+        KUID primaryKey = entityKey.getPrimaryKey();
+        KUID secondaryKey = entityKey.getSecondaryKey();
+        DHTValueType valueType = entityKey.getDHTValueType();
         
         FindValueRequest request = context.getMessageHelper()
-            .createFindValueRequest(node.getContactAddress(), valueId, nodeIds);
+            .createFindValueRequest(node.getContactAddress(), 
+                    primaryKey, Collections.singleton(secondaryKey), valueType);
         
         try {
             context.getMessageDispatcher().send(node, request, this);
@@ -74,10 +79,21 @@ public class GetValueResponseHandler extends AbstractResponseHandler<GetValueRes
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         if (message instanceof FindValueResponse) {
-            Collection<? extends DHTValueEntity> values 
-                = ((FindValueResponse)message).getDHTValueEntities();
+            FindValueResponse response = (FindValueResponse)message;
             
-            setReturnValue(new GetValueResult(message.getContact(), values));
+            // Make sure the DHTValueEntities have the expected
+            // value type.
+            Collection<? extends DHTValueEntity> entities 
+                = DatabaseUtils.filter(entityKey.getDHTValueType(), 
+                        response.getDHTValueEntities());
+            
+            Map<? extends Contact, ? extends SecurityToken> path = Collections.emptyMap();
+            Collection<EntityKey> entityKeys = Collections.emptySet();
+            
+            FindValueResult result = new FindValueResult(entityKey.getPrimaryKey(), 
+                    entityKey.getDHTValueType(), path, entities, entityKeys, time, 1);
+            
+            setReturnValue(result);
             
         // Imagine the following case: We do a lookup for a value 
         // on the 59th minute and start retrieving the values on 
@@ -85,8 +101,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<GetValueRes
         // it may no longer exists and the remote Node returns us
         // a Set of the k-closest Nodes instead.
         } else {
-            setException(new DHTNoSuchElementException(message, 
-                    node + " did not have " + valueId + "=" + nodeIds));
+            setException(new DHTNoSuchElementException(message, entityKey.toString()));
         }
     }
     

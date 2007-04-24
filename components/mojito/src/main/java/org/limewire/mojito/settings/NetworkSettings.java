@@ -34,29 +34,31 @@ public final class NetworkSettings extends MojitoProps {
      * The amout of time we're waiting for a response
      * before giving up
      */
-    public static final LongSetting TIMEOUT
-        = FACTORY.createRemoteLongSetting("TIMEOUT", 10000L, "timeout", 10L, 30000L);
+    public static final LongSetting DEFAULT_TIMEOUT
+        = FACTORY.createRemoteLongSetting("DEFAULT_TIMEOUT", 
+                10L*1000L, "Mojito.DefaultTimeout", 10L, 30L*1000L);
     
     /**
      * A multiplication factor for the RTT.
      */
     public static final IntSetting MIN_TIMEOUT_RTT_FACTOR
         = FACTORY.createRemoteIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, 
-                "min_timeout_rtt_factor", 1, 10);
+                "Mojito.MinTimeoutRTTFactor", 1, 10);
     
     /**
      * A multiplication factor for the RTT.
      */
     public static final LongSetting MIN_TIMEOUT_RTT
         = FACTORY.createRemoteLongSetting("MIN_TIMEOUT_RTT", 1000L, 
-                "min_timeout_rtt", 10L, 30L*1000L);
+                "Mojito.MinTimeoutRTT", 10L, 30L*1000L);
     
     /**
      * The maximum number of errors (timeouts) that may occur 
      * before we're giving up to re-send requests
      */
     public static final IntSetting MAX_ERRORS
-        = FACTORY.createRemoteIntSetting("MAX_ERRORS", 2, "max_errors", 1, 10);
+        = FACTORY.createRemoteIntSetting("MAX_ERRORS", 
+                2, "Mojito.MaxErrors", 1, 10);
     
     /**
      * The maximum size of a serialized message
@@ -115,4 +117,38 @@ public final class NetworkSettings extends MojitoProps {
     public static final BooleanSetting FILTER_CLASS_C
         = FACTORY.createRemoteBooleanSetting("FILTER_CLASS_C", 
                 true, "Mojito.FilterClassC");
+    
+    /**
+     * The maximum amount of time the bootstrapping process can take
+     * before it's interrupted
+     */
+    public static final LongSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+                4L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 10L*60L*1000L);
+    
+    /**
+     * The maximum amount of tume the store process can take
+     * before it's interrupted
+     */
+    public static final LongSetting STORE_TIMEOUT
+        = FACTORY.createRemoteLongSetting("STORE_TIMEOUT", 
+                4L*60L*1000L, "Mojito.StoreTimeout", 60L*1000L, 10L*60L*1000L);
+    
+    /**
+     * Setting for whether or not RESPONSE messages should be dropped if 
+     * the SENDER (remote Node) is firewalled.
+     * 
+     * Warning: Changing this Setting may cause weird effects!
+     */
+    public static final BooleanSetting DROP_RESPONE_IF_FIREWALLED
+        = FACTORY.createBooleanSetting("DROP_RESPONE_IF_FIREWALLED", true);
+    
+    /**
+     * Setting for whether or not REQUEST messages should be dropped is
+     * the RECEIVER (local Node) is firewalled.
+     * 
+     * Warning: Changing this Setting may cause weird effects!
+     */
+    public static final BooleanSetting DROP_REQUEST_IF_FIREWALLED
+        = FACTORY.createBooleanSetting("DROP_REQUEST_IF_FIREWALLED", true);
 }

@@ -293,7 +293,7 @@ public class DHTNodeFetcher {
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
             boolean cancel = (pingingSingleHost.get() 
-                                || delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue()
+                                || delay > DHTSettings.MAX_DHT_NODE_FETCHER_TIME.getValue()
                                 || !RouterService.isConnected()
                                 || !isRunning());
             if(cancel){

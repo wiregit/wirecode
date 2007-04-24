@@ -2,6 +2,8 @@ package org.limewire.mojito;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.BaseTestCase;
@@ -23,6 +25,20 @@ public abstract class MojitoTestCase extends BaseTestCase {
         super.preSetUp();
         
         MojitoProps.instance().revertToDefault();
+        
+        // DHT Settings
+        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
+        
+        NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
+        NetworkSettings.BOOTSTRAP_TIMEOUT.setValue(500);
+        NetworkSettings.STORE_TIMEOUT.setValue(500);
+        
+        NetworkSettings.FILTER_CLASS_C.setValue(false);
+        NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
+        
+        // Nothing should take longer than 1.5 seconds. If we start seeing
+        // LockTimeoutExceptions on the loopback then check this Setting!
+        ContextSettings.WAIT_ON_LOCK.setValue(1500);
         
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {

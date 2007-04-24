@@ -2,6 +2,7 @@ package org.limewire.mojito;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -10,7 +11,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.MojitoUtils;
 
 public class ContextTest extends MojitoTestCase {
     
@@ -90,8 +90,9 @@ public class ContextTest extends MojitoTestCase {
     
     public void testShutdown() throws Exception {
         setLocalIsPrivate(false);
+        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
-        int m = KademliaSettings.SHUTDOWN_MULTIPLIER.getValue();
+        int m = KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         int expected = m*k;
         
@@ -100,15 +101,15 @@ public class ContextTest extends MojitoTestCase {
         try {
             for (int i = 0; i < (2*expected); i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", 2000 + i));
+                dht.bind(new InetSocketAddress(2000 + i));
                 dht.start();
                 
                 if (i > 0) {
-                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
+                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
                 }
                 dhts.add(dht);
             }
-            MojitoUtils.bootstrap(dhts.get(0), new InetSocketAddress("localhost", 2000+1)).get();
+            dhts.get(0).bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             // Shutdown a random MojitoDHT instance
@@ -130,7 +131,7 @@ public class ContextTest extends MojitoTestCase {
                 if (i != index) {
                     Context dht = (Context)dhts.get(i);
                     RouteTable routeTable = dht.getRouteTable();
-                    List<Contact> nodes = routeTable.getContacts();
+                    Collection<Contact> nodes = routeTable.getContacts();
                     boolean flag = false;
                     for (Contact node : nodes) {
                         if (node.isShutdown()) {

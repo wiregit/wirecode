@@ -223,7 +223,7 @@ public class RouteTableVisualizerDemo {
             SocketAddress src = new InetSocketAddress("localhost", 3000+i);
             KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
             Vendor vendor = Vendor.UNKNOWN;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             SocketAddress con = new InetSocketAddress("localhost", 30000+i);
             int instanceId = 0;
             int flags = Contact.DEFAULT_FLAG;

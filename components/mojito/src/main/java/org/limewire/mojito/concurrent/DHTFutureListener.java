@@ -36,15 +36,15 @@ public interface DHTFutureListener<T> {
     /**
      * Called if a task finished with an ExecutionException
      */
-    public void handleFutureFailure(ExecutionException e);
+    public void handleExecutionException(ExecutionException e);
     
     /**
      * Called if a task was cancelled
      */
-    public void handleFutureCancelled(CancellationException e);
+    public void handleCancellationException(CancellationException e);
     
     /**
      * Called if a task was interrupted
      */
-    public void handleFutureInterrupted(InterruptedException e);
+    public void handleInterruptedException(InterruptedException e);
 }

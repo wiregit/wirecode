@@ -21,6 +21,7 @@ package org.limewire.mojito.handler;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,9 +42,9 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
-import org.limewire.service.ErrorService;
 
 
 /**
@@ -144,23 +145,14 @@ public class DefaultMessageHandler {
         
         KUID nodeId = node.getNodeID();
         if (context.isLocalNodeID(nodeId)) {
-            if (message instanceof PingResponse) {
-            	// This is expected if there's a Node ID collision
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Looks like our NodeID collides with " + node);
-            	}
-            } else {
-                // This is unexpected. The MessageDispatcher should have
-                // caught it!
-                
-                String msg = "Received a " + message + " message from " + node 
-                    + ". This message should have never gotten so far!";
-                
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(msg);
-            	}
-                
-                ErrorService.error(new IllegalArgumentException(msg));
+            
+            // This is expected if there's a Node ID collision
+            assert (message instanceof PingResponse) 
+                : "Expected a PingResponse but got a " + message.getClass()
+                    + " from " + message.getContact();
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Looks like our NodeID collides with " + node);
             }
             
             return;
@@ -181,7 +173,7 @@ public class DefaultMessageHandler {
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
                     //of the k closest to the new joining node.
-                    List<Contact> nodes = routeTable.select(nodeId, 2*k, SelectMode.ALL);
+                    Collection<Contact> nodes = routeTable.select(nodeId, 2*k, SelectMode.ALL);
                     
                     // Are we one of the K nearest Nodes to the contact?
                     if (containsNodeID(nodes, context.getLocalNodeID())) {
@@ -211,23 +203,21 @@ public class DefaultMessageHandler {
         
         Database database = context.getDatabase();
         synchronized(database) {
-            for(KUID valueId : database.keySet()) {
+            for(KUID primaryKey : database.keySet()) {
                 
-                Operation op = getOperation(node, existing, valueId);
+                Operation op = getOperation(node, existing, primaryKey);
                 
                 if (op.equals(Operation.FORWARD)) {
-                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     valuesToForward.addAll(bag.values());
                     databaseStats.STORE_FORWARD_COUNT.incrementStat();
                     
                 } else if (op.equals(Operation.DELETE)
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
-                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     for (DHTValueEntity entity : bag.values()) {
-                        if (!entity.isLocalValue()) {
-                            //System.out.println("REMOVING: " + entity + "\n");
-                            database.remove(entity.getKey(), entity.getSecondaryKey());
-                        }
+                        //System.out.println("REMOVING: " + entity + "\n");
+                        database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     }
                     databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
                 }
@@ -255,9 +245,9 @@ public class DefaultMessageHandler {
     /**
      * Returns whether or not the local Node is in the given List
      */
-    private boolean containsNodeID(List<Contact> nodes, KUID id) {
-        for (int i = nodes.size()-1; i >= 0; i--) {
-            if (id.equals(nodes.get(i).getNodeID())) {
+    private boolean containsNodeID(Collection<Contact> nodes, KUID id) {
+        for (Contact node : nodes) {
+            if (id.equals(node.getNodeID())) {
                 return true;
             }
         }
@@ -276,7 +266,8 @@ public class DefaultMessageHandler {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
-        List<Contact> nodes = routeTable.select(valueId, k, SelectMode.ALIVE_WITH_LOCAL);
+        List<Contact> nodes = CollectionUtils.toList(
+                routeTable.select(valueId, k, SelectMode.ALIVE_WITH_LOCAL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         

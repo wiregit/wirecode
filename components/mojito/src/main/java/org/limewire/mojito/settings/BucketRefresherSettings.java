@@ -38,10 +38,10 @@ public class BucketRefresherSettings extends MojitoProps {
         = FACTORY.createBooleanSetting("UNIFORM_BUCKET_REFRESH_DISTRIBUTION", false);
     
     /**
-     * The delay of the RandomBucketRefresher
+     * The delay of the BucketRefresher
      */
-    public static final LongSetting RANDOM_REFRESHER_DELAY
-        = FACTORY.createRemoteLongSetting("RANDOM_REFRESHER_DELAY", 1L*60L*1000L, 
-                "random_refresher_delay", 1L*60L*1000L, 2L*60L*60L*1000L);
+    public static final LongSetting BUCKET_REFRESHER_DELAY
+        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_DELAY", 1L*60L*1000L, 
+                "Mojito.BucketRefresherDelay", 1L*60L*1000L, 2L*60L*60L*1000L);
 
 }

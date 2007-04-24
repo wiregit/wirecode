@@ -19,13 +19,29 @@
 
 package org.limewire.mojito.settings;
 
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 
+/**
+ * Settings for the bootstrapping process
+ */
 public class BootstrapSettings extends MojitoProps {
     
     private BootstrapSettings() {}
     
+    /**
+     * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
+     * is good enough to say it's bootstrapped
+     */
     public static final FloatSetting IS_BOOTSTRAPPED_RATIO
         = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
-                0.5f, "is_bootstrapped_ratio", 0f, 1.0f);
+                0.5f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
+    
+    /**
+     * Enabled or disables the second part of the bootstrapping process that
+     * does a full Bucket refresh to fill up the RouteTable.
+     */
+    public static final BooleanSetting REFRESH_ALL_BUCKETS
+        = FACTORY.createRemoteBooleanSetting("REFRESH_ALL_BUCKETS", 
+                true, "Mojito.RefreshAllBuckets");
 }

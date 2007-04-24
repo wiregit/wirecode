@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindValueRequest;
@@ -39,32 +40,41 @@ import org.limewire.mojito.routing.Version;
 public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
     
-    private final Collection<KUID> keys;
+    private final Collection<KUID> secondaryKeys;
+    
+    private final DHTValueType valueType;
     
     public FindValueRequestImpl(Context context, 
             Contact contact, MessageID messageId, 
-            KUID lookupId, Collection<KUID> keys) {
+            KUID lookupId, Collection<KUID> secondaryKeys, DHTValueType valueType) {
         super(context, OpCode.FIND_VALUE_REQUEST, 
-                contact, messageId, lookupId);
+                contact, messageId, Version.ZERO, lookupId);
         
-        this.keys = keys;
+        this.secondaryKeys = secondaryKeys;
+        this.valueType = valueType;
     }
     
     public FindValueRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, msgVersion, in);
         
-        this.keys = in.readKUIDs();
+        this.secondaryKeys = in.readKUIDs();
+        this.valueType = in.readValueType();
     }
     
     public Collection<KUID> getSecondaryKeys() {
-        return keys;
+        return secondaryKeys;
+    }
+    
+    public DHTValueType getDHTValueType() {
+        return valueType;
     }
     
     @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         super.writeBody(out);
-        out.writeKUIDs(keys);
+        out.writeKUIDs(getSecondaryKeys());
+        out.writeDHTValueType(getDHTValueType());
     }
 
     public String toString() {

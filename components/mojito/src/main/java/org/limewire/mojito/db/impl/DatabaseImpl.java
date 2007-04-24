@@ -178,7 +178,7 @@ public class DatabaseImpl implements Database {
         }
         
         if (entity.getValue().isEmpty()) {
-            return remove(entity.getKey(), entity.getSecondaryKey()) != null;
+            return remove(entity.getPrimaryKey(), entity.getSecondaryKey()) != null;
         } else {
             return add(entity);
         }
@@ -189,7 +189,7 @@ public class DatabaseImpl implements Database {
      * true if the operation succeeded.
      */
     public synchronized boolean add(DHTValueEntity entity) {
-        KUID valueId = entity.getKey();
+        KUID valueId = entity.getPrimaryKey();
         DHTValueEntityBag bag = database.get(valueId);
         
         if (bag == null) {
@@ -235,13 +235,13 @@ public class DatabaseImpl implements Database {
                         if (numKeys <= 1) {
                             hostValuesMap.remove(iaddr);
                             
-                        } else if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                        } else if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
                             // The host went over the limit, thus either he is trying
                             // to legitimately remove a value, in which case we give him a chance
                             // or this method is called from the ban() method, in which case the 
                             // host should be filtered out by the HostFilter anyways
                             hostValuesMap.put(iaddr, 
-                                    DatabaseSettings.MAX_KEY_PER_IP.getValue()-1);
+                                    DatabaseSettings.MAX_KEYS_PER_IP.getValue()-1);
                         } else {
                             
                             numKeys--;
@@ -262,10 +262,7 @@ public class DatabaseImpl implements Database {
     public synchronized float getRequestLoad(KUID valueId, boolean incrementLoad) {
         DHTValueEntityBag bag = database.get(valueId);
         if (bag != null) {
-            if (incrementLoad) {
-                bag.incrementRequestLoad();
-            }
-            return bag.getRequestLoad();
+            return bag.getRequestLoad(incrementLoad);
         }
         return 0f;
     }
@@ -276,7 +273,7 @@ public class DatabaseImpl implements Database {
      * if possible
      */
     private boolean allowStore(DHTValueEntity entity) {
-        DHTValueEntityBag bag = database.get(entity.getKey());
+        DHTValueEntityBag bag = database.get(entity.getPrimaryKey());
         
         // TODO: exclude signed value also
         if (bag == null && !entity.isLocalValue()) {
@@ -307,9 +304,9 @@ public class DatabaseImpl implements Database {
                 numKeys++;
                 hostValuesMap.put(iaddr, numKeys);
                 
-                if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
                     
-                    if(numKeys > DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                    if(numKeys > DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue()) {
                         // Banning will also remove the host from the Map
                         banContact(creator);
                     }
@@ -335,7 +332,7 @@ public class DatabaseImpl implements Database {
         // Remove all values by this contact
         for(DHTValueEntity entity: values()) {
             if(entity.getCreator().equals(contact)) {
-                remove(entity.getKey(), entity.getSecondaryKey());
+                remove(entity.getPrimaryKey(), entity.getSecondaryKey());
             }
         }
         

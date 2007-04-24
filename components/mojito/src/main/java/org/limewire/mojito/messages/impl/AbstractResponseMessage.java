@@ -37,12 +37,12 @@ abstract class AbstractResponseMessage extends AbstractDHTMessage
         implements ResponseMessage {
 
     public AbstractResponseMessage(Context context, 
-            OpCode opcode, Contact contact, MessageID messageId) {
-        super(context, opcode, contact, messageId);
+            OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
+        super(context, opcode, contact, messageId, msgVersion);
     }
     
     public AbstractResponseMessage(Context context, OpCode opcode, 
-            SocketAddress src, MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, opcode, src, messageId, version, in);
+            SocketAddress src, MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, opcode, src, messageId, msgVersion, in);
     }
 }

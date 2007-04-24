@@ -59,4 +59,7 @@ class SocketInterestReadAdapter implements InterestScatteringByteChannel {
 		return channel.read(arg0);
 	}
 
+    public String toString() {
+        return "SocketInterestReadAdapter: " + channel;
+    }
 }

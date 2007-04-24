@@ -152,8 +152,20 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
         return new PushAltLoc(pe,urn);
     }
 	
-
-
+    /**
+     * Creates a new direct AlternateLocation
+     */
+	public static AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
+        return new DirectAltLoc(ipp, urn);
+    }
+    
+    /**
+     * Creates a new push AlternateLocation
+     */
+    public static AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) throws IOException {
+        return new PushAltLoc(pe, urn);
+    }
+    
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> for the data stored in
 	 * a <tt>RemoteFileDesc</tt>.

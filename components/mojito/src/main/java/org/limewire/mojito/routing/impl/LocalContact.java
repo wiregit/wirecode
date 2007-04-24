@@ -186,12 +186,12 @@ public class LocalContact implements Contact {
     /**
      * Sets the external Address of the local Node.
      */
-    public synchronized void setExternalAddress(SocketAddress externalSocketAddress) {
+    public synchronized boolean setExternalAddress(SocketAddress externalSocketAddress) {
         if (externalSocketAddress == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Argument is null");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SocketAddress is null");
             }
-            return;
+            return false;
         }
         
         // --- DOES NOT CHANGE THE PORT! ---
@@ -206,7 +206,7 @@ public class LocalContact implements Contact {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Reported external address is equal to current external address: " + externalAddress);
             }
-            return;
+            return false;
         }
         
         // There's no reason to set the external address to a
@@ -217,17 +217,19 @@ public class LocalContact implements Contact {
             if (LOG.isInfoEnabled()) {
                 LOG.info(externalAddress + " is a PRIVATE address");
             }
-            return;
+            return false;
         }
         
         if (!NetworkUtils.isSameAddressSpace(
                         externalAddress, currentAddress)) {
             
-            if (LOG.isErrorEnabled()) {
-                LOG.error("The current external address " + currentAddress 
+            // The remote Node tries to set our external address
+            // to an address that's from a different address space?
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("The current external address " + currentAddress 
                         + " is from a different IP address space than " + externalAddress);
             }
-            return;
+            return false;
         }
         
         SocketAddress addr = new InetSocketAddress(externalAddress, currentPort);
@@ -246,6 +248,7 @@ public class LocalContact implements Contact {
         }
         
         tmpExternalAddress = addr;
+        return true;
     }
     
     /**

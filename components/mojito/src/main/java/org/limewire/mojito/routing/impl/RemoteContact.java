@@ -132,8 +132,8 @@ public class RemoteContact implements Contact {
             int port = ((InetSocketAddress)contactAddress).getPort();
             if (port == 0) {
                 if (!isFirewalled()) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(ContactUtils.toString(nodeId, sourceAddress) 
                                 + " contact address is set to Port 0 but it is not marked as firewalled");
                     }
                 }
@@ -235,14 +235,15 @@ public class RemoteContact implements Contact {
     
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
-        long timeout = NetworkSettings.TIMEOUT.getValue();
-        if(rtt <= 0L || !isAlive()) {
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        if (rtt <= 0L || !isAlive()) {
             return timeout;
         } else {
-            //should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.TIMEOUT
-            return Math.max(Math.min(timeout, 
-                ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * rtt) + failures * rtt)),
-                NetworkSettings.MIN_TIMEOUT_RTT.getValue());
+            // Should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.DEFAULT_TIMEOUT
+            long rttFactor = NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue();
+            long adaptiveTimeout = ((rttFactor * rtt) + failures * rtt);
+            return Math.max(Math.min(timeout, adaptiveTimeout), 
+                    NetworkSettings.MIN_TIMEOUT_RTT.getValue());
         }
     }
     

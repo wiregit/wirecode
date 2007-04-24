@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.messages.Message;
 
@@ -54,6 +55,10 @@ abstract class AbstractMessageWire<T extends DHTMessage>
         return delegate.getOpCode();
     }
     
+    public Version getMessageVersion() {
+        return delegate.getMessageVersion();
+    }
+
     @Override
     public void write(OutputStream out) throws IOException {
         delegate.write(out);

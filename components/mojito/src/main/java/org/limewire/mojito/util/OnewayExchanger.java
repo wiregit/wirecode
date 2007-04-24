@@ -45,7 +45,7 @@ import java.util.concurrent.TimeoutException;
  * be changed anymore.
  * </ol>
  */
-public class OnewayExchanger<V, E extends Exception> {
+public class OnewayExchanger<V, E extends Throwable> {
     
     /** Flag for whether or not we're done */
     private boolean done = false;

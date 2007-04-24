@@ -108,8 +108,8 @@ public abstract class FileManager {
     private static long QRP_DELAY = 60 * 60 * 1000;
      
     /** List of event listeners for FileManagerEvents. */
-    private volatile CopyOnWriteArrayList<FileEventListener> eventListeners =
-        new CopyOnWriteArrayList<FileEventListener>();
+    private volatile CopyOnWriteArrayList<FileEventListener> eventListeners 
+        = new CopyOnWriteArrayList<FileEventListener>();
     
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
@@ -691,7 +691,9 @@ public abstract class FileManager {
         save();
         SavedFileManager.instance().run();
         UpdateHandler.instance().tryToDownloadUpdates();
+        
         RouterService.getCallback().fileManagerLoaded();
+        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
     /**
@@ -746,7 +748,8 @@ public abstract class FileManager {
 
         //clear this, list of directories retrieved
         RouterService.getCallback().fileManagerLoading();
-
+        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
+        
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(PROGRAM_SHARE, null, revision);
         updateSharedDirectories(PREFERENCE_SHARE, null, revision);
@@ -1097,7 +1100,7 @@ public abstract class FileManager {
             callback = EMPTY_CALLBACK;
 
         if(revision != _revision) {
-            callback.handleFileEvent(new FileManagerEvent(this, Type.FAILED, file));
+            callback.handleFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, file));
             return;
         }
         
@@ -1105,25 +1108,25 @@ public abstract class FileManager {
         try {
             file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
-            callback.handleFileEvent(new FileManagerEvent(this, Type.FAILED, file));
+            callback.handleFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, file));
             return;
 	    }
 	    
         synchronized(this) {
 		    if (revision != _revision) {
-		    	callback.handleFileEvent(new FileManagerEvent(this, Type.FAILED, file));
+		    	callback.handleFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, file));
                 return;
             }
 			// if file is not shareable, also remove it from special files
 			// to share since in that case it's not physically shareable then
 		    if (!isFileShareable(file)) {
 		    	_individualSharedFiles.remove(file);
-		    	callback.handleFileEvent(new FileManagerEvent(this, Type.FAILED, file));
+		    	callback.handleFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, file));
                 return;
 		    }
         
             if(isFileShared(file)) {
-                callback.handleFileEvent(new FileManagerEvent(this, Type.ALREADY_SHARED, file));
+                callback.handleFileEvent(new FileManagerEvent(this, Type.ALREADY_SHARED_FILE, file));
                 return;
             }
             
@@ -1150,7 +1153,7 @@ public abstract class FileManager {
 		        synchronized(FileManager.this) {
     		        if(revision != _revision) {
     		            LOG.warn("Revisions changed, dropping share.");
-                        callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.FAILED, file));
+                        callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ADD_FAILED_FILE, file));
                         return;
                     }
                 
@@ -1166,13 +1169,13 @@ public abstract class FileManager {
                 if(fd != null) {
                     loadFile(fd, file, metadata, urns);
                     
-                    FileManagerEvent evt = new FileManagerEvent(FileManager.this, Type.ADD, fd);
+                    FileManagerEvent evt = new FileManagerEvent(FileManager.this, Type.ADD_FILE, fd);
                     if(notify) // sometimes notify the GUI
                         dispatchFileEvent(evt);
                     callback.handleFileEvent(evt); // always notify the individual callback.
                 } else {
                     // If URNs was empty, or loading failed, notify...
-                    callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.FAILED, file));
+                    callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ADD_FAILED_FILE, file));
                 }
                 
                 if(_numPendingFiles == 0) {
@@ -1363,7 +1366,7 @@ public abstract class FileManager {
 
 			// Notify the GUI...
 	        if (notify) {
-	            FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE, fd);
+	            FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE_FILE, fd);
 	                                            
 	            dispatchFileEvent(evt);
 	        }
@@ -1407,7 +1410,7 @@ public abstract class FileManager {
   
         // Notify the GUI...
         if (notify) {
-            FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE, fd);
+            FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE_FILE, fd);
                                             
             dispatchFileEvent(evt);
         }
@@ -1475,7 +1478,7 @@ public abstract class FileManager {
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         _needRebuild = true;
-        dispatchFileEvent(new FileManagerEvent(this, Type.ADD, ifd));
+        dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
 
     /**
@@ -1567,7 +1570,7 @@ public abstract class FileManager {
     public synchronized void renameFileIfShared(File oldName, final File newName, final FileEventListener callback) {
         FileDesc toRemove = getFileDescForFile(oldName);
         if (toRemove == null) {
-            FileManagerEvent evt = new FileManagerEvent(this, Type.FAILED, oldName);
+            FileManagerEvent evt = new FileManagerEvent(this, Type.ADD_FAILED_FILE, oldName);
             dispatchFileEvent(evt);
             if(callback != null)
                 callback.handleFileEvent(evt);
@@ -1595,9 +1598,9 @@ public abstract class FileManager {
                 FileManagerEvent newEvt = null;
                 if(evt.isAddEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
-                    newEvt = new FileManagerEvent(FileManager.this, Type.RENAME, removed, fd);
+                    newEvt = new FileManagerEvent(FileManager.this, Type.RENAME_FILE, removed, fd);
                 } else {
-                    newEvt = new FileManagerEvent(FileManager.this, Type.REMOVE, removed);
+                    newEvt = new FileManagerEvent(FileManager.this, Type.REMOVE_FILE, removed);
                 }
                 dispatchFileEvent(newEvt);
                 if(callback != null)

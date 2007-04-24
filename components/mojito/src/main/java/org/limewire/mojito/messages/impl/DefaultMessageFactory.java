@@ -25,7 +25,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.io.ByteBufferInputStream;
 import org.limewire.io.ByteBufferOutputStream;
@@ -33,6 +32,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
@@ -50,7 +50,7 @@ import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.SecurityToken;
@@ -82,7 +82,7 @@ public class DefaultMessageFactory implements MessageFactory {
                 throw new MessageFormatException("Unknown function ID: " + func);
             }
             
-            Version version = in.readVersion();
+            Version msgVersion = in.readVersion();
             //byte[] length = in.readBytes(4); // Little-Endian!
             in.skip(4);
             
@@ -91,25 +91,25 @@ public class DefaultMessageFactory implements MessageFactory {
             
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, messageId, version, in);
+                    return new PingRequestImpl(context, src, messageId, msgVersion, in);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, messageId, version, in);
+                    return new PingResponseImpl(context, src, messageId, msgVersion, in);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, messageId, version, in);
+                    return new FindNodeRequestImpl(context, src, messageId, msgVersion, in);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, messageId, version, in);
+                    return new FindNodeResponseImpl(context, src, messageId, msgVersion, in);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, messageId, version, in);
+                    return new FindValueRequestImpl(context, src, messageId, msgVersion, in);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, messageId, version, in);
+                    return new FindValueResponseImpl(context, src, messageId, msgVersion, in);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, messageId, version, in);
+                    return new StoreRequestImpl(context, src, messageId, msgVersion, in);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, messageId, version, in);
+                    return new StoreResponseImpl(context, src, messageId, msgVersion, in);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, messageId, version, in);
+                    return new StatsRequestImpl(context, src, messageId, msgVersion, in);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, messageId, version, in);
+                    return new StatsResponseImpl(context, src, messageId, msgVersion, in);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }
@@ -156,13 +156,14 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact contact, SocketAddress dst, 
-            KUID lookupId, Collection<KUID> keys) {
-        return new FindValueRequestImpl(context, contact, createMessageID(dst), lookupId, keys);
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
+        return new FindValueRequestImpl(context, contact, createMessageID(dst), lookupId, keys, valueType);
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, Contact dst, 
-            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
-        return new FindValueResponseImpl(context, contact, messageId, requestLoad, values, keys);
+            MessageID messageId, float requestLoad, 
+            Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
+        return new FindValueResponseImpl(context, contact, messageId, requestLoad, entities, secondaryKeys);
     }
 
     public PingRequest createPingRequest(Contact contact, SocketAddress dst) {
@@ -189,7 +190,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreResponse createStoreResponse(Contact contact, Contact dst, 
-            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
+            MessageID messageId, Collection<StoreStatusCode> status) {
         return new StoreResponseImpl(context, contact, messageId, status);
     }
 }

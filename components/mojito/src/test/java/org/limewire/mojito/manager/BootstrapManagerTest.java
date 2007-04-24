@@ -48,7 +48,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
     }
     
     private static void setSettings() {
-        NetworkSettings.TIMEOUT.setValue(200);
+        NetworkSettings.DEFAULT_TIMEOUT.setValue(200);
         NetworkSettings.MIN_TIMEOUT_RTT.setValue(200);
     }
     
@@ -124,14 +124,14 @@ public class BootstrapManagerTest extends MojitoTestCase {
         RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
         for(int i= 1; i < 5; i++) {
-            node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 
                     0, Contact.DEFAULT_FLAG);
             rt.add(node);
         }
         //add good node
-        node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN,
+        node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.ZERO,
                 BOOTSTRAP_DHT.getLocalNodeID(),
                 BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
@@ -147,21 +147,26 @@ public class BootstrapManagerTest extends MojitoTestCase {
         //fill RT with bad nodes
         RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
-        for(int i= 1; i < 100; i++) {
-            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+        for(int i = 0; i < 100; i++) {
+            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i));
             rt.add(node);
         }
-        node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+        node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(),
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);
-
+        
+        assertEquals(102, rt.size());
+        
         PingResult pong = TEST_DHT.ping(BOOTSTRAP_DHT.getContactAddress()).get();
         BootstrapResult result = TEST_DHT.bootstrap(pong.getContact()).get();
         assertEquals(result.getResultType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
-        //see if RT was purged
+        
+        // See if RT was purged
         assertNotContains(rt.getActiveContacts(), node);
+        
+        
     }
 }

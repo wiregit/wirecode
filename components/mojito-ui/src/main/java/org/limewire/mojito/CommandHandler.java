@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.impl.DHTValueImpl;
@@ -65,6 +66,7 @@ public class CommandHandler {
             "remove (key|kuid) (\\w|\\d)+",
             "get (key|kuid) (\\w|\\d)+",
             "database",
+            "publisher",
             "routetable",
             "store .+",
             "load .+",
@@ -131,14 +133,21 @@ public class CommandHandler {
     
     public static void database(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
-        Database database = ((Context)dht).getDatabase();
+        Database database = dht.getDatabase();
         buffer.append(database.toString());
+        out.println(buffer);
+    }
+    
+    public static void publisher(MojitoDHT dht, String[] args, PrintWriter out) {
+        StringBuilder buffer = new StringBuilder("\n");
+        StorableModelManager modelManager = dht.getStorableModelManager();
+        buffer.append(modelManager.toString());
         out.println(buffer);
     }
     
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
-        RouteTable routingTable = ((Context)dht).getRouteTable();
+        RouteTable routingTable = dht.getRouteTable();
         buffer.append(routingTable.toString());
         out.println(buffer);
     }
@@ -243,7 +252,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value)).get();
+            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
@@ -325,7 +334,7 @@ public class CommandHandler {
                 }
             });*/
             
-            FindValueResult evt = dht.get(key).get();
+            FindValueResult evt = dht.get(key, DHTValueType.ANY).get();
             out.println(evt.toString());
             
         } catch (Exception e) {

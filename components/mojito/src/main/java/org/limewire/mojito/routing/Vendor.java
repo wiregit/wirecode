@@ -32,7 +32,14 @@ public class Vendor implements Serializable, Comparable<Vendor> {
     
     private static final long serialVersionUID = 1607453128714814318L;
     
+    /** 
+     * An array of cached Vendors. Make it bigger if necessary.
+     */
+    private static final Vendor[] VENDORS = new Vendor[10];
+    
     public static final Vendor UNKNOWN = new Vendor(0);
+    
+    public static final int LENGTH = 4;
     
     private final int vendorId;
     
@@ -68,11 +75,6 @@ public class Vendor implements Serializable, Comparable<Vendor> {
     public String toString() {
         return ArrayUtils.toString(vendorId);
     }
-    
-    /** 
-     * An array of cached Vendors. Make it bigger if necessary.
-     */
-    private static final Vendor[] VENDORS = new Vendor[10];
     
     /**
      * Returns a Vendor object for the given vendor ID

@@ -39,7 +39,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
         final long waitForFutureDone = 250; // ms
         
         NetworkSettings.MAX_ERRORS.setValue(0);
-        NetworkSettings.TIMEOUT.setValue(250);
+        NetworkSettings.DEFAULT_TIMEOUT.setValue(250);
         
         MojitoDHT dht1 = null;
         MojitoDHT dht2 = null;

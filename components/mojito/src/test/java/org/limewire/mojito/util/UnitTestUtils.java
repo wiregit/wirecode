@@ -3,11 +3,11 @@ package org.limewire.mojito.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.manager.BootstrapManager;
 
 
@@ -30,13 +30,21 @@ public class UnitTestUtils {
         synchronized (bootstrapManager) {
             if (bootstrapping) {
                 Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
-                Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
+                Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, DHTTask.class);
                 con.setAccessible(true);
                 
-                Object future = con.newInstance(bootstrapManager, new Callable() { 
-                    public Object call() { 
+                Object future = con.newInstance(bootstrapManager, new DHTTask() {
+                    public void cancel() {
                         throw new UnsupportedOperationException();
                     }
+
+                    public long getLockTimeout() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    public void start(DHTTask.Callback callback) {
+                        throw new UnsupportedOperationException();
+                    } 
                 });
                 
                 futureField.set(bootstrapManager, future);

@@ -20,93 +20,194 @@
 package org.limewire.mojito.db;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
 
+import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * A DHTValueEntity
+ * An Entity is a row in a Database. 
  */
-public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable {
+public class DHTValueEntity implements Serializable {
+    
+    private static final long serialVersionUID = 2007158043378144871L;
+
+    /**
+     * The creator of the value
+     */
+    private final Contact creator;
+    
+    /**
+     * The sender of the value (store forward)
+     */
+    private final Contact sender;
+    
+    /**
+     * The (primary) key of the value
+     */
+    private final KUID primaryKey;
+    
+    /**
+     * The secondary key of the value
+     */
+    private final KUID secondaryKey;
+    
+    /**
+     * The actual value
+     */
+    private final DHTValue value;
+    
+    /**
+     * The time when this value was created (local time)
+     */
+    private final long creationTime = System.currentTimeMillis();
+    
+    /**
+     * Flag for whether or not this is a local entity
+     * (i.e. Sender and Creator are both the local Node)
+     */
+    private final boolean local;
+    
+    /**
+     * The hash code of this entity
+     */
+    private final int hashCode;
+    
+    /**
+     * Creates and returns DHTValueEntity from a Storable
+     */
+    public static DHTValueEntity createFromStorable(Context context, Storable storable) {
+        return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
+                storable.getPrimaryKey(), storable.getValue(), true);
+    }
+
+    /**
+     * Creates and returns DHTValueEntity for the given primary key and value
+     */
+    public static DHTValueEntity createFromValue(Context context, KUID primaryKey, DHTValue value) {
+        return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
+                primaryKey, value, true);
+    }
+    
+    /**
+     * Creates and returns DHTValueEntity from arguments that were created 
+     */
+    public static DHTValueEntity createFromRemote(Contact creator, Contact sender, 
+            KUID primaryKey, DHTValue value) {
+        return new DHTValueEntity(creator, sender, primaryKey, value, false);
+    }
+    
+    /**
+     * Constructor to create DHTValueEntities. It's package private
+     * for testing purposes. Use the factory methods!
+     */
+    DHTValueEntity(Contact creator, Contact sender, 
+            KUID primaryKey, DHTValue value, boolean local) {
+        this.creator = creator;
+        this.sender = sender;
+        this.primaryKey = primaryKey;
+        this.secondaryKey = creator.getNodeID();
+        this.value = value;
+        this.local = local;
+        
+        this.hashCode = 17*primaryKey.hashCode() + secondaryKey.hashCode();
+    }
     
     /**
      * Returns the creator of this value
      */
-    public Contact getCreator();
+    public Contact getCreator() {
+        return creator;
+    }
     
     /**
      * Returns the sender of this value
      */
-    public Contact getSender();
+    public Contact getSender() {
+        return sender;
+    }
     
     /**
      * Returns the primary key of this value
      */
-    public KUID getKey();
+    public KUID getPrimaryKey() {
+        return primaryKey;
+    }
     
     /**
      * Returns the secondary key of this value
      */
-    public KUID getSecondaryKey();
+    public KUID getSecondaryKey() {
+        return secondaryKey;
+    }
     
     /**
      * Returns the value
      */
-    public DHTValue getValue();
-    
-    /**
-     * 
-     */
-    public DHTValue setValue(DHTValue value);
-
+    public DHTValue getValue() {
+        return value;
+    }
+   
     /**
      * Returns the creation time
      */
-    public long getCreationTime();
+    public long getCreationTime() {
+        return creationTime;
+    }
+    
+    /*public void handleStoreResult(StoreResult result) {
+        // DO NOTHING
+    }*/
     
     /**
-     * Returns the time when this value was published
+     * Returns true if this entity was sent by
+     * the creator of the value. In other words
+     * if the creator and sender are equal.
      */
-    public long getPublishTime();
+    public boolean isDirect() {
+        return creator.equals(sender);
+    }
     
-    /**
-     * Returns the number of locations where this value is stored
-     */
-    public Collection<? extends Contact> getLocations();
+    public boolean isLocalValue() {
+        return local;
+    }
     
-    /**
-     * Sets the number of locations where this value is stored
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
      */
-    public void setLocations(Collection<? extends Contact> locations);
+    public int hashCode() {
+        return hashCode;
+    }
     
-    /**
-     * Returns true if this an entity for a local value
-     * and has been published at least once
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean hasBeenPublished();
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof DHTValueEntity)) {
+            return false;
+        }
+        
+        DHTValueEntity other = (DHTValueEntity)o;
+        return primaryKey.equals(other.getPrimaryKey())
+                    && secondaryKey.equals(other.getSecondaryKey());
+    }
     
-    /**
-     * Returns true if this is a local value
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
      */
-    public boolean isLocalValue();
-    
-    /**
-     * Returns true if this value was stored directly
-     * by the creator of the value (that means creator
-     * and sender are the same).
-     */
-    public boolean isDirect();
-    
-    /**
-     * 
-     */
-    public boolean isRepublishingRequired();
-    
-    /**
-     * Creates a new DHTValueEntity with the given new creator
-     * if this is a local value
-     */
-    public DHTValueEntity changeCreator(Contact creator);
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("Creator: ").append(getCreator()).append("\n");
+        buffer.append("Sender: ").append(getSender()).append("\n");
+        buffer.append("Primary Key: ").append(getPrimaryKey()).append("\n");
+        buffer.append("Secondary Key: ").append(getSecondaryKey()).append("\n");
+        buffer.append("Creation time: ").append(getCreationTime()).append("\n");
+        buffer.append("---\n").append(getValue()).append("\n");
+        return buffer.toString();
+    }
 }

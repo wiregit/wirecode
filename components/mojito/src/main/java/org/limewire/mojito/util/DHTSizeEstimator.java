@@ -86,11 +86,14 @@ public class DHTSizeEstimator {
                 (System.currentTimeMillis() - localEstimateTime) 
                     >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
             
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-
-            // TODO only live nodes?
+            SelectMode mode = SelectMode.ALL;
+            if (ContextSettings.ESTIMATE_WITH_LIVE_NODES_ONLY.getValue()) {
+                mode = SelectMode.ALIVE;
+            }
+            
             KUID localNodeId = routeTable.getLocalNode().getNodeID();
-            List<Contact> nodes = routeTable.select(localNodeId, k, SelectMode.ALL);
+            Collection<Contact> nodes = routeTable.select(localNodeId, 
+                    KademliaSettings.REPLICATION_PARAMETER.getValue(), mode);
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();
@@ -115,15 +118,19 @@ public class DHTSizeEstimator {
         
         if (remoteSize.compareTo(BigInteger.ZERO) < 0
                 || remoteSize.compareTo(MAXIMUM) > 0) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(remoteSize + " is an illegal argument");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(remoteSize + " is an illegal argument");
             }
             return;
         }
         
         remoteSizeHistory.add(remoteSize);
-        if (remoteSizeHistory.size() 
-                > ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
+        
+        // Adjust the size of the List. The Setting is SIMPP-able
+        // and may change!
+        int maxRemoteHistorySize = ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue();
+        while(remoteSizeHistory.size() > maxRemoteHistorySize
+                && !remoteSizeHistory.isEmpty()) {
             remoteSizeHistory.remove(0);
         }
     }
@@ -193,11 +200,15 @@ public class DHTSizeEstimator {
         // Get the average of the local estimations
         BigInteger localSize = BigInteger.ZERO;
         localSizeHistory.add(estimatedSize);
-        if (localSizeHistory.size() 
-                > ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
+        
+        // Adjust the size of the List. The Setting is SIMPP-able
+        // and may change!
+        int maxLocalHistorySize = ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue();
+        while(localSizeHistory.size() > maxLocalHistorySize
+                && !localSizeHistory.isEmpty()) {
             localSizeHistory.remove(0);
         }
-
+        
         if (!localSizeHistory.isEmpty()) {
             BigInteger localSizeSum = BigInteger.ZERO;
             for (BigInteger size : localSizeHistory) {
@@ -218,9 +229,9 @@ public class DHTSizeEstimator {
                 BigInteger[] remote = remoteSizeSet.toArray(new BigInteger[0]);
                 
                 // Skip the smallest and largest values
-                // TODO: skip the 3 smallest and biggest values (breaks the unit test)
                 int count = 1;
-                for (int i = 1; i < (remote.length-1); i++) {
+                int skip = ContextSettings.SKIP_REMOTE_ESTIMATES.getValue();
+                for (int i = skip; (skip >= 0) && (i < (remote.length-skip)); i++) {
                     combinedSize = combinedSize.add(remote[i]);
                     count++;
                 }

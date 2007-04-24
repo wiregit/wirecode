@@ -147,7 +147,9 @@ class PingIteratorFactory {
      */
     static class SocketAddressPinger implements PingIterator {
         
-        private final Iterator<? extends SocketAddress> hosts;
+        private final Set<? extends SocketAddress> hosts;
+        
+        private final Iterator<? extends SocketAddress> it;
         
         public SocketAddressPinger(SocketAddress host) {
             this(Collections.singleton(host));
@@ -164,19 +166,24 @@ class PingIteratorFactory {
                 }
             }
             
-            this.hosts = hosts.iterator();
+            this.hosts = hosts;
+            this.it = hosts.iterator();
         }
         
         public boolean hasNext() {
-            return hosts.hasNext();
+            return it.hasNext();
         }
         
         public boolean pingNext(Context context, PingResponseHandler responseHandler) 
                 throws IOException {
-            SocketAddress dst = hosts.next();
+            SocketAddress dst = it.next();
             
             RequestMessage request = context.getMessageHelper().createPingRequest(dst);
             return context.getMessageDispatcher().send(null, dst, request, responseHandler);
+        }
+        
+        public String toString() {
+            return hosts.toString();
         }
     }
     

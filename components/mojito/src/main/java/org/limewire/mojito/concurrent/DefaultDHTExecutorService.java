@@ -19,14 +19,18 @@
 
 package org.limewire.mojito.concurrent;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import org.limewire.concurrent.ThreadPoolExecutor;
 
 /**
  * A default implementation of DHTExecutorService
@@ -60,10 +64,22 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
      * @see com.limegroup.mojito.concurrent.DHTExecutorService#stop()
      */
     public void stop() {
-        scheduledExecutor.shutdownNow();
-        cachedExecutor.shutdownNow();
+        cancel(scheduledExecutor.shutdownNow());
+        cancel(cachedExecutor.shutdownNow());
     }
 
+    /**
+     * Calls cancel() on every element in the given Collection
+     * that implements the Cancellable interface.
+     */
+    private void cancel(Collection<?> c) {
+        for (Object o : c) {
+            if (o instanceof Cancellable) {
+                ((Cancellable)o).cancel(true);
+            }
+        }
+    }
+    
     /**
      * Initializes Context's scheduled Executor
      */
@@ -93,7 +109,18 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
             }
         };
         
-        cachedExecutor = Executors.newCachedThreadPool(factory);
+        cachedExecutor = newThreadPoolExecutor(factory);
+        //cachedExecutor = Executors.newCachedThreadPool(factory);
+    }
+    
+    private org.limewire.concurrent.ThreadPoolExecutor newThreadPoolExecutor(ThreadFactory factory) {
+        ThreadPoolExecutor tpe = new org.limewire.concurrent.ThreadPoolExecutor(
+                1, Integer.MAX_VALUE,
+                5L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                factory);
+        tpe.allowCoreThreadTimeOut(true);
+        return tpe;
     }
     
     /*
@@ -136,6 +163,14 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
      */
     public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
         return scheduledExecutor.schedule(task, delay, unit);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit)
+     */
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        return scheduledExecutor.schedule(command, delay, unit);
     }
     
     /*

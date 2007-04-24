@@ -19,15 +19,12 @@
 
 package org.limewire.mojito.manager;
 
-import java.util.Collection;
-
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.handler.response.GetValueResponseHandler;
-import org.limewire.mojito.result.GetValueResult;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.result.FindValueResult;
 
 
 /**
@@ -36,7 +33,7 @@ import org.limewire.mojito.routing.Contact;
  * rather than to find it. That means you must know which Node is storing
  * a value!
  */
-public class GetValueManager extends AbstractManager<GetValueResult> {
+public class GetValueManager extends AbstractManager<FindValueResult> {
 
     public GetValueManager(Context context) {
         super(context);
@@ -45,11 +42,10 @@ public class GetValueManager extends AbstractManager<GetValueResult> {
     /**
      * Tries to get one or more values from the remote Node
      */
-    public DHTFuture<GetValueResult> get(Contact node, 
-            KUID valueId, Collection<KUID> nodeIds) {
+    public DHTFuture<FindValueResult> get(EntityKey entityKey) {
         
         GetValueResponseHandler handler 
-            = new GetValueResponseHandler(context, node, valueId, nodeIds);
+            = new GetValueResponseHandler(context, entityKey);
         GetValueFuture future = new GetValueFuture(handler);
         context.getDHTExecutorService().execute(future);
         return future;
@@ -58,10 +54,10 @@ public class GetValueManager extends AbstractManager<GetValueResult> {
     /**
      * A "get value" specific implementation of DHTFuture
      */
-    private class GetValueFuture extends DHTFutureTask<GetValueResult> {
+    private class GetValueFuture extends DHTFutureTask<FindValueResult> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
-            super(callable);
+            super(context, callable);
         }
     }
 }
