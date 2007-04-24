@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
+import com.limegroup.gnutella.messages.Message.Network;
+
 import junit.framework.Test;
 
 public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -101,9 +103,9 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         PushRequest pr=new PushRequest(guid, (byte)0,
                                        clientGUID, index, ip, port,
-									   Message.N_UDP);
+                                       Network.UDP);
         
-        assertEquals(Message.N_UDP,pr.getNetwork());
+        assertEquals(Network.UDP,pr.getNetwork());
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);

@@ -345,11 +345,11 @@ public class QueryReply extends Message implements SecureMessage {
     /** Creates a new query reply with data read from the network. */
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
 		throws BadPacketException {
-    	this(guid,ttl,hops,payload,Message.N_UNKNOWN);
+    	this(guid,ttl,hops,payload,Network.UNKNOWN);
                                        
     }
     
-    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,int network) 
+    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,Network network) 
     	throws BadPacketException{
     	super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length,network);
         this._payload=payload;
@@ -410,7 +410,7 @@ public class QueryReply extends Message implements SecureMessage {
              Set<? extends IpPort> proxies, SecurityToken securityToken) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
-              16);                             // 16-byte footer
+              Network.UNKNOWN);
 
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));

@@ -3,9 +3,9 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -47,7 +47,7 @@ public class RequeryFilterTest extends LimeTestCase {
         assertTrue(GUID.isLimeRequeryGUID(guid, 1));
         assertTrue(! GUID.isLimeRequeryGUID(guid, 0));
         QueryRequest qr = QueryRequest.createNetworkQuery(
-            guid, (byte)5, (byte)0, "asdf".getBytes(), Message.N_UNKNOWN );
+            guid, (byte)5, (byte)0, "asdf".getBytes(), Network.UNKNOWN );
         assertTrue(! filter.allow(qr) );
     }
 }

@@ -31,10 +31,10 @@ public abstract class Message implements Comparable<Message> {
     public static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
     public static final byte F_UDP_CONNECTION        = (byte)0x41;
     
-    public static final int N_UNKNOWN = -1;
-    public static final int N_TCP = 1;
-    public static final int N_UDP = 2;
-    public static final int N_MULTICAST = 3;
+    /** The network a message came from or will travel through. */
+    public static enum Network {
+        UNKNOWN, TCP, UDP, MULTICAST;        
+    }
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     public static byte[] makeGuid() {
@@ -60,7 +60,7 @@ public abstract class Message implements Comparable<Message> {
     /**
      * The network that this was received on or is going to be sent to.
      */
-    private final int network;
+    private final Network network;
    
     /** Rep. invariant */
     protected void repOk() {
@@ -88,10 +88,10 @@ public abstract class Message implements Comparable<Message> {
      *  The GUID is set appropriately, and the number of hops is set to 0.
      */
     protected Message(byte func, byte ttl, int length) {
-        this(func, ttl, length, N_UNKNOWN);
+        this(func, ttl, length, Network.UNKNOWN);
     }
 
-    protected Message(byte func, byte ttl, int length, int network) {
+    protected Message(byte func, byte ttl, int length, Network network) {
         this(makeGuid(), func, ttl, (byte)0, length, network);
     }
 
@@ -101,7 +101,7 @@ public abstract class Message implements Comparable<Message> {
      */
     protected Message(byte[] guid, byte func, byte ttl,
               byte hops, int length) {
-        this(guid, func, ttl, hops, length, N_UNKNOWN);
+        this(guid, func, ttl, hops, length, Network.UNKNOWN);
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class Message implements Comparable<Message> {
      * This is used when reading packets off network.
      */
     protected Message(byte[] guid, byte func, byte ttl,
-              byte hops, int length, int network) {
+              byte hops, int length, Network network) {
 		if(guid.length != 16) {
 			throw new IllegalArgumentException("invalid guid length: "+guid.length);
 		} 		
@@ -158,24 +158,24 @@ public abstract class Message implements Comparable<Message> {
     protected abstract void writePayload(OutputStream out) throws IOException;
     
     ////////////////////////////////////////////////////////////////////
-    public int getNetwork() {
+    public Network getNetwork() {
         return network;
     }
     
     public boolean isMulticast() {
-        return network == N_MULTICAST;
+        return network == Network.MULTICAST;
     }
     
     public boolean isUDP() {
-        return network == N_UDP;
+        return network == Network.UDP;
     }
     
     public boolean isTCP() {
-        return network == N_TCP;
+        return network == Network.TCP;
     }
     
     public boolean isUnknownNetwork() {
-        return network == N_UNKNOWN;
+        return network == Network.UNKNOWN;
     }
 
     public byte[] getGUID() {

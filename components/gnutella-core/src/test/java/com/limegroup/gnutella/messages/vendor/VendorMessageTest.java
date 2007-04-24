@@ -18,6 +18,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 
@@ -201,7 +202,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
                               GiveStatsVendorMessage.PER_CONNECTION_STATS,
                               GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                              Message.N_TCP);
+                              Network.TCP);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         statsVM.write(baos);
         ByteArrayInputStream bias = 
@@ -230,7 +231,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         try {
             statsVM = new GiveStatsVendorMessage((byte)-1, 
                                GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                               Message.N_TCP);
+                               Network.TCP);
             fail("-1 invalid stats control");
         } catch (Exception bpx) {
             //good expected behaviour -- keep going
@@ -239,7 +240,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         try {
             statsVM = new GiveStatsVendorMessage(
                                GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                               (byte) -1, Message.N_TCP);
+                               (byte) -1, Network.TCP);
             fail("-1 invalid stats type");
         } catch (Exception bpx) {
             //good expected behaviour -- keep going
@@ -248,7 +249,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         try {
             statsVM = new GiveStatsVendorMessage(
                                GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                               (byte)4, Message.N_TCP);
+                               (byte)4, Network.TCP);
             fail("4 invalid stats type -- too big");
         } catch (Exception bpx) {
             //good expected behaviour -- keep going
@@ -257,7 +258,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         try {
             statsVM = new GiveStatsVendorMessage((byte)4, 
                                GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                               Message.N_TCP);
+                               Network.TCP);
             fail("4 invalid stats control -- too big");
         } catch (Exception bpx) {
             //good expected behaviour -- keep going
@@ -629,7 +630,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Message.N_TCP);
+        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Network.TCP);
         assertNotNull(m2);
     }
     

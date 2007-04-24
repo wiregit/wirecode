@@ -13,6 +13,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 /**
@@ -128,7 +129,7 @@ public class VendorMessageFactory {
     }
     
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl,
-            byte hops, byte[] fromNetwork, int network)
+            byte hops, byte[] fromNetwork, Network network)
             throws BadPacketException {
 
         // sanity check
@@ -170,13 +171,13 @@ public class VendorMessageFactory {
      */
     public static interface VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException;
+                byte[] restOf, Network network) throws BadPacketException;
     }
     
     // HOPS FLOW MESSAGE
     private static class HopsFlowVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new HopsFlowVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -184,7 +185,7 @@ public class VendorMessageFactory {
     // LIME ACK MESSAGE
     private static class LimeACKVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new LimeACKVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -192,7 +193,7 @@ public class VendorMessageFactory {
     // REPLY NUMBER MESSAGE
     private static class ReplyNumberVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -200,7 +201,7 @@ public class VendorMessageFactory {
     // TCP CONNECT BACK
     private static class TCPConnectBackVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new TCPConnectBackVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -208,7 +209,7 @@ public class VendorMessageFactory {
     // Messages Supported Message
     private static class MessagesSupportedVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new MessagesSupportedVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -216,7 +217,7 @@ public class VendorMessageFactory {
     // UDP CONNECT BACK
     private static class UDPConnectBackVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new UDPConnectBackVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
@@ -224,7 +225,7 @@ public class VendorMessageFactory {
     // Push Proxy Request
     private static class PushProxyRequestParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new PushProxyRequest(guid, ttl, hops, version, restOf);
         }
     }
@@ -232,7 +233,7 @@ public class VendorMessageFactory {
     // Push Proxy Acknowledgement
     private static class PushProxyAcknowledgementParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new PushProxyAcknowledgement(guid, ttl, hops, version, restOf);
         }
     }
@@ -240,7 +241,7 @@ public class VendorMessageFactory {
     // Query Status Request
     private static class QueryStatusRequestParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new QueryStatusRequest(guid, ttl, hops, version, restOf);
         }
     }
@@ -248,119 +249,119 @@ public class VendorMessageFactory {
     // Query Status Response
     private static class QueryStatusResponseParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new QueryStatusResponse(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class TCPConnectBackRedirectParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class UDPConnectBackRedirectParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class CapabilitiesVMParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new CapabilitiesVM(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class GiveStatsVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf, network);
         }
     }
     
     private static class StatisticVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class SimppRequestVMParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new SimppRequestVM(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class SimppVMParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new SimppVM(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class UDPCrawlerPingParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new UDPCrawlerPing(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class HeadPingParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new HeadPing(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class HeadPongParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new HeadPong(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class UpdateRequestParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new UpdateRequest(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class UpdateResponseParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new UpdateResponse(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class ContentRequestParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new ContentRequest(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class ContentResponseParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new ContentResponse(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class HeaderUpdateVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new HeaderUpdateVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
     
     private static class OOBProxyControlVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return new OOBProxyControlVendorMessage(guid, ttl, hops, version, restOf);
         }
     }

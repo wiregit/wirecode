@@ -41,6 +41,7 @@ import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -712,7 +713,7 @@ public class Connection implements IpPort, Connectable {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = MessageFactory.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+        Message msg = MessageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
         updateReadStatistics(msg);
         return msg;
     }

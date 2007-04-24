@@ -590,7 +590,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
         }
         
         try {
-            return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Message.N_UNKNOWN);
+            return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Network.UNKNOWN);
         } catch (BadPacketException e) {
             throw new IllegalStateException(e);
         }
@@ -599,7 +599,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
     public static PingReply 
     createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
     throws BadPacketException {
-        return createFromNetwork(guid, ttl, hops, payload, Message.N_UNKNOWN);
+        return createFromNetwork(guid, ttl, hops, payload, Network.UNKNOWN);
     }
 
     /**
@@ -613,7 +613,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
      *  any reason
      */
     public static PingReply 
-        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
+        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
         throws BadPacketException {
         if(guid == null) {
             throw new NullPointerException("null guid");
@@ -722,7 +722,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
      * @throws BadPacketException 
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip, int network) throws BadPacketException {
+                      GGEP ggep, InetAddress ip, Network network) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));

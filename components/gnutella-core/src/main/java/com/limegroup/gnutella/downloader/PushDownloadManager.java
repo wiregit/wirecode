@@ -43,8 +43,8 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -216,7 +216,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                          file.getIndex(),
                                          addr,
                                          port,
-                                         Message.N_MULTICAST);
+                                         Network.MULTICAST);
                 router.sendMulticastPushRequest(pr);
                 if (LOG.isInfoEnabled())
                     LOG.info("Sending push request through multicast " + pr);
@@ -239,7 +239,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                 file.getIndex(),
                                 RouterService.getAddress(),
                                 RouterService.getPort(),
-                                Message.N_UDP);
+                                Network.UDP);
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     

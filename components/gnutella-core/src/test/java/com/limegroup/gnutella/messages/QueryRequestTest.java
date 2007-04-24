@@ -21,6 +21,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -93,7 +94,7 @@ public final class QueryRequestTest extends LimeTestCase {
 				try {
 					qr = QueryRequest.createNetworkQuery(
 					    GUID.makeGuid(), (byte)6, (byte)4, 
-                        baos[i].toByteArray(), Message.N_UNKNOWN);
+                        baos[i].toByteArray(), Network.UNKNOWN);
 				} catch(BadPacketException e) {
                     e.printStackTrace();
 					fail("should have accepted query: "+qr);
@@ -189,7 +190,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
 			QueryRequest.createNetworkQuery(
-			    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN );
+			    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN );
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
 		}
@@ -235,7 +236,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
 		QueryRequest.createNetworkQuery(
-		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 
 		
 		// now test everything empty but URN
@@ -249,7 +250,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		baos.write(0); // last null
 
 		QueryRequest.createNetworkQuery(
-		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 	}
 
 	/**
@@ -269,7 +270,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		byte[] payload = new byte[2+2];
 		payload[2]=(byte)65;
 		qr=QueryRequest.createNetworkQuery(
-		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 		
   		assertEquals("queries should be equal", "A", qr.getQuery());
   		assertEquals("query lengths should be equal", 4, qr.getLength());
@@ -278,7 +279,7 @@ public final class QueryRequestTest extends LimeTestCase {
         payload = new byte[2+3];
         payload[2]=(byte)65;
         qr = QueryRequest.createNetworkQuery(
-            new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 
 		assertEquals("queries should be equal", "A", qr.getQuery());
 
@@ -286,7 +287,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			//String is empty.
 			payload = new byte[2+1];
 			qr = QueryRequest.createNetworkQuery(
-			    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+			    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 			fail("should not have accepted query");
 			//assertEquals("queries should be equal", "", qr.getQuery());
 		} catch(BadPacketException e) {
@@ -328,7 +329,7 @@ public final class QueryRequestTest extends LimeTestCase {
             try {
                 QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     URN_BYTES[i].toByteArray(), 
-                                                    Message.N_UNKNOWN);
+                                                    Network.UNKNOWN);
             } catch(BadPacketException e) {
                 fail("should have accepted query!!");
             }
@@ -365,7 +366,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			baos[i].write(0);
 			QueryRequest qr = QueryRequest.createNetworkQuery(
 			    GUID.makeGuid(), ttl, hops, 
-			    baos[i].toByteArray(), Message.N_UNKNOWN);
+			    baos[i].toByteArray(), Network.UNKNOWN);
 
             assertEquals("incorrect hops", hops, qr.getHops());
             assertEquals("incorrect ttl", ttl, qr.getTTL());
@@ -408,7 +409,7 @@ public final class QueryRequestTest extends LimeTestCase {
             try {
                 QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     baos[i].toByteArray(), 
-                                                    Message.N_UNKNOWN);
+                                                    Network.UNKNOWN);
                 
                 fail("should not have accepted illegal query chars");
             } catch(BadPacketException e) {
@@ -667,7 +668,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, not wanting rich, and can't do FWTrans, just 10000000
         payload[0] = (byte) 0x80;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.canDoFirewalledTransfer());
@@ -675,7 +676,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, not wanting rich, and can't do FWTrans, just 11000000
         payload[0] = (byte) 0xC0;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.canDoFirewalledTransfer());
@@ -683,7 +684,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, wanting rich, can't do FWTrans, just 10100000
         payload[0] = (byte) 0xA0;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.canDoFirewalledTransfer());
@@ -691,7 +692,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, wanting rich, can't do FWTrans, just 11100000
         payload[0] = (byte) 0xE0;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.canDoFirewalledTransfer());
@@ -699,7 +700,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, not wanting rich, and can do FWTrans, just 10000010
         payload[0] = (byte) 0x82;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.canDoFirewalledTransfer());
@@ -707,7 +708,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, not wanting rich, and can do FWTrans, just 11000010
         payload[0] = (byte) 0xC2;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.canDoFirewalledTransfer());
@@ -715,7 +716,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, wanting rich, can do FWTrans, just 10100010
         payload[0] = (byte) 0xA2;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.canDoFirewalledTransfer());
@@ -723,7 +724,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, wanting rich, can do FWTrans, just 11100010
         payload[0] = (byte) 0xE2;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.canDoFirewalledTransfer());
@@ -738,7 +739,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // transfer
         payload[0] = (byte) 0xE4;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -751,7 +752,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0xC4;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -764,7 +765,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0xA4;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -777,7 +778,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0x84;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -790,7 +791,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // transfer
         payload[0] = (byte) 0xE6;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -803,7 +804,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0xC6;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -816,7 +817,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0xA6;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -829,7 +830,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled transfer
         payload[0] = (byte) 0x86;
         qr = QueryRequest.createNetworkQuery(
-            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.desiresOutOfBandReplies());
@@ -844,7 +845,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // make sure that a multicast source overrides that firewalled bit.
         payload[0] = (byte) 0xE0;
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_MULTICAST);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.MULTICAST);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.isMulticast());
@@ -856,11 +857,11 @@ public final class QueryRequestTest extends LimeTestCase {
         
         qr = QueryRequest.createQuery("sam");
         assertTrue(!qr.isMulticast());
-        assertEquals(Message.N_UNKNOWN, qr.getNetwork());
+        assertEquals(Network.UNKNOWN, qr.getNetwork());
         
         qr = QueryRequest.createMulticastQuery(new byte[16], qr);
         assertTrue(qr.isMulticast());
-        assertEquals(Message.N_MULTICAST, qr.getNetwork());
+        assertEquals(Network.MULTICAST, qr.getNetwork());
         
         //String is empty.
         byte[] payload = new byte[2+1];
@@ -870,24 +871,24 @@ public final class QueryRequestTest extends LimeTestCase {
         payload[1] = (byte) 0;
         
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isUnknownNetwork());
-        assertEquals(Message.N_UNKNOWN, qr.getNetwork());
+        assertEquals(Network.UNKNOWN, qr.getNetwork());
         
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_TCP);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.TCP);
         assertTrue(qr.isTCP());
-        assertEquals(Message.N_TCP, qr.getNetwork());
+        assertEquals(Network.TCP, qr.getNetwork());
         
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UDP);
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UDP);
         assertTrue(qr.isUDP());
-        assertEquals(Message.N_UDP, qr.getNetwork());
+        assertEquals(Network.UDP, qr.getNetwork());
         
         qr = QueryRequest.createNetworkQuery(
-            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_MULTICAST);        
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Network.MULTICAST);        
         assertTrue(qr.isMulticast());
-        assertEquals(Message.N_MULTICAST, qr.getNetwork());
+        assertEquals(Network.MULTICAST, qr.getNetwork());
     }
     
 
@@ -943,7 +944,7 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testMetaFlagConstructor() throws Exception {
         try {
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, false, 
+                             null, null, true, Network.TCP, false, 0, false, 
                              1);
             assertTrue(false);
         }
@@ -983,7 +984,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         try {
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, false,
+                             null, null, true, Network.TCP, false, 0, false,
                              0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
                              flags[4] | flags[5]);
             assertTrue(false);
@@ -996,7 +997,7 @@ public final class QueryRequestTest extends LimeTestCase {
         try {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, false,
+                             null, null, true, Network.TCP, false, 0, false,
                              flag);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
@@ -1130,25 +1131,25 @@ public final class QueryRequestTest extends LimeTestCase {
         // payload without ggep and huge
         byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
         
-        QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
         // payload with multiple ggeps
         payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertTrue(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
@@ -1166,12 +1167,12 @@ public final class QueryRequestTest extends LimeTestCase {
         out.write(0x1c);
         
         payload = out.toByteArray();
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         // verfiy unknown gem is still there
@@ -1187,12 +1188,12 @@ public final class QueryRequestTest extends LimeTestCase {
         
         payload = out.toByteArray();
         
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         System.arraycopy(newPayload, startGem, part, 0, part.length);
@@ -1207,12 +1208,12 @@ public final class QueryRequestTest extends LimeTestCase {
                 (byte)0xD8, 00, 0x6C, 0x69, 0x6D, 0x65, 0x77, 0x69, 0x72, 0x65, 00
         };
         
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Message.N_UNKNOWN);
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Network.UNKNOWN);
         assertEquals("limewire", query.getQuery());
         
         newPayload = QueryRequest.patchInGGEP(query.getPayload(), ggep);
         
-        QueryRequest patched = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Message.N_UNKNOWN);
+        QueryRequest patched = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Network.UNKNOWN);
         assertEquals(query.getQuery(), patched.getQuery());
         
         patched = QueryRequest.createProxyQuery(query, GUID.makeGuid());
@@ -1230,38 +1231,38 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertTrue(request.isSecurityTokenRequired());
         
-        QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         // oob not set
-        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (AddressSecurityToken)null, true, Message.N_TCP, false, 0);
+        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP, false, 0);
         assertFalse(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertFalse(fromNetwork.isSecurityTokenRequired());
         
     }
@@ -1319,7 +1320,7 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
                 URN.NO_URN_SET,
                 new AddressSecurityToken(InetAddress.getLocalHost(), 1094),
-                false, Message.N_MULTICAST, false, 0, false, 0, false);
+                false, Network.MULTICAST, false, 0, false, 0, false);
 
         try {
             QueryRequest.createDoNotProxyQuery(query);

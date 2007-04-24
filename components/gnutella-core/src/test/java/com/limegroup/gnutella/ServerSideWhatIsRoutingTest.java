@@ -5,16 +5,16 @@ import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -23,8 +23,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  *  Tests that an Ultrapeer correctly handles connect back redirect messages.
@@ -232,7 +232,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, 
+                             null, null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
@@ -257,7 +257,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, 
+                             null, null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
@@ -276,7 +276,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)1, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -302,7 +302,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -328,7 +328,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -354,7 +354,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         LEAF.send(whatIsNewQuery);
         LEAF.flush();
@@ -383,7 +383,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
@@ -414,7 +414,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();

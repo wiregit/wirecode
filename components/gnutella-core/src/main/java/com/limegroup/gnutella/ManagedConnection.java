@@ -57,6 +57,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -912,8 +913,8 @@ public class ManagedConnection extends Connection
     /**
      * Returns the network that the MessageReceiver uses -- Message.N_TCP.
      */
-    public int getNetwork() {
-        return Message.N_TCP;
+    public Network getNetwork() {
+        return Network.TCP;
     }
     
 

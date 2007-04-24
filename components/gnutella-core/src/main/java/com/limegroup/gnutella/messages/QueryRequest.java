@@ -204,7 +204,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "", 
                                 URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -225,7 +225,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",  URN.Type.SHA1_SET, 
                                 sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
 
 	}
 	/**
@@ -251,7 +251,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -278,7 +278,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -305,7 +305,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
@@ -325,7 +325,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
     }
 	    
 	
@@ -477,7 +477,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 
+                                Network.UNKNOWN, false, 
                                 FeatureSearchData.WHAT_IS_NEW, false, 
                                 getMetaFlag(type));
     }
@@ -504,7 +504,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
+                                Network.UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
                                 false, getMetaFlag(type));
     }
    
@@ -780,7 +780,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -809,7 +809,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", URN.Type.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Network.UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -839,7 +839,7 @@ public class QueryRequest extends Message implements Serializable{
         
         try {
             return createNetworkQuery(guid, (byte)1, qr.getHops(),
-                                      newPayload, Message.N_MULTICAST);
+                                      newPayload, Network.MULTICAST);
         } catch (BadPacketException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
@@ -862,7 +862,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                key, qr.isFirewalledSource(), Message.N_UNKNOWN,
+                                key, qr.isFirewalledSource(), Network.UNKNOWN,
                                 qr.desiresOutOfBandReplies(),
                                 qr.getFeatureSelector(), false,
                                 qr.getMetaMask());
@@ -879,7 +879,7 @@ public class QueryRequest extends Message implements Serializable{
 				FileManager.INDEXING_QUERY, "", 
                 URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
-				Message.N_UNKNOWN, false, 0, false, 0, false);
+                Network.UNKNOWN, false, 0, false, 0, false);
 	}
 	
 
@@ -896,7 +896,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
-                                false, Message.N_UNKNOWN, false, 0, false, 0);
+                                false, Network.UNKNOWN, false, 0, false, 0);
 	}
 
 
@@ -912,7 +912,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> instance from the specified data
 	 */
 	public static QueryRequest 
-		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
+		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
 	    throws BadPacketException {
 		return new QueryRequest(guid, ttl, hops, payload, network);
 	}
@@ -954,7 +954,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
              false, 0, false, 0);
     }
 
@@ -969,7 +969,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          MediaType type) {
         this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
              false, 0, false, getMetaFlag(type));
     }
 
@@ -984,7 +984,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies) {
         this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, 0);
     }
  
@@ -999,7 +999,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies, MediaType type) {
         this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
     }
  
@@ -1047,7 +1047,7 @@ public class QueryRequest extends Message implements Serializable{
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies,
+                        Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector) {
         // calls me with the doNotProxy flag set to false
         this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
@@ -1076,7 +1076,7 @@ public class QueryRequest extends Message implements Serializable{
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies,
+                        Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
@@ -1093,7 +1093,7 @@ public class QueryRequest extends Message implements Serializable{
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies,
+                        Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask,
                         boolean normalize) {
@@ -1123,7 +1123,7 @@ public class QueryRequest extends Message implements Serializable{
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies,
+                        Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, minSpeed, query, richQuery, requestedUrnTypes,
@@ -1152,7 +1152,7 @@ public class QueryRequest extends Message implements Serializable{
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        int network, boolean canReceiveOutOfBandReplies,
+                        Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask, boolean normalize) {
         // don't worry about getting the length right at first
@@ -1371,7 +1371,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
     private QueryRequest(
-      byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
+      byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
 		throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
 		if(payload == null) {

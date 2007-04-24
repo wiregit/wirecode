@@ -30,7 +30,7 @@ public class PushRequest extends Message implements Serializable {
      * @exception BadPacketException the payload length is wrong
      */
     public PushRequest(byte[] guid, byte ttl, byte hops,
-             byte[] payload, int network) throws BadPacketException {
+             byte[] payload, Network network) throws BadPacketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
             ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
@@ -58,7 +58,7 @@ public class PushRequest extends Message implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl,
                byte[] clientGUID, long index, byte[] ip, int port) {
-    	this(guid, ttl, clientGUID, index, ip, port, Message.N_UNKNOWN);
+    	this(guid, ttl, clientGUID, index, ip, port, Network.UNKNOWN);
     }
     
     /**
@@ -71,7 +71,7 @@ public class PushRequest extends Message implements Serializable {
      *           0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
      */
     public PushRequest(byte[] guid, byte ttl,
-            byte[] clientGUID, long index, byte[] ip, int port, int network) {
+            byte[] clientGUID, long index, byte[] ip, int port, Network network) {
     	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
     	
     	if(clientGUID.length != 16) {
@@ -80,8 +80,7 @@ public class PushRequest extends Message implements Serializable {
 		} else if((index&0xFFFFFFFF00000000l)!=0) {
 			throw new IllegalArgumentException("invalid index: "+index);
 		} else if(ip.length!=4) {
-			throw new IllegalArgumentException("invalid ip length: "+
-											   ip.length);
+			throw new IllegalArgumentException("invalid ip length: " + ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
             throw new IllegalArgumentException("invalid ip "+NetworkUtils.ip2string(ip));
 		} else if(!NetworkUtils.isValidPort(port)) {

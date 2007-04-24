@@ -4,20 +4,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 
 @SuppressWarnings("unchecked")
 class StubMessageReceiver implements MessageReceiver {
     
     private final List LIST = new LinkedList();
     private byte softMax;
-    private int network;
+    private Network network;
     private boolean closed = false;
     
     public StubMessageReceiver() {
-        this((byte)10, Message.N_TCP); // default softMax high so we don't change ttl in reading.
+        this((byte)10, Network.TCP); // default softMax high so we don't change ttl in reading.
     }
     
-    public StubMessageReceiver(byte softMax, int network) {
+    public StubMessageReceiver(byte softMax, Network network) {
         this.softMax = softMax;
         this.network = network;
     }
@@ -62,7 +63,7 @@ class StubMessageReceiver implements MessageReceiver {
         return softMax;
     }
     
-    public int getNetwork() {
+    public Network getNetwork() {
         return network;
     }
 }

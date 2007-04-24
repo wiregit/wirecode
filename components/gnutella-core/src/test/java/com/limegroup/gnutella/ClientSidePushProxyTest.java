@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
@@ -98,7 +99,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
-                                              null, false, 0, false, 0);
+                                              null, false, Network.UNKNOWN, false, 0);
         testUP[0].send(query);
         testUP[0].flush();
 

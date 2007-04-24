@@ -30,6 +30,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
@@ -1018,7 +1019,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     private static class V2ReplyNumberVendorMessageParser implements VendorMessageParser {
 
-        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, byte[] restOf, int network) throws BadPacketException {
+        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, byte[] restOf, Network network) throws BadPacketException {
             return new V2ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
         }
     }

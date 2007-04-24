@@ -31,6 +31,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -633,7 +634,7 @@ public final class ServerSideGiveStatsVMTest extends LimeTestCase {
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS, 
                              GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC, 
-                             Message.N_TCP);        
+                             Network.TCP);        
         TCP_TEST_LEAF.send(statsVM);
         TCP_TEST_LEAF.flush();        
         
@@ -644,7 +645,7 @@ public final class ServerSideGiveStatsVMTest extends LimeTestCase {
         GiveStatsVendorMessage statsVM2 = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS,
                              GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC,
-                             Message.N_TCP);
+                             Network.TCP);
         TCP_TEST_LEAF.send(statsVM2);
         TCP_TEST_LEAF.flush();
 
@@ -655,7 +656,7 @@ public final class ServerSideGiveStatsVMTest extends LimeTestCase {
         GiveStatsVendorMessage statsVM3 = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS,
                              GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                             Message.N_UDP);
+                             Network.UDP);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         statsVM3.write(baos);
@@ -691,7 +692,7 @@ public final class ServerSideGiveStatsVMTest extends LimeTestCase {
         GiveStatsVendorMessage statsVM4 = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS,
                              GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC,
-                             Message.N_UDP);
+                             Network.UDP);
 
         baos = new ByteArrayOutputStream();
         statsVM4.write(baos);

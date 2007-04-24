@@ -102,7 +102,7 @@ public abstract class VendorMessage extends Message {
      */
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
                             byte[] payload) {
-        this(vendorIDBytes, selector, version, payload, Message.N_UNKNOWN);
+        this(vendorIDBytes, selector, version, payload, Network.UNKNOWN);
     }
     
     /**
@@ -120,7 +120,7 @@ public abstract class VendorMessage extends Message {
      *  null.
      */
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
-                            byte[] payload, int network) {
+                            byte[] payload, Network network) {
         super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length,
               network);
         if ((vendorIDBytes.length != 4))
@@ -149,7 +149,7 @@ public abstract class VendorMessage extends Message {
     protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
                             int selector, int version, byte[] payload) 
         throws BadPacketException {
-        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
+        this(guid,ttl,hops,vendorID,selector,version,payload, Network.UNKNOWN);
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class VendorMessage extends Message {
      */
     protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
                             int selector, int version, byte[] payload, 
-                            int network) throws BadPacketException {
+                            Network network) throws BadPacketException {
         super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
               network);
         // set the instance params....

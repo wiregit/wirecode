@@ -32,7 +32,7 @@ public class GiveStatsVendorMessage extends VendorMessage {
      * A vendor message read off the network. Package access
      */
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
-                       byte[] payload, int network) throws BadPacketException {
+                       byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload,
               network);
         if(getPayload().length < 2)
@@ -56,7 +56,7 @@ public class GiveStatsVendorMessage extends VendorMessage {
      */
     public GiveStatsVendorMessage(byte statsControl,
                                   byte statType, 
-                                  int network) {
+                                  Network network) {
             super(F_LIME_VENDOR_ID, F_GIVE_STATS, VERSION, 
                                  derivePayload(statsControl, statType),network);
     }
