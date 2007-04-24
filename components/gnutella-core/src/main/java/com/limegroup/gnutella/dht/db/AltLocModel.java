@@ -85,7 +85,7 @@ public class AltLocModel implements StorableModel {
                 
                 // Publish only rare FileDescs and removed entities
                 // respectively
-                if (fd == null || (isRareFile(fd) && DatabaseUtils.isPublishingRequired(storable))) {
+                if (fd == null || (fd.isRareFile() && DatabaseUtils.isPublishingRequired(storable))) {
                     publish.add(storable);
                 }
             }
@@ -115,19 +115,5 @@ public class AltLocModel implements StorableModel {
             buffer.append(CollectionUtils.toString(values.values()));
         }
         return buffer.toString();
-    }
-    
-    /**
-     * Returns true if the FileDesc is considered rare
-     */
-    private static boolean isRareFile(FileDesc fd) {
-        if (fd.getAttemptedUploads() < DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()
-                || fd.getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
-            return false;
-        }
-        
-        long time = fd.getLastAttemptedUploadTime();
-        long delta = System.currentTimeMillis() - time;
-        return (delta >= DHTSettings.RARE_FILE_TIME.getValue());
     }
 }

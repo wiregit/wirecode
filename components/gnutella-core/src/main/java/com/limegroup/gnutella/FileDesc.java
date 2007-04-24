@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -434,6 +435,21 @@ public class FileDesc implements FileDetails {
      */
     public boolean isVerified() {
         return RouterService.getContentManager().isVerified(SHA1_URN);
+    }
+
+    /**
+     * Returns true if the FileDesc is considered rare
+     */
+    public boolean isRareFile() {
+        // TODO use Zlatin's RPN
+        if (getAttemptedUploads() < DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()
+                || getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
+            return false;
+        }
+        
+        long time = getLastAttemptedUploadTime();
+        long delta = System.currentTimeMillis() - time;
+        return (delta >= DHTSettings.RARE_FILE_TIME.getValue());
     }
 }
 
