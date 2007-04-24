@@ -366,4 +366,29 @@ public class NetworkUtilsTest extends BaseTestCase {
         // IPv6 with with IPv4 mapped
         assertFalse(NetworkUtils.isSameAddressSpace(addr3, addr6));
     }
+    
+    public void testIsLocalAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("localhost");
+        assertTrue(NetworkUtils.isLocalAddress(addr1));
+        
+        InetAddress addr2 = InetAddress.getByName("127.0.0.1");
+        assertTrue(NetworkUtils.isLocalAddress(addr2));
+        
+        InetAddress addr3 = InetAddress.getLocalHost();
+        assertTrue(NetworkUtils.isLocalAddress(addr3));
+        
+        InetAddress[] addr4 = InetAddress.getAllByName("localhost");
+        assertTrue(addr4.length > 0);
+        for (InetAddress addr : addr4) {
+            assertTrue(NetworkUtils.isLocalAddress(addr));
+        }
+        
+        // This is not a local address of this machine
+        InetAddress addr5 = InetAddress.getByName("www.google.com");
+        assertFalse(NetworkUtils.isLocalAddress(addr5));
+        
+        // Nor is this
+        InetAddress addr6 = InetAddress.getByName("192.168.88.44");
+        assertFalse(NetworkUtils.isLocalAddress(addr6));
+    }
 }
