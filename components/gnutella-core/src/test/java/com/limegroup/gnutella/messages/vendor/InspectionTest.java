@@ -1,27 +1,40 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.security.PublicKey;
 import java.util.Map;
 import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.IpPortImpl;
+import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessageCallback;
+import org.limewire.security.SecureMessageVerifier;
+import org.limewire.security.Verifier;
 import org.limewire.util.ByteOrder;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 @SuppressWarnings("unused")
@@ -45,7 +58,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
 
     public static Integer numLeaves() {
-        return new Integer(1);
+        return new Integer(2);
     }
     
     public static ActivityCallback getActivityCallback() {
@@ -53,6 +66,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     public static void setUpQRPTables() throws Exception {}
     public static void setSettings() throws Exception{
+        PrivilegedAccessor.setValue(RouterService.class,"secureMessageVerifier",new TestVerifier());
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -60,6 +74,7 @@ public class InspectionTest extends ServerSideTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {InetAddress.getLocalHost().getHostAddress(),"127.*.*.*"});
         FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.*.*.*"});
+        MessageSettings.INSPECTION_VERSION.setValue(0);
     }
     
     @InspectablePrimitive
@@ -102,6 +117,7 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
         
         // send a query
+        MessageSettings.INSPECTION_VERSION.setValue(0);
         Message query = QueryRequest.createQuery("asdf");
         byte []guid = query.getGUID();
         LEAF[0].send(query);
@@ -115,6 +131,7 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals(1,queries + newQueries);
         
         // shut off the query
+        MessageSettings.INSPECTION_VERSION.setValue(0);
         LEAF[0].send(new QueryStatusResponse(new GUID(guid), 65535));
         LEAF[0].flush();
         Thread.sleep(2000);
@@ -122,6 +139,53 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals("false", new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active")));
         assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES")));
         assertEquals("0",new String((byte[])response.get("com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES")));
+    }
+    
+    public void testRouting() throws Exception {
+        // one of the leafs supports inspections
+        LEAF[0].send(MessagesSupportedVendorMessage.instance());
+        
+        // create a request with a return address and one without
+        InspectionRequest notRouted = new InspectionRequest("com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
+        InspectionRequest routed = new InspectionRequest(2, new IpPortImpl("127.0.0.1",20000),
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
+        
+        // the one without should not be forwarded
+        drainAll(LEAF);
+        tryMessage(notRouted);
+        assertNull(getFirstMessageOfType(LEAF[0], InspectionRequest.class));
+        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequest.class));
+        
+        // the one with return address should get answered 
+        DatagramSocket socket2 = new DatagramSocket(20000);
+        socket2.setSoTimeout(100);
+        drainAll(LEAF);
+        try {
+            tryMessage(routed);
+            fail("response should have been sent elsewhere");
+        } catch (IOException expected){}
+        DatagramPacket pack = new DatagramPacket(new byte[1000],1000);
+        socket2.receive(pack);
+        assertEquals(2, MessageSettings.INSPECTION_VERSION.getValue());
+        
+        // and forwarded to the leaf that supports it.
+        InspectionRequest received = getFirstMessageOfType(LEAF[0], InspectionRequest.class);
+        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequest.class));
+        
+        // the forwarded message should be identical
+        assertEquals(routed.getGUID(), received.getGUID());
+        assertEquals(20000,received.getReturnAddress().getPort());
+        assertEquals("com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
+                received.getRequestedFields()[0]);
+        assertEquals(2, received.getRoutableVersion());
+        
+        // and handling it should also respond to the return address
+        MessageSettings.INSPECTION_VERSION.setValue(1);
+        MessageRouter router = RouterService.getMessageRouter();
+        router.handleMessage(received, RouterService.getConnectionManager().getInitializedClientConnections().get(0));
+        pack = new DatagramPacket(new byte[1000],1000);
+        socket2.receive(pack);
+        assertEquals(2, received.getRoutableVersion());
     }
     
     private Map tryMessage(Message m) throws Exception {
@@ -164,5 +228,26 @@ public class InspectionTest extends ServerSideTestCase {
         int numInflated = in.inflate(inflated);
         String s = new String(inflated,0, numInflated);
         return (Map)Token.parse(s.getBytes());
+    }
+    
+    private static class TestVerifier extends SecureMessageVerifier {
+        TestVerifier() {
+            super("asdf","asdf");
+        }
+        @Override
+        public void verify(Verifier verifier) {
+            verifier.getSecureMessageCallback().handleSecureMessage(verifier.getSecureMessage(), true);
+        }
+        
+        @Override
+        public void verify(SecureMessage sm, SecureMessageCallback smc) {
+            smc.handleSecureMessage(sm, true);
+        }
+        
+        @Override
+        public void verify(PublicKey pubKey, String algorithm, 
+                SecureMessage sm, SecureMessageCallback smc) {
+            smc.handleSecureMessage(sm, true);
+        }
     }
 }

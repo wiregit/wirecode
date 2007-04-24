@@ -68,7 +68,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
             this.secureData = new SecureGGEPData(parser);
         }
         this.ggep = ggep;
-        
+
         // get routable version if any
         int routableVersion;
         try {
@@ -82,7 +82,8 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         IpPort retAddr = null;
         try {
             byte [] returnAddress = ggep.get(RETURN_ADDRESS_KEY);
-            IPPortCombo.getCombo(returnAddress);
+            if (returnAddress != null)
+                retAddr = IPPortCombo.getCombo(returnAddress);
         } catch (InvalidDataException bleh) {}
         this.returnAddress = retAddr;
     }

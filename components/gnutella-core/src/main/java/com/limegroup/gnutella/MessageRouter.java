@@ -478,6 +478,7 @@ public abstract class MessageRouter {
         
         // handler for Give Stats VMs
         GiveStatsVMHandler gsvmHandler = new GiveStatsVMHandler();
+        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this);
         
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
@@ -500,6 +501,7 @@ public abstract class MessageRouter {
         setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
         setMessageHandler(HeadPong.class, new HeadPongHandler());
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
+        setMessageHandler(InspectionRequest.class, inspectionHandler);
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
         setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
@@ -513,7 +515,7 @@ public abstract class MessageRouter {
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
-        setUDPMessageHandler(InspectionRequest.class, new InspectionRequestHandler(this));
+        setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
         setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
@@ -2801,6 +2803,7 @@ public abstract class MessageRouter {
         // only inspection requests with return address are forwarded.
         if (ir.getReturnAddress() == null)
             return;
+        
         for (ManagedConnection mc : _manager.getInitializedClientConnections()) {
             if (mc.remoteHostSupportsInspections() >= ir.getVersion())
                 mc.send(ir);
