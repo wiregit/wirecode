@@ -513,7 +513,7 @@ public abstract class MessageRouter {
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
-        setUDPMessageHandler(InspectionRequest.class, new InspectionRequestHandler());
+        setUDPMessageHandler(InspectionRequest.class, new InspectionRequestHandler(this));
         setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
@@ -2791,6 +2791,21 @@ public abstract class MessageRouter {
         } 
     } 
     
+    /**
+     * Forwards an inspection request to leaf connections that 
+     * support it.
+     */
+    public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
+        if (!_manager.isSupernode())
+            return;
+        // only inspection requests with return address are forwarded.
+        if (ir.getReturnAddress() == null)
+            return;
+        for (ManagedConnection mc : _manager.getInitializedClientConnections()) {
+            if (mc.remoteHostSupportsInspections() >= ir.getVersion())
+                mc.send(ir);
+        }
+    }
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;

@@ -1078,6 +1078,15 @@ public class Connection implements IpPort {
     }
     
     /**
+     * @return the peer's supported version of inspection requests or -1.
+     */
+    public int remoteHostSupportsInspections() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsInspectionRequests();
+        return -1;
+    }
+    
+    /**
      * Return whether or not the remote host supports feature queries.
      */
     public boolean getRemoteHostSupportsFeatureQueries() {

@@ -13,4 +13,10 @@ public class MessageSettings extends LimeProps {
      */
     public static final IntSetting MAX_LENGTH = 
         FACTORY.createIntSetting("MAX_LENGTH", 65536);
+    
+    /**
+     * The latest handled routable version of the inspection message.
+     */
+    public static final IntSetting INSPECTION_VERSION = 
+        FACTORY.createIntSetting("INSPECTION_VERSION", 0);
 }

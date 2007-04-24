@@ -96,7 +96,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         // check if its a newer version than the last we routed.
         // messages w/o version just go through.
         int routableVersion = msg.getRoutableVersion();
-        if (routableVersion >= 0) {
+        if (routableVersion >= 0 && lastRoutedVersion != null) {
             synchronized(lastRoutedVersion) {
                 if (routableVersion <= lastRoutedVersion.getValue())
                     return;

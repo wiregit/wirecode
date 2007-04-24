@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.GGEP;
  */
 public class InspectionRequest extends RoutableGGEPMessage {
     
-    private static final int VERSION = 1;
+    static final int VERSION = 1;
     static final String INSPECTION_KEY = "I";
 
     private final String[] requested;
@@ -62,5 +62,9 @@ public class InspectionRequest extends RoutableGGEPMessage {
         GGEP g = new GGEP();
         g.putCompressed(INSPECTION_KEY, ret.getBytes());
         return g;
+    }
+    
+    public int getVersion() {
+        return super.getVersion();
     }
 }
