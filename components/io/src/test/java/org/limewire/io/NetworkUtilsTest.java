@@ -3,9 +3,12 @@ package org.limewire.io;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 
 import junit.framework.Test;
@@ -367,7 +370,7 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertFalse(NetworkUtils.isSameAddressSpace(addr3, addr6));
     }
     
-    public void testIsLocalAddress() throws UnknownHostException {
+    public void testIsLocalAddress() throws UnknownHostException, SocketException {
         InetAddress addr1 = InetAddress.getByName("localhost");
         assertTrue(NetworkUtils.isLocalAddress(addr1));
         
@@ -377,11 +380,27 @@ public class NetworkUtilsTest extends BaseTestCase {
         InetAddress addr3 = InetAddress.getLocalHost();
         assertTrue(NetworkUtils.isLocalAddress(addr3));
         
+        // Get all local InetAddresses for localhost
         InetAddress[] addr4 = InetAddress.getAllByName("localhost");
         assertTrue(addr4.length > 0);
         for (InetAddress addr : addr4) {
             assertTrue(NetworkUtils.isLocalAddress(addr));
         }
+        
+        // Go through every NetworkInterface and every InetAddress
+        // They should be all local addresses!
+        Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
+        boolean checkedAtLeastOneAddress = false;
+        while(nifs.hasMoreElements()) {
+            NetworkInterface nif = nifs.nextElement();
+            Enumeration<InetAddress> addresses = nif.getInetAddresses();
+            while(addresses.hasMoreElements()) {
+                InetAddress address = addresses.nextElement();
+                assertTrue(NetworkUtils.isLocalAddress(address));
+                checkedAtLeastOneAddress = true;
+            }
+        }
+        assertTrue(checkedAtLeastOneAddress);
         
         // This is not a local address of this machine
         InetAddress addr5 = InetAddress.getByName("www.google.com");
