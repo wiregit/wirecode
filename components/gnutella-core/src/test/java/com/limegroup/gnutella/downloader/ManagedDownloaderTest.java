@@ -333,12 +333,13 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
             uploader.waitForUploaderToStop();
-            
-            try { Thread.sleep(65 * 1000); } catch (InterruptedException ie) { }
+            try { Thread.sleep(5 * 1000); } catch (InterruptedException ie) {}
+                        
             // no more auto requeries - so the download should be waiting for
             // input from the user
             assertEquals("should have read 500 bytes", 500, 
                          downloader.getAmountRead());
+            try { Thread.sleep(60 * 1000); } catch (InterruptedException ie) { }
             assertEquals("should be waiting for user",
                          Downloader.WAITING_FOR_USER, 
                          downloader.getState());
