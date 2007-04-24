@@ -2,11 +2,11 @@ package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
 
-import org.limewire.collection.IntWrapper;
 import org.limewire.io.IP;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
+import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -29,10 +29,10 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     /** an optional verifier to very secure messages */
     private final SecureMessageVerifier verifier;
     /** The last version of the routable message that was routed */
-    private IntWrapper lastRoutedVersion = new IntWrapper(0);
+    private final IntSetting lastRoutedVersion;
     
     public RestrictedResponder(StringArraySetting setting) {
-        this(setting, null);
+        this(setting, null, null);
     }
     
     /**
@@ -41,9 +41,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
      * @param verifier the <tt>SignatureVerifier</tt> to use.  Null if we
      * want to process all messages.
      */
-    public RestrictedResponder(StringArraySetting setting, SecureMessageVerifier verifier) {
+    public RestrictedResponder(StringArraySetting setting, 
+            SecureMessageVerifier verifier,
+            IntSetting lastRoutedVersion) {
         this.setting = setting;
         this.verifier = verifier;
+        this.lastRoutedVersion = lastRoutedVersion;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         SimppManager.instance().addListener(this);
@@ -95,9 +98,9 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         int routableVersion = msg.getRoutableVersion();
         if (routableVersion >= 0) {
             synchronized(lastRoutedVersion) {
-                if (routableVersion <= lastRoutedVersion.getInt())
+                if (routableVersion <= lastRoutedVersion.getValue())
                     return;
-                lastRoutedVersion.setInt(routableVersion);
+                lastRoutedVersion.setValue(routableVersion);
             }
         }
         

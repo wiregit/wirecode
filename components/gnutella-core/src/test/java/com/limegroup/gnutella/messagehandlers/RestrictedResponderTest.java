@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messagehandlers;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.PublicKey;
@@ -13,6 +14,8 @@ import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.Verifier;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.SettingsFactory;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
@@ -23,7 +26,6 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
@@ -41,8 +43,12 @@ public class RestrictedResponderTest extends BaseTestCase {
     
     static InetSocketAddress addr;
     static ReplyHandler h;
+    static StringArraySetting ipSetting;
+    static IntSetting versionSetting;
     public void setUp() throws Exception {
-        FilterSettings.HOSTILE_IPS.setValue(new String[]{"1.2.3.4"});
+        SettingsFactory f = new SettingsFactory(new File("set"));
+        ipSetting = f.createStringArraySetting("ips", new String[]{"1.2.3.4"});
+        versionSetting = f.createIntSetting("version", 0);
         addr = new InetSocketAddress(InetAddress.getLocalHost(),1000);
         h = new ReplyHandlerStub() {
             public String getAddress() {
@@ -53,7 +59,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     
     public void testRestrictions() throws Exception {
         // ban everyone
-        FilterSettings.HOSTILE_IPS.setValue(new String[0]);
+        ipSetting.setValue(new String[0]);
         TestResponder responder = new TestResponder(null);
         Message m = PingRequest.createMulticastPing();
         responder.handleMessage(m, addr, h);
@@ -62,7 +68,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         assertNull(responder.handler);
         
         // allow this specific hosts
-        FilterSettings.HOSTILE_IPS.setValue(new String[]{"1.2.3.4"});
+        ipSetting.setValue(new String[]{"1.2.3.4"});
         triggerSimppUpdate();
         responder.handleMessage(m, addr, h);
         assertSame(m, responder.msg);
@@ -138,6 +144,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // if both the return address and source address are allowed, the
         // return address takes precedence.
         responder = new TestResponder(null);
+        m.version++;
         responder.handleMessage(m,addr,h);
         assertSame(m,responder.msg);
         assertEquals(allowed.getAddress(),responder.handler.getAddress());
@@ -172,6 +179,16 @@ public class RestrictedResponderTest extends BaseTestCase {
         m.version = 1;
         responder.handleMessage(m, addr, h);
         assertNull(responder.msg);
+        
+        // create a new responder - it should look up the last routed version
+        // from the persisted setting.
+        responder = new TestResponder(null);
+        responder.handleMessage(m, addr, h);
+        assertNull(responder.msg);
+        m.version = 3;
+        responder.handleMessage(m, addr, h);
+        assertSame(m,responder.msg);
+        assertEquals(3, versionSetting.getValue());
     }
     
     private static int simppVersion;
@@ -188,7 +205,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(FilterSettings.HOSTILE_IPS, verifier);
+            super(ipSetting, verifier, versionSetting);
         }
 
         @Override
