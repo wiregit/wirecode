@@ -1,14 +1,14 @@
 package org.limewire.http;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.nio.NHttpServerConnection;
+import org.apache.http.nio.NHttpConnection;
 
 public interface HttpResponseListener {
 
-    void responseSent(NHttpServerConnection conn, HttpResponse response);
+    void connectionClosed(NHttpConnection conn);
 
-    void connectionClosed(NHttpServerConnection conn);
+    void connectionOpen(NHttpConnection conn);
 
-    void connectionOpened(NHttpServerConnection conn);
+    void responseSent(NHttpConnection conn, HttpResponse response);
     
 }

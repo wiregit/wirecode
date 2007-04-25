@@ -49,6 +49,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
             if (methodBuffer.hasRemaining()) {
                 throw new RuntimeException();
             }
+            methodBuffer = null;
             return read + readSource.read(buffer);
         }
         return readSource.read(buffer);

@@ -6,13 +6,16 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.IOControl;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.WriteObserver;
 
 public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implements HttpNIOEntity, InterestWritableByteChannel {
 
     private ContentEncoder encoder;
+    private IOControl ioctrl;
 
     public InputStream getContent() throws IOException, IllegalStateException {
         throw new UnsupportedOperationException();
@@ -36,25 +39,27 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
 
     public void interest(WriteObserver observer, boolean status) {
         assert observer == this;
-        
-        if (encoder == null) {
-            return;
-        }
+        assert ioctrl != null;
+
         if (status) {
-            encoder.requestOutput();
+            ioctrl.requestOutput();
         } else {
-            encoder.suspendOutput();
+            ioctrl.suspendOutput();
         }
     }
 
-    public void produceContent(final ContentEncoder encoder) throws IOException {
+    public int consumeContent(ContentDecoder decoder, IOControl ioctrl) throws IOException {
+        throw new RuntimeException("Not supported");
+    }
+    
+    public void produceContent(ContentEncoder encoder, IOControl ioctrl) throws IOException {
         if (this.encoder == null) {
             this.encoder = encoder;
+            this.ioctrl = ioctrl;
             initialize();
         }
         if (!handleWrite()) {
             encoder.complete();
-            finished();
         }
     }
     
@@ -74,7 +79,9 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     
     public abstract boolean handleWrite() throws IOException;
 
-    public abstract void finished() throws IOException;
+    //public abstract boolean handleRead() throws IOException;
+
+    public abstract void finished();
 
     public void handleIOException(IOException iox) {
         throw new UnsupportedOperationException();

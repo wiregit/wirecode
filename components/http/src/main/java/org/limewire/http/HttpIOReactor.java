@@ -104,8 +104,6 @@ public class HttpIOReactor implements ConnectingIOReactor {
 
     protected void prepareSocket(final Socket socket) throws IOException {
         socket.setTcpNoDelay(HttpConnectionParams.getTcpNoDelay(this.params));
-        socket.setSoTimeout(HttpConnectionParams.getSoTimeout(this.params));
-        socket.setSoTimeout(0);
         int linger = HttpConnectionParams.getLinger(this.params);
         if (linger >= 0) {
             socket.setSoLinger(linger > 0, linger);
@@ -114,17 +112,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
     
     protected HttpIOSession connectSocket(AbstractNBSocket socket, Object attachment, String word) throws IOException {
         final HttpIOSession session = new HttpIOSession(socket);        
-        int timeout = 0;
-        try {
-            timeout = socket.getSoTimeout();
-        } catch (IOException ex) {
-            // Very unlikely to happen and is not fatal
-            // as the protocol layer is expected to overwrite
-            // this value anyways
-        }
         
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
-        session.setSocketTimeout(timeout);
+        session.setSocketTimeout(HttpConnectionParams.getSoTimeout(this.params));
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, word);
         session.setHttpChannel(channel);
@@ -133,6 +123,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
         
         // need to enable access to the channel for throttling support
         DefaultNHttpServerConnection conn = (DefaultNHttpServerConnection) session.getAttribute(NHTTP_CONN);
+        assert conn != null;
         conn.getContext().setAttribute(IO_SESSION_KEY, session);
         
         socket.setReadObserver(channel);

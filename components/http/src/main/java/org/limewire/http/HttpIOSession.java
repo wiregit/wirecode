@@ -3,6 +3,7 @@
  */
 package org.limewire.http;
 
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ByteChannel;
@@ -173,6 +174,10 @@ public class HttpIOSession implements IOSession {
         } else {
             socket.setWriteObserver(channel);
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
 }
