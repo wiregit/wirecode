@@ -2,7 +2,6 @@ package com.limegroup.gnutella.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -17,6 +16,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.DefaultHttpRequestFactory;
+import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
 import org.apache.http.protocol.HttpContext;
@@ -76,21 +76,22 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
         });
         server.execute(new EventListener() {
-            public void connectionClosed(InetAddress address) {
+            public void connectionClosed(NHttpConnection conn) {
             }
 
-            public void connectionOpen(InetAddress address) {
+            public void connectionOpen(NHttpConnection conn) {
             }
 
-            public void connectionTimeout(InetAddress address) {
+            public void connectionTimeout(NHttpConnection conn) {
             }
 
-            public void fatalIOException(IOException e) {
-                throw new RuntimeException(e);
+            public void fatalIOException(IOException ex, NHttpConnection conn) {
+                throw new RuntimeException(ex);
             }
 
-            public void fatalProtocolException(HttpException e) {
-                throw new RuntimeException(e);
+            public void fatalProtocolException(HttpException ex,
+                    NHttpConnection conn) {
+                throw new RuntimeException(ex);
             }
         });
         RouterService.getConnectionDispatcher().addConnectionAcceptor(

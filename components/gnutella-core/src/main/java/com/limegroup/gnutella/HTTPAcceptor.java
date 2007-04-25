@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -16,7 +18,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
-import org.apache.http.nio.NHttpServerConnection;
+import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -30,11 +32,14 @@ import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
+import org.limewire.http.HttpIOSession;
 import org.limewire.http.HttpResponseListener;
+import org.limewire.http.HttpServiceEventListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
-import org.limewire.http.ServerConnectionEventListener;
 
+import com.limegroup.gnutella.http.HttpContextParams;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -43,6 +48,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Redirects HTTP requests to handlers.
  */
 public class HTTPAcceptor implements ConnectionAcceptor {
+
+    private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
 
     private HttpIOReactor reactor;
 
@@ -99,7 +106,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
         HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
                 responseFactory, new DefaultConnectionReuseStrategy(), params);
-        serviceHandler.setConnectionListener(connectionListener);
+        serviceHandler.setEventListener(connectionListener);
         serviceHandler.setHandlerResolver(this.registry);
 
         this.reactor = new HttpIOReactor(params);
@@ -166,10 +173,17 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.registry.register(pattern, handler);
     }
 
-    private class ConnectionEventListener implements
-            ServerConnectionEventListener {
+    private class ConnectionEventListener implements HttpServiceEventListener {
 
-        public void connectionClosed(NHttpServerConnection conn) {
+        public void connectionOpen(NHttpConnection conn) {
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+                    .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.connectionOpen(conn);
+            }
+        }
+
+        public void connectionClosed(NHttpConnection conn) {
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
                     .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
@@ -177,68 +191,64 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             }
         }
 
-        public void connectionOpen(NHttpServerConnection conn) {
-            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
-                    .toArray(new HttpResponseListener[0]);
-            for (HttpResponseListener listener : listeners) {
-                listener.connectionOpened(conn);
-            }
-        }
-
-        public void connectionTimeout(NHttpServerConnection conn) {
+        public void connectionTimeout(NHttpConnection conn) {
             // should never happen since LimeWire will close the socket on
-            // timeouts
-            // which will trigger a connectionClosed() event
+            // timeouts which will trigger a connectionClosed() event
             throw new RuntimeException();
         }
 
-        public void fatalIOException(NHttpServerConnection conn, IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
-        public void fatalProtocolException(NHttpServerConnection conn,
-                HttpException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
-        public void responseBodySent(NHttpServerConnection conn,
-                HttpResponse response) {
+        public void fatalIOException(IOException e, NHttpConnection conn) {
+            LOG.debug("HTTP connection error", e);
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
                     .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
-                listener.responseSent(conn, response);
+                listener.connectionClosed(conn);
             }
         }
 
-        public void responseHeadersSent(NHttpServerConnection conn,
-                HttpResponse response) {
+        public void fatalProtocolException(HttpException e, NHttpConnection conn) {
+            LOG.debug("HTTP protocol error", e);
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
                     .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
-                listener.responseSent(conn, response);
+                listener.connectionClosed(conn);
+            }
+        }
+
+        public void responseSent(NHttpConnection conn) {
+            HttpIOSession session = HttpContextParams.getIOSession(conn
+                    .getContext());
+            session
+                    .setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
+                            .getValue());
+            session.setThrottle(null);
+
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+                    .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.responseSent(conn, conn.getHttpResponse());
             }
         }
 
     }
 
-    /**
-     * 
-     * XXX iterating over all headers is rather inefficient since the size
-     * of the headers is known in DefaultNHttpServerConnection.submitResponse() 
-     * but can't be easily made accessible  
+    /*
+     * XXX iterating over all headers is rather inefficient since the size of
+     * the headers is known in DefaultNHttpServerConnection.submitResponse() but
+     * can't be easily made accessible
      */
     private class HeaderStatisticTracker implements HttpResponseInterceptor {
 
         public void process(HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
-            for (Iterator it = response.headerIterator(); it.hasNext(); ) {
+            for (Iterator it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();
-                BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.getName().length() + 2 + header.getValue().length());
+                BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header
+                        .getName().length()
+                        + 2 + header.getValue().length());
             }
         }
 
     }
-    
+
 }

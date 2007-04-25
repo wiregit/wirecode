@@ -19,7 +19,7 @@ import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.nio.NHttpServerConnection;
+import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -61,16 +61,16 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
      * instances (all of the uploads in progress).
      */
-    private List<HTTPUploader> _activeUploadList = new LinkedList<HTTPUploader>();
+    private List<HTTPUploader> activeUploadList = new LinkedList<HTTPUploader>();
 
     /** A manager for the available upload slots */
     private final UploadSlotManager slotManager;
 
     /** set to true when an upload has been succesfully completed. */
-    private volatile boolean _hadSuccesfulUpload = false;
+    private volatile boolean hadSuccesfulUpload = false;
 
     /** Number of force-shared active uploads */
-    private int _forcedUploads;
+    private int forcedUploads;
 
     /**
      * Number of active uploads that are not accounted in the slot manager but
@@ -98,6 +98,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     /** The minimum number of bytes transferred by an uploadeder to count. */
     private static final int MIN_SAMPLE_BYTES = 200000; // 200KB
+
+    public static final int TRANSFER_SOCKET_TIMEOUT = 2 * 60 * 1000;
 
     /** The average speed in kiloBITs/second of the last few uploads. */
     private Buffer<Integer> speeds = new Buffer<Integer>(MAX_SPEED_SAMPLE_SIZE);
@@ -180,7 +182,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     // TODO set mime-type to Constants.QUERYREPLY_MIME_TYPE?
                     response.setEntity(new FileResponseEntity(uploader, file));
                 }
-                addToGUI(uploader);
+
+                sendResponse(uploader, response);
             }
         });
 
@@ -312,9 +315,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public synchronized void addAcceptedUploader(HTTPUploader uploader) {
         if (uploader.isForcedShare()) {
             forceAllowedUploads.add(uploader);
-            _forcedUploads++;
+            forcedUploads++;
         }
-        _activeUploadList.add(uploader);
+        activeUploadList.add(uploader);
         uploader.setStartTime(System.currentTimeMillis());
     }
 
@@ -322,7 +325,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Adds this upload to the GUI and increments the attempted uploads. Does
      * nothing if 'shouldShowInGUI' is false.
      */
-    public void addToGUI(HTTPUploader uploader) {
+    public void sendResponse(HTTPUploader uploader, HttpResponse response) {
+        uploader.setLastResponse(response);
+
         if (uploader.isVisible()) {
             return;
         }
@@ -369,7 +374,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized int uploadsInProgress() {
-        return _activeUploadList.size() - _forcedUploads;
+        return activeUploadList.size() - forcedUploads;
     }
 
     public synchronized int getNumQueuedUploads() {
@@ -384,14 +389,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * This method was added to adopt more of the BearShare QHD standard.
      */
     public boolean hadSuccesfulUpload() {
-        return _hadSuccesfulUpload;
+        return hadSuccesfulUpload;
     }
 
     public synchronized boolean isConnectedTo(InetAddress addr) {
         if (slotManager.getNumUsersForHost(addr.getHostAddress()) > 0)
             return true;
 
-        for (HTTPUploader uploader : _activeUploadList) {
+        for (HTTPUploader uploader : activeUploadList) {
             InetAddress host = uploader.getConnectedHost();
             if (host != null && host.equals(addr))
                 return true;
@@ -414,7 +419,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         boolean ret = false;
         // This causes the uploader to generate an exception,
         // and ultimately remove itself from the list.
-        for (HTTPUploader uploader : _activeUploadList) {
+        for (HTTPUploader uploader : activeUploadList) {
             FileDesc upFD = uploader.getFileDesc();
             if (upFD != null && upFD.equals(fd)) {
                 ret = true;
@@ -503,9 +508,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // try remove the urn from the map of unique uploaded files for that
         // host.
 
-        if (_activeUploadList.remove(uploader)) {
+        if (activeUploadList.remove(uploader)) {
             if (uploader.isForcedShare())
-                _forcedUploads--;
+                forcedUploads--;
 
             // at this point it is safe to allow other uploads from the same
             // host
@@ -518,7 +523,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         // Enable auto shutdown
-        if (_activeUploadList.size() == 0)
+        if (activeUploadList.size() == 0)
             RouterService.getCallback().uploadsComplete();
     }
 
@@ -533,10 +538,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 .getValue();
     }
 
-    // //////////////// Bandwith Allocation and Measurement///////////////
+    // //////////////// Bandwidth Allocation and Measurement///////////////
 
     /**
-     * calculates the appropriate burst size for the allocating bandwith on the
+     * calculates the appropriate burst size for the allocating bandwidth on the
      * upload.
      * 
      * @return burstSize. if it is the special case, in which we want to upload
@@ -738,7 +743,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         /**
-         * tells the cache that an upload to the host has started.
+         * Tells the cache that an upload to the host has started.
          * 
          * @param sha1 the urn of the file being uploaded.
          */
@@ -766,14 +771,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         /**
-         * checks whether the given URN is a duplicate request
+         * Checks whether the given URN is a duplicate request
          */
         boolean isDupe(URN sha1) {
             return ACTIVE_UPLOADS.contains(sha1);
         }
 
         /**
-         * informs the request cache that the given URN is no longer actively
+         * Informs the request cache that the given URN is no longer actively
          * uploaded.
          */
         void uploadDone(URN sha1) {
@@ -827,7 +832,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 // start new file
                 slotManager.requestDone(session);
 
-                // Because queueing is per-socket (and not per file),
+                // Because queuing is per-socket (and not per file),
                 // we do not want to reset the queue status if they're
                 // requesting a new file.
                 if (session.isQueued()) {
@@ -889,7 +894,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     /** For testing. */
     public void cleanup() {
-        for (HTTPUploader uploader : _activeUploadList
+        for (HTTPUploader uploader : activeUploadList
                 .toArray(new HTTPUploader[0])) {
             slotManager.cancelRequest(uploader.getSession());
             removeFromList(uploader);
@@ -898,10 +903,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private class ResponseListener implements HttpResponseListener {
 
-        public void connectionOpened(NHttpServerConnection conn) {
+        public void connectionOpen(NHttpConnection conn) {
         }
 
-        public void connectionClosed(NHttpServerConnection conn) {
+        public void connectionClosed(NHttpConnection conn) {
             UploadSession session = getSession(conn.getContext());
             if (session != null) {
                 HTTPUploader uploader = session.getUploader();
@@ -925,20 +930,16 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             }
         }
 
-        public void responseSent(NHttpServerConnection conn,
-                HttpResponse response) {
+        public void responseSent(NHttpConnection conn, HttpResponse response) {
             UploadSession session = getSession(conn.getContext());
             if (session != null) {
                 HTTPUploader uploader = session.getUploader();
-                if (uploader != null) {
+                if (uploader != null && uploader.getLastResponse() == response) {
+                    uploader.setLastResponse(null);
                     uploader.setState(Uploader.COMPLETE);
                 }
-
-                if (session.getQueueStatus() != QueueStatus.QUEUED) {
-                    session.getIOSession().setSocketTimeout(
-                            SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
-                                    .getValue());
-                } else {
+                
+                if (session.getQueueStatus() == QueueStatus.QUEUED) {
                     session.getIOSession().setSocketTimeout(
                             UploadSession.MAX_POLL_TIME);
                 }
