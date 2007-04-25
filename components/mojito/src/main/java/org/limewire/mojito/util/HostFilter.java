@@ -21,14 +21,16 @@ package org.limewire.mojito.util;
 
 import java.net.SocketAddress;
 
-import org.limewire.mojito.io.Filter;
-
-
 /**
- * The HostFilter interface extends Filter by a
- * banning functionality
+ * 
  */
-public interface HostFilter extends Filter {
+public interface HostFilter {
+    
+    /**
+     * Returns whether or not it's allowed to contact
+     * the given SocketAddress
+     */
+    public boolean allow(SocketAddress addr);
     
     /**
      * Bans the given SocketAddress

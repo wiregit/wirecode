@@ -143,6 +143,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     private final StorableModelManager publisherManager = new StorableModelManager();
     
+    private volatile HostFilter hostFilter = null;
     
     /**
      * Constructor to create a new Context
@@ -536,9 +537,17 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setHostFilter(com.limegroup.mojito.util.HostFilter)
      */
-    public void setHostFilter(HostFilter hostFilter) {
+    public synchronized void setHostFilter(HostFilter hostFilter) {
+        this.hostFilter = hostFilter;
         database.setHostFilter(hostFilter);
-        messageDispatcher.setFilter(hostFilter);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getHostFilter()
+     */
+    public HostFilter getHostFilter() {
+        return hostFilter;
     }
     
     /**

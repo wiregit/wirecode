@@ -23,7 +23,6 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -495,8 +494,7 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private static class FilterDelegate implements HostFilter {
         
-        public boolean allow(DHTMessage message) {
-            SocketAddress addr = message.getContact().getContactAddress();
+        public boolean allow(SocketAddress addr) {
             return RouterService.getIpFilter().allow(addr);
         }
 

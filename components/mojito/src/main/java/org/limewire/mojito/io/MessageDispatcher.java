@@ -66,6 +66,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
+import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.MessageUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
@@ -120,11 +121,6 @@ public abstract class MessageDispatcher {
      * Buffer for incoming Messages
      */
     private final ByteBuffer receiveBuffer;
-    
-    /**
-     * Message Filter
-     */
-    private volatile Filter filter;
     
     /**
      * Handle of the cleanup task future
@@ -185,13 +181,6 @@ public abstract class MessageDispatcher {
         }
         
         listeners.remove(l);
-    }
-    
-    /**
-     * Sets the DHTMessage filter. Use null to unset the filter.
-     */
-    public void setFilter(Filter filter) {
-        this.filter = filter;
     }
     
     /**
@@ -815,9 +804,9 @@ public abstract class MessageDispatcher {
      * DHTMessage should be processed. 
      */
     protected boolean allow(DHTMessage message) {
-        Filter f = filter;
-        if (f != null) {
-            return f.allow(message);
+        HostFilter hostFilter = context.getHostFilter();
+        if (hostFilter != null) {
+            return hostFilter.allow(message.getContact().getContactAddress());
         }
         return true;
     }

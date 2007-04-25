@@ -209,6 +209,11 @@ public interface MojitoDHT {
     public void setHostFilter(HostFilter hostFilter);
     
     /**
+     * Returns the current Host Filter
+     */
+    public HostFilter getHostFilter();
+    
+    /**
      * Sets the Database
      */
     public void setDatabase(Database database);

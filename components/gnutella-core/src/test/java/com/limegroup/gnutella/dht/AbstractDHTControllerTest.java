@@ -219,6 +219,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void setHostFilter(HostFilter hostFilter) {
         }
 
+        public HostFilter getHostFilter() {
+            return null;
+        }
+        
         public List<SocketAddress> getPingedNodesList(){
             return pingedList;
         }

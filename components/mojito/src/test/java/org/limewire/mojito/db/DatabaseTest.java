@@ -36,7 +36,6 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
-import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
@@ -606,7 +605,7 @@ public class DatabaseTest extends MojitoTestCase {
         
         private Set<SocketAddress> bannedHosts = new HashSet<SocketAddress>();
         
-        public boolean allow(DHTMessage message) {
+        public boolean allow(SocketAddress addr) {
             return true;
         }
 
