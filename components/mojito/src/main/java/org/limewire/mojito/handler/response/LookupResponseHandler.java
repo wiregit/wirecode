@@ -419,11 +419,6 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         return true;
     }
     
-    /** Returns whether or not the Node is in the to-query Trie */
-    private boolean isYetToBeQueried(Contact node) {
-        return toQuery.containsKey(node.getNodeID());            
-    }
-
     @Override
     protected void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException { 
@@ -652,6 +647,11 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     private void markAsQueried(Contact node) {
         queried.add(node.getNodeID());
         toQuery.remove(node.getNodeID());
+    }
+    
+    /** Returns whether or not the Node is in the to-query Trie */
+    private boolean isYetToBeQueried(Contact node) {
+        return toQuery.containsKey(node.getNodeID());            
     }
     
     /** Adds the Node to the to-query Trie */
