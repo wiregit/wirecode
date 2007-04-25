@@ -1,18 +1,22 @@
 package com.limegroup.gnutella;
 
+import java.net.Socket;
+
 import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 
 public class BandwidthManager {
 
-	private final Throttle UP_TCP, DOWN_TCP;
+	private final Throttle UP_TCP, DOWN_TCP, UP_UDP;
 	
 	public BandwidthManager() {
 		UP_TCP = new NBThrottle(true,0);
 		DOWN_TCP = new NBThrottle(false,0);
+		UP_UDP = new NBThrottle(true, 0);
 	}
 	
 	public void applyRate() {
@@ -33,6 +37,7 @@ public class BandwidthManager {
 	
 	public void applyUploadRate() {
 		UP_TCP.setRate(RouterService.getUploadManager().getUploadSpeed());
+		UP_UDP.setRate(RouterService.getUploadManager().getUploadSpeed());
 	}
 	
 	public Throttle getReadThrottle() {
@@ -44,4 +49,10 @@ public class BandwidthManager {
         applyUploadRate();
         return UP_TCP;
 	}
+    
+    public Throttle getWriteThrottle(Socket socket) {
+        applyUploadRate();
+        return (socket instanceof UDPConnection) ? UP_UDP : UP_TCP;
+    }
+
 }
