@@ -78,8 +78,10 @@ public class GetValueTest extends MojitoTestCase {
                 fail(err);
             }
             
+            int identityHashCode = 0;
             try {
                 FindValueResult result = dhts.get(1).get(valueId, DHTValueType.ANY).get();
+                identityHashCode = System.identityHashCode(result);
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
                 assertEquals(1, entities.size());
                 for (DHTValueEntity entity : entities) {
@@ -91,6 +93,7 @@ public class GetValueTest extends MojitoTestCase {
             
             try {
                 FindValueResult result = dhts.get(1).get(valueId, DHTValueType.LIME).get();
+                assertNotEquals(identityHashCode, System.identityHashCode(result));
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
                 assertEquals("Got " + entities, 0, entities.size());
             } catch (Exception err) {
