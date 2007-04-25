@@ -272,12 +272,13 @@ public class RouterService {
     /**
      * The DHTManager that manages the DHT and its various modes
      */
-    private static DHTManager dhtManager;
+    private static DHTManager dhtManager = new DHTManagerImpl(
+            ExecutorsHelper.newProcessingQueue("DHT-Processor"));
     
     /**
      * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
-    private static AltLocFinder altLocFinder;
+    private static AltLocFinder altLocFinder = new AltLocFinder(dhtManager);
     
     private static MessageDispatcher messageDispatcher;
     
@@ -378,10 +379,6 @@ public class RouterService {
 		RouterService.callback = callback;
         fileManager.addFileEventListener(callback);
         RouterService.setMessageRouter(router);
-        
-        dhtManager = new DHTManagerImpl(
-                ExecutorsHelper.newProcessingQueue("DHT-Processor"));
-        altLocFinder = new AltLocFinder(dhtManager);
         
         manager.addEventListener(callback);
         manager.addEventListener(dhtManager);
@@ -1932,9 +1929,7 @@ public class RouterService {
         	UDPSERVICE.resetLastConnectBackTime();
         
         // Notify the DHT
-        if (dhtManager != null) {
-            dhtManager.addressChanged();
-        }
+        dhtManager.addressChanged();
         
         if (manager != null) {
         	Properties props = new Properties();
