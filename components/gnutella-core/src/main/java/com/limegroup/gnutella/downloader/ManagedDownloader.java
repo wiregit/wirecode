@@ -908,7 +908,7 @@ public class ManagedDownloader extends AbstractDownloader
     private boolean shouldGiveUp() {
         return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS
                 && (numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
-                        || !RouterService.isMemberOfDHT());
+                        || !RouterService.getDHTManager().isMemberOfDHT());
     }
     
     /**
@@ -934,7 +934,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     private void sendRequery() {
         if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-                && RouterService.isMemberOfDHT() 
+                && RouterService.getDHTManager().isMemberOfDHT() 
                 && (firstQueryAttempt || alreadyTriedGnutella)) {
             
             if (sendDHTQuery()) {

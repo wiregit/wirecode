@@ -164,6 +164,10 @@ public class DHTManagerImpl implements DHTManager {
         return controller.isBootstrapped();
     }
     
+    public synchronized boolean isMemberOfDHT() {
+        return isRunning() && isBootstrapped();
+    }
+
     public synchronized boolean isWaitingForNodes() {
         return controller.isWaitingForNodes();
     }

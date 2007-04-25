@@ -19,6 +19,7 @@ import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
@@ -272,13 +273,25 @@ public class RouterService {
     /**
      * The DHTManager that manages the DHT and its various modes
      */
-    private static DHTManager dhtManager = new DHTManagerImpl(
-            ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+    private static final AtomicLazyReference<DHTManager> DHT_MANAGER_REFERENCE
+        = new AtomicLazyReference<DHTManager>() {
+            @Override
+            public DHTManager createObject() {
+                return new DHTManagerImpl(
+                        ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+            }
+        };
     
     /**
      * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
-    private static AltLocFinder altLocFinder = new AltLocFinder(dhtManager);
+    private static final AtomicLazyReference<AltLocFinder> ALT_LOC_FINDER_REFERENCE
+        = new AtomicLazyReference<AltLocFinder>() {
+            @Override
+            public AltLocFinder createObject() {
+                return new AltLocFinder(DHT_MANAGER_REFERENCE.get());
+            }
+        };
     
     private static MessageDispatcher messageDispatcher;
     
@@ -381,7 +394,7 @@ public class RouterService {
         RouterService.setMessageRouter(router);
         
         manager.addEventListener(callback);
-        manager.addEventListener(dhtManager);
+        manager.addEventListener(DHT_MANAGER_REFERENCE.get());
         
         nodeAssigner = new NodeAssigner(uploadManager, 
                                         downloadManager, 
@@ -656,14 +669,14 @@ public class RouterService {
      * Accessor for the <tt>LimeDHTManager</tt> instance.
      */
     public static DHTManager getDHTManager() {
-        return dhtManager;
+        return DHT_MANAGER_REFERENCE.get();
     }
     
     /**
      * Accessor for the <tt>AltLocFinder</tt> instance.
      */
     public static AltLocFinder getAltLocFinder() {
-        return altLocFinder;
+        return ALT_LOC_FINDER_REFERENCE.get();
     }
     
 	/**
@@ -1803,41 +1816,6 @@ public class RouterService {
         return manager.isActiveSupernode();
     }
     
-    /**
-     * Tells whether this node is an active or passive DHT node
-     * @return true if this is a DHT node, false otherwise
-     */
-    public static boolean isDHTNode() {
-        if(dhtManager != null) {
-            return dhtManager.isRunning();
-        } 
-        return false;
-    }
-    
-    /**
-     * Returns the current mode of the DHT
-     */
-    public static DHTMode getDHTMode() {
-        if (dhtManager != null) {
-            return dhtManager.getDHTMode();
-        }
-        return DHTMode.INACTIVE;
-    }
-    
-    /**
-     * Returns whether this node is currently a member of (connect to) the DHT or not.
-     * In order to be part of the DHT, a node has to be bootstrapped.
-     * 
-     */
-    public static boolean isMemberOfDHT() {
-        if(dhtManager != null) {
-            return (dhtManager.isRunning()
-                    && dhtManager.isBootstrapped());
-        }
-        
-        return false;
-    }
-    
 	/**
 	 * Accessor for whether or not this node is a shielded leaf.
 	 *
@@ -1929,7 +1907,7 @@ public class RouterService {
         	UDPSERVICE.resetLastConnectBackTime();
         
         // Notify the DHT
-        dhtManager.addressChanged();
+        getDHTManager().addressChanged();
         
         if (manager != null) {
         	Properties props = new Properties();

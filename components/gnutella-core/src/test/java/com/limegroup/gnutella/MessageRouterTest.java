@@ -928,7 +928,9 @@ public final class MessageRouterTest extends LimeTestCase {
             return null; 
         }
 
-        public boolean isRunning() { return true; }
+        public boolean isRunning() { 
+            return true; 
+        }
 
         public void stop() {}
 
@@ -936,6 +938,10 @@ public final class MessageRouterTest extends LimeTestCase {
         
         public boolean isBootstrapped() {
             return false;
+        }
+
+        public boolean isMemberOfDHT() {
+            return isRunning() && isBootstrapped();
         }
 
         public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}

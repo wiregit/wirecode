@@ -49,6 +49,10 @@ public class DHTManagerStub implements DHTManager {
         return true;
     }
 
+    public boolean isMemberOfDHT() {
+        return isRunning() && isBootstrapped();
+    }
+    
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
 
     public Vendor getVendor() {

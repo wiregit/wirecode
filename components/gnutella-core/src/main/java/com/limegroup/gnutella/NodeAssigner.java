@@ -328,7 +328,7 @@ public class NodeAssigner {
         
         // If I'm not a DHT Node running in ACTIVE mode then
         // try to become an Ultrapeer
-        if (RouterService.getDHTMode() != DHTMode.ACTIVE) {
+        if (RouterService.getDHTManager().getDHTMode() != DHTMode.ACTIVE) {
             return true;
         }
         
@@ -367,7 +367,7 @@ public class NodeAssigner {
         
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
-        final DHTMode current = RouterService.getDHTMode();
+        final DHTMode current = RouterService.getDHTManager().getDHTMode();
         
         // Initial mode is to turn off the DHT
         DHTMode mode = DHTMode.INACTIVE;

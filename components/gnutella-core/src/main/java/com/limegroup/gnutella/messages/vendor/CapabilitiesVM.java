@@ -13,6 +13,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -131,8 +132,9 @@ public final class CapabilitiesVM extends VendorMessage {
                                         UpdateHandler.instance().getLatestId());
         supported.add(smb);
         
-        if (RouterService.isMemberOfDHT()) {
-            DHTMode mode = RouterService.getDHTMode();
+        DHTManager manager = RouterService.getDHTManager();
+        if (manager.isMemberOfDHT()) {
+            DHTMode mode = manager.getDHTMode();
             assert (mode != null);
             smb = new SupportedMessageBlock(mode.getCapabilityName(),
                     RouterService.getDHTManager().getVersion().shortValue());

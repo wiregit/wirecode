@@ -208,7 +208,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             RouterService.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
             
             
             // Bootstrap the Ultrapeer
@@ -290,7 +290,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             RouterService.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
             RouterService.getDHTManager().getMojitoDHT()
@@ -366,7 +366,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             RouterService.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
             RouterService.getDHTManager().getMojitoDHT()

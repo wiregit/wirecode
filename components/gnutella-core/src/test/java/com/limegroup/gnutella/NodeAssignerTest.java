@@ -151,13 +151,13 @@ public class NodeAssignerTest extends LimeTestCase {
         ULTRAPEER.setAcceptsUltrapeers(true);
         connect();
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertTrue("should be passively connected to the DHT", RouterService.isDHTNode() 
-                && (RouterService.getDHTMode() != DHTMode.ACTIVE));
+        assertTrue("should be passively connected to the DHT", RouterService.getDHTManager().isRunning() 
+                && (RouterService.getDHTManager().getDHTMode() != DHTMode.ACTIVE));
         
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();
         sleep(200);
-        assertFalse(RouterService.getDHTMode().isActive());
+        assertFalse(RouterService.getDHTManager().getDHTMode().isActive());
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
@@ -174,7 +174,7 @@ public class NodeAssignerTest extends LimeTestCase {
         sleep(2 * NodeAssigner.TIMER_DELAY);
         
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
+        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
     }
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
@@ -186,7 +186,7 @@ public class NodeAssignerTest extends LimeTestCase {
         connect();
         sleep();
         assertFalse("should not be an ultrapeer", RouterService.isSupernode());
-        assertEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
+        assertEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
@@ -196,7 +196,7 @@ public class NodeAssignerTest extends LimeTestCase {
         
         sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
+        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
         assertTrue("should be an ultrapeer", RouterService.isSupernode());
     }
     

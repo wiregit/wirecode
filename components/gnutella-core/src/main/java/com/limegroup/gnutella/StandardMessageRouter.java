@@ -137,7 +137,7 @@ public class StandardMessageRouter extends MessageRouter {
         List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         
-        if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
+        if (request.requestsDHTIPP() && RouterService.getDHTManager().isRunning()) {
             dhthosts = RouterService.getDHTManager().getActiveDHTNodes(maxHosts);
         }
         

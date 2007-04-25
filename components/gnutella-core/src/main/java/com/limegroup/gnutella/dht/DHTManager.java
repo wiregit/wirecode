@@ -195,6 +195,11 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public boolean isBootstrapped();
     
     /**
+     * 
+     */
+    public boolean isMemberOfDHT();
+    
+    /**
      * Returns whether this Node is waiting for Nodes or not
      */
     public boolean isWaitingForNodes();

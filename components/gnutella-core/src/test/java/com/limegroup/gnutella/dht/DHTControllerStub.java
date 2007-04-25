@@ -12,10 +12,13 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 public class DHTControllerStub implements DHTController {
     
-    private MojitoDHT dht;
+    private final MojitoDHT dht;
 
-    public DHTControllerStub(MojitoDHT dht) {
+    private final DHTMode mode;
+    
+    public DHTControllerStub(MojitoDHT dht, DHTMode mode) {
         this.dht = dht;
+        this.mode = mode;
     }
 
     public void addActiveDHTNode(SocketAddress hostAddress) {
@@ -27,11 +30,7 @@ public class DHTControllerStub implements DHTController {
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
         return null;
     }
-
-    public int getDHTVersion() {
-        return 0;
-    }
-
+    
     public MojitoDHT getMojitoDHT() {
         return dht;
     }
@@ -64,6 +63,6 @@ public class DHTControllerStub implements DHTController {
     }
 
     public DHTMode getDHTMode() {
-        return null;
+        return mode;
     }
 }
