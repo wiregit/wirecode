@@ -68,7 +68,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * Trie of Buckets and the Buckets are a Trie of Contacts
      */
-    private PatriciaTrie<KUID, Bucket> bucketTrie;
+    private final PatriciaTrie<KUID, Bucket> bucketTrie;
     
     /**
      * A counter for consecutive failures

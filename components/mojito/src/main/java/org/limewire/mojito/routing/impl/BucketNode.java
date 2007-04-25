@@ -48,13 +48,13 @@ class BucketNode implements Bucket {
     
     private static final long serialVersionUID = -4116522147032657308L;
 
-    private RouteTable routeTable;
+    private final RouteTable routeTable;
     
-    private KUID bucketId;
+    private final KUID bucketId;
     
     private final int depth;
     
-    private PatriciaTrie<KUID, Contact> nodeTrie;
+    private final PatriciaTrie<KUID, Contact> nodeTrie;
     
     private transient Map<KUID, Contact> cache;
     
