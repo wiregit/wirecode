@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.BandwidthThrottle;
+import org.limewire.io.NetworkUtils;
 import org.limewire.io.ThrottledOutputStream;
 import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
@@ -227,6 +228,11 @@ public class ManagedConnection extends Connection
      *  this certain hops value....
      */
     private volatile int hopsFlowMax = -1;
+    
+    /**
+     * If this connection is no longer forwarding queries.
+     */
+    private volatile boolean muted;
 
     /**
      * This member contains the time beyond which, if this host is still busy (hops flow==0),
@@ -750,6 +756,10 @@ public class ManagedConnection extends Connection
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
 
+        // don't send queries if muted.
+        if (muted && m instanceof QueryRequest)
+            return;
+        
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
     	int smh = hopsFlowMax;
@@ -889,8 +899,18 @@ public class ManagedConnection extends Connection
         } else {
             if(m instanceof QueryReply){ 
             	queryReplies++;
-            	if(m.getHops() == 0)
+            	if(m.getHops() == 0) {
+                    // if the hops is 0, check that the addresses match
+                    QueryReply r = (QueryReply)m;
+                    byte [] replyAddress = r.getIPBytes();
+                    byte [] connectionAddress = getSocket().getInetAddress().getAddress();
+                    if (!NetworkUtils.isPrivateAddress(replyAddress) &&
+                            !Arrays.equals(connectionAddress, replyAddress)) {
+                        muted = true;
+                        return;
+                    }
             		clientGUID = ((QueryReply)m).getClientGUID();
+                }
             }
         
             //special handling for proxying.
@@ -1595,6 +1615,7 @@ public class ManagedConnection extends Connection
         data.put("bl",isBusyLeaf());
         data.put("k", isKillable());
         data.put("pp",isPushProxyFor());
+        data.put("m",muted);
         return data;
     }
 }
