@@ -182,6 +182,12 @@ public class VerifyingFile {
     private static int chunksScheduled = 0;
     
     /**
+     * Additional counter to keep track of scheduled chunks in each single file.
+     * Needed to prevent premature closing of underlying RandomAccessFile.
+     */
+    private int chunksScheduledPerFile = 0;
+    
+    /**
      * Holds the iterable for all blocks, is lazily instantiated when
      * needed for the first time.
      */
@@ -315,6 +321,9 @@ public class VerifyingFile {
             Assert.that(false, "bad length: " + request.length + ", needed <= " + temp.length);
         System.arraycopy(request.buf, request.start, temp, 0, request.length);
         
+        synchronized (this) {
+            chunksScheduledPerFile++;
+        }
         synchronized(VerifyingFile.class) {
             chunksScheduled++;
             QUEUE.execute(new ChunkHandler(temp, request.in));
@@ -594,6 +603,13 @@ public class VerifyingFile {
         if(fos==null)
             return;
         try { 
+            synchronized (this) {
+                while (chunksScheduledPerFile > 0) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ie) { }
+                }
+            }
             fos.close();
         } catch (IOException ioe) {}
     }
@@ -897,9 +913,14 @@ public class VerifyingFile {
             	}
                 
                 synchronized(VerifyingFile.this) {
-                    if (!freedPending)
-                        pendingBlocks.delete(intvl);
-                    VerifyingFile.this.notify(); 
+                    try {
+                        if (!freedPending)
+                            pendingBlocks.delete(intvl);
+                    
+                    } finally {
+                        --chunksScheduledPerFile;
+                        VerifyingFile.this.notifyAll();
+                    }
                 }
             }
         }
