@@ -327,7 +327,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload10() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFD(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -335,8 +335,24 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload11() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFDWithURN(TPORT_1, true);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleTLSDownload10OutgoingOff() throws Exception {
+        LOG.info("-Testing non-swarmed download...");
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        RemoteFileDesc rfd=newRFD(PORT_1, true);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleTLSDownload11OutgoingOff() throws Exception {
+        LOG.info("-Testing non-swarmed download...");
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        RemoteFileDesc rfd=newRFDWithURN(PORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
