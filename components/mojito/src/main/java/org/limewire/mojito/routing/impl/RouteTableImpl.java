@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -864,19 +865,25 @@ public class RouteTableImpl implements RouteTable {
     DHTFuture<PingResult> ping(Contact node, DHTFutureListener<PingResult> listener) {
         DHTFuture<PingResult> future = null;
         
+        ContactPinger pinger = this.pinger;
         if (pinger != null) {
-            future = pinger.ping(node);
-            
+            try {
+                future = pinger.ping(node);
+            } catch (RejectedExecutionException err) {
+                ErrorService.error(err);
+                // TODO: Do the same as below?
+            }
         } else {
-            // If there's no ContactPinger then create a fake
-            // DHTFuture that simulates an instant timeout.
+            // If there's no ContactPinger or the ping request was
+            // rejected then create a fake DHTFuture that simulates 
+            // an instant timeout.
             future = new FixedDHTFuture<PingResult>(new DHTTimeoutException(
                     node.getNodeID(), node.getContactAddress(), null, 0L));
             
             handleFailure(node.getNodeID(), node.getContactAddress());
         }
         
-        if (listener != null) {
+        if (future != null && listener != null) {
             future.addDHTFutureListener(listener);
         }
         
