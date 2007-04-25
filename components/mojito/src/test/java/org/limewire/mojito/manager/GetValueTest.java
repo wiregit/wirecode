@@ -92,7 +92,7 @@ public class GetValueTest extends MojitoTestCase {
             try {
                 FindValueResult result = dhts.get(1).get(valueId, DHTValueType.LIME).get();
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
-                assertEquals(0, entities.size());
+                assertEquals("Got " + entities, 0, entities.size());
             } catch (Exception err) {
                 fail(err);
             }
