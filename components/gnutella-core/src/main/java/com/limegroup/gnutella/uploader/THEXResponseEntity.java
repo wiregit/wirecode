@@ -6,8 +6,9 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 
 import org.limewire.http.AbstractHttpNIOEntity;
+import org.limewire.nio.NBThrottle;
 
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexWriter;
 
@@ -18,6 +19,12 @@ import com.limegroup.gnutella.tigertree.ThexWriter;
  * http://open-content.net/specs/draft-jchapweske-thex-02.html
  */
 public class THEXResponseEntity extends AbstractHttpNIOEntity {
+
+    /**
+     * Throttle for the speed of THEX uploads, allow up to 0.5K/s
+     */
+    private static final NBThrottle THROTTLE =
+        new NBThrottle(true, UploadSettings.THEX_UPLOAD_SPEED.getValue());
 
     private HTTPUploader uploader;
 
@@ -43,7 +50,9 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
     @Override
     public void initialize() throws IOException {
         this.writer = tree.createAsyncWriter();
-        uploader.setState(Uploader.THEX_REQUEST);
+        
+        THROTTLE.setRate(UploadSettings.THEX_UPLOAD_SPEED.getValue());
+        uploader.getSession().getIOSession().setThrottle(THROTTLE);
     }
 
     @Override
@@ -55,7 +64,8 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public void finished() throws IOException {
+    public void finished() {
+        this.writer = null;
     }
 
 }

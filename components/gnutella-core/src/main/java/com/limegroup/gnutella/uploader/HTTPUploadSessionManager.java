@@ -18,7 +18,7 @@ public interface HTTPUploadSessionManager {
 
     void addAcceptedUploader(HTTPUploader uploader);
 
-    void addToGUI(HTTPUploader uploader);
+    void sendResponse(HTTPUploader uploader, HttpResponse response);
 
     void handleFreeLoader(HttpRequest request, HttpResponse response,
             HttpContext context, HTTPUploader uploader) throws HttpException, IOException;

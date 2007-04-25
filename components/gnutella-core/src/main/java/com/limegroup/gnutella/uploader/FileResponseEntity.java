@@ -11,11 +11,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
 
-public class FileResponseEntity extends AbstractHttpNIOEntity {
+public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdownable {
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
@@ -34,6 +35,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     private FilePieceReader reader;
 
     private Piece piece;
+    
+    private StalledUploadWatchdog watchdog;
     
     private FileResponseEntity(HTTPUploader uploader) {
         this.uploader = uploader;
@@ -62,70 +65,23 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         if (LOG.isDebugEnabled())
             LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
 
-//        if (fd != null) {
-//            in = fd.createInputStream();
-//        } else {
-//            in = new BufferedInputStream(new FileInputStream(file));
-//        }
-//        
-//        if (begin > 0) {
-//            long skipped = in.skip(begin);
-//            if (skipped != begin) {
-//                throw new IOException("Could not skip to begin offset: " + skipped + " < " + begin);
-//            }
-//        }
-
+        watchdog = new StalledUploadWatchdog();
+        
         uploader.getSession().getIOSession().setThrottle(RouterService
-                .getBandwidthManager().getWriteThrottle());
+                .getBandwidthManager().getWriteThrottle(uploader.getSession().getIOSession().getSocket()));
 
         reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
         reader.start();
-        
-//        buffer = ByteBuffer.allocate(BUFFER_SIZE);
-//        // don't write on the first call to handleWrite
-//        buffer.limit(0); 
     }
     
     @Override
-    public void finished() throws IOException {
-//        in.close();
+    public void finished() {
+        watchdog.deactivate();
         reader.shutdown();
-        
-        uploader.getSession().getIOSession().setThrottle(null);
     }
     
     @Override
     public boolean handleWrite() throws IOException {
-//        if (buffer == null) {
-//            return false;
-//        }
-//        
-//        if (buffer.hasRemaining()) {
-//             int written = write(buffer);
-//             uploader.addAmountUploaded(written);
-//             if (buffer.hasRemaining()) {
-//                 return true;
-//             } else if (remaining == 0) {
-//                 return false;
-//             }
-//        }
-// 
-//        buffer.clear();
-//        int read = in.read(buffer.array(), 0, (int) Math.min(buffer.remaining(), remaining));
-//        if (read == -1) {
-//            throw new EOFException("Unexpected end of input stream");
-//        }
-//        
-//        remaining -= read;
-//        
-//        if (LOG.isTraceEnabled())
-//            LOG.debug("Uploading " + fd.getFileName() + " [read=" + read + ",remaining=" + remaining + "]");
-//        
-//        buffer.limit(read);
-//        int written = write(buffer);
-//        uploader.addAmountUploaded(written);
-//        return remaining > 0 || buffer.hasRemaining();
-        
         if (reader == null) {
             return false;
         }
@@ -134,6 +90,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             int written = write(buffer);
             uploader.addAmountUploaded(written);
             if (buffer.hasRemaining()) {
+                watchdog.activate(this);
                 return true;
             } else if (remaining == 0) {
                 reader.release(piece);
@@ -146,11 +103,13 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
                 reader.release(piece);
             }
 
-            piece = reader.next();
-            if (piece == null) {
-                buffer = null;
-                interest(this, false);
-                return true;
+            synchronized (this) {
+                piece = reader.next();
+                if (piece == null) {
+                    buffer = null;
+                    interest(false);  
+                    return true;
+                }
             }
 
             buffer = piece.getBuffer();
@@ -161,22 +120,39 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
 
             int written = write(buffer);
             uploader.addAmountUploaded(written);
+            watchdog.activate(this);
         } while (remaining > 0 && !buffer.hasRemaining());
             
         return remaining > 0 || buffer.hasRemaining();
+    }
+
+    public synchronized void interest(boolean status) {
+        interest(this, status);
+    }
+
+    @Override
+    public void shutdown() {
+        LOG.warn("File transfer timed out: " + uploader);
+        uploader.stop();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " [file=" + file.getName() + ",read=" + buffer.remaining() + ",remaining=" + remaining + "]"; 
     }
     
     private class PieceHandler implements PieceListener {
 
         public void readFailed(IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            LOG.warn("Error reading file from disk: " + uploader, e);
+            // XXX communicate 
+            uploader.stop();
         }
 
         public void readSuccessful() {
-            FileResponseEntity.this.interest(FileResponseEntity.this, true);
+            FileResponseEntity.this.interest(true);
         }
-        
-    }
 
+    }
+    
 }

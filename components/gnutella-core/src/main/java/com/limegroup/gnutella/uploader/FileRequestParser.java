@@ -139,6 +139,11 @@ class FileRequestParser {
             return this.requestType == RequestType.THEX;
         }
         
+        @Override
+        public String toString() {
+            return getClass().getName() + " [index=" + index + ",filename=" + filename + ",type=" + requestType + "]";
+        }
+        
     }
 
     

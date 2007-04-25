@@ -7,19 +7,26 @@ public class Piece implements Comparable<Piece> {
     private long offset;
     
     private ByteBuffer buffer;
+
+    private int length;
     
     public Piece(long offset, ByteBuffer buffer) {
         this.offset = offset;
         this.buffer = buffer;
+        this.length = buffer.limit();
     }
 
-    public long getOffset() {
-        return offset;
-    }
-    
     public ByteBuffer getBuffer() {
         return buffer;
     }
+
+    public int getLength() {
+        return length;
+    }
+    
+    public long getOffset() {
+        return offset;
+    }    
 
     public int compareTo(Piece o) {
         long l = offset - o.offset;

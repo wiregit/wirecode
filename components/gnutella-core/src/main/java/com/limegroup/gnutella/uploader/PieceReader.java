@@ -6,10 +6,6 @@ public interface PieceReader {
     
     void release(Piece piece);
     
-    void suspend();
-    
-    void resume();
-    
     void shutdown();
     
 }

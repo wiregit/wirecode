@@ -24,7 +24,7 @@ public class FilePieceReaderTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         file = File.createTempFile("limewire", "");
-        data = new byte[10000];
+        data = new byte[50000];
         Random r = new Random();
         r.nextBytes(data);
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
@@ -38,19 +38,20 @@ public class FilePieceReaderTest extends LimeTestCase {
         FilePieceReader reader = new FilePieceReader(new ByteBufferCache(),
                 file, 0, (int) file.length(), listener);
         reader.start();
-        
+
         int read = 0;
         while (read < file.length()) {
             assertGreaterThan(0, listener.waitForNotification());
             Piece piece = reader.next();
             if (read == 0) {
-                assertNotNull(piece);
+                assertNotNull("Notification should not have been sent", piece);
             }
-            while (piece != null) { 
+            while (piece != null) {
+                assertEquals(piece.getBuffer().limit(), piece.getLength());
+                assertEquals(piece.getBuffer().limit(), piece.getBuffer().remaining());
                 assertEquals(read, piece.getOffset());
                 assertEqualsToData(piece);
-                read += piece.getBuffer().remaining();
-                System.out.println(read);
+                read += piece.getBuffer().limit();
                 reader.release(piece);
                 piece = reader.next();
             }
@@ -58,9 +59,14 @@ public class FilePieceReaderTest extends LimeTestCase {
     }
 
     private void assertEqualsToData(Piece piece) {
-        byte[] content = new byte[piece.getBuffer().remaining()];
-        System.arraycopy(data, (int) piece.getOffset(), content, 0, content.length);
-        assertEquals(content, piece.getBuffer().array());
+        byte[] expectedContent = new byte[piece.getBuffer().remaining()];
+        System.arraycopy(data, (int) piece.getOffset(), expectedContent, 0,
+                expectedContent.length);
+        byte[] readContent = new byte[piece.getBuffer().remaining()];
+        piece.getBuffer().get(readContent);
+        assertEquals("Unexpected data in piece at offset: " + piece.getOffset()
+                + ", length: " + expectedContent.length, //
+                expectedContent, readContent);
     }
 
     private class MyPieceListener implements PieceListener {
@@ -79,8 +85,9 @@ public class FilePieceReaderTest extends LimeTestCase {
             exception = e;
             this.notify();
         }
-        
-        public synchronized int waitForNotification() throws InterruptedException, IOException {
+
+        public synchronized int waitForNotification()
+                throws InterruptedException, IOException {
             while (notificationCount == 0 && exception == null) {
                 this.wait();
             }

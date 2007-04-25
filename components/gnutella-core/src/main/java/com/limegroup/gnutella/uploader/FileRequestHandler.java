@@ -100,7 +100,8 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         assert uploader != null;
         updateStatistics(uploader);
-        sessionManager.addToGUI(uploader);
+        
+        sessionManager.sendResponse(uploader, response);
     }
 
     private HTTPUploader findFileAndProcessHeaders(HttpRequest request,
@@ -283,6 +284,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // see CORE-174
         // response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
 
+        uploader.setState(Uploader.THEX_REQUEST);
         response.setEntity(new THEXResponseEntity(uploader, tree, uploader.getFileSize()));
         response.setStatusCode(HttpStatus.SC_OK);
     }
@@ -358,19 +360,10 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (!request.filename.equals(fd.getFileName())) {
-            // if (LOG.isDebugEnabled())
-            // LOG.debug(uploader + " wrong file name");
+            if (LOG.isDebugEnabled())
+                LOG.debug("Wrong file name in request: " + request);
             return null;
         }
-
-        // try {
-        // uploader.setFileDesc(fd);
-        // } catch (IOException ioe) {
-        // if (LOG.isDebugEnabled())
-        // LOG.debug(uploader + " could not create file stream " + ioe);
-        // uploader.setState(Uploader.FILE_NOT_FOUND);
-        // return;
-        // }
 
         return fd;
     }

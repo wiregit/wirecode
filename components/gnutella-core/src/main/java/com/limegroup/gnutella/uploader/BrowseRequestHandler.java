@@ -48,7 +48,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             response.setEntity(new BrowseResponseEntity(uploader));
             response.setStatusCode(HttpStatus.SC_OK);
         }
-        sessionManager.addToGUI(uploader);
+        sessionManager.sendResponse(uploader, response);
     }
 
     public class BrowseResponseEntity extends AbstractHttpNIOEntity {
@@ -110,7 +110,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         }
 
         @Override
-        public void finished() throws IOException {
+        public void finished() {
         }
 
     }

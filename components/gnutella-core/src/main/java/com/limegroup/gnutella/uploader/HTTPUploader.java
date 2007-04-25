@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.apache.http.HttpResponse;
 import org.limewire.collection.Interval;
 
 import com.limegroup.gnutella.FileDesc;
@@ -33,6 +34,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     private boolean visible;
 
     private String method;
+
+    private HttpResponse lastResponse;
     
     public HTTPUploader(String fileName, UploadSession session) {
         super(fileName, session);
@@ -206,6 +209,14 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     
     public void setMethod(String method) {
         this.method = method;
+    }
+
+    public void setLastResponse(HttpResponse lastResponse) {
+        this.lastResponse = lastResponse;
+    }
+    
+    public HttpResponse getLastResponse() {
+        return lastResponse;
     }
     
 }
