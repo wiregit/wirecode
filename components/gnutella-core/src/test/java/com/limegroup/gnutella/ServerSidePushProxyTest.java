@@ -152,9 +152,56 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
                  202); // opcode expected in return
     }
     
+    public void testGETWithServerIdTLS() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "true");
+        tRequest("GET", // request method.
+                 "/gnutella/push-proxy", // the request
+                 "ServerID", // initial param
+                 Base32.encode(clientGUID), // initial value
+                 "127.0.0.1", // ip
+                 6346, // port
+                 m, // params
+                 202); // opcode expected in return
+    }
+    
+    public void testGETWithServerIdTLSFalse() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "false");
+        tRequest("GET", // request method.
+                 "/gnutella/push-proxy", // the request
+                 "ServerID", // initial param
+                 Base32.encode(clientGUID), // initial value
+                 "127.0.0.1", // ip
+                 6346, // port
+                 m, // params
+                 202); // opcode expected in return
+    }
+    
     public void testHEADWithServerId() throws Exception {
         tRequest("HEAD", "/gnutella/push-proxy", "Serverid", 
                 Base32.encode(clientGUID), "10.238.1.87", 6350, null, 202);
+    }
+    
+    public void testHEADWithServerIdTLS() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "true");
+        tRequest("HEAD", "/gnutella/push-proxy", "Serverid", 
+                Base32.encode(clientGUID), "10.238.1.87", 6350, m, 202);
+    }
+    
+    public void testHEADWithServerIdTLSFalse() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "false");
+        tRequest("HEAD", "/gnutella/push-proxy", "Serverid", 
+                Base32.encode(clientGUID), "10.238.1.87", 6350, m, 202);
+    }
+    
+    public void testHEADWithServerIdTLSOther() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "asdfa32");
+        tRequest("HEAD", "/gnutella/push-proxy", "Serverid", 
+                Base32.encode(clientGUID), "10.238.1.87", 6350, m, 202);
     }
     
     public void testInvalidGUIDWithServerId() throws Exception {
@@ -183,6 +230,21 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
                 leafGUID.toHexString(), "127.0.0.1", 6346, null, 202);
     }
     
+    public void testGuidIsBase16TLS() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "true");
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testGuidIsBase16TLSFalse() throws Exception {
+        Map m = new HashMap();
+        m.put("tls", "false");
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
+    }
+    
+    
     public void testGuidWithBase32Fails() throws Exception {
         tRequest("GET", "/gnutella/push-proxy", "guid",
                 Base32.encode(clientGUID), "127.0.0.1", 6346, null, 400);
@@ -196,6 +258,22 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
     public void testFileChangesIndex() throws Exception {
         Map m = new HashMap();
         m.put("file", new Integer(34));
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testFileChangesIndexTLS() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer(34));
+        m.put("tls", "true");
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testFileChangesIndexTLSFalse() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer(34));
+        m.put("tls", "false");
         tRequest("GET", "/gnutella/push-proxy", "guid",
                 leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
     }
@@ -225,6 +303,22 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
     public void testFirewallTransferPushProxyWorks() throws Exception {
         Map m = new HashMap();
         m.put("file", new Integer((int)PushRequest.FW_TRANS_INDEX));
+        tRequest("GET", "/gnutella/push-proxy", "ServerID",
+                 Base32.encode(clientGUID), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testFirewallTransferPushProxyWorksTLS() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer((int)PushRequest.FW_TRANS_INDEX));
+        m.put("tls", "true");
+        tRequest("GET", "/gnutella/push-proxy", "ServerID",
+                 Base32.encode(clientGUID), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testFirewallTransferPushProxyWorksTLSFalse() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer((int)PushRequest.FW_TRANS_INDEX));
+        m.put("tls", "false");
         tRequest("GET", "/gnutella/push-proxy", "ServerID",
                  Base32.encode(clientGUID), "127.0.0.1", 6346, m, 202);
     }
@@ -278,12 +372,18 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
             } while (!(m instanceof PushRequest)) ;
             PushRequest pr = (PushRequest) m;
             int idx = 0;
-            if(params != null && params.get("file") != null )
-                idx = ((Integer)params.get("file")).intValue();
+            boolean tls = false;
+            if(params != null) {
+                if(params.get("file") != null )
+                    idx = ((Integer)params.get("file")).intValue();
+                if(params.get("tls") != null && "true".equalsIgnoreCase((String)params.get("tls")))
+                    tls = true;
+            }
             assertEquals(idx, pr.getIndex());
             assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
             assertEquals(port, pr.getPort());
             assertEquals(ip, NetworkUtils.ip2string(pr.getIP()));
+            assertEquals(tls, pr.isTLSCapable());
         }
     }
 }

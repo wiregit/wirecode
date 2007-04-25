@@ -69,7 +69,7 @@ public final class PushProxyUploadState extends UploadState {
         boolean useTLS = false;
         Object tls = params.get(P_TLS);
         if( tls != null && tls.toString() != null)
-            tls = "true".equalsIgnoreCase(tls.toString());
+            useTLS = "true".equalsIgnoreCase(tls.toString());
 
         PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
                                            clientGUID, fileIndex, 

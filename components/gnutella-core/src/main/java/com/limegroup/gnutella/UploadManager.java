@@ -1310,7 +1310,11 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
                             throw new IOException("Malformed PushProxy Request");
                         if( parameters == null ) // create the param map
                             parameters = new HashMap<String, Object>();
-                        parameters.put("file", fileIndex);
+                        parameters.put(PushProxyUploadState.P_FILE, fileIndex);
+                     } else if(k.equalsIgnoreCase(PushProxyUploadState.P_TLS)){
+                         if( parameters == null )
+                             parameters = new HashMap<String, Object>();
+                         parameters.put(PushProxyUploadState.P_TLS, val);
                      }
                 }
                 UploadStat.PUSH_PROXY.incrementStat();
