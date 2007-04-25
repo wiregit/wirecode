@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +12,10 @@ import java.util.concurrent.Executor;
 
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
@@ -273,10 +278,26 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
             
             RouteTable routeTable = dht.getRouteTable();
             synchronized (routeTable) {
-                data.put("id", routeTable.getLocalNode().getNodeID().getBytes());
-                data.put("acc", Integer.valueOf(routeTable.getActiveContacts().size()));
-                data.put("ccc", Integer.valueOf(routeTable.getCachedContacts().size()));
-                data.put("bc", Integer.valueOf(routeTable.getBuckets().size()));
+                Contact localNode = routeTable.getLocalNode();
+                KUID nodeId = localNode.getNodeID();
+                data.put("id", nodeId.getBytes());
+                
+                Collection<Contact> activeContacts = routeTable.getActiveContacts();
+                //List<BigInteger> activeDistacnes = getDistances(localNode, activeContacts);
+                data.put("acc", Integer.valueOf(activeContacts.size()));
+                
+                
+                Collection<Contact> cachedContacts = routeTable.getCachedContacts();
+                //List<BigInteger> cachedDistacnes = getDistances(localNode, cachedContacts);
+                data.put("ccc", Integer.valueOf(cachedContacts.size()));
+                
+                Collection<Bucket> buckets = routeTable.getBuckets();
+                data.put("bc", Integer.valueOf(buckets.size()));
+                
+                /*List<Integer> depths = new ArrayList<Integer>(buckets.size());
+                for (Bucket bucket : buckets) {
+                    depths.add(Integer.valueOf(bucket.getDepth()));
+                }*/
             }
             
             Database database = dht.getDatabase();
@@ -286,5 +307,18 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
             }
         }
         return data;
+    }
+    
+    private static List<BigInteger> getDistances(Contact localNode, Collection<? extends Contact> nodes) {
+        KUID nodeId = localNode.getNodeID();
+        List<BigInteger> distacnes = new ArrayList<BigInteger>(nodes.size()-1);
+        for (Contact node : nodes) {
+            // Skip the local Node!
+            if (localNode != node) {
+                KUID xor = nodeId.xor(node.getNodeID());
+                distacnes.add(xor.toBigInteger());
+            }
+        }
+        return distacnes;
     }
 }
