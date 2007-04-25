@@ -2,13 +2,17 @@ package com.limegroup.gnutella.uploader;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NumericBuffer;
+import org.limewire.collection.QueueCounter;
+import org.limewire.inspection.Inspectable;
 
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -63,9 +67,9 @@ public class UploadSlotManager implements BandwidthTracker {
 	private int numMeasures;
 	
 	public UploadSlotManager() {
-		active = new ArrayList<UploadSlotRequest>();
-		queued = new ArrayList<HTTPSlotRequest>();
-		queuedResumable = new ArrayList<BTSlotRequest>();
+		active = new CountingList<UploadSlotRequest>();
+		queued = new CountingList<HTTPSlotRequest>();
+		queuedResumable = new CountingList<BTSlotRequest>();
 		allRequests = new MultiIterable<UploadSlotRequest>(active, queued, queuedResumable);
 	}
 
@@ -507,4 +511,52 @@ public class UploadSlotManager implements BandwidthTracker {
 			return getPriority() == BT_SEED;
 		}
 	}
+    
+    /**
+     * An arraylist that keeps some stats on its elements. 
+     */
+    private static class CountingList<E> extends ArrayList<E> 
+    implements Inspectable {
+        private final QueueCounter counter = new QueueCounter(10);
+        private volatile int maxSize;
+        private volatile long lastMod;
+        
+        public Object inspect() {
+            Map<String,Number> ret = new HashMap<String, Number>();
+            ret.put("avg", counter.getAverageSize());
+            ret.put("max", maxSize);
+            ret.put("cur", size());
+            ret.put("mod", System.currentTimeMillis() - lastMod);
+            return ret;
+        }
+        
+        public boolean add(E e) {
+            lastMod = System.currentTimeMillis();
+            counter.recordArrival();
+            maxSize = Math.max(maxSize, 1 + size());
+            return super.add(e);
+        }
+        
+        public void add(int index, E e) {
+            lastMod = System.currentTimeMillis();
+            counter.recordArrival();
+            maxSize = Math.max(maxSize, 1 + size());
+            super.add(index, e);
+        }
+        
+        public E remove(int index) {
+            lastMod = System.currentTimeMillis();
+            counter.recordDeparture();
+            return super.remove(index);
+        }
+        
+        public boolean remove(Object e) {
+            boolean ret = super.remove(e);
+            if (ret) {
+                lastMod = System.currentTimeMillis();
+                counter.recordDeparture();
+            }
+            return ret;
+        }
+    }
 }
