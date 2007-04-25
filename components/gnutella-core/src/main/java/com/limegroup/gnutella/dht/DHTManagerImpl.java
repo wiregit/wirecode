@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,21 +284,30 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
                 data.put("id", nodeId.getBytes());
                 
                 Collection<Contact> activeContacts = routeTable.getActiveContacts();
-                //List<BigInteger> activeDistacnes = getDistances(localNode, activeContacts);
+                List<BigInteger> activeDistacnes = getDistances(localNode, activeContacts);
                 data.put("acc", Integer.valueOf(activeContacts.size()));
+                data.put("accs",quickStats(activeDistacnes));
                 
                 
                 Collection<Contact> cachedContacts = routeTable.getCachedContacts();
-                //List<BigInteger> cachedDistacnes = getDistances(localNode, cachedContacts);
+                List<BigInteger> cachedDistacnes = getDistances(localNode, cachedContacts);
                 data.put("ccc", Integer.valueOf(cachedContacts.size()));
+                data.put("cccs", quickStats(cachedDistacnes));
                 
                 Collection<Bucket> buckets = routeTable.getBuckets();
                 data.put("bc", Integer.valueOf(buckets.size()));
                 
-                /*List<Integer> depths = new ArrayList<Integer>(buckets.size());
+                List<BigInteger> depths = new ArrayList<BigInteger>(buckets.size());
                 for (Bucket bucket : buckets) {
-                    depths.add(Integer.valueOf(bucket.getDepth()));
-                }*/
+                    depths.add(BigInteger.valueOf(bucket.getDepth()));
+                }
+                data.put("bcd",quickStats(depths));
+                
+                List<BigInteger> sizes = new ArrayList<BigInteger>(buckets.size());
+                for (Bucket bucket : buckets) {
+                    sizes.add(BigInteger.valueOf(bucket.size()));
+                }
+                data.put("bcs",quickStats(sizes));
             }
             
             Database database = dht.getDatabase();
@@ -309,6 +319,9 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
         return data;
     }
     
+    /**
+     * @return a list of distances from a provided node
+     */
     private static List<BigInteger> getDistances(Contact localNode, Collection<? extends Contact> nodes) {
         KUID nodeId = localNode.getNodeID();
         List<BigInteger> distacnes = new ArrayList<BigInteger>(nodes.size()-1);
@@ -320,5 +333,42 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
             }
         }
         return distacnes;
+    }
+    
+    /**
+     * @return the average, variance, min, median and max of a
+     * list of numbers
+     */
+    private static List<byte []> quickStats(List<BigInteger> l) {
+        if (l.size() < 2)
+            return Collections.emptyList();
+        
+        Collections.sort(l);
+        
+        BigInteger min = l.get(0);
+        BigInteger max = l.get(l.size() - 1);
+        BigInteger median = l.get(l.size() / 2);
+        
+        BigInteger sum = BigInteger.valueOf(0);
+        for (BigInteger bi : l) 
+            sum = sum.add(bi);
+        
+        BigInteger avg = sum.divide(BigInteger.valueOf(l.size()));
+        
+        sum = BigInteger.valueOf(0);
+        for (BigInteger bi : l) {
+            BigInteger dist = bi.subtract(avg);
+            dist = dist.multiply(dist);
+            sum = sum.add(dist);
+        }
+        BigInteger variance = sum.divide(BigInteger.valueOf(l.size() - 1));
+        
+        List<byte []> ret = new ArrayList<byte []>(5);
+        ret.add(avg.toByteArray());
+        ret.add(variance.toByteArray());
+        ret.add(median.toByteArray());
+        ret.add(min.toByteArray());
+        ret.add(max.toByteArray());
+        return ret;
     }
 }
