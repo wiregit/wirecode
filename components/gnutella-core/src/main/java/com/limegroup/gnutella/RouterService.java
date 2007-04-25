@@ -1931,8 +1931,10 @@ public class RouterService {
         if (UDPSERVICE != null)
         	UDPSERVICE.resetLastConnectBackTime();
         
-        // notify the dht
-        dhtManager.addressChanged();
+        // Notify the DHT
+        if (dhtManager != null) {
+            dhtManager.addressChanged();
+        }
         
         if (manager != null) {
         	Properties props = new Properties();
