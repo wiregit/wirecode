@@ -52,13 +52,6 @@ public class EntityKey {
     /**
      * Creates and returns a new EntityKey
      */
-    public static EntityKey createEntityKey(Contact node, KUID primaryKey, KUID secondaryKey) {
-        return new EntityKey(node, primaryKey, secondaryKey, DHTValueType.ANY);
-    }
-    
-    /**
-     * Creates and returns a new EntityKey
-     */
     public static EntityKey createEntityKey(Contact node, KUID primaryKey, 
             KUID secondaryKey, DHTValueType valueType) {
         return new EntityKey(node, primaryKey, secondaryKey, valueType);
