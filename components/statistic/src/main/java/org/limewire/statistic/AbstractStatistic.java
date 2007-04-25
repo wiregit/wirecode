@@ -2,9 +2,9 @@ package org.limewire.statistic;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -230,12 +230,11 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	}
     
     public Object inspect() {
-        StringWriter w = new StringWriter();
-        try {
-            storeStats(w);
-        } catch (IOException iox) {
-            return iox.toString();
-        }
-        return w.toString();
+        List<Number> ret = new ArrayList<Number>(4);
+        ret.add(getCurrent());
+        ret.add(getTotal());
+        ret.add(getAverage());
+        ret.add(getMax());
+        return ret;
     }
 }
