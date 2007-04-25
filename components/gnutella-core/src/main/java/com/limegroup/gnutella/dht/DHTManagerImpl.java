@@ -260,12 +260,15 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
 
     public Object inspect() {
         Map<String, Object> data = new HashMap<String, Object>();
+        
         DHTMode mode = getDHTMode();
+        Version version = getVersion();
         MojitoDHT dht = getMojitoDHT();
+        
         data.put("mode", Byte.valueOf(mode.byteValue()));
+        data.put("v", Integer.valueOf(version.shortValue()));
         
         if (dht != null) {
-            data.put("v", Integer.valueOf(dht.getVersion().shortValue()));
             data.put("s", dht.size().toByteArray());
             
             RouteTable routeTable = dht.getRouteTable();
