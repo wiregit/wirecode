@@ -1041,9 +1041,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         if(manager.isMemberOfDHT()) {
             DHTMode mode = manager.getDHTMode();
             assert (mode != null);
-            payload[2] = mode.toByte();
+            payload[2] = mode.byteValue();
         } else {
-            payload[2] = DHTMode.INACTIVE.toByte();
+            payload[2] = DHTMode.INACTIVE.byteValue();
         }
 
         // add it

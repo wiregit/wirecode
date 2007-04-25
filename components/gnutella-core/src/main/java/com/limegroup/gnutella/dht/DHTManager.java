@@ -79,7 +79,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
         /**
          * Returns the mode as byte
          */
-        public byte toByte() {
+        public byte byteValue() {
             return (byte)(mode & 0xFF);
         }
         

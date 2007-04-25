@@ -1,13 +1,18 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.db.Database;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
@@ -23,7 +28,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
-public class DHTManagerImpl implements DHTManager {
+public class DHTManagerImpl implements DHTManager, Inspectable {
     
     /**
      * The Vendor code of this DHT Node
@@ -251,5 +256,32 @@ public class DHTManagerImpl implements DHTManager {
                 }
             }
         });
+    }
+
+    public Object inspect() {
+        Map<String, Object> data = new HashMap<String, Object>();
+        DHTMode mode = getDHTMode();
+        MojitoDHT dht = getMojitoDHT();
+        data.put("mode", Byte.valueOf(mode.byteValue()));
+        
+        if (dht != null) {
+            data.put("v", Integer.valueOf(dht.getVersion().shortValue()));
+            data.put("s", dht.size().toByteArray());
+            
+            RouteTable routeTable = dht.getRouteTable();
+            synchronized (routeTable) {
+                data.put("id", routeTable.getLocalNode().getNodeID().getBytes());
+                data.put("acc", Integer.valueOf(routeTable.getActiveContacts().size()));
+                data.put("ccc", Integer.valueOf(routeTable.getCachedContacts().size()));
+                data.put("bc", Integer.valueOf(routeTable.getBuckets().size()));
+            }
+            
+            Database database = dht.getDatabase();
+            synchronized (database) {
+                data.put("kc", Integer.valueOf(database.getKeyCount()));
+                data.put("vc", Integer.valueOf(database.getValueCount()));
+            }
+        }
+        return data;
     }
 }
