@@ -979,7 +979,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Starts a Node lookup for the given KUID 
      */
     public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
-        return findNodeManager.lookup(lookupId, null);
+        return findNodeManager.lookup(lookupId);
     }
     
     /*

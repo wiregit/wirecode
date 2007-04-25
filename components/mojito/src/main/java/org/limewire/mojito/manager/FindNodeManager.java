@@ -19,10 +19,15 @@
 
 package org.limewire.mojito.manager;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
 
@@ -30,18 +35,69 @@ import org.limewire.mojito.result.FindNodeResult;
 /**
  * FindNodeManager manages lookups for Nodes
  */
-public class FindNodeManager extends AbstractLookupManager<FindNodeResult> {
+public class FindNodeManager extends AbstractManager<FindNodeResult> {
 
+    private final Map<KUID, FindNodeFuture> futureMap = 
+        Collections.synchronizedMap(new HashMap<KUID, FindNodeFuture>());
+    
     public FindNodeManager(Context context) {
         super(context);
     }
 
+    public void init() {
+        futureMap.clear();
+    }
+    
     /**
-     * Creates and returns a FindNodeResponseHandler
+     * Starts a lookup for the given KUID
      */
-    @Override
-    protected DHTTask<FindNodeResult> createLookupHandler(
-            KUID lookupId, DHTValueType valueType, int count) {
-        return new FindNodeResponseHandler(context, lookupId, count);
+    public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
+        return lookup(lookupId, -1);
+    }
+    
+    /**
+     * Starts a lookup for the given KUID and expects 'count' 
+     * number of results
+     */
+    private DHTFuture<FindNodeResult> lookup(KUID lookupId, int count) {
+        FindNodeFuture future = null;
+        synchronized(futureMap) {
+            future = futureMap.get(lookupId);
+            if (future == null) {
+                FindNodeResponseHandler handler 
+                    = new FindNodeResponseHandler(context, lookupId, count);
+                future = new FindNodeFuture(lookupId, handler);
+                
+                futureMap.put(lookupId, future);
+                context.getDHTExecutorService().execute(future);
+            }
+        }
+        
+        return future;
+    }
+    
+    /**
+     * The DHTFuture for FIND_NODE
+     */
+    private class FindNodeFuture extends DHTFutureTask<FindNodeResult> {
+
+        private final KUID lookupId;
+        
+        private final DHTTask<FindNodeResult> handler;
+        
+        public FindNodeFuture(KUID lookupId, DHTTask<FindNodeResult> handler) {
+            super(context, handler);
+            this.lookupId = lookupId;
+            this.handler = handler;
+        }
+
+        @Override
+        protected void done() {
+            futureMap.remove(lookupId);
+        }
+
+        public String toString() {
+            return "FindNodeFuture: " + lookupId + ", " + handler;
+        }
     }
 }
