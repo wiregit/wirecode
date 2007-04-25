@@ -31,7 +31,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.MojitoUtils;
 
 
 public class CollisionTest extends MojitoTestCase {
@@ -69,8 +68,8 @@ public class CollisionTest extends MojitoTestCase {
             original = MojitoFactory.createDHT("OriginalDHT");
             original.bind(new InetSocketAddress(PORT+1));
             original.start();
-            MojitoUtils.bootstrap(original, bootstrap.getContactAddress()).get();
-            MojitoUtils.bootstrap(bootstrap, original.getContactAddress()).get();
+            original.bootstrap(bootstrap.getContactAddress()).get();
+            bootstrap.bootstrap(original.getContactAddress()).get();
             
             // The spoofer Node
             spoofer = MojitoFactory.createDHT("Spoofer Node");
@@ -83,14 +82,13 @@ public class CollisionTest extends MojitoTestCase {
             
             spoofer.bind(new InetSocketAddress(PORT+2));
             spoofer.start();
-            MojitoUtils.bootstrap(spoofer, bootstrap.getContactAddress()).get();
+            spoofer.bootstrap(bootstrap.getContactAddress()).get();
             Thread.sleep(500);
             
             assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
             assertNotEquals(original.getContactAddress(), spoofer.getContactAddress());
             
-            Context context = (Context)bootstrap;
-            Collection<Contact> nodes = context.getRouteTable().getContacts();
+            Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
             // Precondition: LocalContact.equals(LiveContact) == false
             // Copy the fields we're interested in into a Map and perform
@@ -139,13 +137,13 @@ public class CollisionTest extends MojitoTestCase {
             original = MojitoFactory.createDHT("OriginalDHT");
             original.bind(new InetSocketAddress(PORT+1));
             original.start();
-            MojitoUtils.bootstrap(original, bootstrap.getContactAddress()).get();
-            MojitoUtils.bootstrap(bootstrap, original.getContactAddress()).get();
+            original.bootstrap(bootstrap.getContactAddress()).get();
+            bootstrap.bootstrap(original.getContactAddress()).get();
             original.stop();
             
             Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
-            // Precondition: LocalContact.equals(LiveContact) == false
+            // Precondition: LocalContact.equals(RemoteContact) == false
             // Copy the fields we're interested in into a Map and perform
             // all tests on the Map rather than the actual List of Contacts!
             Map<KUID, SocketAddress> map = new HashMap<KUID, SocketAddress>();
@@ -166,11 +164,11 @@ public class CollisionTest extends MojitoTestCase {
             
             replacement.bind(new InetSocketAddress(PORT+2));
             replacement.start();
-            MojitoUtils.bootstrap(replacement, bootstrap.getContactAddress()).get();
+            replacement.bootstrap(bootstrap.getContactAddress()).get();
             
             Thread.sleep(5L * NetworkSettings.DEFAULT_TIMEOUT.getValue());
             
-            nodes = ((Context)bootstrap).getRouteTable().getContacts();
+            nodes = bootstrap.getRouteTable().getContacts();
             map = new HashMap<KUID, SocketAddress>();
             for (Contact node : nodes) {
                 assertNull(map.put(node.getNodeID(), node.getContactAddress()));
