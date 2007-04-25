@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
@@ -15,14 +16,17 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.service.ErrorService;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -58,13 +62,19 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    private static void setAccepted(boolean yes) {
-    	try { 
-            PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(yes)); 
-        }catch(Exception bad) { 
-            ErrorService.error(bad); 
-        }
+    private static void setAccepted(boolean yes) throws Exception {
+    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(yes));
     }
+    
+    public void setUp() throws Exception {
+        super.setUp();
+        // Turn off by default, explicitly test elsewhere.
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        // duplicate queries are sent out each time, so avoid the DuplicateFilter
+        Thread.sleep(2000);
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
@@ -89,12 +99,36 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // client side seems to follow the setup process A-OK
     }
 
-    public void testQueryReplyHasProxiesAndCanGIV() throws Exception {
+    public void testQueryReplyHasProxiesAndCanGIVNoTLSSettingOff() throws Exception {
+        // no tls nor setting, doesn't get TLS connection
+        doQRPCGTest(false, false, false);
+    }
+    
+    public void testQueryReplyHasProxiesAndCanGIVNoTLSSettingOn() throws Exception {
+        // no tls but setting on, doesn't get TLS connection
+        doQRPCGTest(false, true, false);
+    }
+    
+    public void testQueryReplyHasProxiesAndCanGIVWithTLSNoSetting() throws Exception {
+        // tls requested, but setting off, doesn't get TLS connection
+        doQRPCGTest(true, false, false);
+    }
+    
+    public void testQueryReplyHasProxiesAndCanGIVWithTLSAndSetting() throws Exception {
+        // tls requested & setting on -- only time we'll get a TLS connection
+        doQRPCGTest(true, true, true);
+    }
+    
+    private void doQRPCGTest(boolean sendTLS, boolean settingOn, boolean listenTLS) throws Exception {
+        if(settingOn)
+            ConnectionSettings.TLS_OUTGOING.setValue(true);
+        
     	setAccepted(false);
         drain(testUP[0]);
 
         // make sure leaf is sharing
         assertEquals(2, RouterService.getFileManager().getNumFiles());
+        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
@@ -122,16 +156,29 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertTrue(ppi.getInetAddress().equals(testUP[0].getInetAddress()));
 
         // set up a ServerSocket to get give on
-        ServerSocket ss = new ServerSocket(9000);
+        ServerSocket ss;
+        if(listenTLS) {
+            SSLContext context = SSLUtils.getTLSContext();
+            SSLServerSocket sslServer = (SSLServerSocket)context.getServerSocketFactory().createServerSocket();
+            sslServer.setNeedClientAuth(false);
+            sslServer.setWantClientAuth(false);
+            sslServer.setEnabledCipherSuites(new String[] {"TLS_DH_anon_WITH_AES_128_CBC_SHA"});
+            ss = sslServer;
+        } else {
+            ss = new ServerSocket();
+        }
         ss.setReuseAddress(true);        
         ss.setSoTimeout(TIMEOUT);
+        ss.bind(new InetSocketAddress(9000));
 
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
                                          RouterService.getMessageRouter()._clientGUID,
                                          0, 
                                          InetAddress.getLocalHost().getAddress(),
-                                         9000);
+                                         9000,
+                                         Network.TCP,
+                                         sendTLS);
         
         // send the PR off
         testUP[0].send(pr);
@@ -159,7 +206,18 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     }
 
     
-    public void testHTTPRequest() throws Exception {
+    public void testHTTPRequestNoTLS() throws Exception {
+        doHTTPRequestTest(false, false);
+    }
+    
+    public void testHTTPRequestWithTLS() throws Exception {
+        doHTTPRequestTest(true, true);
+    }
+    
+    private void doHTTPRequestTest(boolean settingOn, boolean expectTLS) throws Exception {
+        if(settingOn)
+            ConnectionSettings.TLS_INCOMING.setValue(true);
+        
     	setAccepted(true);
         drain(testUP[0]);
         // some setup
@@ -197,7 +255,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        RouterService.download((new RemoteFileDesc[] 
+        Downloader downloader = RouterService.download((new RemoteFileDesc[] 
             { ((MyActivityCallback)getCallback()).getRFD() }), true, 
                 new GUID(m.getGUID()));
 
@@ -215,6 +273,12 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         currLine = reader.readLine();
         assertTrue(currLine.startsWith("GET /gnutella/push-proxy") ||
                    currLine.startsWith("HEAD /gnutella/push-proxy"));
+        
+        if(expectTLS) {
+            assertTrue(currLine.contains("tls=true"));
+        } else {
+            assertFalse(currLine.contains("tls"));
+        }
         
         // make sure it sends the correct client GUID
         int beginIndex = currLine.indexOf("ID=") + 3;
@@ -268,13 +332,25 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertEquals("GET /get/10/boalt.org HTTP/1.1", currLine);
 
         // awesome - everything checks out!
+        downloader.stop();
         push.close();
         ss.close();
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
 
-    public void testNoProxiesSendsPushNormal() throws Exception {
+    public void testNoProxiesSendsPushNormalNoTLS() throws Exception {
+        doNormalTest(false, false);
+    }
+    
+    public void testNoProxiesSendsPushNormalWithTLS() throws Exception {
+        doNormalTest(true, true);
+    }
+    
+    private void doNormalTest(boolean settingOn, boolean expectTLS) throws Exception {
+        if(settingOn)
+            ConnectionSettings.TLS_INCOMING.setValue(true);
+        
         drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
@@ -304,7 +380,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        RouterService.download((new RemoteFileDesc[] 
+        Downloader downloader = RouterService.download((new RemoteFileDesc[] 
             { ((MyActivityCallback)getCallback()).getRFD() }), true,
                 new GUID(m.getGUID()));
 
@@ -312,6 +388,17 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         do {
             m = testUP[0].receive(25*TIMEOUT);
         } while (!(m instanceof PushRequest)) ;
+        
+        PushRequest pr = (PushRequest)m;
+        assertNotNull(pr);
+        assertEquals(expectTLS, pr.isTLSCapable());
+        assertEquals(clientGUID, pr.getClientGUID());
+        assertEquals(RouterService.getAddress(), pr.getIP());
+        assertEquals(RouterService.getPort(), pr.getPort());
+        assertEquals(10, pr.getIndex());
+        assertFalse(pr.isFirewallTransferPush());
+        
+        downloader.stop();
     }
 
 

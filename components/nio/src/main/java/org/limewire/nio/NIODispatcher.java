@@ -583,9 +583,9 @@ public class NIODispatcher implements Runnable {
                 
                 if(!immediate) {
                 	long delay = nextSelectTimeout();
-                	if (delay == 0)
+                	if (delay == 0) {
                 		immediate = true;
-                	else {
+                    } else {
                         primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
                     }
                 }
@@ -688,6 +688,29 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
+     * Returns true if this channel is going to have handleRead called on its
+     * attachment in this iteration of the NIODispatcher's processing.
+     * 
+     * This must be called from the NIODispatch thread to have any meaningful impact.
+     */
+    boolean isReadReadyThisIteration(SelectableChannel channel) {
+        SelectionKey sk = channel.keyFor(getSelectorFor(channel));
+        Object proxyAttachment = sk.attachment();
+        if(proxyAttachment instanceof Attachment) {
+            Attachment proxy = (Attachment)sk.attachment();
+            if(proxy.lastMod == iteration+1) {
+                if(sk.isValid()) {
+                    try {
+                        return (sk.readyOps() & (~proxy.handled) & SelectionKey.OP_READ) != 0;
+                    } catch(CancelledKeyException ignored) {}
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Processes a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
@@ -711,19 +734,19 @@ public class NIODispatcher implements Runnable {
                     int notHandled = ~proxy.handled;
                     int readyOps = sk.readyOps();
                     if ((allowedOps & readyOps & notHandled & SelectionKey.OP_ACCEPT) != 0)  {
-                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                         proxy.handled |= SelectionKey.OP_ACCEPT;
+                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                     } else if((allowedOps & readyOps & notHandled & SelectionKey.OP_CONNECT) != 0) {
-                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                         proxy.handled |= SelectionKey.OP_CONNECT;
+                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     } else {
                         if ((allowedOps & readyOps & notHandled & SelectionKey.OP_READ) != 0) {
-                            processRead(now, (ReadObserver)attachment, proxy);
                             proxy.handled |= SelectionKey.OP_READ;
+                            processRead(now, (ReadObserver)attachment, proxy);
                         }
                         if ((allowedOps & readyOps & notHandled & SelectionKey.OP_WRITE) != 0) {
-                            processWrite(now, (WriteObserver)attachment, proxy);
                             proxy.handled |= SelectionKey.OP_WRITE;
+                            processWrite(now, (WriteObserver)attachment, proxy);
                         }
                     }
                 } catch (CancelledKeyException err) {
@@ -967,6 +990,7 @@ public class NIODispatcher implements Runnable {
         public ProcessingException(Throwable t) { super(t); }
     }
     
+    /** An ExecutorService that runs all tasks on the NIODispatch thread. */
     private static class NIOExecutorService extends AbstractExecutorService implements ScheduledExecutorService {
         private final Thread nioThread;
         
@@ -1031,6 +1055,7 @@ public class NIODispatcher implements Runnable {
     	return TRANSPORT_LISTENER;
     }
     
+    /** A transport listener that wakes up the selector when an event is pending. */
     private class MyTransportListener implements TransportListener {
     	public void eventPending() {
     		wakeup();

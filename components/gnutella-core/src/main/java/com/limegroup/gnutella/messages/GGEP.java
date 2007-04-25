@@ -171,7 +171,7 @@ public class GGEP {
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
         throws BadGGEPBlockException {
 
-        if (messageBytes.length < 4)
+        if (messageBytes.length - beginOffset < 4)
             throw new BadGGEPBlockException();
 
         // all GGEP blocks start with this prefix....

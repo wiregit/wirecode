@@ -259,7 +259,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         RouterService.getPushManager().
             acceptPushUpload(h, port, req_guid_hexstring,
                              pushRequest.isMulticast(), // force accept
-                             pushRequest.isFirewallTransferPush());
+                             pushRequest.isFirewallTransferPush(),
+                             pushRequest.isTLSCapable());
 	}
 	
 	public boolean isOpen() {

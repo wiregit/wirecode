@@ -216,7 +216,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                          file.getIndex(),
                                          addr,
                                          port,
-                                         Network.MULTICAST);
+                                         Network.MULTICAST,
+                                         ConnectionSettings.TLS_INCOMING.getValue());
                 router.sendMulticastPushRequest(pr);
                 if (LOG.isInfoEnabled())
                     LOG.info("Sending push request through multicast " + pr);
@@ -239,7 +240,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                 file.getIndex(),
                                 RouterService.getAddress(),
                                 RouterService.getPort(),
-                                Network.UDP);
+                                Network.UDP,
+                                ConnectionSettings.TLS_INCOMING.getValue());
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
@@ -261,7 +263,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         Set<IpPort> proxies = file.getPushProxies();
         for(IpPort ppi : proxies) {
             if (filter.allow(ppi.getAddress())) {
-                udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
+                udpService.send(pr, ppi.getInetSocketAddress());
             }
         }
         
@@ -321,7 +323,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                          data.getFile().getClientGUID(),
                                          data.getFile().getIndex(),
                                          addr,
-                                         port);
+                                         port,
+                                         Network.TCP,
+                                         ConnectionSettings.TLS_INCOMING.getValue());
         
         if (LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
@@ -357,7 +361,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // if a fw-fw transfer is required, add the extra "file" parameter.
         final String request = "/gnutella/push-proxy?ServerID=" + 
                                Base32.encode(data.getFile().getClientGUID()) +
-          (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
+          (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
+          (ConnectionSettings.TLS_INCOMING.getValue() ? "(&tls=true" : "");
             
         final String nodeString = "X-Node";
         final String nodeValue =

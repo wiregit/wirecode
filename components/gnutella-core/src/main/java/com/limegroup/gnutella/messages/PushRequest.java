@@ -1,29 +1,35 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
 import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.DataUtils;
 
-/**
- * A Gnutella push request, used to download files behind a firewall.
- */
-
+/** A Gnutella push request, used to download files behind a firewall. */
 public class PushRequest extends Message implements Serializable {
     private static final int STANDARD_PAYLOAD_SIZE=26;
 
     public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
     
+    /** A null GGEP to mark a failed parsing. */
+    private static final GGEP NULL_GGEP = new GGEP();
+    
     /** The unparsed payload--because I don't care what's inside.
      *  NOTE: IP address is BIG-endian.
      */
     private byte[] payload;
+    
+    /** The GGEP, if parsed. */
+    private GGEP ggep;
 
     /**
      * Wraps a PushRequest around stuff snatched from the network.
@@ -72,7 +78,13 @@ public class PushRequest extends Message implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl,
             byte[] clientGUID, long index, byte[] ip, int port, Network network) {
-    	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
+        this(guid, ttl, clientGUID, index, ip, port, network, false);
+    }
+        
+    /** Constructs a new PushRequest that optionally includes TLS data. */
+    public PushRequest(byte[] guid, byte ttl,
+            byte[] clientGUID, long index, byte[] ip, int port, Network network, boolean useTLS) {
+        super(guid, Message.F_PUSH, ttl, (byte)0, 0,network);
     	
     	if(clientGUID.length != 16) {
 			throw new IllegalArgumentException("invalid guid length: "+
@@ -86,8 +98,13 @@ public class PushRequest extends Message implements Serializable {
 		} else if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		}
-
-        payload=new byte[STANDARD_PAYLOAD_SIZE];
+        
+        byte[] extra = DataUtils.EMPTY_BYTE_ARRAY;        
+        if(useTLS)
+            extra = PushGGEPHelper.TLS_GGEP;
+        
+        int payloadSize = STANDARD_PAYLOAD_SIZE + extra.length;
+        payload=new byte[payloadSize];
         System.arraycopy(clientGUID, 0, payload, 0, 16);
         ByteOrder.int2leb((int)index,payload,16); //downcast ok
         payload[20]=ip[0]; //big endian
@@ -95,8 +112,31 @@ public class PushRequest extends Message implements Serializable {
         payload[22]=ip[2];
         payload[23]=ip[3];
         ByteOrder.short2leb((short)port,payload,24); //downcast ok
+        System.arraycopy(extra, 0, payload, STANDARD_PAYLOAD_SIZE, extra.length);
+        
+        updateLength(payloadSize);
     }
-
+    
+    /** Returns true if this Push indicates the host is capable of receiving TLS connections. */
+    public boolean isTLSCapable() {
+        parseGGEP();
+        if(ggep != null && ggep != NULL_GGEP) {
+            return ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+        } else {
+            return false;
+        }
+    }
+    
+    /** Parses the GGEP block in a push, if one exists. */
+    private void parseGGEP() {
+        if(ggep == null && payload.length > STANDARD_PAYLOAD_SIZE) {
+            try {
+                ggep = new GGEP(payload, STANDARD_PAYLOAD_SIZE);
+            } catch (BadGGEPBlockException e) {
+                ggep = NULL_GGEP;
+            }
+        }
+    }
 
     protected void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
@@ -139,6 +179,22 @@ public class PushRequest extends Message implements Serializable {
         return "PushRequest("+super.toString()+" "+
             NetworkUtils.ip2string(getIP())+":"+getPort()+")";
     }
-
-    //Unit tests: tests/com/limegroup/gnutella/messages/PushRequestTest
+    
+    /** A simple GGEP helper that precaches commonly used GGEPs. */
+    private static class PushGGEPHelper {
+        private static final byte[] TLS_GGEP;
+        static {
+            GGEP tlsGGEP = new GGEP(true);
+            tlsGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                tlsGGEP.write(out);
+            } catch(IOException impossible) {
+                ErrorService.error(impossible);
+            }
+            TLS_GGEP = out.toByteArray();
+        }
+        
+        private PushGGEPHelper() {}
+    }
 }

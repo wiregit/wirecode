@@ -416,7 +416,7 @@ public class UDPService implements ReadWriteObserver {
      * @param host the host to send the message to
      */
     public void send(Message msg, IpPort host) {
-        send(msg, new InetSocketAddress(host.getInetAddress(), host.getPort()));
+        send(msg, host.getInetSocketAddress());
     }
 
 	/**

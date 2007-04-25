@@ -1286,24 +1286,28 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
                     final String val = stLocal.nextToken();
                     if(k.equalsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
                         if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
+                            throw new IOException("Malformed PushProxy Request");
                         // must convert from base32 to base 16.
                         byte[] base16 = Base32.decode(val);
                         if( base16.length != 16 )
-                            throw new IOException("Malformed PushProxy Req");
+                            throw new IOException("Malformed PushProxy Request");
                         fileName = new GUID(base16).toHexString();
                     } else if(k.equalsIgnoreCase(PushProxyUploadState.P_GUID)){
                         if( fileName != null ) // already have a name?
-                            throw new IOException("Malformed PushProxy Req");
+                            throw new IOException("Malformed PushProxy Request");
                         if( val.length() != 32 )
-                            throw new IOException("Malformed PushProxy Req");
+                            throw new IOException("Malformed PushProxy Request");
                         fileName = val; //already in base16.
                     } else if(k.equalsIgnoreCase(PushProxyUploadState.P_FILE)){
                         if( fileIndex != null ) // already have an index?
-                            throw new IOException("Malformed PushProxy Req");
-                        fileIndex = Integer.valueOf(val);
+                            throw new IOException("Malformed PushProxy Request");
+                        try {
+                            fileIndex = Integer.valueOf(val);
+                        } catch(NumberFormatException nfe) {
+                            throw new IOException("Malformed PushProxy Request");
+                        }
                         if( fileIndex.intValue() < 0 )
-                            throw new IOException("Malformed PushProxy Req");
+                            throw new IOException("Malformed PushProxy Request");
                         if( parameters == null ) // create the param map
                             parameters = new HashMap<String, Object>();
                         parameters.put("file", fileIndex);

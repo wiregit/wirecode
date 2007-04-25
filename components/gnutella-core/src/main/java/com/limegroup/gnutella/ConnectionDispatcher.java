@@ -99,6 +99,7 @@ public class ConnectionDispatcher {
         try {
             client.setSoTimeout(0);
         } catch(SocketException se) {
+            LOG.warn("Unable to set soTimeout, closing client", se);
             IOUtils.close(client);
             return;
         }
@@ -159,9 +160,14 @@ public class ConnectionDispatcher {
     					acceptor.acceptConnection(word, sock);
     				}
     			};
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Spawning new thread to dispatch: " + word);
     			ThreadExecutor.startThread(r, "IncomingConnection");
-    		} else
+    		} else {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Handling dispatched word: " + word + " in same thread");
     			acceptor.acceptConnection(word, sock);
+            }
     	}
     }
 }

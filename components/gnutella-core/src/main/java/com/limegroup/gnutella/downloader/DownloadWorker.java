@@ -26,6 +26,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
@@ -727,7 +728,7 @@ public class DownloadWorker {
      */
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
-            ConnectType type = _rfd.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+            ConnectType type = _rfd.isTLSCapable() && ConnectionSettings.TLS_OUTGOING.getValue() ? ConnectType.TLS : ConnectType.PLAIN;
             if(LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt asynchronous direct connection w/ " + type + " to: " + _rfd);
             _connectObserver = observer;

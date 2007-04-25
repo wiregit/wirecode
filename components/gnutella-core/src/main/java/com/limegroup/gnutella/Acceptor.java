@@ -685,6 +685,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     private static class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
         private final Socket client;
         private final String allowedWord;
+        private boolean finished = false;
         
         AsyncConnectionDispatcher(Socket client, String allowedWord) {
             super();
@@ -703,6 +704,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         }
 
         public void handleRead() throws IOException {
+            // If we already finished our reading, turn read interest off
+            // and exit early.
+            if(finished) {
+                source.interestRead(false);
+                return;
+            }
+            
             // Fill up our buffer as much we can.
             int read = 0;
             while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
@@ -727,6 +735,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     } else {
                         startTLS();
                     }
+                    finished = true;
                     return;
                 }
             }
@@ -736,6 +745,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // close if we EOF'd early.
             if(!buffer.hasRemaining()) {
                 startTLS();
+                finished = true;
                 return;
             } else if(read == -1) {
                 close();

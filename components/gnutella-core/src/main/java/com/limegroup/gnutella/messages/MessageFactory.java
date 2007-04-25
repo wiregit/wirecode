@@ -208,7 +208,7 @@ public class MessageFactory {
                 int got = in.read(payload, i, length - i);
                 if (got == -1) {
                     ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
-                    throw new IOException("Connection closed.");
+                    throw new IOException("Read EOF before EOM.");
                 }
                 i += got;
             }

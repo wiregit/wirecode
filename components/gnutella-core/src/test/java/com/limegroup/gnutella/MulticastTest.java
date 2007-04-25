@@ -199,13 +199,14 @@ public class MulticastTest extends LimeTestCase {
 	}
     
     /**
-     * Tests that a push sent from a multicast RFD is sent via multicast.
+     * Tests that a push sent from a multicast RFD is sent via multicast
+     * and includes the TLS flag.
      * This does NOT test that ManagedDownloader will actively push
      * multicast requests, nor does it check that we can parse
      * the incoming GIV.  It also does not test to ensure that multicast
      * pushes are given priority over all other uploads.
      */
-    public void testPushSentThroughMulticast() throws Exception {
+    public void testPushSentThroughMulticastWithTLS() throws Exception {
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
         byte[] guid = RouterService.newQueryGUID();
@@ -238,6 +239,7 @@ public class MulticastTest extends LimeTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         RouterService.getDownloadManager().getPushManager().sendPush(rfd);
         
         
@@ -251,6 +253,7 @@ public class MulticastTest extends LimeTestCase {
         assertInstanceof(PushRequest.class, m);
         PushRequest pr = (PushRequest)m;
         // note it was hopped.
+        assertTrue(pr.isTLSCapable());
         assertEquals("wrong ttl", 0, pr.getTTL());
         assertEquals("wrong hops", 1, pr.getHops());
         assertTrue("wrong client guid",
@@ -260,6 +263,72 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should not have unicasted anything", 0,
                 U_HANDLER.unicasted.size());
 	}
+    
+    /**
+     * Tests that a push sent from a multicast RFD is sent via multicast
+     * and does not include the TLS flag.
+     * This does NOT test that ManagedDownloader will actively push
+     * multicast requests, nor does it check that we can parse
+     * the incoming GIV.  It also does not test to ensure that multicast
+     * pushes are given priority over all other uploads.
+     */
+    public void testPushSentThroughMulticastWithoutTLS() throws Exception {
+        // first go through some boring stuff to get a correct QueryReply
+        // that we can convert to an RFD.
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "metadata");
+        sleep(DELAY);
+        assertEquals("should have sent query", 1,
+                M_HANDLER.multicasted.size());
+        assertEquals("should have gotten reply", 1,
+                U_HANDLER.unicasted.size());
+
+        Message m = (Message)U_HANDLER.unicasted.get(0);
+        assertInstanceof( QueryReply.class, m);
+        QueryReply qr = (QueryReply)m;
+        // Because we're acting as both the sender & receiver, our
+        // routing tables are a little confused, so we must reset
+        // the push route table to map the guid to ForMeReplyHandler
+        // from a UDPReplyHandler
+        reroutePush(qr.getClientGUID());
+                
+        // okay, now we have a QueryReply to convert to an RFD.
+        List responses = qr.getResultsAsList();
+        assertEquals("should only have 1 response", 1, responses.size());
+        Response res = (Response)responses.get(0);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData());
+        
+        assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
+        
+        // clear the data to make it easier to look at again...
+        M_HANDLER.multicasted.clear();
+        U_HANDLER.unicasted.clear();        
+        
+        // Finally, we have the RFD we want to push.
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        RouterService.getDownloadManager().getPushManager().sendPush(rfd);
+        
+        
+        // sleep to make sure the push goes through.
+        sleep(DELAY);
+        
+        assertEquals("should have sent & received push", 1,
+                M_HANDLER.multicasted.size());
+        // should be a push.
+        m = (Message)M_HANDLER.multicasted.get(0);
+        assertInstanceof(PushRequest.class, m);
+        PushRequest pr = (PushRequest)m;
+        // note it was hopped.
+        assertFalse(pr.isTLSCapable());
+        assertEquals("wrong ttl", 0, pr.getTTL());
+        assertEquals("wrong hops", 1, pr.getHops());
+        assertTrue("wrong client guid",
+            Arrays.equals(rfd.getClientGUID(), pr.getClientGUID()));
+        assertEquals("wrong index", rfd.getIndex(), pr.getIndex());
+        
+        assertEquals("should not have unicasted anything", 0,
+                U_HANDLER.unicasted.size());
+    }
     
     /**
      * Tests to ensure multicast requests are sent via push

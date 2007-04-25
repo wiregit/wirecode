@@ -14,8 +14,10 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Manages state for push upload requests.
@@ -55,7 +57,8 @@ public final class PushManager {
                                  final int port, 
                                  final String guid,
                                  final boolean lan,
-                                 final boolean isFWTransfer) {
+                                 final boolean isFWTransfer,
+                                 final boolean tlsCapable) {
         if (LOG.isDebugEnabled())
             LOG.debug("Accepting Push Upload from ip:" + host + " port:" + port + " FW:" + isFWTransfer);
                                     
@@ -87,13 +90,15 @@ public final class PushManager {
         if(isFWTransfer) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
+            // TODO: should FW-FW connections also use TLS?
             UDPConnection socket = new UDPConnection();
             socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                Sockets.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false));
+                ConnectType type = tlsCapable && ConnectionSettings.TLS_OUTGOING.getValue() ? ConnectType.TLS : ConnectType.PLAIN;
+                Sockets.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false), type);
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }

@@ -44,25 +44,25 @@ public class UDPPushTest extends LimeTestCase {
 	
 	
 	
-	static RemoteFileDesc rfd1, rfd2,rfdAlt;
+	private static RemoteFileDesc rfd1, rfd2,rfdAlt;
 	
 	/**
 	 * the socket that will supposedly be the push download
 	 */
-	static Socket socket;
+    private static Socket socket;
 	
 	/**
 	 * the socket that will listen for the tcp push request
 	 */
-	static ServerSocket serversocket;
+    private static ServerSocket serversocket;
 	
 	/**
 	 * the socket that will listen for the udp push request
 	 */
-	static DatagramSocket udpsocket;
+    private static DatagramSocket udpsocket;
 	
 	
-	static byte [] guid = GUID.fromHexString("BC1F6870696111D4A74D0001031AE043");
+    private static byte [] guid = GUID.fromHexString("BC1F6870696111D4A74D0001031AE043");
 	
 	public static void globalSetUp() throws Exception {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -195,11 +195,8 @@ public class UDPPushTest extends LimeTestCase {
 	 * tests the scenario where an UDP push is sent and
 	 * a connection is established, so no failover occurs.
 	 */
-	public void testUDPPush() throws Exception {
-
-		
+	public void testUDPPush() throws Exception {		
 		requestPush(rfd1);
-		
 		try {
 			serversocket.accept();
 			fail("tcp attempt was made");
@@ -325,9 +322,60 @@ public class UDPPushTest extends LimeTestCase {
 		Thread.sleep(5200);
 		
 		
-		serversocket.accept().close();
-			
+		serversocket.accept().close();			
 	}
+    
+    /**
+     * tests the scenario where two pushes are made to the same host
+     * for different files and both succeed.
+     */
+    public void testPushContainsTLS() throws Exception{
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        requestPush(rfd1);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        requestPush(rfd2);
+        
+        try {
+            serversocket.accept();
+            fail("tcp attempt was made");
+        }catch(IOException expected){}
+        
+        DatagramPacket push = new DatagramPacket(new byte[1000],1000);
+        udpsocket.receive(push);
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
+        PushRequest pr = (PushRequest)MessageFactory.read(bais);
+        assertEquals(rfd1.getIndex(),pr.getIndex());
+        assertFalse(pr.isTLSCapable());
+        
+        udpsocket.receive(push);
+        bais = new ByteArrayInputStream(push.getData());
+        pr = (PushRequest)MessageFactory.read(bais);
+        assertEquals(rfd2.getIndex(),pr.getIndex());
+        assertTrue(pr.isTLSCapable());
+        
+        // Finish off the test, just to make sure the failover doesn't kick in later.
+        Thread.sleep(2000);        
+        socket = new NIOSocket(InetAddress.getLocalHost(),10000);
+        Socket other = serversocket.accept();        
+        sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        Thread.sleep(1000);
+        socket.close();        
+        socket = new NIOSocket(InetAddress.getLocalHost(),10000);
+        other = serversocket.accept();
+        socket.setSoTimeout(1000);
+        sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        Thread.sleep(1000);
+        socket.close();
+        Thread.sleep(5200);        
+        try {
+            serversocket.accept();
+            fail("tcp attempt was made");
+        }catch(IOException expected){}
+    }
+    
 	
 	
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{

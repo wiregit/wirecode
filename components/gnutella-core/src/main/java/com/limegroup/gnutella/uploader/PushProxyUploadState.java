@@ -14,6 +14,7 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -28,9 +29,8 @@ public final class PushProxyUploadState extends UploadState {
     public static final String P_SERVER_ID = "ServerId";
     public static final String P_GUID = "guid";
     public static final String P_FILE = "file";
+    public static final String P_TLS = "tls";
     
-    
-
 	private final ByteArrayOutputStream BAOS = 
 		new ByteArrayOutputStream();
     
@@ -56,7 +56,6 @@ public final class PushProxyUploadState extends UploadState {
             String str = "HTTP/1.1 400 Push Proxy: Bad Request\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
-            debug("PPUS.doUpload(): unknown host.");
             UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
             return;
         }
@@ -67,21 +66,22 @@ public final class PushProxyUploadState extends UploadState {
         // set the file index if we know it...
         if( index != null )
             fileIndex = ((Integer)index).intValue();
+        boolean useTLS = false;
+        Object tls = params.get(P_TLS);
+        if( tls != null && tls.toString() != null)
+            tls = "true".equalsIgnoreCase(tls.toString());
 
         PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
                                            clientGUID, fileIndex, 
-                                           hostAddress.getAddress(), hostPort);
+                                           hostAddress.getAddress(), hostPort,
+                                           Network.TCP, useTLS);
         try {
             RouterService.getMessageRouter().sendPushRequest(push);
-            
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             // send back a 410
             String str="HTTP/1.1 410 Push Proxy: Servent not connected\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
-            debug("PPUS.doUpload(): push failed.");
-            debug(ioe);
             UploadStat.PUSH_PROXY_REQ_FAILED.incrementStat();
             return;
         }
@@ -105,22 +105,11 @@ public final class PushProxyUploadState extends UploadState {
 		LOG.debug("writing body");
         ostream.write(BAOS.toByteArray());
         UPLOADER.setAmountUploaded(BAOS.size());
-        debug("PPUS.doUpload(): returning.");
 	}
 	
 	public boolean getCloseConnection() {
 	    return false;
 	}
-
-    private final static boolean debugOn = false;
-    private final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
 
     
 }
