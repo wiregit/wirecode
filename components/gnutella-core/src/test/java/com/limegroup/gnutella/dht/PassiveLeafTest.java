@@ -43,8 +43,15 @@ public class PassiveLeafTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        setSettings();
+        super.setUp();
+    }
+    
     public void testLookup() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         MojitoDHT passiveLeaf = null;

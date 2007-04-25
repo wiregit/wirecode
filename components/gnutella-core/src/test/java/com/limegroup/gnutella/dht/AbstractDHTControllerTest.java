@@ -59,11 +59,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         setSettings();
         super.setUp();
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
     
     public void testRandomNodeAdder() throws Exception {
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);

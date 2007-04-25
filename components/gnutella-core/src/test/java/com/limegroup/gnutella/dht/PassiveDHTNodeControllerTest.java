@@ -23,10 +23,6 @@ import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.PassiveDHTNodeController;
-import com.limegroup.gnutella.dht.PassiveDHTNodeRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -53,10 +49,6 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
-    }
-    
-    public void tearDown() throws Exception {
-        Thread.sleep(300);
     }
     
     public void testNodesPersistence() throws Exception{

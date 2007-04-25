@@ -45,10 +45,6 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         setSettings();
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-    }
     
     public void testPersistence() throws Exception{
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
