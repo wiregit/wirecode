@@ -3,12 +3,12 @@ package com.limegroup.gnutella.dht;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
@@ -277,83 +277,114 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
         
         if (dht != null) {
             data.put("s", dht.size().toByteArray()); // 3
-            
+            BigInteger local;
             RouteTable routeTable = dht.getRouteTable();
             synchronized (routeTable) {
                 Contact localNode = routeTable.getLocalNode();
                 data.put("id", localNode.getNodeID().getBytes()); // 20
                 
-                Collection<Contact> activeContacts = routeTable.getActiveContacts();
-                List<BigInteger> activeXorDistances = getXorDistances(localNode, activeContacts);
-                data.put("acc", Integer.valueOf(activeContacts.size())); // 4
-                data.put("accs", quickStats(activeXorDistances)); // 5*20
+                // store stats for both plain contacts as well as xor distances from local node
+                local = localNode.getNodeID().toBigInteger();
+                List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
+                List<BigInteger> activeXorDistances = getXorDistances(local, activeContacts);
+                data.put("acc",quickStats(activeContacts)); // 5*20 + 4
+                data.put("accx", quickStats(activeXorDistances)); // 5*20 + 4
                 
-                Collection<Contact> cachedContacts = routeTable.getCachedContacts();
-                List<BigInteger> cachedXorDistances = getXorDistances(localNode, cachedContacts);
-                data.put("ccc", Integer.valueOf(cachedContacts.size())); // 4
-                data.put("cccs", quickStats(cachedXorDistances)); // 5*20
+                List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
+                List<BigInteger> cachedXorDistances = getXorDistances(local, cachedContacts);
+                data.put("ccc", quickStats(cachedContacts)); // 5*20 + 4
+                data.put("cccx", quickStats(cachedXorDistances)); // 5*20 + 4
                 
                 Collection<Bucket> buckets = routeTable.getBuckets();
-                data.put("bc", Integer.valueOf(buckets.size())); // 4
                 
                 List<BigInteger> depths = new ArrayList<BigInteger>(buckets.size());
                 List<BigInteger> sizes = new ArrayList<BigInteger>(buckets.size());
+                List<BigInteger> kuids = new ArrayList<BigInteger>(buckets.size());
                 
+                double fresh = 0;
                 for (Bucket bucket : buckets) {
                     depths.add(BigInteger.valueOf(bucket.getDepth())); 
                     sizes.add(BigInteger.valueOf(bucket.size()));
+                    kuids.add(bucket.getBucketID().toBigInteger());
+                    if (!bucket.isRefreshRequired())
+                        fresh++;
                 }
                 
-                data.put("bcd", quickStats(depths)); // 5*(should be one byte)
-                data.put("bcs", quickStats(sizes)); // 5*(should be one byte)
+                // bucket kuid distribution *should* be similar to the others, but is it?
+                data.put("bk", quickStats(kuids)); // 5*20 + 4
+                data.put("bkx", quickStats(getXorDistances(local, kuids))); // 5*20 + 4
+                data.put("bd", quickStats(depths)); // 5*(should be one byte) + 4
+                data.put("bs", quickStats(sizes)); // 5*(should be one byte) + 4
+                data.put("bfr", fresh / buckets.size()); // fresh buckets ratio
             }
             
+            // get database stats
             Database database = dht.getDatabase();
+            List<BigInteger> stored;
             synchronized (database) {
-                data.put("kc", Integer.valueOf(database.getKeyCount())); // 4
-                data.put("vc", Integer.valueOf(database.getValueCount())); // 4
+                data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
+                Set<KUID> keys = database.keySet();
+                
+                stored = new ArrayList<BigInteger>(keys.size());
+                for (KUID k : keys)
+                    stored.add(k.toBigInteger());
             }
+
+            List<BigInteger> storedXorDistances = getXorDistances(local, stored);
+            data.put("dsk", quickStats(stored)); // 5*20 + 4
+            data.put("dskx", quickStats(storedXorDistances)); // 5*20 + 4
             
-            // Total: ~261 byte
+            // Total: < 1k
         }
         return data;
     }
     
     /**
-     * @return a list of XOR distances from a provided node
+     * @return a list of XOR distances from a provided bigint
      */
-    private static List<BigInteger> getXorDistances(Contact localNode, Collection<? extends Contact> nodes) {
-        KUID nodeId = localNode.getNodeID();
-        List<BigInteger> distances = new ArrayList<BigInteger>(nodes.size());
-        for (Contact node : nodes) {
+    private static List<BigInteger> getXorDistances(BigInteger local, List<BigInteger> others) {
+        List<BigInteger> distances = new ArrayList<BigInteger>(others.size());
+        for (BigInteger bi : others) {
             // Skip the local Node!
-            if (localNode != node) {
-                KUID xor = nodeId.xor(node.getNodeID());
-                distances.add(xor.toBigInteger());
-            }
+            if (!local.equals(bi)) 
+                distances.add(local.xor(bi));
         }
         return distances;
     }
     
     /**
-     * @return the average, variance, min, median and max of a
+     * @return a list of big integers from a collection of contacts
+     */
+    private static List<BigInteger> getBigInts(Collection <? extends Contact> nodes) {
+        List<BigInteger> bigints = new ArrayList<BigInteger>(nodes.size());
+        for (Contact node : nodes) 
+            bigints.add(node.getNodeID().toBigInteger());
+        return bigints;
+    }
+    
+    /**
+     * @return the number, average, variance, min, median and max of a
      * list of numbers
      */
-    private static List<byte []> quickStats(List<BigInteger> l) {
-        if (l.size() < 2)
-            return Collections.emptyList();
+    private static Map<String, Object> quickStats(List<BigInteger> l) {
+        Map<String, Object> ret = new HashMap<String, Object>();
+        ret.put("num",l.size());
+        
+        if (l.size() < 2) // too small for stats
+            return ret;
         
         Collections.sort(l);
         
-        BigInteger min = l.get(0);
-        BigInteger max = l.get(l.size() - 1);
-        BigInteger median = l.get(l.size() / 2);
+        ret.put("min",l.get(0).toByteArray());
+        ret.put("max",l.get(l.size() -1).toByteArray());
+        ret.put("med",l.get(l.size() / 2).toByteArray());
         
         BigInteger sum = BigInteger.valueOf(0);
         for (BigInteger bi : l) 
             sum = sum.add(bi);
         
         BigInteger avg = sum.divide(BigInteger.valueOf(l.size()));
+        ret.put("avg",avg.toByteArray());
         
         sum = BigInteger.valueOf(0);
         for (BigInteger bi : l) {
@@ -362,12 +393,7 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
             sum = sum.add(dist);
         }
         BigInteger variance = sum.divide(BigInteger.valueOf(l.size() - 1));
-        
-        return Arrays.asList(
-                avg.toByteArray(), 
-                variance.toByteArray(), 
-                median.toByteArray(), 
-                min.toByteArray(), 
-                max.toByteArray());
+        ret.put("var",variance.toByteArray());
+        return ret;
     }
 }
