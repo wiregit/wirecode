@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.concurrent;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -40,7 +41,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         = new OnewayExchanger<T, ExecutionException>(true);
     
     private final Set<DHTFutureListener<T>> listeners 
-        = new LinkedHashSet<DHTFutureListener<T>>();
+        = Collections.synchronizedSet(new LinkedHashSet<DHTFutureListener<T>>());
     
     private final Context context;
     
@@ -221,11 +222,18 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         return exchanger.get(timeout, unit);
     }
     
+    @SuppressWarnings("unchecked")
+    private DHTFutureListener<T>[] listeners() {
+        synchronized (listeners) {
+            return listeners.toArray(new DHTFutureListener[0]);
+        }
+    }
+    
     /**
      * Fires a success event
      */
     protected void fireFutureResult(T value) {
-        for (DHTFutureListener<T> l : listeners) {
+        for (DHTFutureListener<T> l : listeners()) {
             l.handleFutureSuccess(value);
         }
     }
@@ -234,7 +242,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
      * Fires an ExecutionException event
      */
     protected void fireExecutionException(ExecutionException e) {
-        for (DHTFutureListener<T> l : listeners) {
+        for (DHTFutureListener<T> l : listeners()) {
             l.handleExecutionException(e);
         }
     }
@@ -243,7 +251,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
      * Fires an CancellationException event
      */
     protected void fireCancellationException(CancellationException e) {
-        for (DHTFutureListener<T> l : listeners) {
+        for (DHTFutureListener<T> l : listeners()) {
             l.handleCancellationException(e);
         }
     }
