@@ -17,7 +17,9 @@ public final class CountingInputStream extends FilterInputStream {
     
     public int read() throws IOException {
         int read = super.read();
-        _count++;
+        if (read != -1) {
+            _count++;
+        }
         return read;
     }
     
@@ -29,8 +31,9 @@ public final class CountingInputStream extends FilterInputStream {
             // happens.
             throw new IOException();
         }
-        
-        _count += read;
+        if (read != -1) {
+            _count += read;
+        }
         return read;
     }
     
