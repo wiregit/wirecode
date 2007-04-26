@@ -40,7 +40,7 @@ public interface DHTTask<T> {
     public void cancel();
     
     /**
-     * 
+     * The callback interface for DHTTask
      */
     public static interface Callback<T> {
 

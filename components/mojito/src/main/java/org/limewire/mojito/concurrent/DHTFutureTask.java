@@ -88,10 +88,21 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
                 r, task.getLockTimeout(), TimeUnit.MILLISECONDS);
     }
     
+    /**
+     * Protected method invoked when this task transitions to state isDone 
+     * (whether normally or via cancellation). The default implementation 
+     * does nothing. Subclasses may override this method to invoke completion 
+     * callbacks or perform bookkeeping. Note that you can query status 
+     * inside the implementation of this method to determine whether this 
+     * task has been cancelled.
+     */
     protected void done() {
         
     }
     
+    /**
+     * Calls done() and notifies all DHTFutureListeners
+     */
     private void internalDone() {
         done();
         
@@ -113,6 +124,10 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         context.getDHTExecutorService().execute(r);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTTask.Callback#setReturnValue(java.lang.Object)
+     */
     public void setReturnValue(T value) {
         boolean done = false;
         synchronized (exchanger) {
@@ -131,6 +146,10 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         }
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTTask.Callback#setException(java.lang.Throwable)
+     */
     public void setException(Throwable t) {
         boolean done = false;
         synchronized (exchanger) {
@@ -149,6 +168,10 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         }
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTFuture#addDHTFutureListener(org.limewire.mojito.concurrent.DHTFutureListener)
+     */
     public void addDHTFutureListener(final DHTFutureListener<T> listener) {
         if (listener == null) {
             throw new NullPointerException("DHTFutureListener is null");
@@ -182,6 +205,10 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Future#cancel(boolean)
+     */
     public boolean cancel(boolean mayInterruptIfRunning) {
         boolean done = false;
         synchronized (exchanger) {
@@ -205,23 +232,42 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
         return done;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Future#isCancelled()
+     */
     public boolean isCancelled() {
         return exchanger.isCancelled();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Future#isDone()
+     */
     public boolean isDone() {
         return exchanger.isDone();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Future#get()
+     */
     public T get() throws InterruptedException, ExecutionException {
         return exchanger.get();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Future#get(long, java.util.concurrent.TimeUnit)
+     */
     public T get(long timeout, TimeUnit unit) 
             throws InterruptedException, ExecutionException, TimeoutException {
         return exchanger.get(timeout, unit);
     }
     
+    /**
+     * Returns a copy of all listeners as an Array
+     */
     @SuppressWarnings("unchecked")
     private DHTFutureListener<T>[] listeners() {
         synchronized (listeners) {
