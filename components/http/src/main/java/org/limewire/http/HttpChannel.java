@@ -92,7 +92,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void setReadChannel(InterestReadableByteChannel source) {
         this.readSource = source;
-        this.readSource.interest(readInterest);
+        if (this.readSource != null) {
+            this.readSource.interest(readInterest);
+        }
     }
 
     public synchronized InterestWritableByteChannel getWriteChannel() {
@@ -101,7 +103,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
         this.writeSource = channel;
-        this.writeSource.interest(this, writeInterest);
+        if (this.writeSource != null) {
+            this.writeSource.interest(this, writeInterest);
+        }
     }
 
     public boolean handleWrite() throws IOException {

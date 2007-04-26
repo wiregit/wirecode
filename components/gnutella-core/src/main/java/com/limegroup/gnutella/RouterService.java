@@ -640,9 +640,9 @@ public class RouterService {
     public static void setFullPower(boolean newValue) {
         if(_fullPower != newValue) {
             _fullPower = newValue;
-            // FIXME
+            // TODO implement throttle switching for uploads and downloads
             //NormalUploadState.setThrottleSwitching(!newValue);
-            HTTPDownloader.setThrottleSwitching(!newValue);
+            //HTTPDownloader.setThrottleSwitching(!newValue);
         }
     }
 

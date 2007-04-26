@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Random;
 
+import junit.framework.Test;
+
 import org.limewire.nio.ByteBufferCache;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -21,6 +23,10 @@ public class FilePieceReaderTest extends LimeTestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return buildTestSuite(FilePieceReaderTest.class);
+    }
+    
     @Override
     protected void setUp() throws Exception {
         file = File.createTempFile("limewire", "");

@@ -76,8 +76,12 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     
     @Override
     public void finished() {
-        watchdog.deactivate();
-        reader.shutdown();
+        if (watchdog != null) {
+            watchdog.deactivate();
+        }
+        if (reader != null) {
+            reader.shutdown();
+        }
     }
     
     @Override

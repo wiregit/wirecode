@@ -172,7 +172,12 @@ public class HttpIOSession implements IOSession {
             socket.setWriteObserver(channel);
             channel.requestWrite(interest);
         } else {
+            this.throttleWriter = null;
+            boolean interest = channel.isWriteInterest();
+            channel.requestWrite(false);
+            channel.setWriteChannel(null);
             socket.setWriteObserver(channel);
+            channel.requestWrite(interest);
         }
     }
 
