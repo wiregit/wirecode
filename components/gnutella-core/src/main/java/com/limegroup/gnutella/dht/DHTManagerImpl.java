@@ -35,7 +35,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
-public class DHTManagerImpl implements DHTManager, Inspectable {
+public class DHTManagerImpl implements DHTManager {
     
     /**
      * The Vendor code of this DHT Node
@@ -66,6 +66,9 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
     private final Executor executor;
     
     private boolean stopped = false;
+    
+    /** reference to a bunch of inspectables */
+    public final DHTInspectables inspectables = new DHTInspectables();
     
     /**
      * Constructs the LimeDHTManager, using the given Executor
@@ -265,78 +268,111 @@ public class DHTManagerImpl implements DHTManager, Inspectable {
         });
     }
 
-    public Object inspect() {
-        Map<String, Object> data = new HashMap<String, Object>();
+    /** a bunch of inspectables */
+    private class DHTInspectables {
         
-        DHTMode mode = getDHTMode();
-        Version version = getVersion();
-        MojitoDHT dht = getMojitoDHT();
-        
-        data.put("mode", Byte.valueOf(mode.byteValue())); // 4
-        data.put("v", Integer.valueOf(version.shortValue())); // 4
-        
-        if (dht != null) {
-            data.put("s", dht.size().toByteArray()); // 3
-            BigInteger local;
-            RouteTable routeTable = dht.getRouteTable();
-            synchronized (routeTable) {
-                Contact localNode = routeTable.getLocalNode();
-                data.put("id", localNode.getNodeID().getBytes()); // 20
-                
-                // store stats for both plain contacts as well as xor distances from local node
-                local = localNode.getNodeID().toBigInteger();
-                List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
-                List<BigInteger> activeXorDistances = getXorDistances(local, activeContacts);
-                data.put("acc",quickStats(activeContacts)); // 5*20 + 4
-                data.put("accx", quickStats(activeXorDistances)); // 5*20 + 4
-                
-                List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
-                List<BigInteger> cachedXorDistances = getXorDistances(local, cachedContacts);
-                data.put("ccc", quickStats(cachedContacts)); // 5*20 + 4
-                data.put("cccx", quickStats(cachedXorDistances)); // 5*20 + 4
-                
-                Collection<Bucket> buckets = routeTable.getBuckets();
-                
-                List<BigInteger> depths = new ArrayList<BigInteger>(buckets.size());
-                List<BigInteger> sizes = new ArrayList<BigInteger>(buckets.size());
-                List<BigInteger> kuids = new ArrayList<BigInteger>(buckets.size());
-                
-                double fresh = 0;
-                for (Bucket bucket : buckets) {
-                    depths.add(BigInteger.valueOf(bucket.getDepth())); 
-                    sizes.add(BigInteger.valueOf(bucket.size()));
-                    kuids.add(bucket.getBucketID().toBigInteger());
-                    if (!bucket.isRefreshRequired())
-                        fresh++;
+        public Inspectable general = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                DHTMode mode = getDHTMode();
+                Version version = getVersion();
+                data.put("mode", Byte.valueOf(mode.byteValue())); // 4
+                data.put("v", Integer.valueOf(version.shortValue())); // 4
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    data.put("s", dht.size().toByteArray()); // 3
+                    RouteTable routeTable = dht.getRouteTable();
+                    Contact localNode = routeTable.getLocalNode();
+                    data.put("id", localNode.getNodeID().getBytes()); // 20
                 }
-                
-                // bucket kuid distribution *should* be similar to the others, but is it?
-                data.put("bk", quickStats(kuids)); // 5*20 + 4
-                data.put("bkx", quickStats(getXorDistances(local, kuids))); // 5*20 + 4
-                data.put("bd", quickStats(depths)); // 5*(should be one byte) + 4
-                data.put("bs", quickStats(sizes)); // 5*(should be one byte) + 4
-                data.put("bfr", fresh / buckets.size()); // fresh buckets ratio
+                return data;
             }
-            
-            // get database stats
-            Database database = dht.getDatabase();
-            List<BigInteger> stored;
-            synchronized (database) {
-                data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
-                Set<KUID> keys = database.keySet();
-                
-                stored = new ArrayList<BigInteger>(keys.size());
-                for (KUID k : keys)
-                    stored.add(k.toBigInteger());
+        };
+        
+        public Inspectable contacts = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    RouteTable routeTable = dht.getRouteTable();
+                    synchronized(routeTable) {
+                        BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
+                        List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
+                        data.put("acc",quickStats(activeContacts)); // 5*20 + 4
+                        data.put("accx",quickStats(getXorDistances(local, activeContacts))); // 5*20 + 4
+                        List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
+                        data.put("ccc", quickStats(cachedContacts)); // 5*20 + 4
+                        data.put("cccx", quickStats(getXorDistances(local, cachedContacts))); // 5*20 + 4
+                    }
+                }
+                return data;
             }
+        };
+        
+        
+        public Inspectable buckets = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    RouteTable routeTable = dht.getRouteTable();
+                    synchronized(routeTable) {
+                        BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
+                        Collection<Bucket> buckets = routeTable.getBuckets();
+                        
+                        List<BigInteger> depths = new ArrayList<BigInteger>(buckets.size());
+                        List<BigInteger> sizes = new ArrayList<BigInteger>(buckets.size());
+                        List<BigInteger> kuids = new ArrayList<BigInteger>(buckets.size());
+                        List<BigInteger> times = new ArrayList<BigInteger>(buckets.size());
+                        
+                        double fresh = 0;
+                        long now = System.currentTimeMillis(); 
+                        for (Bucket bucket : buckets) {
+                            depths.add(BigInteger.valueOf(bucket.getDepth())); 
+                            sizes.add(BigInteger.valueOf(bucket.size()));
+                            kuids.add(bucket.getBucketID().toBigInteger());
+                            times.add(BigInteger.valueOf(now - bucket.getTimeStamp()));
+                            if (!bucket.isRefreshRequired())
+                                fresh++;
+                        }
+                        
+                        // bucket kuid distribution *should* be similar to the others, but is it?
+                        data.put("bk", quickStats(kuids)); // 5*20 + 4
+                        data.put("bkx", quickStats(getXorDistances(local, kuids))); // 5*20 + 4
+                        data.put("bd", quickStats(depths)); // 5*(should be one byte) + 4
+                        data.put("bs", quickStats(sizes)); // 5*(should be one byte) + 4
+                        data.put("bt", quickStats(times)); // 5*(should be one byte) + 4
+                        data.put("bfr", (int)(100 * fresh / buckets.size())); // fresh buckets %
+                    }
+                }
+                return data;
+            }
+        };
+        
+        public Inspectable database = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    Database database = dht.getDatabase();
+                    List<BigInteger> stored;
+                    BigInteger local = dht.getLocalNodeID().toBigInteger();
+                    synchronized (database) {
+                        data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
+                        Set<KUID> keys = database.keySet();
+                        
+                        stored = new ArrayList<BigInteger>(keys.size());
+                        for (KUID k : keys)
+                            stored.add(k.toBigInteger());
+                    }
 
-            List<BigInteger> storedXorDistances = getXorDistances(local, stored);
-            data.put("dsk", quickStats(stored)); // 5*20 + 4
-            data.put("dskx", quickStats(storedXorDistances)); // 5*20 + 4
-            
-            // Total: < 1k
-        }
-        return data;
+                    List<BigInteger> storedXorDistances = getXorDistances(local, stored);
+                    data.put("dsk", quickStats(stored)); // 5*20 + 4
+                    data.put("dskx", quickStats(storedXorDistances)); // 5*20 + 4
+                }
+                return data;
+            }
+        };
     }
     
     /**
