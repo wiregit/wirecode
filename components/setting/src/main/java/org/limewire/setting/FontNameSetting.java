@@ -14,7 +14,7 @@ import java.util.Properties;
  */
 public final class FontNameSetting extends Setting {
 
-    String _fontName;
+    private String _fontName;
 
     FontNameSetting(Properties defaultProps, Properties props, String key,
                                                            String defaultStr) {
