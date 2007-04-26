@@ -106,8 +106,10 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public synchronized void start() {
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
-            messageRouter.setUDPMessageHandler(clazz, this);
+        if (messageRouter != null) {
+            for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+                messageRouter.setUDPMessageHandler(clazz, this);
+            }
         }
         
         running = true;
@@ -121,8 +123,10 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         // Remove the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
-            messageRouter.setUDPMessageHandler(clazz, null);
+        if (messageRouter != null) {
+            for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+                messageRouter.setUDPMessageHandler(clazz, null);
+            }
         }
     }
 
