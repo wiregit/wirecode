@@ -48,19 +48,19 @@ import java.util.concurrent.TimeoutException;
 public class OnewayExchanger<V, E extends Throwable> {
     
     /** Flag for whether or not we're done */
-    private boolean done = false;
+    private volatile boolean done = false;
     
     /** Flag for whether or not the exchanger was cancelled */
-    private boolean cancelled = false;
+    private volatile boolean cancelled = false;
     
     /** Flag for whether or not this is an one-shot exchanger */
     private final boolean oneShot;
     
     /** The value we're going to return */
-    private V value;
+    private volatile V value;
     
     /** The Exception we're going to throw */
-    private E exception;
+    private volatile E exception;
     
     /**
      * Creates an OnewayExchanger with the default configuration.
