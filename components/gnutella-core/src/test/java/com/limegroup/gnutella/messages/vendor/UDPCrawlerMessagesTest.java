@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
@@ -585,7 +586,10 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     }
     
     public void testMsgDHTStatus() throws Exception {
-        PrivilegedAccessor.setValue(ROUTER_SERVICE, "dhtManager", new DHTManagerStub());
+        AtomicLazyReference ref = (AtomicLazyReference)PrivilegedAccessor.getValue(
+                ROUTER_SERVICE, "DHT_MANAGER_REFERENCE");
+        PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
+        
         UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte) (0x1 << 6));
         UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTStatus);
         byte[] payload = pong.getPayload();

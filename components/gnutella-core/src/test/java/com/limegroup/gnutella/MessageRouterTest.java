@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
+import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
@@ -30,6 +31,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -700,9 +702,12 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         RouterService rs = new RouterService(new ActivityCallbackStub());
+        AtomicLazyReference ref = (AtomicLazyReference)PrivilegedAccessor.getValue(
+                rs, "DHT_MANAGER_REFERENCE");
+        PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
         RouterService.preGuiInit();
         rs.start();
-        PrivilegedAccessor.setValue(rs, "dhtManager", new TestDHTManager());
+        
         Thread.sleep(300);
         //create the request
         PingRequest pr = PingRequest.createUDPingWithDHTIPPRequest();
@@ -925,7 +930,7 @@ public final class MessageRouterTest extends LimeTestCase {
         public MojitoDHT getMojitoDHT() { return null; }
 
         public DHTMode getDHTMode() { 
-            return null; 
+            return DHTMode.INACTIVE; 
         }
 
         public boolean isRunning() { 

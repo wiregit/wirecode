@@ -368,6 +368,7 @@ public class NodeAssigner {
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
         final DHTMode current = RouterService.getDHTManager().getDHTMode();
+        assert (current != null) : "Current DHTMode is null, fix your DHTManager-Stub!";
         
         // Initial mode is to turn off the DHT
         DHTMode mode = DHTMode.INACTIVE;
@@ -464,17 +465,19 @@ public class NodeAssigner {
      * Switches the mode of the DHT
      */
     private static void switchDHTMode(final DHTMode from, final DHTMode to) {
-        switch(from) {
-            case ACTIVE:
-                NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
-                break;
-            case PASSIVE:
-                NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
-                break;
-            case PASSIVE_LEAF:
-                NodeAssignerStat.PASSIVE_LEAF_DHT_DISCONNECTIONS.incrementStat();
-                break;
-            // INACTIVE
+        if (from != null) {
+            switch(from) {
+                case ACTIVE:
+                    NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
+                    break;
+                case PASSIVE:
+                    NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
+                    break;
+                case PASSIVE_LEAF:
+                    NodeAssignerStat.PASSIVE_LEAF_DHT_DISCONNECTIONS.incrementStat();
+                    break;
+                // INACTIVE
+            }
         }
         
         switch(to) {
