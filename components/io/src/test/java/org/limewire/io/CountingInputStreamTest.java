@@ -77,6 +77,13 @@ public class CountingInputStreamTest extends BaseTestCase {
         wrapped.readValue = 3;
         assertEquals(3, in.read(array, 1, 3));
         assertEquals(3, in.getAmountRead());
+        
+        wrapped.readValue = -1;
+        assertEquals(-1, in.read(array));
+        assertEquals(3, in.getAmountRead());
+        
+        assertEquals(-1, in.read(array, 1, 3));
+        assertEquals(3, in.getAmountRead());
     }
     
     private static class AnInputStream extends InputStream {
