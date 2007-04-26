@@ -266,7 +266,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @return a byte-packed representation of this
 	 */
 	public byte [] toBytes() {
-	    Set<IpPort> proxies = getProxies();
+	    Set<? extends IpPort> proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies);
 	    IpPort addr = getValidExternalAddress();
         int FWTVersion = supportsFWTVersion();
@@ -407,7 +407,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * 
 	 * @return a view of the current set of proxies.
 	 */
-	public Set<IpPort> getProxies() {
+	public Set<? extends IpPort> getProxies() {
 
 	    synchronized(this) {
 	    	if (_proxies!=null)

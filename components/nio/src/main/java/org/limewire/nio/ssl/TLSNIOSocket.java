@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import org.limewire.nio.NIOSocket;
@@ -94,6 +95,20 @@ public class TLSNIOSocket extends NIOSocket {
     
     /* package */ SSLReadWriteChannel getSSLChannel() {
         return tlsLayer;
+    }
+    
+    @Override
+    /* Overriden to retrieve the soTimeout from the socket if we're still handshaking. */
+    public long getReadTimeout() {
+        if(tlsLayer != null && tlsLayer.isHandshaking()) {
+            try {
+                return getSoTimeout();
+            } catch(SocketException se) {
+                return 0;
+            }
+        } else {
+            return super.getReadTimeout();
+        }
     }
     
     

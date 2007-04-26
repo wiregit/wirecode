@@ -846,7 +846,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      * @return the <tt>Set</tt> of proxy hosts that will accept push requests
      *  for this host -- can be empty
      */
-    public final Set<IpPort> getPushProxies() {
+    public final Set<? extends IpPort> getPushProxies() {
     	if (_pushAddr!=null)
     		return _pushAddr.getProxies();
     	else

@@ -428,7 +428,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /** Gets the read timeout for this socket. */
-    public final long getReadTimeout() {
+    public long getReadTimeout() {
         if(reader instanceof NIOInputStream) {
             return 0; // NIOInputStream handles its own timeouts.
         } else {

@@ -260,7 +260,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     
         IPFilter filter = RouterService.getIpFilter();
         //make sure we send it to the proxies, if any
-        Set<IpPort> proxies = file.getPushProxies();
+        Set<? extends IpPort> proxies = file.getPushProxies();
         for(IpPort ppi : proxies) {
             if (filter.allow(ppi.getAddress())) {
                 udpService.send(pr, ppi.getInetSocketAddress());
@@ -285,7 +285,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);
 
     	// if there are no proxies, send through the network
-        Set<IpPort> proxies = file.getPushProxies();
+        Set<? extends IpPort> proxies = file.getPushProxies();
         if(proxies.isEmpty()) {
             sendPushThroughNetwork(data);
             return;
@@ -343,7 +343,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * the observer will be notified immediately.  If all fail, the PushMessageSender
      * is told to send the push through the network.
      */
-    private void sendPushThroughProxies(PushData data, Set<IpPort> proxies) {
+    private void sendPushThroughProxies(PushData data, Set<? extends IpPort> proxies) {
         byte[] externalAddr = RouterService.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.

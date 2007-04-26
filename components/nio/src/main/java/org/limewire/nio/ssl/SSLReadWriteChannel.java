@@ -494,4 +494,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     SSLSession getSession() {
         return engine != null ? engine.getSession() : null;
     }
+    
+    /** Returns true if we're currently handshaking. */
+    boolean isHandshaking() {
+        return !firstReadDone.get() || engine.getHandshakeStatus() != HandshakeStatus.NOT_HANDSHAKING;
+        
+    }
 }

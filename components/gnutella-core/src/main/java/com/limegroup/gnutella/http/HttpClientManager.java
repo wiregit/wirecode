@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 
 /**
@@ -66,8 +67,12 @@ public class HttpClientManager {
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
         ((MultiThreadedHttpConnectionManager)MANAGER).setIdleConnectionTime(IDLE_TIME);
-        Protocol limeProtocol = new Protocol("http",new LimeSocketFactory(),80);
-        Protocol.registerProtocol("http",limeProtocol);
+        Protocol p = new Protocol("http", new LimeSocketFactory(ConnectType.PLAIN), 80);
+        Protocol.registerProtocol("http", p);
+        p = new Protocol("tls", new LimeSocketFactory(ConnectType.TLS),80);
+        Protocol.registerProtocol("tls", p);
+        p = new Protocol("https", new LimeSocketFactory(ConnectType.TLS),80);
+        Protocol.registerProtocol("https", p);
     }
             
     /** Returns a new HttpClient with the appropriate manager. */
@@ -215,18 +220,23 @@ public class HttpClientManager {
     }
     
     private static class LimeSocketFactory implements ProtocolSocketFactory {
+        private final ConnectType type;
+        
+        public LimeSocketFactory(ConnectType type) {
+            this.type = type;
+        }
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0);
+            return Sockets.connect(new InetSocketAddress(host,port),0, type);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0);
+            return Sockets.connect(new InetSocketAddress(host,port),0, type);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port), timeout);
+            return Sockets.connect(new InetSocketAddress(host,port), timeout, type);
         }
         
     }

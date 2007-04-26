@@ -5,7 +5,6 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
@@ -127,17 +126,36 @@ public abstract class UploadState implements HTTPMessage {
 	 * section 4.2 of the Push Proxy proposal, v. 0.7
 	 */
 	protected void writeProxies(Writer os) throws IOException {
-	    
-	    if (RouterService.acceptedIncomingConnection())
-	        return;
-	    
-	    
-	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
+	    StringBuilder buf = getProxiesBuffer();        
+        if(buf.length() > 0)
+            HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
+    }
+    
+    /**
+     * writes out the X-Push-Proxies header as specified by 
+     * section 4.2 of the Push Proxy proposal, v. 0.7
+     */
+    protected void writeProxies(OutputStream os) throws IOException {
+        StringBuilder buf = getProxiesBuffer();        
+        if(buf.length() > 0)
+            HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
+    }
+    
+    /**
+     * Gets the the X-Push-Proxies header as specified by 
+     * section 4.2 of the Push Proxy proposal, v. 0.7
+     */
+    private StringBuilder getProxiesBuffer() {
+        if (RouterService.acceptedIncomingConnection())
+            return new StringBuilder();
+        
+        Set<? extends IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
 	    
         StringBuilder buf = new StringBuilder();
 	    int proxiesWritten =0;
-	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = iter.next();
+        for(IpPort current : proxies) {
+            if(proxiesWritten >= 4)
+                break;
 	        buf.append(current.getAddress())
 	        	.append(":")
 	        	.append(current.getPort())
@@ -148,45 +166,7 @@ public abstract class UploadState implements HTTPMessage {
 	    
 	    if (proxiesWritten >0)
 	        buf.deleteCharAt(buf.length()-1);
-	    else
-	        return;
-	    
-	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
-	    
-	}	
-	
-	
-	/**
-	 * writes out the X-Push-Proxies header as specified by 
-	 * section 4.2 of the Push Proxy proposal, v. 0.7
-	 */
-	protected void writeProxies(OutputStream os) throws IOException {
-	    
-	    if (RouterService.acceptedIncomingConnection())
-	        return;
-	    
-	    
-	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
-	    
-        StringBuilder buf = new StringBuilder();
-	    int proxiesWritten =0;
-	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = iter.next();
-	        buf.append(current.getAddress())
-	        	.append(":")
-	        	.append(current.getPort())
-	        	.append(",");
-	        
-	        proxiesWritten++;
-	    }
-	    
-	    if (proxiesWritten >0)
-	        buf.deleteCharAt(buf.length()-1);
-	    else
-	        return;
-	    
-	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
-	    
+        
+        return buf;	    
 	}
-
 }

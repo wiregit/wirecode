@@ -1369,17 +1369,14 @@ public class QueryReply extends Message implements SecureMessage {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();
-                        String host = 
-                            ppi.getAddress();
+                        String host = ppi.getAddress();
                         int port = ppi.getPort();
                         try {
                             IPPortCombo combo = new IPPortCombo(host, port);
                             baos.write(combo.toBytes());
                             numWritten++;
-                        }
-                        catch (UnknownHostException bad) {
-                        }
-                        catch (IOException terrible) {
+                        } catch (UnknownHostException bad) {
+                        } catch (IOException terrible) {
                             ErrorService.error(terrible);
                         }
                     }
@@ -1394,8 +1391,7 @@ public class QueryReply extends Message implements SecureMessage {
                     baos.reset();
                     retGGEP.write(baos);
                     retGGEPBlock = baos.toByteArray();
-                }
-                catch (IOException terrible) {
+                } catch (IOException terrible) {
                     ErrorService.error(terrible);
                 }
 

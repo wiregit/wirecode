@@ -422,7 +422,7 @@ public class StandardMessageRouter extends MessageRouter {
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
         boolean notIncoming = !RouterService.acceptedIncomingConnection();
-        Set<IpPort> proxies = notIncoming ? _manager.getPushProxies() : null;
+        Set<? extends IpPort> proxies = notIncoming ? _manager.getPushProxies() : null;
         
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {

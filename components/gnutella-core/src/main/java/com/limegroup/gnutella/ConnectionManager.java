@@ -16,8 +16,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.SystemUtils;
 
@@ -43,6 +43,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
@@ -1133,12 +1134,12 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set<IpPort> getPushProxies() {
+    public Set<? extends Connectable> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
-            Set<IpPort> proxies = new IpPortSet();
+            Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
             for(ManagedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;

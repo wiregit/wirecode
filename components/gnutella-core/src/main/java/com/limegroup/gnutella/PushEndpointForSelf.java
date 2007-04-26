@@ -42,7 +42,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     /**
      * delegate the call to connection manager
      */
-    public Set<IpPort> getProxies() {
+    public Set<? extends IpPort> getProxies() {
         return RouterService.getConnectionManager().getPushProxies();
     }
     
