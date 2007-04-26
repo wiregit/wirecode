@@ -98,6 +98,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             }
         }
 
+        int written;
         do {
             if (piece != null) {
                 reader.release(piece);
@@ -118,11 +119,11 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             if (LOG.isTraceEnabled())
                 LOG.debug("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
 
-            int written = write(buffer);
+            written = write(buffer);
             uploader.addAmountUploaded(written);
-            watchdog.activate(this);
-        } while (remaining > 0 && !buffer.hasRemaining());
-            
+        } while (written > 0 && remaining > 0 && !buffer.hasRemaining());
+
+        watchdog.activate(this);
         return remaining > 0 || buffer.hasRemaining();
     }
 
@@ -132,7 +133,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
 
     @Override
     public void shutdown() {
-        LOG.warn("File transfer timed out: " + uploader);
+        if (LOG.isWarnEnabled())
+            LOG.warn("File transfer timed out: " + uploader);
         uploader.stop();
     }
 
@@ -144,8 +146,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     private class PieceHandler implements PieceListener {
 
         public void readFailed(IOException e) {
-            LOG.warn("Error reading file from disk: " + uploader, e);
-            // XXX communicate 
+            if (LOG.isWarnEnabled())
+                LOG.warn("Error reading file from disk: " + uploader, e);
             uploader.stop();
         }
 

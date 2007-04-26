@@ -56,7 +56,6 @@ public class AsyncDimeWriter extends WriteState {
             isLastRecord = !recordIt.hasNext();
             current.setLastRecord(isLastRecord);
             current.write(out);
-            amountProcessed += current.getDataLength();
 
             if (writeRemaining(channel)) // still have data to send.
                 return true;
@@ -88,7 +87,8 @@ public class AsyncDimeWriter extends WriteState {
             }
 
             // write.
-            channel.write(buffer);
+            int written = channel.write(buffer);
+            amountProcessed += written;
             
             // if we couldn't write everything, exit.
             if(buffer.hasRemaining())
