@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
@@ -260,8 +261,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     
         IPFilter filter = RouterService.getIpFilter();
         //make sure we send it to the proxies, if any
-        Set<? extends IpPort> proxies = file.getPushProxies();
-        for(IpPort ppi : proxies) {
+        for(IpPort ppi : file.getPushProxies()) {
             if (filter.allow(ppi.getAddress())) {
                 udpService.send(pr, ppi.getInetSocketAddress());
             }
@@ -376,9 +376,12 @@ public class PushDownloadManager implements ConnectionAcceptor {
         for(IpPort ppi : proxies) {
             if (!filter.allow(ppi.getAddress()))
                 continue;
-            final String ppIp = ppi.getAddress();
-            final int ppPort = ppi.getPort();
-            String connectTo =  "http://" + ppIp + ":" + ppPort + request;
+            String protocol = "http://";
+            if(ppi instanceof Connectable) {
+                if(((Connectable)ppi).isTLSCapable())
+                    protocol = "tls://";
+            }
+            String connectTo =  protocol + ppi.getAddress() + ":" + ppi.getPort() + request;
             HeadMethod head = new HeadMethod(connectTo);
             head.addRequestHeader(nodeString, nodeValue);
             head.addRequestHeader("Cache-Control", "no-cache");

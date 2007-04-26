@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -935,11 +936,10 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
             return hosts;
         
         List<IpPort> decorated = null; 
-        int i = 0;
-        int bit = 0x80;
+        BitNumbers tlsBits = new BitNumbers(tlsData);
         int hostIdx = 0;
         for(IpPort next : hosts) {
-            if((tlsData[i] & bit) == bit) {
+            if(tlsBits.isSet(hostIdx)) {
                 ExtendedEndpoint ep = new ExtendedEndpoint(next.getInetAddress(), next.getPort());
                 ep.setTLSCapable(true);
                 if(decorated == null) {
@@ -951,16 +951,9 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
                 decorated.add(next); // preserve decorated
             }
             
-            if(bit == 0x1) {
-                i++;
-                bit = 0x80;
-            } else {
-                bit >>>= 1;
-            }
-            
             // If we've gone past the end of however much is stored,
             // we're done.
-            if(i >= tlsData.length) {
+            if(hostIdx >= tlsBits.getMax()) {
                 // add the rest of the hosts to the decorated list if necessary
                 if(decorated != null && hostIdx+1 < hosts.size())
                     decorated.addAll(hosts.subList(hostIdx+1, hosts.size()));
@@ -1095,31 +1088,15 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
         if(catcher == null)
             return DataUtils.EMPTY_BYTE_ARRAY;
         
-        byte[] b = new byte[(int)Math.ceil((hosts.size() / 8d))];
-        //int lastIndexSet = 0;
-        boolean found = false;
+        BitNumbers bn = new BitNumbers(hosts.size());
         int i = 0;
-        int bit = 0x80;
         for(IpPort ipp : hosts) {
-            if(catcher.isHostTLSCapable(ipp)) {
-                found = true;
-                b[i] |= bit;
-          //      lastIndexSet = i;
-            }
-            if(bit == 0x01) {
-                i++;
-                bit = 0x80;
-            } else {
-                bit >>>= 1;
-            }
+            if(catcher.isHostTLSCapable(ipp))
+                bn.set(i);
+            i++;
         }
         
-        if(!found) {
-            return DataUtils.EMPTY_BYTE_ARRAY;
-        } else {
-            // TODO: reduce size of byte[] to only the # of indexes required
-            return b;
-        }
+        return bn.getByteArray();
     }
 
     /**

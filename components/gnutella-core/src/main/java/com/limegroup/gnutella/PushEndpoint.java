@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -165,19 +164,19 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
-	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version) {
+	public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies,int features,int version) {
 		this(guid,proxies,features,version,null);
 	}
 	
     @SuppressWarnings("unchecked")
-    public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version,IpPort addr) {
+    public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies,int features,int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
 		if (proxies != null) {
             if (proxies instanceof IpPortSet)
-                _proxies = Collections.unmodifiableSet((IpPortSet)proxies);
+                _proxies = Collections.unmodifiableSet(proxies);
             else
                 _proxies = Collections.unmodifiableSet(new IpPortSet(proxies));
         } else
@@ -187,7 +186,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	
 	
 	
-	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies) {
+	public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies) {
 		this(guid,proxies,PLAIN,0);
 	}
 	
@@ -196,7 +195,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * not very useful but can happen.
 	 */
 	public PushEndpoint(byte [] guid) {
-		this(guid, IpPort.EMPTY_LIST);
+		this(guid, IpPort.EMPTY_SET);
 	}
 	
 	/**

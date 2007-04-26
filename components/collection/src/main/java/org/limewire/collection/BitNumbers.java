@@ -1,0 +1,116 @@
+package org.limewire.collection;
+
+
+/** 
+ * Allows storage & retrieval of numbers based on the index of an
+ * on or off bit in a byte[].
+ */
+public class BitNumbers {
+    
+    private static final byte[] EMPTY = new byte[0];
+
+    /** A set of masks for finding if the bit is set at the right index. */
+    private static final byte[] MASKS = new byte[] {
+        (byte)0x80, 0x40, 0x20, 0x10, 0x8, 0x4, 0x2, 0x1
+    };
+    
+    /** The bits that are stored. */
+    private byte[] data;
+    
+    /** The total size of this bitNumbers. */
+    private int size;
+    
+    /** Constructs a BitNumbers backed by the given byte[]. */
+    public BitNumbers(byte[] data) {
+        this.data = data;
+        this.size = data.length * 8;
+    }
+    
+    /** Constructs a BitNumbers large enough to store numbers up to size. */
+    public BitNumbers(int size) {
+        this.size = size;
+    }
+    
+    /** Constructs a BitNumbers based on the given hex string. */
+    public BitNumbers(String hexString) throws IllegalArgumentException {
+        if(hexString.length() % 2 != 0)
+            throw new IllegalArgumentException("Invalid hex string: " + hexString);
+        this.data = new byte[hexString.length() / 2];
+        this.size  = data.length * 8;
+        
+        // Now fill up data, decoding the string...
+        for(int i = 0; i < hexString.length(); i+=2) {
+            // Will throw NFE (which extends IAE) if data is invalid
+            int j = Integer.parseInt(hexString.substring(i, i+2), 16);
+            assert j <= 0xFF;
+            data[i/2] = (byte)j;
+        }
+    }
+    
+    /** Returns true if the correct bit is set. */
+    public boolean isSet(int idx) {
+        if(idx >= size)
+            return false;
+        
+        int index = (int)Math.floor(idx / 8d);
+        int offset = idx % 8;
+        return data != null && index < data.length && (data[index] & MASKS[offset]) != 0;
+    }
+    
+    /** Returns the maximum number that can be stored in this BitNumbers. */
+    public int getMax() {
+        return size;
+    }
+    
+    /** Sets the bit corresponding to the index. */
+    public void set(int idx) {
+        if(idx >= size)
+            throw new IndexOutOfBoundsException("idx: " + idx + ", max: " + size);
+        
+        int index = (int)Math.floor(idx / 8d);
+        int offset = idx % 8;
+        if(data == null)
+            data = new byte[(int)Math.ceil(size / 8d)];
+        data[index] |= MASKS[offset];
+    }
+    
+    /** Returns the byte array that BitNumbers is backed off of. */
+    public byte[] getByteArray() {
+        if(data == null)
+            return EMPTY;
+        else
+            return data;
+    }
+    
+    /** Returns true if no set bits exist. */
+    public boolean isEmpty() {
+        if(data == null)
+            return true;
+        
+        for(int i = 0; i < data.length; i++)
+            if(data[i] != 0)
+                return false;
+        return true;
+    }
+    
+    /** A hexadecimal representation of the byte[] */
+    public String toHexString() {
+        if(isEmpty()) {
+            return "";
+        } else {
+            StringBuilder sb = new StringBuilder(data.length * 2);
+            int lastNonZero = 0;
+            for(int i = 0; i < data.length; i++) {
+                if(data[i] != 0)
+                    lastNonZero = i;
+                String hex = Integer.toHexString(data[i] & 0x00FF);
+                if(hex.length() == 1)
+                    sb.append("0");
+                sb.append(hex.toUpperCase());
+            }
+            sb.setLength(lastNonZero * 2 + 2); // erase empty fields.
+            return sb.toString();
+        }
+    }
+
+}
