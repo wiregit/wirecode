@@ -349,6 +349,29 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        public Inspectable bucketDetail = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    RouteTable routeTable = dht.getRouteTable();
+                    synchronized(routeTable) {
+                        Collection<Bucket> buckets = routeTable.getBuckets();
+                        for (Bucket bucket : buckets) {
+                            Map<String, Object> detail = new HashMap<String, Object>();
+                            detail.put("d", bucket.getDepth());
+                            detail.put("t", System.currentTimeMillis() - bucket.getTimeStamp());
+                            detail.put("a", bucket.getActiveSize());
+                            detail.put("c", bucket.getCacheSize());
+                            detail.put("f", !bucket.isRefreshRequired());
+                            data.put(bucket.getBucketID().toBinString(), detail);
+                        }
+                    }
+                }
+                return data;
+            }
+        };
+        
         public Inspectable database = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
