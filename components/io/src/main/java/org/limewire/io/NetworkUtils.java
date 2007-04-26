@@ -35,6 +35,15 @@ public final class NetworkUtils {
     
     /**
      * The list of private addresses.
+     * 
+     * As of Java 1.4 we can use the following methods:
+     * 
+     * 0.x.x.x InetAddress.isAnyLocalAddress()
+     * 127.x.x.x InetAddress.isLoopbackAddress()
+     * 255.x.x.x There's no method for that
+     * 172.16.x.x InetAddress.isSiteLocalAddress()
+     * 169.254.x.x InetAddress.isLinkLocalAddress()
+     * 192.168.x.x InetAddress.isSiteLocalAddress()
      */ 
     private static final int [][] PRIVATE_ADDRESSES_BYTE =
         new int[][]{
@@ -358,10 +367,11 @@ public final class NetworkUtils {
      * Determines if the given socket is from a local host.
      */
     public static boolean isLocalHost(Socket s) {
+        // TODO: We can use InetAddress.isLoopbackAddress() but
+        // we want most likely check against NetworkUtils.isLocalAddress()!?
         String hostAddress = s.getInetAddress().getHostAddress();
         return "127.0.0.1".equals(hostAddress);
     }
-
     
     /**
      * Packs a Collection of IpPorts into a byte array.
