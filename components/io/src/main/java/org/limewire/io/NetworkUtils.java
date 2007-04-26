@@ -437,10 +437,15 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns the masked IP as an Integer
+     * Applies the netmask on the lower four bytes of the given 
+     * InetAddress and returns it as an Integer.
+     * 
+     * This method is IPv6 compliant but shouldn't be called if
+     * the InetAddress is neither IPv4 compatible nor mapped!
      */
     public static int getMaskedIP(InetAddress addr, int netmask) {
-        return ByteOrder.beb2int(addr.getAddress(),0) & netmask;
+        byte[] address = addr.getAddress();
+        return ByteOrder.beb2int(address, /* 0 */ address.length - 4) & netmask;
     }
     
     /**
