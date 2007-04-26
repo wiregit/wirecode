@@ -35,7 +35,6 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
@@ -142,15 +141,20 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     public HTTPUploadManager(HTTPAcceptor acceptor,
             UploadSlotManager slotManager) {
+        if (acceptor == null) {
+            throw new IllegalArgumentException("acceptor may not be null");
+        }
+        if (slotManager == null) {
+            throw new IllegalArgumentException("slotManager may not be null");
+        }
+        
         this.acceptor = acceptor;
         this.slotManager = slotManager;
 
         FileUtils.addFileLocker(this);
 
-        if (acceptor != null) {
-            acceptor.addResponseListener(responseListener);
-        }
-
+        acceptor.addResponseListener(responseListener);
+        
         inititalizeHandlers();
     }
 
