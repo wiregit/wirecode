@@ -16,7 +16,7 @@ class SSLUtils {
     private static final Executor TLS_PROCESSOR = ExecutorsHelper.newProcessingQueue("TLSProcessor");
     private static final AtomicLazyReference<SSLContext> TLS_CONTEXT = new AtomicLazyReference<SSLContext>() {
         @Override
-        public SSLContext createObject() {
+        protected SSLContext createObject() {
                 try {
                     SSLContext context = SSLContext.getInstance("TLS");
                     context.init(null, null, null);

@@ -18,6 +18,6 @@ public abstract class AtomicLazyReference<T> {
     }
     
     /** Creates the object this reference will use. */
-    public abstract T createObject();
+    protected abstract T createObject();
 
 }

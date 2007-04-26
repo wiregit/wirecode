@@ -20,7 +20,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
     public void testSingleton() {
         AtomicLazyReference<Object> o = new AtomicLazyReference<Object>() {
             @Override
-            public Object createObject() {
+            protected Object createObject() {
                 return new Object();
             }
         };
@@ -70,7 +70,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
         Object obj;
 
         @Override
-        public Object createObject() {
+        protected Object createObject() {
             obj = new Object();
             return obj;
         }
@@ -85,7 +85,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
         }
         
         @Override
-        public Object createObject() {
+        protected Object createObject() {
             creates.getAndIncrement();
             
             try {
