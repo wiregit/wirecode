@@ -261,9 +261,8 @@ public class InstantMessenger implements Chatter {
 
     private class MessageReceiver extends AbstractChannelInterestReader {
 
-        @Override
-        protected int getBufferSize() {
-            return 1024;
+        public MessageReceiver() {
+            super(1024);
         }
 
         @Override
