@@ -95,10 +95,23 @@ public final class NetworkUtils {
 	
 	/**
 	 * Returns whether or not the specified address is valid.
+     * 
+     * This method is IPv6 compliant
 	 */
 	public static boolean isValidAddress(byte[] addr) {
-	    return addr[0]!=INVALID_ADDRESSES_BYTE[0] &&
-	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
+        if (addr.length != 4 && addr.length != 16) {
+            return false;
+        }
+        
+        // Assume all IPv6 addresses are valid that are 
+        // neither IPv4 compatible nor IPv4 mapped 
+        if (!isIPv4CompatibleAddress(addr)
+                && !isIPv4MappedAddress(addr)) {
+            return true;
+        }
+        
+	    return addr[/* 0 */ addr.length - 4] != INVALID_ADDRESSES_BYTE[0]
+               && addr[/* 0 */ addr.length - 4] != INVALID_ADDRESSES_BYTE[1];
     }
     
     /**
