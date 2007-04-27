@@ -50,8 +50,6 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     
     /**
      * Adds a new state to process.
-     * 
-     * @param state
      */
     public void addState(final IOState newState) {
         NIODispatcher.instance().invokeLater(new Runnable() {
