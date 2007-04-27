@@ -74,6 +74,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
@@ -620,6 +621,34 @@ public class RouterService {
         LOG.trace("Started manual GC thread.");
     }
 	                
+    /**
+     * @return the bandwidth for uploads in bytes per second
+     */
+    public static float getRequestedUploadSpeed() {
+        // if the user chose not to limit his uploads
+        // by setting the upload speed to unlimited
+        // set the upload speed to 3.4E38 bytes per second.
+        // This is de facto not limiting the uploads
+        int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
+        if (uSpeed == 100) {
+            return Float.MAX_VALUE; 
+        } else {
+            // if the uploads are limited, take messageUpstream
+            // for ultrapeers into account, - don't allow lower 
+            // speeds than 1kb/s so uploads won't stall completely
+            // if the user accidently sets his connection speed 
+            // lower than his message upstream
+
+            // connection speed is in kbits per second and upload speed is in percent
+            float speed = ConnectionSettings.CONNECTION_SPEED.getValue() / 8f * uSpeed / 100f;
+            
+            // reduced upload speed if we are an ultrapeer
+            speed -= getConnectionManager().getMeasuredUpstreamBandwidth();
+            
+            // we need bytes per second
+            return Math.max(speed, 1f) * 1024f;
+        }
+    }
 
     /**
      * Used to determine whether or not the backend threads have been

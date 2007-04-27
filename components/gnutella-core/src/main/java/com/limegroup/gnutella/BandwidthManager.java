@@ -32,7 +32,7 @@ public class BandwidthManager {
 	}
 	
 	public void applyUploadRate() {
-		UP_TCP.setRate(UploadManager.getUploadSpeed());
+		UP_TCP.setRate(RouterService.getRequestedUploadSpeed());
 	}
 	
 	public Throttle getReadThrottle() {

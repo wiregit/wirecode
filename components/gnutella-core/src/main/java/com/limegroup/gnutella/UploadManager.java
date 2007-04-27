@@ -1523,34 +1523,6 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
     }
     
     
-    /**
-     * @return the bandwidth for uploads in bytes per second
-     */
-    public static float getUploadSpeed() {
-        // if the user chose not to limit his uploads
-	    // by setting the upload speed to unlimited
-	    // set the upload speed to 3.4E38 bytes per second.
-	    // This is de facto not limiting the uploads
-	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
-	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
-            // if the uploads are limited, take messageUpstream
-            // for ultrapeers into account, - don't allow lower 
-            // speeds than 1kb/s so uploads won't stall completely
-            // if the user accidently sets his connection speed 
-            // lower than his message upstream
-            Math.max(
-                // connection speed is in kbits per second
-                ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
-                // upload speed is in percent
-                * uSpeed / 100.f
-                // reduced upload speed if we are an ultrapeer
-                - RouterService.getConnectionManager()
-                .getMeasuredUpstreamBandwidth()*1.f, 1.f )
-	        // we need bytes per second
-	        * 1024;
-	    return ret;
-    }
-
     public void measureBandwidth() {
     	slotManager.measureBandwidth();
     	for (HTTPUploader forced : forceAllowedUploads) 
