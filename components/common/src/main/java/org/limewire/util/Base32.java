@@ -28,7 +28,9 @@ public class Base32 {
       0x17,0x18,0x19,0xFF,0xFF,0xFF,0xFF,0xFF  // 'x', 'y', 'z', '{', '|', '}', '~', 'DEL'
     };
     
-     static public String encode(final byte[] bytes)
+    private Base32() {}
+    
+    static public String encode(final byte[] bytes)
     {
         int i =0, index = 0, digit = 0;
         int currByte, nextByte;
