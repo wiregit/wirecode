@@ -52,10 +52,11 @@ import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.mojito.util.ContactFilter;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -314,21 +315,20 @@ public class StoreManager extends AbstractManager<StoreResult> {
                 Contact sender = response.getContact();
                 Collection<? extends Contact> nodes = response.getNodes();
                 
-                ContactFilter filter = new ContactFilter(context, response.getContact());
-                
-                // We did a FIND_NODE lookup use the info
-                // to fill/update our routing table
-                for(Contact node : nodes) {
+                if (!nodes.isEmpty()) {
                     
-                    if (!filter.isValidContact(node)) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Dropping invalid Contact " + node + " from " + sender);
+                    ContactsScrubber scrubber = ContactsScrubber.scrub(
+                            context, sender, nodes, 
+                            LookupSettings.CONTACTS_SCRUBBER_REQUIRED_RATIO.getValue());
+                    
+                    if (scrubber.isValidResponse()) {
+                        // We did a FIND_NODE lookup use the info
+                        // to fill/update our routing table
+                        for(Contact node : scrubber.getScrubbed()) {
+                            assert (node.isAlive() == false);
+                            context.getRouteTable().add(node);
                         }
-                        continue;
                     }
-                    
-                    assert (node.isAlive() == false);
-                    context.getRouteTable().add(node);
                 }
             }
             

@@ -52,8 +52,9 @@ import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.ContactFilter;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 
@@ -381,17 +382,19 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         
         // Nodes that are currently bootstrapping return
         // an empty Collection of Contacts! 
-        if (!nodes.isEmpty()) {
-            ContactFilter filter = new ContactFilter(context, sender);
-            
-            for(Contact node : nodes) {
-                
-                if (!filter.isValidContact(node)) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Dropping invalid Contact " + node + " from " + sender);
-                    }
-                    continue;
-                }
+        if (nodes.isEmpty()) {
+            if (LookupSettings.ACCEPT_EMPTY_FIND_NODE_RESPONSES.getValue()) {
+                addToResponsePath(response);
+            }
+            return true;
+        }
+        
+        ContactsScrubber scrubber = ContactsScrubber.scrub(
+                context, sender, nodes, 
+                LookupSettings.CONTACTS_SCRUBBER_REQUIRED_RATIO.getValue());
+        
+        if (scrubber.isValidResponse()) {
+            for(Contact node : scrubber.getScrubbed()) {
                 
                 if (!isQueried(node) 
                         && !isYetToBeQueried(node)) {
@@ -409,13 +412,10 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
                 }
             }
             
-            collisions.addAll(filter.getCollisions());
+            collisions.addAll(scrubber.getCollisions());
+            addToResponsePath(response);
         }
         
-        // TODO add only if nodes is empty or if there's
-        // at least certain percentage of Contacts is
-        // valid
-        addToResponsePath(response);
         return true;
     }
     

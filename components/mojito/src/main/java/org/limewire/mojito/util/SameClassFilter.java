@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.util;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -45,7 +46,20 @@ public class SameClassFilter {
     }
 
     private boolean add(Contact node) {
-        return filter.put(toKey(node), node) == null;
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        
+        // IPv6 is Classles! Do as if the InetAddress passed our
+        // filter if it's neither an IPv4 compatible nor mapped
+        // address!
+        if (addr instanceof Inet6Address) {
+            if (!((Inet6Address)addr).isIPv4CompatibleAddress()
+                    && !NetworkUtils.isIPv4MappedAddress(addr)) {
+                return true;
+            }
+        }
+        
+        int key = NetworkUtils.getMaskedIP(addr, NetworkUtils.CLASS_C_NETMASK);
+        return filter.put(key, node) == null;
     }
     
     /**
@@ -55,10 +69,5 @@ public class SameClassFilter {
      */
     public boolean isSameNetwork(Contact node) {
         return !add(node);
-    }
-    
-    private static int toKey(Contact node) {
-        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
-        return NetworkUtils.getMaskedIP(addr, NetworkUtils.CLASS_C_NETMASK);
     }
 }

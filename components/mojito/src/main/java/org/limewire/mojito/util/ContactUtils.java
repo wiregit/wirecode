@@ -191,38 +191,10 @@ public final class ContactUtils {
     }
     
     /**
-     * Checks whether or not 'node' is a valid Contact. Valid 
-     * in sense of having a correct IP:Port and depending on
-     * the ConnectionSettings.LOCAL_IS_PRIVATE setting whether or
-     * not its IP is a non-private Address.
-     * 
-     * @param src The source that send the 'node'
-     * @param node The Contact to verify
-     * @return Whether or not 'node' is a valid Contact
+     * Returns true if both Contacts have the same Node ID
      */
-    public static boolean isValidContact(Contact src, Contact node) {
-        if (!isValidSocketAddress(node)) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(src + " sent us a Contact with an invalid IP:Port " + node);
-            }
-            return false;
-        }
-        
-        if (isPrivateAddress(node)) {
-            if (src.getNodeID().equals(node.getNodeID())) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(src + " does not know its external address");
-                }
-            } else {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(src + " sent us a Contact with a private IP:Port " + node);
-                }
-            }
-            
-            return false;
-        }
-        
-        return true;
+    public static boolean isSameNodeID(Contact node1, Contact node2) {
+        return node1.getNodeID().equals(node2.getNodeID());
     }
     
     /**
