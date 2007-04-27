@@ -81,7 +81,6 @@ import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -175,6 +174,11 @@ public class RouterService {
     private static DownloadManager downloadManager = new DownloadManager();
     
     /**
+     * Acceptor for HTTP connections.
+     */    
+    private static com.limegroup.gnutella.HTTPAcceptor httpUploadAcceptor = new com.limegroup.gnutella.HTTPAcceptor();
+    
+    /**
      * <tt>UploadSlotManager</tt> for controlling upload slots.
      */
     private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
@@ -182,8 +186,8 @@ public class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = 
-    	new UploadManager(uploadSlotManager);
+    private static HTTPUploadManager uploadManager = 
+    	new HTTPUploadManager(httpUploadAcceptor, uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -689,8 +693,9 @@ public class RouterService {
     public static void setFullPower(boolean newValue) {
         if(_fullPower != newValue) {
             _fullPower = newValue;
-            NormalUploadState.setThrottleSwitching(!newValue);
-            HTTPDownloader.setThrottleSwitching(!newValue);
+            // TODO implement throttle switching for uploads and downloads
+            //NormalUploadState.setThrottleSwitching(!newValue);
+            //HTTPDownloader.setThrottleSwitching(!newValue);
         }
     }
 
@@ -773,11 +778,20 @@ public class RouterService {
 	}
 	
     /** 
+     * Accessor for the <tt>HTTPAcceptor</tt> instance.
+     *
+     * @return the <tt>HTTPAcceptor</tt> in use
+     */
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() {
+        return httpUploadAcceptor;
+    }
+
+    /** 
      * Accessor for the <tt>UploadManager</tt> instance.
      *
      * @return the <tt>UploadManager</tt> in use
      */
-	public static UploadManager getUploadManager() {
+	public static HTTPUploadManager getUploadManager() {
 		return uploadManager;
 	}
 

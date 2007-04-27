@@ -250,9 +250,10 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
                 out.write("&" + entry.getKey() + "=" + entry.getValue());
             }
         }
-        out.write(" HTTP/1.1.\r\n");
+        out.write(" HTTP/1.1\r\n");
         out.write("X-Node: ");
         out.write(ip + ":" + port + "\r\n");
+        out.write("Connection: close\r\n");
         out.write("\r\n");
         out.flush();
         

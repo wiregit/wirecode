@@ -48,26 +48,26 @@ public class UploadStat extends AdvancedStatistic {
     public static final Statistic INTERRUPTED =
         new UploadStat();
     
-    /**
-     * Statistic for GET requests that are accumulated AFTER the initial
-     * incoming HTTP connection.
-     */ 
-    public static final Statistic SUBSEQUENT_GET =
-        new UploadStat();
-       
-    /**
-     * Statistic for HEAD requests that are accumulated AFTER the initial
-     * incoming HTTP connection.
-     */ 
-    public static final Statistic SUBSEQUENT_HEAD =
-        new UploadStat();
-
-    /**
-     * Statistic for unknown requests that are accumulated AFTER the initial
-     * incoming HTTP connection.
-     */ 
-    public static final Statistic SUBSEQUENT_UNKNOWN =
-        new UploadStat();
+//    /**
+//     * Statistic for GET requests that are accumulated AFTER the initial
+//     * incoming HTTP connection.
+//     */ 
+//    public static final Statistic SUBSEQUENT_GET =
+//        new UploadStat();
+//       
+//    /**
+//     * Statistic for HEAD requests that are accumulated AFTER the initial
+//     * incoming HTTP connection.
+//     */ 
+//    public static final Statistic SUBSEQUENT_HEAD =
+//        new UploadStat();
+//
+//    /**
+//     * Statistic for unknown requests that are accumulated AFTER the initial
+//     * incoming HTTP connection.
+//     */ 
+//    public static final Statistic SUBSEQUENT_UNKNOWN =
+//        new UploadStat();
         
     /**
      * Statistic for uploads whose status is FILE_NOT_FOUND.

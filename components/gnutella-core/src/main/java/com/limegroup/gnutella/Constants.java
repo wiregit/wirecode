@@ -18,6 +18,12 @@ public final class Constants {
         "application/x-gnutella-packets";
     
     /**
+     * Mime Type to be used when uploading files.
+     */
+    public static final String FILE_MIME_TYPE = 
+        "application/binary";
+
+    /**
      * Constant for the timeout to use on sockets.
      */
     public static final int TIMEOUT = 8000;  

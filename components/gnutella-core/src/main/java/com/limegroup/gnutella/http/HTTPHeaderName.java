@@ -2,6 +2,9 @@ package com.limegroup.gnutella.http;
 
 import java.util.Locale;
 
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 /** All HTTPHeaderNames. */
 public enum HTTPHeaderName {
     
@@ -38,6 +41,9 @@ public enum HTTPHeaderName {
     
 	/** Header for specifying the length of the content, in bytes. */
 	CONTENT_LENGTH("Content-Length"),
+    
+    /** Header for specifying the media types we'll accept. */
+    ACCEPT("Accept"),
     
     /** Header for specifying the type of encoding we'll accept. */
     ACCEPT_ENCODING("Accept-Encoding"),
@@ -122,8 +128,10 @@ public enum HTTPHeaderName {
     RANGE("Range"),
     
     /** The chat status. */
-    CHAT("Chat");
+    CHAT("Chat"),
 
+    /** The transfer encoding. */
+    TRANSFER_ENCODING("Transfer-Encoding");
     
     /**
      * Constant for the HTTP header name as a string.
@@ -196,4 +204,17 @@ public enum HTTPHeaderName {
 	public String toString() {
 		return NAME;
 	}
+    
+    public boolean matches(Header header) {
+        return header.getName().equalsIgnoreCase(NAME);
+    }
+
+    public Header create(String value) {
+        return new BasicHeader(httpStringValue(), value);
+    }
+
+    public Header create(HTTPHeaderValue value) {
+        return new BasicHeader(httpStringValue(), value.httpStringValue());
+    }
+
 }
