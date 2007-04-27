@@ -14,7 +14,7 @@ public interface HTTPUploadSessionManager {
     HTTPUploader getOrCreateUploader(HttpRequest request, HttpContext context,
             UploadType type, String filename);
 
-    QueueStatus enqueue(HttpContext context, HttpRequest request, HttpResponse response);
+    QueueStatus enqueue(HttpContext context, HttpRequest request);
 
     void addAcceptedUploader(HTTPUploader uploader);
 

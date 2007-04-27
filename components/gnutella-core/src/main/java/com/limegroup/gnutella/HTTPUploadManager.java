@@ -545,7 +545,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     // //////////////// Bandwidth Allocation and Measurement///////////////
 
     /**
-     * calculates the appropriate burst size for the allocating bandwidth on the
+     * Calculates the appropriate burst size for the allocating bandwidth on the
      * upload.
      * 
      * @return burstSize. if it is the special case, in which we want to upload
@@ -670,7 +670,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     /**
-     * This class keeps track of client requests.
+     * Keeps track of client requests.
      */
     private static class RequestCache {
         // we don't allow more than 1 request per 5 seconds
@@ -789,6 +789,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return session;
     }
 
+    /**
+     * Returns the session stored in <code>context</code>.
+     *
+     * @return null, if no session exists
+     */
     public UploadSession getSession(HttpContext context) {
         UploadSession session = (UploadSession) context
                 .getAttribute(SESSION_KEY);
@@ -847,8 +852,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return uploader;
     }
 
-    public QueueStatus enqueue(HttpContext context, HttpRequest request,
-            HttpResponse response) {
+    public QueueStatus enqueue(HttpContext context, HttpRequest request) {
         UploadSession session = getSession(context);
         assert !session.isAccepted();
 
@@ -866,8 +870,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return session.getQueueStatus();
     }
 
-    /** For testing. */
-    public void cleanup() {
+    /** Removes active uploaders for testing. */
+    protected void cleanup() {
         for (HTTPUploader uploader : activeUploadList
                 .toArray(new HTTPUploader[0])) {
             slotManager.cancelRequest(uploader.getSession());
@@ -875,6 +879,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
     }
 
+    /**
+     * Manages the {@link UploadSession} associated with a connection.
+     */
     private class ResponseListener implements HttpResponseListener {
 
         public void connectionOpen(NHttpConnection conn) {

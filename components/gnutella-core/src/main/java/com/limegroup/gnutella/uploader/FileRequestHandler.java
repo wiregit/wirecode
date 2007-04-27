@@ -179,8 +179,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
         if (!uploader.getSession().isAccepted()) {
-            QueueStatus queued = sessionManager.enqueue(context, request,
-                    response);
+            QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
             case REJECTED:
                 new LimitReachedRequestHandler(uploader).handle(request,

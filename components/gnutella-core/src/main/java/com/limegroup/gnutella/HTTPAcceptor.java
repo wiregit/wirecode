@@ -132,12 +132,15 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         reactor.acceptConnection(word, socket);
     }
 
+    /**
+     * Adds a listener for acceptor events.
+     */
     public void addResponseListener(HttpResponseListener listener) {
         responseListeners.add(listener);
     }
 
-    /** For testing. */
-    public HttpResponse process(HttpRequest request) throws IOException,
+    /* Simulates the processing of request for testing. */
+    protected HttpResponse process(HttpRequest request) throws IOException,
             HttpException {
         HttpExecutionContext context = new HttpExecutionContext(null);
         HttpResponse response = responseFactory.newHttpResponse(request
@@ -164,15 +167,44 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         return response;
     }
 
+    /**
+     * Removes <code>listener</code> from the list of acceptor listeners.
+     * 
+     * @see #addResponseListener(HttpResponseListener)
+     */
     public void removeResponseListener(HttpResponseListener listener) {
         responseListeners.remove(listener);
     }
 
-    public void registerHandler(final String pattern,
+    /**
+     * Registers a request handler for a request pattern. See
+     * {@link HttpRequestHandlerRegistry} for a description of valid patterns.
+     * <p>
+     * If a request matches multiple handlers, the handler with the longer
+     * pattern is preferred.
+     * <p>
+     * Only a single handler may be registered per pattern.
+     * 
+     * @param pattern the URI pattern to handle requests for
+     * @param handler the handler that processes the request
+     */
+    public synchronized void registerHandler(final String pattern,
             final HttpRequestHandler handler) {
         this.registry.register(pattern, handler);
     }
 
+    /**
+     * Unregisters the handlers for <code>pattern</code>.
+     *  
+     * @see 
+     */
+    public synchronized void unregisterHandler(final String pattern) {
+        this.registry.unregister(pattern);
+    }
+    
+    /**
+     * Forwards events from the underlying protocol layer to acceptor event listeners.
+     */
     private class ConnectionEventListener implements HttpServiceEventListener {
 
         public void connectionOpen(NHttpConnection conn) {
