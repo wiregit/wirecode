@@ -570,8 +570,8 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if both InetAddresses are compatible (IPv4 and IPv4,
-     * IPv6 and IPv6 or IPv4 and an IPv4 compatible IPv6 address).
+     * Returns true if both InetAddresses are compatible (IPv4 and IPv4
+     * or IPv6 and IPv6).
      * 
      * This method is IPv6 compliant
      */
@@ -584,20 +584,9 @@ public final class NetworkUtils {
         if ((a instanceof Inet4Address && b instanceof Inet4Address)
                 || (a instanceof Inet6Address && b instanceof Inet6Address)) {
             return true;
-            
-        // Is 'b' IPv4 compatible or mapped?
-        } else if (a instanceof Inet4Address && b instanceof Inet6Address) {
-            return ((Inet6Address)b).isIPv4CompatibleAddress() || isIPv4MappedAddress(b);
-        
-        // Is 'a' IPv4 compatible or mapped?
-        } else if (a instanceof Inet6Address && b instanceof Inet4Address) {
-            return ((Inet6Address)a).isIPv4CompatibleAddress() || isIPv4MappedAddress(a);
         }
         
-        // No clue! This method works only with known InetAddress
-        // implementations!
-        // TODO: Add support for vaporware like IPv9 :)
-        throw new IllegalArgumentException(a + " and/or " + b + " are unknown InetAddress instances");
+        return false;
     }
     
     /**

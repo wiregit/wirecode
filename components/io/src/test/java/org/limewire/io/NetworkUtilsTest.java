@@ -346,28 +346,6 @@ public class NetworkUtilsTest extends BaseTestCase {
         
         // IPv4 with IPv6
         assertFalse(NetworkUtils.isSameAddressSpace(addr1, addr3));
-        
-        InetAddress addr5 = InetAddress.getByName("[::0000:192.168.1.5]");
-        InetAddress addr6 = InetAddress.getByName("[::FFFF:192.168.1.6]");
-        
-        // IPv4 compatible addresses are IPv6 instances and IPv4 
-        // mapped addresses are IPv4 instances (see below)
-        
-        // Note: It's not possible to construct an IPv4 mapped address
-        // that is an instance of Inet6Address in Java! The factory 
-        // methods getByName() and getByAddress() return always an 
-        // Inet4Address instance!
-        assertInstanceof(Inet6Address.class, addr5);
-        assertInstanceof(Inet4Address.class, addr6);
-        
-        // IPv4 comatible with IPv4 mapped
-        assertTrue(NetworkUtils.isSameAddressSpace(addr5, addr6));
-        
-        // IPv6 with IPv4 compatible
-        assertTrue(NetworkUtils.isSameAddressSpace(addr3, addr5));
-        
-        // IPv6 with with IPv4 mapped
-        assertFalse(NetworkUtils.isSameAddressSpace(addr3, addr6));
     }
     
     public void testIsLocalAddress() throws UnknownHostException, SocketException {
