@@ -144,7 +144,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
 
     @Override
     public String toString() {
-        return getClass().getName() + " [file=" + file.getName() + ",read=" + buffer.remaining() + ",remaining=" + remaining + "]"; 
+        return getClass().getName() + " [file=" + file.getName() + "]"; 
     }
     
     private class PieceHandler implements PieceListener {
