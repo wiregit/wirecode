@@ -151,7 +151,7 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
     private void connect(String uri, int expectedCode) throws IOException {
         socket = new Socket("localhost", PORT);
-        socket.setSoTimeout(200000);
+        socket.setSoTimeout(2000);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new BufferedWriter(new OutputStreamWriter(socket
                 .getOutputStream()));

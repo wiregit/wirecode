@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.nio.NIOServerSocket;
@@ -89,6 +90,11 @@ public class PipedSocketFactory {
             } catch(UnknownHostException uhe) {
                 throw new RuntimeException(uhe);
             }
+        }
+        
+        @Override
+        public SocketAddress getRemoteSocketAddress() {
+            return new InetSocketAddress(getInetAddress(), getPort());
         }
     }
 }

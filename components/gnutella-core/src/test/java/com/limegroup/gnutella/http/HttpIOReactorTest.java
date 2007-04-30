@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import junit.framework.Test;
-
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestFactory;
@@ -40,13 +38,10 @@ public class HttpIOReactorTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
-        return buildTestSuite(HttpIOReactorTest.class);
-    }
-
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
-    }
+    // disabled, see {@link HttpIOReactor#connect}
+//    public static Test suite() {
+//        return buildTestSuite(HttpIOReactorTest.class);
+//    }
 
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
