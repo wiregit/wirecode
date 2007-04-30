@@ -28,7 +28,7 @@ import java.util.Map;
 // TODO: Add support for adding arbitrary migrations.
 public class ConverterObjectInputStream extends ObjectInputStream { 
     
-    private Map<String, String> lookups = new HashMap<String, String>();
+    private Map<String, String> lookups = new HashMap<String, String>(8);
 
     /**
      * Constructs a new ConverterObjectInputStream wrapping the specified
