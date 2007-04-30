@@ -65,6 +65,7 @@ public class XMLDocFilter extends KeywordFilter {
      */
     public void disallowAdult() {
         addDisallowedEntries(LimeXMLNames.VIDEO_TYPE, Arrays.asList("adult"));
+        addDisallowedEntries(LimeXMLNames.VIDEO_RATING, Arrays.asList("adult"));
         addDisallowedExactEntries(LimeXMLNames.VIDEO_RATING, Arrays.asList("r", "nc-17"));
         super.disallowAdult();
     }

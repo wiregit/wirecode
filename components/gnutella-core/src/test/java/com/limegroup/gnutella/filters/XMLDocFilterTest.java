@@ -68,6 +68,9 @@ public class XMLDocFilterTest extends KeywordFilterTest {
         
         qr = createReply("Adult Film");
         assertFalse(filter.allow(qr));
+        
+        qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "Adults Only");
+        assertFalse(filter.allow(qr));
     }
     
     private QueryReply createXMLReply(String field, String values) throws Exception {
