@@ -8,9 +8,10 @@
 package org.limewire.util;
 
 /**
- * Base32 - encodes and decodes 'Canonical' Base32
- *
- * @author  Robert Kaye & Gordon Mohr
+ * Provides methods to encode bytes in Base32 and decode Base32 encrypted Strings back to bytes.
+ *  For additional information see <a href="http://en.wikipedia.org/wiki/Base_32">Base 32</a>.
+ * 
+ * @author Robert Kaye & Gordon Mohr
  */
 public class Base32 {
     private static final String base32Chars = 

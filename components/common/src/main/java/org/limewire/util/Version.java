@@ -1,23 +1,24 @@
 package org.limewire.util;
 
 /**
- * Enscapulates a version, allowing easy compareTos.
- * 
- * Supported versions are in the format of:
- * - 1         (1, 0, 0, 0)
- * - 1.2       (1, 2, 0, 0)
- * - 1.2.3     (1, 2, 3, 0)
- * - 1.2.3_4   (1, 2, 3, 4)
- * - 1.2.3a    (1, 2, 3, 0)
- * - 1.2.3_4a  (1, 2, 3, 4)
- * - 1.2.3 A   (1, 2, 3, 0)
- * - 1.2.3a4   (1, 2, 3, 4)
- * 
- * Unsupported versions include:
- *  - 1a
- *  - 1.2a
- *  - 1.a
- *  - 1.2.a
+ * Compares versions using major, minor, service and revision values. You must include 
+ * a major version in the string, however you may omit the other fields. When applicable, 
+ * the string version must have a dot between the major, minor and service, however 
+ * any-non digit separates service from revision.
+<p>
+ <table>
+<tr><td><b>String</b></td>  <td><b>Major</b></td><td><b>Minor</b></td><td><b>Service</b></td><td><b>Revision</b></td></tr>
+<tr><td>1</td>              <td>1</td>              <td>0</td>              <td>0</td>          <td>0</td></tr>
+<tr><td>1.2</td>            <td>1</td>              <td>2</td>              <td>0</td>          <td>0</td></tr>
+<tr><td>1.2.3</td>          <td>1</td>              <td>2</td>              <td>3</td>          <td>0</td></tr>
+<tr><td>1.2.3_4</td>        <td>1</td>              <td>2</td>              <td>3</td>          <td>4</td></tr>
+<tr><td>1.2.3a</td>         <td>1</td>              <td>2</td>              <td>3</td>          <td>0</td></tr>
+<tr><td>1.2.3_4a</td>       <td>1</td>              <td>2</td>              <td>3</td>          <td>4</td></tr>
+<tr><td>1.2.3 A</td>        <td>1</td>              <td>2</td>              <td>3</td>          <td>0</td></tr>
+<tr><td>1.2.3a4</td>        <td>1</td>              <td>2</td>              <td>3</td>          <td>4</td></tr>
+</table>
+<p>
+  Unsupported versions include: <ul>1a</ul> <ul>1.2a</ul> <ul>1.a </ul> <ul>1.2.a </ul> <ul>etc.</ul>
  */
 public class Version implements Comparable<Version> {
    

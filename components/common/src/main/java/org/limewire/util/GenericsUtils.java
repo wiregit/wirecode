@@ -6,10 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** A collection of useful Generics-related utilities. */
+/**
+ * Provides a means to ensure <code>Maps</code>, <code>Collections</code>,
+ * <code>Sets</code> and <code>Lists</code> contain objects of a specific type only. 
+ * <code>GenericsUtils</code> is intended for checking the type-safety of de-serialized 
+ * objects.
+ */
 public class GenericsUtils {
     
-    /** The mode that scanning should use. */
+    /** The mode to scan Maps, Collections, Sets and Lists. */
     public enum ScanMode {
         /** Throw an exception on bad objects. */
         EXCEPTION,

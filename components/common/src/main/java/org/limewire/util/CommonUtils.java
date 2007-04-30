@@ -15,7 +15,40 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * Provides convenience functionality ranging from getting user information,
+ * copying files to getting the stack traces of all current threads.
+ * <code>CommonUtils</code> is neither systematically ordered, nor logically
+ * grouped; the methods in <code>CommonUtils</code> abstract common
+ * functionality to make programming easier. 
+ * <br><p>
+ * <table cellpadding="5">
+ * <tr><td>User Information </td>
+ * <td> Use <code>CommonUtils</code> to get a username, a user home directory, etc.</td>
+ * </tr>
+ * <tr>
+ * <td>File Operation</td>
+ * <td> <code>CommonUtils</code> lets you copy resource files, get the current
+ * directory, set, get and validate the directory to store user settings. Also,
+ * you can use convertFileName to replace operating system specific illegal
+ * characters. </td> </tr>
+ * <tr> <td>Threads</td>
+ * <td> <code>getAllStackTraces</code> method returns the stack traces of all
+ * current threads. </td>  </tr>
+ * <tr> <td>Time</td>  
+ * <td> <code>seconds2time</code> method converts an integer value
+ * representing the seconds into an appropriate days, hour, minutes and seconds
+ * format (d:hh:mm:ss). For example, <code>seconds2time(1) </code> returns 0:01
+ * and <code>seconds2time(93784) </code> returns 1:02:03:04, 1 day, 2 hours, 3
+ * minutes, 4 seconds. </td></tr> 
+ * <tr> <td>Decode</td>
+ * <td> You can decode a URL encoded from a string. </td> </tr>
+ * <tr> <td>Resources</td>
+ * <td> Retrieve a resource file and a stream. </td> </tr>
+ * </table>
+ * 
+ * 
+ */
 public class CommonUtils {
     
     /**

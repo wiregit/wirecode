@@ -24,7 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/** Utilities for dealing with Files. */
+/**
+ * Provides file manipulation methods. <code>FileUtils</code> ensures a 
+ * file exists, makes a file writable, renames, saves and deletes a file. 
+ * 
+ */
 public class FileUtils {
     
     private static final Log LOG = LogFactory.getLog(FileUtils.class);

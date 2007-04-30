@@ -5,7 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Various static routines for solving endian problems.
+ * Provides methods for resolving endianness issues. Methods operate on byte arrays as
+ * well as on streams.<p>
+ * See <a href = "http://en.wikipedia.org/wiki/Endianness">Endianness</a> 
+ * for more information.
  */
 public class ByteOrder {
     /**

@@ -8,21 +8,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ObjectInputStream that converts serialized files using old packages
- * or classnames into the newer equiv.
+ * Converts older package names to the new equivalent name version and extends the <code>ObjectInputStream</code> 
+ * used for serialization. <code>ConverterObjectInputStream</code> is an input stream
+ * and is useful in code refactoring. If classes are renamed, <code>ObjectInputStream</code> fails to find
+ * the older name. Therefore, <code>ConverterObjectInputStream</code> fixes the problem with changed class names.
  * 
- * This is currently hardcoded to convert:
- *  com.sun.java.util.collections.* -> java.util.*
- *  com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator -> org.limewire.collection.Comparators$CaseInsensitiveStringComparator
- *  com.limegroup.gnutella.util.FileComparator -> org.limewire.collection.FileComparator
- *  com.limegroup.gnutella.downloader.Interval -> org.limewire.collection.Interval
- *  com.limegroup.gnutella.util.IntervalSet -> org.limewire.collection.IntervalSet
- *  com.limegroup.gnutella.util.StringComparator  -> org.limewire.collection.StringComparator
- *  
- * None of the earlier forms of the class need to exist on the classpath.
  * 
- * TODO: Add support for adding arbitrary migrations.
+ * <p><table cellpadding="5">
+ * <tr> <td><b> Former Package Name</b></td>                    <td> <b>New Package Name</b></td> </tr>
+ * <tr> <td>com.sun.java.util.collections.* </td>               <td> java.util.* </td> </tr>
+ * <tr> <td>com.limegroup.gnutella.util.FileComparator</td>     <td> org.limewire.collection.FileComparator</td> </tr>
+ * <tr> <td>com.limegroup.gnutella.downloader.Interval</td>     <td> org.limewire.collection.Interval</td> </tr>
+ * <tr> <td>com.limegroup.gnutella.util.IntervalSet</td>        <td> org.limewire.collection.IntervalSet</td> </tr>
+ * <tr> <td>com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator</td> <td> org.limewire.collection.Comparators$CaseInsensitiveStringComparator</td> </tr>
+ * <tr> <td>com.limegroup.gnutella.util.StringComparator</td>   <td> org.limewire.collection.StringComparator</td> </tr>
+ * </table><p>
+ * None of the earlier forms of the class need to exist in the classpath.<p> 
  */
+// TODO: Add support for adding arbitrary migrations.
 public class ConverterObjectInputStream extends ObjectInputStream { 
     
     private Map<String, String> lookups = new HashMap<String, String>(3);
@@ -42,6 +45,7 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         lookups.put("com.limegroup.gnutella.util.IntervalSet", "org.limewire.collection.IntervalSet");
         lookups.put("com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator", "org.limewire.collection.Comparators$CaseInsensitiveStringComparator");
         lookups.put("com.limegroup.gnutella.util.StringComparator", "org.limewire.collection.StringComparator");
+                
     }
      
     /** 

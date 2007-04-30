@@ -2,7 +2,12 @@ package org.limewire.util;
 
 import java.util.Locale;
 
-
+/**
+ * 
+ * Includes methods to get operating system properties, resources and versions, 
+ * and determine operating system criteria.
+ * 
+ */
 public class OSUtils {
     
     static {

@@ -16,7 +16,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-/** A collection of utilities for retrieving XML documents. */
+/**
+ * Provides utilities to retrieve XML documents. 
+ */
 public class XMLUtils {
 
     private static Log LOG = LogFactory.getLog(XMLUtils.class);
@@ -76,7 +78,7 @@ public class XMLUtils {
     }
     
     /**
-     * A generic ErrorHandler that prints errors to the log.
+     * Provides a default implementation of <code>ErrorHandler</code>. <code>LogErrorHandler</code> prints warnings, errors and fatal errors to a log; 
      */
     public static class LogErrorHandler implements ErrorHandler {
         private final Log log;

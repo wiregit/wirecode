@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Misc Utilities for Processes
+ * Includes <code>consumeAllInput</code> method that adds a data buffer to the
+ * input stream.
  */
 public final class ProcessUtils {
     

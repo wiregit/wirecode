@@ -3,7 +3,8 @@ package org.limewire.util;
 import java.io.IOException;
 
 /**
- * class that handles the removal of accents, etc.
+ * Removes accents, symbols and normalizes strings for internationalization. <code>I18NConvert</code>
+ * abstracts how the strings are normalized.
  */
 public class I18NConvert {
 

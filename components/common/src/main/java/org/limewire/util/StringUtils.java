@@ -9,7 +9,10 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 
-/** Various static routines for manipulating strings.*/
+/**
+ * Includes static methods to split, check for substrings, change case and
+ * compare strings, along with additional string utility methods.
+ */
 public class StringUtils {
 
     /**

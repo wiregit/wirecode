@@ -9,8 +9,8 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- * A collection of core-related systems utilities,
- * most of which will require native code to do correctly.
+ * Returns system information for supported operating systems; most methods rely on native code. <br>
+ * 
  */
 public class SystemUtils {
     

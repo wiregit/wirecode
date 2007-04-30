@@ -2,8 +2,9 @@ package org.limewire.util;
 
 
 /**
- * Abstract clas to use for different normalization implementations
- * Helper functions like blockSplit are also defined here.
+ * Converts and splits strings to a normalized versions for internationalization. Additionally 
+ * lists a simple string composition method.
+ * 
  */
 abstract class AbstractI18NConverter {
 

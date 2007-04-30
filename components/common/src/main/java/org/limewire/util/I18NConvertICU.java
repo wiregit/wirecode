@@ -8,7 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ibm.icu.text.Normalizer;
-
+/**
+ * Removes accents and symbols, and normalizes strings.
+ * 
+ */
 final class I18NConvertICU extends AbstractI18NConverter {
 
     /** excluded codepoints (like accents) */
