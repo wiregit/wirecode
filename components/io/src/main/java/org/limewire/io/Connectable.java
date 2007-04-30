@@ -14,5 +14,4 @@ public interface Connectable extends IpPort {
     public static final List<Connectable> EMPTY_LIST = Collections.emptyList();
     /** An empty set, casted to an Connectable. */
     public static final Set<Connectable> EMPTY_SET = Collections.emptySet();
-
 }

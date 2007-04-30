@@ -12,7 +12,6 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -57,8 +56,8 @@ public class DirectAltLoc extends AlternateLocation {
 	 * creates an altloc for myself.
 	 */
 	protected DirectAltLoc(final URN sha1) throws IOException{
-		this(new Endpoint(
-		        RouterService.getAddress(),
+		this(new IpPortImpl(
+		        NetworkUtils.ip2string(RouterService.getAddress()),
 		        RouterService.getPort())
 		    ,sha1);
 	}

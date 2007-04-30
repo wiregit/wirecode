@@ -319,6 +319,15 @@ public final class HTTPUtils {
         }
     }
     
+    /** Utility for extracting a value from a K=V string. */
+    public static String parseValue(String keyValuePair) throws IOException {
+        int equalIndex = keyValuePair.indexOf("=");
+        if(equalIndex == -1 || equalIndex >= keyValuePair.length() -1)
+            throw new IOException("invalid keyValuePair: " + keyValuePair);
+        
+        return keyValuePair.substring(equalIndex+1);
+    }
+    
     /**
      * Utility method for getting the date value for the "Date" header in
      * standard format.

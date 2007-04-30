@@ -35,7 +35,11 @@ import com.limegroup.gnutella.messages.GGEP;
  */
 
 public class HeadPing extends VendorMessage {
-	public static final int VERSION = 1;
+    /*
+     * Version 1: Initial revision.
+     * Version 2: Signals support for understanding TLS info about push proxies of push altlocs.
+     */
+	public static final int VERSION = 2;
 	
 	/**
 	 * requsted content of the pong
@@ -158,7 +162,7 @@ public class HeadPing extends VendorMessage {
      * vendor message
      */
     public HeadPing (HeadPing original) {
-        super(F_LIME_VENDOR_ID,F_UDP_HEAD_PING,VERSION,original.getPayload());
+        super(F_LIME_VENDOR_ID,F_UDP_HEAD_PING,original.getVersion(),original.getPayload());
         _features = original.getFeatures();
         _urn = original.getUrn();
         _clientGUID = original.getClientGuid();

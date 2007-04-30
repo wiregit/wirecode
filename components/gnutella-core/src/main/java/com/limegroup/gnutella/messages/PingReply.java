@@ -1096,7 +1096,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
             i++;
         }
         
-        return bn.getByteArray();
+        return bn.toByteArray();
     }
 
     /**

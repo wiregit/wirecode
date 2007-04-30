@@ -73,6 +73,20 @@ public class IPPortCombo implements IpPort {
         
         addr = new InetSocketAddress(host, port);
     }
+    
+    /**
+     * Constructor used for local data.
+     * Throws IllegalArgumentException on errors.
+     */
+    public IPPortCombo(InetSocketAddress addr) throws IllegalArgumentException  {
+        if (!NetworkUtils.isValidPort(addr.getPort()))
+            throw new IllegalArgumentException("Bad Port: " + addr);
+        
+        if (!NetworkUtils.isValidAddress(addr.getAddress()))
+            throw new IllegalArgumentException("invalid addr: " + addr);
+        
+        this.addr = addr;
+    }
 
     // Implements IpPort interface
     public int getPort() {

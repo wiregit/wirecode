@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -19,6 +18,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -1022,7 +1024,7 @@ public class QueryReply extends Message implements SecureMessage {
             boolean supportsChatT=false;
             boolean supportsBrowseHostT=false;
             boolean replyToMulticastT=false;
-            Set<IpPort> proxies = IpPort.EMPTY_SET;
+            Set<? extends IpPort> proxies = IpPort.EMPTY_SET;
             byte[] securityToken = null;
             boolean supportsTLST = false;
             
@@ -1365,17 +1367,17 @@ public class QueryReply extends Message implements SecureMessage {
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
+                BitNumbers bn = new BitNumbers(Math.min(MAX_PROXIES, proxies.size()));
                 if (proxies != null && !proxies.isEmpty()) {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();
-                        String host = ppi.getAddress();
-                        int port = ppi.getPort();
+                        IPPortCombo combo = new IPPortCombo(ppi.getInetSocketAddress());
                         try {
-                            IPPortCombo combo = new IPPortCombo(host, port);
                             baos.write(combo.toBytes());
+                            if(ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
+                                bn.set(numWritten);
                             numWritten++;
-                        } catch (UnknownHostException bad) {
                         } catch (IOException terrible) {
                             ErrorService.error(terrible);
                         }
@@ -1384,9 +1386,12 @@ public class QueryReply extends Message implements SecureMessage {
 
                 try {
                     // add the PushProxies
-                    if (numWritten > 0)
-                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY,
-                                    baos.toByteArray());
+                    if (numWritten > 0) {
+                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
+                        // add the TLS push proxies info, if any.
+                        if(!bn.isEmpty())
+                            retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
+                    }
                     // set up return value
                     baos.reset();
                     retGGEP.write(baos);
@@ -1425,22 +1430,36 @@ public class QueryReply extends Message implements SecureMessage {
          * @param ggeps the array of GGEP extensions that may or may not
          *  contain push proxy data
          */
-        public Set<IpPort> getPushProxies(GGEP ggep) {
+        public Set<? extends IpPort> getPushProxies(GGEP ggep) {
             Set<IpPort> proxies = null;
+            BitNumbers bn = null;
+            
+            // First try and get the bits for which PPs support TLS.
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS)) {
+                try {
+                    bn = new BitNumbers(ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+                } catch(BadGGEPPropertyException bad) {}
+            }
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
                 try {
                     byte[] proxyBytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
                     ByteArrayInputStream bais = new ByteArrayInputStream(proxyBytes);
+                    int i = 0;
                     while (bais.available() > 0) {
                         byte[] combo = new byte[6];
                         if (bais.read(combo, 0, combo.length) == combo.length) {
                             try {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
-                                proxies.add(IPPortCombo.getCombo(combo));
+                                IpPort ipp = IPPortCombo.getCombo(combo);
+                                // make it a connectable if the TLS bit is set.
+                                if(bn != null && bn.isSet(i))
+                                    ipp = new ConnectableImpl(ipp, true);
+                                proxies.add(ipp);
                             } catch (InvalidDataException malformedPair) {}
-                        }                        
+                        }
+                        i++;
                     }
                  } catch (BadGGEPPropertyException bad) {}
             }

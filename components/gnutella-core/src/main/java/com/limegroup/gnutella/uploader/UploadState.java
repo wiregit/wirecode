@@ -7,10 +7,12 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Set;
 
-import org.limewire.io.IpPort;
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -149,13 +151,17 @@ public abstract class UploadState implements HTTPMessage {
         if (RouterService.acceptedIncomingConnection())
             return new StringBuilder();
         
-        Set<? extends IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
-	    
+        
+        Set<? extends Connectable> proxies = RouterService.getConnectionManager().getPushProxies();
         StringBuilder buf = new StringBuilder();
-	    int proxiesWritten =0;
-        for(IpPort current : proxies) {
+	    int proxiesWritten = 0;
+        BitNumbers bn = new BitNumbers(proxies.size());
+        for(Connectable current : proxies) {
             if(proxiesWritten >= 4)
                 break;
+            
+            if(current.isTLSCapable())
+                bn.set(proxiesWritten);
 	        buf.append(current.getAddress())
 	        	.append(":")
 	        	.append(current.getPort())
@@ -163,8 +169,11 @@ public abstract class UploadState implements HTTPMessage {
 	        
 	        proxiesWritten++;
 	    }
+        
+        if(!bn.isEmpty())
+            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + ";");
 	    
-	    if (proxiesWritten >0)
+	    if (proxiesWritten > 0)
 	        buf.deleteCharAt(buf.length()-1);
         
         return buf;	    

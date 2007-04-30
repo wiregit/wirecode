@@ -8,10 +8,10 @@ import java.util.StringTokenizer;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -177,7 +177,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 		    throw new NullPointerException("cannot accept null URN");
 
 		if (!rfd.needsPush()) {
-			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
+			return new DirectAltLoc(new IpPortImpl(rfd.getHost(),rfd.getPort()), urn);
 		} else {
 		    PushEndpoint copy;
             if (rfd.getPushAddr() != null) 
@@ -439,7 +439,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
         if(!NetworkUtils.isValidPort(port))
             throw new IOException("invalid port: " + port);
 	    
-	    return new Endpoint(loc,port);
+	    return new IpPortImpl(loc,port);
     }
 
 	/**

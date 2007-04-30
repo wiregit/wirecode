@@ -50,6 +50,8 @@ public class GGEP {
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
+    /** The extension header (key) for PushProxy TLS indexes. */
+    public static final String GGEP_HEADER_PUSH_PROXY_TLS = "PUSH_TLS";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
     /** The extention header (key) for IpPort request */

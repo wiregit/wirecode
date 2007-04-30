@@ -339,13 +339,13 @@ public class HeadPong extends VendorMessage {
     		
     		//if we have any firewalled altlocs and enough room in the packet, add them.
     		if (ping.requestsPushLocs()){
-    			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
-    				HeadPing.FWT_PUSH_ALTLOCS;
+    			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) == HeadPing.FWT_PUSH_ALTLOCS;
+                boolean includeTLS = ping.getVersion() >= 2; // first version that supported binary PPTLS
                 
                 if (FWTOnly) {
                     AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,true);
                     synchronized(push) {
-                        didNotSendPushAltLocs = !writePushLocs(caos,push.iterator());
+                        didNotSendPushAltLocs = !writePushLocs(caos,push.iterator(), includeTLS);
                     }
                 } else {
                     AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,false);
@@ -354,7 +354,7 @@ public class HeadPong extends VendorMessage {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
                                 !writePushLocs(caos,
-                                        new MultiRRIterator<PushAltLoc>(push.iterator(),fwt.iterator()));
+                                        new MultiRRIterator<PushAltLoc>(push.iterator(),fwt.iterator()), includeTLS);
                         }
                     }
                 }
@@ -603,16 +603,23 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writePushLocs(CountingOutputStream caos, Iterator<PushAltLoc> pushlocs) 
-    throws IOException {
+    /**
+     * Writes out PushEndpoints in binary form to the output stream.
+     * This will only write as many push locations as possible that can
+     * fit in the PACKET_SIZE.  If includeTLS is true, this will include
+     * a byte that describes which push proxies of each PushEndpoint
+     * are capable of receiving TLS connections.
+     */
+	private static final boolean writePushLocs(CountingOutputStream caos, Iterator<PushAltLoc> pushlocs, boolean includeTLS) 
+      throws IOException {
 	
         if (!pushlocs.hasNext())
             return false;
 
         //push altlocs are bigger than normal altlocs, however we 
         //don't know by how much.  The size can be between
-        //23 and 47 bytes.  We assume its 47.
-        int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
+        //23 and 48 bytes.  We assume its 47 if includeTLS is false, 48 otherwise.
+        int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / (includeTLS ? 48 : 47);
         
         // if we don't have any space left, we can't send any pushlocs
         if (available == 0)
@@ -632,8 +639,8 @@ public class HeadPong extends VendorMessage {
             }
             
             if (loc.canBeSent(AlternateLocation.MESH_PING)) {
-                baos.write(loc.getPushAddress().toBytes());
-                available --;
+                baos.write(loc.getPushAddress().toBytes(includeTLS));
+                available--;
                 loc.send(now,AlternateLocation.MESH_PING);
             } else if (!loc.canBeSentAny())
                 pushlocs.remove();

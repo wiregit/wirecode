@@ -31,17 +31,25 @@ public class BitNumbers {
         this.size = size;
     }
     
-    /** Constructs a BitNumbers based on the given hex string. */
+    /**
+     * Constructs a BitNumbers based on the given hex string.
+     * This accepts a nibble for the last element,
+     * thus: 
+     *    FF   corresponds to elements 0 through 8 being on
+     *    FFF  corresponds to elements 0 through 12 being on (implies below)
+     *    FFF0 corresponds to elements 0 through 12 being on also
+     */
     public BitNumbers(String hexString) throws IllegalArgumentException {
-        if(hexString.length() % 2 != 0)
-            throw new IllegalArgumentException("Invalid hex string: " + hexString);
-        this.data = new byte[hexString.length() / 2];
+        this.data = new byte[(int)Math.ceil(hexString.length() / 2d)];
         this.size  = data.length * 8;
         
         // Now fill up data, decoding the string...
         for(int i = 0; i < hexString.length(); i+=2) {
             // Will throw NFE (which extends IAE) if data is invalid
-            int j = Integer.parseInt(hexString.substring(i, i+2), 16);
+            boolean nibble = i == hexString.length() - 1;
+            int j = Integer.parseInt(hexString.substring(i, nibble ? i+1 : i+2), 16);
+            if(nibble) // the last element may just be a nibble
+                j <<= 4;
             assert j <= 0xFF;
             data[i/2] = (byte)j;
         }
@@ -75,7 +83,7 @@ public class BitNumbers {
     }
     
     /** Returns the byte array that BitNumbers is backed off of. */
-    public byte[] getByteArray() {
+    public byte[] toByteArray() {
         if(data == null)
             return EMPTY;
         else
@@ -109,6 +117,8 @@ public class BitNumbers {
                 sb.append(hex.toUpperCase());
             }
             sb.setLength(lastNonZero * 2 + 2); // erase empty fields.
+            if(sb.length() > 1 && sb.charAt(sb.length()-1) == '0')
+                sb.setLength(sb.length()-1);
             return sb.toString();
         }
     }
