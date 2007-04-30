@@ -206,7 +206,7 @@ public class StringUtils {
         while (tokenizer.hasMoreTokens())
             tokens.add(tokenizer.nextToken());
 
-        return (String[])tokens.toArray(new String[0]);
+        return tokens.toArray(new String[0]);
     }
 
     /**
@@ -258,7 +258,7 @@ public class StringUtils {
         if (gotDelimiter && !tokens.isEmpty())
             tokens.add("");
 
-        return (String[])tokens.toArray(new String[0]);
+        return tokens.toArray(new String[0]);
     }
 
     /**
