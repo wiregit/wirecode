@@ -12,11 +12,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.reactor.IOEventDispatch;
@@ -30,6 +32,7 @@ import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseContent;
+import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.HttpIOSession;
@@ -42,6 +45,7 @@ import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
+import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -68,7 +72,8 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
     public HTTPAcceptor() {
         initializeReactor();
-
+        inititalizeDefaultHandler();
+        
         RouterService.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
@@ -94,9 +99,12 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.registry = new HttpRequestHandlerRegistry();
         this.connectionListener = new ConnectionEventListener();
 
-        // intercepts http requests and responses
+        // intercepts HTTP requests and responses
         processor = new BasicHttpProcessor();
-        // processor.addInterceptor(new ResponseDate());
+        
+        processor.addInterceptor(new RequestStatisticTracker());
+
+        processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new LimeResponseConnControl());
@@ -120,6 +128,18 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         }
     }
 
+    private void inititalizeDefaultHandler() {
+        // return 400 for unmatched requests
+        registerHandler("*", new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                UploadStat.MALFORMED_REQUEST.incrementStat();
+
+                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+            }
+        });
+    }
+
     /**
      * Incoming HTTP requests.
      */
@@ -130,6 +150,14 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             HTTPStat.HEAD_REQUESTS.incrementStat();
 
         reactor.acceptConnection(word, socket);
+    }
+
+    /**
+     * Incoming HTTP push requests.
+     */
+    public void acceptLocalConnection(Socket socket) {
+        DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
+        HttpContextParams.setLocal(conn.getContext(), true);
     }
 
     /**
@@ -264,6 +292,30 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
     }
 
+    private class RequestStatisticTracker implements HttpRequestInterceptor {
+
+        public void process(HttpRequest request, HttpContext context)
+                throws HttpException, IOException {
+            String method = request.getRequestLine().getMethod();
+            if (HttpContextParams.isLocal(context)) {
+                if ("GET".equals(method))
+                    UploadStat.PUSHED_GET.incrementStat();
+                else if ("HEAD".equals(method))
+                    UploadStat.PUSHED_HEAD.incrementStat();
+                else
+                    UploadStat.PUSHED_UNKNOWN.incrementStat();
+            } else {
+                if ("GET".equals(method))
+                    HTTPStat.GET_REQUESTS.incrementStat();
+                else if ("HEAD".equals(method))
+                    HTTPStat.HEAD_REQUESTS.incrementStat();
+                else 
+                    HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+            }
+        }
+        
+    }
+    
     /*
      * XXX iterating over all headers is rather inefficient since the size of
      * the headers is known in DefaultNHttpServerConnection.submitResponse() but

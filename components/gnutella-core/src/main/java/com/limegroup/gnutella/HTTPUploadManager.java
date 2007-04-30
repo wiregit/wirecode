@@ -213,16 +213,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/browser-control", notFoundHandler);
         acceptor.registerHandler("/gnutella/file-view*", notFoundHandler);
         acceptor.registerHandler("/gnutella/res/*", notFoundHandler);
-
-        // return malformed request for everything else
-        acceptor.registerHandler("*", new HttpRequestHandler() {
-            public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws HttpException, IOException {
-                UploadStat.MALFORMED_REQUEST.incrementStat();
-
-                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
-            }
-        });
     }
 
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
@@ -238,7 +228,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Push uploads from firewalled clients.
      */
     public void acceptUpload(Socket socket, boolean lan) {
-        acceptor.acceptConnection(null, socket);
+        if (lan) {
+            acceptor.acceptLocalConnection(socket);
+        } else {
+            acceptor.acceptConnection(null, socket);
+        }
     }
 
     /**
