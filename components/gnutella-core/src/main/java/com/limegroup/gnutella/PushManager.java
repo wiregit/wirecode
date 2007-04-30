@@ -1,19 +1,19 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.channel.ChannelWriter;
+import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -154,56 +154,85 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ThreadExecutor.startThread(new Pusher(data, socket, fwt), "PushUploadThread");
+            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data));
         }
     }    
 
-    /** A runnable that starts a push transfer. */
-    private static class Pusher implements Runnable {
-        PushData data;
-        private Socket socket;
-        private boolean fwTransfer;
-        
-        Pusher(PushData data, Socket socket, boolean fwt) {
+    /** Non-blocking observer for connect events related to pushing. */
+    private static class PushConnector implements ChannelWriter {
+
+        private InterestWritableByteChannel channel;
+
+        private final ByteBuffer buffer;
+
+        private final Socket socket;
+
+        private final PushData data;
+
+        public PushConnector(Socket socket, PushData data) throws IOException {
             this.data = data;
             this.socket = socket;
-            this.fwTransfer = fwt;
+
+            socket.setSoTimeout(30 * 1000);
+
+            String giv = "GIV 0:"  + data.getGuid() + "/file\n\n";
+            this.buffer = ByteBuffer.wrap(giv.getBytes());
         }
 
-        public void run() {
-            try {
-                OutputStream ostream = socket.getOutputStream();
-                String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
-                ostream.write(giv.getBytes());
-                ostream.flush();
+        public boolean handleWrite() throws IOException {
+            if (!buffer.hasRemaining()) {
+                return false;
+            }
 
-                // try to read a GET or HEAD for only 30 seconds.
-                socket.setSoTimeout(30 * 1000);
-
-                // read GET or HEAD and delegate appropriately.
-                String word = IOUtils.readWord(socket.getInputStream(), 4);
-                if (fwTransfer)
-                    UploadStat.FW_FW_SUCCESS.incrementStat();
-
-                if (word.equals("GET")) {
-                    UploadStat.PUSHED_GET.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, socket, data.isLan());
-                } else if (word.equals("HEAD")) {
-                    UploadStat.PUSHED_HEAD.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, socket, data.isLan());
-                } else {
-                    UploadStat.PUSHED_UNKNOWN.incrementStat();
-                    throw new IOException();
+            while (buffer.hasRemaining()) {
+                int written = channel.write(buffer);
+                if (written == 0) {
+                    return true;
                 }
-            } catch (IOException ioe) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Failed push connect/transfer to " + data.getHost() + ":" + data.getPort() + ", fwt: " + fwTransfer);
-                if (fwTransfer)
-                    UploadStat.FW_FW_FAILURE.incrementStat();
-                UploadStat.PUSH_FAILED.incrementStat();
-            } finally {
-                IOUtils.close(socket);
+            }
+
+//                try {
+//                    if (word.equals("GET")) {
+//                        UploadStat.PUSHED_GET.incrementStat();
+//                        RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, socket, data.isLan());
+//                    } else if (word.equals("HEAD")) {
+//                        UploadStat.PUSHED_HEAD.incrementStat();
+//                        RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, socket, data.isLan());
+//                    } else {
+//                        UploadStat.PUSHED_UNKNOWN.incrementStat();
+//                        throw new IOException();
+//                    }
+//                } catch (IOException ioe) {
+//                    if(LOG.isDebugEnabled())
+//                        LOG.debug("Failed push connect/transfer to " + data.getHost() + ":" + data.getPort() + ", fwt: " + fwTransfer);
+//                    if (fwTransfer)
+//                        UploadStat.FW_FW_FAILURE.incrementStat();
+//                    UploadStat.PUSH_FAILED.incrementStat();
+//                }
+
+            RouterService.getUploadManager().acceptUpload(socket, data.isLan());
+            return false;
+        }
+
+        public void handleIOException(IOException iox) {
+            throw new RuntimeException();
+        }
+
+        public void shutdown() {
+            // ignore
+        }
+
+        public InterestWritableByteChannel getWriteChannel() {
+            return channel;
+        }
+
+        public void setWriteChannel(InterestWritableByteChannel newChannel) {
+            this.channel = newChannel;
+
+            if (newChannel != null) {
+                newChannel.interestWrite(this, true);
             }
         }
-    }
+    }    
+
 }

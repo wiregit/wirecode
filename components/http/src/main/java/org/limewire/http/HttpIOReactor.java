@@ -110,12 +110,12 @@ public class HttpIOReactor implements ConnectingIOReactor {
         }
     }
     
-    protected HttpIOSession connectSocket(AbstractNBSocket socket, Object attachment, String word) throws IOException {
+    protected DefaultNHttpServerConnection connectSocket(AbstractNBSocket socket, Object attachment, String word) {
         final HttpIOSession session = new HttpIOSession(socket);        
         
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
         session.setSocketTimeout(HttpConnectionParams.getSoTimeout(this.params));
-
+        
         HttpChannel channel = new HttpChannel(session, eventDispatch, word);
         session.setHttpChannel(channel);
         
@@ -129,15 +129,16 @@ public class HttpIOReactor implements ConnectingIOReactor {
         socket.setReadObserver(channel);
         socket.setWriteObserver(channel);
         
-        return session;
+        return conn;
     }
 
-    public void acceptConnection(String word, Socket socket) {
+    public DefaultNHttpServerConnection acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);
-            connectSocket((AbstractNBSocket) socket, null, word);
+            return connectSocket((AbstractNBSocket) socket, null, word);
         } catch (IOException e) {
             IOUtils.close(socket);
+            return null;
         }
     }
 

@@ -31,7 +31,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -238,9 +237,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Push uploads from firewalled clients.
      */
-    public void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan) {
-        acceptor.acceptConnection((get != null) ? get.getMethod() : null,
-                socket);
+    public void acceptUpload(Socket socket, boolean lan) {
+        acceptor.acceptConnection(null, socket);
     }
 
     /**

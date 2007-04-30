@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -23,7 +22,6 @@ import com.limegroup.gnutella.downloader.QueuedException;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -445,7 +443,7 @@ public class UploaderTest extends LimeTestCase {
         Thread t = new Thread() {
             public void run() {
                 try {
-                    upman.acceptUpload(null, sa, false);
+                    upman.acceptUpload(sa, false);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -1079,12 +1077,12 @@ public class UploaderTest extends LimeTestCase {
         Thread runner=new Thread() {
             public void run() {
                 try {
-                    InputStream ia = sa.getInputStream();
-                    assertEquals('G', ia.read());
-                    assertEquals('E', ia.read());
-                    assertEquals('T', ia.read());
-                    assertEquals(' ', ia.read());
-                    upman.acceptUpload(HTTPRequestMethod.GET,sa, false);
+//                    InputStream ia = sa.getInputStream();
+//                    assertEquals('G', ia.read());
+//                    assertEquals('E', ia.read());
+//                    assertEquals('T', ia.read());
+//                    assertEquals(' ', ia.read());
+                    upman.acceptUpload(sa, false);
                 } catch(Throwable t) {
                     // make sure we know about errors.
                     ErrorService.error(t);
