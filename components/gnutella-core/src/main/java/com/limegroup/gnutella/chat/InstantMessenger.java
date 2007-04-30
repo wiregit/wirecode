@@ -63,7 +63,7 @@ public class InstantMessenger implements Chatter {
     
     private static final String CHARSET = "UTF-8";
 
-    private Socket socket;
+    private volatile Socket socket;
 
     private final String host;
 
@@ -228,6 +228,10 @@ public class InstantMessenger implements Chatter {
         ((NIOMultiplexor) socket).setWriteObserver(sender);
 
         callback.acceptChat(this);
+        
+        synchronized (this) {
+            this.notifyAll();
+        }
     }
 
     private void handleException(IOException e) {
@@ -259,6 +263,13 @@ public class InstantMessenger implements Chatter {
         ((NIOMultiplexor) socket).setWriteObserver(shaker);
     }
 
+    /* For testing. */
+    public synchronized void waitForConnect(long timeout) throws InterruptedException {
+        if (socket == null || !socket.isConnected()) {
+            this.wait(timeout);
+        }
+    }
+    
     private class MessageReceiver extends AbstractChannelInterestReader {
 
         public MessageReceiver() {

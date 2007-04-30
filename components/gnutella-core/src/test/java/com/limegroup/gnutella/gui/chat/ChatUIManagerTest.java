@@ -95,6 +95,8 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
     public void testChatLocalhost() throws Exception {
         //String localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
         outgoing = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
+        ((InstantMessenger)outgoing.getChat()).waitForConnect(1000);
+        // wait for SwingUtilities.invokeLater() to create chat frame
         Thread.sleep(4000);
         assertTrue(!outgoing.getChat().isConnected());
     }
