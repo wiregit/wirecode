@@ -440,6 +440,12 @@ public class DHTManagerImpl implements DHTManager {
         ret.put("max",l.get(l.size() -1).toByteArray());
         ret.put("med",l.get(l.size() / 2).toByteArray());
         
+        if (l.size() > 6) {
+            // big enough to find outliers 
+            ret.put("Q1", l.get((int)(l.size() * 0.25)).toByteArray());
+            ret.put("Q3", l.get((int)(l.size() * 0.75)).toByteArray());
+        }
+        
         BigInteger sum = BigInteger.valueOf(0);
         for (BigInteger bi : l) 
             sum = sum.add(bi);
