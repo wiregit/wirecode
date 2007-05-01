@@ -27,6 +27,11 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
 
+/**
+ * Responds to Gnutella browse requests. Only supports the
+ * application/x-gnutella-packets mime-type, browsing through HTML is not
+ * supported.
+ */
 public class BrowseRequestHandler implements HttpRequestHandler {
 
     private HTTPUploadSessionManager sessionManager;
@@ -38,9 +43,11 @@ public class BrowseRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         UploadStat.BROWSE_HOST.incrementStat();
-        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context,
-                UploadType.BROWSE_HOST, "Browse-File");
+        
+        HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
+                context, UploadType.BROWSE_HOST, "Browse-File");
         uploader.setState(Uploader.BROWSE_HOST);
+        
         if (!HttpCoreUtils.hasHeader(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {
             response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
@@ -48,10 +55,13 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             response.setEntity(new BrowseResponseEntity(uploader));
             response.setStatusCode(HttpStatus.SC_OK);
         }
+        
         sessionManager.sendResponse(uploader, response);
     }
 
     public class BrowseResponseEntity extends AbstractHttpNIOEntity {
+
+        private static final int RESPONSES_PER_REPLY = 10;
 
         private HTTPUploader uploader;
 
@@ -78,7 +88,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         public void initialize() throws IOException {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {
-                    // TODO update progress
+                    uploader.addAmountUploaded(m.getTotalLength());
                 }                
             };
             
@@ -98,9 +108,13 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             return more || iterable.hasNext();
         }
         
+        /**
+         * Adds a query reply with {@link #RESPONSES_PER_REPLY} responses to the
+         * message queue.
+         */
         private void addMessages() {
             List<Response> responses = new ArrayList<Response>(10); 
-            for (int i = 0; iterable.hasNext() && i < 10; i++) {
+            for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
                 responses.add(iterable.next());
             }
             
@@ -109,13 +123,12 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
-                // TODO we should set this to the amount that has acctually been written to the network
-                uploader.addAmountUploaded(queryReply.getTotalLength());
             }
         }
 
         @Override
         public void finished() {
+            sender = null;
         }
 
     }
