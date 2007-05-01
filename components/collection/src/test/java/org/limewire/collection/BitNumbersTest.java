@@ -35,7 +35,7 @@ public class BitNumbersTest extends BaseTestCase {
         assertEquals(15, bn.getMax());
         for(int i = 0; i < 15; i++)
             assertEquals(i == 0 || i == 3 || i == 5 || i == 10, bn.isSet(i));
-        assertEquals("9420", bn.toHexString());
+        assertEquals("942", bn.toHexString());
         assertEquals(new byte[] { (byte)0x94, 0x20 }, bn.toByteArray());
     }
     
@@ -46,7 +46,7 @@ public class BitNumbersTest extends BaseTestCase {
         assertEquals(16, bn.getMax());
         for(int i = 0; i < 15; i++)
             assertEquals(i == 0 || i == 3 || i == 5 || i == 10, bn.isSet(i));
-        assertEquals("9420", bn.toHexString());
+        assertEquals("942", bn.toHexString());
         assertEquals(new byte[] { (byte)0x94, 0x20 }, bn.toByteArray());
         
         bn.set(1);
@@ -58,13 +58,31 @@ public class BitNumbersTest extends BaseTestCase {
         assertEquals(new byte[] { (byte)0xD4, 0x31 }, bn.toByteArray());
     }
     
-    public void testStringConstruction() {
+    public void testStringConstructionWhole() {
         BitNumbers bn = new BitNumbers("9420");
         assertFalse(bn.isEmpty());
         assertEquals(16, bn.getMax());
         for(int i = 0; i < 15; i++)
             assertEquals(i == 0 || i == 3 || i == 5 || i == 10, bn.isSet(i));
-        assertEquals("9420", bn.toHexString());
+        assertEquals("942", bn.toHexString());
+        assertEquals(new byte[] { (byte)0x94, 0x20 }, bn.toByteArray());
+        
+        bn.set(1);
+        bn.set(11);
+        bn.set(15);
+        for(int i = 0; i < 16; i++)
+            assertEquals(i == 0 || i == 1 || i == 3 || i == 5 || i == 10 || i == 11 || i == 15, bn.isSet(i));
+        assertEquals("D431", bn.toHexString());
+        assertEquals(new byte[] { (byte)0xD4, 0x31 }, bn.toByteArray());
+    }
+    
+    public void testStringConstructionNibble() {
+        BitNumbers bn = new BitNumbers("942");
+        assertFalse(bn.isEmpty());
+        assertEquals(16, bn.getMax());
+        for(int i = 0; i < 15; i++)
+            assertEquals(i == 0 || i == 3 || i == 5 || i == 10, bn.isSet(i));
+        assertEquals("942", bn.toHexString());
         assertEquals(new byte[] { (byte)0x94, 0x20 }, bn.toByteArray());
         
         bn.set(1);
@@ -83,7 +101,7 @@ public class BitNumbersTest extends BaseTestCase {
         for(int i = 0; i < 32; i++) {
             assertEquals(i == 3, bn.isSet(i));
         }
-        assertEquals("10", bn.toHexString());
+        assertEquals("1", bn.toHexString());
     }
     
     public void testToByteArrayDoesntCutExtra() {
