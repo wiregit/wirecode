@@ -268,7 +268,8 @@ public final class NetworkUtils {
                 || address.isLinkLocalAddress() 
                 || address.isSiteLocalAddress()
                 || isUniqueLocalUnicastAddress(address)
-                || isBroadcastAddress(address)) {
+                || isBroadcastAddress(address)
+                || isInvalidAddress(address)) {
             return true;
         }
         
@@ -291,6 +292,7 @@ public final class NetworkUtils {
         }
         
         if (isAnyLocalAddress(address) 
+                || isInvalidAddress(address)
                 || isLoopbackAddress(address) 
                 || isLinkLocalAddress(address) 
                 || isSiteLocalAddress(address)
