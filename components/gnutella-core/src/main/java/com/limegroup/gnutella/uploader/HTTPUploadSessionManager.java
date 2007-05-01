@@ -16,8 +16,14 @@ public interface HTTPUploadSessionManager {
 
     QueueStatus enqueue(HttpContext context, HttpRequest request);
 
+    /**
+     * Adds an accepted HTTPUploader to the internal list of active downloads.
+     */
     void addAcceptedUploader(HTTPUploader uploader);
 
+    /**
+     * Adds <code>uploader</code> to the GUI and increments the attempted uploads.
+     */
     void sendResponse(HTTPUploader uploader, HttpResponse response);
 
     void handleFreeLoader(HttpRequest request, HttpResponse response,

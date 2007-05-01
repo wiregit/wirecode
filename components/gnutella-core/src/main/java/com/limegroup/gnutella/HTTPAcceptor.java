@@ -70,6 +70,8 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
     private DefaultHttpResponseFactory responseFactory;
 
+    private HttpRequestHandler notFoundHandler;
+
     public HTTPAcceptor() {
         initializeReactor();
         inititalizeDefaultHandler();
@@ -129,6 +131,20 @@ public class HTTPAcceptor implements ConnectionAcceptor {
     }
 
     private void inititalizeDefaultHandler() {
+        // unsupported requests
+        notFoundHandler = new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                UploadStat.FILE_NOT_FOUND.incrementStat();
+
+                response.setReasonPhrase("Feature Not Active");
+                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+            }
+        };
+        registerHandler("/browser-control", notFoundHandler);
+        registerHandler("/gnutella/file-view*", notFoundHandler);
+        registerHandler("/gnutella/res/*", notFoundHandler);
+
         // return 400 for unmatched requests
         registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
@@ -167,6 +183,13 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         responseListeners.add(listener);
     }
 
+    /**
+     * Returns a handler that responds with a HTTP 404 error.
+     */
+    public HttpRequestHandler getNotFoundHandler() {
+        return notFoundHandler;
+    }
+    
     /* Simulates the processing of request for testing. */
     protected HttpResponse process(HttpRequest request) throws IOException,
             HttpException {

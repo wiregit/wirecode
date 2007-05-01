@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -35,8 +33,6 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
         else if (readContentURNHeader(header))
             ;
         else if (readQueueVersion(header))
-            ;
-        else if (readNodeHeader(header))
             ;
         else if (readFeatureHeader(header))
             ;
@@ -74,7 +70,7 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
 
             uploader.setChatEnabled(true);
             uploader.setBrowseEnabled(true);
-            uploader.setNodePort(port);
+            uploader.setGnutellaPort(port);
         }
         
         return true;
@@ -271,34 +267,35 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
         return true;
     }
 
-    /**
-     * Reads the X-Node header
-     * 
-     * @return true if the header had an node description value
-     */
-    private boolean readNodeHeader(final Header header) {
-        if (!HTTPHeaderName.NODE.matches(header))
-            return false;
-
-        StringTokenizer st = new StringTokenizer(header.getValue(), ":");
-        InetAddress tempAddr = null;
-        int tempPort = -1;
-        // we are expecting 2 tokens - only evalute if you see 2
-        if (st.countTokens() == 2) {
-            try {
-                tempAddr = InetAddress.getByName(st.nextToken().trim());
-                tempPort = Integer.parseInt(st.nextToken().trim());
-                if (NetworkUtils.isValidPort(tempPort)) {
-                    // everything checks out....
-                    uploader.setNodeAddress(tempAddr);
-                    uploader.setNodePort(tempPort);
-                }
-            } catch (UnknownHostException badHost) { // crappy host
-            } catch (NumberFormatException nfe) {
-            } // crappy port
-        }
-
-        return true;
-    }
+    // see PushProxyRequestHandler#getNodeAddress()
+//    /**
+//     * Reads the X-Node header
+//     * 
+//     * @return true if the header had an node description value
+//     */
+//    private boolean readNodeHeader(final Header header) {
+//        if (!HTTPHeaderName.NODE.matches(header))
+//            return false;
+//
+//        StringTokenizer st = new StringTokenizer(header.getValue(), ":");
+//        InetAddress tempAddr = null;
+//        int tempPort = -1;
+//        // we are expecting 2 tokens - only evalute if you see 2
+//        if (st.countTokens() == 2) {
+//            try {
+//                tempAddr = InetAddress.getByName(st.nextToken().trim());
+//                tempPort = Integer.parseInt(st.nextToken().trim());
+//                if (NetworkUtils.isValidPort(tempPort)) {
+//                    // everything checks out....
+//                    uploader.setNodeAddress(tempAddr);
+//                    uploader.setGnutellaPort(tempPort);
+//                }
+//            } catch (UnknownHostException badHost) { // crappy host
+//            } catch (NumberFormatException nfe) {
+//            } // crappy port
+//        }
+//
+//        return true;
+//    }
 
 }

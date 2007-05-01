@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 
 import org.apache.http.HttpResponse;
@@ -13,7 +12,11 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
 
+/**
+ * Maintains state for an HTTP upload.
+ */
 public class HTTPUploader extends AbstractUploader implements Uploader {
+
     /**
      * The URN specified in the X-Gnutella-Content-URN header, if any.
      */
@@ -53,7 +56,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     @Override
-    public void setFileDesc(FileDesc fd) throws IOException {
+    public void setFileDesc(FileDesc fd) {
         super.setFileDesc(fd);
 
         setUploadBegin(0);

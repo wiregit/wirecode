@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
-import java.net.InetAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,14 +12,7 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
- * Maintains state for an HTTP upload request.
- * 
- * Care must be taken to call closeFileStreams whenever a chunk of the transfer
- * is finished, and to call stop when the entire HTTP/1.1 session is finished.
- * 
- * A single HTTPUploader should be reused for multiple chunks of a single file
- * in an HTTP/1.1 session. However, multiple HTTPUploaders should be used for
- * multiple files in a single HTTP/1.1 session.
+ * Provides an implementation of the {@link Uploader} interface.
  */
 public abstract class AbstractUploader implements Uploader {
 
@@ -33,7 +25,7 @@ public abstract class AbstractUploader implements Uploader {
 
     /**
      * The number of bytes transfered by all requests represented by this
-     * Uploader.
+     * instance.
      */
     private long totalAmountUploaded;
 
@@ -43,8 +35,6 @@ public abstract class AbstractUploader implements Uploader {
     private boolean ignoreTotalAmountUploaded;
 
     private long fileSize;
-
-    private int index;
 
     private String userAgent;
 
@@ -70,20 +60,12 @@ public abstract class AbstractUploader implements Uploader {
      */
     private boolean priorityShare = false;
 
-    /**
-     * The descriptor for the file we're uploading.
-     */
+    /** The descriptor of the file being uploaded. */
     private FileDesc fileDesc;
 
-    /**
-     * The address as described by the "X-Node" header.
-     */
-    private InetAddress nodeAddress = null;
-
-    /**
-     * The port as described by the "X-Node" header.
-     */
-    private int nodePort = -1;
+    int index;
+    
+    private int port = -1;
 
     /** The upload type of this uploader. */
     private UploadType uploadType;
@@ -95,14 +77,11 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     /**
-     * Reinitializes this uploader for a new request method.
-     * 
-     * @param method the HTTPRequestMethod to change to.
-     * @param params the parameter list to change to.
+     * Reinitializes this uploader for a new request.
      */
     public void reinitialize() {
         setState(CONNECTING);
-        nodePort = -1;
+        port = -1;
         totalAmountUploadedBefore = 0;
         if (!ignoreTotalAmountUploaded) {
             totalAmountUploaded += amountUploaded;
@@ -113,17 +92,18 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     /**
-     * Sets the FileDesc for this HTTPUploader to use.
+     * Sets the file that is being uploaded.
      * 
-     * @param fd the <tt>FileDesc</tt> to use
+     * @param fd the file being uploaded
      * @throws IOException if the file cannot be read from the disk.
      */
-    public void setFileDesc(FileDesc fd) throws IOException {
+    public void setFileDesc(FileDesc fd) {
         if (LOG.isDebugEnabled())
             LOG.debug("Setting file description for " + this + ": " + fd);
-        fileDesc = fd;
-        forcedShare = FileManager.isForcedShare(fd);
-        priorityShare = FileManager.isApplicationSpecialShare(fd.getFile());
+        this.fileDesc = fd;
+        this.forcedShare = FileManager.isForcedShare(fd);
+        this.priorityShare = FileManager.isApplicationSpecialShare(fd.getFile());
+        this.index = fd.getIndex();
         setFileSize(fd.getFileSize());
     }
 
@@ -153,7 +133,14 @@ public abstract class AbstractUploader implements Uploader {
         addAmountUploaded((int) (amount - amountUploaded));
     }
 
+    /**
+     * Increases the amount of uploaded bytes.
+     *  
+     * @param written number of bytes transferred
+     */
     public void addAmountUploaded(int written) {
+        assert written >= 0;
+        
         if (written > 0) {
             if (isForcedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
@@ -223,7 +210,7 @@ public abstract class AbstractUploader implements Uploader {
 
     // implements the Uploader interface
     public int getGnutellaPort() {
-        return nodePort;
+        return port;
     }
 
     public String getUserAgent() {
@@ -239,35 +226,17 @@ public abstract class AbstractUploader implements Uploader {
         return priorityShare;
     }
 
+    /**
+     * Returns true, if this is this Uploader represents the first request.
+     */
     protected boolean isFirstReply() {
         return firstReply;
     }
 
-    public InetAddress getNodeAddress() {
-        return nodeAddress;
-    }
-
-    public int getNodePort() {
-        return nodePort;
-    }
-
-    /**
-     * The amount of bytes that this upload has transferred. For HTTP/1.1
-     * transfers, this number is the amount uploaded for this specific chunk
-     * only. Uses getTotalAmountUploaded for the entire amount uploaded.
-     * 
-     * Implements the Uploader interface.
-     */
     public long amountUploaded() {
         return amountUploaded;
     }
 
-    /**
-     * The total amount of bytes that this upload and all previous uploaders
-     * have transferred on this socket in this file-exchange.
-     * 
-     * Implements the Uploader interface.
-     */
     public long getTotalAmountUploaded() {
         if (ignoreTotalAmountUploaded)
             return amountUploaded;
@@ -277,13 +246,6 @@ public abstract class AbstractUploader implements Uploader {
             return totalAmountUploaded + amountUploaded;
     }
 
-    /**
-     * Returns the <tt>FileDesc</tt> instance for this uploader.
-     * 
-     * @return the <tt>FileDesc</tt> instance for this uploader, or
-     *         <tt>null</tt> if the <tt>FileDesc</tt> could not be assigned
-     *         from the shared files
-     */
     public FileDesc getFileDesc() {
         return fileDesc;
     }
@@ -322,12 +284,8 @@ public abstract class AbstractUploader implements Uploader {
         this.chatEnabled = chatEnabled;
     }
 
-    public void setNodeAddress(InetAddress nodeAddress) {
-        this.nodeAddress = nodeAddress;
-    }
-
-    public void setNodePort(int nodePort) {
-        this.nodePort = nodePort;
+    public void setGnutellaPort(int port) {
+        this.port = port;
     }
 
     public void setTotalAmountUploadedBefore(int totalAmountReadBefore) {
@@ -336,10 +294,6 @@ public abstract class AbstractUploader implements Uploader {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
     }
 
     public String toString() {
