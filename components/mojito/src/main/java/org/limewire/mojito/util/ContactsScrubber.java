@@ -76,6 +76,8 @@ public class ContactsScrubber {
         this.scrubbed = new LinkedHashMap<KUID, Contact>(nodes.size());
         this.collisions = new LinkedHashSet<Contact>(1);
         
+        Contact localNode = context.getLocalNode();
+        
         SameClassFilter filter = new SameClassFilter(sender);
         
         boolean containsLocal = false;
@@ -101,22 +103,49 @@ public class ContactsScrubber {
                 continue;
             }
             
-            // Make sure the IPs are from different Networks. Don't apply
-            // this filter if the sender is in the response Set though!
-            if (!ContactUtils.isSameNodeID(sender, node)
-                    && NetworkSettings.FILTER_CLASS_C.getValue() 
-                    && filter.isSameNetwork(node)) {
+            // Make sure we're not mixing IPv4 and IPv6 addresses.
+            // See RouteTableImpl.add() for more Info!
+            if (!ContactUtils.isSameAddressSpace(localNode, node)) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(sender + " sent one or more Contacts from the same Network-Class: " + node);
+                    LOG.info(node + " is from a different IP address space than local Node");
                 }
                 continue;
             }
             
-            // Make sure we're not mixing IPv4 and IPv6 addresses.
-            // See RouteTableImpl.add() for more Info!
-            if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+            // IPv4-compatible addresses are 'tricky'. Two IPv6 aware systems
+            // may communicate with each other by using IPv4 infrastructure.
+            // This works only if both are dual-stack systems. In an IPv6 DHT
+            // we may have the situation that some systems don't understand
+            // IPv4 and they can't do anything with these Contacts.
+            if (NetworkSettings.DROP_PUBLIC_IPV4_COMPATIBLE_ADDRESSES.getValue()
+                    && ContactUtils.isIPv4CompatibleAddress(node)) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(node + " is from a different IP address space than local Node");
+                    LOG.info(node + " has an IPv4-compatible address");
+                }
+                continue;
+            }
+            
+            // Same as above but somewhat undefined. It's unclear whether or not
+            // an address such as ::0000:192.168.0.1 is a site-local addresses
+            // or not. On one side it's an IPv6 addresss and therefore not a
+            // site-local address but if you read it as an IPv4 addresss then
+            // it is.
+            if (NetworkSettings.DROP_PRIVATE_IPV4_COMPATIBLE_ADDRESSES.getValue()
+                    && ContactUtils.isPrivateIPv4CompatibleAddress(node)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(node + " has a private IPv4-compatible address");
+                }
+                continue;
+            }
+            
+            // Make sure the IPs are from different Networks. Don't apply
+            // this filter if the sender is in the response Set though!
+            if (NetworkSettings.FILTER_CLASS_C.getValue()
+                    && ContactUtils.isIPv4Address(node)
+                    && !ContactUtils.isSameNodeID(sender, node)
+                    && filter.isSameNetwork(node)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(sender + " sent one or more Contacts from the same Network-Class: " + node);
                 }
                 continue;
             }

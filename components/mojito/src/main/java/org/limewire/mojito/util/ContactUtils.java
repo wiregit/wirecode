@@ -19,6 +19,8 @@
  
 package org.limewire.mojito.util;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -163,7 +165,7 @@ public final class ContactUtils {
      * LOCAL_IS_PRIVATE to false!
      */
     public static boolean isPrivateAddress(InetAddress addr) {
-        return NetworkUtils.isPrivateAddress(addr.getAddress());
+        return NetworkUtils.isPrivateAddress(addr);
     }
     
     /**
@@ -188,6 +190,37 @@ public final class ContactUtils {
      */
     public static boolean isPrivateAddress(Contact node) {
         return isPrivateAddress(node.getContactAddress());
+    }
+    
+    /**
+     * Returns true if the given Contact's contact address is
+     * an IPv4 address
+     */
+    public static boolean isIPv4Address(Contact node) {
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        return (addr instanceof Inet4Address);
+    }
+    
+    /**
+     * Returns true if the given Contact's contact address is
+     * an IPv4-compatible IPv6 address
+     */
+    public static boolean isIPv4CompatibleAddress(Contact node) {
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        if (addr instanceof Inet6Address
+                && ((Inet6Address)addr).isIPv4CompatibleAddress()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given Contact's contact address is
+     * a private IPv4-compatible IPv6 address
+     */
+    public static boolean isPrivateIPv4CompatibleAddress(Contact node) {
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        return NetworkUtils.isPrivateIPv4CompatibleAddress(addr);
     }
     
     /**

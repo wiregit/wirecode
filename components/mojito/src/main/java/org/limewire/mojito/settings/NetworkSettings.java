@@ -151,4 +151,20 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final BooleanSetting DROP_REQUEST_IF_FIREWALLED
         = FACTORY.createBooleanSetting("DROP_REQUEST_IF_FIREWALLED", true);
+    
+    /**
+     * Setting for whether or not IPv4-compatible addresses should be 
+     * dropped that have a public address
+     */
+    public static final BooleanSetting DROP_PUBLIC_IPV4_COMPATIBLE_ADDRESSES
+        = FACTORY.createRemoteBooleanSetting("DROP_PUBLIC_IPV4_COMPATIBLE_ADDRESSES", 
+                true, "Mojito.DropPublicIPv4CompatibleAddresses");
+    
+    /**
+     * Setting for whether or not IPv4-compatible addresses should be 
+     * dropped that have a private address
+     */
+    public static final BooleanSetting DROP_PRIVATE_IPV4_COMPATIBLE_ADDRESSES
+        = FACTORY.createRemoteBooleanSetting("DROP_PRIVATE_IPV4_COMPATIBLE_ADDRESSES", 
+                true, "Mojito.DropPrivateIPv4CompatibleAddresses");
 }
