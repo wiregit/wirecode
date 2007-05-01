@@ -129,6 +129,12 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static boolean isLocalAddress(InetAddress addr) {
+        // There are cases where InetAddress.getLocalHost() returns addesses
+        // such as 127.0.1.1 (note the two 1) but if you iterate through all
+        // NetworkInterfaces and look at every InetAddress then it's not there
+        // and NetworkInterface.getByInetAddress(...) returns null 'cause it
+        // cannot find an Interface for it. The following checks take care
+        // of this case.
         if (addr.isAnyLocalAddress() || addr.isLoopbackAddress()) {
             return true;
         }
