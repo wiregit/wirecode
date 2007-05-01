@@ -158,14 +158,28 @@ public final class NetworkUtils {
      * @param addr0 the first address to compare
      * @param addr1 the second address to compare
      */
+    public static boolean isCloseIP(InetAddress addr0, InetAddress addr1) {
+        return isCloseIP(addr0.getAddress(), addr1.getAddress());
+    }
+    
+    /**
+     * Returns whether or not the two ip addresses share the same
+     * first octet in their address.  
+     * 
+     * This method is IPv6 compliant but returns always false if
+     * any of the two addresses in an IPv6 address.
+     * 
+     * @param addr0 the first address to compare
+     * @param addr1 the second address to compare
+     */
     public static boolean isCloseIP(byte[] addr0, byte[] addr1) {
         if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
-                || isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1)) {
+                || (isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1))) {
             return addr0[/* 0 */ addr0.length - 4] == addr1[/* 0 */ addr1.length - 4];                    
         }
         return false;
     }
-
+    
     /**
      * Returns whether or not the two ip addresses share the same
      * first two octets in their address -- the most common
@@ -193,7 +207,18 @@ public final class NetworkUtils {
         }
         return false;
     }
-
+    
+    /**
+     * Returns whether or not the given ip address shares the same
+     * first three octets as the address for this node -- the most 
+     * common indication that they may be on the same network.
+     *
+     * @param addr the address to compare
+     */
+    public static boolean isVeryCloseIP(InetAddress addr) {
+        return isVeryCloseIP(addr.getAddress());
+    }
+    
     /**
      * Returns whether or not the given ip address shares the same
      * first three octets as the address for this node -- the most 
