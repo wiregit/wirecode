@@ -35,6 +35,7 @@ import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
 import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.nio.statemachine.ReadState;
+import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -1455,9 +1456,11 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private void updatePEAddress() throws IOException {
-        IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
-        if (NetworkUtils.isValidExternalIpPort(newAddr))
-            PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+        if (_socket instanceof UDPConnection) {
+            IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
+            if (NetworkUtils.isValidExternalIpPort(newAddr))
+                PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+        }
     }
     
     /////////////////////////////// Download ////////////////////////////////
