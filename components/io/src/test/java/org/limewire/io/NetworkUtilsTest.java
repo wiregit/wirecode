@@ -186,6 +186,39 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertTrue(NetworkUtils.isValidAddress(ip));
     }
 
+    public void testIsInvalidAddress() throws UnknownHostException {
+        // A bunch of invalid addresses
+        InetAddress addr1 = InetAddress.getByName("0.0.0.0");
+        assertFalse(NetworkUtils.isValidAddress(addr1));
+        assertFalse(NetworkUtils.isValidAddress(addr1.getAddress()));
+        
+        InetAddress addr2 = InetAddress.getByName("0.0.0.1");
+        assertFalse(NetworkUtils.isValidAddress(addr2));
+        assertFalse(NetworkUtils.isValidAddress(addr2.getAddress()));
+        
+        InetAddress addr3 = InetAddress.getByName("255.0.0.0");
+        assertFalse(NetworkUtils.isValidAddress(addr3));
+        assertFalse(NetworkUtils.isValidAddress(addr3.getAddress()));
+        
+        InetAddress addr4 = InetAddress.getByName("255.0.1.2");
+        assertFalse(NetworkUtils.isValidAddress(addr4));
+        assertFalse(NetworkUtils.isValidAddress(addr4.getAddress()));
+        
+        InetAddress addr5 = InetAddress.getByName("[2001:db8::1428:57ab]");
+        assertInstanceof(Inet6Address.class, addr5);
+        assertFalse(NetworkUtils.isValidAddress(addr5));
+        assertFalse(NetworkUtils.isValidAddress(addr5.getAddress()));
+        
+        // And two valid addresses
+        InetAddress addr6 = InetAddress.getByName("212.0.0.0");
+        assertTrue(NetworkUtils.isValidAddress(addr6));
+        assertTrue(NetworkUtils.isValidAddress(addr6.getAddress()));
+        
+        InetAddress addr7 = InetAddress.getByName("[2001:db9::1428:57ab]");
+        assertTrue(NetworkUtils.isValidAddress(addr7));
+        assertTrue(NetworkUtils.isValidAddress(addr7.getAddress()));
+    }
+    
     /**
      * Test to make sure the method for checking for valid ports is working.
      */

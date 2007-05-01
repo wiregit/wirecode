@@ -70,6 +70,7 @@ public final class NetworkUtils {
      */
     public static boolean isValidAddress(byte[] address) {
         return !isAnyLocalAddress(address) 
+            && !isInvalidAddress(address)
             && !isBroadcastAddress(address)
             && !isDocumentationAddress(address);
     }
@@ -87,6 +88,7 @@ public final class NetworkUtils {
      */
     public static boolean isValidAddress(InetAddress address) {
         return !address.isAnyLocalAddress() 
+            && !isInvalidAddress(address)
             && !isBroadcastAddress(address)
             && !isDocumentationAddress(address);
     }
@@ -677,6 +679,23 @@ public final class NetworkUtils {
         }
         
         return false;  
+    }
+    
+    /**
+     * Returns true if it's an IPv4 InetAddress and the first octed is 0x00.
+     */
+    private static boolean isInvalidAddress(InetAddress address) {
+        return isInvalidAddress(address.getAddress());
+    }
+    
+    /**
+     * Returns true if it's an IPv4 InetAddress and the first octed is 0x00.
+     */
+    private static boolean isInvalidAddress(byte[] address) {
+        if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
+            return address[/* 0 */ address.length - 4] == 0x00;
+        }
+        return false;
     }
     
     /**
