@@ -26,6 +26,9 @@ public class NetworkUtilsTest extends BaseTestCase {
      */
     private static final String[] PRIVATE_ADDRESSES = {
         "0.0.0.0",
+        "0.0.0.1",
+        "10.0.0.0",
+        "10.254.0.1",
         "127.1.1.1",
         "127.0.0.0",
         "172.16.0.0",
@@ -176,6 +179,9 @@ public class NetworkUtilsTest extends BaseTestCase {
         IP ip = new IP("0.0.0.0");
         assertFalse(NetworkUtils.isValidAddress(ip));
         
+        ip = new IP("0.0.0.1");
+        assertFalse(NetworkUtils.isValidAddress(ip));
+        
         ip = new IP("1.2.3.0");
         assertTrue(NetworkUtils.isValidAddress(ip));
         
@@ -231,6 +237,12 @@ public class NetworkUtilsTest extends BaseTestCase {
 		assertTrue("port should not be valid", !NetworkUtils.isValidPort(port));
 		port = 20;
 		assertTrue("port should be valid", NetworkUtils.isValidPort(port));
+        
+        port = Short.MAX_VALUE+1;
+        assertTrue("port should be valid: " + port, NetworkUtils.isValidPort(port));
+        
+        port = 0xFFFF + 1;
+        assertFalse("port should not be valid: " + port, NetworkUtils.isValidPort(port));
 	}
 
     /**
@@ -492,10 +504,18 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertFalse(addr2.isLoopbackAddress());
         assertFalse(NetworkUtils.isLoopbackAddress(addr2.getAddress()));
         
-        InetAddress addr3 = InetAddress.getByName("[0000:0000:0000:0000:0000:0000:0000:0001]");
-        assertInstanceof(Inet6Address.class, addr3);
-        assertTrue(addr3.isLoopbackAddress());
-        assertTrue(NetworkUtils.isLoopbackAddress(addr3.getAddress()));
+        InetAddress addr3 = InetAddress.getByName("198.168.0.1");
+        assertFalse(addr3.isLoopbackAddress());
+        assertFalse(NetworkUtils.isLoopbackAddress(addr3.getAddress()));
+        
+        InetAddress addr4 = InetAddress.getByName("10.254.0.1");
+        assertFalse(addr4.isLoopbackAddress());
+        assertFalse(NetworkUtils.isLoopbackAddress(addr4.getAddress()));
+        
+        InetAddress addr5 = InetAddress.getByName("[0000:0000:0000:0000:0000:0000:0000:0001]");
+        assertInstanceof(Inet6Address.class, addr5);
+        assertTrue(addr5.isLoopbackAddress());
+        assertTrue(NetworkUtils.isLoopbackAddress(addr5.getAddress()));
     }
     
     public void testIsIPv4LinkLocalAddress() throws UnknownHostException {
