@@ -106,10 +106,6 @@ public final class NetworkUtils {
      * @return whether the IpPort is a valid external address.
      */
     public static boolean isValidExternalIpPort(IpPort addr) {
-        if (addr == null) {
-            return false;
-        }
-        
         InetAddress address = addr.getInetAddress();
         return isValidAddress(address) 
             && isValidPort(addr.getPort())
