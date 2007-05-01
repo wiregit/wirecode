@@ -143,6 +143,7 @@ public class HTTPUploadManagerTest extends LimeTestCase {
         assertEquals(UploadType.UPDATE_FILE, uploader.getUploadType());
 
         readBytes(26);
+        Thread.sleep(100);
         assertGreaterThanOrEquals(26, uploader.amountUploaded());
 
         close();
