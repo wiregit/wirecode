@@ -528,11 +528,17 @@ public class NetworkUtilsTest extends BaseTestCase {
     }
     
     public void testIsUniqueLocalUnicastAddress() throws UnknownHostException {
+        // FC00::/7
         InetAddress addr1 = InetAddress.getByName("[FC00:0000:0000:0000:0000:0000:0000:0001]");
         assertTrue(NetworkUtils.isUniqueLocalUnicastAddress(addr1));
         
-        InetAddress addr2 = InetAddress.getByName("[FC01:0000:0000:0000:0000:0000:0000:0001]");
-        assertFalse(NetworkUtils.isUniqueLocalUnicastAddress(addr2));
+        // This is also an Unique Local Unicast Address
+        InetAddress addr2 = InetAddress.getByName("[FD00:0000:0000:0000:0000:0000:0000:0001]");
+        assertTrue(NetworkUtils.isUniqueLocalUnicastAddress(addr2));
+        
+        // This isn't
+        InetAddress addr3 = InetAddress.getByName("[FB00:0000:0000:0000:0000:0000:0000:0001]");
+        assertFalse(NetworkUtils.isUniqueLocalUnicastAddress(addr3));
     }
     
     public void testIsBroadcastAddress() throws UnknownHostException {

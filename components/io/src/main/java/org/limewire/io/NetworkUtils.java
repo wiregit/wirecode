@@ -761,8 +761,7 @@ public final class NetworkUtils {
     private static boolean isUniqueLocalUnicastAddress(byte[] address) {
         // FC00::/7
         if (address.length == 16) {
-            return (address[0] & 0xFE) == 0xFC
-                && (address[1] & 0xFF) == 0x00;
+            return (address[0] & 0xFE) == 0xFC;
         }
         return false;
     }
