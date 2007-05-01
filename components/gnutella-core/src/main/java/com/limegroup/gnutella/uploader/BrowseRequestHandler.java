@@ -70,6 +70,11 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         }
 
         @Override
+        public long getContentLength() {
+            return -1;
+        }
+        
+        @Override
         public void initialize() throws IOException {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {

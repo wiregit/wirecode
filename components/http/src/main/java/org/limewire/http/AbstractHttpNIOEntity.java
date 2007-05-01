@@ -33,6 +33,8 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
         throw new UnsupportedOperationException();
     }
 
+    public abstract long getContentLength();
+    
     /**
      * Throws <code>UnsupportedOperationException</code>.
      */
