@@ -1455,7 +1455,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private void updatePEAddress() throws IOException {
-        IpPort newAddr = new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()); 
+        IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
         if (NetworkUtils.isValidExternalIpPort(newAddr))
             PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
     }
