@@ -129,7 +129,7 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static boolean isLocalAddress(InetAddress addr) {
-        // There are cases where InetAddress.getLocalHost() returns addesses
+        // There are cases where InetAddress.getLocalHost() returns addresses
         // such as 127.0.1.1 (note the two 1) but if you iterate through all
         // NetworkInterfaces and look at every InetAddress then it's not there
         // and NetworkInterface.getByInetAddress(...) returns null 'cause it
