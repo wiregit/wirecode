@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.gnutella.uploader;
 
 import java.io.File;
@@ -9,6 +6,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
@@ -16,30 +14,41 @@ import org.limewire.nio.observer.Shutdownable;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
 
+/**
+ * An event based {@link HttpEntity} that uploads a {@link File}. A
+ * corresponding {@link HTTPUploader} is updated with progress.
+ */
 public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdownable {
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
-    private HTTPUploader uploader;
+    private final HTTPUploader uploader;
 
+    private final File file;
+
+    /** Buffer that is currently transferred. */
     private ByteBuffer buffer;
 
+    /** Total number of bytes to transfer. */
     private long length;
 
+    /** Offset of the first byte. */
     private long begin;
 
-    private File file;
-
+    /** Number of bytes remaining to be read from disk. */
     private long remaining;
 
     private FilePieceReader reader;
 
+    /** Piece that is currently transferred. */
     private Piece piece;
-    
+
+    /** Cancels the transfer if inactivity for too long. */  
     private StalledUploadWatchdog watchdog;
     
-    private FileResponseEntity(HTTPUploader uploader) {
+    public FileResponseEntity(HTTPUploader uploader, File file) {
         this.uploader = uploader;
+        this.file = file;
         
         setContentType(Constants.FILE_MIME_TYPE);
 
@@ -47,12 +56,6 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
         long end = uploader.getUploadEnd();
         length = end - begin;
         remaining = length;
-    }
-    
-    public FileResponseEntity(HTTPUploader uploader, File file) {
-        this(uploader);
-        
-        this.file = file;
     }
     
     @Override
@@ -86,10 +89,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     
     @Override
     public boolean handleWrite() throws IOException {
-        if (reader == null) {
-            return false;
-        }
-           
+        // flush current buffer
         if (buffer != null && buffer.hasRemaining()) {
             int written = write(buffer);
             uploader.addAmountUploaded(written);
@@ -104,28 +104,33 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
 
         int written;
         do {
-            if (piece != null) {
-                reader.release(piece);
-            }
+            if (buffer == null || !buffer.hasRemaining()) {
+                if (piece != null) {
+                    reader.release(piece);
+                }
 
-            synchronized (this) {
-                piece = reader.next();
-                if (piece == null) {
-                    buffer = null;
-                    interestWrite(false);  
-                    return true;
+                // get next piece from file
+                synchronized (this) {
+                    piece = reader.next();
+                    if (piece == null) {
+                        // need to wait for the disk, PieceHandler will turn
+                        // interest back on when the next piece is available
+                        buffer = null;
+                        interestWrite(false);
+                        watchdog.activate(this);
+                        return true;
+                    }
+                    buffer = piece.getBuffer();
+                    remaining -= buffer.remaining();
                 }
             }
-
-            buffer = piece.getBuffer();
-            remaining -= buffer.remaining();
-
+            
             if (LOG.isTraceEnabled())
                 LOG.debug("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
 
             written = write(buffer);
             uploader.addAmountUploaded(written);
-        } while (written > 0 && remaining > 0 && !buffer.hasRemaining());
+        } while (written > 0 && remaining > 0);
 
         watchdog.activate(this);
         return remaining > 0 || buffer.hasRemaining();
