@@ -183,7 +183,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
             if (rfd.getPushAddr() != null) 
                 copy = rfd.getPushAddr();
             else 
-                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,0,0,null);
+                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,PushEndpoint.PLAIN,0,null);
 		    return new PushAltLoc(copy,urn);
 		} 
 	}

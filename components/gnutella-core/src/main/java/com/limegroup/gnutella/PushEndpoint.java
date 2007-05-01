@@ -90,16 +90,16 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
 	public static final int PROXY_SIZE=6; //ip:port
 	
-	public static final int PLAIN=0x0; //no features for this PE
-    public static final int PPTLS_BINARY = 0x80;
+	public static final byte PLAIN=0x0; //no features for this PE
+    public static final byte PPTLS_BINARY = (byte)0x80;
 	
-	private static final int SIZE_MASK=0x7; //0000 0111
+	private static final byte SIZE_MASK=0x7; //0000 0111
 	
-	private static final int FWT_VERSION_MASK=0x18; //0001 1000
+	private static final byte FWT_VERSION_MASK=0x18; //0001 1000
 	
 	//the features mask does not clear the bits we do not understand
 	//because we may pass on the altloc to someone who does.
-	private static final int FEATURES_MASK=0xE0;   //1110 0000
+	private static final byte FEATURES_MASK= (byte)0xE0;   //1110 0000
     
     /** The pptls portion constant. */
     public static final String PPTLS_HTTP = "pptls";
@@ -178,12 +178,12 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
-	public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies,int features,int version) {
+	public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies, byte features, int version) {
 		this(guid,proxies,features,version,null);
 	}
 	
     @SuppressWarnings("unchecked")
-    public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies,int features,int version,IpPort addr) {
+    public PushEndpoint(byte [] guid, Set<? extends IpPort> proxies, byte features, int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;
@@ -253,11 +253,13 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             
             // don't parse it in the middle of parsing proxies.
             if (proxies.size() == 0 && current.startsWith(PPTLS_HTTP)) {
-                String value = HTTPUtils.extractHeaderValue(current);
-                try {
-                    tlsProxies = new BitNumbers(value);
-                } catch(IllegalArgumentException invalid) {
-                    throw (IOException)new IOException().initCause(invalid);
+                String value = HTTPUtils.parseValue(current);
+                if(value != null) {
+                    try {
+                        tlsProxies = new BitNumbers(value);
+                    } catch(IllegalArgumentException invalid) {
+                        throw (IOException)new IOException().initCause(invalid);
+                    }
                 }
                 continue;
             }
@@ -378,7 +380,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             if(i >= MAX_PROXIES)
                 break;
             
-            if(ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
+            if(includeTLS && ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
                 bn.set(i);
             
 			byte [] addr = ppi.getInetAddress().getAddress();
@@ -397,6 +399,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             assert tlsIndexes.length == 1;
             where[pptlsIdx] = tlsIndexes[0];
             where[featureIdx] |= PPTLS_BINARY;
+        } else {
+            where[featureIdx] &= ~PPTLS_BINARY; // make sure its not in the features!
         }
 	}
 	
@@ -423,12 +427,12 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         Set<IpPort> proxies = new IpPortSet(); 
         IpPort addr = null;
         
-        int header = dais.read() & 0xFF;
+        byte header = (byte)(dais.read() & 0xFF);
         
         // get the number of push proxies
-        int number = header & SIZE_MASK; 
-        int features = header & FEATURES_MASK;
-        int version = (header & FWT_VERSION_MASK) >> 3;
+        byte number = (byte)(header & SIZE_MASK); 
+        byte features = (byte)(header & FEATURES_MASK);
+        byte version = (byte)((header & FWT_VERSION_MASK) >> 3);
         
         dais.readFully(guid);
         
@@ -503,11 +507,16 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	public static int getSizeBytes(Set<? extends IpPort> proxies, boolean includeTLS) {
         boolean hasTLS = false;
         if(includeTLS) {
+            int i = 0;
             for(IpPort ipp : proxies) {
+                if(i >= MAX_PROXIES)
+                    break;
+                
                 if(ipp instanceof ConnectableImpl && ((Connectable)ipp).isTLSCapable()) {
                     hasTLS = true;
                     break;
                 }
+                i++;
             }
         }
 		return HEADER_SIZE + (hasTLS ? 1 : 0 ) + Math.min(proxies.size(),MAX_PROXIES) * PROXY_SIZE;
@@ -627,10 +636,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * returns the most current features, or the ones it was created with
 	 * if they have never been updated.
 	 */
-	public int getFeatures() {
+	public byte getFeatures() {
 		GuidSetWrapper current = GUID_PROXY_MAP.get(_guid);
 		int currentFeatures = current==null ? _features : current.getFeatures();
-		return currentFeatures & FEATURES_MASK;
+		return (byte)(currentFeatures & FEATURES_MASK);
 	}
 
 	/**
@@ -747,11 +756,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	
 	/**
 	 * Overwrites the current known push proxies for the host specified
-	 * in the httpString with the set contained in the httpString.
+	 * by the GUID, using the the proxies as written in the httpString.
 	 * 
 	 * @param guid the guid whose proxies to overwrite
 	 * @param httpString comma-separated list of proxies and possible proxy features
-	 * @throws IOException if parsing of the http fails.
 	 */
 	public static void overwriteProxies(byte [] guid, String httpString) {
 	    Set<IpPort> newSet = new HashSet<IpPort>();
@@ -761,10 +769,14 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	        String proxy = tok.nextToken().trim();
             // only read features when we haven't read proxies yet.
             if(newSet.size() == 0 && proxy.startsWith(PPTLS_HTTP)) {
-                String value = HTTPUtils.extractHeaderValue(proxy);
                 try {
-                    tlsProxies = new BitNumbers(value);
-                } catch(IllegalArgumentException ignored) {}
+                    String value = HTTPUtils.parseValue(proxy);
+                    if(value != null) {
+                        try {
+                            tlsProxies = new BitNumbers(value);
+                        } catch(IllegalArgumentException ignored) {}
+                    }
+                } catch(IOException invalid) {}
                 continue;
             }
             
@@ -778,7 +790,13 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 
         overwriteProxies(guid, newSet);
     }
-    
+
+    /**
+     * Overwrites any stored proxies for the host specified by the guid.
+     * 
+     * @param guid the guid whose proxies to overwrite
+     * @param newSet the proxies to overwrite with
+     */
     public static void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet) {
 	    GUID g = new GUID(guid);
 	    GuidSetWrapper wrapper;
@@ -798,7 +816,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @return an object implementing PushProxyInterface 
 	 * @throws IOException parsing failed.
 	 */
-	private static Connectable parseIpPort(String http, boolean tlsCapable) throws IOException {
+	private static IpPort parseIpPort(String http, boolean tlsCapable) throws IOException {
 	    int separator = http.indexOf(":");
 		
 		//see if this is a valid ip:port address; 
@@ -815,8 +833,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		try {
 			int port = Integer.parseInt(portS);
 			if(!NetworkUtils.isValidPort(port))
-			    throw new IOException("invalid port: " + port);			
-			return new ConnectableImpl(host, port, tlsCapable);
+			    throw new IOException("invalid port: " + port);
+            if(tlsCapable)
+                return new ConnectableImpl(host, port, true);
+            else
+                return new IpPortImpl(host, port); // could technically also return a ConnectableImpl w/ tls=false
 		} catch(NumberFormatException invalid) {
 		    throw (IOException)new IOException().initCause(invalid);
 		}

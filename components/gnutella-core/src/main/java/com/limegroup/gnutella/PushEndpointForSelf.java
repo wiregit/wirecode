@@ -27,7 +27,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     private PushEndpointForSelf() {
         super(RouterService.getMyGUID(),
                 IpPort.EMPTY_SET,
-                0,
+                PushEndpoint.PLAIN,
                 UDPConnection.VERSION);
     
     }
@@ -49,7 +49,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     /**
      * we always have the same features
      */
-    public int getFeatures() {
+    public byte getFeatures() {
     	return 0;
     }
     
