@@ -413,7 +413,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	}
     
     public synchronized String toString() {
-        StringBuilder ret = new StringBuilder("UploadSlotManager:");
+        StringBuilder ret = new StringBuilder();
         ret.append("active:");
         appendPriorities(active, ret);
         ret.append("queued:");
