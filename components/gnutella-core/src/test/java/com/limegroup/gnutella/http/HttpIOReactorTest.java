@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestFactory;
@@ -38,10 +40,9 @@ public class HttpIOReactorTest extends BaseTestCase {
         super(name);
     }
 
-    // disabled, see {@link HttpIOReactor#connect}
-//    public static Test suite() {
-//        return buildTestSuite(HttpIOReactorTest.class);
-//    }
+    public static Test suite() {
+        return buildTestSuite(HttpIOReactorTest.class);
+    }
 
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
@@ -62,7 +63,8 @@ public class HttpIOReactorTest extends BaseTestCase {
         acceptor.setListeningPort(0);
     }
 
-    public void testGetFromAcceptor() throws Exception {
+    // disabled, see {@link HttpIOReactor#connect}
+    public void disabledTestGetFromAcceptor() throws Exception {
         final HttpTestServer server = new HttpTestServer();
         server.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
