@@ -438,12 +438,12 @@ public class DHTManagerImpl implements DHTManager {
         
         ret.put("min",l.get(0).toByteArray());
         ret.put("max",l.get(l.size() -1).toByteArray());
-        ret.put("med",l.get(l.size() / 2).toByteArray());
+        ret.put("med", getQuartile(2, l).toByteArray());
         
         if (l.size() > 6) {
             // big enough to find outliers 
-            ret.put("Q1", l.get((int)(l.size() * 0.25)).toByteArray());
-            ret.put("Q3", l.get((int)(l.size() * 0.75)).toByteArray());
+            ret.put("Q1", getQuartile(1, l).toByteArray());
+            ret.put("Q3", getQuartile(3, l).toByteArray());
         }
         
         BigInteger sum = BigInteger.valueOf(0);
@@ -462,5 +462,23 @@ public class DHTManagerImpl implements DHTManager {
         BigInteger variance = sum.divide(BigInteger.valueOf(l.size() - 1));
         ret.put("var",variance.toByteArray());
         return ret;
+    }
+    
+    /**
+     * the a specified quartile of a list of BigIntegers. 
+     */
+    private static BigInteger getQuartile(int quartile, List<BigInteger> l) {
+        double q1 = (l.size()+1) * (quartile / 4.0);
+        int q1i = (int)q1;
+        if (q1 - q1i == 0) 
+            return l.get(q1i - 1);
+        int quart = (int)(1 / (q1 - q1i));
+        BigInteger q1a = l.get(q1i - 1);
+        BigInteger q1b = l.get(q1i);
+        q1b = q1b.subtract(q1a);
+        q1b = q1b.divide(BigInteger.valueOf(4));
+        q1b = q1b.multiply(BigInteger.valueOf(quart));
+        q1a = q1a.add(q1b);
+        return q1a;
     }
 }
