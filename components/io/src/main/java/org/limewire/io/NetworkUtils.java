@@ -133,6 +133,10 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static boolean isLocalAddress(InetAddress addr) {
+        if (addr.isAnyLocalAddress() || addr.isLoopbackAddress()) {
+            return true;
+        }
+        
         try {
             return NetworkInterface.getByInetAddress(addr) != null;
         } catch (SocketException err) {
