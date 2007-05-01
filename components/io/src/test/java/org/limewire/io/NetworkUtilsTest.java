@@ -145,20 +145,30 @@ public class NetworkUtilsTest extends BaseTestCase {
      */
     public void testIsPrivateAddress() throws Exception {
         stubProvider.setLocalAddressPrivate(true);
-        byte[] address = new byte[4];
         
         for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
-            address = 
-                InetAddress.getByName(PUBLIC_ADDRESSES[i]).getAddress();
-            assertFalse("should be a public address"+address,
-                       NetworkUtils.isPrivateAddress(address));
+            InetAddress addr = InetAddress.getByName(PUBLIC_ADDRESSES[i]);
+            
+            // Check the InetAddress
+            assertFalse("should be a public address"+addr,
+                    NetworkUtils.isPrivateAddress(addr));
+            
+            // and the byte-array version
+            assertFalse("should be a public address"+addr,
+                    NetworkUtils.isPrivateAddress(addr.getAddress()));
+            
         }
 
         for(int i=0; i<PRIVATE_ADDRESSES.length; i++) {
-            address = 
-                InetAddress.getByName(PRIVATE_ADDRESSES[i]).getAddress();
-            assertTrue("should be a private address"+address,
-                       NetworkUtils.isPrivateAddress(address));
+            InetAddress addr = InetAddress.getByName(PRIVATE_ADDRESSES[i]);
+            
+            // Check the InetAddress
+            assertTrue("should be a private address" + addr,
+                       NetworkUtils.isPrivateAddress(addr));
+            
+            // and the byte-array version
+            assertTrue("should be a private address" + addr,
+                    NetworkUtils.isPrivateAddress(addr.getAddress()));
         }
     }
     
@@ -267,39 +277,70 @@ public class NetworkUtilsTest extends BaseTestCase {
     public void testIsPrivateAddressIPv6() throws UnknownHostException {
         stubProvider.setLocalAddressPrivate(true);
         
-        // Private IPv4 mapped address
+        // A private IPv4-mapped address 
         InetAddress addr1 = InetAddress.getByName("[::ffff:192.168.1.0]");
         assertInstanceof(Inet4Address.class, addr1);
         assertTrue(NetworkUtils.isPrivateAddress(addr1));
+        assertTrue(NetworkUtils.isPrivateAddress(addr1.getAddress()));
         
-        // Private IPv4 compatible address
+        // An IPv4-compatible address but it's not private.
         InetAddress addr2 = InetAddress.getByName("[::0000:192.168.1.0]");
         assertInstanceof(Inet6Address.class, addr2);
-        assertTrue(NetworkUtils.isPrivateAddress(addr2));
+        assertTrue(((Inet6Address)addr2).isIPv4CompatibleAddress());
+        assertTrue(NetworkUtils.isPrivateIPv4CompatibleAddress(addr2));
+        assertFalse(NetworkUtils.isPrivateAddress(addr2));
+        assertFalse(NetworkUtils.isPrivateAddress(addr2.getAddress()));
         
         // Public IPv4 mapped address
         InetAddress addr3 = InetAddress.getByName("[::ffff:216.254.98.132]");
         assertInstanceof(Inet4Address.class, addr3);
         assertFalse(NetworkUtils.isPrivateAddress(addr3));
+        assertFalse(NetworkUtils.isPrivateAddress(addr3.getAddress()));
         
         // Public IPv4 compatible address
         InetAddress addr4 = InetAddress.getByName("[::0000:216.254.98.132]");
         assertInstanceof(Inet6Address.class, addr4);
         assertFalse(NetworkUtils.isPrivateAddress(addr4));
+        assertFalse(NetworkUtils.isPrivateAddress(addr4.getAddress()));
+        
+        // Create an IPv4-mapped address
+        byte[] addr5 = new byte[16];
+        addr5[10] = (byte)0xFF;
+        addr5[11] = (byte)0xFF;
+        addr5[12] = (byte)192;
+        addr5[13] = (byte)168;
+        addr5[14] = (byte)1;
+        addr5[15] = (byte)0;
+        
+        // Check if it's an IPv4-mapped address
+        assertTrue(NetworkUtils.isIPv4MappedAddress(addr5));
+        
+        // It's not possible to construct an Inet6Address instance
+        // of an IPv4-mapped address
+        assertInstanceof(Inet4Address.class, InetAddress.getByAddress(addr5));
+        
+        // Yes, it's private
+        assertTrue(NetworkUtils.isPrivateAddress(addr5));
+        
+        // Create a non private address and check again
+        addr5[12] = (byte)212;
+        addr5[13] = (byte)1;
+        addr5[14] = (byte)2;
+        addr5[15] = (byte)3;
+        assertTrue(NetworkUtils.isIPv4MappedAddress(addr5));
+        assertFalse(NetworkUtils.isPrivateAddress(addr5));
     }
     
     public void testIsIPv4ComatibleAddress() throws UnknownHostException {
         InetAddress addr = InetAddress.getByName("192.168.1.0");
-        
-        // Should be an IPv4 compatible addresses
-        assertTrue(NetworkUtils.isIPv4CompatibleAddress(addr.getAddress()));
+        assertInstanceof(Inet4Address.class, addr);
         
         // Create an IPv4 compatible IPv6 address
         byte[] compatible = new byte[16];
         System.arraycopy(addr.getAddress(), 0, compatible, 12, addr.getAddress().length);
         assertTrue(NetworkUtils.isIPv4CompatibleAddress(compatible));
         
-        // Change any bytes from 0 through 11 and it shouldn't
+        // Change some bytes from 0 through 11 and it shouldn't
         // be any longer an IPv4 compatible address
         compatible[10] = (byte)0xFF;
         compatible[11] = (byte)0xFF;
@@ -308,7 +349,7 @@ public class NetworkUtilsTest extends BaseTestCase {
     
     public void testIsIPv4MappedAddress() throws UnknownHostException {
         InetAddress addr = InetAddress.getByName("192.168.1.0");
-        assertTrue(NetworkUtils.isIPv4MappedAddress(addr.getAddress()));
+        assertInstanceof(Inet4Address.class, addr);
         
         // Create an IPv4 mapped IPv6 address. We start with
         // a byte-array that's NOT an IPv4 mapped address!
@@ -387,5 +428,150 @@ public class NetworkUtilsTest extends BaseTestCase {
         // Nor is this
         InetAddress addr6 = InetAddress.getByName("192.168.88.44");
         assertFalse(NetworkUtils.isLocalAddress(addr6));
+    }
+    
+    public void testIsAnyLocalAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("0.0.0.0");
+        assertTrue(addr1.isAnyLocalAddress());
+        assertTrue(NetworkUtils.isAnyLocalAddress(addr1.getAddress()));
+        
+        InetAddress addr2 = InetAddress.getByName("0.0.0.1");
+        assertFalse(addr2.isAnyLocalAddress());
+        assertFalse(NetworkUtils.isAnyLocalAddress(addr2.getAddress()));
+        
+        InetAddress addr3 = InetAddress.getByName("[0000:0000:0000:0000:0000:0000:0000:0000]");
+        assertInstanceof(Inet6Address.class, addr3);
+        assertTrue(addr3.isAnyLocalAddress());
+        assertTrue(NetworkUtils.isAnyLocalAddress(addr3.getAddress()));
+        
+        InetAddress addr4 = InetAddress.getByName("[0000:0000:0000:0000:0000:0000:0000:0001]");
+        assertInstanceof(Inet6Address.class, addr4);
+        assertFalse(addr4.isAnyLocalAddress());
+        assertFalse(NetworkUtils.isAnyLocalAddress(addr4.getAddress()));
+    }
+    
+    public void testIsLoopbackAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("127.0.0.1");
+        assertTrue(addr1.isLoopbackAddress());
+        assertTrue(NetworkUtils.isLoopbackAddress(addr1.getAddress()));
+        
+        InetAddress addr2 = InetAddress.getByName("128.0.0.1");
+        assertFalse(addr2.isLoopbackAddress());
+        assertFalse(NetworkUtils.isLoopbackAddress(addr2.getAddress()));
+        
+        InetAddress addr3 = InetAddress.getByName("[0000:0000:0000:0000:0000:0000:0000:0001]");
+        assertInstanceof(Inet6Address.class, addr3);
+        assertTrue(addr3.isLoopbackAddress());
+        assertTrue(NetworkUtils.isLoopbackAddress(addr3.getAddress()));
+    }
+    
+    public void testIsIPv4LinkLocalAddress() throws UnknownHostException {
+        
+        // 169.254.0.0/16
+        InetAddress addr1 = InetAddress.getByName("169.254.0.1");
+        assertTrue(addr1.isLinkLocalAddress());
+        assertTrue(NetworkUtils.isLinkLocalAddress(addr1.getAddress()));
+        
+        InetAddress addr2 = InetAddress.getByName("169.255.0.1");
+        assertFalse(addr2.isLinkLocalAddress());
+        assertFalse(NetworkUtils.isLinkLocalAddress(addr2.getAddress()));
+    }
+    
+    public void testIsIPv6LinkLocalAddress() throws UnknownHostException {
+        // This is an IPv6 Site-Local address
+        InetAddress addr11 = InetAddress.getByName("[FE80:0000:0000:0000:0000:0000:0000:0001]");
+        assertTrue(addr11.isLinkLocalAddress());
+        assertTrue(NetworkUtils.isLinkLocalAddress(addr11.getAddress()));
+        
+        // And this isn't an IPv6 Site-Local address
+        InetAddress addr12 = InetAddress.getByName("[FF70:0000:0000:0000:0000:0000:0000:0001]");
+        assertFalse(addr12.isLinkLocalAddress());
+        assertFalse(NetworkUtils.isLinkLocalAddress(addr12.getAddress()));
+    }
+    
+    public void testIsIPv4SiteLocalAddress() throws UnknownHostException {
+        
+        // 10.0.0.0/8
+        InetAddress addr1 = InetAddress.getByName("10.0.0.1");
+        assertTrue(addr1.isSiteLocalAddress());
+        assertTrue(NetworkUtils.isSiteLocalAddress(addr1.getAddress()));
+        
+        // 172.16.0.0/12
+        InetAddress addr2 = InetAddress.getByName("172.16.1.1");
+        assertTrue(addr2.isSiteLocalAddress());
+        assertTrue(NetworkUtils.isSiteLocalAddress(addr2.getAddress()));
+        
+        InetAddress addr3 = InetAddress.getByName("172.31.1.1");
+        assertTrue(addr3.isSiteLocalAddress());
+        assertTrue(NetworkUtils.isSiteLocalAddress(addr3.getAddress()));
+        
+        InetAddress addr4 = InetAddress.getByName("172.32.1.1");
+        assertFalse(addr4.isSiteLocalAddress());
+        assertFalse(NetworkUtils.isSiteLocalAddress(addr4.getAddress()));
+        
+        // 192.168.0.0/16
+        InetAddress addr5 = InetAddress.getByName("192.168.1.1");
+        assertTrue(addr5.isSiteLocalAddress());
+        assertTrue(NetworkUtils.isSiteLocalAddress(addr5.getAddress()));
+    }
+    
+    public void testIsIPv6SiteLocalAddress() throws UnknownHostException {
+        // This is an IPv6 Site-Local address
+        InetAddress addr11 = InetAddress.getByName("[FEC0:0000:0000:0000:0000:0000:0000:0001]");
+        assertTrue(addr11.isSiteLocalAddress());
+        assertTrue(NetworkUtils.isSiteLocalAddress(addr11.getAddress()));
+        
+        // And this isn't an IPv6 Site-Local address
+        InetAddress addr12 = InetAddress.getByName("[FFC0:0000:0000:0000:0000:0000:0000:0001]");
+        assertFalse(addr12.isSiteLocalAddress());
+        assertFalse(NetworkUtils.isSiteLocalAddress(addr12.getAddress()));
+    }
+    
+    public void testIsUniqueLocalUnicastAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("[FC00:0000:0000:0000:0000:0000:0000:0001]");
+        assertTrue(NetworkUtils.isUniqueLocalUnicastAddress(addr1));
+        
+        InetAddress addr2 = InetAddress.getByName("[FC01:0000:0000:0000:0000:0000:0000:0001]");
+        assertFalse(NetworkUtils.isUniqueLocalUnicastAddress(addr2));
+    }
+    
+    public void testIsBroadcastAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("255.0.0.0");
+        assertTrue(NetworkUtils.isBroadcastAddress(addr1));
+        
+        InetAddress addr2 = InetAddress.getByName("254.0.0.0");
+        assertFalse(NetworkUtils.isBroadcastAddress(addr2));
+        
+        // IPv6 has no broadcasts addresses
+        InetAddress addr3 = InetAddress.getByName("[::0000:255.0.0.0]");
+        assertFalse(NetworkUtils.isBroadcastAddress(addr3));
+    }
+    
+    public void testIsPrivateIPv4CompatibleAddress() throws UnknownHostException {
+        stubProvider.setLocalAddressPrivate(true);
+        
+        InetAddress addr1 = InetAddress.getByName("[::0000:10.0.0.1]");
+        assertInstanceof(Inet6Address.class, addr1);
+        assertTrue(((Inet6Address)addr1).isIPv4CompatibleAddress());
+        assertTrue(NetworkUtils.isPrivateIPv4CompatibleAddress(addr1));
+        
+        InetAddress addr2 = InetAddress.getByName("[::0000:212.1.2.3]");
+        assertInstanceof(Inet6Address.class, addr2);
+        assertTrue(((Inet6Address)addr1).isIPv4CompatibleAddress());
+        assertFalse(NetworkUtils.isPrivateIPv4CompatibleAddress(addr2));
+    }
+    
+    public void testIsDocumentationAddress() throws UnknownHostException {
+        InetAddress addr1 = InetAddress.getByName("[2001:db8::1428:57ab]");
+        assertInstanceof(Inet6Address.class, addr1);
+        assertTrue(NetworkUtils.isDocumentationAddress(addr1));
+        
+        InetAddress addr2 = InetAddress.getByName("[2001:db9::1428:57ab]");
+        assertInstanceof(Inet6Address.class, addr2);
+        assertFalse(NetworkUtils.isDocumentationAddress(addr2));
+        
+        InetAddress addr3 = InetAddress.getByName("192.168.1.1");
+        assertInstanceof(Inet4Address.class, addr3);
+        assertFalse(NetworkUtils.isDocumentationAddress(addr3));
     }
 }

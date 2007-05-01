@@ -1,6 +1,5 @@
 package org.limewire.io;
 
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -28,34 +27,6 @@ import org.limewire.util.ByteOrder;
 public final class NetworkUtils {
     
     /**
-     * The list of invalid addresses.
-     */
-    private static final byte [] INVALID_ADDRESSES_BYTE = 
-        new byte[]{(byte)0,(byte)255};
-    
-    /**
-     * The list of private addresses.
-     * 
-     * As of Java 1.4 we can use the following methods:
-     * 
-     * 0.x.x.x InetAddress.isAnyLocalAddress()
-     * 127.x.x.x InetAddress.isLoopbackAddress()
-     * 255.x.x.x There's no method for that
-     * 172.16.x.x InetAddress.isSiteLocalAddress()
-     * 169.254.x.x InetAddress.isLinkLocalAddress()
-     * 192.168.x.x InetAddress.isSiteLocalAddress()
-     */ 
-    private static final int [][] PRIVATE_ADDRESSES_BYTE =
-        new int[][]{
-            {0xFF000000,0},
-            {0xFF000000,127 << 24},
-            {0xFF000000,255 << 24},
-            {0xFF000000,10 << 24},
-            {0xFFF00000,(172 << 24) | (16 << 16)},
-            {0xFFFF0000,(169 << 24) | (254 << 16)},
-            {0xFFFF0000,(192 << 24) | (168 << 16)}};
-    
-    /**
      * Natmask for Class C Networks
      */
     public static final int CLASS_C_NETMASK = 0xFFFFFF00;
@@ -81,53 +52,43 @@ public final class NetworkUtils {
         return isValidAddress(addr) && isValidPort(port);
     }    
 
-	/**
-	 * Returns whether or not the specified port is within the valid range of
-	 * ports.
-	 *
-	 * @param port the port number to check
-	 */
-	public static boolean isValidPort(int port) {
-		if((port & 0xFFFF0000) != 0) return false;
-        if(port == 0) return false;
-		return true;
-	}
+    /**
+     * Returns whether or not the specified port is within the valid range of
+     * ports.
+     * 
+     * @param port
+     *            the port number to check
+     */
+    public static boolean isValidPort(int port) {
+        return (port > 0 && port <= 0xFFFF);
+    }
 	
-	/**
-	 * Returns whether or not the specified address is valid.
+    /**
+     * Returns whether or not the specified address is valid.
      * 
      * This method is IPv6 compliant
-	 */
-	public static boolean isValidAddress(byte[] addr) {
-        if (addr.length != 4 && addr.length != 16) {
-            return false;
-        }
-        
-        // Assume all IPv6 addresses are valid that are 
-        // neither IPv4 compatible nor IPv4 mapped 
-        if (!isIPv4CompatibleAddress(addr)
-                && !isIPv4MappedAddress(addr)) {
-            return true;
-        }
-        
-	    return addr[/* 0 */ addr.length - 4] != INVALID_ADDRESSES_BYTE[0]
-               && addr[/* 0 */ addr.length - 4] != INVALID_ADDRESSES_BYTE[1];
+     */
+    public static boolean isValidAddress(byte[] address) {
+        return !isAnyLocalAddress(address) 
+            && !isBroadcastAddress(address)
+            && !isDocumentationAddress(address);
     }
     
     /**
      * Returns whether or not the specified IP is valid.
      */
     public static boolean isValidAddress(IP ip) {
-        int b = ip.addr >> 24;
-        return (b != INVALID_ADDRESSES_BYTE[0]) && 
-            (b != INVALID_ADDRESSES_BYTE[1]);
+        int msb = (ip.addr >> 24) & 0xFF;
+        return (msb != 0x00 && msb != 0xFF);
     }
     
     /**
      * Returns whether or not the specified InetAddress is valid.
      */
-    public static boolean isValidAddress(InetAddress addr) {
-        return isValidAddress(addr.getAddress());
+    public static boolean isValidAddress(InetAddress address) {
+        return !address.isAnyLocalAddress() 
+            && !isBroadcastAddress(address)
+            && !isDocumentationAddress(address);
     }
     
     /**
@@ -141,6 +102,31 @@ public final class NetworkUtils {
         }
     }
 	
+    /**
+     * @return whether the IpPort is a valid external address.
+     */
+    public static boolean isValidExternalIpPort(IpPort addr) {
+        if (addr == null) {
+            return false;
+        }
+        
+        InetAddress address = addr.getInetAddress();
+        return isValidAddress(address) 
+            && isValidPort(addr.getPort())
+            && !isPrivateAddress(address);
+    }
+    
+    /**
+     * Returns whether or not the specified InetAddress and Port is valid.
+     */
+    public static boolean isValidSocketAddress(SocketAddress address) {
+        InetSocketAddress iaddr = (InetSocketAddress)address;
+        
+        return !iaddr.isUnresolved()
+            && isValidAddress(iaddr.getAddress())
+            && isValidPort(iaddr.getPort());
+    }
+    
     /**
      * Returns true if the InetAddress is any of our local machine addresses
      * 
@@ -165,12 +151,19 @@ public final class NetworkUtils {
     /**
      * Returns whether or not the two ip addresses share the same
      * first octet in their address.  
-     *
+     * 
+     * This method is IPv6 compliant but returns always false if
+     * any of the two addresses in an IPv6 address.
+     * 
      * @param addr0 the first address to compare
      * @param addr1 the second address to compare
      */
     public static boolean isCloseIP(byte[] addr0, byte[] addr1) {
-        return addr0[0] == addr1[0];        
+        if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
+                || isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1)) {
+            return addr0[/* 0 */ addr0.length - 4] == addr1[/* 0 */ addr1.length - 4];                    
+        }
+        return false;
     }
 
     /**
@@ -180,18 +173,25 @@ public final class NetworkUtils {
      *
      * Private networks are NOT CONSIDERED CLOSE.
      *
+     * This method is IPv6 compliant but returns always false if
+     * any of the two addresses in a true IPv6 address.
+     * 
      * @param addr0 the first address to compare
      * @param addr1 the second address to compare
      */
     public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
         // if 0 is not a private address but 1 is, then the next
         // check will fail anyway, so this is okay.
-        if( isPrivateAddress(addr0) )
+        if ( isPrivateAddress(addr0) ) {
             return false;
-        else 
-            return
-                addr0[0] == addr1[0] &&
-                addr0[1] == addr1[1];
+            
+        } else if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
+                || (isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1))) {
+            
+            return addr0[/* 0 */ addr0.length - 4] == addr1[/* 0 */ addr1.length - 4]
+                && addr0[/* 1 */ addr0.length - 3] == addr1[/* 1 */ addr1.length - 3];
+        }
+        return false;
     }
 
     /**
@@ -216,6 +216,33 @@ public final class NetworkUtils {
     }
     
     /**
+     * Utility method for determing whether or not the given 
+     * address is private taking an InetAddress object as argument
+     * like the isLocalAddress(InetAddress) method. 
+     *
+     * This method is IPv6 compliant
+     *
+     * @return <tt>true</tt> if the specified address is private,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isPrivateAddress(InetAddress address) {
+        if (!LocalSocketAddressService.isLocalAddressPrivate()) {
+            return false;
+        }
+        
+        if (address.isAnyLocalAddress() 
+                || address.isLoopbackAddress() 
+                || address.isLinkLocalAddress() 
+                || address.isSiteLocalAddress()
+                || isUniqueLocalUnicastAddress(address)
+                || isBroadcastAddress(address)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Checks if the given address is a private address.
      * 
      * This method is IPv6 compliant
@@ -230,23 +257,13 @@ public final class NetworkUtils {
             return false;
         }
         
-        // IPv6 has no private addresses
-        if (!isIPv4CompatibleAddress(address)
-                && !isIPv4MappedAddress(address)) {
-            return false;
-        }
-        
-        // The byte-array is either 4 or 16 bytes long. We work
-        // with the lower 4 bytes [0.0.0...0]1.2.3.4
-        
-        int addr = ((address[/* 0 */ address.length-4] & 0xFF) << 24) 
-                 | ((address[/* 1 */ address.length-3] & 0xFF) << 16);
-        
-        for (int i = 0; i < PRIVATE_ADDRESSES_BYTE.length; i++) {
-            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) 
-                    == PRIVATE_ADDRESSES_BYTE[i][1]) {
-                return true;
-            }
+        if (isAnyLocalAddress(address) 
+                || isLoopbackAddress(address) 
+                || isLinkLocalAddress(address) 
+                || isSiteLocalAddress(address)
+                || isUniqueLocalUnicastAddress(address)
+                || isBroadcastAddress(address)) {
+            return true;
         }
         
         return false;
@@ -254,21 +271,8 @@ public final class NetworkUtils {
     
     /**
      * Utility method for determing whether or not the given 
-     * address is private taking an InetAddress object as argument
-     * like the isLocalAddress(InetAddress) method. Delegates to 
-     * <tt>isPrivateAddress(byte[] address)</tt>.
-     *
-     * @return <tt>true</tt> if the specified address is private,
-     *  otherwise <tt>false</tt>
-     */
-    public static boolean isPrivateAddress(InetAddress address) {
-        return isPrivateAddress(address.getAddress());
-    }
-
-    /**
-     * Utility method for determing whether or not the given 
      * address is private.  Delegates to 
-     * <tt>isPrivateAddress(byte[] address)</tt>.
+     * <tt>isPrivateAddress(InetAddress)</tt>.
      *
      * Returns true if the host is unknown.
      *
@@ -293,7 +297,7 @@ public final class NetworkUtils {
      *  otherwise <tt>false</tt>
      */
     public static boolean isPrivateAddress(SocketAddress address) {
-        return isPrivateAddress(((InetSocketAddress)address).getAddress().getAddress());
+        return isPrivateAddress(((InetSocketAddress)address).getAddress());
     }
     
     /** 
@@ -338,14 +342,11 @@ public final class NetworkUtils {
      *         otherwise <tt>false</tt>.
      */
     public static boolean isMe(String host, int port) {
-        byte[] cIP;
         try {
-            cIP = InetAddress.getByName(host).getAddress();
-        } catch (IOException e) {
+            return isMe(InetAddress.getByName(host).getAddress(), port);
+        } catch (UnknownHostException e) {
             return false;
         }
-        
-        return isMe(cIP, port);
     }
     
     /**
@@ -356,34 +357,36 @@ public final class NetworkUtils {
      * @return <tt>true</tt> if the specified host/port combo is this servent,
      *         otherwise <tt>false</tt>.
      */
-    public static boolean isMe(byte[] cIP, int port) {
+    public static boolean isMe(byte[] address, int port) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "127.*.*.*" since
         //they are aliases this machine.
 
-        if (cIP[0]==(byte)127) {
+        if (isLoopbackAddress(address)) {
             return port == LocalSocketAddressService.getLocalPort();
         } else {
-            byte[] managerIP = LocalSocketAddressService.getLocalAddress();
-            return port == LocalSocketAddressService.getLocalPort() &&
-                   Arrays.equals(cIP, managerIP);
+            byte[] local = LocalSocketAddressService.getLocalAddress();
+            return port == LocalSocketAddressService.getLocalPort() 
+                    && Arrays.equals(address, local);
         }
     }
     
+    /**
+     * Returns true if the given IpPort is the local host
+     */
     public static boolean isMe(IpPort me) {
     	if (me == IpPortForSelf.instance())
-    		return true;
-    	return isMe(me.getInetAddress().getAddress(),me.getPort());
+    	    return true;
+    	return isMe(me.getInetAddress().getAddress(), me.getPort());
     }
 
     /**
      * Determines if the given socket is from a local host.
+     * 
+     * This method is IPv6 compliant
      */
-    public static boolean isLocalHost(Socket s) {
-        // TODO: We can use InetAddress.isLoopbackAddress() but
-        // we want most likely check against NetworkUtils.isLocalAddress()!?
-        String hostAddress = s.getInetAddress().getHostAddress();
-        return "127.0.0.1".equals(hostAddress);
+    public static boolean isLocalHost(Socket socket) {
+        return isLocalAddress(socket.getInetAddress());
     }
     
     /**
@@ -462,18 +465,6 @@ public final class NetworkUtils {
     }
     
     /**
-     * @return whether the IpPort is a valid external address.
-     */
-    public static boolean isValidExternalIpPort(IpPort addr) {
-        if (addr == null)
-            return false;
-	byte [] b = addr.getInetAddress().getAddress();       
-        return isValidAddress(b) &&
-        	!isPrivateAddress(b) &&
-        	isValidPort(addr.getPort());
-    }
-    
-    /**
      * @return A non-loopback IPv4 address of a network interface on the local
      *         host.
      * @throws UnknownHostException
@@ -503,17 +494,6 @@ public final class NetworkUtils {
 
         throw new UnknownHostException(
                 "localhost has no interface with a non-loopback IPv4 address");
-    }
-    
-    /**
-     * Returns whether or not the specified InetAddress and Port is valid.
-     */
-    public static boolean isValidSocketAddress(SocketAddress address) {
-        InetSocketAddress iaddr = (InetSocketAddress)address;
-        
-        return !iaddr.isUnresolved()
-            && isValidAddress(iaddr.getAddress())
-            && isValidPort(iaddr.getPort());
     }
     
     /**
@@ -621,18 +601,21 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if the given byte-array is an IPv4 compatible address
-     * 
-     * This method is IPv6 compliant
+     * Returns true if the given byte-array is an IPv4 address
      */
-    public static boolean isIPv4CompatibleAddress(byte[] address) {
-        // Is it a IPv4 address?
-        if (address.length == 4) {
-            return true;
-            
+    private static boolean isIPv4Address(byte[] address) {
+        return address.length == 4;
+    }
+    
+    /**
+     * Returns true if the given byte-array is an IPv4 compatible address.
+     * They're used when IPv6 systems need to communicate with each other, 
+     * but are separated by an IPv4 network.
+     */
+    static boolean isIPv4CompatibleAddress(byte[] address) { 
         // Is it a IPv4 compatible IPv6 address?
         // (copied from Inet6Address)
-        } else if (address.length == 16 
+        if (address.length == 16 
                 && (address[ 0] == 0x00) && (address[ 1] == 0x00) 
                 && (address[ 2] == 0x00) && (address[ 3] == 0x00) 
                 && (address[ 4] == 0x00) && (address[ 5] == 0x00) 
@@ -646,35 +629,196 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if the given InetAddress is an IPv4 mapped address
-     * 
-     * This method is IPv6 compliant
+     * Returns true if the given byte-array is an IPv4 mapped address.
+     * IPv4 mapped addresses indicate systems that do not support IPv6. 
+     * They are limited to IPv4. An IPv6 host can communicate with an 
+     * IPv4 only host using the IPv4 mapped IPv6 address.
      */
-    public static boolean isIPv4MappedAddress(InetAddress addr) {
-        return isIPv4MappedAddress(addr.getAddress());
-    }
-    
-    /**
-     * Returns true if the given byte-array is an IPv4 mapped address
-     * 
-     * This method is IPv6 compliant
-     */
-    public static boolean isIPv4MappedAddress(byte[] address) {
-        // Is it a IPv4 address?
-        if (address.length == 4) {
-            return true;
-            
-        // Is it a IPv4 mapped IPv6 address?
-        } else if (address.length == 16 
+    static boolean isIPv4MappedAddress(byte[] address) {
+        if (address.length == 16 
                 && (address[ 0] == 0x00) && (address[ 1] == 0x00) 
                 && (address[ 2] == 0x00) && (address[ 3] == 0x00) 
                 && (address[ 4] == 0x00) && (address[ 5] == 0x00) 
                 && (address[ 6] == 0x00) && (address[ 7] == 0x00) 
                 && (address[ 8] == 0x00) && (address[ 9] == 0x00) 
-                && (address[10] == (byte)0xFF) && (address[11] == (byte)0xFF))  {   
+                && (address[10] == (byte)0xFF) && (address[11] == (byte)0xFF)) {   
             return true;
         }
         
         return false;  
+    }
+    
+    /**
+     * Returns true if the given byte-array is an any local address.
+     */
+    static boolean isAnyLocalAddress(byte[] address) {
+        if (address.length == 4 || address.length == 16) {
+            byte test = 0;
+            for (int i = 0; i < address.length; i++) {
+                test |= address[i];
+            }
+            
+            return (test == 0x00);
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array is a loopback address
+     */
+    static boolean isLoopbackAddress(byte[] address) {
+        if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
+            return (address[/* 0 */ address.length - 4] & 0xFF) == 127;
+        } else if (address.length == 16) {
+            byte test = 0x00;
+            for (int i = 0; i < 15; i++) {
+                test |= address[i];
+            }
+            return (test == 0x00) && (address[15] == 0x01);
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array is a link-local address
+     */
+    static boolean isLinkLocalAddress(byte[] address) {
+        if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
+            return (address[/* 0 */ address.length - 4] & 0xFF) == 169
+                && (address[/* 1 */ address.length - 3] & 0xFF) == 254;
+            
+        // FE80::/64
+        } else if (address.length == 16) {
+            return (address[0] & 0xFF) == 0xFE
+                && (address[1] & 0xC0) == 0x80;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array is a site-local address.
+     * IPv6 site-local addresses were deprecated in September 2004 
+     * by RFC 3879 and replaced by RFC 4193 (Unique Local IPv6 Unicast
+     * Addresses).
+     */
+    static boolean isSiteLocalAddress(byte[] address) {
+        if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
+            return  (address[/* 0 */ address.length - 4] & 0xFF) == 10
+                || ((address[/* 0 */ address.length - 4] & 0xFF) == 172
+                &&  (address[/* 1 */ address.length - 3] & 0xF0) == 16)
+                || ((address[/* 0 */ address.length - 4] & 0xFF) == 192
+                &&  (address[/* 1 */ address.length - 3] & 0xFF) == 168);
+            
+        // Has been deprecated in September 2004 by RFC 3879 
+        // FEC0::/10
+        } else if (address.length == 16) {
+            return (address[0] & 0xFF) == 0xFE
+                && (address[1] & 0xC0) == 0xC0;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given InetAddress is an Unique Local IPv6
+     * Unicast Address. See RFC 4193 for more info.
+     */
+    public static boolean isUniqueLocalUnicastAddress(InetAddress address) {
+        if (address instanceof Inet6Address) {
+            return isUniqueLocalUnicastAddress(address.getAddress());
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array is an Unique Local IPv6
+     * Unicast Address. See RFC 4193 for more info.
+     */
+    private static boolean isUniqueLocalUnicastAddress(byte[] address) {
+        // FC00::/7
+        if (address.length == 16) {
+            return (address[0] & 0xFE) == 0xFC
+                && (address[1] & 0xFF) == 0x00;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the given InetAddress is a broadcast address.
+     */
+    public static boolean isBroadcastAddress(InetAddress address) {
+        return isBroadcastAddress(address.getAddress());
+    }
+    
+    /**
+     * Returns true if the given byte-array is a brodcast address
+     * 
+     * This method is IPv6 compliant but returns always false if
+     * the given address is neither a true IPv4, nor an IPv4-mapped
+     * address.
+     */
+    private static boolean isBroadcastAddress(byte[] address) {
+        if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
+            return (address[/* 0 */ address.length - 4] & 0xFF) == 0xFF;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Returns true if the given InetAddress is a private IPv4-compatible
+     * address.
+     * 
+     * It checks for a somewhat tricky and undefined case. An address such
+     * as ::0000:192.168.0.1 is an IPv6 address, it's an IPv4-compatible
+     * address but it's by IPv6 definition not a site-local (private) address.
+     * On the other hand it's a private IPv4 address.
+     */
+    public static boolean isPrivateIPv4CompatibleAddress(InetAddress address) {
+        if (address instanceof Inet6Address) {
+            return isPrivateIPv4CompatibleAddress(address.getAddress());
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array is a private IPv4-compatible
+     * address.
+     */
+    private static boolean isPrivateIPv4CompatibleAddress(byte[] address) {
+        if (isIPv4CompatibleAddress(address)) {
+            // Copy the lower four bytes and perform the
+            // checks on it to determinate whether or not
+            // it's a private IPv4 address
+            byte[] ipv4 = new byte[4];
+            System.arraycopy(address, 12, ipv4, 0, ipv4.length);
+            return isPrivateAddress(ipv4);
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given InetAddress has a prefix that's used in
+     * Documentation. See RFC 3849 for more information.
+     */
+    public static boolean isDocumentationAddress(InetAddress address) {
+        if (address instanceof Inet6Address) {
+            return isDocumentationAddress(address.getAddress());
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given byte-array has a prefix that's used in
+     * Documentation. See RFC 3849 for more information.
+     */
+    private static boolean isDocumentationAddress(byte[] address) {
+        // 2001:0DB8::/32
+        if (address.length == 16) {
+            return (address[0] & 0xFF) == 0x20
+                && (address[1] & 0xFF) == 0x01
+                && (address[2] & 0xFF) == 0x0D
+                && (address[3] & 0xFF) == 0xB8;
+        }
+        return false;
     }
 }
