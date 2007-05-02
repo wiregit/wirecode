@@ -161,7 +161,7 @@ public class FileUtils {
         File testChildParentFile = testChild.getAbsoluteFile().getParentFile();
         if (testChildParentFile == null) 
             testChildParentFile = testChild.getAbsoluteFile();
-    	String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
+    	String testChildParentName = getCanonicalPath(testChildParentFile);
     	return testChildParentName.startsWith(testParentName);
     }
     
