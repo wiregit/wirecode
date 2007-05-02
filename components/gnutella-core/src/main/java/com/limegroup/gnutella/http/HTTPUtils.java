@@ -326,7 +326,7 @@ public final class HTTPUtils {
         if(equalIndex == -1 || equalIndex >= keyValuePair.length() -1)
             throw new IOException("invalid keyValuePair: " + keyValuePair);
         
-        return keyValuePair.substring(equalIndex+1);
+        return keyValuePair.substring(equalIndex+1).trim();
     }
     
     /**

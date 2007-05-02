@@ -1063,7 +1063,7 @@ public class QueryReply extends Message implements SecureMessage {
                     measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
                 if ((control & GGEP_MASK) != 0 && (flags & GGEP_MASK) != 0) {
                     GGEPParser parser = new GGEPParser();
-                    parser.scanForGGEPs(_payload, i + 2);
+                    parser.scanForGGEPs(_payload, i + 5);
                     GGEP ggep = parser.getNormalGGEP();
                     if (ggep != null) {
                         try {

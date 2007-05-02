@@ -26,9 +26,13 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
@@ -811,36 +815,33 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
 
     public void testBasicPushProxyGGEP() throws Exception {
-        basicTest(false, false, false, false);
-        basicTest(false, false, false, true);
-        basicTest(false, false, true, false);
-        basicTest(false, false, true, true);
-        basicTest(false, true, false, false);
-        basicTest(false, true, false, true);
-        basicTest(false, true, true, false);
-        basicTest(false, true, true, true);
-        basicTest(true, false, false, false);
-        basicTest(true, false, false, true);
-        basicTest(true, false, true, false);
-        basicTest(true, false, true, true);
-        basicTest(true, true, false, false);
-        basicTest(true, true, false, true);
-        basicTest(true, true, true, false);
-        basicTest(true, true, true, true);
+        for(byte i = 0; i < 0x1F; i++) {
+            BitNumbers bn = new BitNumbers(new byte[] { i } );
+            basicTest(bn.isSet(3), bn.isSet(4), bn.isSet(5), bn.isSet(6), bn.isSet(7));
+        }
     }
 
-    public void basicTest(final boolean browseHost, 
+    private static final Random RND = new Random();
+    public void basicTest(final boolean browseHost,
                           final boolean multicast,
                           final boolean fwTransfer,
-                          final boolean tls) throws Exception {
+                          final boolean tls,
+                          final boolean proxiesTLS) throws Exception {
+        
         int numHeaders = 1;
 
-        // first take input of proxies
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.stanford.edu"};
+        // these are in order so that the TreeSet doesn't re-order them -- makes TLS matching easier
+        String[] hosts = {"1.2.3.4", "1.2.3.5", "1.2.3.6", "1.2.3.7"};
         Set proxies = new TreeSet(IpPort.COMPARATOR);
-        for (int i = 0; i < hosts.length; i++)
-            proxies.add(new IpPortImpl(hosts[i], 6346));
+        BitNumbers bn = new BitNumbers(4);
+        for (int i = 0; i < hosts.length; i++) {
+            if(!proxiesTLS || !RND.nextBoolean()) {
+                proxies.add(new IpPortImpl(hosts[i], 6346));
+            } else {
+                proxies.add(new ConnectableImpl(hosts[i], 6346, true));
+                bn.set(i);
+            }
+        }
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
                                                      fwTransfer, tls, proxies, null), 
                                  0, null);
@@ -859,6 +860,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         if (tls) {
             numHeaders++;
             assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE));
+        }
+        
+        if(proxiesTLS && !bn.isEmpty()) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+            assertEquals(bn.toByteArray(), testGGEP.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
         }
         
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
@@ -1041,6 +1048,54 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             assertEquals(retProxies, proxies);
             assertEquals(proxies, retProxies);
         }
+    }
+    
+    public void testPushProxyWithTLS() throws Exception {
+        Set proxies = new IpPortSet();
+        proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.5", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.6", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.7", 5, false));
+        QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
+                6346, IP, 0, new Response[0],
+                GUID.makeGuid(), new byte[0],
+                false, false, true, true, true, false,
+                proxies);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        qr.write(out);
+        
+        // All we care about is the GGEP in the reply,
+        // which should begin at:
+        // + 0  // beginning
+        // + 23 // header
+        // + 11 // responses
+        // + 0  // (0 responses)
+        // + 10 // GGEP area of QHD
+        GGEP ggep = new GGEP(out.toByteArray(), 44);
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+        byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+        assertEquals(new byte[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 5, 5, 0, 1, 2, 3, 6, 5, 0, 1, 2, 3, 7, 5, 0 }, bytes);
+        bytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS);
+        assertEquals(new byte[] { (byte)0xE0 }, bytes);
+        
+        // Make sure we can deserialize it too.
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        qr = (QueryReply)MessageFactory.read(in);
+        assertEquals(4, qr.getPushProxies().size());
+        int tls = 0;
+        IpPort nonTLS = null;
+        for(IpPort ipp : qr.getPushProxies()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                tls++;
+            else
+                nonTLS = ipp;
+        }
+        assertEquals(3, tls);
+        assertEquals("1.2.3.7", nonTLS.getAddress());
+        proxies.retainAll(qr.getPushProxies());
+        assertEquals(4, proxies.size()); // make sure it's the right ones!
+        
     }
     
     public void testQueryReplyHasAlternates() throws Exception {
