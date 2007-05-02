@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/ServerConnState.java $
- * $Revision: 1.1.4.1 $
- * $Date: 2007-04-27 18:28:35 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-05-02 19:58:54 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -37,7 +37,8 @@ import org.apache.http.nio.util.ContentInputBuffer;
 import org.apache.http.nio.util.ContentOutputBuffer;
 
 /**
- * Based on ServerConnState rev. 509494.
+ * Based on ServerConnState rev. 509494. Contains modifications to handle
+ * {@link HttpNIOEntity} objects.
  * 
  * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
  */

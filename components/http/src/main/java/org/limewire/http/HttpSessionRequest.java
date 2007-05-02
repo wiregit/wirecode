@@ -9,6 +9,8 @@ import org.apache.http.nio.reactor.SessionRequestCallback;
 
 /** 
  * Based on {@link org.apache.http.impl.nio.reactor.SessionRequestImpl}.
+ * 
+ * See https://issues.apache.org/jira/browse/HTTPCORE-70
  */
 public class HttpSessionRequest implements SessionRequest {
 

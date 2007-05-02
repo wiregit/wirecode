@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.4.1 $
- * $Date: 2007-04-27 18:28:35 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-05-02 19:58:54 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -381,6 +381,8 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
             this.httpProcessor.process(request, context);
 
+            notifyRequestReceived(conn);
+            
             HttpRequestHandler handler = null;
             if (this.handlerResolver != null) {
                 String requestURI = request.getRequestLine().getUri();
@@ -545,7 +547,13 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
 
     // LW
-    
+
+    public void notifyRequestReceived(NHttpServerConnection conn) {
+        if (eventListener instanceof HttpServiceEventListener) {
+            ((HttpServiceEventListener)eventListener).requestReceived(conn);
+        }
+    }
+
     public void responseSent(NHttpServerConnection conn) {
         if (eventListener instanceof HttpServiceEventListener) {
             ((HttpServiceEventListener)eventListener).responseSent(conn);

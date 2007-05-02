@@ -9,10 +9,12 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.ResponseConnControl;
 
+/**
+ * An extended connection control that does nothing if a response contains a
+ * <tt>Connection</tt> header.
+ */
 public class LimeResponseConnControl extends ResponseConnControl {
 
-    public static final String KEEP_ALIVE = "org.limewire.keepalive";
-    
     @Override
     public void process(HttpResponse response, HttpContext context)
             throws HttpException, IOException {

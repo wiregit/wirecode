@@ -18,6 +18,10 @@ import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 
+/**
+ * An implementation of the {@link ConnectingIOReactor} interface that
+ * establishes connections through LimeWire's NIO layer.
+ */
 public class HttpIOReactor implements ConnectingIOReactor {
 
     public static final String IO_SESSION_KEY = "org.limewire.iosession";

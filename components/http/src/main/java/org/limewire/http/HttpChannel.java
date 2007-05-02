@@ -13,7 +13,7 @@ import org.limewire.util.BufferUtils;
 
 /**
  * A read/write channel implementation that forwards all requests received from
- * HttpComponent to LimeWire's NIO layer.
+ * LimeWire's NIO layer to HttpCore's {@link IOEventDispatch}. 
  */
 public class HttpChannel implements ByteChannel, ChannelReadObserver,
         ChannelWriter {
@@ -34,6 +34,18 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private ByteBuffer methodBuffer;
 
+    /**
+     * Constructs a channel optionally pushing back a string that will be read
+     * first. LimeWire's acceptor eats the first word of a connection to
+     * determine the type. If a non-null value is passed as <code>method</code>
+     * this word can be pushed back into the channel and will be the first
+     * data returned by {@link #read(ByteBuffer)}.
+     * 
+     * @param session the IO session
+     * @param eventDispatch the IO event dispatcher that 
+     * @param method if != null, the content will be pushed back into the
+     *        channel
+     */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
         this.session = session;
         this.eventDispatch = eventDispatch;
@@ -42,6 +54,15 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         }
     }
 
+    /**
+     * Constructs a channel that does not push back a method.
+     * 
+     * @see  #HttpChannel(HttpIOSession, IOEventDispatch)
+     */
+    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch) {
+        this(session, eventDispatch, null);
+    }
+    
     public int read(ByteBuffer buffer) throws IOException {
         if (methodBuffer != null && methodBuffer.hasRemaining()) {
             // XXX need to read as much as we can
