@@ -2,9 +2,8 @@ package org.limewire.util;
 
 
 /**
- * Converts and splits strings to a normalized versions for internationalization. Additionally 
- * lists a simple string composition method.
- * 
+ * Converts and splits strings to a normalized versions for internationalization. 
+ * Implementations should use the provided string composition method.
  */
 abstract class AbstractI18NConverter {
 

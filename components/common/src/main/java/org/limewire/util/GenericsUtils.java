@@ -8,13 +8,13 @@ import java.util.Set;
 
 /**
  * Provides a means to ensure <code>Maps</code>, <code>Collections</code>,
- * <code>Sets</code> and <code>Lists</code> contain objects of a specific type only. 
- * <code>GenericsUtils</code> is intended for checking the type-safety of de-serialized 
- * objects.
+ * <code>Sets</code> and <code>Lists</code> contain objects of a specific 
+ * type only. <code>GenericsUtils</code> and its static methods are intended 
+ * for checking the type-safety of de-serialized objects.
  */
 public class GenericsUtils {
     
-    /** The mode to scan Maps, Collections, Sets and Lists. */
+/**The mode {@link GenericsUtils} should use when scanning through objects.*/
     public enum ScanMode {
         /** Throw an exception on bad objects. */
         EXCEPTION,

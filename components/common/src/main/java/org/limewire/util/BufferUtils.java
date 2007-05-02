@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * Gives methods for reading, transferring and compacting a {@link ByteBuffer}.
- * 
+ * Provides static methods for reading, transferring and compacting a
+ * {@link ByteBuffer}.
  */
 public class BufferUtils {
     

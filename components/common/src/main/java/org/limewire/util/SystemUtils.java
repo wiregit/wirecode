@@ -9,8 +9,11 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- * Returns system information for supported operating systems; most methods rely on native code. <br>
- * 
+ * Returns system information, where supported, for Windows and OSX. Most methods
+ * in <code>SystemUtils</code> rely on native code and fail gracefully if the 
+ * native code library isn't found. <code>SystemUtils</code> uses 
+ * SystemUtilities.dll for Window environments and libSystemUtilities.jnilib 
+ * for OSX.
  */
 public class SystemUtils {
     

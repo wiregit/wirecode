@@ -2,7 +2,7 @@ package org.limewire.util;
 
 /**
  * Thrown upon a version parsing error when the provided version format 
- * is ill-formed.
+ * is malformed.
  * 
  */
 public class VersionFormatException extends Exception {

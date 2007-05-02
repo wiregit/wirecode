@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Provides methods for resolving endianness issues. Methods operate on byte arrays as
- * well as on streams.<p>
+ * Provides methods for resolving endianness issues. Methods operate on byte 
+ * arrays as well as on streams.
  * See <a href = "http://en.wikipedia.org/wiki/Endianness">Endianness</a> 
  * for more information.
  */

@@ -3,9 +3,8 @@ package org.limewire.util;
 import java.io.File;
 
 /**
- * 
- * Defines an interface class method whether or not the lock on a file was released.
- * 
+ * Defines the requirements for classes that lock files preventing other 
+ * classes from deleting and renaming.
  */
 public interface FileLocker {
     

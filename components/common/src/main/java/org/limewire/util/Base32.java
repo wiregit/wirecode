@@ -8,9 +8,9 @@
 package org.limewire.util;
 
 /**
- * Provides methods to encode bytes in Base32 and decode Base32 encrypted Strings back to bytes.
- *  For additional information see <a href="http://en.wikipedia.org/wiki/Base_32">Base 32</a>.
- * 
+ * Provides methods to encode bytes in Base32 and decode Base32 encoded Strings 
+ * to bytes. For additional information see 
+ * <a href="http://en.wikipedia.org/wiki/Base_32">Base 32</a>.
  * @author Robert Kaye & Gordon Mohr
  */
 public class Base32 {

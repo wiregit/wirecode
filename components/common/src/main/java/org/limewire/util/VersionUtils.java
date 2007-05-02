@@ -3,7 +3,7 @@ package org.limewire.util;
 
 
 /**
- * Gets the current JVM version and compares Java versions.
+ * Provides methods to get the current JVM version and compare Java versions.
  */
 public class VersionUtils {
 

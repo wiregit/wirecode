@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
- * Provides utilities to retrieve XML documents. 
+ * Provides utilities to retrieve XML documents.
  */
 public class XMLUtils {
 
@@ -77,8 +77,10 @@ public class XMLUtils {
         }
     }
     
-    /**
-     * Provides a default implementation of <code>ErrorHandler</code>. <code>LogErrorHandler</code> prints warnings, errors and fatal errors to a log; 
+   /**
+     * Provides a default implementation of <code>ErrorHandler</code>.
+     * <code>LogErrorHandler</code> prints warnings, errors and fatal
+     * errors to a log.
      */
     public static class LogErrorHandler implements ErrorHandler {
         private final Log log;

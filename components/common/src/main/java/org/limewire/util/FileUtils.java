@@ -25,9 +25,8 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- * Provides file manipulation methods. <code>FileUtils</code> ensures a 
- * file exists, makes a file writable, renames, saves and deletes a file. 
- * 
+ * Provides file manipulation methods; ensures a file exists, makes a file 
+ * writable, renames, saves and deletes a file. 
  */
 public class FileUtils {
     

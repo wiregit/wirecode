@@ -3,8 +3,14 @@ package org.limewire.util;
 import java.io.IOException;
 
 /**
- * Removes accents, symbols and normalizes strings for internationalization. <code>I18NConvert</code>
- * abstracts how the strings are normalized.
+ * Removes accents, symbols and normalizes strings for internationalization. 
+ * <code>I18NConvert</code>'s current implementation delegates the 
+ * internationalization conversion through the ICU4J library. 
+ * <p>
+ * For example, Ã is normalized to a, ™ is normalized to tm and LiMEWirE is 
+ * normalized to limewire. See 
+ * <a href = "http://en.wikipedia.org/wiki/International_Components_for_Unicode">
+ * Unicode</a> for more information about international components.
  */
 public class I18NConvert {
 

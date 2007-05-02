@@ -8,24 +8,53 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Converts older package names to the new equivalent name version and extends the <code>ObjectInputStream</code> 
- * used for serialization. <code>ConverterObjectInputStream</code> is an input stream
- * and is useful in code refactoring. If classes are renamed, <code>ObjectInputStream</code> fails to find
- * the older name. Therefore, <code>ConverterObjectInputStream</code> fixes the problem with changed class names.
- * 
- * 
- * <p><table cellpadding="5">
- * <tr> <td><b> Former Package Name</b></td>                    <td> <b>New Package Name</b></td> </tr>
- * <tr> <td>com.sun.java.util.collections.* </td>               <td> java.util.* </td> </tr>
- * <tr> <td>com.limegroup.gnutella.util.FileComparator</td>     <td> org.limewire.collection.FileComparator</td> </tr>
- * <tr> <td>com.limegroup.gnutella.downloader.Interval</td>     <td> org.limewire.collection.Interval</td> </tr>
- * <tr> <td>com.limegroup.gnutella.util.IntervalSet</td>        <td> org.limewire.collection.IntervalSet</td> </tr>
- * <tr> <td>com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator</td> <td> org.limewire.collection.Comparators$CaseInsensitiveStringComparator</td> </tr>
- * <tr> <td>com.limegroup.gnutella.util.StringComparator</td>   <td> org.limewire.collection.StringComparator</td> </tr>
- * </table><p>
- * None of the earlier forms of the class need to exist in the classpath.<p> 
+ * Converts older package and class names to the new equivalent name and is useful 
+ * in code refactoring. For example, if packages or classes are renamed, 
+ * <code>ObjectInputStream</code> fails to find 
+ * the older name. <code>ConverterObjectInputStream</code> looks up the old name 
+ * and if a new name exists, returns the <code>ObjectStreamClass</code> object for
+ * the new name. Then the corresponding new class/package name is loaded. If the
+ * new name doesn't exist in <code>ConverterObjectInputStream</code>'s mapping,
+ * then the original <code>ObjectStreamClass</code> object is returned.
+ * <p>
+ * <code>ConverterObjectInputStream</code> comes with a pre-set package and class 
+ * mapping between the old and new name, and you can add more lookups with 
+ * {@link #addLookup(String, String)}.
+ * <p>
+ * Pre-set package and class mapping:
+ * <table cellpadding="5">
+ * <tr>
+ * <td><b>Old Name</b></td>
+ * <td><b>New Name</b></td>
+ * </tr>
+ * <td>com.limegroup.gnutella.util.FileComparator</td>
+ * <td>org.limewire.collection.FileComparator</td>
+ * </tr>
+ * <tr>
+ * <td>com.limegroup.gnutella.downloader.Interval</td>
+ * <td>org.limewire.collection.Interval</td>
+ * </tr>
+ * <tr>
+ * <td>com.limegroup.gnutella.util.IntervalSet</td>
+ * <td> org.limewire.collection.IntervalSet</td>
+ * </tr>
+ * <tr>
+ * <td>com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator</td>
+ * <td> org.limewire.collection.Comparators$CaseInsensitiveStringComparator</td>
+ * </tr>
+ * <td>com.limegroup.gnutella.util.StringComparator</td>
+ * <td> org.limewire.collection.StringComparator</td>
+ * </tr>
+ * <tr>
+ * <td>com.sun.java.util.collections</td>
+ * <td>java.util</td>
+ * </tr>
+ * </table>
+ * <p>
+ * None of the earlier forms of the class need to exist in the classpath.
+ * <p>
  */
-// TODO: Add support for adding arbitrary migrations.
+
 public class ConverterObjectInputStream extends ObjectInputStream { 
     
     private Map<String, String> lookups = new HashMap<String, String>(8);
@@ -33,6 +62,10 @@ public class ConverterObjectInputStream extends ObjectInputStream {
     /**
      * Constructs a new ConverterObjectInputStream wrapping the specified
      * InputStream.
+     * 
+     * {@link ObjectInputStream} {@link ObjectInputStream}
+     * 
+     * 
      */     
     public ConverterObjectInputStream(InputStream in) throws IOException { 
         super(in); 
