@@ -487,6 +487,10 @@ public final class NetworkUtils {
         return ret;
     }
     
+    public static int getClassC(InetAddress addr) {
+        return getMaskedIP(addr, 0xFFFFFF00);
+    }
+    
     /**
      * Applies the netmask on the lower four bytes of the given 
      * InetAddress and returns it as an Integer.
