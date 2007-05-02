@@ -158,6 +158,9 @@ public class FileUtils {
     public static final boolean isReallyInParentPath(File testParent, File testChild) throws IOException {
 
     	String testParentName = getCanonicalPath(testParent);
+        File testChildParentFile = testChild.getAbsoluteFile().getParentFile();
+        if (testChildParentFile == null) 
+            testChildParentFile = testChild.getAbsoluteFile();
     	String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
     	return testChildParentName.startsWith(testParentName);
     }
