@@ -318,9 +318,10 @@ public class ConnectionManager implements ConnectionAcceptor,
                 if (evt.isConnectedEvent()) {
                     List<Endpoint> filtered = new ArrayList<Endpoint>();
                     synchronized(ConnectionManager.this) {
-                        for (List<Endpoint> l : classCNetworks.values())
+                        for (List<Endpoint> l : classCNetworks.values()) {
                             filtered.addAll(l);
-                        classCNetworks.clear();
+                            l.clear();
+                        }
                     }
                     for (Endpoint e : filtered)
                         _catcher.add(e, false);
