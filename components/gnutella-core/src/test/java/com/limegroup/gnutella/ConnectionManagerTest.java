@@ -565,15 +565,27 @@ public class ConnectionManagerTest extends LimeTestCase {
         Endpoint e2 = new Endpoint("127.0.0.2", 10000);
         eo.handleEndpoint(e2);
         assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
+        // we should be still looking for more connections
+        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+        // this is a different class C - it should trigger an event.
+        eo.handleEndpoint(new Endpoint("127.0.1.1", 20000));
+        do {
+            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionInitializingEvent());
         
         // after the connection gets closed we should get the endpoint back to 
         // hostcatcher
         s.accept().close();
         assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
-        // and we should be able to establish a second connection
+        // two closed events - one for .1 and one for 1.1
         do {
             event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
         } while( !event.isConnectionClosedEvent());
+        do {
+            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionClosedEvent());
+        
+        // now we should be able to establish a second connection
         eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
         do {
             event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
