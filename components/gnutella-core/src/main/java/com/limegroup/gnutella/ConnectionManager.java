@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -161,6 +163,14 @@ public class ConnectionManager implements ConnectionAcceptor,
      *  LOCKING: obtain this. */
     private final List<ConnectionFetcher> _fetchers =
         new ArrayList<ConnectionFetcher>();
+    /** 
+     * Mapping from class C networks to lists of connections that
+     * we have decided not to connect to.
+     * LOCKING: this 
+     */
+    private final Map<Integer, List<Endpoint>> classCNetworks = 
+        new HashMap<Integer,List<Endpoint>>();
+    
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
@@ -299,6 +309,22 @@ public class ConnectionManager implements ConnectionAcceptor,
             public void simppUpdated(int newVersion) {
                 CapabilitiesVM.reconstructInstance();
                 sendUpdatedCapabilities();
+            }
+        });
+        
+        // return any filtered results to the hostcatcher.
+        addEventListener(new ConnectionLifecycleListener() {
+            public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+                if (evt.isConnectedEvent()) {
+                    List<Endpoint> filtered = new ArrayList<Endpoint>();
+                    synchronized(ConnectionManager.this) {
+                        for (List<Endpoint> l : classCNetworks.values())
+                            filtered.addAll(l);
+                        classCNetworks.clear();
+                    }
+                    for (Endpoint e : filtered)
+                        _catcher.add(e, false);
+                }
             }
         });
     }
@@ -538,6 +564,21 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
     }
 
+    
+    /**
+    * @return if there is already a connection established or establishing
+    * to a host in the same class C network as the provided host.
+    */
+    private boolean attemptClassC(Endpoint host) {
+        if (!ConnectionSettings.FILTER_CLASS_C.getValue())
+            return false; 
+        List<Endpoint> l = classCNetworks.get(NetworkUtils.getClassC(host.getInetAddress()));
+        if (l == null)
+            return false;
+        l.add(host);
+        return true;
+    }
+    
     /**
      * @return the number of connections, which is greater than or equal
      *  to the number of initialized connections.
@@ -1283,6 +1324,14 @@ public class ConnectionManager implements ConnectionAcceptor,
         List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
+        try {
+            int classC =  NetworkUtils.getClassC(InetAddress.getByName(c.getAddress()));
+            List<Endpoint> l = classCNetworks.get(classC);
+            if (l == null)
+                classCNetworks.put(classC,new ArrayList<Endpoint>());
+        } catch (UnknownHostException uhe) {
+            // this will cause the connection to fail, ignore
+        }
     }
 
     /**
@@ -1583,6 +1632,15 @@ public class ConnectionManager implements ConnectionAcceptor,
             newConnections.remove(c);
             _connections = Collections.unmodifiableList(newConnections);
         }
+        
+        // 1c) Remove from list of class C networks and return bypassed to catcher
+        try {
+            List<Endpoint> l = classCNetworks.remove(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
+            if (l != null) {
+                for (Endpoint ip : l)
+                    _catcher.add(ip, false);
+            }
+        } catch (UnknownHostException ignore){}
 
         // 2) Ensure that the connection is closed.  This must be done before
         // step (3) to ensure that dead connections are not added to the route
@@ -1958,7 +2016,9 @@ public class ConnectionManager implements ConnectionAcceptor,
                 continue;
             }
         }
-        _catcher.add(hosts);        
+        _catcher.add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
+                NetworkUtils.filterOnePerClassC(hosts) :
+                    hosts); ;        
     }
 
 
@@ -2268,7 +2328,8 @@ public class ConnectionManager implements ConnectionAcceptor,
             // If this was an invalid endpoint, try again.
             if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
                 || isConnectedTo(endpoint.getAddress())
-                || isConnectingTo(endpoint)) {
+                || isConnectingTo(endpoint)
+                || (!isSupernode() && attemptClassC(endpoint))) {
                 _catcher.getAnEndpoint(this);
                 return;
             }

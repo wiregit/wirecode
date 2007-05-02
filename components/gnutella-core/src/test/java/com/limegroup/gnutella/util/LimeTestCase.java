@@ -205,6 +205,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     public static void setupSettings() throws Exception{
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
+        ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);

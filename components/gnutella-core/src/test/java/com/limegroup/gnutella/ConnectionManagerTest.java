@@ -2,17 +2,25 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.HostCatcher.EndpointObserver;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -533,6 +541,56 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertEquals(x, mgr.getCurrentAverageUptime());
         assertEquals(avgtime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
     }
+    
+    public void testClassCFiltering() throws Exception {
+        ServerSocket s = new ServerSocket(10000);
+        ConnectionSettings.FILTER_CLASS_C.setValue(true);
+        TestHostCatcher2 catcher = new TestHostCatcher2();
+        TestConnectionObserver observer = new TestConnectionObserver();
+        ConnectionManager cm = RouterService.getConnectionManager();
+        PrivilegedAccessor.setValue(cm,"_catcher",catcher);
+        cm.addEventListener(observer);
+        cm.connect();
+        EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+        
+        // a connection should be initialized.
+        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+        ConnectionLifecycleEvent event;
+        do {
+            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionInitializingEvent());
+        // we should be still looking for more connections
+        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+        // adding a new endpoint from the same class C network should not trigger a connection
+        Endpoint e2 = new Endpoint("127.0.0.2", 10000);
+        eo.handleEndpoint(e2);
+        assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
+        
+        // after the connection gets closed we should get the endpoint back to 
+        // hostcatcher
+        s.accept().close();
+        assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
+        // and we should be able to establish a second connection
+        do {
+            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionClosedEvent());
+        eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
+        do {
+            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionInitializingEvent());
+        
+        // if we allow more than one connection per class C, we'll be able to
+        // add a second connection to the same class
+        ConnectionSettings.FILTER_CLASS_C.setValue(false);
+        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+        do {
+            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+        } while( !event.isConnectionInitializingEvent());
+        assertEquals(2,cm.getNumConnections());
+        
+        s.close();
+        cm.removeEventListener(observer);
+    }
 
     private void sleep() {
         sleep(5000);
@@ -602,6 +660,29 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  setting up some required members.  Now, the code which was intended to be 
         //  skipped was moved into this function (on the base class)
         public void scheduleServices() {            
+        }
+    }
+    
+    private static class TestHostCatcher2 extends TestHostCatcher {
+        final BlockingQueue<EndpointObserver> observers = 
+            new ArrayBlockingQueue<EndpointObserver>(100);
+        final BlockingQueue<Endpoint> endpoints = 
+            new ArrayBlockingQueue<Endpoint>(100);
+        public void getAnEndpoint(EndpointObserver observer) {
+            assertTrue(observers.offer(observer));
+        }
+        
+        public boolean add(Endpoint e, boolean asdf) {
+            assertTrue(endpoints.offer(e));
+            return false;
+        }
+    }
+    
+    private static class TestConnectionObserver implements ConnectionLifecycleListener {
+        final BlockingQueue<ConnectionLifecycleEvent> evts = 
+            new ArrayBlockingQueue<ConnectionLifecycleEvent>(100);
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+            assertTrue(evts.offer(evt));
         }
     }
 
