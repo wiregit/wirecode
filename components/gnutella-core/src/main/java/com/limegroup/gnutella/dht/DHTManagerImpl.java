@@ -380,19 +380,26 @@ public class DHTManagerImpl implements DHTManager {
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     Database database = dht.getDatabase();
-                    List<BigInteger> stored;
                     BigInteger local = dht.getLocalNodeID().toBigInteger();
+                    
+                    List<BigInteger> primaryKeys = null;
+                    List<BigInteger> requestLoads = null;
                     synchronized (database) {
                         data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
                         Set<KUID> keys = database.keySet();
                         
-                        stored = new ArrayList<BigInteger>(keys.size());
-                        for (KUID k : keys)
-                            stored.add(k.toBigInteger());
+                        primaryKeys = new ArrayList<BigInteger>(keys.size());
+                        for (KUID primaryKey : keys) {
+                            primaryKeys.add(primaryKey.toBigInteger());
+                            
+                            long load = (long)(database.getRequestLoad(primaryKey, false) * 100f);
+                            requestLoads.add(BigInteger.valueOf(load));
+                        }
                     }
 
-                    List<BigInteger> storedXorDistances = getXorDistances(local, stored);
-                    data.put("dsk", quickStats(stored)); // 5*20 + 4
+                    List<BigInteger> storedXorDistances = getXorDistances(local, primaryKeys);
+                    data.put("dsk", quickStats(primaryKeys)); // 5*20 + 4
+                    data.put("drl", quickStats(requestLoads)); // 5*4 + 4
                     data.put("dskx", quickStats(storedXorDistances)); // 5*20 + 4
                 }
                 return data;
