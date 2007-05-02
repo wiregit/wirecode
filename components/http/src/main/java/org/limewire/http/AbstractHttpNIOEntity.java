@@ -17,7 +17,7 @@ import org.limewire.nio.observer.WriteObserver;
  * implements {@link InterestWritableByteChannel}. Inherited methods from
  * {@HttpEntity} for streaming throw {@link UnsupportedOperationException}.
  * <p>
- * NOTE: This class only supports writing.
+ * NOTE: This class only supports writing, reading has not been implemented.
  */
 public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
         implements HttpNIOEntity, InterestWritableByteChannel {
