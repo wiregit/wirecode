@@ -70,7 +70,12 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
         throw new UnsupportedOperationException();
     }
 
-    public void interestWrite(WriteObserver observer, boolean status) {
+    /**
+     * Sets write interest to <code>status</code>.
+     * <p>
+     * Note: Ignores <code>observer</code>
+     */
+    public void interestWrite(WriteObserver observer, boolean status) {       
         assert observer == this;
         assert ioctrl != null;
 
@@ -91,6 +96,7 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
         if (this.encoder == null) {
             this.encoder = encoder;
             this.ioctrl = ioctrl;
+            
             initialize();
         }
         if (!handleWrite()) {
@@ -108,14 +114,6 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
     }
 
     /**
-     * Invoked before the first call to {@link #handleWrite()}.
-     * 
-     * @throws IOException indicates an I/O error which will abort the
-     *         connection
-     */
-    public abstract void initialize() throws IOException;
-
-    /**
      * Sub-classes need to implement this and invoke {@link #write(ByteBuffer)}
      * to transmit data.
      * 
@@ -125,7 +123,13 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
      */
     public abstract boolean handleWrite() throws IOException;
 
-    // public abstract boolean handleRead() throws IOException;
+    /**
+     * Invoked before the first call to {@link #handleWrite()}.
+     * 
+     * @throws IOException indicates an I/O error which will abort the
+     *         connection
+     */
+    public abstract void initialize() throws IOException;
 
     /**
      * Invoked after transfer has completed. This is true if either

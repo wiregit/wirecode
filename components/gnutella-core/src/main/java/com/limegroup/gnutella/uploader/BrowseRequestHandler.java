@@ -13,6 +13,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
+import org.limewire.nio.observer.WriteObserver;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Response;
@@ -98,6 +99,12 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             query = QueryRequest.createBrowseHostQuery();
             iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
+        }
+        
+        @Override
+        public void interestWrite(WriteObserver observer, boolean status) {
+            // make sure all events are delegated through this 
+            super.interestWrite(this, status);
         }
         
         @Override

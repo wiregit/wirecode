@@ -49,7 +49,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     public FileResponseEntity(HTTPUploader uploader, File file) {
         this.uploader = uploader;
         this.file = file;
-        
+
         setContentType(Constants.FILE_MIME_TYPE);
 
         begin = uploader.getUploadBegin();
