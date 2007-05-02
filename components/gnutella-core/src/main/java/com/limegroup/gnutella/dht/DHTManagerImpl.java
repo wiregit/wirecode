@@ -389,6 +389,8 @@ public class DHTManagerImpl implements DHTManager {
                         Set<KUID> keys = database.keySet();
                         
                         primaryKeys = new ArrayList<BigInteger>(keys.size());
+                        requestLoads = new ArrayList<BigInteger>(keys.size());
+                        
                         for (KUID primaryKey : keys) {
                             primaryKeys.add(primaryKey.toBigInteger());
                             
