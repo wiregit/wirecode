@@ -229,6 +229,19 @@ public final class FileUtilsTest extends BaseTestCase {
         assertFalse("Multi-level malicious case failed.", FileUtils.isReallyParent(testDirectory, testFile));
     }
     
+    public void testReallyInParentPath() throws Exception {
+        File testDirectory;
+        File testFile;
+        testDirectory = new File("a/b/c");
+        testFile = new File("a/b/c/../../../a/b/c/d/e/f.txt");
+        assertTrue(FileUtils.isReallyInParentPath(testDirectory, testFile));
+        testFile = new File("a/b/c/../../../e/b/c/d.txt");
+        assertFalse(FileUtils.isReallyInParentPath(testDirectory, testFile));
+        testFile = new File("/");
+        assertNull(testFile.getParentFile());
+        assertFalse(FileUtils.isReallyInParentPath(testDirectory, testFile));
+    }
+    
     private File createHierarchy() throws IOException {
     	File tmpFile = File.createTempFile("test", "test");
     	tmpFile.deleteOnExit();
