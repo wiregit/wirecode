@@ -178,6 +178,9 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
 	    if (fileName == null)
 	        fileName = getDefaultFileName();
+        else
+            fileName = CommonUtils.convertFileName(fileName);
+        
 	    if (saveDirectory == null)
 	        saveDirectory = SharingSettings.getSaveDirectory(fileName);
 	    
