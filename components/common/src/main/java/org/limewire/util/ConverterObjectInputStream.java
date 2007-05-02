@@ -12,7 +12,7 @@ import java.util.Map;
  * in code refactoring. For example, if packages or classes are renamed, 
  * <code>ObjectInputStream</code> fails to find 
  * the older name. <code>ConverterObjectInputStream</code> looks up the old name 
- * and if a new name exists, returns the <code>ObjectStreamClass</code> object for
+ * and if a new name exists, returns the {@link ObjectStreamClass} object for
  * the new name. Then the corresponding new class/package name is loaded. If the
  * new name doesn't exist in <code>ConverterObjectInputStream</code>'s mapping,
  * then the original <code>ObjectStreamClass</code> object is returned.
@@ -50,9 +50,7 @@ import java.util.Map;
  * <td>java.util</td>
  * </tr>
  * </table>
- * <p>
  * None of the earlier forms of the class need to exist in the classpath.
- * <p>
  */
 
 public class ConverterObjectInputStream extends ObjectInputStream { 
@@ -60,12 +58,8 @@ public class ConverterObjectInputStream extends ObjectInputStream {
     private Map<String, String> lookups = new HashMap<String, String>(8);
 
     /**
-     * Constructs a new ConverterObjectInputStream wrapping the specified
-     * InputStream.
-     * 
-     * {@link ObjectInputStream} {@link ObjectInputStream}
-     * 
-     * 
+     * Constructs a new <code>ConverterObjectInputStream</code> wrapping the 
+     * specified <code>InputStream</code>.
      */     
     public ConverterObjectInputStream(InputStream in) throws IOException { 
         super(in); 
@@ -91,13 +85,13 @@ public class ConverterObjectInputStream extends ObjectInputStream {
     }
      
     /** 
-     * Overriden to manually alter the class descriptors. 
-     * Note that this does NOT require the original class to be loadable.
-     * 
+     * Overridden to manually alter the class descriptors. 
+     * Note this does NOT require the original class to be loadable.
+     * <p>
      * Lookup works as follows:
      * <ul>
      * <li>The serialized (old) class name is looked up, if a corresponding new
-     * class name exists the ObjectStreamClass object for it is returned.</li>
+     * class name exists the <code>ObjectStreamClass</code> object for it is returned.</li>
      * <li>The package name of the serialized class name is extracted and
      * looked up if a new package name exists, it is prepended to the name of
      * the class the corresponding class is loaded.</li>
