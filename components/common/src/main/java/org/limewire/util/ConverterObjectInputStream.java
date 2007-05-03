@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +13,10 @@ import java.util.Map;
  * in code refactoring. For example, if packages or classes are renamed, 
  * <code>ObjectInputStream</code> fails to find 
  * the older name. <code>ConverterObjectInputStream</code> looks up the old name 
- * and if a new name exists, returns the {@link ObjectStreamClass} object for
- * the new name. Then the corresponding new class/package name is loaded. If the
- * new name doesn't exist in <code>ConverterObjectInputStream</code>'s mapping,
- * then the original <code>ObjectStreamClass</code> object is returned.
+ * and if a new name exists, <code>ConverterObjectInputStream</code> internally
+ * updates any references to the new name without the old name needing to be in the
+ * classpath (and as long as serialVersionUID is the same; see {@link Serializable}
+ * for more information).
  * <p>
  * <code>ConverterObjectInputStream</code> comes with a pre-set package and class 
  * mapping between the old and new name, and you can add more lookups with 
