@@ -46,8 +46,7 @@ public class SameClassFilter {
 
     private boolean add(Contact node) {
         InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
-        int key = NetworkUtils.getMaskedIP(addr, NetworkUtils.CLASS_C_NETMASK);
-        return filter.put(key, node) == null;
+        return filter.put(NetworkUtils.getClassC(addr), node) == null;
     }
     
     /**

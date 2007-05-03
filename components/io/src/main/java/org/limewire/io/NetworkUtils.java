@@ -487,8 +487,12 @@ public final class NetworkUtils {
         return ret;
     }
     
+    /**
+     * Returns the Class C Network part of the given InetAddress.
+     * See {@link #getMaskedIP(InetAddress, int)} for more info.
+     */
     public static int getClassC(InetAddress addr) {
-        return getMaskedIP(addr, 0xFFFFFF00);
+        return getMaskedIP(addr, CLASS_C_NETMASK);
     }
     
     /**
