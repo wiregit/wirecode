@@ -4,10 +4,9 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
-public class HttpCoreUtilsTest extends LimeTestCase {
+public class HttpCoreUtilsTest extends BaseTestCase {
 
     public HttpCoreUtilsTest(String name) {
         super(name);

@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpClient.java $
- * $Revision: 1.1.4.1 $
- * $Date: 2007-04-27 18:28:35 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-05-03 15:07:34 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -38,6 +38,8 @@ import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.protocol.BufferingHttpClientHandler;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
+import org.apache.http.nio.reactor.SessionRequest;
+import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -46,8 +48,6 @@ import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
-import org.limewire.http.HttpIOReactor;
-import org.limewire.http.HttpSessionRequest;
 
 public class HttpTestClient {
 
@@ -84,10 +84,8 @@ public class HttpTestClient {
         ioReactor.execute(ioEventDispatch);
     }
     
-    public HttpSessionRequest connect(final InetSocketAddress address, final Object attachment) {
-        HttpSessionRequest session = ioReactor.createSession(address, null, attachment);
-        ioReactor.connect(session);
-        return session;
+    public SessionRequest connect(final InetSocketAddress address, final Object attachment, SessionRequestCallback callback) {
+        return ioReactor.connect(address, null, attachment, callback);
     }
     
     public HttpParams getParams() {

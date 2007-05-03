@@ -9,10 +9,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
-public class BasicHeaderProcessorTest extends LimeTestCase {
+public class BasicHeaderProcessorTest extends BaseTestCase {
 
     public BasicHeaderProcessorTest(String name) {
         super(name);

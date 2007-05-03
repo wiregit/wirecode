@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
+import org.apache.http.impl.nio.reactor.SessionRequestImpl;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOSession;
@@ -58,34 +59,29 @@ public class HttpIOReactor implements ConnectingIOReactor {
     public void shutdown() throws IOException {
     }
 
-    public HttpSessionRequest createSession(SocketAddress remoteAddress,
-            SocketAddress localAddress, final Object attachment) {
+    public SessionRequest connect(SocketAddress remoteAddress,
+            SocketAddress localAddress, Object attachment,
+            SessionRequestCallback callback) {
         if (remoteAddress == null || (!(remoteAddress instanceof InetSocketAddress))) {
             throw new IllegalArgumentException("Unsupported address type");
         }
         
-        final HttpSessionRequest sessionRequest = new HttpSessionRequest(
-                remoteAddress, localAddress, attachment);
+        final SessionRequestImpl sessionRequest = new SessionRequestImpl(
+                remoteAddress, localAddress, attachment, callback);
+        connect(sessionRequest);
         return sessionRequest;
-    }
-    
-//    public SessionRequest connect(SocketAddress remoteAddress,
-//            SocketAddress localAddress, final Object attachment) {
-//        HttpSessionRequest sessionRequest = createSession(remoteAddress, localAddress, attachment);
-//        connect(sessionRequest);
-//        return sessionRequest;
-//    }
+    }   
 
     // FIXME move Sockets class to NIO component
-    public void connect(final HttpSessionRequest sessionRequest) {
+    protected void connect(final SessionRequestImpl sessionRequest) {
 //        try {
 //            Sockets.connect((InetSocketAddress) sessionRequest.getRemoteAddress(), 
 //                    sessionRequest.getConnectTimeout(),
 //                    new ConnectObserver() {
 //                        public void handleConnect(Socket socket) throws IOException {                          
 //                            prepareSocket(socket);
-//                            HttpIOSession session = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
-//                            sessionRequest.connected(session);
+//                            DefaultNHttpServerConnection conn = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
+//                            sessionRequest.completed((IOSession) conn.getContext().getAttribute(IO_SESSION_KEY));
 //                        }
 //
 //                        public void handleIOException(IOException e) {
@@ -94,7 +90,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
 //                        }
 //
 //                        public void shutdown() {
-//                            sessionRequest.shutdown();
+//                            sessionRequest.timedout();
 //                        }
 //
 //                    });
@@ -146,13 +142,4 @@ public class HttpIOReactor implements ConnectingIOReactor {
         }
     }
 
-    public SessionRequest connect(SocketAddress remoteAddress,
-            SocketAddress localAddress, Object attachment,
-            SessionRequestCallback callback) {
-        HttpSessionRequest sessionRequest = createSession(remoteAddress, localAddress, attachment);
-        sessionRequest.setCallback(callback);
-        connect(sessionRequest);
-        return sessionRequest;
-    }
-    
 }
