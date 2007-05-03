@@ -15,7 +15,7 @@ public final class ErrorService {
      * which prints to {@link System#out}.
 	 */
 	private static ErrorCallback _errorCallback = 
-		new PrintStreamErroCallback(System.out);
+		new PrintStreamErrorCallback(System.out);
 
 	/**
 	 * Private constructor to ensure this class cannot be instantiated.
@@ -56,14 +56,14 @@ public final class ErrorService {
 	 * Helper class that outputs the stack trace and the exception message to 
      * a {@link PrintStream}.
 	 */
-	private static class PrintStreamErroCallback implements ErrorCallback {
+	private static class PrintStreamErrorCallback implements ErrorCallback {
 		
         private final PrintStream out;
         
         /**
          * Takes a {@link PrintStream} which is used for error output. 
          */
-        public PrintStreamErroCallback(PrintStream out) {
+        public PrintStreamErrorCallback(PrintStream out) {
             this.out = out;
         }
         
