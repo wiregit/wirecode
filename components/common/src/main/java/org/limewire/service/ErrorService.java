@@ -1,5 +1,7 @@
 package org.limewire.service;
 
+import java.io.PrintStream;
+
 /**
  * Displays error messages from the core component (backend) to the gui (user).
  * <code>ErrorService</code> includes static methods to set and get an 
@@ -8,12 +10,12 @@ package org.limewire.service;
 public final class ErrorService {	
 
 	/**
-	 * The <code>ErrorCallback</code> instance that callbacks are sent to.  
-	 * <code>ShellErrorCallback</code> is the default in case
-	 * no other callback is set.
+	 * The <tt>ErrorCallback</tt> instance that callbacks are sent to.  
+	 * As a default the <tt>PrintStreamErrorCallback</tt> is set,
+     * which prints to {@link System#out}.
 	 */
 	private static ErrorCallback _errorCallback = 
-		new ShellErrorCallback();
+		new PrintStreamErroCallback(System.out);
 
 	/**
 	 * Private constructor to ensure this class cannot be instantiated.
@@ -51,10 +53,20 @@ public final class ErrorService {
 
 
 	/**
-	 * Helper class that outputs the stack trace to the shell.
+	 * Helper class that outputs the stack trace and the exception message to 
+     * a {@link PrintStream}.
 	 */
-	private static class ShellErrorCallback implements ErrorCallback {
+	private static class PrintStreamErroCallback implements ErrorCallback {
 		
+        private final PrintStream out;
+        
+        /**
+         * Takes a {@link PrintStream} which is used for error output. 
+         */
+        public PrintStreamErroCallback(PrintStream out) {
+            this.out = out;
+        }
+        
 		/**
 		 * Implements the <code>ErrorCallback</code> interface.  Prints
 		 * the stack trace for the given <code>Throwable</tt>.
@@ -62,14 +74,14 @@ public final class ErrorService {
 		 * @param t the <code>Throwable</code> to display
 		 */
 		public void error(Throwable t) {
-			t.printStackTrace();
+			t.printStackTrace(out);
 			throw new RuntimeException(t.getMessage());
 		}
 		
 		//inherit doc comment
 		public void error(Throwable t, String msg) {
-		    t.printStackTrace();
-		    System.out.println(msg);
+		    t.printStackTrace(out);
+		    out.println(msg);
 		    throw new RuntimeException(t.getMessage());
 		}
 	}
