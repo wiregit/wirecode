@@ -660,6 +660,7 @@ public class HostCatcherTest extends LimeTestCase {
     }
     
     public void testPackedIPPongsAreUsed() throws Exception {
+        ConnectionSettings.FILTER_CLASS_C.setValue(true);
         assertEquals(0, hc.getNumHosts());
         
         GGEP ggep = new GGEP(true);
@@ -759,6 +760,7 @@ public class HostCatcherTest extends LimeTestCase {
     }
     
     public void testGetDHTSupportEndpoint() throws Exception {
+        ConnectionSettings.FILTER_CLASS_C.setValue(true);
         assertEquals(0, hc.getDHTSupportEndpoint(0).size());
         
         // add a bunch of nodes from the same class C network
@@ -814,6 +816,7 @@ public class HostCatcherTest extends LimeTestCase {
     }
 
     public void testPingTagging() throws Exception {
+        ConnectionSettings.FILTER_CLASS_C.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         // tell hostcatcher about one node

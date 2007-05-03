@@ -31,7 +31,6 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -565,6 +564,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     public void testUDPPingReplies() throws Exception {
+        ConnectionSettings.FILTER_CLASS_C.setValue(true);
         ConnectionManager cm = new ConnectionManager();
         cm.initialize();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
