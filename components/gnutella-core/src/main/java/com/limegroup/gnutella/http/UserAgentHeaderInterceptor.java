@@ -4,11 +4,16 @@ import java.io.IOException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
 
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
+/**
+ * Processes the User-Agent headers from an {@link HttpRequest} and updates a
+ * corresponding {@link HTTPUploader}.
+ */
 public class UserAgentHeaderInterceptor implements HeaderInterceptor {
 
     private HTTPUploader uploader;

@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 
 import org.apache.http.Header;
 import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
 
@@ -13,6 +14,10 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
+/**
+ * Processes alternate location headers from an {@link HttpRequest} and updates
+ * a corresponding {@link HTTPUploader}.
+ */
 public class AltLocHeaderInterceptor implements HeaderInterceptor {
 
     private HTTPUploader uploader;
@@ -40,27 +45,14 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
         }
     }
 
-//    private AltLocTracker getTracker(HttpContext context, FileDetails fd) {
-//        AltLocTracker tracker = HttpContextParams.getAltLocTracker(context);
-//        if (tracker == null) {
-//            tracker = new AltLocTracker(fd.getSHA1Urn());
-//        } else {
-//            assert tracker.getUrn() == fd.getSHA1Urn();
-//        }
-//        return tracker;
-//    }
-
     /**
      * Parses the alternate location header. The header can contain only one
      * alternate location, or it can contain many in the same header. This
      * method will notify DownloadManager of new alternate locations if the
      * FileDesc is an IncompleteFileDesc.
      * 
-     * @param altLocTracker
-     * 
+     * @param altLocTracker the tracker that stores locations
      * @param altHeader the full alternate locations header
-     * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
-     *        locations should be added to
      */
     private void parseAlternateLocations(AltLocTracker tracker,
             final String alternateLocations, boolean isGood) {

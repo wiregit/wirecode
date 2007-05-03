@@ -15,6 +15,9 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 
+/**
+ * Manages a list of alternate locations.
+ */
 public class AltLocTracker {
 
     /**

@@ -4,30 +4,24 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.HttpIOSession;
 
-import com.limegroup.gnutella.FileDetails;
-
+/**
+ * Provides methods to access or modify objects stored in an {@link HttpContext}.
+ */
 public class HttpContextParams {
 
-    public final static String FILE_DETAILS = "org.limewire.filedetails";
-    
-    public final static String ALT_LOC_TRACKER = "org.limewire.altloctracker";
-
+    /** Key for the local flag. */
     public final static String LOCAL = "org.limewire.local";
 
-    public static FileDetails getFileDetails(final HttpContext context) {
-        return (FileDetails) context.getAttribute(FILE_DETAILS);
-    }
-    
-    public static void setFileDetails(final HttpContext context, final FileDetails fd) {
-        context.setAttribute(FILE_DETAILS, fd);
+    /** Key for the subsequent request flag. */
+    public final static String SUBSEQUENT_REQUEST = "org.limewire.subsequentRequest";
+
+    public static boolean isSubsequentRequest(final HttpContext context) {
+        Object o = context.getAttribute(SUBSEQUENT_REQUEST);
+        return (o != null) ? (Boolean) o : false;
     }
 
-    public static AltLocTracker getAltLocTracker(final HttpContext context) {
-        return (AltLocTracker) context.getAttribute(ALT_LOC_TRACKER);
-    }
-
-    public static void setAltLocTracker(final HttpContext context, final AltLocTracker tracker) {
-        context.setAttribute(ALT_LOC_TRACKER, tracker);
+    public static void setSubsequentRequest(final HttpContext context, final boolean local) {
+        context.setAttribute(SUBSEQUENT_REQUEST, local);
     }
 
     public static boolean isLocal(final HttpContext context) {

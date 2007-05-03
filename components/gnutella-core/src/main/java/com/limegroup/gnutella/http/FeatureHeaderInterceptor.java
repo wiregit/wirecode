@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
 import org.limewire.io.NetworkUtils;
@@ -14,6 +15,10 @@ import org.limewire.io.NetworkUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
+/**
+ * Processes Gnutella headers from an {@link HttpRequest} and updates
+ * a corresponding {@link HTTPUploader}.
+ */
 public class FeatureHeaderInterceptor implements HeaderInterceptor {
 
     private static final Log LOG = LogFactory.getLog(FeatureHeaderInterceptor.class);

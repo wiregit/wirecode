@@ -330,20 +330,30 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         public void process(HttpRequest request, HttpContext context)
                 throws HttpException, IOException {
             String method = request.getRequestLine().getMethod();
-            if (HttpContextParams.isLocal(context)) {
+            if (HttpContextParams.isSubsequentRequest(context)) {
                 if ("GET".equals(method))
-                    UploadStat.PUSHED_GET.incrementStat();
+                    UploadStat.SUBSEQUENT_GET.incrementStat();
                 else if ("HEAD".equals(method))
-                    UploadStat.PUSHED_HEAD.incrementStat();
+                    UploadStat.SUBSEQUENT_HEAD.incrementStat();
                 else
-                    UploadStat.PUSHED_UNKNOWN.incrementStat();
+                    UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
+                HttpContextParams.setSubsequentRequest(context, true);
             } else {
-                if ("GET".equals(method))
-                    HTTPStat.GET_REQUESTS.incrementStat();
-                else if ("HEAD".equals(method))
-                    HTTPStat.HEAD_REQUESTS.incrementStat();
-                else 
-                    HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+                if (HttpContextParams.isLocal(context)) {
+                    if ("GET".equals(method))
+                        UploadStat.PUSHED_GET.incrementStat();
+                    else if ("HEAD".equals(method))
+                        UploadStat.PUSHED_HEAD.incrementStat();
+                    else
+                        UploadStat.PUSHED_UNKNOWN.incrementStat();
+                } else {
+                    if ("GET".equals(method))
+                        HTTPStat.GET_REQUESTS.incrementStat();
+                    else if ("HEAD".equals(method))
+                        HTTPStat.HEAD_REQUESTS.incrementStat();
+                    else 
+                        HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+                }
             }
         }
         
