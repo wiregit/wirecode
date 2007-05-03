@@ -439,7 +439,7 @@ public class DHTManagerImpl implements DHTManager {
                   }
                   for(long load : popularKeys.keySet()) {
                       ret.add(BigInteger.valueOf(load).toByteArray());
-                      ret.add(popularKeys.get(load).toBigInteger().toByteArray());
+                      ret.add(popularKeys.get(load).getBytes());
                       if (ret.size() >= 20)
                           break;
                   }
