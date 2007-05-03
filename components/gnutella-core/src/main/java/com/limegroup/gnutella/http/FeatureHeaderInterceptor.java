@@ -74,7 +74,7 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             }
 
             uploader.setChatEnabled(true);
-            uploader.setBrowseEnabled(true);
+            uploader.setBrowseHostEnabled(true);
             uploader.setGnutellaPort(port);
         }
         
@@ -253,7 +253,7 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             if (protocol.equals(HTTPConstants.CHAT_PROTOCOL))
                 uploader.setChatEnabled(true);
             else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
-                uploader.setBrowseEnabled(true);
+                uploader.setBrowseHostEnabled(true);
             else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
                 uploader.setSupportsQueueing(true);
             else if (protocol.equals(HTTPConstants.PUSH_LOCS))

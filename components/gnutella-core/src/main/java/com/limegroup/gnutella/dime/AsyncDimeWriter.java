@@ -12,7 +12,8 @@ import org.limewire.nio.statemachine.WriteState;
 import com.limegroup.gnutella.connection.MessageWriter;
 
 /**
- * Based on {@link MessageWriter}.
+ * Uses NIO to write a list of {@link DIMERecord} objects to a channel. Based on
+ * {@link MessageWriter}.
  */
 public class AsyncDimeWriter extends WriteState {
     

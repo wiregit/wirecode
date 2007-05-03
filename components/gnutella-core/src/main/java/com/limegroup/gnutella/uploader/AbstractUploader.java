@@ -48,7 +48,7 @@ public abstract class AbstractUploader implements Uploader {
 
     private boolean chatEnabled;
 
-    private boolean browseEnabled;
+    private boolean browseHostEnabled;
 
     /**
      * True if this is a forcibly shared network file.
@@ -63,7 +63,7 @@ public abstract class AbstractUploader implements Uploader {
     /** The descriptor of the file being uploaded. */
     private FileDesc fileDesc;
 
-    int index;
+    private int index;
     
     private int port = -1;
 
@@ -168,47 +168,38 @@ public abstract class AbstractUploader implements Uploader {
         }
     }
 
-    // implements the Uploader interface
     public long getFileSize() {
         return fileSize;
     }
 
-    // implements the Uploader interface
     public int getIndex() {
         return index;
     }
 
-    // implements the Uploader interface
     public String getFileName() {
         return this.filename;
     }
 
-    // implements the Uploader interface
     public int getState() {
         return state;
     }
 
-    // implements the Uploader interface
     public int getLastTransferState() {
         return lastTransferState;
     }
 
-    // implements the Uploader interface
     public String getHost() {
         return session.getHost();
     }
 
-    // implements the Uploader interface
     public boolean isChatEnabled() {
         return chatEnabled;
     }
 
-    // implements the Uploader interface
     public boolean isBrowseHostEnabled() {
-        return browseEnabled;
+        return browseHostEnabled;
     }
 
-    // implements the Uploader interface
     public int getGnutellaPort() {
         return port;
     }
@@ -221,13 +212,12 @@ public abstract class AbstractUploader implements Uploader {
         return forcedShare;
     }
 
-    // uploader with high priority?
     public boolean isPriorityShare() {
         return priorityShare;
     }
 
     /**
-     * Returns true, if this is this Uploader represents the first request.
+     * Returns true, if this is this uploader represents the first request.
      */
     protected boolean isFirstReply() {
         return firstReply;
@@ -272,48 +262,91 @@ public abstract class AbstractUploader implements Uploader {
         return uploadType;
     }
 
+    /**
+     * Sets the type returned by {@link #getUploadType()}.
+     */
     public void setUploadType(UploadType type) {
         uploadType = type;
     }
 
-    public void setBrowseEnabled(boolean browseEnabled) {
-        this.browseEnabled = browseEnabled;
+    /**
+     * Sets the flag returned by {@link #isBrowseHostEnabled()}.
+     */
+    public void setBrowseHostEnabled(boolean browseHostEnabled) {
+        this.browseHostEnabled = browseHostEnabled;
     }
 
+    /**
+     * Sets the flag returned by {@link #isChatEnabled()}.
+     */
     public void setChatEnabled(boolean chatEnabled) {
         this.chatEnabled = chatEnabled;
     }
 
+    /**
+     * Sets the port returned by {@link #getGnutellaPort()}.
+     */
     public void setGnutellaPort(int port) {
         this.port = port;
     }
 
+    /**
+     * Sets the amount uploaded in previous sessions. If
+     * <code>totalAmountReadBefore</code> is != 0,
+     * {@link #getTotalAmountUploaded()} will use that value to calculate the
+     * total amount uploaded instead of relying on the value maintained by this
+     * uploader.
+     */
     public void setTotalAmountUploadedBefore(int totalAmountReadBefore) {
         this.totalAmountUploadedBefore = totalAmountReadBefore;
     }
 
+    /**
+     * Sets the user agent returned by {@link #getUserAgent()}.
+     */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
 
+    @Override
     public String toString() {
         return getClass().getName() + "[host=" + getHost() + ",index=" + index
                 + ",filename=" + filename + ",state=" + state
                 + ",lastTransferState=" + lastTransferState + "]";
     }
 
+    /**
+     * Returns the upload session that is associated with the connection.
+     */
     public UploadSession getSession() {
         return session;
     }
 
+    /**
+     * Returns the file size returned by {@link #getFileSize()}.
+     */
     public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 
+    /**
+     * Returns true, if the amount uploaded in previous sessions is not returned
+     * by {@link #getTotalAmountUploaded()}.
+     * 
+     * @see #setIgnoreTotalAmountUploaded(boolean)
+     */
     public boolean getIgnoreTotalAmountUploaded() {
         return ignoreTotalAmountUploaded;
     }
 
+    /**
+     * If set to true, the amount uploaded in previous sessions is not returned
+     * by {@link #getTotalAmountUploaded()}.
+     * <p>
+     * Note: This is reset to <code>false</code> by {@link #reinitialize()}.
+     * 
+     * @see #getIgnoreTotalAmountUploaded()
+     */
     public void setIgnoreTotalAmountUploaded(boolean ignoreTotalAmountUploaded) {
         this.ignoreTotalAmountUploaded = ignoreTotalAmountUploaded;
     }
