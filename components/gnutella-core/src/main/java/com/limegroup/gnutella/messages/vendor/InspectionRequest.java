@@ -20,8 +20,10 @@ public class InspectionRequest extends VendorMessage {
     
     private static final int VERSION = 1;
     static final String INSPECTION_KEY = "I";
+    static final String TIMESTAMP_KEY = "T";
 
     private final String[] requested;
+    private final boolean timestamp;
     
     public InspectionRequest(byte[] guid, byte ttl, byte hops, 
             int version, byte[] payload, int network)
@@ -31,6 +33,7 @@ public class InspectionRequest extends VendorMessage {
         try {
             GGEP ggep = new GGEP(payload,0,null);
             requested = ggep.getString(INSPECTION_KEY);
+            timestamp = ggep.hasKey(TIMESTAMP_KEY);
         } catch (BadGGEPBlockException bad) {
             throw new BadPacketException();
         } catch (BadGGEPPropertyException bad) {
@@ -41,20 +44,26 @@ public class InspectionRequest extends VendorMessage {
     }
     
     /**
+     * @param timestamp true if the response should contain a timestamp.
      * @param requested requested fields for inspection.  
      * See <tt>InspectionUtils</tt> for description of the format.
      */
-    public InspectionRequest(String... requested) {
+    public InspectionRequest(boolean timestamp,String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
-                derivePayload(requested));
+                derivePayload(timestamp, requested));
         this.requested = requested;
+        this.timestamp = timestamp;
     }
 
     public String[] getRequestedFields() {
         return requested;
     }
     
-    private static byte [] derivePayload(String... requested) {
+    public boolean requestsTimeStamp() {
+        return timestamp;
+    }
+    
+    private static byte [] derivePayload(boolean timestamp, String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.
@@ -70,6 +79,8 @@ public class InspectionRequest extends VendorMessage {
         
         GGEP g = new GGEP();
         g.putCompressed(INSPECTION_KEY, ret.getBytes());
+        if (timestamp)
+            g.put(TIMESTAMP_KEY);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             g.write(baos);

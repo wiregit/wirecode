@@ -34,11 +34,15 @@ public class InspectionResponse extends VendorMessage {
     private static byte[] derivePayload(InspectionRequest request) {
         /*
          * The format is a deflated bencoded mapping from
-         * the inspected fields to their values.
+         * the indices of the inspected fields to their values.
          */
         String [] requested = request.getRequestedFields();
         Map<Integer, Object> responses = 
             new HashMap<Integer, Object>(requested.length);
+        
+        // if a timestamp was requested, it is put under the "-1" key.
+        if (request.requestsTimeStamp())
+            responses.put(-1,System.currentTimeMillis());
         
         for (int i = 0; i < requested.length; i++) {
             try {
@@ -48,6 +52,7 @@ public class InspectionResponse extends VendorMessage {
         
         if (responses.isEmpty())
             return DataUtils.EMPTY_BYTE_ARRAY;
+        
         
         // since the inspected values may contain any character, bencoding is safest
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
