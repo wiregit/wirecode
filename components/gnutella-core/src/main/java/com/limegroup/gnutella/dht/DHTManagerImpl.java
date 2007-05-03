@@ -475,19 +475,25 @@ public class DHTManagerImpl implements DHTManager {
     }
     
     /**
-     * the a specified quartile of a list of BigIntegers. 
+     * the a specified quartile of a list of BigIntegers. It uses
+     * type 6 of the quantile() function in R as explained in the
+     * R help: 
+     * 
+     * "Type 6: p(k) = k / (n + 1). Thus p(k) = E[F(x[k])]. 
+     * This is used by Minitab and by SPSS." 
      */
     private static BigInteger getQuartile(int quartile, List<BigInteger> l) {
         double q1 = (l.size()+1) * (quartile / 4.0);
         int q1i = (int)q1;
         if (q1 - q1i == 0) 
             return l.get(q1i - 1);
-        int quart = (int)(1 / (q1 - q1i));
+        
+        int quart = (int)(4 * (q1 - q1i));
         BigInteger q1a = l.get(q1i - 1);
         BigInteger q1b = l.get(q1i);
         q1b = q1b.subtract(q1a);
-        q1b = q1b.divide(BigInteger.valueOf(4));
-        q1b = q1b.multiply(BigInteger.valueOf(quart));
+        q1b = q1b.multiply(BigInteger.valueOf(quart)); //1st multiply, then divide
+        q1b = q1b.divide(BigInteger.valueOf(4)); // less precision is lost that way
         q1a = q1a.add(q1b);
         return q1a;
     }
