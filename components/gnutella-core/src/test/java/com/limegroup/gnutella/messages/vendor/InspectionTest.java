@@ -74,18 +74,27 @@ public class InspectionTest extends ServerSideTestCase {
     public void testInspection() throws Exception {
         inspectedValue = "a";
         otherValue = "b";
-        InspectionRequest request = new InspectionRequest(
+        InspectionRequest request = new InspectionRequest(false,
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
         Map response = tryMessage(request);
         assertEquals(1, response.size());
         assertEquals("a",new String((byte[])response.get("0")));
-        
+        request = new InspectionRequest(true,
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
+        response = tryMessage(request);
+        assertEquals(2, response.size());
+        Thread.sleep(20);
+        long timestamp = Long.valueOf(response.get("-1").toString());
+        assertLessThan(System.currentTimeMillis(), timestamp);
+        assertGreaterThan(System.currentTimeMillis() - 100, timestamp);
     }
 
     public void testEmpty() throws Exception {
-        InspectionRequest request = new InspectionRequest(
+        InspectionRequest request = new InspectionRequest(false,
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
         try {
             tryMessage(request);
@@ -94,7 +103,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     
     public void testDynamicQuerying() throws Exception {
-        InspectionRequest request = new InspectionRequest(
+        InspectionRequest request = new InspectionRequest(false,
                 "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,QUERIES",
                 "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,NEW_QUERIES",
                 "com.limegroup.gnutella.search.QueryDispatcher,INSTANCE,_active");
@@ -132,7 +141,7 @@ public class InspectionTest extends ServerSideTestCase {
     public void testBEncoded() throws Exception {
         BEObject valid = new BEObject();
         BEObject.self = valid;
-        InspectionRequest request = new InspectionRequest("com.limegroup.gnutella.messages.vendor.BEObject,self");
+        InspectionRequest request = new InspectionRequest(false,"com.limegroup.gnutella.messages.vendor.BEObject,self");
         Map m = tryMessage(request);
         assertEquals(1, m.size());
         Map contained = (Map)m.get("0");
@@ -149,7 +158,7 @@ public class InspectionTest extends ServerSideTestCase {
         ULTRAPEER[0].flush();
         
         // send an inspection request
-        InspectionRequest request = new InspectionRequest("com.limegroup.gnutella.LegacyConnectionStats,UP",
+        InspectionRequest request = new InspectionRequest(false,"com.limegroup.gnutella.LegacyConnectionStats,UP",
                 "com.limegroup.gnutella.LegacyConnectionStats,LEAF");
         Map m = tryMessage(request);
         Map leafs = (Map) m.get("1");
