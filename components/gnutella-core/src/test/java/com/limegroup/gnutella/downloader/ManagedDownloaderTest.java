@@ -432,17 +432,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 						 SaveLocationException.NOT_A_DIRECTORY,
 						 sle.getErrorCode());
 		}
-		try {
-			new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					null, "./", false);
-			fail("No exception thrown");
-		}
-		catch (SaveLocationException sle) {
-			assertEquals("Error code should be: file not regular",
-						 SaveLocationException.FILE_NOT_REGULAR,
-						 sle.getErrorCode());
-		}
+        // we force filename normalization
+		new ManagedDownloader(rfds,
+		        new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+		        null, "./", false);
+		
 		try {
 			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
