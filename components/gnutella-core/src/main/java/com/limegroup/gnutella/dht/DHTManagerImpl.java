@@ -394,7 +394,8 @@ public class DHTManagerImpl implements DHTManager {
                         for (KUID primaryKey : keys) {
                             primaryKeys.add(primaryKey.toBigInteger());
                             
-                            long load = (long)(database.getRequestLoad(primaryKey, false) * 100f);
+                            long load = (long)(database.getRequestLoad(primaryKey, false) 
+                                                    * (double)Integer.MAX_VALUE);
                             requestLoads.add(BigInteger.valueOf(load));
                         }
                     }
