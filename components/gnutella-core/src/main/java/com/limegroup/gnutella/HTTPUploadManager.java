@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
@@ -204,17 +203,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         uploader.setState(Uploader.FREELOADER);
         freeLoaderRequestHandler.handle(request, response, context);
-    }
-
-    /**
-     * Push uploads from firewalled clients.
-     */
-    public void acceptUpload(Socket socket, boolean lan) {
-        if (lan) {
-            acceptor.acceptLocalConnection(socket);
-        } else {
-            acceptor.acceptConnection(null, socket);
-        }
     }
 
     /**

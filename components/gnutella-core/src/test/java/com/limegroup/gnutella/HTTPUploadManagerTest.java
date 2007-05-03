@@ -81,7 +81,7 @@ public class HTTPUploadManagerTest extends LimeTestCase {
         File targetFile = new File(_settingsDir, "update.xml");
         CommonUtils.copyResourceFile(testDirName + "/update.xml", targetFile);
 
-        upMan = RouterService.getUploadManager();
+        upMan = (HTTPUploadManager) RouterService.getUploadManager();
         upMan.cleanup();
 
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();

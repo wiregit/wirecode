@@ -9,7 +9,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -956,6 +958,41 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
             //  revert the os.name system property back to normal 
             setOSName(realOS);
         }
+    }
+    
+    public void testGetIndexingIterator() throws Exception {
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        waitForLoad();
+        f3 = createNewTestFile(11);
+
+        assertEquals(2, fman.getNumFiles());
+        Iterator<Response> it = fman.getIndexingIterator(false);
+        Response response = it.next();
+        assertEquals(response.getName(), f1.getName());
+        assertNull(response.getDocument());
+        response = it.next();
+        assertEquals(response.getName(), f2.getName());
+        assertNull(response.getDocument());
+        assertFalse(it.hasNext());
+        try {
+            response = it.next();
+            fail("Expected NoSuchElementException, got: " + response);
+        } catch (NoSuchElementException e) {
+        }
+        
+        it = fman.getIndexingIterator(false);
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        it.next();
+        fman.removeFileIfShared(f2);
+        assertFalse(it.hasNext());
+
+        it = fman.getIndexingIterator(true);
+        response = it.next();
+        assertNotNull(response.getDocument());
+        assertFalse(it.hasNext());
     }
     
     /**

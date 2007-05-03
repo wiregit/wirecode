@@ -1,10 +1,10 @@
 package com.limegroup.gnutella;
 
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectableChannel;
 import java.util.Arrays;
@@ -52,7 +52,6 @@ import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -86,7 +85,6 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
-
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -186,7 +184,7 @@ public class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static HTTPUploadManager uploadManager = 
+    private static UploadManager uploadManager = 
     	new HTTPUploadManager(httpUploadAcceptor, uploadSlotManager);
     
     /**
@@ -786,12 +784,23 @@ public class RouterService {
         return httpUploadAcceptor;
     }
 
+    /**
+     * Push uploads from firewalled clients.
+     */
+    public static void acceptUpload(Socket socket, boolean lan) {
+        if (lan) {
+            getHTTPUploadAcceptor().acceptLocalConnection(socket);
+        } else {
+            getHTTPUploadAcceptor().acceptConnection(null, socket);
+        }
+    }
+    
     /** 
      * Accessor for the <tt>UploadManager</tt> instance.
      *
      * @return the <tt>UploadManager</tt> in use
      */
-	public static HTTPUploadManager getUploadManager() {
+	public static UploadManager getUploadManager() {
 		return uploadManager;
 	}
 

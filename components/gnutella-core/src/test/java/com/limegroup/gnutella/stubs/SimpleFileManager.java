@@ -14,12 +14,26 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public class SimpleFileManager extends FileManager {
     
+    private static LimeXMLDocument document;
+    
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
         return false;
     }
     
     public void addXMLToResponse(Response r, FileDesc fd) {
-        ;
+        if (document == null) {
+            try {
+                document = new LimeXMLDocument(
+                        "<?xml version=\"1.0\"?>"+
+                        "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
+                        "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+                        "</audios>");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        r.setDocument(document);
     }
     
     public void fileChanged(File f) {

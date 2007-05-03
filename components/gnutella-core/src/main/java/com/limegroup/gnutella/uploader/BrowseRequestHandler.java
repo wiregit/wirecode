@@ -29,9 +29,9 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
- * Responds to Gnutella browse requests. Only supports the
- * application/x-gnutella-packets mime-type, browsing through HTML is not
- * supported.
+ * Responds to Gnutella browse requests by returning a list of all shared files.
+ * Only supports the application/x-gnutella-packets mime-type, browsing through
+ * HTML is not supported.
  */
 public class BrowseRequestHandler implements HttpRequestHandler {
 

@@ -2,14 +2,27 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
-import com.limegroup.gnutella.uploader.UploadSlotManager;
-
+/**
+ * Defines the requirements for classes that manage Gnutella uploads. 
+ */
 public interface UploadManager extends BandwidthTracker {
-    
+
+    /**
+     * Return the last value that was measured by
+     * {@link BandwidthTracker#getMeasuredBandwidth()}.
+     * 
+     * @return bandwidth in KB / s
+     */
     float getLastMeasuredBandwidth();
 
+    /**
+     * Returns the number of queued uploads.
+     */
     int getNumQueuedUploads();
 
+    /**
+     * Returns the number of uploads excluding forced uploads. 
+     */
     int uploadsInProgress();
 
     /**
@@ -26,6 +39,9 @@ public interface UploadManager extends BandwidthTracker {
      */
     boolean hasActiveInternetTransfers();
 
+    /**
+     * Returns true if any uploader is conneected to <code>addr</code>.  
+     */
     boolean isConnectedTo(InetAddress addr);
 
     /**
@@ -54,6 +70,4 @@ public interface UploadManager extends BandwidthTracker {
      */
     int measuredUploadSpeed();
     
-    UploadSlotManager getSlotManager();
-
 }

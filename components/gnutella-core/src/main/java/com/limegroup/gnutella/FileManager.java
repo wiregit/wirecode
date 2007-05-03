@@ -2125,8 +2125,8 @@ public abstract class FileManager {
         return ret;
     }
 
-    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
-     *  files of this client.
+    /** 
+     * 
      */
     public Iterator<Response> getIndexingIterator(final boolean includeXML) {
         //Extract responses for all non-null (i.e., not deleted) files.
@@ -2134,6 +2134,7 @@ public abstract class FileManager {
         //to work as the expected size of ret.
         return new Iterator<Response>() {
             int startRevision = _revision;
+            /** Points to the index that is to be examined next. */
             int index = 0;
             Response preview;
             
@@ -2164,6 +2165,18 @@ public abstract class FileManager {
             }
             
             public boolean hasNext() {
+                if (_revision != startRevision) {
+                    return false;
+                }
+
+                if (preview != null) {
+                    synchronized (FileManager.this) {
+                        if (_files.get(index - 1) == null) {
+                            // file was removed in the meantime
+                            preview = null;
+                        }
+                    }
+                }
                 return preview != null || preview();
             }
 

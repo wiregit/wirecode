@@ -210,7 +210,7 @@ public final class PushManager {
 //                    UploadStat.PUSH_FAILED.incrementStat();
 //                }
 
-            RouterService.getUploadManager().acceptUpload(socket, data.isLan());
+            RouterService.acceptUpload(socket, data.isLan());
             return false;
         }
 

@@ -439,11 +439,10 @@ public class UploaderTest extends LimeTestCase {
             fail("unable to create piped socket factory", e);
         }
         final Socket sa = psf.getSocketA();
-        final HTTPUploadManager upman = upManager;
         Thread t = new Thread() {
             public void run() {
                 try {
-                    upman.acceptUpload(sa, false);
+                    RouterService.acceptUpload(sa, false);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -1082,7 +1081,7 @@ public class UploaderTest extends LimeTestCase {
 //                    assertEquals('E', ia.read());
 //                    assertEquals('T', ia.read());
 //                    assertEquals(' ', ia.read());
-                    upman.acceptUpload(sa, false);
+                    RouterService.acceptUpload(sa, false);
                 } catch(Throwable t) {
                     // make sure we know about errors.
                     ErrorService.error(t);

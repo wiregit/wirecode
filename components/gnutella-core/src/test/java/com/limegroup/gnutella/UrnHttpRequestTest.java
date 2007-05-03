@@ -233,7 +233,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 	private void sendRequestThatShouldSucceed(HttpRequest request, 
 											  FileDesc fd) throws Exception {
 	    HttpResponse response = RouterService.getHTTPUploadAcceptor().process(request);
-	    RouterService.getUploadManager().cleanup();
+	    ((HTTPUploadManager)RouterService.getUploadManager()).cleanup();
 	    assertEquals(200, response.getStatusLine().getStatusCode());
 	       
 		boolean contentUrnHeaderPresent = false;
