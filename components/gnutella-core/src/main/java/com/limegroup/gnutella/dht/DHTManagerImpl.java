@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
+import org.limewire.collection.Comparators;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
@@ -271,9 +273,16 @@ public class DHTManagerImpl implements DHTManager {
     /** a bunch of inspectables */
     private class DHTInspectables {
         
+        private static final int VERSION = 1;
+        
+        private void addVersion(Map<String, Object> m) {
+            m.put("sv",VERSION);
+        }
+        
         public Inspectable general = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
                 DHTMode mode = getDHTMode();
                 Version version = getVersion();
                 data.put("mode", Byte.valueOf(mode.byteValue())); // 4
@@ -292,6 +301,7 @@ public class DHTManagerImpl implements DHTManager {
         public Inspectable contacts = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     RouteTable routeTable = dht.getRouteTable();
@@ -313,6 +323,7 @@ public class DHTManagerImpl implements DHTManager {
         public Inspectable buckets = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     RouteTable routeTable = dht.getRouteTable();
@@ -377,6 +388,7 @@ public class DHTManagerImpl implements DHTManager {
         public Inspectable database = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     Database database = dht.getDatabase();
@@ -407,6 +419,33 @@ public class DHTManagerImpl implements DHTManager {
                 }
                 return data;
             }
+        };
+        
+        public Inspectable databaseTop10Keys = new Inspectable() {
+          public Object inspect() {
+              List<byte[]>ret = new ArrayList<byte[]>();
+              MojitoDHT dht = getMojitoDHT();
+              if (dht != null) {
+                  Database database = dht.getDatabase();
+                  Map<Long, KUID> popularKeys = 
+                      new TreeMap<Long,KUID>(Comparators.inverseLongComparator());
+                  synchronized(database) {
+                      Set<KUID> keys = database.keySet();
+                      for (KUID primaryKey : keys) {
+                          long load = (long)
+                          (database.getRequestLoad(primaryKey, false) * (double)Integer.MAX_VALUE);
+                          popularKeys.put(load, primaryKey);
+                      }
+                  }
+                  for(long load : popularKeys.keySet()) {
+                      ret.add(BigInteger.valueOf(load).toByteArray());
+                      ret.add(popularKeys.get(load).toBigInteger().toByteArray());
+                      if (ret.size() >= 20)
+                          break;
+                  }
+              }
+              return ret;
+          }
         };
     }
     
