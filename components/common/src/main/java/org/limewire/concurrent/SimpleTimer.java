@@ -12,10 +12,10 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * An extension for Timer, allowing users to schedule Runnables instead
- * of TimerTasks.
+ * An extension for {@link Timer}, allowing you to schedule a {@link Runnable} task instead
+ * of scheduling a {@link TimerTask}.
  *
- * This does not expose the methods for scheduling at fixed rates.
+ * <code>SimpleTimer</code> does not expose the methods for scheduling at fixed rates.
  */
 public class SimpleTimer implements SchedulingThreadPool {
     
@@ -33,7 +33,7 @@ public class SimpleTimer implements SchedulingThreadPool {
     private final Timer TIMER;
     
     /**
-     * Whether or not we actively cancelled the timer.
+     * Whether or not we actively canceled the timer.
      */
     private volatile boolean cancelled = false;
     
@@ -53,7 +53,7 @@ public class SimpleTimer implements SchedulingThreadPool {
      * @param delay the initial delay, in milliseconds
      * @param period the delay between executions, in milliseconds
      *  or zero if it should not be rescheduled
-     * @exception IllegalStateException this is cancelled
+     * @exception IllegalStateException this is canceled
      * @exception IllegalArgumentException delay or period negative
      * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
      */
@@ -80,14 +80,13 @@ public class SimpleTimer implements SchedulingThreadPool {
             else
                 TIMER.schedule(tt, delay, period);
         } catch(IllegalStateException ise) {
-            // swallow ISE's if the Timer cancelled itself.
+            // swallow ISE's if the Timer canceled itself.
             if(cancelled)
                 throw ise;
         }
         
         return tt;
     }      
-
     public void invokeLater(Runnable r) {
     	schedule(r, 0, 0);
     }

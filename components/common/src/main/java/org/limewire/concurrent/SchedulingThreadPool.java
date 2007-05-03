@@ -1,8 +1,13 @@
 package org.limewire.concurrent;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
-/** A bare-boned version of ScheduledExecutorService */
+/** 
+ *                      
+ * Defines a simplified {@link ScheduledExecutorService} to schedule tasks to 
+ * execute immediately or after a delay.
+ */
 public interface SchedulingThreadPool {
     /** Invokes the task as soon as possible. */
     public void invokeLater(Runnable r);

@@ -1,8 +1,9 @@
 package org.limewire.service;
 
 /**
- * Implementation of the <tt>MessageService</tt> interface for displaying 
- * messages to the user.
+ * Displays messages to the user. <code>MessageService</code> includes
+ * static methods to set the {@link MessageCallback}, and to display 
+ * formatted and unformatted error messages.
  */
 public class MessageService {
 
@@ -159,7 +160,7 @@ public class MessageService {
             System.out.println("error key: "+messageKey);
         }
 
-        // Inherit doc domment.        
+        // Inherit doc comment.        
         public void showError(String messageKey, Switch ignore) {
             showError(messageKey);
         }

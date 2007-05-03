@@ -1,15 +1,15 @@
 package org.limewire.service;
 
 /**
- * This class handles displaying errors from the backend to the user.
- * The method to set the callback must be called immediately to allow
- * the backend to use this service during construction time.
+ * Displays error messages from the core component (backend) to the gui (user).
+ * <code>ErrorService</code> includes static methods to set and get an 
+ * {@link ErrorCallback} and to display generic and more specific error messages.
  */
 public final class ErrorService {	
 
 	/**
-	 * The <tt>ErrorCallback</tt> instance that callbacks are sent to.  
-	 * We use the <tt>ShellErrorCallback</tt> as the default in case
+	 * The <code>ErrorCallback</code> instance that callbacks are sent to.  
+	 * <code>ShellErrorCallback</code> is the default in case
 	 * no other callback is set.
 	 */
 	private static ErrorCallback _errorCallback = 
@@ -28,7 +28,7 @@ public final class ErrorService {
 	}
 	
 	/**
-	 * Gets the <tt>ErrorCallback</tt> currently in use.
+	 * Gets the <code>ErrorCallback</code> currently in use.
 	 */
 	public static ErrorCallback getErrorCallback() {
 	    return _errorCallback;
@@ -51,15 +51,15 @@ public final class ErrorService {
 
 
 	/**
-	 * Helper class that simply outputs the stack trace to the shell.
+	 * Helper class that outputs the stack trace to the shell.
 	 */
 	private static class ShellErrorCallback implements ErrorCallback {
 		
 		/**
-		 * Implements the <tt>ErrorCallback</tt> interface.  Simply prints
-		 * out the stack trace for the given <tt>Throwable</tt>.
+		 * Implements the <code>ErrorCallback</code> interface.  Prints
+		 * the stack trace for the given <code>Throwable</tt>.
 		 *
-		 * @param t the <tt>Throwable</tt> to display
+		 * @param t the <code>Throwable</code> to display
 		 */
 		public void error(Throwable t) {
 			t.printStackTrace();

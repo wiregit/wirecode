@@ -3,6 +3,9 @@ package org.limewire.concurrent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * Creates and runs threads.
+ */
 
 public class ThreadExecutor {
     
