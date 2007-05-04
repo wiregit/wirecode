@@ -25,6 +25,7 @@ import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiCollection;
 import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.ByteOrder;
@@ -1019,6 +1020,7 @@ public abstract class FileManager {
 	 * Always shares the given file.
 	 */
 	public void addFileAlways(File file) {
+        System.out.println(this._keywordTrie);
 		addFileAlways(file, EMPTY_DOCUMENTS, null);
 	}
 	
@@ -2371,4 +2373,32 @@ public abstract class FileManager {
             buildInProgress = false;
         }
     }
+    
+    /** An inspectable that returns some info about the QRP */
+    public final Inspectable QRP = new Inspectable() {
+        public Object inspect() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver",1);
+            
+            
+            // create a small qrt that can fit in an udp packet when compressed
+            // yet is only 1/4 of the size of the "production" one
+            QueryRouteTable qrt = new QueryRouteTable(2 * 8 * 1024); //2kb 
+            synchronized(FileManager.this) {
+                FileDesc[] fds = getAllSharedFileDescriptors();
+                for(int i = 0; i < fds.length; i++) {
+                    if (fds[i] instanceof IncompleteFileDesc)
+                        continue;
+                    
+                    qrt.add(fds[i].getPath());
+                }
+                // also return % full the production qrp is so we have an idea
+                // how much accuracy was lost
+                ret.put("pf", (long)(_queryRouteTable.getPercentFull() * Integer.MAX_VALUE));
+            }
+            ret.put("qrt",qrt.getRawDump());
+            
+            return ret;
+        }
+    };
 }

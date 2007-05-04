@@ -678,6 +678,15 @@ public class QueryRouteTable {
         }
     }
 
+    /**
+     * @return a byte[] copy of this routing table.  
+     */
+    public byte [] getRawDump() {
+        byte [] ret = new byte[bitTableLength / 8];
+        for(int i = bitTable.nextSetBit(0); i >= 0; i = bitTable.nextSetBit(i+1)) 
+            ret[i / 8] = (byte) (ret[i / 8] | (1 << (7 - i % 8)));
+        return ret;
+    }
     
     /** Returns an array R of length array.length/2, where R[i] consists of the
      *  low nibble of array[2i] concatentated with the low nibble of array[2i+1].
