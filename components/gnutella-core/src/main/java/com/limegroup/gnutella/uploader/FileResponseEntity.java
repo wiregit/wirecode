@@ -126,7 +126,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             }
             
             if (LOG.isTraceEnabled())
-                LOG.debug("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
+                LOG.trace("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
 
             written = write(buffer);
             uploader.addAmountUploaded(written);

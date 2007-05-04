@@ -32,7 +32,6 @@ import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSession;
-import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
@@ -123,10 +122,14 @@ public class UploaderTest extends LimeTestCase {
         
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
-        upManager = new HTTPUploadManager(new HTTPAcceptor(), new UploadSlotManager());
-
+        //UploadSlotManager slotManager = new UploadSlotManager();
+        //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
+        upManager = (HTTPUploadManager) RouterService.getUploadManager();
+        upManager.cleanup();
+        
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
-        PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
+        //PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
+        //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
 
         fm.get(0);
     }
@@ -173,6 +176,7 @@ public class UploaderTest extends LimeTestCase {
         d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1, true, rfd1, true);
         assertEquals(1, auth.getSent().size()); // didn't send again.
+        kill(d1);
     }
     
     /**
