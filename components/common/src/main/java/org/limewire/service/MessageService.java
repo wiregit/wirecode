@@ -1,9 +1,10 @@
 package org.limewire.service;
 
 /**
- * Displays messages to the user. <code>MessageService</code> includes
- * static methods to set the {@link MessageCallback}, and to display 
- * formatted and unformatted error messages.
+ * Forwards messages to a {@link MessageCallback}. <code>MessageService</code> 
+ * includes static methods to set the <code>MessageCallback</code>, and to send 
+ * formatted and unformatted error messages (an unformatted message 
+ * accepts arbitrary parameters). 
  */
 public class MessageService {
 

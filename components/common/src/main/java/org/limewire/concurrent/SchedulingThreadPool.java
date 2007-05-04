@@ -4,9 +4,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 /** 
- *                      
- * Defines a simplified {@link ScheduledExecutorService} to schedule tasks to 
- * execute immediately or after a delay.
+ * Defines the interface for a class to schedule tasks to execute immediately or
+ * after a delay; <code>SchedulingThreadPool</code> is a bare bones of
+ * {@link ScheduledExecutorService}.
  */
 public interface SchedulingThreadPool {
     /** Invokes the task as soon as possible. */

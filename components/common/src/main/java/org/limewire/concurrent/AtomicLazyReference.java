@@ -2,8 +2,12 @@ package org.limewire.concurrent;
 
 /**
  * Provides a reference to an object that is created when first
- * needed. An abstract class, <code>AtomicLazyReference</code> defines
- * a method to retrieve and create an instance of an object T. For more 
+ * needed. An abstract class, <code>AtomicLazyReference</code> includes an 
+ * implementation to retrieve an object T. You must
+ * implement {@link #createObject()} in a subclass.
+ * 
+ * 
+ * For more 
  * information see <a href="http://en.wikipedia.org/wiki/Lazy_initialization">
  * Lazy initialization</a>.
  */

@@ -12,10 +12,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * A factory that builds {@link ExecutorService}, {@link ThreadFactory}
  * and {@link ScheduledExecutorService} objects via static methods.
- * 
- * <code>ExecutorsHelper</code> is differs from {@link Executors} since 
+ * <p>
+ * <code>ExecutorsHelper</code> differs from {@link Executors} since 
  * <code>ExecutorsHelper</code> returns the thread factory for daemon threads
- * and creates non-fixed sized thread pools.
+ * and creates non-fixed size thread pools. Additionally, 
+ * <code>ExecutorsHelper</code> guarantees the returned <code>ExeuctorService
+ * </code> will allow worker threads to expire. On the other hand, 
+ * <code>Executors</code> create <code>ExecutorService</code>s whose core-pool
+ * of worker threads never die.
  */
 public class ExecutorsHelper {
         
@@ -27,7 +31,6 @@ public class ExecutorsHelper {
      * 
      * @param name the name of the processing thread that is created 
      * with the daemon thread factory.
-     * @return ExecutorService
      */
     public static ExecutorService newProcessingQueue(String name) {
         return newProcessingQueue(daemonThreadFactory(name));
@@ -36,23 +39,22 @@ public class ExecutorsHelper {
     /**
      * Creates a new "ProcessingQueue".
      * 
-     * A <code>ProcessingQueue</code> is an <code>ExecutorService that will process all Runnables/
-     * Callables sequentially, creating one thread for processing when it needs
-     * it.
+     * A <code>ProcessingQueue</code> is an <code>ExecutorService</code> that 
+     * will process all Runnables/Callables sequentially, creating one thread 
+     * for processing when it needs it.
      * 
      * See {@link #newSingleThreadExecutor(ThreadFactory)}.
      * 
      * @param factory the factory used for creating a new processing thread 
-     * @return ExecutorService
      */
     public static ExecutorService newProcessingQueue(ThreadFactory factory) {
         return Executors.unconfigurableExecutorService(newSingleThreadExecutor(factory));
     }
     
     /**
-     * A ProcessingQueue Executor is an <code>ExecutorService</code> that processes all Runnables/
-     * Callables sequentially, creating one thread for processing when it needs
-     * it.
+     * A ProcessingQueue Executor is an <code>ExecutorService</code> that 
+     * processes all Runnables/Callables sequentially, creating one thread 
+     * for processing when it needs it.
      * 
      * This kind of Executor is ideal for long-lived tasks
      * that require processing rarely.
@@ -60,8 +62,7 @@ public class ExecutorsHelper {
      * If there are no tasks the thread will be terminated after a timeout of
      * 5 seconds and a new one will be created when necessary.
      * 
-     * @param factory
-     * @return ThreadPoolExeuctor
+     * @param factory the factory used for creating a new processing thread 
      */
     public static java.util.concurrent.ThreadPoolExecutor newSingleThreadExecutor(ThreadFactory factory) {
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(1, 1,
@@ -78,8 +79,6 @@ public class ExecutorsHelper {
      * although an unlimited number of threads will be created to handle
      * the tasks.  Each thread is set to linger for a short period of time,
      * ready to handle new tasks, before the thread terminates.
-     * @param name
-     * @return ExeuctorService
      */
     public static ExecutorService newThreadPool(String name) {
         return Executors.unconfigurableExecutorService(
@@ -95,8 +94,8 @@ public class ExecutorsHelper {
      * although an unlimited number of threads will be created to handle
      * the tasks.  Each thread is set to linger for a short period of time,
      * ready to handle new tasks, before the thread terminates.
-     * @param factory
-     * @return ExecutorService
+     * 
+     * @param factory the factory used for creating a new processing thread 
      */
     public static ExecutorService newThreadPool(ThreadFactory factory) {
         return Executors.unconfigurableExecutorService(
@@ -110,9 +109,6 @@ public class ExecutorsHelper {
      * Creates a new ThreadPool with the maximum number of available threads.
      * Items added while no threads are available to process them will wait
      * until an executing item is finished and then be processed.
-     * @param size
-     * @param name
-     * @return ExeuctorService
      */
     public static ExecutorService newFixedSizeThreadPool(int size, String name) {
         ThreadPoolExecutor tpe =  new ThreadPoolExecutor(1, size,
@@ -125,17 +121,12 @@ public class ExecutorsHelper {
     
     
     /** Returns the default thread factory, using the given name. 
-     * @param name
-     * @return ThreadFactory
-
      * */
     public static ThreadFactory defaultThreadFactory(String name) {
         return new DefaultThreadFactory(name, false);
     }
     
     /** Returns the a thread factory of daemon threads, using the given name. 
-     * @param name
-     * @return ThreadFactory
      */
     public static ThreadFactory daemonThreadFactory(String name) {
         return new DefaultThreadFactory(name, true);

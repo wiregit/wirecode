@@ -3,9 +3,8 @@ package org.limewire.service;
 import java.io.PrintStream;
 
 /**
- * Displays error messages from the core component (backend) to the gui (user).
- * <code>ErrorService</code> includes static methods to set and get an 
- * {@link ErrorCallback} and to display generic and more specific error messages.
+ * Forwards errors to an {@link ErrorCallback}. <code>ErrorService</code> 
+ * includes static methods to set and get the <code>ErrorCallback</code> class.
  */
 public final class ErrorService {	
 

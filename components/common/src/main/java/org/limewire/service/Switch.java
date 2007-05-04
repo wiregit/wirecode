@@ -1,7 +1,7 @@
 package org.limewire.service;
 
 /**
- * Defines methods for getting and setting a boolean value.
+ * Defines the interface for a class to get and set a boolean value.
  */
 public interface Switch {
     

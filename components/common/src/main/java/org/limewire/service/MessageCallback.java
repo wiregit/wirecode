@@ -1,11 +1,12 @@
 package org.limewire.service;
 
 /**
- * Defines methods for showing formatted and unformatted errors.
- * <code>MessageCallback</code>, an interface, includes methods to
- * display errors and messages based on a message key. 
- * <code>MessageCallback</code> defines methods with locale-specific 
- * messages and a flag to receive future messages of the same type. 
+ * Defines the interface for a class to send a formatted and, or unformatted 
+ * message. (An unformatted message accepts arbitrary parameters you format
+ * when you implement <MessageCallback>.) This class contains methods to
+ * send errors and messages based on a message key. 
+ * Additionally, <code>MessageCallback</code> has methods with a flag 
+ * to receive future messages of the same type. 
  */
 public interface MessageCallback {
 
@@ -60,8 +61,6 @@ public interface MessageCallback {
     /**
      * Shows a locale-specific error message to the user, using the
      * given message key & the arguments for that key.
-     * @param errorKey 
-     * @param args
      */
     void showFormattedError(String errorKey, String... args);
     
@@ -70,12 +69,12 @@ public interface MessageCallback {
      * given message key & the arguments for that key. 
      * The message is only displayed if the Switch indicates
      * the user had chosen to display the message.
-     * @param errorKey 
      * @param ignore the BooleanSetting that stores whether or not the user
      *        has chosen to receive future warnings of this message.
-     * @param args
      */
     void showFormattedError(String errorKey, Switch ignore, String... args);    
+
+    
     /**
      * Shows a locale-specific message to the user using the given message key.
      * 
@@ -101,7 +100,6 @@ public interface MessageCallback {
      * given message key & the arguments for that key.
      * @param messageKey the key for looking up the locale-specific message
      *  in the resource bundles
-     * @param args
      */
     void showFormattedMessage(String messageKey, String... args);
     
@@ -114,7 +112,6 @@ public interface MessageCallback {
      *  in the resource bundles
      * @param ignore the BooleanSetting that stores whether or not the user
      *        has chosen to receive future warnings of this message.
-     * @param args
      */
     void showFormattedMessage(String messageKey, Switch ignore, String... args);
 }

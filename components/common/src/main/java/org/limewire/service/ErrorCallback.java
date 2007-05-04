@@ -1,8 +1,8 @@
 package org.limewire.service;
 
 /**
- * Defines a generic error message and a method that displays a specific 
- * error message.
+ * Defines the interface for a class to receive generic and specific error 
+ * messages.
  */
 public interface ErrorCallback {
 

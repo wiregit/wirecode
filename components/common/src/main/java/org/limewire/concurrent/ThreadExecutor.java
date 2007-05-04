@@ -3,8 +3,12 @@ package org.limewire.concurrent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+import org.limewire.service.ErrorService;
+
 /**
- * Creates and runs threads.
+ * Creates {@link ManagedThread} daemon threads and executes {@link Runnable}s 
+ * on threads from a thread pool. As a <code>ManagedThread</code>, 
+ * <code>ThreadExecutor</code> reports uncaught errors to {@link ErrorService}.
  */
 
 public class ThreadExecutor {
