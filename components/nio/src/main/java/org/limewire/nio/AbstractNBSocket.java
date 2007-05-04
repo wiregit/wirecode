@@ -28,6 +28,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 import org.limewire.nio.timeout.SoTimeout;
+import org.limewire.util.VersionUtils;
 
 /**
  * Implements all common functionality that a non-blocking socket must contain.
@@ -41,7 +42,6 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                                                                   NIOMultiplexor, ReadTimeout, SoTimeout{
     
     private static final Log LOG = LogFactory.getLog(AbstractNBSocket.class);
-
 
     /** Lock for shutting down. */
     private final Object LOCK = new Object();
@@ -452,11 +452,25 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
  
-        shutdownImpl();
-            
-        try {
-            getChannel().close();
-        } catch(IOException ignored) {}
+        // Workaround for bugid: 4744057, fixed in Java 1.5.0_10.
+        // Bug: If the channel is closed in a thread other than the selector thread,
+        //      there is a potential for deadlock.
+        // Note: We ONLY offload the actual shutting of the socket/channel,
+        //       as we don't want to expose the observer shutdowns to the
+        //       invokeAndWait, which could introduce a lot of potential deadlock.
+        if(VersionUtils.isJavaVersionOrAbove("1.5.0_10") || NIODispatcher.instance().isDispatchThread()) {
+            shutdownSocketAndChannels();
+        } else {
+            try {
+                NIODispatcher.instance().invokeAndWait(new Runnable() {
+                    public void run() {
+                        shutdownSocketAndChannels();
+                    }
+                });
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
         
         reader.shutdown();
         writer.shutdown();
@@ -476,6 +490,14 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 shutdownObserver = null;
             }
         });
+    }
+    
+    /** Shuts down the socket and channels. */
+    private void shutdownSocketAndChannels() {
+        shutdownImpl();
+        try {
+            getChannel().close();
+        } catch(IOException ignored) {}
     }
     
     private boolean isShutdown() {
