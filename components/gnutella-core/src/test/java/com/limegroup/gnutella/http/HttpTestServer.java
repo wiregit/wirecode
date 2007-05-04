@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.1.4.1 $
- * $Date: 2007-04-27 18:28:35 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-05-04 19:50:54 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +32,6 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
-import java.net.Socket;
 
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
@@ -72,11 +71,6 @@ public class HttpTestServer {
         this.registry = new HttpRequestHandlerRegistry();
     }
 
-    public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
-        this.registry.register(pattern, handler);
-    }
-
     public void execute(EventListener listener) throws IOException {
         BasicHttpProcessor processor = new BasicHttpProcessor();
         processor.addInterceptor(new ResponseDate());
@@ -98,8 +92,13 @@ public class HttpTestServer {
         reactor.execute(ioEventDispatch);
     }
 
-    public void acceptConnection(String word, Socket socket) {
-        reactor.acceptConnection(word, socket);
+    public HttpIOReactor getReactor() {
+        return reactor;
     }
     
+    public void registerHandler(final String pattern,
+            final HttpRequestHandler handler) {
+        this.registry.register(pattern, handler);
+    }
+
 }

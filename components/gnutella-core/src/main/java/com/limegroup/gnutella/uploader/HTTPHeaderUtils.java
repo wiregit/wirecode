@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -19,6 +18,10 @@ import com.limegroup.gnutella.http.HTTPUtils;
 
 public class HTTPHeaderUtils {
 
+    /**
+     * Adds the <code>X-Available-Ranges</code> header to
+     * <code>response</code> if available.
+     */
     public static void addRangeHeader(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         if (fd instanceof IncompleteFileDesc) {
@@ -60,8 +63,12 @@ public class HTTPHeaderUtils {
         response.addHeader(HTTPHeaderName.PROXIES.create(buf.toString()));
     }
 
+    /**
+     * Adds alternate locations for <code>fd</code> to <code>response</code>
+     * if available.
+     */
     public static void addAltLocationsHeader(HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) throws IOException {
+            HTTPUploader uploader, FileDesc fd) {
         // write the URN in case the caller wants it
         URN sha1 = fd.getSHA1Urn();
         if (sha1 != null) {
@@ -84,11 +91,15 @@ public class HTTPHeaderUtils {
         }
     }
 
+    /**
+     * Adds an <code>X-Features</code> header to <code>response</code>.
+     */
     public static void addFeatures(HttpResponse response) {
         Set<HTTPHeaderValue> features = HTTPUtils.getFeaturesValue();
-        // Write X-Features header.
         if (features.size() > 0) {
             response.addHeader(HTTPHeaderName.FEATURES.create(
                     new HTTPHeaderValueCollection(features)));
         }
-    }}
+    }
+
+}

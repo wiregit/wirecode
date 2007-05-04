@@ -24,6 +24,12 @@ public final class Constants {
         "application/binary";
 
     /**
+     * Mime Type to be used when showing HTML files.
+     */
+    public static final String HTML_MIME_TYPE = 
+        "text/html";
+
+    /**
      * Constant for the timeout to use on sockets.
      */
     public static final int TIMEOUT = 8000;  

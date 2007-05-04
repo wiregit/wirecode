@@ -10,25 +10,32 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.util.LimeWireUtils;
+
+/**
+ * Responds with an HTML page showing information. 
+ */
 public class FreeLoaderRequestHandler implements HttpRequestHandler {
 
-    // FIXME provide a working link
+    public static final String REDIRECT_URL = "http://www2.limewire.com/browser.htm";
+        
     public static final String FREELOADER_RESPONSE_PAGE = "<html>\r\n"
             + "<head>\r\n"
-            + "<title>Please Share</title>\r\n"
-            + "<meta http-equiv=\"refresh\" \r\n"
-            + "content=\"0; \r\n"
-            + "URL=http://www2.limewire.com/browser.htm\">\r\n"
+            + "  <title>" + LimeWireUtils.getHttpServer() + "</title>\r\n"
+            + "  <meta http-equiv=\"refresh\" content=\"0; URL=" + REDIRECT_URL + "\">\r\n"
             + "</head>\r\n"
             + "<body>\r\n"
-            + "<a href=\"http://www2.limewire.com/browser.htm\">Please Share</a>\r\n"
+            + "  <a href=\"" + REDIRECT_URL + "\">Please Share</a>\r\n"
             + "</body>\r\n" // 
             + "</html>\r\n";
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         response.setStatusCode(HttpStatus.SC_OK);
-        response.setEntity(new StringEntity(FREELOADER_RESPONSE_PAGE));
+        StringEntity entity = new StringEntity(FREELOADER_RESPONSE_PAGE);
+        entity.setContentType(Constants.HTML_MIME_TYPE);
+        response.setEntity(entity);
     }
 
 }

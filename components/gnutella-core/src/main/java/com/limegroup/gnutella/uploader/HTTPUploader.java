@@ -105,7 +105,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         long first = getUploadBegin();
         long last = getUploadEnd();
 
-        if (getFileDesc() instanceof IncompleteFileDesc) {
+        if (first >= last) {
+            return false;
+        } if (getFileDesc() instanceof IncompleteFileDesc) {
             // If we are allowing, see if we have the range.
             IncompleteFileDesc ifd = (IncompleteFileDesc) getFileDesc();
             // If the request contained a 'Range:' header, then we can
@@ -123,12 +125,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
                     return false;
                 }
             }
-        } else {
-            if (containedRangeRequest()) {
-                setUploadEnd(Math.min(last, getFileSize()));
-            } else if (first < 0 || last > getFileSize()) {
-                return false;
-            }
+        } else if (first < 0 || last > getFileSize()) {
+            return false;
         }
 
         return true;

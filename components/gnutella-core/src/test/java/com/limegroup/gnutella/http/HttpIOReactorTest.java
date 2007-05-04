@@ -16,11 +16,16 @@ import org.apache.http.HttpVersion;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.DefaultHttpRequestFactory;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.HttpIOReactor;
 import org.limewire.http.SessionRequestCallbackAdapter;
 import org.limewire.util.BaseTestCase;
 
@@ -28,6 +33,7 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.Sockets;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -36,6 +42,8 @@ public class HttpIOReactorTest extends BaseTestCase {
     private static Acceptor acceptor;
 
     private HttpRequestFactory requestFactory = new DefaultHttpRequestFactory();
+
+    private BasicHttpParams params;
 
     public HttpIOReactorTest(String name) {
         super(name);
@@ -64,6 +72,32 @@ public class HttpIOReactorTest extends BaseTestCase {
         acceptor.setListeningPort(0);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        params = new BasicHttpParams();
+        params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2000)
+               .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 2000)
+               .setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE, 8 * 1024)
+               .setBooleanParameter(HttpConnectionParams.STALE_CONNECTION_CHECK, false)
+               .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
+               .setParameter(HttpProtocolParams.USER_AGENT, "TEST-SERVER/1.1");
+
+    }
+    
+    public void testAcceptConnection() throws Exception {
+        HttpTestServer server = new HttpTestServer();
+        server.execute(null);
+        HttpIOReactor reactor = server.getReactor();
+        
+        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500, null);
+        try {
+            DefaultNHttpServerConnection conn = reactor.acceptConnection("GET", socket);
+            assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
+        } finally {
+            socket.close();
+        }
+    }
+    
     // disabled, see {@link HttpIOReactor#connect}
     public void disabledTestGetFromAcceptor() throws Exception {
         final HttpTestServer server = new HttpTestServer();
@@ -73,29 +107,11 @@ public class HttpIOReactorTest extends BaseTestCase {
                 response.setEntity(new ByteArrayEntity("foobar".getBytes()));
             }
         });
-        server.execute(new EventListener() {
-            public void connectionClosed(NHttpConnection conn) {
-            }
-
-            public void connectionOpen(NHttpConnection conn) {
-            }
-
-            public void connectionTimeout(NHttpConnection conn) {
-            }
-
-            public void fatalIOException(IOException ex, NHttpConnection conn) {
-                throw new RuntimeException(ex);
-            }
-
-            public void fatalProtocolException(HttpException ex,
-                    NHttpConnection conn) {
-                throw new RuntimeException(ex);
-            }
-        });
+        server.execute(new MyEventListener());
         RouterService.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
-                        server.acceptConnection(word, socket);
+                        server.getReactor().acceptConnection(word, socket);
                     }
                 }, new String[] { "GET", "HEAD", "POST" }, false, false);
 
@@ -159,4 +175,25 @@ public class HttpIOReactorTest extends BaseTestCase {
 
     }
 
+    private class MyEventListener implements  EventListener {
+        
+        public void connectionClosed(NHttpConnection conn) {
+        }
+
+        public void connectionOpen(NHttpConnection conn) {
+        }
+
+        public void connectionTimeout(NHttpConnection conn) {
+        }
+
+        public void fatalIOException(IOException ex, NHttpConnection conn) {
+            throw new RuntimeException(ex);
+        }
+
+        public void fatalProtocolException(HttpException ex,
+                NHttpConnection conn) {
+            throw new RuntimeException(ex);
+        }
+        
+    }
 }

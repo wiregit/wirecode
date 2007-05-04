@@ -15,6 +15,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.ByteBufferCache;
 
+/**
+ * Reads chunks from a file into ByteBuffers.  
+ */
 public class FilePieceReader implements PieceReader {
 
     private static final Log LOG = LogFactory.getLog(FilePieceReader.class);

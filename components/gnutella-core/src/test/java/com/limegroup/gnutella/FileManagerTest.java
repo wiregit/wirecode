@@ -37,6 +37,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @SuppressWarnings("unchecked")
 public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -961,9 +962,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testGetIndexingIterator() throws Exception {
+        LimeXMLDocument document = new LimeXMLDocument(
+                "<?xml version=\"1.0\"?>"+
+                "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
+                "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+                "</audios>");
+
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
+        fman.get(0).addLimeXMLDocument(document);
+        fman.get(1).addLimeXMLDocument(document);
         f3 = createNewTestFile(11);
 
         assertEquals(2, fman.getNumFiles());
