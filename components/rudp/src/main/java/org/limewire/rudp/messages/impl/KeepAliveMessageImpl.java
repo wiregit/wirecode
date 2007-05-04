@@ -39,6 +39,9 @@ class KeepAliveMessageImpl extends RUDPMessageImpl implements KeepAliveMessage {
     KeepAliveMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
       throws MessageFormatException {
         super(OpCode.OP_KEEPALIVE, connectionId, sequenceNumber, data1, data2);
+        if (data1.remaining() < 4) {
+            throw new MessageFormatException("Message not long enough, message length " + data1.remaining() + " < 4");
+        }
         data1.order(ByteOrder.BIG_ENDIAN);
         // Parse the added windowStart and windowSpace information
         _windowStart = data1.getShort();

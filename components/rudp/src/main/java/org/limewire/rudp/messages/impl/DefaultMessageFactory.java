@@ -50,10 +50,10 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
         OpCode opcode = OpCode.valueOf((b & 0xF0) >> 4); // b1
         long sequenceNumber = ((long)in.read() & 0xFF) << 8 | ((long)in.read() & 0xFF); // C
         int data1Length = b & 0xF; // b2
-        ByteBuffer data1 = ByteBuffer.allocate(RUDPMessageImpl.MAX_DATA1_SIZE);
-        in.read(data1);
         if(data1Length > RUDPMessageImpl.MAX_DATA1_SIZE)
             throw new MessageFormatException("data1Length too big: " + data1Length);
+        ByteBuffer data1 = ByteBuffer.allocate(RUDPMessageImpl.MAX_DATA1_SIZE);
+        in.read(data1); // D
         data1.flip();
         data1.limit(data1Length);
         in.skip(3); // E

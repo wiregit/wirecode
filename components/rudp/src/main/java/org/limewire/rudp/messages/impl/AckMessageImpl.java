@@ -30,6 +30,9 @@ class AckMessageImpl extends RUDPMessageImpl implements AckMessage {
     AckMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
       throws MessageFormatException {
         super(OpCode.OP_ACK, connectionId, sequenceNumber, data1, data2);
+        if (data1.remaining() < 4) {
+            throw new MessageFormatException("Message not long enough, message length " + data1.remaining() + " < 4");
+        }
         data1.order(ByteOrder.BIG_ENDIAN);
         _windowStart = data1.getShort();
         _windowSpace = data1.getShort();

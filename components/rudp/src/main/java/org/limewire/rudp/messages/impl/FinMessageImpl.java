@@ -25,6 +25,9 @@ class FinMessageImpl extends RUDPMessageImpl implements FinMessage {
     FinMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
       throws MessageFormatException {
         super(OpCode.OP_FIN, connectionId, sequenceNumber, data1, data2);
+        if (data1.remaining() < 1) {
+            throw new MessageFormatException("Message not long enough, message length " + data1.remaining() + " < 1");
+        }
         _reasonCode = data1.get();
         data1.rewind(); 
     }
