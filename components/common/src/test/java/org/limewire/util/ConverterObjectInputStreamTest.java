@@ -89,7 +89,7 @@ public class ConverterObjectInputStreamTest extends BaseTestCase {
     }
     
     public void testDefaultPackageClassMappedToThisPackage() throws Exception {
-        // serializable static inner class
+        // serializable static inner class in default package
         // new ConverterObjectInputStreamTest.SerializableClass();
         byte[] serializbleClassInDefaultPackage = new byte[] { -84, -19, 0, 5, 115, 114, 0, 48, 67, 111, 110, 118, 101, 114, 116, 101, 114, 79, 98, 106, 101, 99, 116, 73, 110, 112, 117, 116, 83, 116, 114, 101, 97, 109, 84, 101, 115, 116, 36, 83, 101, 114, 105, 97, 108, 105, 122, 97, 98, 108, 101, 67, 108, 97, 115, 115, -6, 49, 117, -36, -108, -33, -69, 70, 2, 0, 0, 120, 112 };
         
