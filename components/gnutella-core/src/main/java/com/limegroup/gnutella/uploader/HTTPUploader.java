@@ -626,13 +626,13 @@ public final class HTTPUploader implements Uploader {
             return Collections.emptySet();
         
     	AlternateLocationCollection<PushAltLoc> fwt = 
-            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
+            RouterService.getAltlocManager().getPushFWT(_fileDesc.getSHA1Urn());
         
         AlternateLocationCollection<PushAltLoc> push;
         if(_FWTVersion > 0)
             push = AlternateLocationCollection.getEmptyCollection();
         else
-            push = RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
+            push = RouterService.getAltlocManager().getPushNoFWT(_fileDesc.getSHA1Urn());
     	
     	Set<PushAltLoc> ret = null;
     	long now = System.currentTimeMillis();

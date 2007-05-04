@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -15,14 +14,13 @@ public class ManagedConnectionStub extends ManagedConnection {
     public ManagedConnectionStub() {
         super("1.2.3.4", 6346);
 		
-		try {
-            //PrivilegedAccessor.setValue(this, "_router", new MessageRouterStub());
+        try {
             PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
-        } catch(Exception e) {
-            ErrorService.error(e);
-        }		
-		//_router = new MessageRouterStub(); 
-        //_manager = new ConnectionManagerStub();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void initialize() {

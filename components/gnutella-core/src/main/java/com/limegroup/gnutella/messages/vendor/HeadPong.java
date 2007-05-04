@@ -343,13 +343,13 @@ public class HeadPong extends VendorMessage {
                 boolean includeTLS = ping.getVersion() >= 2; // first version that supported binary PPTLS
                 
                 if (FWTOnly) {
-                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPushFWT(urn);
                     synchronized(push) {
                         didNotSendPushAltLocs = !writePushLocs(caos,push.iterator(), includeTLS);
                     }
                 } else {
-                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,false);
-                    AlternateLocationCollection<PushAltLoc> fwt = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPushNoFWT(urn);
+                    AlternateLocationCollection<PushAltLoc> fwt = RouterService.getAltlocManager().getPushFWT(urn);
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
@@ -615,6 +615,7 @@ public class HeadPong extends VendorMessage {
 	
         if (!pushlocs.hasNext())
             return false;
+        
 
         //push altlocs are bigger than normal altlocs, however we 
         //don't know by how much.  The size can be between

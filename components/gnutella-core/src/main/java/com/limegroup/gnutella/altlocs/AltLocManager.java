@@ -140,7 +140,6 @@ public class AltLocManager {
     
     /**
      * @param sha1 the URN for which to get altlocs
-     * @param size the maximum number of altlocs to return
      */
     public AlternateLocationCollection<DirectAltLoc> getDirect(URN sha1) {
         URNData data = urnMap.get(sha1);
@@ -153,17 +152,30 @@ public class AltLocManager {
     }
     
     /**
+     * Returns push alternate locations that do not support FWT.
      * @param sha1 the URN for which to get altlocs
-     * @param size the maximum number of altlocs to return
-     * @param FWTOnly whether the altlocs must support FWT
      */
-    public AlternateLocationCollection<PushAltLoc> getPush(URN sha1, boolean FWTOnly) {
+    public AlternateLocationCollection<PushAltLoc> getPushNoFWT(URN sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.getEmptyCollection();
         
         synchronized(data) {
-            return FWTOnly ? data.fwt : data.push;
+            return data.push;
+        }
+    }
+    
+    /**
+     * Returns push alternate locations that support FWT.
+     * @param sha1 the URN for which to get altlocs
+     */
+    public AlternateLocationCollection<PushAltLoc> getPushFWT(URN sha1) {
+        URNData data = urnMap.get(sha1);
+        if (data == null)
+            return AlternateLocationCollection.getEmptyCollection();
+        
+        synchronized(data) {
+            return data.fwt;
         }
     }
     

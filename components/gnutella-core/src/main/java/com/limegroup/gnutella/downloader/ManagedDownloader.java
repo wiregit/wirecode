@@ -1132,8 +1132,8 @@ public class ManagedDownloader extends AbstractDownloader
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             //create validAlts
             addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                    RouterService.getAltlocManager().getPush(hash,false),
-                    RouterService.getAltlocManager().getPush(hash,true),
+                    RouterService.getAltlocManager().getPushNoFWT(hash),
+                    RouterService.getAltlocManager().getPushFWT(hash),
                     (int)size);
         }
     }

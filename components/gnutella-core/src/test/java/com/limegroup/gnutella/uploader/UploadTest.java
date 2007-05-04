@@ -744,10 +744,10 @@ public class UploadTest extends LimeTestCase {
                          );
         assertTrue(passed);
 		assertEquals(2,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));
-		assertEquals(1,RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
+		assertEquals(1,RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
 		assertEquals(1,RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).getAltLocsSize());
 		
-		assertTrue(RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).contains(push));
+		assertTrue(RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn()).contains(push));
 		assertTrue(RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).contains(direct));
     }
     
@@ -1016,7 +1016,7 @@ public class UploadTest extends LimeTestCase {
         assertTrue("alt failed", passed);
         
         //two of the proxies of bcd should be gone
-        assertEquals("wrong # locs", 1, RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
+        assertEquals("wrong # locs", 1, RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
         
         
@@ -1029,7 +1029,7 @@ public class UploadTest extends LimeTestCase {
         
         // all proxies should be gone, and bcd should be removed from 
         // the filedesc
-        assertEquals("wrong # locs", 0, RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
+        assertEquals("wrong # locs", 0, RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
     }
     

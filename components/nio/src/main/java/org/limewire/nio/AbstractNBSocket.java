@@ -28,6 +28,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 import org.limewire.nio.timeout.SoTimeout;
+import org.limewire.util.VersionUtils;
 
 /**
  * Implements all common functionality that a non-blocking socket must contain.
@@ -458,6 +459,30 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             shutdown = true;
         }
         
+        // See bugid: 4744057, fixed in 1.5.0_10.
+        // Potential deadlock if SocketChannel.close is called
+        // in an arbitrary thread.
+        if(VersionUtils.isJavaVersionOrAbove("1.5.0_10")) {
+            doShutdown();
+        } else {
+            Future f = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                public void run() {
+                    doShutdown();
+                }
+            });
+            
+            try {
+                f.get(); // wait for the future to finish.
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            } catch (ExecutionException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+    
+    /** Does a shutdown. */
+    private void doShutdown() {
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
  
