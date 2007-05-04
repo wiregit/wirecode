@@ -55,7 +55,10 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
         ByteBuffer data1 = ByteBuffer.allocate(RUDPMessageImpl.MAX_DATA1_SIZE);
         in.read(data1); // D
         data1.flip();
-        data1.limit(data1Length);
+        // only limit data1 buffer to read length for DATA packets, see spec
+        if (opcode == OpCode.OP_DATA) {
+            data1.limit(data1Length);
+        }
         in.skip(3); // E
         
         // Assert that the int in F is the number of bytes remaining.

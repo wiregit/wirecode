@@ -34,13 +34,10 @@ public class DefaultMessageFactoryTest extends BaseTestCase {
     }
 
     public void testCreateMessages() throws Exception {
-        // empty messages that should fail
+        // empty messages that should not fail
         for (OpCode opcode : OpCode.values()) {
             ByteBuffer data = createMessage(opcode, 0);
-            // data message doesn't have any mandatory content            
-            if (opcode != OpCode.OP_DATA) {
-                assertCreationFails(factory, data, MessageFormatException.class);
-            }
+            factory.createMessage(data);
         }
         
         // messages that have barely the length to succeed
@@ -50,10 +47,6 @@ public class DefaultMessageFactoryTest extends BaseTestCase {
         }
         
         // some single tests
-        assertCreationFails(factory, createMessage(OpCode.OP_ACK, 3), MessageFormatException.class);
-        assertCreationFails(factory, createMessage(OpCode.OP_KEEPALIVE, 3), MessageFormatException.class);
-        assertCreationFails(factory, createMessage(OpCode.OP_SYN, 2), MessageFormatException.class);
-        
         factory.createMessage(createMessage(OpCode.OP_SYN, 3));
         factory.createMessage(createMessage(OpCode.OP_FIN, 1));
         
