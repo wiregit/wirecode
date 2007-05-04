@@ -44,6 +44,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Everytime an Ultrapeer learns of a new Contact or updates an
  * existing Contact it will forward it to its leafs
  */
+@SuppressWarnings("unchecked")
 public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     private static final int PORT = 6667;
@@ -180,7 +181,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(RouterService.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = (ManagedConnection)cm.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
@@ -280,7 +281,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(RouterService.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = (ManagedConnection)cm.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
@@ -341,7 +342,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(RouterService.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = (ManagedConnection)cm.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());

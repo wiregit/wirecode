@@ -50,7 +50,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         
         byte[] guid = new byte[16];
         System.arraycopy(raw, 0, guid, 0, guid.length);
-        byte func = raw[16];
+     //   byte func = raw[16];
         byte ttl = raw[17];
         byte hops = raw[18];
         byte[] payload = new byte[raw.length - 23];
