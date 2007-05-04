@@ -52,6 +52,13 @@ public final class Comparators {
     private static final Comparator<String> CASE_INSENSITIVE_STRING_COMPARATOR =
         new CaseInsensitiveStringComparator();
     
+    private static final Comparator<Double> INVERSE_DOUBLE_COMPARATOR = 
+        new Comparator<Double>() {
+        public int compare(Double a, Double b) {
+            return b.compareTo(a);
+        }
+    };
+    
     /**
      * Ensure that this class cannot be constructed.
      */
@@ -100,6 +107,10 @@ public final class Comparators {
         return INVERSE_LONG_COMPARATOR;
     }
 
+    public static Comparator<Double> inverseDoubleComparator() {
+        return INVERSE_DOUBLE_COMPARATOR;
+    }
+    
     /**
      * Instance accessor for the <tt>Comparator</tt> for <tt>String</tt>s.  This
      * is necessary because the <tt>String</tt> class did not implement 

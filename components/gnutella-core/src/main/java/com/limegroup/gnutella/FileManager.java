@@ -2423,24 +2423,26 @@ public abstract class FileManager {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 addVersion(ret);
-                List<Integer> hits = new ArrayList<Integer>();
-                List<Integer> uploads = new ArrayList<Integer>();
+                ArrayList<Double> hits = new ArrayList<Double>();
+                ArrayList<Double> uploads = new ArrayList<Double>();
                 Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
                 Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
                 synchronized(FileManager.this) {
                     FileDesc[] fds = getAllSharedFileDescriptors();
+                    hits.ensureCapacity(fds.length);
+                    uploads.ensureCapacity(fds.length);
                     for(int i = 0; i < fds.length; i++) {
                         if (fds[i] instanceof IncompleteFileDesc)
                             continue;
 
-                        hits.add(fds[i].getHitCount());
-                        uploads.add(fds[i].getAttemptedUploads());
+                        hits.add((double)fds[i].getHitCount());
+                        uploads.add((double)fds[i].getAttemptedUploads());
                         topHitsFDs.put(fds[i].getHitCount(), fds[i]);
                         topUpsFDs.put(fds[i].getAttemptedUploads(), fds[i]);
                     }
                 }
-                ret.put("hits",StatsUtils.quickStatsInt(hits));
-                ret.put("ups",StatsUtils.quickStatsInt(uploads));
+                ret.put("hits",StatsUtils.quickStatsDouble(hits));
+                ret.put("ups",StatsUtils.quickStatsDouble(uploads));
 
                 QueryRouteTable topHits = new QueryRouteTable(QRP_SIZE);
                 QueryRouteTable topUps = new QueryRouteTable(QRP_SIZE);

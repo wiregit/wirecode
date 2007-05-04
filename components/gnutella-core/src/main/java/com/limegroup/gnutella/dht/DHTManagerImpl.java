@@ -273,7 +273,11 @@ public class DHTManagerImpl implements DHTManager {
     /** a bunch of inspectables */
     private class DHTInspectables {
         
-        private static final int VERSION = 1;
+        /*
+         * 1 - initial version, doubles reported as long * Integer.MAX_VALUE
+         * 2 - doubles reported as Double.doubleToLongBits
+         */
+        private static final int VERSION = 2;
         
         private void addVersion(Map<String, Object> m) {
             m.put("sv",VERSION);
@@ -331,18 +335,18 @@ public class DHTManagerImpl implements DHTManager {
                         BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
                         Collection<Bucket> buckets = routeTable.getBuckets();
                         
-                        List<BigInteger> depths = new ArrayList<BigInteger>(buckets.size());
-                        List<BigInteger> sizes = new ArrayList<BigInteger>(buckets.size());
+                        List<Double> depths = new ArrayList<Double>(buckets.size());
+                        List<Double> sizes = new ArrayList<Double>(buckets.size());
                         List<BigInteger> kuids = new ArrayList<BigInteger>(buckets.size());
-                        List<BigInteger> times = new ArrayList<BigInteger>(buckets.size());
+                        List<Double> times = new ArrayList<Double>(buckets.size());
                         
                         double fresh = 0;
                         long now = System.currentTimeMillis(); 
                         for (Bucket bucket : buckets) {
-                            depths.add(BigInteger.valueOf(bucket.getDepth())); 
-                            sizes.add(BigInteger.valueOf(bucket.size()));
+                            depths.add((double)bucket.getDepth()); 
+                            sizes.add((double)bucket.size());
                             kuids.add(bucket.getBucketID().toBigInteger());
-                            times.add(BigInteger.valueOf(now - bucket.getTimeStamp()));
+                            times.add((double)(now - bucket.getTimeStamp()));
                             if (!bucket.isRefreshRequired())
                                 fresh++;
                         }
@@ -350,9 +354,9 @@ public class DHTManagerImpl implements DHTManager {
                         // bucket kuid distribution *should* be similar to the others, but is it?
                         data.put("bk", StatsUtils.quickStats(kuids)); // 5*20 + 4
                         data.put("bkx", StatsUtils.quickStats(getXorDistances(local, kuids))); // 5*20 + 4
-                        data.put("bd", StatsUtils.quickStats(depths)); // 5*(should be one byte) + 4
-                        data.put("bs", StatsUtils.quickStats(sizes)); // 5*(should be one byte) + 4
-                        data.put("bt", StatsUtils.quickStats(times)); // 5*(should be one byte) + 4
+                        data.put("bd", StatsUtils.quickStatsDouble(depths)); // 5*(should be one byte) + 4
+                        data.put("bs", StatsUtils.quickStatsDouble(sizes)); // 5*(should be one byte) + 4
+                        data.put("bt", StatsUtils.quickStatsDouble(times)); // 5*(should be one byte) + 4
                         data.put("bfr", (int)(100 * fresh / buckets.size())); // fresh buckets %
                     }
                 }
@@ -395,26 +399,23 @@ public class DHTManagerImpl implements DHTManager {
                     BigInteger local = dht.getLocalNodeID().toBigInteger();
                     
                     List<BigInteger> primaryKeys = null;
-                    List<BigInteger> requestLoads = null;
+                    List<Double> requestLoads = null;
                     synchronized (database) {
                         data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
                         Set<KUID> keys = database.keySet();
                         
                         primaryKeys = new ArrayList<BigInteger>(keys.size());
-                        requestLoads = new ArrayList<BigInteger>(keys.size());
+                        requestLoads = new ArrayList<Double>(keys.size());
                         
                         for (KUID primaryKey : keys) {
                             primaryKeys.add(primaryKey.toBigInteger());
-                            
-                            long load = (long)(database.getRequestLoad(primaryKey, false) 
-                                                    * (double)Integer.MAX_VALUE);
-                            requestLoads.add(BigInteger.valueOf(load));
+                            requestLoads.add((double)database.getRequestLoad(primaryKey, false));
                         }
                     }
 
                     List<BigInteger> storedXorDistances = getXorDistances(local, primaryKeys);
                     data.put("dsk", StatsUtils.quickStats(primaryKeys)); // 5*20 + 4
-                    data.put("drl", StatsUtils.quickStats(requestLoads)); // 5*4 + 4
+                    data.put("drl", StatsUtils.quickStatsDouble(requestLoads)); // 5*4 + 4
                     data.put("dskx", StatsUtils.quickStats(storedXorDistances)); // 5*20 + 4
                 }
                 return data;
@@ -427,18 +428,17 @@ public class DHTManagerImpl implements DHTManager {
               MojitoDHT dht = getMojitoDHT();
               if (dht != null) {
                   Database database = dht.getDatabase();
-                  Map<Long, KUID> popularKeys = 
-                      new TreeMap<Long,KUID>(Comparators.inverseLongComparator());
+                  Map<Double, KUID> popularKeys = 
+                      new TreeMap<Double,KUID>(Comparators.inverseDoubleComparator());
                   synchronized(database) {
                       Set<KUID> keys = database.keySet();
                       for (KUID primaryKey : keys) {
-                          long load = (long)
-                          (database.getRequestLoad(primaryKey, false) * (double)Integer.MAX_VALUE);
-                          popularKeys.put(load, primaryKey);
+                          popularKeys.put((double)database.getRequestLoad(primaryKey, false), 
+                                  primaryKey);
                       }
                   }
-                  for(long load : popularKeys.keySet()) {
-                      ret.add(BigInteger.valueOf(load).toByteArray());
+                  for(double load : popularKeys.keySet()) {
+                      ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
                       ret.add(popularKeys.get(load).getBytes());
                       if (ret.size() >= 20)
                           break;

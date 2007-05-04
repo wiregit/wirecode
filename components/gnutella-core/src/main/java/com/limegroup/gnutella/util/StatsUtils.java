@@ -65,7 +65,7 @@ public class StatsUtils {
      * @return the number, average, variance, min, median and max of a
      * list of Integers
      */
-    public static Map<String, Object> quickStatsInt(List<Integer> l) {
+    public static Map<String, Object> quickStatsDouble(List<Double> l) {
         Map<String, Object> ret = new HashMap<String, Object>();
         ret.put("num",l.size());
         
@@ -85,14 +85,14 @@ public class StatsUtils {
         }
         
         int sum = 0;
-        for (int i : l) 
+        for (double i : l) 
             sum += i;
 
         double avg = sum / l.size();
         ret.put("avg", Double.doubleToLongBits(avg));
         
         sum = 0;
-        for (int i : l) {
+        for (double i : l) {
             double dist = i - avg;
             dist *= dist;
             sum += dist;
@@ -137,14 +137,14 @@ public class StatsUtils {
      *  The return value is a long of the double value multiplied by Integer.MAX_VALUE
      *  so that as much precision is possible while transferring over network.
      */
-    private static long getQuartile(Quartile quartile, List<Integer> l) {
+    private static long getQuartile(Quartile quartile, List<Double> l) {
         double q1 = (l.size()+1) * (quartile.getType() / 4.0);
         int q1i = (int)q1;
         if (q1 - q1i == 0) 
-            return l.get(q1i - 1);
+            return Double.doubleToLongBits(l.get(q1i - 1));
         
-        int q1a = l.get(q1i - 1);
-        double q1b = Double.valueOf(l.get(q1i));
+        double q1a = l.get(q1i - 1);
+        double q1b = l.get(q1i);
         q1b = q1a - q1b;
         q1b = q1b * quartile.getType() / 4;
         return Double.doubleToLongBits(q1a+q1b);
