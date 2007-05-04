@@ -2457,7 +2457,7 @@ public abstract class FileManager {
                 // we return both qrps, but since they will have very few entries
                 // they will compress very well
                 ret.put("hitsq",topHits.getRawDump());
-                ret.put("upsq",topHits.getRawDump());
+                ret.put("upsq",topUps.getRawDump());
 
                 return ret;
             }
