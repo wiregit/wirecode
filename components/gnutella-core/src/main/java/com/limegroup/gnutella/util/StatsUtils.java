@@ -74,8 +74,8 @@ public class StatsUtils {
         
         Collections.sort(l);
         
-        ret.put("min",l.get(0));
-        ret.put("max",l.get(l.size() -1));
+        ret.put("min",Double.doubleToLongBits(l.get(0)));
+        ret.put("max",Double.doubleToLongBits(l.get(l.size() -1)));
         ret.put("med", getQuartile(Quartile.MED, l));
         
         if (l.size() > 6) {
@@ -84,7 +84,7 @@ public class StatsUtils {
             ret.put("Q3", getQuartile(Quartile.Q3, l));
         }
         
-        int sum = 0;
+        double sum = 0;
         for (double i : l) 
             sum += i;
 
@@ -98,7 +98,7 @@ public class StatsUtils {
             sum += dist;
         }
         
-        ret.put("var",Double.doubleToLongBits((double)sum / (l.size() - 1)));
+        ret.put("var",Double.doubleToLongBits(sum / (l.size() -1)));
         return ret;
     }
     
@@ -145,7 +145,7 @@ public class StatsUtils {
         
         double q1a = l.get(q1i - 1);
         double q1b = l.get(q1i);
-        q1b = q1a - q1b;
+        q1b = q1b - q1a;
         q1b = q1b * quartile.getType() / 4;
         return Double.doubleToLongBits(q1a+q1b);
     }
