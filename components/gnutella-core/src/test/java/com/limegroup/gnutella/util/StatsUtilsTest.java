@@ -28,9 +28,7 @@ public class StatsUtilsTest extends LimeTestCase {
         assertMatches(49.5,"avg", stats);
         assertMatches(24.25,"Q1", stats);
         assertMatches(74.75,"Q3", stats);
-        double variance = get("var", stats);
-        assertGreaterThan(841.6666666, variance); // its a nasty irrational fraction
-        assertLessThan(841.6666667, variance);
+        assertEquals(841.66666, get("var",stats), 0.00001);
     }
     
     private void assertMatches(double expected, String key, Map<String, Object> stats) {
