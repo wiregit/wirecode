@@ -142,10 +142,18 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         return _opcode;
     }
     
+    /**
+     * Returns the length of the data1 block. Since only some packets have
+     * an actual length value the default implementation returns 0;
+     */
+    protected int getData1Length() {
+       return 0; 
+    }
+    
     /** Writes the entire message to an OutputStream. */
     public void write(OutputStream out) throws IOException {
         out.write(_connectionID);
-        out.write(((_opcode.toByte() & 0x0F) << 4) | ((byte)_data1.limit() & 0x0F));
+        out.write(((_opcode.toByte() & 0x0F) << 4) | ((byte)getData1Length() & 0x0F));
         out.write((byte)((_sequenceNumber & 0xFF00) >> 8));
         out.write((byte)(_sequenceNumber & 0x00FF));
         if(_data1.hasRemaining())

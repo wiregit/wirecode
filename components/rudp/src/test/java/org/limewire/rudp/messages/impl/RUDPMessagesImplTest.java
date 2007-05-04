@@ -26,17 +26,17 @@ public class RUDPMessagesImplTest extends BaseTestCase {
     
     public void testMessageFormat() throws Exception {
         // 3, 5, 8, 3
-        byte[] ackData = Base32.decode("AMKAABIABAAAGAAAAAAAAAAAABAQCAAAAAAAA");
+        byte[] ackData = Base32.decode("AMIAABIABAAAGAAAAAAAAAAAABAQCAAAAAAAA");
         // data for dataData
         byte[] bufferData = Base32.decode("VNMMPZX6DDIHKZ6UHU34ZYHHVK7TO2FQVRL755B2WS6SSOSQFSALBLJKHCNSJ2WCEKNPGDEGWIBVNQFKZWYKMBW753ERHQXZPJW6N7LAOJA2EIJQZ3CY3OX6XKZ62CXFAYK5G6Y4222UK43TREZYOGNR7RCDHNPH443Q");
         // 5, 2, bufferData
         byte[] dataData = Base32.decode("AU6AAAVLLDD6N7QY2B2WPVB5G5AQCAC2AAAABTHA46VL6N3IWCWFP7XUHK2L2KJ2KAWIBMFNFI4JWJHKYIRJV4YMQ2ZAGVWAVLG3BJQG37XMSE6C7F5G3ZX5MBZEDIRBGDHMLDN2725LH3IK4UDBLU33DTLLKRLTOOETHBYZWH6EIM5V47TTO");
         // 254, 21, 5
-        byte[] finData = Base32.decode("7ZAQAFIFAAAAAAAAAAAAAAAAABAQCAAAAAAAA");
+        byte[] finData = Base32.decode("7ZAAAFIFAAAAAAAAAAAAAAAAABAQCAAAAAAAA");
         // 203, 5810, 52
-        byte[] keepAliveData = Base32.decode("ZMSAAAAWWIADIAAAAAAAAAAAABAQCAAAAAAAA");
+        byte[] keepAliveData = Base32.decode("ZMQAAAAWWIADIAAAAAAAAAAAABAQCAAAAAAAA");
         // 123, 153
-        byte[] synData = Base32.decode("TEBQAAD3AAAAAAAAAAAAAAAAABAQCAAAAAAAA");
+        byte[] synData = Base32.decode("TEAAAAD3AAAAAAAAAAAAAAAAABAQCAAAAAAAA");
         
         RUDPMessageFactory factory = new DefaultMessageFactory();
         
