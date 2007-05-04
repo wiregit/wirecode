@@ -25,6 +25,8 @@ import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiCollection;
 import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.InspectableForSize;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -134,6 +136,7 @@ public abstract class FileManager {
      * INVARIANT: _filesSize=sum of all size of the elements of _files,
      *   except IncompleteFileDescs, whose size may change at any time.
      */
+    @InspectablePrimitive
     private long _filesSize;
     
     /**
@@ -141,12 +144,14 @@ public abstract class FileManager {
      * INVARIANT: _numFiles==number of elements of _files that are not null
      *  and not IncompleteFileDescs.
      */
+    @InspectablePrimitive
     private int _numFiles;
     
     /** 
      * The total number of files that are pending sharing.
      *  (ie: awaiting hashing or being added)
      */
+    @InspectablePrimitive
     private int _numPendingFiles;
     
     /**
@@ -154,12 +159,14 @@ public abstract class FileManager {
      * INVARIANT: _numFiles + _numIncompleteFiles == the number of
      *  elements of _files that are not null.
      */
+    @InspectablePrimitive
     private int _numIncompleteFiles;
     
     /**
      * The number of files that are forcibly shared over the network.
      * INVARIANT: _numFiles >= _numForcedFiles.
      */
+    @InspectablePrimitive
     private int _numForcedFiles;
     
     /**
@@ -185,6 +192,7 @@ public abstract class FileManager {
      * i, for all k in _files[i]._path where _files[i] is not an
      * IncompleteFileDesc, _keywordTrie.get(k) contains i.
      */
+    @InspectableForSize
     private StringTrie<IntSet> _keywordTrie;
     
     /**
@@ -222,6 +230,7 @@ public abstract class FileManager {
      * Incomplete shared files are NOT stored in this data structure, but are
      * instead in the _incompletesShared IntSet.
      */
+    @InspectableForSize
     private Map<File, IntSet> _sharedDirectories;
     
 	/**
@@ -229,6 +238,7 @@ public abstract class FileManager {
 	 * directories are shared by default and will be shared unless the File is
 	 * listed in SharingSettings.FILES_NOT_TO_SHARE.
 	 */
+    @InspectableForSize
 	private Set<File> _completelySharedDirectories;
 	
     /**
@@ -245,6 +255,7 @@ public abstract class FileManager {
      * others to retrieve all the incomplete shared files, which is
      * relatively useful.                                                                                                       
      */
+    @InspectableForSize
     private IntSet _incompletesShared;
     
     /**
@@ -259,22 +270,26 @@ public abstract class FileManager {
      * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
      * at the same time
      */
+    @InspectableForSize
     private Set<File> _transientSharedFiles = new HashSet<File>();
     
     /**
      * Individual files that are not in a shared folder.
      */
+    @InspectableForSize
     private Collection<File> _individualSharedFiles; 
     
     /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
+    @InspectablePrimitive
     protected volatile int _revision = 0;
     
     /**
      * The revision that finished loading all pending files.
      */
+    @InspectablePrimitive
     private volatile int _pendingFinished = -1;
     
     /**
@@ -285,6 +300,7 @@ public abstract class FileManager {
     /**
      * If true, indicates that the FileManager is currently updating.
      */
+    @InspectablePrimitive
     private volatile boolean _isUpdating = false;
     
     /**

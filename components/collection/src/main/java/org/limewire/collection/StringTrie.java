@@ -356,6 +356,16 @@ public class StringTrie<V> {
     public Iterator<V> getIterator() {
         return new ValueIterator(root);
     }
+    
+    /**
+     * @return the number of values stored in the trie.
+     */
+    public int size() {
+        int ret = 0;
+        for (Iterator<V> iter = getIterator();iter.hasNext();)
+            ret++;
+        return ret;
+    }
 
     /**
      * Returns all the (non-null) values associated with a given
