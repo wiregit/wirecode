@@ -2405,15 +2405,17 @@ public abstract class FileManager {
             }
         };
 
-        /** An inspectable that returns stats about hits & uploads */
+        /** An inspectable that returns stats about hits, uploads & alts */
         public final Inspectable FDS = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 addVersion(ret);
                 ArrayList<Double> hits = new ArrayList<Double>();
                 ArrayList<Double> uploads = new ArrayList<Double>();
+                ArrayList<Double> alts = new ArrayList<Double>();
                 Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
                 Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
+                Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
                 synchronized(FileManager.this) {
                     FileDesc[] fds = getAllSharedFileDescriptors();
                     hits.ensureCapacity(fds.length);
@@ -2421,30 +2423,39 @@ public abstract class FileManager {
                     for(int i = 0; i < fds.length; i++) {
                         if (fds[i] instanceof IncompleteFileDesc)
                             continue;
+                        // locking FM->ALM ok.
+                        int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn()); 
 
                         hits.add((double)fds[i].getHitCount());
                         uploads.add((double)fds[i].getAttemptedUploads());
+                        alts.add((double)numAlts);
                         topHitsFDs.put(fds[i].getHitCount(), fds[i]);
                         topUpsFDs.put(fds[i].getAttemptedUploads(), fds[i]);
+                        topAltsFDs.put(numAlts,fds[i]);
                     }
                 }
                 ret.put("hits",StatsUtils.quickStatsDouble(hits).getMap());
                 ret.put("ups",StatsUtils.quickStatsDouble(uploads).getMap());
-                
+                ret.put("alts", StatsUtils.quickStatsDouble(uploads).getMap());
                 QueryRouteTable topHits = new QueryRouteTable();
                 QueryRouteTable topUps = new QueryRouteTable();
+                QueryRouteTable topAlts = new QueryRouteTable();
                 Iterator<FileDesc> hitIter = topHitsFDs.values().iterator();
                 Iterator<FileDesc> upIter = topUpsFDs.values().iterator();
+                Iterator<FileDesc> altIter = topAltsFDs.values().iterator();
                 for (int i = 0; i < 10; i++) {
                     if (hitIter.hasNext())
                         topHits.add(hitIter.next().getPath());
                     if (upIter.hasNext())
                         topUps.add(upIter.next().getPath());
+                    if (altIter.hasNext())
+                        topAlts.add(altIter.next().getPath());
                 }
-                // we return both qrps, but since they will have very few entries
+                // we return all qrps, but since they will have very few entries
                 // they will compress very well
                 ret.put("hitsq",topHits.getRawDump());
                 ret.put("upsq",topUps.getRawDump());
+                ret.put("altsq",topAlts.getRawDump());
 
                 return ret;
             }
