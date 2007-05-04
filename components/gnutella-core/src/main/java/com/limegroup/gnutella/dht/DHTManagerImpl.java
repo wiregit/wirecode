@@ -312,11 +312,11 @@ public class DHTManagerImpl implements DHTManager {
                     synchronized(routeTable) {
                         BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
                         List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
-                        data.put("acc", StatsUtils.quickStats(activeContacts)); // 5*20 + 4
-                        data.put("accx",StatsUtils.quickStats(getXorDistances(local, activeContacts))); // 5*20 + 4
+                        data.put("acc", StatsUtils.quickStatsBigInt(activeContacts).getMap()); // 5*20 + 4
+                        data.put("accx",StatsUtils.quickStatsBigInt(getXorDistances(local, activeContacts)).getMap()); // 5*20 + 4
                         List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
-                        data.put("ccc", StatsUtils.quickStats(cachedContacts)); // 5*20 + 4
-                        data.put("cccx", StatsUtils.quickStats(getXorDistances(local, cachedContacts))); // 5*20 + 4
+                        data.put("ccc", StatsUtils.quickStatsBigInt(cachedContacts).getMap()); // 5*20 + 4
+                        data.put("cccx", StatsUtils.quickStatsBigInt(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
                     }
                 }
                 return data;
@@ -352,11 +352,11 @@ public class DHTManagerImpl implements DHTManager {
                         }
                         
                         // bucket kuid distribution *should* be similar to the others, but is it?
-                        data.put("bk", StatsUtils.quickStats(kuids)); // 5*20 + 4
-                        data.put("bkx", StatsUtils.quickStats(getXorDistances(local, kuids))); // 5*20 + 4
-                        data.put("bd", StatsUtils.quickStatsDouble(depths)); // 5*(should be one byte) + 4
-                        data.put("bs", StatsUtils.quickStatsDouble(sizes)); // 5*(should be one byte) + 4
-                        data.put("bt", StatsUtils.quickStatsDouble(times)); // 5*(should be one byte) + 4
+                        data.put("bk", StatsUtils.quickStatsBigInt(kuids).getMap()); // 5*20 + 4
+                        data.put("bkx", StatsUtils.quickStatsBigInt(getXorDistances(local, kuids)).getMap()); // 5*20 + 4
+                        data.put("bd", StatsUtils.quickStatsDouble(depths).getMap()); // 5*(should be one byte) + 4
+                        data.put("bs", StatsUtils.quickStatsDouble(sizes).getMap()); // 5*(should be one byte) + 4
+                        data.put("bt", StatsUtils.quickStatsDouble(times).getMap()); // 5*(should be one byte) + 4
                         data.put("bfr", (int)(100 * fresh / buckets.size())); // fresh buckets %
                     }
                 }
@@ -414,9 +414,9 @@ public class DHTManagerImpl implements DHTManager {
                     }
 
                     List<BigInteger> storedXorDistances = getXorDistances(local, primaryKeys);
-                    data.put("dsk", StatsUtils.quickStats(primaryKeys)); // 5*20 + 4
-                    data.put("drl", StatsUtils.quickStatsDouble(requestLoads)); // 5*4 + 4
-                    data.put("dskx", StatsUtils.quickStats(storedXorDistances)); // 5*20 + 4
+                    data.put("dsk", StatsUtils.quickStatsBigInt(primaryKeys).getMap()); // 5*20 + 4
+                    data.put("drl", StatsUtils.quickStatsDouble(requestLoads).getMap()); // 5*4 + 4
+                    data.put("dskx", StatsUtils.quickStatsBigInt(storedXorDistances).getMap()); // 5*20 + 4
                 }
                 return data;
             }

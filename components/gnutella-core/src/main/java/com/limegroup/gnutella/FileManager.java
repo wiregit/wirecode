@@ -2380,15 +2380,14 @@ public abstract class FileManager {
 
     /** A bunch of inspectables for FileManager */
     private class FMInspectables {
-        private static final int VERSION = 1;
+        /*
+         * 1 - used to create smaller qrp table
+         * 2 - just sends the current table
+         */
+        private static final int VERSION = 2;
         private void addVersion(Map<String, Object> m) {
             m.put("ver", VERSION);
         }
-
-        // use a small qrt that can fit in an udp packet when compressed
-        // yet is only 1/4 of the size of the "production" one
-        private static final int QRP_SIZE = 2 * 8 * 1024; //2kb
-
 
         /** An inspectable that returns some info about the QRP */
         public final Inspectable QRP = new Inspectable() {
@@ -2398,21 +2397,9 @@ public abstract class FileManager {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 addVersion(ret);
 
-
-                QueryRouteTable qrt = new QueryRouteTable(QRP_SIZE); //2kb 
                 synchronized(FileManager.this) {
-                    FileDesc[] fds = getAllSharedFileDescriptors();
-                    for(int i = 0; i < fds.length; i++) {
-                        if (fds[i] instanceof IncompleteFileDesc)
-                            continue;
-
-                        qrt.add(fds[i].getPath());
-                    }
-                    // also return % full the production qrp is so we have an idea
-                    // how much accuracy was lost
-                    ret.put("pf", Double.doubleToLongBits(_queryRouteTable.getPercentFull()));
+                    ret.put("qrt",getQRT().getRawDump());
                 }
-                ret.put("qrt",qrt.getRawDump());
 
                 return ret;
             }
@@ -2441,11 +2428,11 @@ public abstract class FileManager {
                         topUpsFDs.put(fds[i].getAttemptedUploads(), fds[i]);
                     }
                 }
-                ret.put("hits",StatsUtils.quickStatsDouble(hits));
-                ret.put("ups",StatsUtils.quickStatsDouble(uploads));
-
-                QueryRouteTable topHits = new QueryRouteTable(QRP_SIZE);
-                QueryRouteTable topUps = new QueryRouteTable(QRP_SIZE);
+                ret.put("hits",StatsUtils.quickStatsDouble(hits).getMap());
+                ret.put("ups",StatsUtils.quickStatsDouble(uploads).getMap());
+                
+                QueryRouteTable topHits = new QueryRouteTable();
+                QueryRouteTable topUps = new QueryRouteTable();
                 Iterator<FileDesc> hitIter = topHitsFDs.values().iterator();
                 Iterator<FileDesc> upIter = topUpsFDs.values().iterator();
                 for (int i = 0; i < 10; i++) {
