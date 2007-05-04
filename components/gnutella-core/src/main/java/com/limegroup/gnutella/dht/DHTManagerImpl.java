@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import org.limewire.mojito.settings.ContextSettings;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.StatsUtils;
 
 /**
  * This DHT manager starts either an active or a passive DHT controller.
@@ -308,11 +308,11 @@ public class DHTManagerImpl implements DHTManager {
                     synchronized(routeTable) {
                         BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
                         List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
-                        data.put("acc",quickStats(activeContacts)); // 5*20 + 4
-                        data.put("accx",quickStats(getXorDistances(local, activeContacts))); // 5*20 + 4
+                        data.put("acc", StatsUtils.quickStats(activeContacts)); // 5*20 + 4
+                        data.put("accx",StatsUtils.quickStats(getXorDistances(local, activeContacts))); // 5*20 + 4
                         List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
-                        data.put("ccc", quickStats(cachedContacts)); // 5*20 + 4
-                        data.put("cccx", quickStats(getXorDistances(local, cachedContacts))); // 5*20 + 4
+                        data.put("ccc", StatsUtils.quickStats(cachedContacts)); // 5*20 + 4
+                        data.put("cccx", StatsUtils.quickStats(getXorDistances(local, cachedContacts))); // 5*20 + 4
                     }
                 }
                 return data;
@@ -348,11 +348,11 @@ public class DHTManagerImpl implements DHTManager {
                         }
                         
                         // bucket kuid distribution *should* be similar to the others, but is it?
-                        data.put("bk", quickStats(kuids)); // 5*20 + 4
-                        data.put("bkx", quickStats(getXorDistances(local, kuids))); // 5*20 + 4
-                        data.put("bd", quickStats(depths)); // 5*(should be one byte) + 4
-                        data.put("bs", quickStats(sizes)); // 5*(should be one byte) + 4
-                        data.put("bt", quickStats(times)); // 5*(should be one byte) + 4
+                        data.put("bk", StatsUtils.quickStats(kuids)); // 5*20 + 4
+                        data.put("bkx", StatsUtils.quickStats(getXorDistances(local, kuids))); // 5*20 + 4
+                        data.put("bd", StatsUtils.quickStats(depths)); // 5*(should be one byte) + 4
+                        data.put("bs", StatsUtils.quickStats(sizes)); // 5*(should be one byte) + 4
+                        data.put("bt", StatsUtils.quickStats(times)); // 5*(should be one byte) + 4
                         data.put("bfr", (int)(100 * fresh / buckets.size())); // fresh buckets %
                     }
                 }
@@ -413,9 +413,9 @@ public class DHTManagerImpl implements DHTManager {
                     }
 
                     List<BigInteger> storedXorDistances = getXorDistances(local, primaryKeys);
-                    data.put("dsk", quickStats(primaryKeys)); // 5*20 + 4
-                    data.put("drl", quickStats(requestLoads)); // 5*4 + 4
-                    data.put("dskx", quickStats(storedXorDistances)); // 5*20 + 4
+                    data.put("dsk", StatsUtils.quickStats(primaryKeys)); // 5*20 + 4
+                    data.put("drl", StatsUtils.quickStats(requestLoads)); // 5*4 + 4
+                    data.put("dskx", StatsUtils.quickStats(storedXorDistances)); // 5*20 + 4
                 }
                 return data;
             }
@@ -470,70 +470,5 @@ public class DHTManagerImpl implements DHTManager {
         for (Contact node : nodes) 
             bigints.add(node.getNodeID().toBigInteger());
         return bigints;
-    }
-    
-    /**
-     * @return the number, average, variance, min, median and max of a
-     * list of numbers
-     */
-    private static Map<String, Object> quickStats(List<BigInteger> l) {
-        Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("num",l.size());
-        
-        if (l.size() < 2) // too small for stats
-            return ret;
-        
-        Collections.sort(l);
-        
-        ret.put("min",l.get(0).toByteArray());
-        ret.put("max",l.get(l.size() -1).toByteArray());
-        ret.put("med", getQuartile(2, l).toByteArray());
-        
-        if (l.size() > 6) {
-            // big enough to find outliers 
-            ret.put("Q1", getQuartile(1, l).toByteArray());
-            ret.put("Q3", getQuartile(3, l).toByteArray());
-        }
-        
-        BigInteger sum = BigInteger.valueOf(0);
-        for (BigInteger bi : l) 
-            sum = sum.add(bi);
-        
-        BigInteger avg = sum.divide(BigInteger.valueOf(l.size()));
-        ret.put("avg",avg.toByteArray());
-        
-        sum = BigInteger.valueOf(0);
-        for (BigInteger bi : l) {
-            BigInteger dist = bi.subtract(avg);
-            dist = dist.multiply(dist);
-            sum = sum.add(dist);
-        }
-        BigInteger variance = sum.divide(BigInteger.valueOf(l.size() - 1));
-        ret.put("var",variance.toByteArray());
-        return ret;
-    }
-    
-    /**
-     * the a specified quartile of a list of BigIntegers. It uses
-     * type 6 of the quantile() function in R as explained in the
-     * R help: 
-     * 
-     * "Type 6: p(k) = k / (n + 1). Thus p(k) = E[F(x[k])]. 
-     * This is used by Minitab and by SPSS." 
-     */
-    private static BigInteger getQuartile(int quartile, List<BigInteger> l) {
-        double q1 = (l.size()+1) * (quartile / 4.0);
-        int q1i = (int)q1;
-        if (q1 - q1i == 0) 
-            return l.get(q1i - 1);
-        
-        int quart = (int)(4 * (q1 - q1i));
-        BigInteger q1a = l.get(q1i - 1);
-        BigInteger q1b = l.get(q1i);
-        q1b = q1b.subtract(q1a);
-        q1b = q1b.multiply(BigInteger.valueOf(quart)); //1st multiply, then divide
-        q1b = q1b.divide(BigInteger.valueOf(4)); // less precision is lost that way
-        q1a = q1a.add(q1b);
-        return q1a;
     }
 }

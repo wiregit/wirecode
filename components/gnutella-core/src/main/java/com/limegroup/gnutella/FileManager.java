@@ -15,11 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Comparators;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiCollection;
@@ -47,6 +49,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.util.StatsUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -375,6 +378,8 @@ public abstract class FileManager {
     
     private final QRPUpdater qrpUpdater = new QRPUpdater();
 
+    public final FMInspectables inspectables = new FMInspectables();
+    
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
@@ -1020,7 +1025,6 @@ public abstract class FileManager {
 	 * Always shares the given file.
 	 */
 	public void addFileAlways(File file) {
-        System.out.println(this._keywordTrie);
 		addFileAlways(file, EMPTY_DOCUMENTS, null);
 	}
 	
@@ -2373,32 +2377,88 @@ public abstract class FileManager {
             buildInProgress = false;
         }
     }
-    
-    /** An inspectable that returns some info about the QRP */
-    public final Inspectable QRP = new Inspectable() {
-        public Object inspect() {
-            Map<String, Object> ret = new HashMap<String, Object>();
-            ret.put("ver",1);
-            
-            
-            // create a small qrt that can fit in an udp packet when compressed
-            // yet is only 1/4 of the size of the "production" one
-            QueryRouteTable qrt = new QueryRouteTable(2 * 8 * 1024); //2kb 
-            synchronized(FileManager.this) {
-                FileDesc[] fds = getAllSharedFileDescriptors();
-                for(int i = 0; i < fds.length; i++) {
-                    if (fds[i] instanceof IncompleteFileDesc)
-                        continue;
-                    
-                    qrt.add(fds[i].getPath());
-                }
-                // also return % full the production qrp is so we have an idea
-                // how much accuracy was lost
-                ret.put("pf", (long)(_queryRouteTable.getPercentFull() * Integer.MAX_VALUE));
-            }
-            ret.put("qrt",qrt.getRawDump());
-            
-            return ret;
+
+    /** A bunch of inspectables for FileManager */
+    private class FMInspectables {
+        private static final int VERSION = 1;
+        private void addVersion(Map<String, Object> m) {
+            m.put("ver", VERSION);
         }
-    };
+
+        // use a small qrt that can fit in an udp packet when compressed
+        // yet is only 1/4 of the size of the "production" one
+        private static final int QRP_SIZE = 2 * 8 * 1024; //2kb
+
+
+        /** An inspectable that returns some info about the QRP */
+        public final Inspectable QRP = new Inspectable() {
+
+
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                addVersion(ret);
+
+
+                QueryRouteTable qrt = new QueryRouteTable(QRP_SIZE); //2kb 
+                synchronized(FileManager.this) {
+                    FileDesc[] fds = getAllSharedFileDescriptors();
+                    for(int i = 0; i < fds.length; i++) {
+                        if (fds[i] instanceof IncompleteFileDesc)
+                            continue;
+
+                        qrt.add(fds[i].getPath());
+                    }
+                    // also return % full the production qrp is so we have an idea
+                    // how much accuracy was lost
+                    ret.put("pf", Double.doubleToLongBits(_queryRouteTable.getPercentFull()));
+                }
+                ret.put("qrt",qrt.getRawDump());
+
+                return ret;
+            }
+        };
+
+        /** An inspectable that returns stats about hits & uploads */
+        public final Inspectable FDS = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                addVersion(ret);
+                List<Integer> hits = new ArrayList<Integer>();
+                List<Integer> uploads = new ArrayList<Integer>();
+                Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
+                Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
+                synchronized(FileManager.this) {
+                    FileDesc[] fds = getAllSharedFileDescriptors();
+                    for(int i = 0; i < fds.length; i++) {
+                        if (fds[i] instanceof IncompleteFileDesc)
+                            continue;
+
+                        hits.add(fds[i].getHitCount());
+                        uploads.add(fds[i].getAttemptedUploads());
+                        topHitsFDs.put(fds[i].getHitCount(), fds[i]);
+                        topUpsFDs.put(fds[i].getAttemptedUploads(), fds[i]);
+                    }
+                }
+                ret.put("hits",StatsUtils.quickStatsInt(hits));
+                ret.put("ups",StatsUtils.quickStatsInt(uploads));
+
+                QueryRouteTable topHits = new QueryRouteTable(QRP_SIZE);
+                QueryRouteTable topUps = new QueryRouteTable(QRP_SIZE);
+                Iterator<FileDesc> hitIter = topHitsFDs.values().iterator();
+                Iterator<FileDesc> upIter = topUpsFDs.values().iterator();
+                for (int i = 0; i < 10; i++) {
+                    if (hitIter.hasNext())
+                        topHits.add(hitIter.next().getPath());
+                    if (upIter.hasNext())
+                        topUps.add(upIter.next().getPath());
+                }
+                // we return both qrps, but since they will have very few entries
+                // they will compress very well
+                ret.put("hitsq",topHits.getRawDump());
+                ret.put("upsq",topHits.getRawDump());
+
+                return ret;
+            }
+        };
+    }
 }

@@ -20,6 +20,11 @@ public final class Comparators {
     private static final Comparator<Integer> INT_COMPARATOR = new IntComparator();
 
     /**
+     * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s the opposite way.
+     */
+    private static final Comparator<Integer> INVERSE_INT_COMPARATOR = new InverseIntComparator();
+    
+    /**
      * <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
      */
     private static final Comparator<Long> LONG_COMPARATOR = new LongComparator();
@@ -63,6 +68,10 @@ public final class Comparators {
      */
     public static Comparator<Integer> integerComparator() {
         return INT_COMPARATOR;
+    }
+    
+    public static Comparator<Integer> inverseIntegerComparator() {
+        return INVERSE_INT_COMPARATOR;
     }
     
     /**
@@ -138,6 +147,16 @@ public final class Comparators {
             
         public int compare(Integer o1, Integer o2) {
             return intCompareTo(o1, o2);
+        }
+    }
+    
+    /**
+     * Compares two Integers the opposite way. 
+     */
+    private static final class InverseIntComparator implements
+    Comparator<Integer> {
+        public int compare(Integer o1, Integer o2) {
+            return -intCompareTo(o1, o2);
         }
     }
 
