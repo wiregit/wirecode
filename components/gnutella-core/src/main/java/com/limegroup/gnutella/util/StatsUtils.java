@@ -45,12 +45,21 @@ public class StatsUtils {
         ret.avg = sum.divide(BigInteger.valueOf(l.size()));
         
         sum = BigInteger.valueOf(0);
+        BigInteger sum3 = BigInteger.valueOf(0);
+        BigInteger sum4 = BigInteger.valueOf(0);
         for (BigInteger bi : l) {
             BigInteger dist = bi.subtract(ret.avg);
-            dist = dist.multiply(dist);
-            sum = sum.add(dist);
+            BigInteger dist2 = dist.multiply(dist);
+            BigInteger dist3 = dist2.multiply(dist);
+            BigInteger dist4 = dist2.multiply(dist2);
+            sum = sum.add(dist2);
+            sum3 = sum3.add(dist3);
+            sum4 = sum4.add(dist4);
         }
-        ret.var = sum.divide(BigInteger.valueOf(l.size() - 1));
+        BigInteger div = BigInteger.valueOf(l.size() - 1);
+        ret.m2 = sum.divide(div);
+        ret.m3 = sum3.divide(div);
+        ret.m4 = sum4.divide(div);
         return ret;
     }
     
@@ -80,13 +89,20 @@ public class StatsUtils {
         ret.avg = sum / l.size();
         
         sum = 0;
+        double sum3 = 0;
+        double sum4 = 0;
         for (double i : l) {
             double dist = i - ret.avg;
-            dist *= dist;
-            sum += dist;
+            double dist2 = dist * dist; 
+            double dist3 = dist2 * dist;
+            sum += dist2;
+            sum3 += dist3;
+            sum4 += (dist2 * dist2);
         }
-        ret.var = sum / (l.size() - 1);
-        
+        int div = l.size() - 1;
+        ret.m2 = sum / div;
+        ret.m3 = sum3 / div;
+        ret.m4 = sum4 / div;
         return ret;
     }
     
@@ -140,9 +156,15 @@ public class StatsUtils {
     
     /**
      * A stats object holding the minimum, maximum, median
-     * average, variance and quartiles 1 and 3.
+     * average, quartiles 1 and 3 and second, third and fourth central moments
      */
     public abstract static class Stats {
+        
+        /*
+         * first versioned version of this class.
+         * previous iterations used variance ("var") which is now "m2"
+         */ 
+        private static final int VERSION = 1;
         
         /** The number of elements described in this */
         int number;
@@ -152,6 +174,7 @@ public class StatsUtils {
          */
         public final Map<String, Object> getMap() {
             Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver", VERSION);
             ret.put("num", number);
             if (number < 2) // too small for stats
                 return ret;
@@ -159,7 +182,9 @@ public class StatsUtils {
             ret.put("max", getMax());
             ret.put("med", getMed());
             ret.put("avg", getAvg());
-            ret.put("var", getVar());
+            ret.put("M2", getM2());
+            ret.put("M3", getM3());
+            ret.put("M4", getM4());
             if (number > 6) {
                 ret.put("Q1", getQ1());
                 ret.put("Q3", getQ3());
@@ -177,7 +202,9 @@ public class StatsUtils {
         public abstract Object getAvg();
         public abstract Object getQ1();
         public abstract Object getQ3();
-        public abstract Object getVar();
+        public abstract Object getM2();
+        public abstract Object getM3();
+        public abstract Object getM4();
     }
     
     /**
@@ -185,7 +212,7 @@ public class StatsUtils {
      */
     public static class DoubleStats extends Stats {
         DoubleStats() {}
-        double min, max, med, q1, q3, avg, var;
+        double min, max, med, q1, q3, avg, m2, m3, m4;
         public Object getMin() {
             return Double.doubleToLongBits(min);
         }
@@ -204,8 +231,14 @@ public class StatsUtils {
         public Object getAvg() {
             return Double.doubleToLongBits(avg);
         }
-        public Object getVar() {
-            return Double.doubleToLongBits(var);
+        public Object getM2() {
+            return Double.doubleToLongBits(m2);
+        }
+        public Object getM3() {
+            return Double.doubleToLongBits(m3);
+        }
+        public Object getM4() {
+            return Double.doubleToLongBits(m4);
         }
     }
 
@@ -214,7 +247,7 @@ public class StatsUtils {
      */
     public static class BigIntStats extends Stats {
         BigIntStats(){}
-        BigInteger min, max, med, q1, q3, avg, var;
+        BigInteger min, max, med, q1, q3, avg, m2, m3, m4;
         public Object getMin() {
             return min.toByteArray();
         }
@@ -233,8 +266,14 @@ public class StatsUtils {
         public Object getAvg() {
             return avg.toByteArray();
         }
-        public Object getVar() {
-            return var.toByteArray();
+        public Object getM2() {
+            return m2.toByteArray();
+        }
+        public Object getM3() {
+            return m3.toByteArray();
+        }
+        public Object getM4() {
+            return m4.toByteArray();
         }
     }
 }
