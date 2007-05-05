@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -100,12 +102,14 @@ public class StatsUtilsTest extends LimeTestCase {
         kurtosis = s.m4;
     }
     
-    private void assertMatches(double expected, String key, Map<String, Object> stats) {
+    private void assertMatches(double expected, String key, Map<String, Object> stats) 
+    throws Exception {
         assertEquals(expected, get(key,stats));
     }
     
-    private double get(String key, Map<String,Object>stats) {
-        long value = Long.valueOf(stats.get(key).toString());
-        return Double.longBitsToDouble(value);
+    private double get(String key, Map<String,Object>stats) throws Exception {
+        byte [] b = (byte[])stats.get(key);
+        DataInputStream dais = new DataInputStream(new ByteArrayInputStream(b));
+        return Double.longBitsToDouble(dais.readLong());
     }
 }

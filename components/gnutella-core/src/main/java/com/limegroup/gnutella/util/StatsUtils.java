@@ -214,31 +214,49 @@ public class StatsUtils {
         DoubleStats() {}
         double min, max, med, q1, q3, avg, m2, m3, m4;
         public Object getMin() {
-            return Double.doubleToLongBits(min);
+            return doubleToBytes(min);
         }
         public Object getMax() {
-            return Double.doubleToLongBits(max);
+            return doubleToBytes(max);
         }
         public Object getMed() {
-            return Double.doubleToLongBits(med);
+            return doubleToBytes(med);
         }
         public Object getQ1() {
-            return Double.doubleToLongBits(q1);
+            return doubleToBytes(q1);
         }
         public Object getQ3() {
-            return Double.doubleToLongBits(q3);
+            return doubleToBytes(q3);
         }
         public Object getAvg() {
-            return Double.doubleToLongBits(avg);
+            return doubleToBytes(avg);
         }
         public Object getM2() {
-            return Double.doubleToLongBits(m2);
+            return doubleToBytes(m2);
         }
         public Object getM3() {
-            return Double.doubleToLongBits(m3);
+            return doubleToBytes(m3);
         }
         public Object getM4() {
-            return Double.doubleToLongBits(m4);
+            return doubleToBytes(m4);
+        }
+        
+        /**
+         * @return byte [] representation of a double, compatible
+         * with DataInputStream.readLong()
+         */
+        private byte [] doubleToBytes(double d) {
+            byte [] writeBuffer = new byte[8];
+            long v = Double.doubleToLongBits(d);
+            writeBuffer[0] = (byte)(v >>> 56);
+            writeBuffer[1] = (byte)(v >>> 48);
+            writeBuffer[2] = (byte)(v >>> 40);
+            writeBuffer[3] = (byte)(v >>> 32);
+            writeBuffer[4] = (byte)(v >>> 24);
+            writeBuffer[5] = (byte)(v >>> 16);
+            writeBuffer[6] = (byte)(v >>>  8);
+            writeBuffer[7] = (byte)(v >>>  0);
+            return writeBuffer;
         }
     }
 
