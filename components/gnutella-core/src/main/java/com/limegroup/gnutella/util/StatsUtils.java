@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -152,6 +153,49 @@ public class StatsUtils {
         q1b = q1b - q1a;
         q1b = q1b * quartile.getType() / 4;
         return q1a+q1b;
+    }
+    
+    
+    /**
+     * Creates a histogram of the provided data.
+     * 
+     * @param data list of observations
+     * @param breaks # of breaks in the histogram
+     * @return List of integer values size of the breaks
+     */
+    public static List<Integer> getHistogram(List<Double> data, int breaks) {
+        List<Integer> ret = new ArrayList<Integer>(breaks);
+        for (int i = 0; i < breaks; i++)
+            ret.add(0);
+        double min = Collections.min(data);
+        double range = Collections.max(data) - min + 1;
+        double step = range / breaks;
+        for (double point : data) {
+            // Math.min necessary because rounding error -> AIOOBE
+            int index = Math.min((int)((point - min) / step), breaks - 1);
+            ret.set(index, ret.get(index)+1);
+        }
+        return ret;
+    }
+    
+    /**
+     * Same as getHistogram but operates on BigIntegers.
+     */
+    public static List<Integer> getHistogramBigInt(List<BigInteger> data, int breaks) {
+        List<Integer> ret = new ArrayList<Integer>(breaks);
+        for (int i = 0; i < breaks; i++)
+            ret.add(0);
+        BigInteger min = Collections.min(data);
+        BigInteger max = Collections.max(data);
+        BigInteger range = max.subtract(min).add(BigInteger.valueOf(1));
+        BigInteger step = range.divide(BigInteger.valueOf(breaks));
+        for (BigInteger point : data) {
+            int index = point.subtract(min).divide(step).intValue();
+            // Math.min necessary because rounding error -> AIOOBE
+            index = Math.min(index, breaks - 1);
+            ret.set(index, ret.get(index)+1);
+        }
+        return ret;
     }
     
     /**

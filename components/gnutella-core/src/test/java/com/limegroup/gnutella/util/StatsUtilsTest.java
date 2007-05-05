@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,79 @@ public class StatsUtilsTest extends LimeTestCase {
         s = StatsUtils.quickStatsDouble(l);
         assertLessThan(kurtosis, s.m4);
         kurtosis = s.m4;
+    }
+    
+    public void testHistogram() throws Exception {
+        List<Double> l = new ArrayList<Double>();
+        for (int x = 0; x < 20; x++)
+            l.add((double)x);
+        
+        List<Integer> hist = StatsUtils.getHistogram(l, 2);
+        assertEquals(Integer.valueOf(10), hist.get(0));
+        assertEquals(Integer.valueOf(10), hist.get(1));
+        
+        hist = StatsUtils.getHistogram(l, 10);
+        assertEquals(10,hist.size());
+        for (int i : hist)
+            assertEquals(2, i);
+        
+        hist = StatsUtils.getHistogram(l, 20);
+        assertEquals(20,hist.size());
+        for (int i : hist)
+            assertEquals(1, i);
+        
+        // a histogram with more breaks than data points will have
+        // some of them 0
+        hist = StatsUtils.getHistogram(l, 40); //1,0,1,0,1,0...
+        for (int i = 0; i < 40; i++) {
+            if (i % 2 == 0)
+                assertEquals(Integer.valueOf(1), hist.get(i));
+            else
+                assertEquals(Integer.valueOf(0), hist.get(i));
+        }
+        
+        // now test with BigIntegers 
+        // Long.MAX_VALUE, power 2, power 3... power 10
+        List<BigInteger> big = new ArrayList<BigInteger>();
+        for (int i = 0; i < 10; i++) {
+            BigInteger v = BigInteger.valueOf(Long.MAX_VALUE);
+            int power = i;
+            while (power-- > 0)
+                v = v.multiply(v);
+            big.add(v);
+        }
+        
+        // we have 1000 breaks, but the values are powers, so most will
+        // be in the first step and one in the last
+        hist = StatsUtils.getHistogramBigInt(big, 1000);
+        assertEquals(Integer.valueOf(9), hist.get(0));
+        assertEquals(Integer.valueOf(1), hist.get(999));
+        for (int i = 1; i< 999; i++)
+            assertEquals(Integer.valueOf(0),hist.get(i));
+        
+        // try less spread out big ints
+        // 0, Long.MAX_VALUE, *4, *9, *16...
+        big.clear();
+        for (int i = 0; i < 10; i++) {
+            BigInteger v = BigInteger.valueOf(Long.MAX_VALUE);
+            v = v.multiply(BigInteger.valueOf(i * i));
+            big.add(v);
+        }
+
+        // with 9^2 breaks there should be an entry in each square slot
+        // except the last one which will fall into 80 because of rounding
+        hist = StatsUtils.getHistogramBigInt(big, 81);
+        assertEquals(Integer.valueOf(1), hist.get(80));
+        // all others should be 0
+        for (int i = 0; i < 80; i++) {
+            
+            double root = Math.sqrt(i);
+            if (root - (int)(root) != 0)
+                assertEquals(Integer.valueOf(0), hist.get(i));
+            else
+                assertEquals(Integer.valueOf(1), hist.get(i));
+        }
+        
     }
     
     private void assertMatches(double expected, String key, Map<String, Object> stats) 
