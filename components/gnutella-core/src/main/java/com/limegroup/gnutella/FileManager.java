@@ -2454,8 +2454,11 @@ public abstract class FileManager {
                 }
             }
             ret.put("hits",StatsUtils.quickStatsDouble(hits).getMap());
+            ret.put("hitsh", StatsUtils.getHistogram(hits, 10)); // small, will compress
             ret.put("ups",StatsUtils.quickStatsDouble(uploads).getMap());
-            ret.put("alts", StatsUtils.quickStatsDouble(uploads).getMap());
+            ret.put("upsh", StatsUtils.getHistogram(uploads, 10));
+            ret.put("alts", StatsUtils.quickStatsDouble(alts).getMap());
+            ret.put("altsh", StatsUtils.getHistogram(alts, 10));
             QueryRouteTable topHits = new QueryRouteTable();
             QueryRouteTable topUps = new QueryRouteTable();
             QueryRouteTable topAlts = new QueryRouteTable();

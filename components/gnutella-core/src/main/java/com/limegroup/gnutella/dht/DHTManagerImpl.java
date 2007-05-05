@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -447,6 +448,40 @@ public class DHTManagerImpl implements DHTManager {
               return ret;
           }
         };
+        
+        /** Histograms of the stored keys with various detail */
+        public Inspectable database10StoredHist = new DBHist(10);
+        public Inspectable database100StoredHist = new DBHist(100); // ~ 400 bytes uncompressed
+        public Inspectable database500StoredHist = new DBHist(500); // ~ 2kb uncompressed
+    }
+    
+    /**
+     * Inspectable that returns a histogram of the stored keys in the
+     * database with specified accuracy.
+     */
+    private class DBHist implements Inspectable {
+        private final int breaks;
+        /**
+         * @param breaks how many breaks should the histogram have.
+         */
+        DBHist(int breaks) {
+            this.breaks = breaks;
+        }
+        public Object inspect() {
+            MojitoDHT dht = getMojitoDHT();
+            if (dht != null) {
+                Database database = dht.getDatabase();
+                List<BigInteger> primaryKeys;
+                synchronized(database) {
+                    Set<KUID> keys = database.keySet();
+                    primaryKeys = new ArrayList<BigInteger>(keys.size());
+                    for (KUID primaryKey : keys) 
+                        primaryKeys.add(primaryKey.toBigInteger());
+                }
+                return StatsUtils.getHistogramBigInt(primaryKeys, breaks);
+            }
+            return Collections.emptyList();
+        }
     }
     
     /**
