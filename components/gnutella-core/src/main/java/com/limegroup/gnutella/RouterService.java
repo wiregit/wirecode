@@ -24,6 +24,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
@@ -341,12 +342,18 @@ public class RouterService {
 	/**
 	 * Long for the last time this host originated a query.
 	 */
+    @InspectablePrimitive
 	private static long _lastQueryTime = 0L;
 	
 	/**
 	 * Whether or not we are running at full power.
 	 */
+    @InspectablePrimitive
 	private static boolean _fullPower = true;
+    
+    /** The time when this finished starting. */
+    @InspectablePrimitive
+    public static long startTime;
 	
 	private static final byte [] MYGUID, MYBTGUID;
 	static {
@@ -595,6 +602,8 @@ public class RouterService {
             
             LOG.trace("STOP RouterService.");
             _state = StartStatus.STARTED;
+            
+            startTime = System.currentTimeMillis();
         }
 	}
 	

@@ -21,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableForSize;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
@@ -89,11 +91,13 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * Timestamp for the last time the user selected to disconnect.
      */
+    @InspectablePrimitive
     private volatile long _disconnectTime = -1;
     
     /**
      * Timestamp for the last time we started trying to connect
      */
+    @InspectablePrimitive
     private volatile long _connectTime = Long.MAX_VALUE;
 
     /**
@@ -101,28 +105,33 @@ public class ConnectionManager implements ConnectionAcceptor,
      * trying to automatically connect if the user has disconnected since that
      * time.
      */
+    @InspectablePrimitive
     private volatile long _automaticConnectTime = 0;
 
     /**
      * Flag for whether or not the auto-connection process is in effect.
      */
+    @InspectablePrimitive
     private volatile boolean _automaticallyConnecting;
 
     /**
      * Timestamp of our last successful connection.
      */
+    @InspectablePrimitive
     private volatile long _lastSuccessfulConnect = 0;
 
     /**
      * Timestamp of the last time we checked to verify that the user has a live
      * Internet connection.
      */
+    @InspectablePrimitive
     private volatile long _lastConnectionCheck = 0;
 
 
     /**
      * Counter for the number of connection attempts we've made.
      */
+    @InspectablePrimitive
     private volatile static int _connectionAttempts;
 
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
@@ -151,6 +160,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * The current number of connections we want to maintain.
      */
+    @InspectablePrimitive
     private volatile int _preferredConnections = -1;
 
     /**
@@ -168,6 +178,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * we have decided not to connect to.
      * LOCKING: this 
      */
+    @InspectableForSize
     private final Map<Integer, List<Endpoint>> classCNetworks = 
         new HashMap<Integer,List<Endpoint>>();
     
@@ -249,6 +260,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 * to become an Ultrapeer that we were told to become leaves.  If this
 	 * number is too great, we give up and become a leaf.
 	 */
+    @InspectablePrimitive
 	private volatile int _leafTries;
 
 	/**
@@ -256,6 +268,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 * a leaf -- this number depends on how good this potential Ultrapeer seems
 	 * to be.
 	 */
+    @InspectablePrimitive
 	private volatile int _demotionLimit = 0;
 
     /**
