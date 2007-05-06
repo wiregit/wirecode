@@ -2,19 +2,25 @@ package com.limegroup.gnutella.spam;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
@@ -22,6 +28,7 @@ import org.limewire.util.GenericsUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.util.StatsUtils;
 
 public class RatingTable {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
@@ -33,6 +40,8 @@ public class RatingTable {
 	private static final int MAX_SIZE = 50000;
 
 	private static final RatingTable INSTANCE = new RatingTable();
+    
+    public final Object inspectables = new RatingTableInspectables();
 
 	/**
 	 * @return single instance of this
@@ -297,4 +306,75 @@ public class RatingTable {
 	private static File getSpamDat() {
 	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
 	}
+private static class RatingTableInspectables {
+        
+        private static final int VERSION = 1;
+        private static void addVersion(Map<String, Object> m) {
+            m.put("ver", VERSION);
+        }
+        
+        /** Inspectable with some stats about tokens */
+        public static final Inspectable TOKEN_STAT = new Inspectable() {
+            public Object inspect() {
+                synchronized(INSTANCE) {
+                    Map<String, Object> ret = new HashMap<String, Object>();
+                    addVersion(ret);
+                    List<Double> ratings = new ArrayList<Double>(INSTANCE._tokenMap.size());
+                    List<Double> types = new ArrayList<Double>(INSTANCE._tokenMap.size());
+                    List<Double> importance = new ArrayList<Double>(INSTANCE._tokenMap.size());
+                    List<Double> ratingToType = new ArrayList<Double>(INSTANCE._tokenMap.size());
+                    for (Token t : INSTANCE._tokenMap.values()) {
+                        ratings.add((double)t.getRating());
+                        types.add((double)t.getType());
+                        importance.add(t.getImportance());
+                        ratingToType.add((double)t.getRating() - t.getType());
+                    }
+
+                    ret.put("ratings", StatsUtils.quickStatsDouble(ratings).getMap());
+                    ret.put("types", StatsUtils.quickStatsDouble(ratings).getMap());
+                    ret.put("imp", StatsUtils.quickStatsDouble(ratings).getMap());
+                    ret.put("r2tt", StatsUtils.quickStatsDouble(ratings).getTTestMap());
+                    return ret;
+                }
+            }
+        };
+
+        /** Inspectable that returns a hash of the tokens */
+        public static final Inspectable TOKEN_HASH = new Inspectable() {
+            public Object inspect() {
+                synchronized(INSTANCE) {
+                    Map<String, Object> ret = new HashMap<String, Object>();
+                    addVersion(ret);
+                    final float spamTreshold = Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
+                            SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+                    Set<Token> spam = new TreeSet<Token>(new Comparator<Token>() {
+                        public int compare(Token a, Token b) {
+                            // higher rating first
+                            return -Float.compare(a.getRating(), b.getRating());
+                        }
+                    });
+                    spam.addAll(INSTANCE._tokenMap.values());
+                    int written = 0;
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    DataOutputStream daos = new DataOutputStream(baos);
+                    try {
+                        for (Token t : spam) {
+                            // 8 bytes per entry, limit size to 2kb uncompressed
+                            float rating = t.getRating();
+                            if (rating < spamTreshold || written++ > 250)
+                                break;
+                            daos.writeFloat(rating);
+                            daos.writeInt(t.hashCode());
+                        }
+                        daos.flush();
+                        daos.close();
+                        ret.put("dump", baos.toByteArray());
+                    } catch (IOException impossible) {
+                        ret.put("error", impossible.toString());
+                    }
+                    return ret;
+                }
+            }
+        };
+    }
 }
