@@ -2432,9 +2432,14 @@ public abstract class FileManager {
                 FileDesc[] fds = getAllSharedFileDescriptors();
                 hits.ensureCapacity(fds.length);
                 uploads.ensureCapacity(fds.length);
+                int rare = 0;
+                int total = 0;
                 for(int i = 0; i < fds.length; i++) {
                     if (fds[i] instanceof IncompleteFileDesc)
                         continue;
+                    total++;
+                    if (fds[i].isRareFile())
+                        rare++;
                     // locking FM->ALM ok.
                     int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn());
                     if (!nonZero || numAlts > 0) {
@@ -2452,6 +2457,7 @@ public abstract class FileManager {
                         topUpsFDs.put(upCount, fds[i]);
                     }
                 }
+                ret.put("rare",Double.doubleToLongBits((double)rare / total));
             }
             ret.put("hits",StatsUtils.quickStatsDouble(hits).getMap());
             ret.put("hitsh", StatsUtils.getHistogram(hits, 10)); // small, will compress
