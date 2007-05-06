@@ -2422,9 +2422,16 @@ public abstract class FileManager {
         public Object inspect() {
             Map<String, Object> ret = new HashMap<String, Object>();
             ret.put("ver", FMInspectables.VERSION);
+            // the actual values
             ArrayList<Double> hits = new ArrayList<Double>();
             ArrayList<Double> uploads = new ArrayList<Double>();
             ArrayList<Double> alts = new ArrayList<Double>();
+            
+            // differences for t-test 
+            ArrayList<Double> altsHits = new ArrayList<Double>();
+            ArrayList<Double> altsUploads = new ArrayList<Double>();
+            ArrayList<Double> hitsUpload = new ArrayList<Double>();
+            
             Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
@@ -2456,6 +2463,14 @@ public abstract class FileManager {
                         uploads.add((double)upCount);
                         topUpsFDs.put(upCount, fds[i]);
                     }
+                    
+                    // populate differences
+                    if (hits.size() >= i && uploads.size() >=i)
+                        hitsUpload.add(hits.get(i-1) - uploads.get(i - 1));
+                    if (hits.size() >= i && alts.size() >=i)
+                        altsHits.add(alts.get(i-1) - hits.get(i - 1));
+                    if (alts.size() >= i && uploads.size() >= i)
+                        altsUploads.add(alts.get(i-1)  - uploads.get(i - 1));
                 }
                 ret.put("rare",Double.doubleToLongBits((double)rare / total));
             }
@@ -2465,6 +2480,12 @@ public abstract class FileManager {
             ret.put("upsh", StatsUtils.getHistogram(uploads, 10));
             ret.put("alts", StatsUtils.quickStatsDouble(alts).getMap());
             ret.put("altsh", StatsUtils.getHistogram(alts, 10));
+            
+            // t-test values
+            ret.put("hut",StatsUtils.quickStatsDouble(hitsUpload).getTTestMap());
+            ret.put("aht",StatsUtils.quickStatsDouble(altsHits).getTTestMap());
+            ret.put("aut",StatsUtils.quickStatsDouble(altsUploads).getTTestMap());
+            
             QueryRouteTable topHits = new QueryRouteTable();
             QueryRouteTable topUps = new QueryRouteTable();
             QueryRouteTable topAlts = new QueryRouteTable();

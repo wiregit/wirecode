@@ -83,6 +83,21 @@ public class StatsUtils {
             ret.q3 = getQuartile(Quartile.Q3, l);
         }
         
+        double mode = l.get(0);
+        double current = l.get(0);
+        int occurences = 0;
+        int currentOccurences = 0;
+        for (int i = 1; i < l.size(); i++) {
+            if (l.get(i) == current) 
+                currentOccurences++;
+            current = l.get(i);
+            if (currentOccurences > occurences) {
+                occurences = currentOccurences;
+                mode = current;
+            }
+        }
+        ret.mode = mode;
+        
         double sum = 0;
         for (double i : l) 
             sum += i;
@@ -229,10 +244,24 @@ public class StatsUtils {
             ret.put("M2", getM2());
             ret.put("M3", getM3());
             ret.put("M4", getM4());
+            ret.put("mode", getMode());
             if (number > 6) {
                 ret.put("Q1", getQ1());
                 ret.put("Q3", getQ3());
             }
+            return ret;
+        }
+        
+        /** 
+         * @return subset of the information necessary to do 
+         * a t-test  http://en.wikipedia.org/wiki/Student's_t-test 
+         */
+        public final Map<String, Object> getTTestMap() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver", VERSION);
+            ret.put("num", number);
+            ret.put("avg", getAvg());
+            ret.put("M2", getM2());
             return ret;
         }
         
@@ -249,6 +278,7 @@ public class StatsUtils {
         public abstract Object getM2();
         public abstract Object getM3();
         public abstract Object getM4();
+        public abstract Object getMode();
     }
     
     /**
@@ -256,7 +286,7 @@ public class StatsUtils {
      */
     public static class DoubleStats extends Stats {
         DoubleStats() {}
-        double min, max, med, q1, q3, avg, m2, m3, m4;
+        double min, max, med, q1, q3, avg, m2, m3, m4, mode;
         public Object getMin() {
             return doubleToBytes(min);
         }
@@ -284,6 +314,9 @@ public class StatsUtils {
         public Object getM4() {
             return doubleToBytes(m4);
         }
+        public Object getMode() {
+            return doubleToBytes(mode);
+        }
         
         /**
          * @return byte [] representation of a double, compatible
@@ -309,7 +342,7 @@ public class StatsUtils {
      */
     public static class BigIntStats extends Stats {
         BigIntStats(){}
-        BigInteger min, max, med, q1, q3, avg, m2, m3, m4;
+        BigInteger min, max, med, q1, q3, avg, m2, m3, m4, mode;
         public Object getMin() {
             return min.toByteArray();
         }
@@ -336,6 +369,9 @@ public class StatsUtils {
         }
         public Object getM4() {
             return m4.toByteArray();
+        }
+        public Object getMode() {
+            return mode.toByteArray();
         }
     }
 }

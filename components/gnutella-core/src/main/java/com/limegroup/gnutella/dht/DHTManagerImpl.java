@@ -401,16 +401,25 @@ public class DHTManagerImpl implements DHTManager {
                     
                     List<BigInteger> primaryKeys = null;
                     List<Double> requestLoads = null;
+                    List<BigInteger> distanceToLoad = null;
                     synchronized (database) {
                         data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
                         Set<KUID> keys = database.keySet();
                         
                         primaryKeys = new ArrayList<BigInteger>(keys.size());
                         requestLoads = new ArrayList<Double>(keys.size());
+                        distanceToLoad = new ArrayList<BigInteger>(keys.size());
                         
                         for (KUID primaryKey : keys) {
-                            primaryKeys.add(primaryKey.toBigInteger());
-                            requestLoads.add((double)database.getRequestLoad(primaryKey, false));
+                            BigInteger big = primaryKey.toBigInteger();
+                            double load = database.getRequestLoad(primaryKey, false);
+                            primaryKeys.add(big);
+                            requestLoads.add(load);
+                            if (local.equals(big))
+                                continue;
+                            big = local.xor(big);
+                            long bigLoad = (long) (load * Integer.MAX_VALUE);
+                            distanceToLoad.add(big.subtract(BigInteger.valueOf(bigLoad)));
                         }
                     }
 
@@ -418,6 +427,7 @@ public class DHTManagerImpl implements DHTManager {
                     data.put("dsk", StatsUtils.quickStatsBigInt(primaryKeys).getMap()); // 5*20 + 4
                     data.put("drl", StatsUtils.quickStatsDouble(requestLoads).getMap()); // 5*4 + 4
                     data.put("dskx", StatsUtils.quickStatsBigInt(storedXorDistances).getMap()); // 5*20 + 4
+                    data.put("dxlt", StatsUtils.quickStatsBigInt(distanceToLoad).getTTestMap());
                 }
                 return data;
             }
