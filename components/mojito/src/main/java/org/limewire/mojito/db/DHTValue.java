@@ -55,9 +55,9 @@ public interface DHTValue extends Serializable {
     public void write(OutputStream out) throws IOException;
 
     /**
-     * Returns true if this is an empty value
+     * Returns the size of the value payload in byte
      */
-    public boolean isEmpty();
+    public int size();
 
     /**
      * An implementation of DHTValue that has no payload
@@ -86,8 +86,8 @@ public interface DHTValue extends Serializable {
             return Version.ZERO;
         }
 
-        public boolean isEmpty() {
-            return true;
+        public int size() {
+            return 0;
         }
         
         public String toString() {

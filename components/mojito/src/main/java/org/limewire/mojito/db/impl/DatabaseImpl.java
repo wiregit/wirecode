@@ -177,7 +177,7 @@ public class DatabaseImpl implements Database {
             return false;
         }
         
-        if (entity.getValue().isEmpty()) {
+        if (entity.getValue().size() == 0) {
             return remove(entity.getPrimaryKey(), entity.getSecondaryKey()) != null;
         } else {
             return add(entity);

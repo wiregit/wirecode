@@ -77,7 +77,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         }
         
         // It's not possible to remove a value indirectly
-        if (!entity.isDirect() && entity.getValue().isEmpty()) {
+        if (!entity.isDirect() && entity.getValue().size() == 0) {
             return false;
         }
         

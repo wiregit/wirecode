@@ -98,10 +98,10 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
 
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#isEmpty()
+     * @see org.limewire.mojito.db.DHTValue#size()
      */
-    public boolean isEmpty() {
-        return false;
+    public int size() {
+        return getValue().length;
     }
     
     /**

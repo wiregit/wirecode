@@ -106,11 +106,12 @@ public class DHTValueImpl implements DHTValue {
         return copy;
     }
     
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#isEmpty()
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValue#size()
      */
-    public boolean isEmpty() {
-        return value.length == 0;
+    public int size() {
+        return value.length;
     }
     
     public int hashCode() {
@@ -136,7 +137,7 @@ public class DHTValueImpl implements DHTValue {
         buffer.append("Version: ").append(getVersion()).append("\n");
         
         buffer.append("Value: ");
-        if (isEmpty()) {
+        if (size() == 0) {
             buffer.append("This is an empty value (REMOVE operation)");
         } else {
             try {

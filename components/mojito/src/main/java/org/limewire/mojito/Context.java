@@ -1032,7 +1032,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         // And if we're not bootstrapped then return a fake Future
         // and let the DHTValueManager do its work once we're bootstrapped
         } else {
-            String operation = entity.getValue().isEmpty() ? "remove()" : "put()";
+            String operation = (entity.getValue().size() == 0) ? "remove()" : "put()";
             Exception ex = new NotBootstrappedException(getName(), operation);
             return new FixedDHTFuture<StoreResult>(ex);
         }
