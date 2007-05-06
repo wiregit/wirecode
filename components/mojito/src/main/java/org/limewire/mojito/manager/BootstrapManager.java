@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -49,6 +50,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.MessageUtils;
 import org.limewire.mojito.util.RouteTableUtils;
 
 /**
@@ -143,6 +145,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         // Having parallel bootstrap proccesses is too expensive!
         stop();
         
+        for (SocketAddress addr : dst) {
+            check(addr);
+        }
+        
         // Bootstrap...
         BootstrapProcess process = new BootstrapProcess(dst);
         BootstrapFuture future = new BootstrapFuture(process);
@@ -152,6 +158,55 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         context.getDHTExecutorService().execute(future);
 
         return future;
+    }
+    
+    private void check(SocketAddress dst) {
+        // Make sure we're not sending messages to ourself
+        if (context.isLocalContactAddress(dst)) {
+            // This can happen when the RouteTable was
+            // initialized with Nodes from an external
+            // source like a file. It's not really an
+            // error because the Node's ID is different
+            // but there's no point in sending the Msg.
+            String msg = "Cannot send Message "
+                + " to " + ContactUtils.toString(null, dst)
+                + " because it has the same contact address as the local Node "
+                + context.getLocalNode() + " has";
+            
+            throw new IllegalArgumentException(msg);
+        }
+        
+        // Like above. It makes no sense to send messages to a
+        // Node that has our local Node ID but we have to permit
+        // this case for ID collision test pings
+        if (context.isLocalNodeID(null) 
+                && !MessageUtils.isCollisionPingRequest(
+                        context.getLocalNodeID(), null)) {
+            
+            String msg = "Cannot send Message " 
+                + " to " + ContactUtils.toString(null, dst) 
+                + " which is equal to our local Node " 
+                + context.getLocalNode();
+            
+            throw new IllegalArgumentException(msg);
+        }
+        
+        // Check if it's a valid destination address
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            String msg = "Invalid IP:Port " + ContactUtils.toString(null, dst);
+            
+            throw new IllegalArgumentException(msg);
+        }
+        
+        // And make sure we're not sending messages to private
+        // IPs if it's not permitted. Two Nodes behind the same 
+        // NAT using private IPs to communicate with each other
+        // would screw up a few things.
+        if (ContactUtils.isPrivateAddress(dst)) {
+            String msg = "Private IP:Port " + ContactUtils.toString(null, dst);
+            
+            throw new IllegalArgumentException(msg);
+        }
     }
     
     private class BootstrapFuture extends DHTFutureTask<BootstrapResult> {
