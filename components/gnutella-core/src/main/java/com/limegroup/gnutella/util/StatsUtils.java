@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.limegroup.gnutella.settings.MessageSettings;
+
 public class StatsUtils {
     private StatsUtils() {}
     
@@ -260,6 +262,8 @@ public class StatsUtils {
             Map<String, Object> ret = new HashMap<String, Object>();
             ret.put("ver", VERSION);
             ret.put("num", number);
+            if (number < 2) // too small for stats
+                return ret;
             ret.put("avg", getAvg());
             ret.put("M2", getM2());
             return ret;
@@ -323,6 +327,8 @@ public class StatsUtils {
          * with DataInputStream.readLong()
          */
         private byte [] doubleToBytes(double d) {
+            if (!MessageSettings.REPORT_DOUBLE_PRECISION.getValue())
+                return floatToBytes((float)d);
             byte [] writeBuffer = new byte[8];
             long v = Double.doubleToLongBits(d);
             writeBuffer[0] = (byte)(v >>> 56);
@@ -333,6 +339,20 @@ public class StatsUtils {
             writeBuffer[5] = (byte)(v >>> 16);
             writeBuffer[6] = (byte)(v >>>  8);
             writeBuffer[7] = (byte)(v >>>  0);
+            return writeBuffer;
+        }
+        
+        /**
+         * @return byte [] representation of a float, compatible
+         * with DataInputStream.readInt()
+         */
+        private byte [] floatToBytes(float f) {
+            byte [] writeBuffer = new byte[4];
+            int v = Float.floatToIntBits(f);
+            writeBuffer[0] = (byte)(v >>> 24);
+            writeBuffer[1] = (byte)(v >>> 16);
+            writeBuffer[2] = (byte)(v >>>  8);
+            writeBuffer[3] = (byte)(v >>>  0);
             return writeBuffer;
         }
     }

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 
 /**
@@ -13,4 +14,11 @@ public class MessageSettings extends LimeProps {
      */
     public static final IntSetting MAX_LENGTH = 
         FACTORY.createIntSetting("MAX_LENGTH", 65536);
+    
+    /**
+     * Whether to report stats with double precision.
+     */
+    public static final BooleanSetting REPORT_DOUBLE_PRECISION = 
+        FACTORY.createRemoteBooleanSetting("REPORT_DOUBLE_PRECISION", 
+                true, "MessageSettings.reportDoublePrecision");
 }

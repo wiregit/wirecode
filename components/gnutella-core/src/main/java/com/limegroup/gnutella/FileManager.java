@@ -44,6 +44,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -2426,11 +2427,13 @@ public abstract class FileManager {
             ArrayList<Double> hits = new ArrayList<Double>();
             ArrayList<Double> uploads = new ArrayList<Double>();
             ArrayList<Double> alts = new ArrayList<Double>();
+            ArrayList<Double> keywords = new ArrayList<Double>();
             
             // differences for t-test 
             ArrayList<Double> altsHits = new ArrayList<Double>();
             ArrayList<Double> altsUploads = new ArrayList<Double>();
             ArrayList<Double> hitsUpload = new ArrayList<Double>();
+            ArrayList<Double> hitsKeywords = new ArrayList<Double>();
             
             Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
@@ -2464,13 +2467,22 @@ public abstract class FileManager {
                         topUpsFDs.put(upCount, fds[i]);
                     }
                     
+                    // keywords per fd
+                    double keywordsCount = 
+                        HashFunction.getPrefixes(HashFunction.keywords(fds[i].getPath())).length;
+                    keywords.add(keywordsCount);
+                    
                     // populate differences
-                    if (hits.size() >= i && uploads.size() >=i)
-                        hitsUpload.add(hits.get(i-1) - uploads.get(i - 1));
-                    if (hits.size() >= i && alts.size() >=i)
-                        altsHits.add(alts.get(i-1) - hits.get(i - 1));
-                    if (alts.size() >= i && uploads.size() >= i)
-                        altsUploads.add(alts.get(i-1)  - uploads.get(i - 1));
+                    if (!nonZero) {
+                        if (hits.size() >= i && uploads.size() >=i)
+                            hitsUpload.add(hits.get(i-1) - uploads.get(i - 1));
+                        if (hits.size() >= i && alts.size() >=i)
+                            altsHits.add(alts.get(i-1) - hits.get(i - 1));
+                        if (alts.size() >= i && uploads.size() >= i)
+                            altsUploads.add(alts.get(i-1)  - uploads.get(i - 1));
+                        if (hits.size() >= i)
+                            hitsKeywords.add(hits.get(i - 1) - keywordsCount);
+                    }
                 }
                 ret.put("rare",Double.doubleToLongBits((double)rare / total));
             }
@@ -2480,11 +2492,14 @@ public abstract class FileManager {
             ret.put("upsh", StatsUtils.getHistogram(uploads, 10));
             ret.put("alts", StatsUtils.quickStatsDouble(alts).getMap());
             ret.put("altsh", StatsUtils.getHistogram(alts, 10));
+            ret.put("kw", StatsUtils.quickStatsDouble(keywords).getMap());
+            ret.put("kwh", StatsUtils.getHistogram(keywords, 10));
             
             // t-test values
             ret.put("hut",StatsUtils.quickStatsDouble(hitsUpload).getTTestMap());
             ret.put("aht",StatsUtils.quickStatsDouble(altsHits).getTTestMap());
             ret.put("aut",StatsUtils.quickStatsDouble(altsUploads).getTTestMap());
+            ret.put("hkt",StatsUtils.quickStatsDouble(hitsKeywords).getTTestMap());
             
             QueryRouteTable topHits = new QueryRouteTable();
             QueryRouteTable topUps = new QueryRouteTable();

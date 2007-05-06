@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.StatsUtils.DoubleStats;
 
 import junit.framework.Test;
@@ -49,6 +50,10 @@ public class StatsUtilsTest extends LimeTestCase {
         assertEquals(24.25, s.q1);
         assertEquals(74.75, s.q3);
         assertEquals(841.6666666, s.m2, 0.00001);
+        assertEquals(0.0, s.mode); // all elements occur once
+        l.add((double)55);
+        s = StatsUtils.quickStatsDouble(l);
+        assertEquals(55.0, s.mode);
     }
     
     public void testSkewedness() throws Exception {
@@ -176,6 +181,20 @@ public class StatsUtilsTest extends LimeTestCase {
         
     }
     
+    public void testSinglePrecision() throws Exception {
+        MessageSettings.REPORT_DOUBLE_PRECISION.setValue(false);
+        List<Double> l = new ArrayList<Double>();
+        for (int i = 0; i < 100; i++)
+            l.add((double)i);
+        Map<String, Object> stats = StatsUtils.quickStatsDouble(l).getMap();
+        assertEquals(0.0f,getSP("min", stats));
+        assertEquals(99.0f,getSP("max",stats));
+        assertEquals(49.5f,getSP("med", stats));
+        assertEquals(49.5f,getSP("avg", stats));
+        assertEquals(24.25f,getSP("Q1", stats));
+        assertEquals(74.75f,getSP("Q3", stats));
+    }
+    
     private void assertMatches(double expected, String key, Map<String, Object> stats) 
     throws Exception {
         assertEquals(expected, get(key,stats));
@@ -185,5 +204,11 @@ public class StatsUtilsTest extends LimeTestCase {
         byte [] b = (byte[])stats.get(key);
         DataInputStream dais = new DataInputStream(new ByteArrayInputStream(b));
         return Double.longBitsToDouble(dais.readLong());
+    }
+    
+    private float getSP(String key, Map<String,Object>stats) throws Exception {
+        byte [] b = (byte[])stats.get(key);
+        DataInputStream dais = new DataInputStream(new ByteArrayInputStream(b));
+        return Float.intBitsToFloat(dais.readInt());
     }
 }
