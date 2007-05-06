@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -68,7 +69,8 @@ public class GetValueTest extends MojitoTestCase {
             first.put(valueId, value).get();
             
             try {
-                FindValueResult result = dhts.get(1).get(valueId, DHTValueType.TEXT).get();
+                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.TEXT);
+                FindValueResult result = dhts.get(1).get(lookupKey).get();
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
                 assertEquals(1, entities.size());
                 for (DHTValueEntity entity : entities) {
@@ -79,7 +81,8 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                FindValueResult result = dhts.get(1).get(valueId, DHTValueType.ANY).get();
+                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.ANY);
+                FindValueResult result = dhts.get(1).get(lookupKey).get();
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
                 assertEquals(1, entities.size());
                 for (DHTValueEntity entity : entities) {
@@ -90,7 +93,8 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                FindValueResult result = dhts.get(1).get(valueId, DHTValueType.LIME).get();
+                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.LIME);
+                FindValueResult result = dhts.get(1).get(lookupKey).get();
                 Collection<? extends DHTValueEntity> entities = result.getEntities();
                 assertEquals("Got " + entities, 0, entities.size());
             } catch (Exception err) {
@@ -131,8 +135,11 @@ public class GetValueTest extends MojitoTestCase {
                     DHTValueType.TEXT, Version.ZERO, "Hello World".getBytes());
             first.put(valueId, value).get();
             
-            FindValueResult result1 = dhts.get(1).get(valueId, DHTValueType.TEXT).get();
-            FindValueResult result2 = dhts.get(1).get(valueId, DHTValueType.ANY).get();
+            EntityKey lookupKey1 = EntityKey.createEntityKey(valueId, DHTValueType.TEXT);
+            FindValueResult result1 = dhts.get(1).get(lookupKey1).get();
+            
+            EntityKey lookupKey2 = EntityKey.createEntityKey(valueId, DHTValueType.ANY);
+            FindValueResult result2 = dhts.get(1).get(lookupKey2).get();
             
             assertNotSame(result1, result2);
             

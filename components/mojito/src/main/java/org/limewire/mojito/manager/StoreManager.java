@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureTask;
@@ -264,7 +265,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
             if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
                 handler = new FindNodeResponseHandler(context, valueId);
             } else {
-                handler = new FindValueResponseHandler(context, valueId, DHTValueType.ANY);
+                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.ANY);
+                handler = new FindValueResponseHandler(context, lookupKey);
             }
             return (LookupResponseHandler<LookupResult>)handler;
         }

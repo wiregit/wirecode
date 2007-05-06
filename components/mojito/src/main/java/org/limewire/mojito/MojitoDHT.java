@@ -29,7 +29,6 @@ import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
@@ -257,12 +256,7 @@ public interface MojitoDHT {
     public DHTFuture<PingResult> ping(SocketAddress dst);
     
     /**
-     * Tries to find the value for the given key
-     */
-    public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType);
-    
-    /**
-     * Tries to get the value of the given EntityKey
+     * Tries to find and get a DHTValue with the given EntityKey
      */
     public DHTFuture<FindValueResult> get(EntityKey entityKey);
     

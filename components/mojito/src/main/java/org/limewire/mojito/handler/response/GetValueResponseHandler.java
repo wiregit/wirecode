@@ -48,22 +48,22 @@ import org.limewire.security.SecurityToken;
  */
 public class GetValueResponseHandler extends AbstractResponseHandler<FindValueResult> {
         
-    private final EntityKey entityKey;
+    private final EntityKey lookupKey;
     
     public GetValueResponseHandler(Context context, 
-            EntityKey entityKey) {
+            EntityKey lookupKey) {
         super(context);
         
-        this.entityKey = entityKey;
+        this.lookupKey = lookupKey;
     }
     
     @Override
     protected void start() throws DHTException {
         
-        Contact node = entityKey.getContact();
-        KUID primaryKey = entityKey.getPrimaryKey();
-        KUID secondaryKey = entityKey.getSecondaryKey();
-        DHTValueType valueType = entityKey.getDHTValueType();
+        Contact node = lookupKey.getContact();
+        KUID primaryKey = lookupKey.getPrimaryKey();
+        KUID secondaryKey = lookupKey.getSecondaryKey();
+        DHTValueType valueType = lookupKey.getDHTValueType();
         
         FindValueRequest request = context.getMessageHelper()
             .createFindValueRequest(node.getContactAddress(), 
@@ -84,14 +84,14 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
             // Make sure the DHTValueEntities have the expected
             // value type.
             Collection<? extends DHTValueEntity> entities 
-                = DatabaseUtils.filter(entityKey.getDHTValueType(), 
+                = DatabaseUtils.filter(lookupKey.getDHTValueType(), 
                         response.getDHTValueEntities());
             
             Map<? extends Contact, ? extends SecurityToken> path = Collections.emptyMap();
             Collection<EntityKey> entityKeys = Collections.emptySet();
             
-            FindValueResult result = new FindValueResult(entityKey.getPrimaryKey(), 
-                    entityKey.getDHTValueType(), path, entities, entityKeys, time, 1);
+            FindValueResult result = new FindValueResult(lookupKey, 
+                    path, entities, entityKeys, time, 1);
             
             setReturnValue(result);
             
@@ -101,7 +101,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
         // it may no longer exists and the remote Node returns us
         // a Set of the k-closest Nodes instead.
         } else {
-            setException(new DHTNoSuchElementException(message, entityKey.toString()));
+            setException(new DHTNoSuchElementException(message, lookupKey.toString()));
         }
     }
     

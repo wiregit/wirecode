@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import junit.framework.Test;
 
 import org.limewire.mojito.Context;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -90,7 +91,8 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Try to get the value which should fail
             try {
-                FindValueResult r = passiveLeaf.get(key, DHTValueType.ANY).get();
+                EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
+                FindValueResult r = passiveLeaf.get(lookupKey).get();
                 if (!r.getEntities().isEmpty()) {
                     fail("Should not have got DHTValue: " + r);
                 }
@@ -105,7 +107,8 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Try again and it should work now
             try {
-                FindValueResult r = passiveLeaf.get(key, DHTValueType.ANY).get();
+                EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
+                FindValueResult r = passiveLeaf.get(lookupKey).get();
                 if (r.getEntities().isEmpty()) {
                     fail("Should have found DHTValue");
                 }

@@ -32,7 +32,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.LookupRequest;
@@ -58,8 +57,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     
     private final FindValueLookupStatisticContainer lookupStat;
     
-    /** The type of value we're looking for */
-    private final DHTValueType valueType;
+    /** The key we're looking for */
+    private final EntityKey lookupKey;
     
     /** Collection of EntityKeys */
     private final Collection<EntityKey> entityKeys
@@ -69,10 +68,9 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     private final Collection<DHTValueEntity> entities 
         = new ArrayList<DHTValueEntity>();
     
-    public FindValueResponseHandler(Context context, KUID lookupId, 
-            DHTValueType valueType) {
-        super(context, lookupId);
-        this.valueType = valueType;
+    public FindValueResponseHandler(Context context, EntityKey lookupKey) {
+        super(context, lookupKey.getPrimaryKey());
+        this.lookupKey = lookupKey;
         
         setExhaustive(KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
@@ -122,14 +120,14 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         }
         
         setReturnValue(new FindValueResult(
-                getLookupID(), valueType, path, entities, entityKeys, time, currentHop));
+                lookupKey, path, entities, entityKeys, time, currentHop));
     }
     
     /**
      * Returns the type of value we're looking for
      */
-    public DHTValueType getDHTValueType() {
-        return valueType;
+    public EntityKey getLookupKey() {
+        return lookupKey;
     }
     
     /**
@@ -189,7 +187,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     @Override
     protected LookupRequest createLookupRequest(SocketAddress addr) {
         Collection<KUID> noKeys = Collections.emptySet();
-        return context.getMessageHelper().createFindValueRequest(addr, lookupId, noKeys, valueType);
+        return context.getMessageHelper().createFindValueRequest(
+                addr, lookupId, noKeys, lookupKey.getDHTValueType());
     }
     
     private boolean extractDataFromResponse(FindValueResponse response) {
@@ -212,7 +211,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         }
         
         Collection<? extends DHTValueEntity> filtered 
-            = DatabaseUtils.filter(valueType, entities);
+            = DatabaseUtils.filter(lookupKey.getDHTValueType(), entities);
     
         // The filtered Set is empty and the unfiltered isn't?
         // The remote Node send us unrequested Value(s)!
@@ -230,7 +229,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         
         for (KUID secondaryKey : availableSecondaryKeys) {
             EntityKey key = EntityKey.createEntityKey(
-                    sender, lookupId, secondaryKey, valueType);
+                    sender, lookupId, secondaryKey, lookupKey.getDHTValueType());
             
             this.entityKeys.add(key);
         }

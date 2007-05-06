@@ -24,9 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.security.SecurityToken;
@@ -36,6 +34,8 @@ import org.limewire.security.SecurityToken;
  * The FindValueResult is fired when a FIND_VALUE lookup finishes
  */
 public class FindValueResult extends LookupResult {
+    
+    private final EntityKey lookupKey;
     
     private final Map<? extends Contact, ? extends SecurityToken> path;
     
@@ -47,19 +47,26 @@ public class FindValueResult extends LookupResult {
     
     private final Collection<? extends EntityKey> entityKeys;
     
-    public FindValueResult(KUID lookupId, 
-            DHTValueType valueType,
+    public FindValueResult(EntityKey lookupKey,
             Map<? extends Contact, ? extends SecurityToken> path,
             Collection<? extends DHTValueEntity> entities,
             Collection<? extends EntityKey> entityKeys,
             long time, int hop) {
-        super(lookupId);
+        super(lookupKey.getPrimaryKey());
         
+        this.lookupKey = lookupKey;
         this.path = path;
         this.time = time;
         this.hop = hop;
         this.entities = entities;
         this.entityKeys = entityKeys;
+    }
+    
+    /**
+     * Returns the lookup key that was used to get this value
+     */
+    public EntityKey getLookupKey() {
+        return lookupKey;
     }
     
     /*

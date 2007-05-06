@@ -50,10 +50,45 @@ public class EntityKey {
     private final int hashCode;
     
     /**
-     * Creates and returns a new EntityKey
+     * Creates and returns an EntityKey that will do a full lookup
+     * for the value
+     */
+    public static EntityKey createEntityKey(KUID primaryKey, DHTValueType valueType) {
+        
+        if (primaryKey == null) {
+            throw new NullPointerException("PrimaryKey is null");
+        }
+        
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
+        return new EntityKey(null, primaryKey, null, valueType);
+    }
+    
+    /**
+     * Creates and returns a new EntityKey with a known source
+     * which will look only at the given Node for the value.
      */
     public static EntityKey createEntityKey(Contact node, KUID primaryKey, 
             KUID secondaryKey, DHTValueType valueType) {
+        
+        if (node == null) {
+            throw new NullPointerException("Contact is null");
+        }
+        
+        if (primaryKey == null) {
+            throw new NullPointerException("PrimaryKey is null");
+        }
+        
+        if (secondaryKey == null) {
+            throw new NullPointerException("SecondaryKey is null");
+        }
+        
+        if (valueType == null) {
+            throw new NullPointerException("DHTValueType is null");
+        }
+        
         return new EntityKey(node, primaryKey, secondaryKey, valueType);
     }
     
@@ -65,9 +100,21 @@ public class EntityKey {
         this.secondaryKey = secondaryKey;
         this.valueType = valueType;
         
-        this.hashCode = primaryKey.hashCode() 
-                        ^ secondaryKey.hashCode() 
-                        ^ valueType.hashCode();
+        int hashCode = primaryKey.hashCode() 
+                     ^ valueType.hashCode();
+        
+        if (secondaryKey != null) {
+            hashCode ^= secondaryKey.hashCode();
+        }
+        
+        this.hashCode = hashCode;
+    }
+    
+    /**
+     * Returns true if this is a lookup key
+     */
+    public boolean isLookupKey() {
+        return secondaryKey == null;
     }
     
     /**
@@ -109,10 +156,20 @@ public class EntityKey {
             return false;
         }
         
-        EntityKey key = (EntityKey)o;
-        return primaryKey.equals(key.primaryKey)
-            && secondaryKey.equals(key.secondaryKey)
-            && valueType.equals(key.valueType);
+        EntityKey other = (EntityKey)o;
+        
+        if (other.isLookupKey() != other.isLookupKey()) {
+            return false;
+        }
+        
+        if (isLookupKey()) {
+            return primaryKey.equals(other.primaryKey)
+                && valueType.equals(other.valueType);
+        } else {
+            return primaryKey.equals(other.primaryKey)
+                && secondaryKey.equals(other.secondaryKey)
+                && valueType.equals(other.valueType);
+        }
     }
     
     public String toString() {
@@ -121,6 +178,7 @@ public class EntityKey {
         buffer.append("PrimaryKey: ").append(getPrimaryKey()).append("\n");
         buffer.append("SecondaryKey: ").append(getSecondaryKey()).append("\n");
         buffer.append("DHTValueType: ").append(getDHTValueType()).append("\n");
+        buffer.append("IsLookupKey: ").append(isLookupKey()).append("\n");
         return buffer.toString();
     }
 }

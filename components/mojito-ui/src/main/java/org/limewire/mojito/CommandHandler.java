@@ -334,7 +334,8 @@ public class CommandHandler {
                 }
             });*/
             
-            FindValueResult evt = dht.get(key, DHTValueType.ANY).get();
+            EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
+            FindValueResult evt = dht.get(lookupKey).get();
             out.println(evt.toString());
             
         } catch (Exception e) {
