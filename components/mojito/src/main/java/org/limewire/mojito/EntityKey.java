@@ -158,7 +158,7 @@ public class EntityKey {
         
         EntityKey other = (EntityKey)o;
         
-        if (other.isLookupKey() != other.isLookupKey()) {
+        if (isLookupKey() != other.isLookupKey()) {
             return false;
         }
         
