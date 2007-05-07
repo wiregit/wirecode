@@ -75,7 +75,7 @@ public class DatabaseImpl implements Database {
     
     private static final Log LOG = LogFactory.getLog(DatabaseImpl.class);
     
-    private static final int IPV4_ADDRESS_MASK = 0xFFFFFFFF;
+    private static final int IPV4_ADDRESS_NETMASK = 0xFFFFFFFF;
     
     /** LOCKING: this */
     private final Map<KUID, DHTValueEntityBag> database = new HashMap<KUID, DHTValueEntityBag>();
@@ -200,7 +200,7 @@ public class DatabaseImpl implements Database {
      * Returns the number of values that are currently stored under
      * the same Class C Network
      */
-    private int getValuesPerNetwork(DHTValueEntity entity) {
+    public synchronized int getValuesPerNetwork(DHTValueEntity entity) {
         return getValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
     }
     
@@ -208,8 +208,8 @@ public class DatabaseImpl implements Database {
      * Returns the number of values that are currently stored under
      * the same IP Address
      */
-    private int getValuesPerAddress(DHTValueEntity entity) {
-        return getValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+    public synchronized int getValuesPerAddress(DHTValueEntity entity) {
+        return getValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
     /**
@@ -247,7 +247,7 @@ public class DatabaseImpl implements Database {
      * same IP address
      */
     private int incrementValuesPerAddress(DHTValueEntity entity) {
-        return incrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+        return incrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
     /**
@@ -288,7 +288,7 @@ public class DatabaseImpl implements Database {
      * stored under the same IP address
      */
     private int decrementValuesPerAddress(DHTValueEntity entity) {
-        return decrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+        return decrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
     /**
