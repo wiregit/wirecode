@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.db.impl;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.limewire.mojito.KUID;
@@ -53,7 +54,26 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         // Limit the number of values per key
         DHTValueEntity existing = bag.get(entity.getSecondaryKey());
         if (existing == null) {
-            return (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey);
+            // Allow to store if there's enough free space
+            if (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey) {
+                return true;
+            }
+            
+            // Prioritze values that were stored by non-firewalled Nodes
+            if (entity.getCreator().isFirewalled()) {
+                return false;
+            }
+            
+            // Get the oldest firewalled value from the Bag, remove it and
+            // allow the Database to store the new value
+            DHTValueEntity firewalled = getOldestFirewalledValue(bag.values());
+            if (firewalled != null) {
+                database.remove(firewalled.getPrimaryKey(), 
+                        firewalled.getSecondaryKey());
+                return true;
+            }
+            
+            return false;
         }
         
         return allowReplace(database, bag, existing, entity);
@@ -84,5 +104,19 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         // TODO signed values cannot be replaced?
         
         return true;
+    }
+    
+    private DHTValueEntity getOldestFirewalledValue(Collection<DHTValueEntity> entities) {
+        DHTValueEntity oldest = null;
+        
+        for (DHTValueEntity entity : entities) {
+            if (!entity.isLocalValue() 
+                    && entity.getCreator().isFirewalled()) {
+                if (oldest == null || entity.getCreationTime() < oldest.getCreationTime()) {
+                    oldest = entity;
+                }
+            }
+        }
+        return oldest;
     }
 }

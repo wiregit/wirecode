@@ -21,9 +21,11 @@ package org.limewire.mojito.db;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -599,6 +601,80 @@ public class DatabaseTest extends MojitoTestCase {
         assertGreaterThan(1f, load);
         //but never be larger than 1/0.01
         assertLessThan(1f/0.01f, load);
+    }
+    
+    public void testReplaceFirewalledValue() {
+        final int MAX_VALUES_PER_KEY = 5;
+        
+        DatabaseImpl database = new DatabaseImpl(-1, MAX_VALUES_PER_KEY);
+        
+        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
+        
+        KUID primaryKey = KUID.createRandomID();
+        
+        // Create a bunch of firewalled values and add them to the Database
+        for (int i = 0; i < 2*MAX_VALUES_PER_KEY; i++) {
+            SocketAddress addr = new InetSocketAddress(6666);
+            Contact node = ContactFactory.createLiveContact(
+                    addr, 
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    addr, 0, 
+                    Contact.FIREWALLED_FLAG);
+            
+            assertTrue(node.isFirewalled());
+            
+            DHTValueEntity entity = new DHTValueEntity(node, node, primaryKey, 
+                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes()), false);
+            
+            database.store(entity);
+            values.add(entity);
+        }
+        
+        // Check initial State
+        assertEquals(1, database.getKeyCount());
+        assertEquals(MAX_VALUES_PER_KEY, database.getValueCount());
+        
+        // The first five values should be in the Database
+        for (DHTValueEntity entity : values.subList(0, MAX_VALUES_PER_KEY)) {
+            assertTrue(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
+        }
+        
+        // And the last five shouldn't!
+        for (DHTValueEntity entity : values.subList(MAX_VALUES_PER_KEY, values.size())) {
+            assertFalse(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
+        }
+        
+        // Create a non-firewalled value
+        SocketAddress addr = new InetSocketAddress(6666);
+        Contact node = ContactFactory.createLiveContact(
+                addr, 
+                Vendor.UNKNOWN, 
+                Version.ZERO, 
+                KUID.createRandomID(), 
+                addr, 0, 
+                Contact.DEFAULT_FLAG);
+        
+        assertFalse(node.isFirewalled());
+        
+        DHTValueEntity notFirewalled = new DHTValueEntity(node, node, primaryKey, 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes()), false);
+        
+        // Store it in the Database
+        database.store(notFirewalled);
+        
+        // It should be there
+        assertTrue(database.contains(notFirewalled.getPrimaryKey(), notFirewalled.getSecondaryKey()));
+        
+        // The oldest firewalled value should be done
+        DHTValueEntity oldest = values.get(0);
+        assertFalse(database.contains(oldest.getPrimaryKey(), oldest.getSecondaryKey()));
+        
+        // And the remaining four firewalled values should be still there
+        for (DHTValueEntity firewalled : values.subList(1, MAX_VALUES_PER_KEY)) {
+            assertTrue(database.contains(firewalled.getPrimaryKey(), firewalled.getSecondaryKey()));
+        }
     }
     
     private class HostFilterStub implements HostFilter{
