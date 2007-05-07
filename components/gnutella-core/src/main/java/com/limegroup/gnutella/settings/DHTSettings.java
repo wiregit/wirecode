@@ -208,6 +208,15 @@ public class DHTSettings extends LimeProps {
                 0, "DHT.RareFileCompletedUploads", 0, Integer.MAX_VALUE);
     
     /**
+     * Definition whether a file is rare.  For the list of keys look at
+     * FileDesc.lookup(String).
+     */
+    public static final StringArraySetting RARE_FILE_DEFINITION =
+        FACTORY.createRemoteStringArraySetting("RARE_FILE_DEFINITION", 
+                new String[]{"ups","atUpSet","<","cups","cUpSet","<","OR","NOT",
+                "lastup","rftSet",">","AND"}, 
+                "DHT.RareFileDefinition");
+    /**
      * Whether or not AlternativeLocations should be published.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */

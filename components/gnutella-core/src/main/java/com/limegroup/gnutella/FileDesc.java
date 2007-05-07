@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.util.I18NConvert;
+import org.limewire.util.RPNParser;
+import org.limewire.util.RPNParser.StringLookup;
 
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -27,7 +29,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * various utility methods for checking against the encapsulated data.<p>
  */
 
-public class FileDesc implements FileDetails {
+public class FileDesc implements FileDetails, StringLookup {
     
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
@@ -441,15 +443,36 @@ public class FileDesc implements FileDetails {
      * Returns true if the FileDesc is considered rare
      */
     public boolean isRareFile() {
-        // TODO use Zlatin's RPN
-        if (getAttemptedUploads() < DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()
-                || getCompletedUploads() < DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue()) {
-            return false;
-        }
-        
-        long time = getLastAttemptedUploadTime();
-        long delta = System.currentTimeMillis() - time;
-        return (delta >= DHTSettings.RARE_FILE_TIME.getValue());
+        RPNParser parser = new RPNParser(this);
+        return parser.evaluate(DHTSettings.RARE_FILE_DEFINITION.getValue());
+    }
+    
+    /**
+     * some factors to consider when deciding if a file is rare.
+     */
+    public String lookup(String key) {
+        if ("verified".equals(key))
+            return String.valueOf(isVerified());
+        else if ("firewalled".equals(key))
+            return String.valueOf(isFirewalled());
+        else if ("hits".equals(key))
+            return String.valueOf(getHitCount());
+        else if ("ups".equals(key))
+            return String.valueOf(getAttemptedUploads());
+        else if ("cups".equals(key))
+            return String.valueOf(getCompletedUploads());
+        else if ("lastup".equals(key))
+            return String.valueOf(System.currentTimeMillis() - getLastAttemptedUploadTime());
+        else if ("licensed".equals(key))
+            return String.valueOf(isLicensed());
+        else if ("atUpSet".equals(key))
+            return DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValueAsString();
+        else if ("cUpSet".equals(key))
+            return DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValueAsString();
+        else if ("rftSet".equals(key))
+            return DHTSettings.RARE_FILE_TIME.getValueAsString();
+        else
+            return "false";
     }
 }
 
