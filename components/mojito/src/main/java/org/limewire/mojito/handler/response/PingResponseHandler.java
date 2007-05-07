@@ -111,7 +111,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         
         try {
             pingNextAndThrowIfDone(new DHTException(
-                "All SocketAddresses were invalid and there are no Hosts left to Ping"));
+                "All SocketAddresses were invalid and there are no Hosts left to Ping: "
+                    + context.getLocalNode() + "; " + pinger));
         } catch (IOException e) {
             throw new DHTException(e);
         }

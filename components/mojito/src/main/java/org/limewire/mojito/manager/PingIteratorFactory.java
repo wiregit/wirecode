@@ -21,6 +21,7 @@ package org.limewire.mojito.manager;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -51,7 +52,9 @@ class PingIteratorFactory {
      */
     static class ContactPinger implements PingIterator {
         
-        final Iterator<? extends Contact> nodes;
+        final Collection<? extends Contact> nodes;
+        
+        final Iterator<? extends Contact> it;
         
         public ContactPinger(Contact node) {
             this(Collections.singleton(node));
@@ -68,22 +71,27 @@ class PingIteratorFactory {
                 }
             }
             
-            this.nodes = nodes.iterator();
+            this.nodes = nodes;
+            this.it = nodes.iterator();
         }
         
         public boolean hasNext() {
-            return nodes.hasNext();
+            return it.hasNext();
         }
         
         public boolean pingNext(Context context, PingResponseHandler responseHandler) 
                 throws IOException {
-            Contact node = nodes.next();
+            Contact node = it.next();
             
             KUID nodeId = node.getNodeID();
             SocketAddress dst = node.getContactAddress();
             
             RequestMessage request = context.getMessageHelper().createPingRequest(dst);
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+        }
+        
+        public String toString() {
+            return "ContactPinger: " + nodes;
         }
     }
     
@@ -130,7 +138,7 @@ class PingIteratorFactory {
         @Override
         public boolean pingNext(Context context, PingResponseHandler responseHandler) 
                 throws IOException {
-            Contact node = nodes.next();
+            Contact node = it.next();
             
             KUID nodeId = node.getNodeID();
             SocketAddress dst = node.getContactAddress();
@@ -139,6 +147,10 @@ class PingIteratorFactory {
             RequestMessage request = context.getMessageFactory().createPingRequest(sender, dst);
             
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+        }
+        
+        public String toString() {
+            return "CollisionPinger: " + sender;
         }
     }
 
@@ -183,7 +195,7 @@ class PingIteratorFactory {
         }
         
         public String toString() {
-            return hosts.toString();
+            return "SocketAddressPinger: " + hosts.toString();
         }
     }
     
@@ -192,7 +204,9 @@ class PingIteratorFactory {
      */
     static class EntryPinger implements PingIterator {
         
-        private final Iterator<? extends Entry<KUID, ? extends SocketAddress>> entries;
+        private final Collection<? extends Entry<KUID, ? extends SocketAddress>> entries;
+        
+        private final Iterator<? extends Entry<KUID, ? extends SocketAddress>> it;
         
         public EntryPinger(KUID nodeId, SocketAddress address) {
             this(Collections.singleton(
@@ -218,23 +232,28 @@ class PingIteratorFactory {
                 }
             }
             
-            this.entries = entries.iterator();
+            this.entries = entries;
+            this.it = entries.iterator();
         }
         
         public boolean hasNext() {
-            return entries.hasNext();
+            return it.hasNext();
         }
         
         public boolean pingNext(Context context, PingResponseHandler responseHandler) 
                 throws IOException {
             
-            Entry<KUID, ? extends SocketAddress> entry = entries.next();
+            Entry<KUID, ? extends SocketAddress> entry = it.next();
             
             KUID nodeId = entry.getKey();
             SocketAddress dst = entry.getValue();
             
             RequestMessage request = context.getMessageHelper().createPingRequest(dst);
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+        }
+        
+        public String toString() {
+            return "EntryPinger: " + entries.toString();
         }
     }
 }
