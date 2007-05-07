@@ -433,21 +433,17 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 						 sle.getErrorCode());
 		}
         // we force filename normalization
-		new ManagedDownloader(rfds,
-		        new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-		        null, "./", false);
-		
-		try {
-			new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					null, "../myfile.txt", false);
-			fail("No exception thrown");
-		}
-		catch (SaveLocationException sle) {
-//			assertEquals("Error code should be: security violation", 
-//						 SaveLocationException.SECURITY_VIOLATION,
-//						 sle.getErrorCode());
-		}
+        try {
+            new ManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+                    null, "./", false);
+            new ManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+                    null, "../myfile.txt", false);
+        }
+        catch (SaveLocationException sle) {
+            fail("Should not have thrown" + sle);
+        }
 		try {
 			// should not throw an exception
 			new ManagedDownloader(rfds, new IncompleteFileManager(), 
