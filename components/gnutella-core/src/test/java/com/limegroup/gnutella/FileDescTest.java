@@ -114,5 +114,9 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // And it should be rare
         assertTrue(fd.isRareFile());
+        
+        // Simulate an upload attempt and it shoudn't be rare anymore
+        fd.incrementAttemptedUploads();
+        assertFalse(fd.isRareFile());
     }
 }
