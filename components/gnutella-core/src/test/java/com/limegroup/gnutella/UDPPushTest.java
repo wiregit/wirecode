@@ -82,6 +82,7 @@ public class UDPPushTest extends LimeTestCase {
 	}
 	
 	public void setUp() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		Map map = (Map) PrivilegedAccessor.getValue(
                 RouterService.getDownloadManager().getPushManager(), "UDP_FAILOVER");
         map.clear();
