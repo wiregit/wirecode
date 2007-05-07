@@ -26,6 +26,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseSecurityConstraint;
+import org.limewire.mojito.settings.DatabaseSettings;
 
 /**
  * A default implementation of DatabaseSecurityConstraint
@@ -43,8 +44,8 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         
         // TODO allow as many signed values as you want?
         
-        int maxDatabaseSize = database.getMaxDatabaseSize();
-        int maxValuesPerKey = database.getMaxValuesPerKey();
+        int maxDatabaseSize = DatabaseSettings.MAX_DATABASE_SIZE.getValue();
+        int maxValuesPerKey = DatabaseSettings.MAX_VALUES_PER_KEY.getValue();
         
         // Limit the number of keys
         if (bag == null) {

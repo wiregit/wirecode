@@ -23,11 +23,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.Test;
 
@@ -44,7 +42,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
 
 
@@ -449,94 +446,127 @@ public class DatabaseTest extends MojitoTestCase {
         assertTrue(database.get(key).isEmpty());
     }
     
-    public void testFloodDatabase() {
-        DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.setValue(10);
-        Database db = new DatabaseImpl();
-        HostFilterStub filter = new HostFilterStub();
-        db.setHostFilter(filter);
+    public void testMaxValuesPerAddress() {
+        DatabaseSettings.LIMIT_VALUES_PER_ADDRESS.setValue(true);
+        DatabaseSettings.MAX_VALUES_PER_ADDRESS.setValue(5);
         
-        //this should accept
+        DatabaseSettings.LIMIT_VALUES_PER_NETWORK.setValue(false);
+        
+        Database db = new DatabaseImpl();
+        
+        // this should accept
         Contact badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.1", 1111), 
+                new InetSocketAddress("192.168.1.1", 1111), 
                 Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
-                new InetSocketAddress("169.0.1.1", 1111), 1, 0);
+                new InetSocketAddress("192.168.1.1", 1111), 0, Contact.DEFAULT_FLAG);
         
         Contact goodHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.ZERO, 
-                KUID.createRandomID(), new InetSocketAddress("169.0.1.2", 1111), 1, 0);
-
-        DHTValueEntity value = null;
-        //should allow x direct values
-        for(int i = 0; i < DatabaseSettings.MAX_KEYS_PER_IP.getValue(); i++) {
-            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
-                        new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
-            
-            assertTrue(db.store(value));
-        }
-        //and reject after that
-        DHTValueEntity newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
-        assertFalse(db.store(newValue));
+                new InetSocketAddress("192.168.1.2", 1111), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
+                new InetSocketAddress("192.168.1.2", 1111), 0, Contact.DEFAULT_FLAG);
         
-        //should make some space for a new one
-        db.remove(value.getPrimaryKey(), value.getSecondaryKey());
-        assertTrue(db.store(value));
-        
-        //should also reject an indirect one coming from the bad host
-        newValue = new DHTValueEntity(badHost, goodHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
-        assertFalse(db.store(newValue));
-        
-        //should not allow more, even if it is coming indirectly        
-        newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);;
-        assertFalse(db.store(newValue));
-        
-        //but should allow one created by a good host
-        DHTValueEntity goodValue = new DHTValueEntity(goodHost, goodHost, KUID.createRandomID(), 
+        DHTValueEntity value1 = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
                 new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         
-        assertTrue(db.store(goodValue));
-
-        //test banning now
-        badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.ZERO, 
-                KUID.createRandomID(), 
-                new InetSocketAddress("169.0.1.3", 1111), 1, 0);
+        DHTValueEntity value2 = new DHTValueEntity(goodHost, goodHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         
-        for(int i = 0; i <= DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue(); i++) {
-            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+        // Store both values
+        assertTrue(db.store(value1));
+        assertTrue(db.store(value2));
+        assertEquals(2, db.getValueCount());
+        
+        // The bad host fills up all its free slots
+        int remaining = DatabaseSettings.MAX_VALUES_PER_ADDRESS.getValue() - 1;
+        for (int i = 0; i < remaining; i++) {
+            DHTValueEntity value3 = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
                     new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
-            db.store(value);
+            assertTrue(db.store(value3));
         }
-        //should have banned the host
-        assertContains(filter.getBannedHosts(), badHost.getContactAddress());
+        assertEquals(6, db.getValueCount());
+        
+        // The bad host cannot store values anymore
+        DHTValueEntity value4 = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertFalse(db.store(value4));
+        assertEquals(6, db.getValueCount());
+        
+        // The good host can
+        DHTValueEntity value5 = new DHTValueEntity(goodHost, goodHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertTrue(db.store(value5));
+        assertEquals(7, db.getValueCount());
+        
+        // Store forward a value from bad host? Cannot store!
+        DHTValueEntity value6 = new DHTValueEntity(badHost, goodHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertFalse(db.store(value6));
+        assertEquals(7, db.getValueCount());
+        
+        // Store forward from bad host? Should work!
+        DHTValueEntity value7 = new DHTValueEntity(goodHost, badHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertTrue(db.store(value7));
+        assertEquals(8, db.getValueCount());
+        
+        // Bad host but is a local value? Should work!
+        DHTValueEntity value8 = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), true);
+        assertTrue(db.store(value8));
+        assertEquals(9, db.getValueCount());
     }
     
-    /*public void testRemoveAll() {
-        Database database = new DatabaseImpl();
+    public void testMaxValuesPerNetwork() {
+        DatabaseSettings.LIMIT_VALUES_PER_ADDRESS.setValue(false);
         
-        KUID valueId = KUID.createRandomID();
-        List<KUID> nodeIds = new ArrayList<KUID>();
-        for (int i = 0; i < 10; i++) {
-            KUID nodeId = KUID.createRandomID();
-            DHTValue value = createDirectDHTValue(nodeId, 
-                    valueId, ("Lime-" + i).getBytes());
+        DatabaseSettings.LIMIT_VALUES_PER_NETWORK.setValue(true);
+        DatabaseSettings.MAX_VALUES_PER_NETWORK.setValue(5);
+        
+        Database db = new DatabaseImpl();
+        
+        // Fill up all slots for the Class C Network
+        for (int i = 0; i < DatabaseSettings.MAX_VALUES_PER_NETWORK.getValue(); i++) {
+            Contact node1 = ContactFactory.createLiveContact(
+                    new InetSocketAddress("192.168.1." + i, 1111+i), 
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
+                    new InetSocketAddress("192.168.1." + i, 1111+i), 0, Contact.DEFAULT_FLAG);
             
-            nodeIds.add(nodeId);
-            database.store(value);
+            DHTValueEntity value1 = new DHTValueEntity(node1, node1, KUID.createRandomID(), 
+                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+            
+            assertTrue(db.store(value1));
         }
         
-        assertEquals(1, database.getKeyCount());
-        assertEquals(10, database.getValueCount());
+        assertEquals(5, db.getValueCount());
         
-        Map<KUID, DHTValue> view = database.get(valueId);
-        assertEquals(10, view.size());
+        // Shouldn't be able to store more from the Class C Network!
+        Contact node2 = ContactFactory.createLiveContact(
+                new InetSocketAddress("192.168.1.50", 2050), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
+                new InetSocketAddress("192.168.1.50", 2050), 0, Contact.DEFAULT_FLAG);
         
-        database.removeAll(view.values());
-        assertEquals(0, database.getKeyCount());
-        assertEquals(0, database.getValueCount());
-    }*/
+        DHTValueEntity value2 = new DHTValueEntity(node2, node2, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertFalse(db.store(value2));
+        assertEquals(5, db.getValueCount());
+        
+        // Different Class C Network, should work!
+        Contact node3 = ContactFactory.createLiveContact(
+                new InetSocketAddress("192.168.2.50", 2050), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
+                new InetSocketAddress("192.168.2.50", 2050), 0, Contact.DEFAULT_FLAG);
+        
+        DHTValueEntity value3 = new DHTValueEntity(node3, node3, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
+        assertTrue(db.store(value3));
+        assertEquals(6, db.getValueCount());
+        
+        // Same Class C Network as Node #2 but the value is local. Should work!
+        DHTValueEntity value4 = new DHTValueEntity(node2, node2, KUID.createRandomID(), 
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), true);
+        assertTrue(db.store(value4));
+        assertEquals(7, db.getValueCount());
+    }
     
     public void testIncrementRequestLoad() throws Exception{
         DatabaseImpl database = new DatabaseImpl();
@@ -604,9 +634,13 @@ public class DatabaseTest extends MojitoTestCase {
     }
     
     public void testReplaceFirewalledValue() throws InterruptedException {
+        DatabaseSettings.LIMIT_VALUES_PER_ADDRESS.setValue(false);
+        DatabaseSettings.LIMIT_VALUES_PER_NETWORK.setValue(false);
+       
         final int MAX_VALUES_PER_KEY = 5;
+        DatabaseSettings.MAX_VALUES_PER_KEY.setValue(MAX_VALUES_PER_KEY);
         
-        DatabaseImpl database = new DatabaseImpl(-1, MAX_VALUES_PER_KEY);
+        DatabaseImpl database = new DatabaseImpl();
         
         List<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
         
@@ -730,23 +764,6 @@ public class DatabaseTest extends MojitoTestCase {
         for (DHTValueEntity entity : values.subList(fromIndex, toIndex)) {
             assertFalse(entity.getCreator().isFirewalled());
             assertFalse(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
-        }
-    }
-    
-    private class HostFilterStub implements HostFilter{
-        
-        private Set<SocketAddress> bannedHosts = new HashSet<SocketAddress>();
-        
-        public boolean allow(SocketAddress addr) {
-            return true;
-        }
-
-        public void ban(SocketAddress addr) {
-            bannedHosts.add(addr);
-        }
-
-        public Set<SocketAddress> getBannedHosts() {
-            return bannedHosts;
         }
     }
 }

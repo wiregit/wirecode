@@ -61,17 +61,19 @@ public final class DatabaseSettings extends MojitoProps {
      * 
      * Considering even NAT'd addresses, this should be enough
      */
-    public static final IntSetting MAX_KEYS_PER_IP
-        = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP", 5, 
-                "Mojito.MaxKeysPerIP", 1, Integer.MAX_VALUE - 1);
+    // LimeWire 4.13.3
+    //public static final IntSetting MAX_KEYS_PER_IP
+    //    = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP", 5, 
+    //            "Mojito.MaxKeysPerIP", 1, Integer.MAX_VALUE - 1);
     
     /**
      * The limit after which the host gets banned. 
      * @see MAX_KEY_PER_IP
      */
-    public static final IntSetting MAX_KEYS_PER_IP_BAN_LIMIT
-    = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP_BAN_LIMIT", 50, 
-            "Mojito.MaxKeysPerIPBanLimit", 1, Integer.MAX_VALUE - 1);
+    // LimeWire 4.13.3
+    //public static final IntSetting MAX_KEYS_PER_IP_BAN_LIMIT
+    //    = FACTORY.createRemoteIntSetting("MAX_KEYS_PER_IP_BAN_LIMIT", 50, 
+    //        "Mojito.MaxKeysPerIPBanLimit", 1, Integer.MAX_VALUE - 1);
     
     /**
      * The time after a non-local value expires
@@ -129,6 +131,57 @@ public final class DatabaseSettings extends MojitoProps {
      * that is nearer
      */
     public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
-        = FACTORY.createRemoteBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, 
-                "Mojito.DeleteValueIfFurthestNode");
+        = FACTORY.createRemoteBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", 
+                false, "Mojito.DeleteValueIfFurthestNode");
+    
+    /**
+     * Whether or not we limit the number of values a certain Class C
+     * Network can store at the local Node
+     */
+    public static final BooleanSetting LIMIT_VALUES_PER_NETWORK
+        = FACTORY.createRemoteBooleanSetting("LIMIT_VALUES_PER_NETWORK", 
+                true, "Mojito.LimitValuesPerNetwork");
+    
+    /**
+     * The maximum number of values a certain Class C Network can
+     * store at the local Node
+     */
+    public static final IntSetting MAX_VALUES_PER_NETWORK
+        = FACTORY.createRemoteIntSetting("MAX_VALUES_PER_NETWORK", 
+            100, "Mojito.MaxValuesPerNetwork", 1, Integer.MAX_VALUE - 1);
+    
+    /**
+     * Whether or not we limit the number of values a single IP address
+     * can store at the local Node
+     */
+    public static final BooleanSetting LIMIT_VALUES_PER_ADDRESS
+        = FACTORY.createRemoteBooleanSetting("LIMIT_VALUES_PER_ADDRESS", 
+                true, "Mojito.LimitValuesPerAddress");
+    
+    /**
+     * The maximum number of keys a single IP can store in the DHT.
+     * (assuming random distribution of keys)
+     * 
+     * v = total number of values for one IP
+     * n = DHT size
+     * k = replication param (default 20)
+     * 
+     * x = number of key stored per DHT node per IP
+     * 
+     * x = (v*k)/n  ==> x = (v*20)/100000 = (1/5000)*v
+     * 
+     * --> with x = 5, v = 25'000
+     * 
+     * Considering even NAT'd addresses, this should be enough
+     */
+    public static final IntSetting MAX_VALUES_PER_ADDRESS
+        = FACTORY.createRemoteIntSetting("MAX_VALUES_PER_ADDRESS", 
+            5, "Mojito.MaxValuesPerAddress", 1, Integer.MAX_VALUE - 1);
+    
+    /**
+     * Whether or not we validate the creator of a value
+     */
+    public static final BooleanSetting VALIDATE_VALUE_CREATOR
+        = FACTORY.createRemoteBooleanSetting("VALIDATE_VALUE_CREATOR", 
+                false, "Mojito.ValidateValueCreator");
 }

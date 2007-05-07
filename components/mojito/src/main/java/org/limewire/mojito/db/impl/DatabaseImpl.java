@@ -30,15 +30,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IntHashMap;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseSecurityConstraint;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.util.HostFilter;
-import org.limewire.util.ByteOrder;
+import org.limewire.mojito.util.ContactUtils;
 
 
 /*
@@ -69,20 +73,12 @@ public class DatabaseImpl implements Database {
     
     private static final long serialVersionUID = -4857315774747734947L;
     
+    private static final Log LOG = LogFactory.getLog(DatabaseImpl.class);
+    
+    private static final int IPV4_ADDRESS_MASK = 0xFFFFFFFF;
+    
     /** LOCKING: this */
     private final Map<KUID, DHTValueEntityBag> database = new HashMap<KUID, DHTValueEntityBag>();
-    
-    /**
-     * The maximum database size. Can be negative to 
-     * make the size unbound
-     */
-    final int maxDatabaseSize;
-    
-    /**
-     * The maximum number of values per primary key. Can 
-     * be negative to make the size unbound
-     */
-    final int maxValuesPerKey;
     
     /**
      * The DatabaseSecurityConstraint handle
@@ -91,24 +87,14 @@ public class DatabaseImpl implements Database {
         = new DefaultDatabaseSecurityConstraint();
     
     /**
-     * A Map of raw IP address -> number of keys stored in this DB.
+     * A Map of masked IP address to number of values
      */
-    private Map<Integer, Integer> hostValuesMap;
+    private final IntHashMap<AtomicInteger> valuesPerNetwork = new IntHashMap<AtomicInteger>();
     
     /**
-     * The Host filter. Used to ban hosts when database flooding is detected.
+     * A Map of IP address to number of values
      */
-    private transient volatile HostFilter filter;
-
-    
-    public DatabaseImpl() {
-        this(-1, -1);
-    }
-    
-    public DatabaseImpl(int maxDatabaseSize, int maxValuesPerKey) {
-        this.maxDatabaseSize = maxDatabaseSize;
-        this.maxValuesPerKey = maxValuesPerKey;
-    }
+    private final IntHashMap<AtomicInteger> valuesPerAddress = new IntHashMap<AtomicInteger>();
     
     /*
      * (non-Javadoc)
@@ -122,26 +108,6 @@ public class DatabaseImpl implements Database {
         }
         
         this.securityConstraint = securityConstraint;
-    }
-    
-    public void setHostFilter(HostFilter filter) {
-        this.filter = filter;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#getMaxDatabaseSize()
-     */
-    public int getMaxDatabaseSize() {
-        return maxDatabaseSize;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#getMaxValuesPerKey()
-     */
-    public int getMaxValuesPerKey() {
-        return maxValuesPerKey;
     }
     
     /*
@@ -170,7 +136,7 @@ public class DatabaseImpl implements Database {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#store(com.limegroup.mojito.db.DHTValue)
+     * @see org.limewire.mojito.db.Database#store(org.limewire.mojito.db.DHTValueEntity)
      */
     public synchronized boolean store(DHTValueEntity entity) {
         if (!allowStore(entity)) {
@@ -189,17 +155,21 @@ public class DatabaseImpl implements Database {
      * true if the operation succeeded.
      */
     public synchronized boolean add(DHTValueEntity entity) {
-        KUID valueId = entity.getPrimaryKey();
-        DHTValueEntityBag bag = database.get(valueId);
+        KUID primaryKey = entity.getPrimaryKey();
+        DHTValueEntityBag bag = database.get(primaryKey);
         
         if (bag == null) {
-            bag = new DHTValueEntityBag(this, valueId);
+            bag = new DHTValueEntityBag(this, primaryKey);
         }
         
         if (bag.add(entity)) {
-            if (!database.containsKey(valueId)) {
-                database.put(valueId, bag);
+            if (!database.containsKey(primaryKey)) {
+                database.put(primaryKey, bag);
             }
+            
+            incrementValuesPerAddress(entity);
+            incrementValuesPerNetwork(entity);
+            
             return true;
         }
         return false;
@@ -207,7 +177,7 @@ public class DatabaseImpl implements Database {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#remove(com.limegroup.mojito.db.DHTValue)
+     * @see org.limewire.mojito.db.Database#remove(org.limewire.mojito.KUID, org.limewire.mojito.KUID)
      */
     public synchronized DHTValueEntity remove(KUID primaryKey, KUID secondaryKey) {
         
@@ -219,48 +189,141 @@ public class DatabaseImpl implements Database {
                 database.remove(primaryKey);
             }
             
-            if (hostValuesMap != null) {
-                
-                InetAddress addr = ((InetSocketAddress) 
-                        entity.getCreator().getContactAddress()).getAddress();
-                
-                // TODO: Handle only IPv4 addresses for now. 
-                // See allowStore(DHTValue) for more information!
-                if (addr instanceof Inet4Address) {
-                    Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
-                    
-                    if (hostValuesMap.containsKey(iaddr)) {
-                        int numKeys = hostValuesMap.get(iaddr);
-                        
-                        if (numKeys <= 1) {
-                            hostValuesMap.remove(iaddr);
-                            
-                        } else if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
-                            // The host went over the limit, thus either he is trying
-                            // to legitimately remove a value, in which case we give him a chance
-                            // or this method is called from the ban() method, in which case the 
-                            // host should be filtered out by the HostFilter anyways
-                            hostValuesMap.put(iaddr, 
-                                    DatabaseSettings.MAX_KEYS_PER_IP.getValue()-1);
-                        } else {
-                            
-                            numKeys--;
-                            hostValuesMap.put(iaddr, numKeys);
-                        }
-                    }
-                }
-            }
+            decrementValuesPerAddress(entity);
+            decrementValuesPerNetwork(entity);
         }
         
         return entity;
+    }
+    
+    /**
+     * Returns the number of values that are currently stored under
+     * the same Class C Network
+     */
+    private int getValuesPerNetwork(DHTValueEntity entity) {
+        return getValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
+    }
+    
+    /**
+     * Returns the number of values that are currently stored under
+     * the same IP Address
+     */
+    private int getValuesPerAddress(DHTValueEntity entity) {
+        return getValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+    }
+    
+    /**
+     * A helper method to get the number of values that are currently stored
+     * under a certain masked IP address
+     */
+    private static int getValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+        if (entity.isLocalValue()) {
+            return 0;
+        }
+        
+        Contact node = entity.getCreator();
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        if (addr instanceof Inet4Address) {
+            int masked = NetworkUtils.getMaskedIP(addr, netmask);
+            AtomicInteger count = map.get(masked);
+            if (count != null) {
+                return count.get();
+            }
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Increments and returns the number of values that are stored under the
+     * same Class C Network
+     */
+    private int incrementValuesPerNetwork(DHTValueEntity entity) {
+        return incrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
+    }
+    
+    /**
+     * Increments and returns the number of values that are stored under the
+     * same IP address
+     */
+    private int incrementValuesPerAddress(DHTValueEntity entity) {
+        return incrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+    }
+    
+    /**
+     * A halper method to increment the number of values that are stored
+     * under a certain masked IP address
+     */
+    private static int incrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+        if (entity.isLocalValue()) {
+            return 0;
+        }
+        
+        Contact node = entity.getCreator();
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        if (addr instanceof Inet4Address) {
+            int masked = NetworkUtils.getMaskedIP(addr, netmask);
+            
+            AtomicInteger count = map.get(masked);
+            if (count == null) {
+                count = new AtomicInteger(0);
+                map.put(masked, count);
+            }
+            
+            return count.incrementAndGet();
+        }
+        return 0;
+    }
+    
+    /**
+     * Decrements and returns the number of values that are currently
+     * stored under the same Class C Network
+     */
+    private int decrementValuesPerNetwork(DHTValueEntity entity) {
+        return decrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
+    }
+    
+    /**
+     * Decrements and returns the number of values that are currently
+     * stored under the same IP address
+     */
+    private int decrementValuesPerAddress(DHTValueEntity entity) {
+        return decrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_MASK);
+    }
+    
+    /**
+     * A halper method to decrement the number of values that are stored
+     * under a certain masked IP address
+     */
+    private static int decrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+        if (entity.isLocalValue()) {
+            return 0;
+        }
+        
+        Contact node = entity.getCreator();
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        if (addr instanceof Inet4Address) {
+            int masked = NetworkUtils.getMaskedIP(addr, netmask);
+            
+            AtomicInteger count = map.get(masked);
+            if (count != null) {
+                int value = count.decrementAndGet();
+                if (value == 0) {
+                    map.remove(masked);
+                }
+                return value;
+            }
+        }
+        
+        return 0;
     }
     
     /*
      * (non-Javadoc)
      * @see org.limewire.mojito.db.Database#getRequestLoad(org.limewire.mojito.KUID, boolean)
      */
-    public synchronized float getRequestLoad(KUID valueId, boolean incrementLoad) {
-        DHTValueEntityBag bag = database.get(valueId);
+    public synchronized float getRequestLoad(KUID primaryKey, boolean incrementLoad) {
+        DHTValueEntityBag bag = database.get(primaryKey);
         if (bag != null) {
             return bag.getRequestLoad(incrementLoad);
         }
@@ -273,74 +336,50 @@ public class DatabaseImpl implements Database {
      * if possible
      */
     private boolean allowStore(DHTValueEntity entity) {
-        DHTValueEntityBag bag = database.get(entity.getPrimaryKey());
+        if (entity.isLocalValue()) {
+            return true;
+        }
         
-        // TODO: exclude signed value also
-        if (bag == null && !entity.isLocalValue()) {
-            // First check if the node is flooding us with keys:
-            // We can only check for flooding by the value creator, not by the sender, 
-            // because that could be misused to prevent us from storing real values
-
-            Contact creator = entity.getCreator();
-            InetAddress addr = ((InetSocketAddress)creator
-                                    .getContactAddress()).getAddress();
+        if (DatabaseSettings.VALIDATE_VALUE_CREATOR.getValue()
+                && !entity.isDirect()) {
             
-            // TODO: There's currently no real urge to have this for IPv6 addresses
-            // in which case we'd have to use BigIntegers instead of Integers or 
-            // some other type of wrapper for the address bytes... We could also use 
-            // the InetAddress object as key but it has too much memory overhead...
+            if (!ContactUtils.isValidSocketAddress(entity.getCreator())) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("The Creator of " + entity + " has an invalid address");
+                }
+                return false;
+            }
             
-            if (addr instanceof Inet4Address) {
-                Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
-                
-                int numKeys = 0;
-                if (hostValuesMap == null) {
-                    hostValuesMap = new HashMap<Integer, Integer>();
-                    
-                } else if (hostValuesMap.containsKey(iaddr)) {
-                    numKeys = hostValuesMap.get(iaddr);
+            if (ContactUtils.isPrivateAddress(entity.getCreator())) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("The Creator of " + entity + " has a private address");
                 }
-                
-                numKeys++;
-                hostValuesMap.put(iaddr, numKeys);
-                
-                if (numKeys > DatabaseSettings.MAX_KEYS_PER_IP.getValue()) {
-                    
-                    if(numKeys > DatabaseSettings.MAX_KEYS_PER_IP_BAN_LIMIT.getValue()) {
-                        // Banning will also remove the host from the Map
-                        banContact(creator);
-                    }
-                    return false;
-                }
+                return false;
+            }
+        }
+        
+        if (entity.getValue().size() != 0) {
+            int valuesPerAddress = getValuesPerAddress(entity);
+            if (DatabaseSettings.LIMIT_VALUES_PER_ADDRESS.getValue() 
+                    && valuesPerAddress >= DatabaseSettings.MAX_VALUES_PER_ADDRESS.getValue()) {
+                return false;
+            }
+            
+            int valuesPerNetwork = getValuesPerNetwork(entity);
+            if (DatabaseSettings.LIMIT_VALUES_PER_NETWORK.getValue()
+                    && valuesPerNetwork >= DatabaseSettings.MAX_VALUES_PER_NETWORK.getValue()) {
+                return false;
             }
         }
         
         // Check with the security constraint now
+        DHTValueEntityBag bag = database.get(entity.getPrimaryKey());
         DatabaseSecurityConstraint dbsc = securityConstraint;
         if (dbsc != null && bag != null) {
             return dbsc.allowStore(this, bag.getValues(false), entity);
         }
         
         return true;
-    }
-    
-    /**
-     * Bans the given Contact and removes all values the Contact
-     * has ever stored in our Database
-     */
-    private void banContact(Contact contact) {
-        // Remove all values by this contact
-        for(DHTValueEntity entity: values()) {
-            if(entity.getCreator().equals(contact)) {
-                remove(entity.getPrimaryKey(), entity.getSecondaryKey());
-            }
-        }
-        
-        // Ban the Host if possible
-        HostFilter f = filter;
-        if (f != null) {
-            f.ban(contact.getContactAddress());
-        }
     }
     
     /**

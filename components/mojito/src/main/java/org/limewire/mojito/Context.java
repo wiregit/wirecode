@@ -77,7 +77,6 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.statistics.DHTStatsManager;
@@ -460,9 +459,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         if (database == null) {
-            database = new DatabaseImpl(
-                    DatabaseSettings.MAX_DATABASE_SIZE.getValue(), 
-                    DatabaseSettings.MAX_VALUES_PER_KEY.getValue());
+            database = new DatabaseImpl();
         }
         
         this.database = database;
@@ -538,7 +535,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public synchronized void setHostFilter(HostFilter hostFilter) {
         this.hostFilter = hostFilter;
-        database.setHostFilter(hostFilter);
     }
     
     /*

@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.util.HostFilter;
 
 
 /**
@@ -44,8 +43,6 @@ public interface Database extends Serializable {
      */
     public void setDatabaseSecurityConstraint(
             DatabaseSecurityConstraint securityConstraint);
-    
-    public void setHostFilter(HostFilter filter);
     
     /**
      * Adds or removes the given DHTValue depending on
@@ -107,16 +104,6 @@ public interface Database extends Serializable {
      * which is greater or equal to key count.
      */
     public int getValueCount();
-    
-    /**
-     * Returns the maximum number of keys
-     */
-    public int getMaxDatabaseSize();
-    
-    /**
-     * Returns the maximum number of values per key
-     */
-    public int getMaxValuesPerKey();
     
     /**
      * Clears the Database
