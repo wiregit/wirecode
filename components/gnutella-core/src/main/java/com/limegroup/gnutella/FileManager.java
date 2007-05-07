@@ -2426,6 +2426,7 @@ public abstract class FileManager {
             // the actual values
             ArrayList<Double> hits = new ArrayList<Double>();
             ArrayList<Double> uploads = new ArrayList<Double>();
+            ArrayList<Double> completeUploads = new ArrayList<Double>();
             ArrayList<Double> alts = new ArrayList<Double>();
             ArrayList<Double> keywords = new ArrayList<Double>();
             
@@ -2434,10 +2435,12 @@ public abstract class FileManager {
             ArrayList<Double> altsUploads = new ArrayList<Double>();
             ArrayList<Double> hitsUpload = new ArrayList<Double>();
             ArrayList<Double> hitsKeywords = new ArrayList<Double>();
+            ArrayList<Double> uploadsToComplete = new ArrayList<Double>();
             
             Map<Integer, FileDesc> topHitsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
+            Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             synchronized(FileManager.this) {
                 FileDesc[] fds = getAllSharedFileDescriptors();
                 hits.ensureCapacity(fds.length);
@@ -2466,6 +2469,11 @@ public abstract class FileManager {
                         uploads.add((double)upCount);
                         topUpsFDs.put(upCount, fds[i]);
                     }
+                    int cupCount = fds[i].getCompletedUploads();
+                    if (!nonZero || cupCount > 0) {
+                        completeUploads.add((double)upCount);
+                        topCupsFDs.put(cupCount, fds[i]);
+                    }
                     
                     // keywords per fd
                     double keywordsCount = 
@@ -2474,14 +2482,12 @@ public abstract class FileManager {
                     
                     // populate differences
                     if (!nonZero) {
-                        if (hits.size() >= i && uploads.size() >=i)
-                            hitsUpload.add(hits.get(i-1) - uploads.get(i - 1));
-                        if (hits.size() >= i && alts.size() >=i)
-                            altsHits.add(alts.get(i-1) - hits.get(i - 1));
-                        if (alts.size() >= i && uploads.size() >= i)
-                            altsUploads.add(alts.get(i-1)  - uploads.get(i - 1));
-                        if (hits.size() >= i)
-                            hitsKeywords.add(hits.get(i - 1) - keywordsCount);
+                        int index = hits.size() - 1;
+                        hitsUpload.add(hits.get(index) - uploads.get(index));
+                        altsHits.add(alts.get(index) - hits.get(index));
+                        altsUploads.add(alts.get(index)  - uploads.get(index));
+                        hitsKeywords.add(hits.get(index) - keywordsCount);
+                        uploadsToComplete.add(uploads.get(index) - completeUploads.get(index));
                     }
                 }
                 ret.put("rare",Double.doubleToLongBits((double)rare / total));
@@ -2490,6 +2496,8 @@ public abstract class FileManager {
             ret.put("hitsh", StatsUtils.getHistogram(hits, 10)); // small, will compress
             ret.put("ups",StatsUtils.quickStatsDouble(uploads).getMap());
             ret.put("upsh", StatsUtils.getHistogram(uploads, 10));
+            ret.put("cups",StatsUtils.quickStatsDouble(completeUploads).getMap());
+            ret.put("cupsh", StatsUtils.getHistogram(completeUploads, 10));
             ret.put("alts", StatsUtils.quickStatsDouble(alts).getMap());
             ret.put("altsh", StatsUtils.getHistogram(alts, 10));
             ret.put("kw", StatsUtils.quickStatsDouble(keywords).getMap());
@@ -2500,12 +2508,15 @@ public abstract class FileManager {
             ret.put("aht",StatsUtils.quickStatsDouble(altsHits).getTTestMap());
             ret.put("aut",StatsUtils.quickStatsDouble(altsUploads).getTTestMap());
             ret.put("hkt",StatsUtils.quickStatsDouble(hitsKeywords).getTTestMap());
+            ret.put("ucut",StatsUtils.quickStatsDouble(uploadsToComplete).getTTestMap());
             
             QueryRouteTable topHits = new QueryRouteTable();
             QueryRouteTable topUps = new QueryRouteTable();
+            QueryRouteTable topCups = new QueryRouteTable();
             QueryRouteTable topAlts = new QueryRouteTable();
             Iterator<FileDesc> hitIter = topHitsFDs.values().iterator();
             Iterator<FileDesc> upIter = topUpsFDs.values().iterator();
+            Iterator<FileDesc> cupIter = topCupsFDs.values().iterator();
             Iterator<FileDesc> altIter = topAltsFDs.values().iterator();
             for (int i = 0; i < 10; i++) {
                 if (hitIter.hasNext())
@@ -2514,11 +2525,14 @@ public abstract class FileManager {
                     topUps.add(upIter.next().getPath());
                 if (altIter.hasNext())
                     topAlts.add(altIter.next().getPath());
+                if (cupIter.hasNext())
+                    topCups.add(cupIter.next().getPath());
             }
             // we return all qrps, but since they will have very few entries
             // they will compress very well
             ret.put("hitsq",topHits.getRawDump());
             ret.put("upsq",topUps.getRawDump());
+            ret.put("cupsq",topCups.getRawDump());
             ret.put("altsq",topAlts.getRawDump());
             
             return ret;
