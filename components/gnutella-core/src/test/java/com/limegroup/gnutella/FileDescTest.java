@@ -7,9 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.CommonUtils;
-
 import junit.framework.Test;
+
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.settings.DHTSettings;
 
 
 /**
@@ -82,5 +85,34 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
             Set urns = calculateAndCacheURN(file); 
             new FileDesc(file, urns, i);
         }
+    }
+    
+    public void testIsRareFile() throws Exception {
+        File file = CommonUtils.getResourceFile("build.xml");
+        Set urns = calculateAndCacheURN(file);
+        
+        FileDesc fd = new FileDesc(file, urns, 0);
+        
+        // Initial State: Not Rare!
+        assertLessThan(DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue(), fd.getAttemptedUploads());
+        assertLessThanOrEquals(DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue(), fd.getCompletedUploads());
+        
+        long delta = System.currentTimeMillis() - fd.getLastAttemptedUploadTime();
+        assertLessThan(DHTSettings.RARE_FILE_TIME.getValue(), delta);
+        
+        assertFalse(fd.isRareFile());
+        
+        // Modify the lastAttemptedUploadTime and it should be still not rare
+        delta = System.currentTimeMillis() - DHTSettings.RARE_FILE_TIME.getValue();
+        PrivilegedAccessor.setValue(fd, "lastAttemptedUploadTime", Long.valueOf(delta));
+        
+        assertFalse(fd.isRareFile());
+        
+        // Change the _attemptedUploads counter
+        PrivilegedAccessor.setValue(fd, "_attemptedUploads", 
+                Integer.valueOf(DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()));
+        
+        // And it should be rare
+        assertTrue(fd.isRareFile());
     }
 }
