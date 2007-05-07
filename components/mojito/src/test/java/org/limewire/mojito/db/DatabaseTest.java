@@ -603,7 +603,7 @@ public class DatabaseTest extends MojitoTestCase {
         assertLessThan(1f/0.01f, load);
     }
     
-    public void testReplaceFirewalledValue() {
+    public void testReplaceFirewalledValue() throws InterruptedException {
         final int MAX_VALUES_PER_KEY = 5;
         
         DatabaseImpl database = new DatabaseImpl(-1, MAX_VALUES_PER_KEY);
@@ -630,6 +630,9 @@ public class DatabaseTest extends MojitoTestCase {
             
             database.store(entity);
             values.add(entity);
+            
+            // Make sure the creation times are different
+            Thread.sleep(100);
         }
         
         // Check initial State
@@ -663,6 +666,7 @@ public class DatabaseTest extends MojitoTestCase {
         
         // Store it in the Database
         database.store(notFirewalled);
+        values.add(notFirewalled);
         
         // It should be there
         assertTrue(database.contains(notFirewalled.getPrimaryKey(), notFirewalled.getSecondaryKey()));
@@ -674,6 +678,58 @@ public class DatabaseTest extends MojitoTestCase {
         // And the remaining four firewalled values should be still there
         for (DHTValueEntity firewalled : values.subList(1, MAX_VALUES_PER_KEY)) {
             assertTrue(database.contains(firewalled.getPrimaryKey(), firewalled.getSecondaryKey()));
+        }
+        
+        // Create more non-firewalled values
+        for (int i = 0; i < 2*MAX_VALUES_PER_KEY; i++) {
+            addr = new InetSocketAddress(6666);
+             node = ContactFactory.createLiveContact(
+                    addr, 
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    addr, 0, 
+                    Contact.DEFAULT_FLAG);
+            
+            assertFalse(node.isFirewalled());
+            
+            DHTValueEntity entity = new DHTValueEntity(node, node, primaryKey, 
+                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes()), false);
+            
+            database.store(entity);
+            values.add(entity);
+            
+            // Make sure the creation times are different
+            Thread.sleep(100); 
+        }
+        
+        // Check state
+        assertEquals(1, database.getKeyCount());
+        assertEquals(MAX_VALUES_PER_KEY, database.getValueCount());
+        
+        
+        // The firewalled values should be all gone
+        int fromIndex = 0;
+        int toIndex = values.size() - (2*MAX_VALUES_PER_KEY);
+        for (DHTValueEntity entity : values.subList(fromIndex, toIndex-1)) {
+            assertTrue(entity.getCreator().isFirewalled());
+            assertFalse(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
+        }
+        
+        // The first five non-firewalled values should be there
+        fromIndex = toIndex;
+        toIndex = fromIndex + MAX_VALUES_PER_KEY;
+        for (DHTValueEntity entity : values.subList(fromIndex, toIndex-1)) {
+            assertFalse(entity.getCreator().isFirewalled());
+            assertTrue(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
+        }
+        
+        // The last five non-firewalled shouldn't be there
+        fromIndex = toIndex;
+        toIndex = values.size();
+        for (DHTValueEntity entity : values.subList(fromIndex, toIndex)) {
+            assertFalse(entity.getCreator().isFirewalled());
+            assertFalse(database.contains(entity.getPrimaryKey(), entity.getSecondaryKey()));
         }
     }
     
