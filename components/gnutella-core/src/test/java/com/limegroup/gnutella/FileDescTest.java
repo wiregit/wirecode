@@ -105,7 +105,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         // Modify the lastAttemptedUploadTime and it should be still not rare
         delta = System.currentTimeMillis() - DHTSettings.RARE_FILE_TIME.getValue();
         PrivilegedAccessor.setValue(fd, "lastAttemptedUploadTime", Long.valueOf(delta));
-        
+        Thread.sleep(10);
         assertFalse(fd.isRareFile());
         
         // Change the _attemptedUploads counter
@@ -118,5 +118,16 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         // Simulate an upload attempt and it shoudn't be rare anymore
         fd.incrementAttemptedUploads();
         assertFalse(fd.isRareFile());
+        
+        // Change the definition to something bogus like completedUploads == attemptedUploads
+        DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
+        "cups","ups","=="
+        });
+        assertFalse(fd.isRareFile());
+        fd.incrementCompletedUploads();
+        assertFalse(fd.isRareFile());
+        fd.incrementCompletedUploads();
+        assertEquals(fd.getAttemptedUploads(), fd.getCompletedUploads());
+        assertTrue(fd.isRareFile());
     }
 }
