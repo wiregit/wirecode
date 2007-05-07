@@ -472,7 +472,7 @@ public class FileDesc implements FileDetails, StringLookup {
         else if ("rftSet".equals(key))
             return DHTSettings.RARE_FILE_TIME.getValueAsString();
         else
-            return "false";
+            return null;
     }
 }
 
