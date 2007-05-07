@@ -129,5 +129,11 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         fd.incrementCompletedUploads();
         assertEquals(fd.getAttemptedUploads(), fd.getCompletedUploads());
         assertTrue(fd.isRareFile());
+        
+        // test that a broken rule will not make the file rare
+        DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
+                "badger","badger"
+                });
+        assertFalse(fd.isRareFile());
     }
 }
