@@ -75,7 +75,7 @@ public class DatabaseImpl implements Database {
     
     private static final Log LOG = LogFactory.getLog(DatabaseImpl.class);
     
-    private static final int IPV4_ADDRESS_NETMASK = 0xFFFFFFFF;
+    public static final int IPV4_ADDRESS_NETMASK = 0xFFFFFFFF;
     
     /** LOCKING: this */
     private final Map<KUID, DHTValueEntityBag> database = new HashMap<KUID, DHTValueEntityBag>();
