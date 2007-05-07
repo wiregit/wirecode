@@ -84,6 +84,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.statistics.LimeSentMessageStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
@@ -2469,6 +2470,7 @@ public abstract class MessageRouter {
             qr.setTTL((byte)(request.getHops()+1));
             try {
                 sendQueryReply(qr);
+                LimeSentMessageStat.LIME_REPLIES_SENT.incrementStat();
             } catch (IOException ignored) {}
         }
         

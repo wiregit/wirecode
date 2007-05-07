@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
 import org.limewire.statistic.AdvancedStatistic;
+import org.limewire.statistic.BasicStatistic;
 import org.limewire.statistic.Statistic;
 
 
@@ -301,5 +302,11 @@ public class LimeSentMessageStat extends AdvancedStatistic {
      */
     public static final Statistic UDP_DHT_MSG = 
         new UDPLimeSentMessageStat();
+    
+    /**
+     * <tt>Statistic</tt> for lime replies sent.
+     */
+    public static final Statistic LIME_REPLIES_SENT = 
+        new BasicStatistic(){};
 
 }
