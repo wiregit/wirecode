@@ -269,7 +269,8 @@ public final class NetworkUtils {
                 || address.isSiteLocalAddress()
                 || isUniqueLocalUnicastAddress(address)
                 || isBroadcastAddress(address)
-                || isInvalidAddress(address)) {
+                || isInvalidAddress(address)
+                || isDocumentationAddress(address)) {
             return true;
         }
         
@@ -297,7 +298,8 @@ public final class NetworkUtils {
                 || isLinkLocalAddress(address) 
                 || isSiteLocalAddress(address)
                 || isUniqueLocalUnicastAddress(address)
-                || isBroadcastAddress(address)) {
+                || isBroadcastAddress(address)
+                || isDocumentationAddress(address)) {
             return true;
         }
         
@@ -857,7 +859,8 @@ public final class NetworkUtils {
     
     /**
      * Returns true if the given InetAddress has a prefix that's used in
-     * Documentation. See RFC 3849 for more information.
+     * Documentation. It's a non-routeable IPv6 address. See RFC 3849 
+     * for more information.
      */
     public static boolean isDocumentationAddress(InetAddress address) {
         if (address instanceof Inet6Address) {
@@ -868,7 +871,8 @@ public final class NetworkUtils {
     
     /**
      * Returns true if the given byte-array has a prefix that's used in
-     * Documentation. See RFC 3849 for more information.
+     * Documentation. It's a non-routeable IPv6 address. See RFC 3849 
+     * for more information.
      */
     private static boolean isDocumentationAddress(byte[] address) {
         // 2001:0DB8::/32
