@@ -78,7 +78,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         RouterService.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
-                        reactor.acceptConnection(word, socket);
+                        reactor.acceptConnection(word + " ", socket);
                     }
                 }, new String[] { "GET", "HEAD", }, false, false);
     }
@@ -164,6 +164,10 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         else if ("HEAD".equals(word))
             HTTPStat.HEAD_REQUESTS.incrementStat();
 
+        if (word != null) {
+            word += " ";
+        }
+        
         reactor.acceptConnection(word, socket);
     }
 

@@ -57,7 +57,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         this.session = session;
         this.eventDispatch = eventDispatch;
         if (method != null) {
-            this.methodBuffer = ByteBuffer.wrap((method + " ").getBytes());
+            this.methodBuffer = ByteBuffer.wrap(method.getBytes());
         }
     }
 

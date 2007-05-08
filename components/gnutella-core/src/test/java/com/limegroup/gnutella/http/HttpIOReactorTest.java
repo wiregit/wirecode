@@ -91,7 +91,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         
         Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500, null);
         try {
-            DefaultNHttpServerConnection conn = reactor.acceptConnection("GET", socket);
+            DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
         } finally {
             socket.close();
@@ -111,7 +111,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         RouterService.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
-                        server.getReactor().acceptConnection(word, socket);
+                        server.getReactor().acceptConnection(word + " ", socket);
                     }
                 }, new String[] { "GET", "HEAD", "POST" }, false, false);
 
