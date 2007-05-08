@@ -138,22 +138,27 @@ public class GUID implements Comparable<GUID> {
     
     /**
      * encodes the current time in seconds in the guid.  This takes away
-     * 4 bytes of entropy.  If used together with address encoding, we're
-     * left with 5 bytes of entropy (~ 8 billion)
+     * 3 bytes of entropy because it overwrites byte 16.  
+     * If used together with address encoding, we're
+     * left with 4 bytes of entropy (~ 4 billion)
+     * (4 ip, 2 port, 4 timestamp, 2 lime mark)
      */
     public static void timeStampGuid(byte [] guid) {
         int now = (int)(System.currentTimeMillis() / 1000); // good for another 30 years
-        ByteOrder.int2beb(now, guid, 4);
-        guid[15] = 0x1;
+        guid[4] = (byte) (now >> 24);
+        guid[5] = (byte) (now >> 16);
+        guid[6] = (byte) (now >> 8);
+        guid[15] = (byte) now;
     }
     
     /**
-     * @return the encoded time in the guid, -1 if none.
+     * @return the encoded time in the guid
      */
     public static long readTimeStamp(byte [] guid) {
-        if (guid[15] != 0x1)
-            return -1;
-        return (long)ByteOrder.beb2int(guid, 4) * 1000 ; // lose some precision
+        return ((guid[4] << 24) |
+         ((guid[5] & 0xFF) << 16) |
+         ((guid[6] & 0xFF) << 8) |
+         (guid[15] & 0xFF) ) * 1000l; // round off last second
     }
 
     /** Create a guid with an ip and port encoded within.
