@@ -97,7 +97,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         outgoing = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
         ((InstantMessenger)outgoing.getChat()).waitForConnect(1000);
         // wait for SwingUtilities.invokeLater() to create chat frame
-        Thread.sleep(4000);
+        GUITestUtils.waitForSwing();
         assertTrue(!outgoing.getChat().isConnected());
     }
 

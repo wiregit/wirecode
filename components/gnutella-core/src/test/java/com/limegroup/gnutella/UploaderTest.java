@@ -525,11 +525,9 @@ public class UploaderTest extends LimeTestCase {
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
-        Class cache = PrivilegedAccessor.getClass(HTTPUploadManager.class,
-                                                  "RequestCache");
-        PrivilegedAccessor.setValue(cache, "WAIT_TIME",
+        PrivilegedAccessor.setValue(RequestCache.class, "WAIT_TIME",
                                     new Long(20*1000));
-        PrivilegedAccessor.setValue(cache, "FIRST_CHECK_TIME",
+        PrivilegedAccessor.setValue(RequestCache.class, "FIRST_CHECK_TIME",
                                     new Long(10*1000));        
    
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
