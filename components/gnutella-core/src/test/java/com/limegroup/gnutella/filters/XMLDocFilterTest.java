@@ -81,6 +81,10 @@ public class XMLDocFilterTest extends KeywordFilterTest {
         
         Response resp = createXMLResponse("filename", field, values);
         
+        return createReply(resp, port, address);
+    }
+    
+    public static QueryReply createReply(Response resp, int port, byte[] address) throws Exception {
         QueryReply qr = createReply(resp, new GUID(), port, address);
 
         // write out to network so it is parsed again and xml docs are constructed
