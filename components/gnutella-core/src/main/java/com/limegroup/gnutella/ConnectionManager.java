@@ -99,6 +99,13 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     @InspectablePrimitive
     private volatile long _connectTime = Long.MAX_VALUE;
+    
+    /**
+     * Timestamp for the last time we reached our preferred connections
+     */
+    @InspectablePrimitive
+    @SuppressWarnings("unused")
+    private volatile long _lastFullConnectTime;
 
     /**
      * Timestamp for the time we began automatically connecting.  We stop
@@ -2143,10 +2150,12 @@ public class ConnectionManager implements ConnectionAcceptor,
                         EventType.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
-                if (_initializedConnections.size() >= getPreferredConnectionCount())
+                if (_initializedConnections.size() >= getPreferredConnectionCount()) {
+                    _lastFullConnectTime = System.currentTimeMillis();
                     dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
                             EventType.CONNECTED,
                             mc));
+                }
                     
             }
             return connectionOpen;
