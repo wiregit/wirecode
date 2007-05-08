@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +14,10 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.filters.XMLDocFilterTest;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -680,6 +684,25 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         r1 = new Response(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
         r2 = new Response(0, Integer.MAX_VALUE, "name");
         assertNotEquals(r1.hashCode(), r2.hashCode());
+    }
+    
+    public void testIllegalFilenamesInInputStream() throws Exception {
+        // illegal filename
+        Response resp = new Response(1, 2, "a;lksdflkfj../");
+        assertReadingFromNetworkFails(resp);
+        assertReadingFromNetworkFails(new Response(1, 4545, "s;lkdf\n\n\n"));
+        assertReadingFromNetworkFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
+        assertReadingFromNetworkFails(new Response(4545, 3454, ""));
+    }
+    
+    private static void assertReadingFromNetworkFails(Response r) throws Exception {
+        QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 });
+        try {
+            qr.getResultsArray();
+            fail("Expected bad packet exception");
+        }
+        catch (BadPacketException bpe) {
+        }
     }
     
     private Set getAsEndpoints(AlternateLocationCollection col)

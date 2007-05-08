@@ -259,13 +259,7 @@ public class Response {
             baos.write(c);
         }
         String name = new String(baos.toByteArray(), "UTF-8");
-        if(name.length() == 0) {
-            throw new IOException("empty name in response");
-        }
-        // sanity checks for filename 
-        if (name.contains("/") || name.contains("\n")) {
-            throw new IOException("Illegal filename " + name);
-        }
+        checkFilename(name); // throws IOException
 
         // Extract extra info, if any
         baos.reset();
@@ -275,7 +269,7 @@ public class Response {
             baos.write(c);
         }
         byte[] rawMeta = baos.toByteArray();
-        if(rawMeta == null || rawMeta.length == 0) {
+        if(rawMeta.length == 0) {
 			if(is.available() < 16) {
 				throw new IOException("not enough room for the GUID");
 			}
@@ -748,6 +742,17 @@ public class Response {
                 }
             }
             return locations;
+        }
+    }
+    
+    
+    private final static void checkFilename(String name) throws IOException {
+        if (name.length() == 0) {
+            throw new IOException("empty name in response");
+        }
+        // sanity checks for filename 
+        if (name.indexOf('/') != -1 || name.indexOf('\n') != -1 || name.indexOf('\r') != -1) {
+            throw new IOException("Illegal filename " + name + "contains one of [/\\n\\r]");
         }
     }
     
