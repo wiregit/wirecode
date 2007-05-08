@@ -689,14 +689,14 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testIllegalFilenamesInInputStream() throws Exception {
         // illegal filename
         Response resp = new Response(1, 2, "a;lksdflkfj../");
-        assertReadingFromNetworkFails(resp);
-        assertReadingFromNetworkFails(new Response(1, 4545, "s;lkdf\n\n\n"));
-        assertReadingFromNetworkFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
-        assertReadingFromNetworkFails(new Response(4545, 3454, ""));
-        assertReadingFromNetworkFails(new Response(1454, 3245, "dlksdf\r"));
+        assertResponseParsingFails(resp);
+        assertResponseParsingFails(new Response(1, 4545, "s;lkdf\n\n\n"));
+        assertResponseParsingFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
+        assertResponseParsingFails(new Response(4545, 3454, ""));
+        assertResponseParsingFails(new Response(1454, 3245, "dlksdf\r"));
     }
     
-    private static void assertReadingFromNetworkFails(Response r) throws Exception {
+    private static void assertResponseParsingFails(Response r) throws Exception {
         QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 });
         try {
             qr.getResultsArray();
