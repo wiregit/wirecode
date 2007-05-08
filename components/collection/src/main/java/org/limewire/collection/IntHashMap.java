@@ -58,6 +58,11 @@
  */
 package org.limewire.collection;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 
 /*
  * http://fisheye5.cenqua.com/viewrep/~raw,r=1.2/dwr/java/uk/ltd/getahead/dwr/lang/IntHashMap.java
@@ -74,10 +79,12 @@ package org.limewire.collection;
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne
  * @since 2.0
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see java.util.HashMap
  */
-public class IntHashMap<V> {
+public class IntHashMap<V> implements Serializable {
+    
+    private static final long serialVersionUID = 2514013526418191636L;
 
     /**
      * The hash table data.
@@ -102,7 +109,7 @@ public class IntHashMap<V> {
      *
      * @serial
      */
-    private float loadFactor;
+    private final float loadFactor;
 
     /**
      * <p>Innerclass that acts as a datastructure to create a new entry in the
@@ -426,5 +433,49 @@ public class IntHashMap<V> {
             tab[index] = null;
         }
         count = 0;
+    }
+    
+    private void writeObject(ObjectOutputStream oos) 
+            throws IOException {
+        
+        // Write out the threshold, loadfactor, and any hidden stuff
+        oos.defaultWriteObject();
+
+        // Write out number of buckets
+        oos.writeInt(table.length);
+
+        // Write out size (number of Mappings)
+        oos.writeInt(count);
+
+        // Write the Entries
+        for (Entry<V> entry : table) {
+            while(entry != null) {
+                oos.writeInt(entry.key);
+                oos.writeObject(entry.value);
+                entry = entry.next;
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream ois) 
+            throws IOException, ClassNotFoundException {
+        
+        // Read in the threshold, loadfactor, and any hidden stuff
+        ois.defaultReadObject();
+
+        // Read in number of buckets and allocate the bucket array
+        int numBuckets = ois.readInt();
+        table = new Entry[numBuckets];
+        
+        // Read in size (number of Mappings)
+        int size = ois.readInt();
+
+        // Read the keys and values, and put the mappings in the IntHashMap
+        for (int i = 0; i < size; i++) {
+            int key = ois.readInt();
+            V value = (V)ois.readObject();
+            put(key, value);
+        }
     }
 }
