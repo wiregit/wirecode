@@ -80,6 +80,7 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -340,10 +341,9 @@ public class RouterService {
 
 
 	/**
-	 * Long for the last time this host originated a query.
+	 * Keeps track of times of queries.
 	 */
-    @InspectablePrimitive
-	private static long _lastQueryTime = 0L;
+	private static QueryStats queryStats = new QueryStats();
 	
 	/**
 	 * Whether or not we are running at full power.
@@ -1440,7 +1440,7 @@ public class RouterService {
      */ 
     private static void recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
-        _lastQueryTime = System.currentTimeMillis();
+        queryStats.recordQuery();
         VERIFIER.record(qr, type);
         RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
         messageRouter.sendDynamicQuery(qr);
@@ -1453,7 +1453,7 @@ public class RouterService {
 	 *  January 1, 1970, that the last query originated from this host
 	 */
 	public static long getLastQueryTime() {
-		return _lastQueryTime;
+		return queryStats.getLastQueryTime();
 	}
 
     /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
