@@ -54,7 +54,6 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ReplyHandler;
@@ -223,8 +222,14 @@ public class UploadTest extends LimeTestCase {
 		copyFile(testFile, sharedFile);
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
 		assertGreaterThan("should have data", 0, new File(_sharedDir, fileName).length());
+       
+        // Make sure our customized UploadManager is set in
+        // RouterService and clear its activeUploads
+        // cache. See TestUploadManager for more Info!
+        upMan = RouterService.getUploadManager();
+		assertTrue(upMan == UPLOAD_MANAGER);
 
-        if ( !RouterService.isLoaded() ) {
+        if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
             Thread.sleep(2000);
         }
@@ -232,14 +237,6 @@ public class UploadTest extends LimeTestCase {
         assertEquals("ports should be equal",
                      PORT, ConnectionSettings.PORT.getValue());
                      
-        upMan = RouterService.getUploadManager();
-        
-        // Make sure our customized UploadManager is set in
-        // RouterService and clear its activeUploads
-        // cache. See TestUploadManager for more Info!
-        assertTrue(upMan == UPLOAD_MANAGER);
-        UPLOAD_MANAGER.clearUploads();
-        
         FileManager fm = RouterService.getFileManager();
         File incFile = new File(_incompleteDir, incName);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
@@ -274,6 +271,13 @@ public class UploadTest extends LimeTestCase {
 			": "+ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue();        
 	}
 
+    public void tearDown() {
+        UPLOAD_MANAGER.clearUploads();
+
+        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
+        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+    }
+	
     /**
      * Tests the case of requests for different file over the same http session
      */
@@ -2713,7 +2717,7 @@ public class UploadTest extends LimeTestCase {
         private List activeUploads = new ArrayList();
         
         public TestUploadManager() {
-        	super(new HTTPAcceptor(), new UploadSlotManager());
+        	super(RouterService.getUploadSlotManager());
         }
         
         public synchronized void addAcceptedUploader(HTTPUploader uploader) {
@@ -2722,6 +2726,8 @@ public class UploadTest extends LimeTestCase {
         }
         
         public void clearUploads() {
+            cleanup();
+            
             activeUploads.clear();
         }
     }

@@ -69,5 +69,9 @@ public interface UploadManager extends BandwidthTracker {
      * estimate.
      */
     int measuredUploadSpeed();
+
+    void start(HTTPAcceptor acceptor);
+
+    void stop(HTTPAcceptor acceptor);
     
 }

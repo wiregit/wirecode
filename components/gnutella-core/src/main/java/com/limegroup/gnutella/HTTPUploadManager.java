@@ -65,8 +65,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /** Number of force-shared active uploads. */
     private int forcedUploads;
 
-    private HTTPAcceptor acceptor;
-
     private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
 
     private ResponseListener responseListener = new ResponseListener();
@@ -133,26 +131,23 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
-    public HTTPUploadManager(HTTPAcceptor acceptor,
-            UploadSlotManager slotManager) {
-        if (acceptor == null) {
-            throw new IllegalArgumentException("acceptor may not be null");
-        }
+    public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
         }
 
-        this.acceptor = acceptor;
         this.slotManager = slotManager;
+    }
+
+    public void start(HTTPAcceptor acceptor) {
+        if (acceptor == null) {
+            throw new IllegalArgumentException("acceptor may not be null");
+        }
 
         FileUtils.addFileLocker(this);
 
         acceptor.addResponseListener(responseListener);
 
-        inititalizeHandlers();
-    }
-
-    private void inititalizeHandlers() {
         // browse
         acceptor.registerHandler("/", new BrowseRequestHandler(this));
 
@@ -196,6 +191,21 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
     }
 
+    public void stop(HTTPAcceptor acceptor) {
+        if (acceptor == null) {
+            throw new IllegalArgumentException("acceptor may not be null");
+        }
+
+        acceptor.unregisterHandler("/");
+        acceptor.unregisterHandler("/update.xml");
+        acceptor.unregisterHandler("/gnutella/push-proxy");
+        acceptor.unregisterHandler("/gnet/push-proxy");
+        acceptor.unregisterHandler("/get*");
+        acceptor.unregisterHandler("/uri-res/*");
+        
+        FileUtils.removeFileLocker(this);
+    }
+    
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
             HttpContext context, HTTPUploader uploader) throws HttpException,
             IOException {

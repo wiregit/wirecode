@@ -1,6 +1,5 @@
 package org.limewire.http;
 
-
 import java.nio.ByteBuffer;
 
 import org.apache.http.ConnectionReuseStrategy;
@@ -41,14 +40,13 @@ public class HttpChannelTest extends BaseTestCase {
         serviceHandler = new HttpServiceHandler(httpProcessor, responseFactory,
                 connStrategy, parms);
         eventDispatch = new DefaultServerIOEventDispatch(serviceHandler, parms);
-
     }
 
     public void testPushBackReadAllAtOnce() throws Exception {
         MockSocket socket = new MockSocket();
         HttpIOSession session = new HttpIOSession(socket);
         MockChannel srcChannel = new MockChannel("abc");
-        
+
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
         channel.setReadChannel(srcChannel);
         ByteBuffer dst = ByteBuffer.allocate(8);
@@ -66,7 +64,7 @@ public class HttpChannelTest extends BaseTestCase {
         MockSocket socket = new MockSocket();
         HttpIOSession session = new HttpIOSession(socket);
         MockChannel srcChannel = new MockChannel("abc");
-        
+
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
         channel.setReadChannel(srcChannel);
         ByteBuffer dst = ByteBuffer.allocate(2);
@@ -74,7 +72,7 @@ public class HttpChannelTest extends BaseTestCase {
         assertEquals(2, read);
         dst.flip();
         assertEquals("GE", new String(dst.array(), 0, 2));
-        
+
         dst.clear();
         read = channel.read(dst);
         assertEquals(2, read);
@@ -90,12 +88,12 @@ public class HttpChannelTest extends BaseTestCase {
         assertEquals(0, read);
         assertEquals(0, dst.position());
     }
-    
+
     public void testNoPushBack() throws Exception {
         MockSocket socket = new MockSocket();
         HttpIOSession session = new HttpIOSession(socket);
         MockChannel srcChannel = new MockChannel("abc");
-        
+
         HttpChannel channel = new HttpChannel(session, eventDispatch, null);
         channel.setReadChannel(srcChannel);
         ByteBuffer dst = ByteBuffer.allocate(4);
@@ -104,6 +102,5 @@ public class HttpChannelTest extends BaseTestCase {
         dst.flip();
         assertEquals("abc", new String(dst.array(), 0, 3));
     }
-        
-    
+
 }

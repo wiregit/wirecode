@@ -184,8 +184,7 @@ public class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = 
-    	new HTTPUploadManager(httpUploadAcceptor, uploadSlotManager);
+    private static UploadManager uploadManager = new HTTPUploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -497,7 +496,15 @@ public class RouterService {
             callback.componentLoading("ACCEPTOR");
     		acceptor.start();
     		LOG.trace("STOP Acceptor");
-    		
+
+            LOG.trace("START HTTPUploadAcceptor");
+            httpUploadAcceptor.start(getConnectionDispatcher()); 
+            LOG.trace("STOP HTTPUploadAcceptor");
+
+            LOG.trace("START HTTPUploadManager");
+            uploadManager.start(httpUploadAcceptor); 
+            LOG.trace("STOP HTTPUploadManager");
+
             LOG.trace("START loading StaticMessages");
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
@@ -510,7 +517,7 @@ public class RouterService {
     		LOG.trace("START DownloadManager");
     		downloadManager.initialize(); 
     		LOG.trace("STOP DownloadManager");
-    		
+
     		LOG.trace("START NodeAssigner");
     		nodeAssigner.start();
     		LOG.trace("STOP NodeAssigner");
@@ -791,7 +798,7 @@ public class RouterService {
         if (lan) {
             getHTTPUploadAcceptor().acceptLocalConnection(socket);
         } else {
-            getHTTPUploadAcceptor().acceptConnection(null, socket);
+            getHTTPUploadAcceptor().acceptConnection(socket);
         }
     }
     

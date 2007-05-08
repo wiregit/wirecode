@@ -50,9 +50,11 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * Redirects HTTP requests to handlers.
  */
-public class HTTPAcceptor implements ConnectionAcceptor {
+public class HTTPAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
+
+    private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
 
     private HttpIOReactor reactor;
 
@@ -74,13 +76,6 @@ public class HTTPAcceptor implements ConnectionAcceptor {
     public HTTPAcceptor() {
         initializeReactor();
         inititalizeDefaultHandler();
-        
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(
-                new ConnectionAcceptor() {
-                    public void acceptConnection(String word, Socket socket) {
-                        reactor.acceptConnection(word + " ", socket);
-                    }
-                }, new String[] { "GET", "HEAD", }, false, false);
     }
 
     private void initializeReactor() {
@@ -158,17 +153,8 @@ public class HTTPAcceptor implements ConnectionAcceptor {
     /**
      * Incoming HTTP requests.
      */
-    public void acceptConnection(String word, Socket socket) {
-        if ("GET".equals(word))
-            HTTPStat.GET_REQUESTS.incrementStat();
-        else if ("HEAD".equals(word))
-            HTTPStat.HEAD_REQUESTS.incrementStat();
-
-        if (word != null) {
-            word += " ";
-        }
-        
-        reactor.acceptConnection(word, socket);
+    public void acceptConnection(Socket socket) {
+        reactor.acceptConnection(null, socket);
     }
 
     /**
@@ -256,6 +242,19 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.registry.unregister(pattern);
     }
     
+    public void start(ConnectionDispatcher dispatcher) {
+        dispatcher.addConnectionAcceptor(
+            new ConnectionAcceptor() {
+                public void acceptConnection(String word, Socket socket) {
+                    reactor.acceptConnection(word + " ", socket);
+                }
+            }, SUPPORTED_METHODS, false, false);
+    }
+
+    public void stop(ConnectionDispatcher dispatcher) {
+        dispatcher.removeConnectionAcceptor(SUPPORTED_METHODS);
+    }
+
     /**
      * Forwards events from the underlying protocol layer to acceptor event listeners.
      */

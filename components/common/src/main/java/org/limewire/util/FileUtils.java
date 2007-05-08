@@ -290,7 +290,16 @@ public class FileUtils {
     public static void addFileLocker(FileLocker locker) {
         fileLockers.addIfAbsent(locker);
     }
-    
+
+    /**
+     * Removes <code>locker</code> from the list of FileLockers.
+     * 
+     * @see #addFileLocker(FileLocker) 
+     */
+    public static void removeFileLocker(FileLocker locker) {
+        fileLockers.remove(locker);
+    }
+
     /**
      * Forcibly renames a file, removing any locks that may
      * be held from any FileLockers that were added.
