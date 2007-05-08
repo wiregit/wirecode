@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.search;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.service.ErrorService;
@@ -32,6 +34,16 @@ public final class QueryDispatcher implements Runnable {
     @InspectableForSize
 	private final Map<GUID, QueryHandler> QUERIES = new HashMap<GUID, QueryHandler>();
 
+    /** Details about the queries */
+    public final Inspectable queryDetail = new Inspectable() {
+        public Object inspect() {
+            List<Object> l = new ArrayList<Object>(QUERIES.size());
+            for(QueryHandler qh : QUERIES.values())
+                l.add(qh.inspect());
+            return l;
+        }
+    };
+    
 	/**
 	 * <tt>List</tt> of new queries to add.
 	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if

@@ -3,10 +3,13 @@ package com.limegroup.gnutella.search;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.Connection;
@@ -30,7 +33,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
  * such as guids, the query itself, the xml query, etc, but with customized
  * settings, such as the TTL.
  */
-public final class QueryHandler {
+public final class QueryHandler implements Inspectable {
     
     private static final Log LOG = LogFactory.getLog(QueryHandler.class);
 
@@ -108,6 +111,12 @@ public final class QueryHandler {
      * can last.  The query expires when this limit is reached.
      */
     public static final int MAX_QUERY_TIME = 200 * 1000;
+    
+    /** List of times since start of query that results were updated */
+    private final List<Long> times = new ArrayList<Long>();
+    
+    /** Number of results reported each update */
+    private final List<Integer> results = new ArrayList<Integer>();
 
 
 	/**
@@ -738,8 +747,14 @@ public final class QueryHandler {
      * querying for.
      */
     public void updateLeafResults(int numResults) {
-        if (numResults > _numResultsReportedByLeaf)
+        if (numResults > _numResultsReportedByLeaf) {
+            // record up to the first 20 updates
+            if (times.size() < 20) {
+                times.add(System.currentTimeMillis() - _queryStartTime);
+                results.add(numResults);
+            }
             _numResultsReportedByLeaf = numResults;
+        }
     }
 
     /**
@@ -780,6 +795,22 @@ public final class QueryHandler {
      */
     public GUID getGUID() {
         return new GUID(QUERY.getGUID());
+    }
+    
+    public Object inspect() {
+        Map<String, Object> ret = new HashMap<String,Object>();
+        ret.put("ver",1);
+        ret.put("times", times);
+        ret.put("res", results);
+        ret.put("twh", _timeToWaitPerHop);
+        ret.put("tdh", _timeToDecreasePerHop);
+        ret.put("dec", _numDecrements);
+        ret.put("nqt", _nextQueryTime);
+        ret.put("qst", _queryStartTime);
+        ret.put("ct", _curTime);
+        ret.put("pqs", _probeQuerySent);
+        ret.put("ftw", _forwardedToLeaves);
+        return ret;
     }
 
 }
