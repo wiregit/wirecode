@@ -277,6 +277,19 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         // test comparator
         assertTrue(guid.addressesMatch(nyuBytes, port));
+        
+        // test that timestamping doesn't break address encoding
+        GUID.timeStampGuid(guidBytes);
+        guid = new GUID(guidBytes);
+        assertTrue(guid.addressesMatch(nyuBytes, port));
+    }
+    
+    public void testTimeStamp() throws Exception {
+        byte [] g = GUID.makeGuid();
+        assertEquals(-1, GUID.readTimeStamp(g));
+        GUID.timeStampGuid(g);
+        Thread.sleep(10);
+        assertGreaterThan(System.currentTimeMillis() - 1000, GUID.readTimeStamp(g));
     }
 
 }

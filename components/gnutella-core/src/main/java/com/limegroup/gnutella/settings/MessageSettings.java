@@ -21,4 +21,11 @@ public class MessageSettings extends LimeProps {
     public static final BooleanSetting REPORT_DOUBLE_PRECISION = 
         FACTORY.createRemoteBooleanSetting("REPORT_DOUBLE_PRECISION", 
                 true, "MessageSettings.reportDoublePrecision");
+    
+    /**
+     * Whether to embed a timestamp in the query guids.
+     */
+    public static final BooleanSetting STAMP_QUERIES =
+        FACTORY.createRemoteBooleanSetting("STAMP_QUERIES", false, 
+                "MessageSettings.stampQueries");
 }

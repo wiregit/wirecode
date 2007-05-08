@@ -800,6 +800,7 @@ public final class QueryHandler implements Inspectable {
     public Object inspect() {
         Map<String, Object> ret = new HashMap<String,Object>();
         ret.put("ver",1);
+        ret.put("guid", QUERY.getGUID());
         ret.put("times", times);
         ret.put("res", results);
         ret.put("twh", _timeToWaitPerHop);

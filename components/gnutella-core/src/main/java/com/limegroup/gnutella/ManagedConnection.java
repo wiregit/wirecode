@@ -77,6 +77,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -959,6 +960,8 @@ public class ManagedConnection extends Connection
         System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
         GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
                                RouterService.getPort());
+        if (MessageSettings.STAMP_QUERIES.getValue())
+            GUID.timeStampGuid(oobGUID);
 
         query = QueryRequest.createProxyQuery(query, oobGUID);
         

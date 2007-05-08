@@ -30,6 +30,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -1450,7 +1451,12 @@ public class QueryRequest extends Message implements Serializable{
      * the GUID query is marked.
      */
     public static byte[] newQueryGUID(boolean isRequery) {
-        return isRequery ? GUID.makeGuidRequery() : GUID.makeGuid();
+        if (isRequery)
+            return GUID.makeGuidRequery();
+        byte [] ret = GUID.makeGuid();
+        if (MessageSettings.STAMP_QUERIES.getValue())
+            GUID.timeStampGuid(ret);
+        return ret;
 	}
 
     protected void writePayload(OutputStream out) throws IOException {

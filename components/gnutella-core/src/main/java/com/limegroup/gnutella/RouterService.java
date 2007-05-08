@@ -73,6 +73,7 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -1334,10 +1335,14 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
+        byte []ret;
         if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
-            return GUID.makeAddressEncodedGuid(getAddress(), getPort());
+            ret = GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
-            return GUID.makeGuid();
+            ret = GUID.makeGuid();
+        if (MessageSettings.STAMP_QUERIES.getValue())
+            GUID.timeStampGuid(ret);
+        return ret;
     }
 
     /**
