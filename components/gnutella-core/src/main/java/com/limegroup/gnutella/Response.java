@@ -262,6 +262,10 @@ public class Response {
         if(name.length() == 0) {
             throw new IOException("empty name in response");
         }
+        // sanity checks for filename 
+        if (name.contains("/") || name.contains("\n")) {
+            throw new IOException("Illegal filename " + name);
+        }
 
         // Extract extra info, if any
         baos.reset();
