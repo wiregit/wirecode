@@ -47,6 +47,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      *        channel
      */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
+        if (session == null) {
+            throw new IllegalArgumentException("session must not be null");
+        }
+        if (eventDispatch == null) {
+            throw new IllegalArgumentException("eventDispatch must not be null");
+        }
+
         this.session = session;
         this.eventDispatch = eventDispatch;
         if (method != null) {
@@ -64,11 +71,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
     
     public int read(ByteBuffer buffer) throws IOException {
-        if (methodBuffer != null && methodBuffer.hasRemaining()) {
-            // XXX need to read as much as we can
+        if (methodBuffer != null) {
             int read = BufferUtils.transfer(methodBuffer, buffer, false);
             if (methodBuffer.hasRemaining()) {
-                throw new RuntimeException();
+                return read;
             }
             methodBuffer = null;
             return read + readSource.read(buffer);
@@ -90,6 +96,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void handleRead() throws IOException {
         if (!readInterest) {
+            // HttpIOSession turns off read interest before switching channels
+            // using AbstractNBSocket#setReadObserver(), do not delegate to http
+            // core in this case
             return;
         }
 
@@ -136,8 +145,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
         eventDispatch.outputReady(session);
         
-        // XXX is there a way to find out if there is still data buffered? 
-        return false;
+        return session.hasBufferedOutput();
     }
 
     public void requestRead(boolean status) {

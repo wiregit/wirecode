@@ -394,6 +394,10 @@ public class UploadSlotManager implements BandwidthTracker {
 			queuedRequest.getListener().slotAvailable();
 		}
 	}
+
+	public synchronized int getNumActive() {
+	    return active.size();
+	}
 	
 	public synchronized int getNumQueued() {
 		return queued.size();
@@ -476,6 +480,12 @@ public class UploadSlotManager implements BandwidthTracker {
 			// one request per user at a time.
 			return getUser() == other.getUser();
 		}
+		
+		@Override
+		public String toString() {
+		    return getClass().getName() + "[user=" + user + "]";
+		}
+
 	}
 
 	/**
@@ -493,6 +503,7 @@ public class UploadSlotManager implements BandwidthTracker {
 		boolean isQueuable() {
 			return queuable;
 		}
+		
 	}
 
 	/**
@@ -558,5 +569,11 @@ public class UploadSlotManager implements BandwidthTracker {
             }
             return ret;
         }
+    }
+
+    public synchronized void cleanup() {
+        active.clear();
+        queued.clear();
+        queuedResumable.clear();        
     }
 }

@@ -120,21 +120,27 @@ public class UploaderTest extends LimeTestCase {
         // correct time.
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
         
-        fm = new FileManagerStub(urns,descs);
-        RouterService.getContentManager().initialize();
         //UploadSlotManager slotManager = new UploadSlotManager();
         //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
         upManager = (HTTPUploadManager) RouterService.getUploadManager();
-        upManager.cleanup();
-        
+
+        fm = new FileManagerStub(urns,descs);
+        RouterService.getContentManager().initialize();
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         //PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
-
         fm.get(0);
+        
+        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
+        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
     }
     
     public void tearDown() {
+        upManager.cleanup();
+
+        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
+        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+
         fm = null;
         upManager = null;
         rfd1 = null;
@@ -368,20 +374,26 @@ public class UploaderTest extends LimeTestCase {
         
         Thread.sleep(5000);
         
-        HTTPDownloader d3 = null;
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
+        assertEquals(1, upManager.uploadsInProgress());
+        assertEquals(0, upManager.getNumQueuedUploads());
+        
         HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
         connectDloader(d2,true,rfd2,true);
-        try { //queued at 0th position
+        assertEquals(2, upManager.uploadsInProgress());
+        assertEquals(0, upManager.getNumQueuedUploads());
+
+        HTTPDownloader d3 = null;
+        try { 
+            //queued at 0th position
             d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
             connectDloader(d3,true,rfd3,true);
             fail("uploader should have been queued, but was given slot");
         } catch(QueuedException qx) {
             assertEquals(1, qx.getQueuePosition());
         }
-        
         assertEquals("should have 1 queued uploads",
             1, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
@@ -390,7 +402,8 @@ public class UploaderTest extends LimeTestCase {
         // should queue next guy, but 'cause its thex we wont.
         HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
         assertNotNull(connectThex(d4, true));
-        
+        assertEquals(2, upManager.uploadsInProgress());
+        assertEquals(1, upManager.getNumQueuedUploads());
         
         // d5 will connect and get queued.
         HTTPDownloader d5 = addUploader(upManager, rfd2, "1.1.1.5", true);
@@ -400,18 +413,15 @@ public class UploaderTest extends LimeTestCase {
         } catch(QueuedException qx) {
             assertEquals(2, qx.getQueuePosition());
         }
-
         assertEquals("should have 2 queued uploads",
             2, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
         
-        //even though 5 is queued, he should be able to get the thex tree.
-        assertNotNull(connectThex(d5, false));
-        
+        // even though 5 is queued, he should be able to get the thex tree.
         // no need to check the tree, is checked in lots of other tests.
-        
-        //but, when he tries to get the file again, he stays queued.
+        assertNotNull(connectThex(d5, false));
+        // but, when he tries to get the file again, he stays queued.
         assertEquals("should have 2 queued uploads",
             2, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
@@ -423,6 +433,8 @@ public class UploaderTest extends LimeTestCase {
         } catch(QueuedException qx) {
             assertEquals(2, qx.getQueuePosition());
         }
+        assertEquals(2, upManager.uploadsInProgress());
+        assertEquals(2, upManager.getNumQueuedUploads());
     }
     
     

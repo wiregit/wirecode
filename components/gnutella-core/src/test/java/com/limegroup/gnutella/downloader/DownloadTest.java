@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -29,6 +28,7 @@ import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
@@ -165,7 +165,7 @@ public class DownloadTest extends LimeTestCase {
         
         PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        RouterService.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
         
         assertTrue(RouterService.isConnected());
         

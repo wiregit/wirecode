@@ -52,7 +52,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     /**
      * This is a <code>List</code> of all of the current <code>Uploader</code>
-     * instances (all of the uploads in progress).
+     * instances (all of the uploads in progress that are not queued).
      */
     private List<HTTPUploader> activeUploadList = new LinkedList<HTTPUploader>();
 
@@ -700,13 +700,16 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return session.getQueueStatus();
     }
 
-    /** For testing: removes active uploaders. */
+    /** For testing: removes all uploaders and clears the request cache. */
     protected void cleanup() {
         for (HTTPUploader uploader : activeUploadList
                 .toArray(new HTTPUploader[0])) {
+            uploader.stop();
             slotManager.cancelRequest(uploader.getSession());
             removeFromList(uploader);
         }
+        slotManager.cleanup();
+        REQUESTS.clear();
     }
 
     /**
