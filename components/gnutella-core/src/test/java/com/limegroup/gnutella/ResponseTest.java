@@ -693,6 +693,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertReadingFromNetworkFails(new Response(1, 4545, "s;lkdf\n\n\n"));
         assertReadingFromNetworkFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
         assertReadingFromNetworkFails(new Response(4545, 3454, ""));
+        assertReadingFromNetworkFails(new Response(1454, 3245, "dlksdf\r"));
     }
     
     private static void assertReadingFromNetworkFails(Response r) throws Exception {
