@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
+import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.impl.nio.reactor.SessionRequestImpl;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
@@ -33,7 +34,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
     
     protected IOEventDispatch eventDispatch = null;
 
-    // XXX copied from DefaultServerIOEventDispatch
+    // copied from DefaultServerIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
     
     public HttpIOReactor(final HttpParams params) {
@@ -43,11 +44,10 @@ public class HttpIOReactor implements ConnectingIOReactor {
         
         this.params = params;
     }
-
     
     public void execute(IOEventDispatch eventDispatch) throws IOException {
-        if (eventDispatch == null) {
-            throw new IllegalArgumentException("Event dispatcher may not be null");
+        if (!(eventDispatch instanceof DefaultServerIOEventDispatch)) {
+            throw new IllegalArgumentException("Event dispatch must be of type DefaultServerIOEventDispatch");
         }
         this.eventDispatch = eventDispatch;
     }
@@ -102,6 +102,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets parameters of <code>socket</code> based on default {@link HttpParams}. 
+     */
     protected void prepareSocket(final Socket socket) throws IOException {
         socket.setTcpNoDelay(HttpConnectionParams.getTcpNoDelay(this.params));
         int linger = HttpConnectionParams.getLinger(this.params);
@@ -110,6 +113,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
         }
     }
     
+    /**
+     * Connects <code>socket</code> to LimeWire's NIO layer. 
+     */
     protected DefaultNHttpServerConnection connectSocket(AbstractNBSocket socket, Object attachment, String word) {
         final HttpIOSession session = new HttpIOSession(socket);        
         
@@ -132,6 +138,14 @@ public class HttpIOReactor implements ConnectingIOReactor {
         return conn;
     }
 
+    /**
+     * Processes an established connection.
+     * 
+     * @param word the text that was send on connect, this is injected back when
+     *        the socket's channel is read
+     * @param socket the socket
+     * @return the HttpCore connection object
+     */
     public DefaultNHttpServerConnection acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);

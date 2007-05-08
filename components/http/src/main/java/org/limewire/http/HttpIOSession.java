@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.http;
 
 import java.net.Socket;
@@ -20,6 +17,10 @@ import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.channel.ThrottleWriter;
 
+/**
+ * Provides an implementation of the <code>IOSession</code> interface that
+ * connects to LimeWire's NIO layer and has support for throttling.
+ */
 public class HttpIOSession implements IOSession {
 
     private static final Log LOG = LogFactory.getLog(HttpIOSession.class);
@@ -59,9 +60,6 @@ public class HttpIOSession implements IOSession {
 
     public void close() {
         socket.close();
-        // XXX is this call required or did socket.close() already shutdown the
-        // channel?
-        channel.shutdown();
     }
 
     public Object getAttribute(String name) {
@@ -158,6 +156,10 @@ public class HttpIOSession implements IOSession {
                 && this.bufferStatus.hasBufferedOutput();
     }
 
+    /**
+     * Throttles the underlying connection using <code>throttle</code>. If
+     * <code>throttle</code> is null, throtteling is disabled.
+     */
     public synchronized void setThrottle(Throttle throttle) {
         boolean enable = (throttle != null);
         if (enable == (this.throttleWriter != null)) {
