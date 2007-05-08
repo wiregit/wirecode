@@ -1053,7 +1053,7 @@ SAVE_LOCATION_ALREADY_SAVED_ERROR=לא ניתן לשנות את מיקום הק�
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Could not save download to the folder {0}, because you do not have write access to it.
 SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=לא ניתן להוריד לתיקיה {0}, מכיוון שאין לך הרשאות כתיבה אליה.
 # {0} the full path name of the folder
-#### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder ?oes not exist.
+#### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
 SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=לא ניתן להוריד לתיקיה {0}, מכיוון שהתיקיה אינה קיימת.
 # {0} the full path name of the folder/file
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Could not set download folder to {0}, because it represents an individual file, not a folder.
@@ -1830,7 +1830,7 @@ XML_videos__video__subtitles__=כתוביות
 #### XML_videos__video__rating__=Rating
 XML_videos__video__rating__=דירוג
 #### XML_videos__video__comments__=Comments
-XML_videos__video__co?ments__=הערות
+#? XML_videos__video__comments__=
 #### XML_videos__video__action__=Action
 XML_videos__video__action__=פעולה
 #### XML_videos__video__license__=Copyright
@@ -2205,7 +2205,7 @@ SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=טוען הורדות 
 SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=בודק לעידכונים...
 #### SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading Directed Querier...
 SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=טוען מחפש ישיר... 
-#### SPLASH_STATUS_COMPO?ENT_LOADING_HTTPACCEPTOR=Loading Magnet Listener...
+#### SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading Magnet Listener...
 SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=טוען את המאזין ל-Magnet...
 #### SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading Peer Listener...
 SPLASH_STATUS_COMPONENT_LOADING_PINGER=טוען את המאזין ל-Peer...
@@ -2285,7 +2285,7 @@ UPDATE_RESTART_TITLE=עידכון מוכן
 #? SHARED_FILES_DROP_DIALOG_OPTION_NO=
 #### SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=Do not show this message again.
 #? SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=
-#### SHARED_FILES_DROP_DI?LOG_EMPTY_SELECTION_MESSAGE=You clicked OK but did not select any files to be shared. Would you like to try again?
+#### SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=You clicked OK but did not select any files to be shared. Would you like to try again?
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
@@ -2347,7 +2347,7 @@ UPDATE_RESTART_TITLE=עידכון מוכן
 #### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
 #? NO_INTERNET_RETRYING=
 
-##########?#####################################################################
+################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
 ################################################################################
@@ -2385,7 +2385,7 @@ UPDATE_RESTART_TITLE=עידכון מוכן
 #? ERROR_INTERNAL_TITLE=
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 #? ERROR_INTERNAL_SERVLET=
-#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To cont?nue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
+#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
 #? ERROR_INTERNAL_OLD=
 #### ERROR_INTERNAL_SEND=Send
 #? ERROR_INTERNAL_SEND=
@@ -2508,7 +2508,7 @@ ERROR_INTERNAL_OK=אישור
 #? ERROR_SEARCH_TOO_LARGE=
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 #? ERROR_XML_SEARCH_TOO_LARGE=
-#### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the c?pyright holder, copright year and title.
+#### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copright year and title.
 #? ERROR_CCPUBLISHER_MISSING_DETAIL=
 #### ERROR_CCPUBLISHER_MISSING_TITLE=Please enter the title of the file you want to publish.
 #? ERROR_CCPUBLISHER_MISSING_TITLE=
@@ -2576,7 +2576,7 @@ ERROR_INTERNAL_OK=אישור
 #? LICENSE_CC_CLAIMED_DEED=
 #### LICENSE_CC_DEED=View License Deed
 #? LICENSE_CC_DEED=
-#### LICENSE_CC_VERIFICATION=View Verification Pa?e
+#### LICENSE_CC_VERIFICATION=View Verification Page
 #? LICENSE_CC_VERIFICATION=
 #### LICENSE_CC=Creative Commons
 #? LICENSE_CC=
@@ -2761,7 +2761,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #? OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 #? OPTIONS_SHARED_NEW_SAVE_FOLDERS=
-#### OPTIONS_SHARED_SHARE_TORRENTS_META?TITLE=Torrent Sharing
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
@@ -2834,7 +2834,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 #? OPTIONS_DOWNLOAD_CLEAR_TITLE=
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
-#??OPTIONS_DOWNLOAD_CLEAR_LABEL=
+#? OPTIONS_DOWNLOAD_CLEAR_LABEL=
 #### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Clear Completed Downloads:
 #? OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=
 
@@ -2905,7 +2905,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #### OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads. This value will only be reached if you have enough bandwidth.
 #? OPTIONS_UPLOAD_MAX_LABEL=
 #### OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max Upload Slots:
-#? ?PTIONS_UPLOAD_MAX_NUMBER_LABEL=
+#? OPTIONS_UPLOAD_MAX_NUMBER_LABEL=
 
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads.
@@ -2973,7 +2973,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #### OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Shutdown Immediately
 #? OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=
 #### OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after Transfers
-#? OPT?ONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=
+#? OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 #? OPTIONS_SHUTDOWN_TO_TRAY_LABEL=
 #### OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Show System Tray Icon:
@@ -3043,7 +3043,8 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Connection Quality Indicator
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=?#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=?#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=
 #### OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Show Shared Files Indicator:
 #? OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=
@@ -3110,7 +3111,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 
 ################################################################################
 # Key/Value pairs for url handler options.
-#############################################################?##################
+################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 #? OPTIONS_BROWSER_PREFERENCE_TITLE=
 #### OPTIONS_BROWSER_PREFERENCE_LABEL=You can choose which browser to use.
@@ -3178,7 +3179,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield.
 ################################################################################
-#### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocom?letion
+#### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 #? OPTIONS_AUTOCOMPLETE_TITLE=
 #### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 #? OPTIONS_AUTOCOMPLETE_LABEL=
@@ -3253,7 +3254,7 @@ OPTIONS_GUI_MAIN_TITLE=הצג
 #? OPTIONS_IGNORE_RESULT_TYPES_TITLE=
 #### OPTIONS_IGNORE_RESULT_TYPES_LABEL=You can specify general types of search results to filter.
 #? OPTIONS_IGNORE_RESULT_TYPES_LABEL=
-#### OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL?Ignore Adult Content
+#### OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignore Adult Content
 OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=הסתר את הפורנו
 #### OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignore .htm/.html Files
 #? OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=
@@ -3391,7 +3392,7 @@ OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
-#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, y?u are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
 #? OPTIONS_CONTENT_FILTER_LABEL=
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
 #? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
@@ -3463,7 +3464,7 @@ GNUTELLA_MESSAGES=Gnutella
 #? STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=
 
 ################################################################################
-####################################################################?###########
+################################################################################
 ## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL
 ################################################################################
 ################################################################################
@@ -3551,7 +3552,7 @@ STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=Multicast
 #### STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
 #? STATS_SPECIAL_QUERIES_LABEL=
 # Advanced Gnutella Message hops/ttl for query hits
-#### STATS_QUERY_REPLY_HOP?_TITLE=Hops
+#### STATS_QUERY_REPLY_HOPS_TITLE=Hops
 #? STATS_QUERY_REPLY_HOPS_TITLE=
 #### STATS_QUERY_REPLY_HOPS_LABEL=All received query hits, by hops.
 #? STATS_QUERY_REPLY_HOPS_LABEL=
@@ -3619,7 +3620,7 @@ STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=
 #### STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
 #? STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=
-#### STATS_LIME_RECEI?ED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
+#### STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=
 #### STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Queries
 #? STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=
@@ -3679,7 +3680,7 @@ STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #? STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_TITLE=
 #### STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=Multicast query hits received from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=
-#### ?TATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
+#### STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 #? STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=
 #### STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=Multicast pushes received from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=
@@ -3737,7 +3738,7 @@ STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 # number of kilobytes received for LimeWire-specific stats -- Multicast
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Total
 #? STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=
-##?# STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+#### STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
 #? STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
 #? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=
@@ -3806,7 +3807,7 @@ QRP_MESSAGES=QRP
 #### STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False Positive
 #? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=
 
-?###############################################################################
+################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
@@ -3899,7 +3900,7 @@ STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 #? STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=
 #### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
-#### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over ?DP, by message type.
+#### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
 #? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=
 #### STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
@@ -3967,7 +3968,7 @@ STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #? STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=
 #### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
 #? STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=
-#### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=Multicast pings sent from?all Gnutella clients versus other LimeWires.
+#### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=Multicast pings sent from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=
 #### STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
 #? STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=
@@ -4029,7 +4030,8 @@ STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #### STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries sent from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=
 #### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=?#### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=?#### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
+#### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=
 #### STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
 #? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=
@@ -4091,7 +4093,8 @@ STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 # Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
-#? COMPRESSABLE_MESSAGES=?#### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream
+COMPRESSABLE_MESSAGES=?#### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream
+#### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream
 #? STATS_COMPRESSABLE_UPSTREAM_TITLE=
 #### STATS_COMPRESSABLE_UPSTREAM_LABEL=Statistics for compressed upstream traffic in kilobytes.
 #? STATS_COMPRESSABLE_UPSTREAM_LABEL=
@@ -4163,7 +4166,7 @@ STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #? STATS_DOWNLOAD_RESPONSES_LABEL=
 #### STATS_DOWNLOAD_ALTERNATE_TITLE=Alt. Locations
 #? STATS_DOWNLOAD_ALTERNATE_TITLE=
-#### STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we wi?l ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
+#### STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
 #? STATS_DOWNLOAD_ALTERNATE_LABEL=
 #### STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
 #? STATS_DOWNLOAD_TRANFERS_TITLE=
@@ -4248,7 +4251,7 @@ STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #? GNUTELLA_MESSAGE_BANDWIDTH=
 
 # Compression
-#### UNCOMPRESSED_UPSTREAM=Total Pot?ntial Upstream
+#### UNCOMPRESSED_UPSTREAM=Total Potential Upstream
 #? UNCOMPRESSED_UPSTREAM=
 #### COMPRESSED_UPSTREAM=Total Actual Upstream
 #? COMPRESSED_UPSTREAM=
@@ -4363,7 +4366,7 @@ STATS_LIMEWIRE=LimeWire
 #### ERROR_QUERY_ILLEGAL_CHARS=Illegal Characters in Query
 #? ERROR_QUERY_ILLEGAL_CHARS=
 #### ERROR_ALL_QUERY_REPLY_ERRORS=All Query Reply Errors
-#? ERROR_ALL_QUERY_REPLY_?RRORS=
+#? ERROR_ALL_QUERY_REPLY_ERRORS=
 #### ERROR_REPLY_INVALID_PORT=Invalid Reply Port
 #? ERROR_REPLY_INVALID_PORT=
 #### ERROR_REPLY_INVALID_ADDRESS=Invalid Reply Address
@@ -4595,7 +4598,7 @@ WHAT_IS_NEW_QUERIES=מה חדש?
 #### DOWNLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
 #? DOWNLOAD_FW_FW_SUCCESS=
 #### DOWNLOAD_FW_FW_FAILURE=Failed FW-FW Connection
-#? DOWNL?AD_FW_FW_FAILURE=
+#? DOWNLOAD_FW_FW_FAILURE=
 
 # Advanced Upload statistics
 #### UPLOAD_STAT_THEX=THEX Request
