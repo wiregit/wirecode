@@ -1,11 +1,18 @@
 package com.limegroup.gnutella;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.limewire.collection.Comparators;
+import org.limewire.collection.MultiIterable;
+import org.limewire.inspection.Inspectable;
+
 import com.limegroup.gnutella.search.ResultCounter;
+import com.limegroup.gnutella.util.StatsUtils;
 
 /**
  * The reply routing table.  Given a GUID from a reply message header,
@@ -20,7 +27,7 @@ import com.limegroup.gnutella.search.ResultCounter;
  * routed per guid.  This can be useful for implementing fair flow-control
  * strategies.
  */
-public final class RouteTable {
+public final class RouteTable  {
     /**
      * The obvious implementation of this class is a mapping from GUID to
      * ReplyHandler's.  The problem with this representation is it's hard to
@@ -71,6 +78,9 @@ public final class RouteTable {
     private Map<Integer, ReplyHandler> _idMap  = new HashMap<Integer, ReplyHandler>();
     private Map<ReplyHandler, Integer> _handlerMap = new HashMap<ReplyHandler, Integer>();
     private int _nextID;
+    
+    /** Inspectables for a routing table */
+    public final Object rtInspectables = new RTInspectables();
 
     /** Values stored in _newMap/_oldMap. */
     private static final class RouteTableEntry implements ResultCounter {
@@ -82,6 +92,9 @@ public final class RouteTable {
         private int repliesRouted;
         /** The ttl associated with this RTE - meaningful only if > 0. */
         private byte ttl = 0;
+        /** The class C networks that have returned a reply for this query */
+        private final Map<Integer,Integer> classCnetworks = new HashMap<Integer, Integer>();
+        
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
             this.handlerID = handlerID;
@@ -94,6 +107,15 @@ public final class RouteTable {
 
 		/** Accessor for the number of results for this entry. */
 		public int getNumResults() { return repliesRouted; }
+        
+        void updateClassCNetworks(int classCNetwork, int numReplies) {
+            if (!classCnetworks.containsKey(classCNetwork))
+                classCnetworks.put(classCNetwork, numReplies);
+            else {
+                int previous = classCnetworks.get(classCNetwork);
+                classCnetworks.put(classCNetwork, previous + numReplies);
+            }
+        }
     }
 
     /**
@@ -248,10 +270,18 @@ public final class RouteTable {
         return (entry==null) ? null : id2handler(new Integer(entry.handlerID));
     }
 
+    public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
+            int replyBytes,
+               short numReplies) {
+        return getReplyHandler(guid, replyBytes, numReplies, 0);
+    }
+    
     /**
      * Looks up the reply route and route volume for a given guid, incrementing
      * the count of bytes routed for that GUID.
      *
+     * @param classCNetwork integer representing the classC network the replies 
+     * came from.  0 if it should not be counted (as 0 is not a valid classC network).
      * @requires guid.length==16
      * @effects if no mapping for guid, or guid maps to null (i.e., to a removed
      *  ReplyHandler) returns null.  Otherwise returns a tuple containing the
@@ -261,7 +291,8 @@ public final class RouteTable {
      */
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
                                                        int replyBytes,
-													   short numReplies) {
+													   short numReplies,
+                                                       int classCNetwork) {
         //no purge
         repOk();
 
@@ -284,6 +315,8 @@ public final class RouteTable {
 
         entry.bytesRouted += replyBytes;
         entry.repliesRouted += numReplies;
+        if (classCNetwork != 0)
+            entry.updateClassCNetworks(classCNetwork, numReplies);
         return ret;
     }
 
@@ -460,6 +493,83 @@ public final class RouteTable {
         */
     }
 
+    private class RTInspectables {
+        
+        /** Inspectable with some general stats about the routing table */
+        public final Inspectable RTStats = new Inspectable() {
+            public synchronized Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                ret.put("ver",1);
+                Map<Integer,Integer> globalClassC = new HashMap<Integer,Integer>();
+                List<Double> classCSizes = new ArrayList<Double>();
+                List<Double> repliesRouted = new ArrayList<Double>();
+                List<Double> ttls = new ArrayList<Double>();
+                Iterable<RouteTableEntry> bothMaps = 
+                    new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
+                for(RouteTableEntry rte : bothMaps) {
+                    classCSizes.add((double)(rte.classCnetworks.size()));
+                    repliesRouted.add((double)rte.repliesRouted);
+                    ttls.add((double)rte.ttl);
+                    for (int classC : rte.classCnetworks.keySet()) {
+                        int num = rte.classCnetworks.get(classC);
+                        if (!globalClassC.containsKey(classC))
+                            globalClassC.put(classC, num);
+                        else {
+                            int previous = globalClassC.get(classC);
+                            globalClassC.put(classC, previous + num);
+                        }
+                    }
+                }
+
+                // we'll lose some duplicates but oh well
+                Map<Integer, Integer> topClassC = 
+                    new TreeMap<Integer, Integer>(Comparators.inverseIntegerComparator());
+                for (Map.Entry<Integer, Integer> entry : globalClassC.entrySet())
+                    topClassC.put(entry.getValue(), entry.getKey());
+
+                List<Integer> top10Networks = new ArrayList<Integer>(10);
+                for (Map.Entry<Integer, Integer> entry : topClassC.entrySet()) {
+                    if (top10Networks.size() >= 20)
+                        break;
+                    top10Networks.add(entry.getKey());
+                    top10Networks.add(entry.getValue());
+                }
+
+                ret.put("top10", top10Networks);
+                ret.put("cs", StatsUtils.quickStatsDouble(classCSizes).getMap());
+                ret.put("csh", StatsUtils.getHistogram(classCSizes, 10));
+                ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
+                ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
+                ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
+                ret.put("ttlh", StatsUtils.getHistogram(classCSizes, 5));
+                return ret;
+            }
+
+        };
+        
+        /** 
+         * An actual dump of the routing table.  May get big, so 
+         * its a good idea to first inspect the stats to see how many
+         * entries there are.
+         */
+        public final Inspectable RTDump = new Inspectable() {
+            public Object inspect() {
+                Map<byte [], Object> ret = new HashMap<byte [], Object>();
+                Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
+                    new MultiIterable<Map.Entry<byte[],RouteTableEntry>>(_newMap.entrySet(),_oldMap.entrySet());
+                for (Map.Entry<byte[], RouteTableEntry> entry : bothMaps) {
+                    RouteTableEntry e = entry.getValue();
+                    Map<String, Object> m = new HashMap<String, Object>();
+                    m.put("br", e.bytesRouted);
+                    m.put("ttl", e.ttl);
+                    m.put("rr", e.repliesRouted);
+                    m.put("cc", e.classCnetworks);
+                    ret.put(entry.getKey(), m);
+                }
+                return ret;
+            }
+        };
+    }
 }
 
 

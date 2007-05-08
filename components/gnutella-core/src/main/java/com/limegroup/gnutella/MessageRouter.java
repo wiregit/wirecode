@@ -34,6 +34,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -1964,10 +1965,13 @@ public abstract class MessageRouter {
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
+        int classC = ByteOrder.beb2int(queryReply.getIPBytes(), 0);
+        classC &= NetworkUtils.CLASS_C_NETMASK;
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
-											 queryReply.getUniqueResultCount());
+											 queryReply.getUniqueResultCount(),
+                                             classC);
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
@@ -2193,7 +2197,8 @@ public abstract class MessageRouter {
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
-											 queryReply.getResultCount());
+											 queryReply.getResultCount(),
+                                             0);
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
