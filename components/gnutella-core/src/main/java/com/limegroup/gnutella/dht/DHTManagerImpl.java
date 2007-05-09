@@ -321,25 +321,25 @@ public class DHTManagerImpl implements DHTManager {
                         data.put("ccc", StatsUtils.quickStatsBigInt(cachedContacts).getMap()); // 5*20 + 4
                         data.put("cccx", StatsUtils.quickStatsBigInt(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
                         
-                        List<BigInteger> activeIps = new ArrayList<BigInteger>();
-                        List<BigInteger> cachedIps = new ArrayList<BigInteger>();
-                        List<BigInteger> allIps = new ArrayList<BigInteger>();
+                        List<Double> activeIps = new ArrayList<Double>();
+                        List<Double> cachedIps = new ArrayList<Double>();
+                        List<Double> allIps = new ArrayList<Double>();
                         
                         for (Contact node : routeTable.getActiveContacts()) {
-                            BigInteger masked = getUnsignedMaskedAddress(node);
+                            double masked = getUnsignedMaskedAddress(node);
                             activeIps.add(masked);
                             allIps.add(masked);
                         }
                         
                         for (Contact node : routeTable.getCachedContacts()) {
-                            BigInteger masked = getUnsignedMaskedAddress(node);
+                            double masked = getUnsignedMaskedAddress(node);
                             cachedIps.add(masked);
                             allIps.add(masked);
                         }
                         
-                        data.put("aips", StatsUtils.quickStatsBigInt(activeIps));
-                        data.put("cips", StatsUtils.quickStatsBigInt(cachedIps));
-                        data.put("allips", StatsUtils.quickStatsBigInt(allIps));
+                        data.put("aips", StatsUtils.quickStatsDouble(activeIps).getMap());
+                        data.put("cips", StatsUtils.quickStatsDouble(cachedIps).getMap());
+                        data.put("allips", StatsUtils.quickStatsDouble(allIps).getMap());
                     }
                 }
                 return data;
@@ -542,9 +542,9 @@ public class DHTManagerImpl implements DHTManager {
      * Returns the masked contact address of the given Contact as an
      * unsigned int
      */
-    private static BigInteger getUnsignedMaskedAddress(Contact node) {
+    private static double getUnsignedMaskedAddress(Contact node) {
         InetSocketAddress addr = (InetSocketAddress)node.getContactAddress();
         long masked = NetworkUtils.getClassC(addr.getAddress()) & 0xFFFFFFFFL;
-        return BigInteger.valueOf(masked);
+        return masked;
     }
 }
