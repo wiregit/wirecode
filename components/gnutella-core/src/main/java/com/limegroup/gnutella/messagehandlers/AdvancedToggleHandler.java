@@ -35,6 +35,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     
     public AdvancedToggleHandler() {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES);
+        
         shutOff = new Periodic(new Runnable() {
             public void run (){
                 synchronized(AdvancedToggleHandler.this) {

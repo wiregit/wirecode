@@ -477,6 +477,9 @@ public abstract class MessageRouter {
         OOBHandler oobHandler = new OOBHandler(this);
         RouterService.schedule(oobHandler, CLEAR_TIME, CLEAR_TIME);
         
+        // handler for inspection requests
+        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this);
+        
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
         setMessageHandler(QueryRequest.class, new QueryRequestHandler());
@@ -498,6 +501,7 @@ public abstract class MessageRouter {
         setMessageHandler(HeadPong.class, new HeadPongHandler());
         setMessageHandler(DHTContactsMessage.class, new DHTContactsMessageHandler());
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
+        setMessageHandler(InspectionRequest.class, inspectionHandler);
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
         setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
@@ -510,7 +514,7 @@ public abstract class MessageRouter {
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
-        setUDPMessageHandler(InspectionRequest.class, new InspectionRequestHandler());
+        setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
         setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
@@ -2795,6 +2799,23 @@ public abstract class MessageRouter {
     
     private void handleDHTContactsMessage(DHTContactsMessage msg, ReplyHandler handler) {
         RouterService.getDHTManager().handleDHTContactsMessage(msg);
+    }
+    
+    /**
+     * Forwards an inspection request to leaf connections that 
+     * support it.
+     */
+    public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
+        if (!_manager.isSupernode())
+            return;
+        // only inspection requests with return address are forwarded.
+        if (ir.getReturnAddress() == null)
+            return;
+        
+        for (ManagedConnection mc : _manager.getInitializedClientConnections()) {
+            if (mc.remoteHostSupportsInspections() >= ir.getVersion())
+                mc.send(ir);
+        }
     }
     
     private static class QueryResponseBundle {
