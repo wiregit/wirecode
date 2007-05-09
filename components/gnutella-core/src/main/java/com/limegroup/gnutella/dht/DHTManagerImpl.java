@@ -526,11 +526,14 @@ public class DHTManagerImpl implements DHTManager {
                                   primaryKey);
                       }
                   }
+                  
+                  // load -> key
                   for(double load : popularKeys.keySet()) {
-                      ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
-                      ret.add(popularKeys.get(load).getBytes());
                       if (ret.size() >= 20)
                           break;
+                      
+                      ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
+                      ret.add(popularKeys.get(load).getBytes());
                   }
               }
               return ret;
