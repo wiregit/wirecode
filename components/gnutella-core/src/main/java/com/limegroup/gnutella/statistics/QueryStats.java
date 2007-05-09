@@ -23,6 +23,8 @@ public class QueryStats implements Inspectable {
         times.add(System.currentTimeMillis());
     }
     public long getLastQueryTime() {
+        if (times.isEmpty())
+            return 0;
         return times.first();
     }
     
