@@ -6,9 +6,10 @@ import java.util.concurrent.ThreadFactory;
 import org.limewire.service.ErrorService;
 
 /**
- * Creates {@link ManagedThread} daemon threads and executes {@link Runnable}s 
- * on threads from a thread pool. As a <code>ManagedThread</code>, 
- * <code>ThreadExecutor</code> reports uncaught errors to {@link ErrorService}.
+ * Creates {@link ManagedThread} daemon threads and executes {@link Runnable 
+ * Runnables} on threads from a thread pool. Since the created threads are of 
+ * type <code> ManagedThread</code>, uncaught errors are reported to {@link 
+ * ErrorService}.
  */
 
 public class ThreadExecutor {

@@ -53,7 +53,8 @@ public final class ErrorService {
 
 	/**
 	 * Helper class that outputs the stack trace and the exception message to 
-     * a {@link PrintStream}.
+     * a {@link PrintStream} and rethrows the exception as a {@link 
+     * RuntimeException}.
 	 */
 	private static class PrintStreamErrorCallback implements ErrorCallback {
 		
@@ -67,8 +68,9 @@ public final class ErrorService {
         }
         
 		/**
-		 * Implements the <code>ErrorCallback</code> interface.  Prints
-		 * the stack trace for the given <code>Throwable</tt>.
+		 * Implements the <code>ErrorCallback</code> interface. Prints
+		 * the stack trace for the given <code>Throwable</code> and rethrows
+         * the exception as a {@link RuntimeException}.
 		 *
 		 * @param t the <code>Throwable</code> to display
 		 */

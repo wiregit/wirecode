@@ -2,7 +2,8 @@ package org.limewire.service;
 
 /**
  * Defines the interface for a class to receive generic and specific error 
- * messages.
+ * messages. See {@link ErrorService} for information on how errors are 
+ * set to an <code>ErrorCallback</code> class.
  */
 public interface ErrorCallback {
 

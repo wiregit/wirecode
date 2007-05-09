@@ -1,12 +1,45 @@
 package org.limewire.service;
 
+import java.text.MessageFormat;
+
 /**
- * Defines the interface for a class to send a formatted and, or unformatted 
- * message. (An unformatted message accepts arbitrary parameters you format
- * when you implement <MessageCallback>.) This class contains methods to
- * send errors and messages based on a message key. 
- * Additionally, <code>MessageCallback</code> has methods with a flag 
- * to receive future messages of the same type. 
+ * Defines the interface for a class to handle formatted and unformatted 
+ * messages. This class contains methods to handle errors and messages with a 
+ * message key. Additionally, <code>MessageCallback</code> has methods with a 
+ * flag to receive future messages of the same type. Messages can be displayed 
+ * in different ways, in a dialog box, the "standard" output stream, a file, etc.
+ * <p>
+ * <code>MessageCallback</code> includes methods to handle a fixed message 
+ * (<code>showError</code>) or a variable length message (<code>showFormattedError</code>). 
+ * A formatted message accepts arbitrary parameters you format when 
+ * you implement <MessageCallback>. For example, one partial 
+ * implementation of <code>MessageCallback</code> using {@link MessageFormat}
+ * could be:
+ * <p>
+ * <pre>
+    void showError(String messageKey, String message){
+        System.out.println(messageKey + message);      
+    }
+    void showFormattedError(String messageKey, String... args){
+        System.out.println(MessageFormat.format(messageKey, args));
+    }
+    
+ Call:
+    myMessageCallback.showError("File, directory, was moved to -> ", 
+        "temp.dat, c:\\temp\\, c:\\documents and settings\\all users\\");
+     
+    myMessageCallback.showFormattedError(
+            "File {0} in directory {1} was moved to {2}.", "temp.dat", 
+            "c:\\temp\\", "c:\\documents and settings\\all users\\");
+
+ Output: 
+    File, directory, was moved to -> temp.dat, c:\temp\, 
+        c:\documents and settings\all users\
+
+    File temp.dat in directory c:\temp\ was moved to 
+        c:\documents and settings\all users\.
+
+</pre>
  */
 public interface MessageCallback {
 

@@ -3,8 +3,8 @@ package org.limewire.concurrent;
 import org.limewire.service.ErrorService;
 
 /**
- * A <code>Thread</code> that sets the UncaughtExceptionHandler to 
- * report errors to {@link ErrorService}.
+ * A <code>Thread</code> that sets the <code>UncaughtExceptionHandler</code> to
+ * forward uncaught exceptions to {@link ErrorService}.
  */
 public class ManagedThread extends Thread {
     
