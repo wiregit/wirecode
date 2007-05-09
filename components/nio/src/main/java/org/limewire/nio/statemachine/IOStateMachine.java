@@ -11,13 +11,14 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestScatteringByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.util.BufferUtils;
 
 /**
  * State machine for reading & writing.
  */
-public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadableByteChannel {
+public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestScatteringByteChannel {
     
     private static final Log LOG = LogFactory.getLog(IOStateMachine.class);
    
@@ -303,6 +304,16 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             throw new ClosedChannelException();
         
         return BufferUtils.transfer(readBuffer, toBuffer);
+    }
+    
+    public long read(ByteBuffer []toBuffer) throws ClosedChannelException {
+        return read(toBuffer, 0, toBuffer.length);
+    }
+    
+    public long read(ByteBuffer[] toBuffer, int offset, int num) throws ClosedChannelException  {
+        if(shutdown)
+            throw new ClosedChannelException();
+        return BufferUtils.transfer(readBuffer, toBuffer, 0, toBuffer.length, true);
     }
 
     // unused.
