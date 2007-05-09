@@ -12,7 +12,6 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
-import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.auth.StubContentAuthority;
@@ -39,15 +38,16 @@ import com.limegroup.gnutella.util.PipedSocketFactory;
 @SuppressWarnings("unchecked")
 public class UploaderTest extends LimeTestCase {
 
-    private static FileManager fm;
     private static RouterService rs;
-    private HTTPUploadManager upManager;
+    private static HTTPUploadManager upManager;
+    private static FileManager fm;
     private RemoteFileDesc rfd1;
     private RemoteFileDesc rfd2;
     private RemoteFileDesc rfd3;
     private RemoteFileDesc rfd4;
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
+    private long savedDelayTime;
     
     public UploaderTest(String name) {
         super(name);
@@ -63,8 +63,19 @@ public class UploaderTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         rs = new RouterService( new ActivityCallbackStub() );
+        
+        upManager = (HTTPUploadManager) RouterService.getUploadManager();
+        upManager.start(RouterService.getHTTPUploadAcceptor());
     }
 
+    public static void globalTearDown() throws Exception {
+        upManager.stop(RouterService.getHTTPUploadAcceptor());
+        
+        upManager = null;
+        rs = null;
+    }
+    
+    @Override
     public void setUp() throws Exception {
         // allow running single tests from Eclipse
         if (rs == null) {
@@ -118,11 +129,11 @@ public class UploaderTest extends LimeTestCase {
         // watchdog killing stuff.
         // note that the testStalledUploads sets this to the
         // correct time.
+        savedDelayTime = StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
         
         //UploadSlotManager slotManager = new UploadSlotManager();
         //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
-        upManager = (HTTPUploadManager) RouterService.getUploadManager();
 
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
@@ -135,14 +146,16 @@ public class UploaderTest extends LimeTestCase {
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
     }
     
+    @Override
     public void tearDown() {
+        StalledUploadWatchdog.DELAY_TIME = savedDelayTime;
+        
         upManager.cleanup();
 
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
 
         fm = null;
-        upManager = null;
         rfd1 = null;
         rfd2 = null;
         rfd3 = null;
@@ -190,7 +203,7 @@ public class UploaderTest extends LimeTestCase {
      * - uploads upto maxUploads get slots
      * - uploader after that but upto uploadQueueSize get queued
      * - uploads beyond that get try again later
-     * - when an uploade with slot terminates first uploader gets slot
+     * - when an uploader with slot terminates first uploader gets slot
      * - when an uploader with slot terminates, everyone in queue advances.
      * - uploads not in slot one, but uploader has available for all get slot
      */
@@ -455,17 +468,18 @@ public class UploaderTest extends LimeTestCase {
             fail("unable to create piped socket factory", e);
         }
         final Socket sa = psf.getSocketA();
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    RouterService.acceptUpload(sa, false);
-                } catch(Throwable e) {
-                    ErrorService.error(e);
-                }
-            }
-        };
-        t.setDaemon(true);
-        t.start();
+        RouterService.acceptUpload(sa, false);
+//        Thread t = new Thread() {
+//            public void run() {
+//                try {
+//                    RouterService.acceptUpload(sa, false);
+//                } catch(Throwable e) {
+//                    ErrorService.error(e);
+//                }
+//            }
+//        };
+//        t.setDaemon(true);
+//        t.start();
         BufferedWriter out = null;
         ByteReader byteReader = null;
         String s = null;
@@ -1087,23 +1101,24 @@ public class UploaderTest extends LimeTestCase {
         //Socket A either has no limit or a limit of 1000 bytes to write.
         //Socket B has no limit
         final Socket sa=psf.getSocketA();
-        Thread runner=new Thread() {
-            public void run() {
-                try {
+        RouterService.acceptUpload(sa, false);
+//        Thread runner=new Thread() {
+//            public void run() {
+//                try {
 //                    InputStream ia = sa.getInputStream();
 //                    assertEquals('G', ia.read());
 //                    assertEquals('E', ia.read());
 //                    assertEquals('T', ia.read());
 //                    assertEquals(' ', ia.read());
-                    RouterService.acceptUpload(sa, false);
-                } catch(Throwable t) {
-                    // make sure we know about errors.
-                    ErrorService.error(t);
-                }
-            }
-        };
-        runner.setDaemon(true);
-        runner.start();       
+//                    RouterService.acceptUpload(sa, false);
+//                } catch(Throwable t) {
+//                    // make sure we know about errors.
+//                    ErrorService.error(t);
+//                }
+//            }
+//        };
+//        runner.setDaemon(true);
+//        runner.start();       
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
