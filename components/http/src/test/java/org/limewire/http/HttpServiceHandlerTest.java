@@ -140,7 +140,7 @@ public class HttpServiceHandlerTest extends TestCase {
         assertTrue(listener.connectionClosed);
     }
 
-    public void testGetRequestWithNIOEntity() throws Exception {
+    public void testGetRequestNIOEntity() throws Exception {
         MockSocket socket = new MockSocket();
         MockIOSession session = new MockIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
@@ -168,7 +168,7 @@ public class HttpServiceHandlerTest extends TestCase {
         assertTrue(nioEntity.finished);
     }
 
-    public void testGetRequestWithNIOEntityThrowingException() throws Exception {
+    public void testGetRequestNIOEntityThrowingException() throws Exception {
         MockSocket socket = new MockSocket();
         MockIOSession session = new MockIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
@@ -188,6 +188,27 @@ public class HttpServiceHandlerTest extends TestCase {
         conn.produceOutput(serviceHandler);
         assertTrue(session.closed);
         assertTrue(nioEntity.finished);
+    }
+
+    public void testGetRequestStringEntity() throws Exception {
+        MockSocket socket = new MockSocket();
+        MockIOSession session = new MockIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/string");
+        conn.setHttpRequest(request);
+        serviceHandler.requestReceived(conn);
+        
+        MockContentEncoder encoder = new MockContentEncoder();
+        conn.setContentEncoder(encoder);
+        conn.produceOutput(serviceHandler);
+        assertEquals("abc", encoder.data.toString());
+        assertTrue(encoder.isCompleted());
     }
 
     public static class MockHttpChannel extends HttpChannel {
