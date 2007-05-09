@@ -50,7 +50,6 @@ import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -1116,7 +1115,7 @@ public class RouterService {
             
             nodeAssigner.stop();
 
-            shutdownDHT();
+            getDHTManager().stop();
             
             getAcceptor().shutdown();
             
@@ -2111,13 +2110,5 @@ public class RouterService {
     
     public static int getNumberOfPendingTimeouts() {
         return NIODispatcher.instance().getNumPendingTimeouts();
-    }
-    
-    public static void startDHT(DHTMode mode) {
-        getDHTManager().start(mode);
-    }
-    
-    public static void shutdownDHT() {
-        getDHTManager().stop();
     }
 }

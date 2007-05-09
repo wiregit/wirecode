@@ -496,9 +496,9 @@ public class NodeAssigner {
         Runnable init = new Runnable() {
             public void run() {
                 if (to != DHTMode.INACTIVE) {
-                    RouterService.startDHT(to);
+                    RouterService.getDHTManager().start(to);
                 } else {
-                    RouterService.shutdownDHT();
+                    RouterService.getDHTManager().stop();
                 }
                 
                 DHTSettings.DHT_MODE.setValue(to.toString());
