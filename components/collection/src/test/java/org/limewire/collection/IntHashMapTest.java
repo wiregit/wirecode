@@ -20,6 +20,7 @@ public class IntHashMapTest extends BaseTestCase {
         return buildTestSuite(IntHashMapTest.class);
     }
 
+    @SuppressWarnings("unchecked")
     public void testSerialization() {
         IntHashMap map1 = new IntHashMap();
         map1.put(1, "Hello World");

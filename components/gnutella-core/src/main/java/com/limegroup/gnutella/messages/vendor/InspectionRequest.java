@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.net.UnknownHostException;
 
-import org.limewire.service.ErrorService;
+import org.limewire.io.IPPortCombo;
+import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
@@ -16,9 +15,9 @@ import com.limegroup.gnutella.messages.GGEP;
  * Note this is very LimeWire-specific, so other vendors will
  * almost certainly have no use for supporting this message.
  */
-public class InspectionRequest extends VendorMessage {
+public class InspectionRequest extends RoutableGGEPMessage {
     
-    private static final int VERSION = 1;
+    static final int VERSION = 1;
     static final String INSPECTION_KEY = "I";
     static final String TIMESTAMP_KEY = "T";
 
@@ -31,11 +30,8 @@ public class InspectionRequest extends VendorMessage {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_INSPECTION_REQ, version, payload, network);
         String requested;
         try {
-            GGEP ggep = new GGEP(payload,0,null);
             requested = ggep.getString(INSPECTION_KEY);
             timestamp = ggep.hasKey(TIMESTAMP_KEY);
-        } catch (BadGGEPBlockException bad) {
-            throw new BadPacketException();
         } catch (BadGGEPPropertyException bad) {
             throw new BadPacketException();
         }
@@ -43,14 +39,17 @@ public class InspectionRequest extends VendorMessage {
         this.requested = requested.split(";"); 
     }
     
+    InspectionRequest(String... requested) {
+        this(false, 1, null, requested);
+    }
     /**
      * @param timestamp true if the response should contain a timestamp.
      * @param requested requested fields for inspection.  
      * See <tt>InspectionUtils</tt> for description of the format.
      */
-    public InspectionRequest(boolean timestamp,String... requested) {
+    InspectionRequest(boolean timestamp, int version, IpPort returnAddr, String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
-                derivePayload(timestamp, requested));
+                deriveGGEP(timestamp, version, returnAddr, requested));
         this.requested = requested;
         this.timestamp = timestamp;
     }
@@ -63,7 +62,7 @@ public class InspectionRequest extends VendorMessage {
         return timestamp;
     }
     
-    private static byte [] derivePayload(boolean timestamp, String... requested) {
+    private static GGEP deriveGGEP(boolean timestamp, int version, IpPort returnAddr, String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.
@@ -81,12 +80,20 @@ public class InspectionRequest extends VendorMessage {
         g.putCompressed(INSPECTION_KEY, ret.getBytes());
         if (timestamp)
             g.put(TIMESTAMP_KEY);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            g.write(baos);
-        } catch (IOException impossible) {
-            ErrorService.error(impossible);
+
+        if (returnAddr != null) {
+            try {
+                IPPortCombo ipc = new IPPortCombo(returnAddr.getAddress(), returnAddr.getPort());
+                g.put(RETURN_ADDRESS_KEY, ipc.toBytes());
+            } catch (UnknownHostException ignore){}
         }
-        return baos.toByteArray();
+        
+        if (version >= 0)
+            g.put(VERSION_KEY, version);
+        return g;
+    }
+    
+    public int getVersion() {
+        return super.getVersion();
     }
 }

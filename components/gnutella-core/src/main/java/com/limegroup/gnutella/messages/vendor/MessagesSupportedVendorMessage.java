@@ -143,6 +143,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                                         F_OOB_PROXYING_CONTROL,
                                         OOBProxyControlVendorMessage.VERSION);
         hashSet.add(smp);
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                                        F_INSPECTION_REQ,
+                                        InspectionRequest.VERSION);
+        hashSet.add(smp);
         
         // DHT Contacts
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
@@ -256,6 +260,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     
     public int supportsOOBProxyingControl() {
         return supportsMessage(F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL);
+    }
+    
+    public int supportsInspectionRequests() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_INSPECTION_REQ);
     }
 
     /**

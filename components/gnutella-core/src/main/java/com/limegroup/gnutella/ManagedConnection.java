@@ -1598,6 +1598,7 @@ public class ManagedConnection extends Connection
         data.put("bl",isBusyLeaf());
         data.put("k", isKillable());
         data.put("pp",isPushProxyFor());
+        data.put("rhsi", remoteHostSupportsInspections());
         return data;
     }
 }

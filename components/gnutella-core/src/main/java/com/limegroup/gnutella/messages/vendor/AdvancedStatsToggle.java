@@ -1,11 +1,5 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import org.limewire.service.ErrorService;
-
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
@@ -13,7 +7,7 @@ import com.limegroup.gnutella.messages.GGEP;
 /**
  * Vendor message that toggles collecting of advanced stats on or off.
  */
-public class AdvancedStatsToggle extends VendorMessage {
+public class AdvancedStatsToggle extends RoutableGGEPMessage {
 
     private static final int VERSION = 1;
     
@@ -38,24 +32,21 @@ public class AdvancedStatsToggle extends VendorMessage {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, version, payload, network);
         try {
             // check for shut off key first
-            GGEP ggep = new GGEP(payload,0,null);
             if (ggep.hasKey(OFF_KEY))
                 time = -1;
             else
                 this.time = ggep.getInt(TIME_KEY);
-        } catch (BadGGEPBlockException bad) {
-            throw new BadPacketException();
         } catch (BadGGEPPropertyException bad) {
             throw new BadPacketException();
         }
     }
     
     public AdvancedStatsToggle(int time) {
-        super(F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, VERSION, derivePayload(time));
+        super(F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, VERSION, deriveGGEP(time));
         this.time = time;
     }
     
-    private static byte [] derivePayload(int time) {
+    private static GGEP deriveGGEP(int time) {
         
         // ggep does not support negative integers, so if this is a
         // shut off just put the shut off key.
@@ -65,13 +56,7 @@ public class AdvancedStatsToggle extends VendorMessage {
         else
             g.put(OFF_KEY);
         
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            g.write(baos);
-        } catch (IOException impossible) {
-            ErrorService.error(impossible);
-        }
-        return baos.toByteArray();
+        return g;
     }
     
     /**

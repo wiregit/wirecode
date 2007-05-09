@@ -28,4 +28,10 @@ public class MessageSettings extends LimeProps {
     public static final BooleanSetting STAMP_QUERIES =
         FACTORY.createRemoteBooleanSetting("STAMP_QUERIES", false, 
                 "MessageSettings.stampQueries");
+    
+    /**
+     * The latest handled routable version of the inspection message.
+     */
+    public static final IntSetting INSPECTION_VERSION = 
+        FACTORY.createIntSetting("INSPECTION_VERSION", 0);
 }
