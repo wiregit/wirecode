@@ -1,16 +1,19 @@
 package com.limegroup.gnutella.dht;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
@@ -343,6 +346,60 @@ public class DHTManagerImpl implements DHTManager {
                     }
                 }
                 return data;
+            }
+        };
+        
+        public Inspectable routeTableTop10Networks = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    RouteTable routeTable = dht.getRouteTable();
+                    synchronized(routeTable) {
+                        data.put("ta", getTop(routeTable.getActiveContacts(), 10));
+                        data.put("tc", getTop(routeTable.getCachedContacts(), 10));
+                    }
+                }
+                return data;
+            }
+            
+            private List<Integer> getTop(Collection<? extends Contact> nodes, int count) {
+                // Masked IP -> Count
+                Map<Integer, Integer> top = new HashMap<Integer, Integer>();
+                
+                for (Contact node : nodes) {
+                    InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+                    Integer masked = NetworkUtils.getClassC(addr);
+                    Integer num = top.get(masked);
+                    if (num == null) {
+                        num = Integer.valueOf(0);
+                    }
+                    num = Integer.valueOf(num.intValue() + 1);
+                    top.put(masked, num);
+                }
+                
+                List<Entry<Integer, Integer>> list = new ArrayList<Entry<Integer, Integer>>();
+                list.addAll(top.entrySet());
+                
+                // Sort in decending order
+                Collections.sort(list, new Comparator<Entry<Integer, Integer>>() {
+                    public int compare(Entry<Integer, Integer> o1, Entry<Integer, Integer> o2) {
+                        return o2.getValue().intValue() - o1.getValue().intValue();
+                    }
+                });
+                
+                // Return the Top IPs and their count
+                List<Integer> ret = new ArrayList<Integer>(2*count);
+                for (Entry<Integer, Integer> e : list) {
+                    if (ret.size() >= (2*count)) {
+                        break;
+                    }
+                    
+                    ret.add(e.getKey());
+                    ret.add(e.getValue());
+                }
+                return ret;
             }
         };
         
