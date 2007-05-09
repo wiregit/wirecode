@@ -357,14 +357,14 @@ public class DHTManagerImpl implements DHTManager {
                 if (dht != null) {
                     RouteTable routeTable = dht.getRouteTable();
                     synchronized(routeTable) {
-                        data.put("ta", getTop(routeTable.getActiveContacts(), 10));
-                        data.put("tc", getTop(routeTable.getCachedContacts(), 10));
+                        data.put("ta", getTopNetworks(routeTable.getActiveContacts(), 10));
+                        data.put("tc", getTopNetworks(routeTable.getCachedContacts(), 10));
                     }
                 }
                 return data;
             }
             
-            private List<Integer> getTop(Collection<? extends Contact> nodes, int count) {
+            private List<Integer> getTopNetworks(Collection<? extends Contact> nodes, int count) {
                 // Masked IP -> Count
                 Map<Integer, Integer> top = new HashMap<Integer, Integer>();
                 
