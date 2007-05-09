@@ -103,7 +103,11 @@ public class RestrictedResponderTest extends BaseTestCase {
         };
         TestGGEPMessage m = new TestGGEPMessage();
         
-        // the message should be sent for verification
+        // the message doesn't specify return address, so it won't get verified
+        assertNull(verifier.sm);
+        
+        // the message should be sent for verification if it does
+        m.returnAddr = new IpPortImpl("1.2.3.4",5);
         responder.handleMessage(m, addr, h);
         assertSame(verifier.sm, m);
         

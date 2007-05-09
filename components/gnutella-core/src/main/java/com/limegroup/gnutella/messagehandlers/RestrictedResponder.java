@@ -69,8 +69,11 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     
     public final void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
         if (msg instanceof RoutableGGEPMessage) {
-            // if we have a verifier, verify
-            if (verifier != null)
+            RoutableGGEPMessage rgp = (RoutableGGEPMessage) msg;
+            // if we have a verifier and a return address, verify
+            if (verifier != null && 
+                    rgp.getReturnAddress() != null && 
+                    msg instanceof SecureMessage)
                 verifier.verify((SecureMessage)msg, new SecureCallback(addr, handler));
             else
                 processRoutableMessage((RoutableGGEPMessage)msg, addr, handler);
