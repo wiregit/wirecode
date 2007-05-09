@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executor;
 import org.limewire.collection.Comparators;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.Database;
@@ -318,12 +320,31 @@ public class DHTManagerImpl implements DHTManager {
                         List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
                         data.put("ccc", StatsUtils.quickStatsBigInt(cachedContacts).getMap()); // 5*20 + 4
                         data.put("cccx", StatsUtils.quickStatsBigInt(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
+                        
+                        List<BigInteger> activeIps = new ArrayList<BigInteger>();
+                        List<BigInteger> cachedIps = new ArrayList<BigInteger>();
+                        List<BigInteger> allIps = new ArrayList<BigInteger>();
+                        
+                        for (Contact node : routeTable.getActiveContacts()) {
+                            BigInteger masked = getUnsignedMaskedAddress(node);
+                            activeIps.add(masked);
+                            allIps.add(masked);
+                        }
+                        
+                        for (Contact node : routeTable.getCachedContacts()) {
+                            BigInteger masked = getUnsignedMaskedAddress(node);
+                            cachedIps.add(masked);
+                            allIps.add(masked);
+                        }
+                        
+                        data.put("aips", StatsUtils.quickStatsBigInt(activeIps));
+                        data.put("cips", StatsUtils.quickStatsBigInt(cachedIps));
+                        data.put("allips", StatsUtils.quickStatsBigInt(allIps));
                     }
                 }
                 return data;
             }
         };
-        
         
         public Inspectable buckets = new Inspectable() {
             public Object inspect() {
@@ -515,5 +536,15 @@ public class DHTManagerImpl implements DHTManager {
         for (Contact node : nodes) 
             bigints.add(node.getNodeID().toBigInteger());
         return bigints;
+    }
+    
+    /**
+     * Returns the masked contact address of the given Contact as an
+     * unsigned int
+     */
+    private static BigInteger getUnsignedMaskedAddress(Contact node) {
+        InetSocketAddress addr = (InetSocketAddress)node.getContactAddress();
+        long masked = NetworkUtils.getClassC(addr.getAddress()) & 0xFFFFFFFFL;
+        return BigInteger.valueOf(masked);
     }
 }
