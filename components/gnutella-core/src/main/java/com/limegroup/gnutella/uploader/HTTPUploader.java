@@ -39,7 +39,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     private String method;
 
     private HttpResponse lastResponse;
-    
+
     public HTTPUploader(String fileName, UploadSession session) {
         super(fileName, session);
     }
@@ -74,7 +74,11 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     public void stop() {
-        getSession().getIOSession().close();
+        // for testing: if the uploader was not initialized from a real
+        // connection it does not have an IO session
+        if (getSession().getIOSession() != null) {
+            getSession().getIOSession().close();
+        }
     }
 
     /**
@@ -107,7 +111,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
         if (first >= last) {
             return false;
-        } if (getFileDesc() instanceof IncompleteFileDesc) {
+        }
+        if (getFileDesc() instanceof IncompleteFileDesc) {
             // If we are allowing, see if we have the range.
             IncompleteFileDesc ifd = (IncompleteFileDesc) getFileDesc();
             // If the request contained a 'Range:' header, then we can
@@ -199,7 +204,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public boolean isVisible() {
         return visible;
     }
-    
+
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
@@ -207,7 +212,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public String getMethod() {
         return method;
     }
-    
+
     public void setMethod(String method) {
         this.method = method;
     }
@@ -215,9 +220,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public void setLastResponse(HttpResponse lastResponse) {
         this.lastResponse = lastResponse;
     }
-    
+
     public HttpResponse getLastResponse() {
         return lastResponse;
     }
-    
+
 }

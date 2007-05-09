@@ -131,6 +131,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
+    private ActivityCallback activityCallback = RouterService.getCallback();
+
+    private FileManager fileManager = RouterService.getFileManager();
+
     public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
@@ -187,6 +191,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         // uploads
         FileRequestHandler fileRequestHandler = new FileRequestHandler(this);
+        fileRequestHandler.setFileManager(fileManager);
         acceptor.registerHandler("/get*", fileRequestHandler);
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
     }
@@ -204,6 +209,22 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.unregisterHandler("/uri-res/*");
         
         FileUtils.removeFileLocker(this);
+    }
+    
+    public ActivityCallback getActivityCallback() {
+        return activityCallback;
+    }
+    
+    public void setActivityCallback(ActivityCallback activityCallback) {
+        this.activityCallback = activityCallback;
+    }
+    
+    public FileManager getFileManager() {
+        return fileManager;
+    }
+    
+    public void setFileManager(FileManager fileManager) {
+        this.fileManager = fileManager;
     }
     
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
@@ -275,12 +296,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     && state == HTTPUploader.COMPLETE
                     && (lastState == HTTPUploader.UPLOADING || lastState == HTTPUploader.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
-                RouterService.getCallback()
-                        .handleSharedFileUpdate(fd.getFile());
+                activityCallback .handleSharedFileUpdate(fd.getFile());
             }
         }
 
-        RouterService.getCallback().removeUpload(uploader);
+        activityCallback.removeUpload(uploader);
     }
 
     public synchronized void addAcceptedUploader(HTTPUploader uploader) {
@@ -306,15 +326,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // We are going to notify the gui about the new upload, and let
         // it decide what to do with it - will act depending on it's
         // state
-        RouterService.getCallback().addUpload(uploader);
+        activityCallback.addUpload(uploader);
         uploader.setVisible(true);
 
         if (!uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null) {
                 fd.incrementAttemptedUploads();
-                RouterService.getCallback()
-                        .handleSharedFileUpdate(fd.getFile());
+                activityCallback.handleSharedFileUpdate(fd.getFile());
             }
         }
     }
@@ -325,7 +344,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized boolean mayBeServiceable() {
-        if (RouterService.getFileManager().hasApplicationSharedFiles())
+        if (fileManager .hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
                     + getNumQueuedUploads());
         return isServiceable();
@@ -356,7 +375,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public boolean releaseLock(File file) {
-        FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
+        FileDesc fd = fileManager.getFileDescForFile(file);
         if (fd != null)
             return killUploadsForFileDesc(fd);
         else
@@ -402,7 +421,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         FileDesc fd = session.getUploader().getFileDesc();
         if (!fd.isVerified()) // spawn a validation
-            RouterService.getFileManager().validate(fd);
+            fileManager.validate(fd);
 
         URN sha1 = fd.getSHA1Urn();
 
@@ -469,7 +488,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         // Enable auto shutdown
         if (activeUploadList.size() == 0)
-            RouterService.getCallback().uploadsComplete();
+            activityCallback.uploadsComplete();
     }
 
     /**

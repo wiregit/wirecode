@@ -49,10 +49,20 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private HTTPUploadSessionManager sessionManager;
 
+    private FileManager fileManager = RouterService.getFileManager();
+    
     public FileRequestHandler(HTTPUploadSessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
+    public FileManager getFileManager() {
+        return fileManager;
+    }
+    
+    public void setFileManager(FileManager fileManager) {
+        this.fileManager = fileManager;
+    }
+    
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         if (LOG.isDebugEnabled())
@@ -66,7 +76,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         try {
             String uri = request.getRequestLine().getUri();
             if (FileRequestParser.isURNGet(uri)) {
-                fileRequest = FileRequestParser.parseURNGet(uri);
+                fileRequest = FileRequestParser.parseURNGet(fileManager, uri);
                 if (fileRequest == null) {
                     uploader = sessionManager.getOrCreateUploader(request,
                             context, UploadType.INVALID_URN,
@@ -339,15 +349,14 @@ public class FileRequestHandler implements HttpRequestHandler {
     }
 
     private FileDesc getFileDesc(FileRequest request) {
-        FileManager fm = RouterService.getFileManager();
         FileDesc fd = null;
 
         int index = request.index;
 
         // first verify the file index
-        synchronized (fm) {
-            if (fm.isValidIndex(index)) {
-                fd = fm.get(index);
+        synchronized (fileManager) {
+            if (fileManager.isValidIndex(index)) {
+                fd = fileManager.get(index);
             }
         }
 

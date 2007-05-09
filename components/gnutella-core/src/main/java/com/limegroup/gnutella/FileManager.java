@@ -18,6 +18,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -403,6 +404,11 @@ public abstract class FileManager {
         cleanIndividualFiles();
 		loadSettings();
         SimppManager.instance().addListener(qrpUpdater);
+    }
+    
+    public void startAndWait(long timeout) throws InterruptedException {
+        start();
+        LOADER.awaitTermination(timeout, TimeUnit.MILLISECONDS);
     }
     
     public void stop() {

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.statistics.UploadStat;
@@ -95,7 +95,7 @@ class FileRequestParser {
      *         request type is invalid or the URN does not map to a valid file
      * @throws IOException thrown if the request is malformed
      */
-    public static FileRequest parseURNGet(final String uri) throws IOException {
+    public static FileRequest parseURNGet(final FileManager fileManager, final String uri) throws IOException {
         URN urn = URN.createSHA1UrnFromHttpRequest(uri + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something
@@ -110,7 +110,7 @@ class FileRequestParser {
             return null;
         }
     
-        FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
+        FileDesc desc = fileManager.getFileDescForUrn(urn);
         if (desc == null) {
             UploadStat.UNKNOWN_URN_GET.incrementStat();
             return null;
