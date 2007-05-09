@@ -63,25 +63,26 @@ public class UploaderTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         rs = new RouterService( new ActivityCallbackStub() );
-        
-        upManager = (HTTPUploadManager) RouterService.getUploadManager();
-        upManager.start(RouterService.getHTTPUploadAcceptor());
     }
 
     public static void globalTearDown() throws Exception {
-        upManager.stop(RouterService.getHTTPUploadAcceptor());
-        
-        upManager = null;
         rs = null;
     }
     
     @Override
-    public void setUp() throws Exception {
+    public void setUp() throws Exception {        
         // allow running single tests from Eclipse
         if (rs == null) {
             globalSetUp();
         }
-        
+
+        // we don't want the tests confused by the stalled
+        // watchdog killing stuff.
+        // note that the testStalledUploads sets this to the
+        // correct time.
+        savedDelayTime = StalledUploadWatchdog.DELAY_TIME;
+        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
+
         Map urns = new HashMap();
         Vector descs = new Vector();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
@@ -125,13 +126,6 @@ public class UploaderTest extends LimeTestCase {
                                   new byte[16], 56, false, 3,
                                   false, null, descStub.getUrns(), false, false,"",null, -1);
         
-        // we don't want the tests confused by the stalled
-        // watchdog killing stuff.
-        // note that the testStalledUploads sets this to the
-        // correct time.
-        savedDelayTime = StalledUploadWatchdog.DELAY_TIME;
-        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
-        
         //UploadSlotManager slotManager = new UploadSlotManager();
         //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
 
@@ -142,6 +136,10 @@ public class UploaderTest extends LimeTestCase {
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
         fm.get(0);
         
+        upManager = (HTTPUploadManager) RouterService.getUploadManager();
+        upManager.setFileManager(fm);
+        upManager.start(RouterService.getHTTPUploadAcceptor());
+        
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
     }
@@ -150,7 +148,9 @@ public class UploaderTest extends LimeTestCase {
     public void tearDown() {
         StalledUploadWatchdog.DELAY_TIME = savedDelayTime;
         
+        upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager.cleanup();
+        upManager = null;
 
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());

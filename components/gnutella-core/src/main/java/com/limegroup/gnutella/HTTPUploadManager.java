@@ -131,9 +131,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
-    private ActivityCallback activityCallback = RouterService.getCallback();
+    private ActivityCallback activityCallback;
 
-    private FileManager fileManager = RouterService.getFileManager();
+    private FileManager fileManager;
 
     public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
@@ -144,6 +144,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public void start(HTTPAcceptor acceptor) {
+        if (activityCallback == null) {
+            activityCallback = RouterService.getCallback();
+        }        
+        if (fileManager == null) {
+            fileManager = RouterService.getFileManager();
+        }
+        
         if (acceptor == null) {
             throw new IllegalArgumentException("acceptor may not be null");
         }
