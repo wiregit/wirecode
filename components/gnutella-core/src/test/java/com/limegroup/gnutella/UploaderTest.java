@@ -38,7 +38,7 @@ import com.limegroup.gnutella.util.PipedSocketFactory;
 @SuppressWarnings("unchecked")
 public class UploaderTest extends LimeTestCase {
 
-    private static RouterService rs;
+    //private static RouterService rs;
     private static HTTPUploadManager upManager;
     private static FileManager fm;
     private RemoteFileDesc rfd1;
@@ -62,20 +62,11 @@ public class UploaderTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        rs = new RouterService( new ActivityCallbackStub() );
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
     }
 
-    public static void globalTearDown() throws Exception {
-        rs = null;
-    }
-    
     @Override
     public void setUp() throws Exception {        
-        // allow running single tests from Eclipse
-        if (rs == null) {
-            globalSetUp();
-        }
-
         // we don't want the tests confused by the stalled
         // watchdog killing stuff.
         // note that the testStalledUploads sets this to the
@@ -131,7 +122,7 @@ public class UploaderTest extends LimeTestCase {
 
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
-        PrivilegedAccessor.setValue(rs,"fileManager",fm);
+        PrivilegedAccessor.setValue(RouterService.class,"fileManager",fm);
         //PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
         fm.get(0);

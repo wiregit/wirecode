@@ -48,12 +48,17 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
- * Redirects HTTP requests to handlers.
+ * Processes HTTP requests which are redirected to {@link HttpRequestHandler}
+ * objects that can be registered for a URL pattern.
+ * <p>
+ * The acceptor uses HttpCore and LimeWire's HTTP component for connection
+ * handling. It needs to be start by invoking
+ * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
 public class HTTPAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
-
+    
     private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
 
     private HttpIOReactor reactor;
@@ -84,7 +89,7 @@ public class HTTPAcceptor {
                 Constants.TIMEOUT);
         this.params.setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT,
                 Constants.TIMEOUT);
-        // size of the buffers used for headers and by the
+        // size of the per connection buffers used for headers and by the
         // decoder/encoder
         this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
                 8 * 1024);
@@ -151,14 +156,14 @@ public class HTTPAcceptor {
     }
 
     /**
-     * Incoming HTTP requests.
+     * Handles an incoming HTTP requests.
      */
     public void acceptConnection(Socket socket) {
         reactor.acceptConnection(null, socket);
     }
 
     /**
-     * Incoming HTTP push requests.
+     * Handles an incoming HTTP push requests.
      */
     public void acceptLocalConnection(Socket socket) {
         DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
@@ -236,12 +241,16 @@ public class HTTPAcceptor {
     /**
      * Unregisters the handlers for <code>pattern</code>.
      *  
-     * @see 
+     * @see #registerHandler(String, HttpRequestHandler)
      */
     public synchronized void unregisterHandler(final String pattern) {
         this.registry.unregister(pattern);
     }
     
+    /**
+     * Registers the acceptor at <code>dispatcher</code> for incoming
+     * connections.
+     */
     public void start(ConnectionDispatcher dispatcher) {
         dispatcher.addConnectionAcceptor(
             new ConnectionAcceptor() {
@@ -251,6 +260,11 @@ public class HTTPAcceptor {
             }, SUPPORTED_METHODS, false, false);
     }
 
+    /**
+     * Unregisters the acceptor at <code>dispatcher</code>.
+     * 
+     * @see #start(ConnectionDispatcher)
+     */
     public void stop(ConnectionDispatcher dispatcher) {
         dispatcher.removeConnectionAcceptor(SUPPORTED_METHODS);
     }
@@ -328,6 +342,9 @@ public class HTTPAcceptor {
 
     }
 
+    /**
+     * Updates statistics when a request is received.
+     */
     private class RequestStatisticTracker implements HttpRequestInterceptor {
 
         public void process(HttpRequest request, HttpContext context)
@@ -361,14 +378,17 @@ public class HTTPAcceptor {
         }
         
     }
-    
-    /*
-     * XXX iterating over all headers is rather inefficient since the size of
-     * the headers is known in DefaultNHttpServerConnection.submitResponse() but
-     * can't be easily made accessible
+
+    /**
+     * Tracks the bandwidth used when sending a response.
      */
     private class HeaderStatisticTracker implements HttpResponseInterceptor {
 
+        /*
+         * XXX iterating over all headers is rather inefficient since the size of
+         * the headers is known in DefaultNHttpServerConnection.submitResponse() but
+         * can't be easily made accessible
+         */
         public void process(HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
             for (Iterator it = response.headerIterator(); it.hasNext();) {

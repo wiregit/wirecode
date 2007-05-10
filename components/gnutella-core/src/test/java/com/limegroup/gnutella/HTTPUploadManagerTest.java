@@ -15,15 +15,16 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.uploader.HTTPUploader;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -33,9 +34,7 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
     private static final String CRLF = "\r\n";
 
-    private static String testDirName = "com/limegroup/gnutella/data";
-
-    private static RouterService rs;
+    private static final String testDirName = "com/limegroup/gnutella/data";
 
     private HTTPUploadManager upMan;
 
@@ -53,36 +52,48 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
     private BufferedWriter out;
 
+    private static Acceptor acceptor;
+
+    private HTTPAcceptor httpAcceptor;
+
     public HTTPUploadManagerTest(String name) {
         super(name);
     }
 
+    public static Test suite() {
+        return buildTestSuite(HTTPUploadManagerTest.class);
+    }
+
     public static void globalSetUp() throws Exception {
         cb = new MyActivityCallback();
-        rs = new RouterService(cb);
+        LimeTestUtils.setActivityCallBack(cb);
+
+        doSettings();
+
+        acceptor = RouterService.getAcceptor();
+        acceptor.init();
+        acceptor.start();
+    }
+
+    private static void doSettings() {
+        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
     }
 
     @Override
     protected void setUp() throws Exception {
-        if (rs == null) {
+        if (cb == null) {
             globalSetUp();
         }
 
-        ConnectionSettings.PORT.setValue(PORT);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-
-        if (!RouterService.isLoaded()) {
-            rs.start();
-            Thread.sleep(2000);
-        }
+        doSettings();
 
         // copy resources
         File targetFile = new File(_settingsDir, "update.xml");
         CommonUtils.copyResourceFile(testDirName + "/update.xml", targetFile);
 
-        upMan = (HTTPUploadManager) RouterService.getUploadManager();
-        upMan.cleanup();
+        cb.uploads.clear();
 
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         Vector<FileDesc> descs = new Vector<FileDesc>();
@@ -95,25 +106,23 @@ public class HTTPUploadManagerTest extends LimeTestCase {
                 FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
                 null, descStub.getUrns(), false, false, "", null, -1);
 
-        // we don't want the tests confused by the stalled
-        // watchdog killing stuff.
-        // note that the testStalledUploads sets this to the
-        // correct time.
-        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
-
         fm = new FileManagerStub(urns, descs);
-        RouterService.getContentManager().initialize();
 
-        PrivilegedAccessor.setValue(rs, "fileManager", fm);
+        httpAcceptor = new HTTPAcceptor();
 
-        fm.get(0);
+        upMan = new HTTPUploadManager(new UploadSlotManager());
+        upMan.setFileManager(fm);
 
-        cb.uploads.clear();
+        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        upMan.start(httpAcceptor);
     }
 
     @Override
     protected void tearDown() throws Exception {
         close();
+
+        upMan.stop(httpAcceptor);
+        httpAcceptor.stop(RouterService.getConnectionDispatcher());
     }
 
     public void testAmountRead() throws Exception {
@@ -137,20 +146,29 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
     public void testUpdateXML() throws Exception {
         connect("/update.xml", 200);
+        LimeTestUtils.waitForNIO();
         assertEquals(1, cb.uploads.size());
 
         HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
         assertEquals(UploadType.UPDATE_FILE, uploader.getUploadType());
 
         readBytes(26);
-        Thread.sleep(100);
+        // make sure the NIO thread is finished processing and uploader has been
+        // updated
+        LimeTestUtils.waitForNIO();
         assertGreaterThanOrEquals(26, uploader.amountUploaded());
 
         close();
         assertEquals(Uploader.COMPLETE, uploader.getState());
     }
 
-    private void connect(String uri, int expectedCode) throws IOException {
+    /**
+     * Sends a GET request for uri.
+     * 
+     * @return the returned headers
+     */
+    private List<String> connect(String uri, int expectedCode)
+            throws IOException {
         socket = new Socket("localhost", PORT);
         socket.setSoTimeout(2000);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -172,15 +190,20 @@ public class HTTPUploadManagerTest extends LimeTestCase {
         assertEquals("Unexpected response code", "" + expectedCode, t
                 .nextToken());
 
-        // swallow headers
+        // read headers
+        ArrayList<String> headers = new ArrayList<String>();
         String line;
         while ((line = in.readLine()) != null) {
             if (line.length() == 0) {
-                return;
+                return headers;
             }
+            headers.add(line);
         }
 
         fail("Unexpected end of stream");
+
+        // never reached
+        return null;
     }
 
     private void readBytes(long count) throws IOException {
@@ -190,7 +213,8 @@ public class HTTPUploadManagerTest extends LimeTestCase {
                     fail("Unexpected end of stream after " + i + " bytes");
                 }
             } catch (SocketTimeoutException e) {
-                fail("Timeout while reading " + count + " bytes (read " + i + " bytes)");
+                fail("Timeout while reading " + count + " bytes (read " + i
+                        + " bytes)");
             }
         }
     }
@@ -217,7 +241,8 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
         @Override
         public void removeUpload(Uploader u) {
-            uploads.remove(u);
+            boolean removed = uploads.remove(u);
+            assertTrue("Upload has been added before", removed);
         }
 
     }

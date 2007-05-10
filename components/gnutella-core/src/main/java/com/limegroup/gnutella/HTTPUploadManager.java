@@ -22,30 +22,33 @@ import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.http.BasicHeaderProcessor;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HttpContextParams;
-import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
-import com.limegroup.gnutella.uploader.FileResponseEntity;
 import com.limegroup.gnutella.uploader.FreeLoaderRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
+import com.limegroup.gnutella.uploader.UpdateFileRequestHandler;
 import com.limegroup.gnutella.uploader.UploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 
+/**
+ * 
+ * 
+ *
+ */
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadManager, HTTPUploadSessionManager {
 
+    /** The key used to store the {@link UploadSession} object. */
     private final static String SESSION_KEY = "org.limewire.session";
 
     private static final Log LOG = LogFactory.getLog(HTTPUploadManager.class);
@@ -143,6 +146,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         this.slotManager = slotManager;
     }
 
+    /**
+     * Registers the upload manager at <code>acceptor</code>.
+     * 
+     * @see #stop(HTTPAcceptor)
+     */
     public void start(HTTPAcceptor acceptor) {
         if (activityCallback == null) {
             activityCallback = RouterService.getCallback();
@@ -163,36 +171,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/", new BrowseRequestHandler(this));
 
         // update
-        acceptor.registerHandler("/update.xml", new HttpRequestHandler() {
-            public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws HttpException, IOException {
-                UploadStat.UPDATE_FILE.incrementStat();
-                HTTPUploader uploader = getOrCreateUploader(request, context,
-                        UploadType.UPDATE_FILE, "Update-File Request");
-
-                BasicHeaderProcessor processor = new BasicHeaderProcessor();
-                processor.addInterceptor(new UserAgentHeaderInterceptor(
-                        uploader));
-                processor.process(request, context);
-                if (UserAgentHeaderInterceptor.isFreeloader(uploader
-                        .getUserAgent())) {
-                    handleFreeLoader(request, response, context, uploader);
-                } else {
-                    File file = new File(CommonUtils.getUserSettingsDir(),
-                            "update.xml");
-                    uploader.setFile(file);
-                    uploader.setState(Uploader.UPDATE_FILE);
-
-                    // TODO set mime-type to Constants.QUERYREPLY_MIME_TYPE?
-                    response.setEntity(new FileResponseEntity(uploader, file));
-                }
-
-                sendResponse(uploader, response);
-            }
-        });
+        acceptor.registerHandler("/update.xml", new UpdateFileRequestHandler(this));
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler();
+        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this);
         acceptor.registerHandler("/gnutella/push-proxy", pushProxyHandler);
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
@@ -203,6 +185,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
     }
 
+    /**
+     * Unregisters the upload manager at <code>acceptor</code>.
+     * 
+     * @see #start(HTTPAcceptor)
+     */
     public void stop(HTTPAcceptor acceptor) {
         if (acceptor == null) {
             throw new IllegalArgumentException("acceptor may not be null");
@@ -214,6 +201,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.unregisterHandler("/gnet/push-proxy");
         acceptor.unregisterHandler("/get*");
         acceptor.unregisterHandler("/uri-res/*");
+        
+        acceptor.removeResponseListener(responseListener);
         
         FileUtils.removeFileLocker(this);
     }
@@ -250,10 +239,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      */
     private boolean shouldBypassQueue(HttpRequest request, HTTPUploader uploader) {
         assert uploader.getState() == HTTPUploader.CONNECTING;
-        return /*
-                 * uploader.getState() != HTTPUploader.CONNECTING ||
-                 */"HEAD".equals(request.getRequestLine().getMethod())
-                || uploader.isForcedShare();
+        return "HEAD".equals(request.getRequestLine().getMethod())
+            || uploader.isForcedShare();
     }
 
     /**
@@ -774,6 +761,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                         // responseSent() already
                         uploader.setState(Uploader.COMPLETE);
                     }
+                    uploader.setLastResponse(null);
                     cleanupFinishedUploader(uploader);
                     session.setUploader(null);
                 }

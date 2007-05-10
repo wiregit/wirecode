@@ -28,10 +28,15 @@ import com.limegroup.gnutella.statistics.UploadStat;
 public class PushProxyRequestHandler implements HttpRequestHandler {
 
     public static final String P_SERVER_ID = "ServerId";
+
     public static final String P_GUID = "guid";
+
     public static final String P_FILE = "file";
 
-    public PushProxyRequestHandler() {
+    private HTTPUploadSessionManager sessionManager;
+
+    public PushProxyRequestHandler(HTTPUploadSessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -102,7 +107,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
             }
         }
-        
+
         if (clientGUID == null) {
             return null;
         }

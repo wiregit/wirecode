@@ -39,6 +39,8 @@ public class HttpIOSession implements IOSession {
 
     private ThrottleWriter throttleWriter;
 
+    private volatile boolean closed = false;
+    
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
             throw new IllegalArgumentException();
@@ -59,6 +61,9 @@ public class HttpIOSession implements IOSession {
     }
 
     public void close() {
+        if (this.closed) {
+            return;
+        }
         socket.close();
     }
 
@@ -83,7 +88,7 @@ public class HttpIOSession implements IOSession {
     }
 
     public boolean isClosed() {
-        return socket.isClosed();
+        return this.closed;
     }
 
     public Object removeAttribute(String name) {

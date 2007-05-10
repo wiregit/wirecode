@@ -18,7 +18,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -395,10 +396,12 @@ public abstract class FileManager {
         		new MultiCollection<File>(_transientSharedFiles, _data.SPECIAL_FILES_TO_SHARE));
     }
 
-    /** Asynchronously loads all files by calling loadSettings.  Sets this's
-     *  callback to be "callback", and notifies "callback" of all file loads.
-     *      @modifies this
-     *      @see loadSettings */
+    /** 
+     * Asynchronously loads all files by calling loadSettings.  Sets this's
+     * callback to be "callback", and notifies "callback" of all file loads.
+     *  
+     * @see #loadSettings() 
+     */
     public void start() {
         _data.clean();
         cleanIndividualFiles();
@@ -406,9 +409,41 @@ public abstract class FileManager {
         SimppManager.instance().addListener(qrpUpdater);
     }
     
-    public void startAndWait(long timeout) throws InterruptedException {
-        start();
-        LOADER.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+    /**
+     * Invokes {@link #start()} and waits for <code>timeout</code>
+     * milliseconds for the initialization to finish.
+     * 
+     * @param timeout timeout in milliseconds
+     * @throws InterruptedException if interrupted while waiting
+     * @throws TimeoutException if timeout elapsed before initialization completed 
+     */
+    public void startAndWait(long timeout) throws InterruptedException, TimeoutException {
+        final AtomicBoolean done = new AtomicBoolean();
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                    synchronized (done) {
+                        done.set(true);
+                        done.notify();                    
+                    }
+                }
+            }            
+        };
+        addFileEventListener(listener);
+        try {
+            start();
+            synchronized (done) {
+                if (!done.get()) {
+                    done.wait(timeout);
+                }
+            }
+        } finally {
+            removeFileEventListener(listener);
+        }
+        
+        if (!done.get()) {
+            throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
+        }
     }
     
     public void stop() {
@@ -630,10 +665,8 @@ public abstract class FileManager {
     /**
      * Starts a new revision of the library, ensuring that only items present
      * in the appropriate sharing settings are shared.
-     *
+     * <p>
      * This method is non-blocking and thread-safe.
-     *
-     * @modifies this
      */
     public void loadSettings() {
         final int currentRevision = ++_revision;

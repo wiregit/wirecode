@@ -184,6 +184,7 @@ public class UploadTest extends LimeTestCase {
         }
     }
     
+    @Override
 	protected void setUp() throws Exception {
 	    // allows to run single tests from Eclipse
 	    if (ROUTER_SERVICE == null) {
@@ -271,6 +272,7 @@ public class UploadTest extends LimeTestCase {
 			": "+ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue();        
 	}
 
+    @Override
     public void tearDown() {
         UPLOAD_MANAGER.clearUploads();
 

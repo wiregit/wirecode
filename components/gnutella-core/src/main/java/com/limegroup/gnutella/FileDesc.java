@@ -386,18 +386,6 @@ public class FileDesc implements FileDetails {
         return _completedUploads;
     }       
     
-//    /**
-//     * Opens an input stream to the <tt>File</tt> instance for this
-//	 * <tt>FileDesc</tt>.
-//	 *
-//	 * @return an <tt>InputStream</tt> to the <tt>File</tt> instance
-//	 * @throws <tt>FileNotFoundException</tt> if the file represented
-//	 *  by the <tt>File</tt> instance could not be found
-//     */
-//    public InputStream createInputStream() throws FileNotFoundException {
-//		return new BufferedInputStream(new FileInputStream(FILE));
-//    }
-
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
 		return ("FileDesc:\r\n"+

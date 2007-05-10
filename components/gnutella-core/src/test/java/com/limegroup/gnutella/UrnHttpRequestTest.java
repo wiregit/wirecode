@@ -27,8 +27,6 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  */
 public final class UrnHttpRequestTest extends LimeTestCase {
 
-    private static RouterService ROUTER_SERVICE;
-
     private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
 
     private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
@@ -69,23 +67,20 @@ public final class UrnHttpRequestTest extends LimeTestCase {
             }
         }
 
-        // TODO remove me: need to initialize call back
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         
         setSharedDirectories(new File[] { TEMP_DIR });
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 
         fm = new MetaFileManager();
         fm.startAndWait(4000);
-
+        
         assertGreaterThan("FileManager should have loaded files", 4, fm
                 .getNumFiles());
     }
 
     public static void globalTearDown() throws Exception {
         fm.stop();
-        
-        ROUTER_SERVICE = null;
     }
 
     /**
@@ -95,11 +90,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    protected void setUp() throws Exception {
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
-        
+    protected void setUp() throws Exception {       
         acceptor = new HTTPAcceptor();
         
         uploadManager = new HTTPUploadManager(RouterService.getUploadSlotManager());
