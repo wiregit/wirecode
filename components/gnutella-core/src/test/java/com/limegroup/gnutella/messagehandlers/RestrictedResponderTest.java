@@ -255,7 +255,11 @@ public class RestrictedResponderTest extends BaseTestCase {
         int version = 1;
         IpPort returnAddr;
         protected TestGGEPMessage() throws BadPacketException {
-            super(new byte[4], 1, 1, new GGEP());
+            super(new byte[4], 1, 1, new RoutableGGEPMessage.GGEPSigner() {
+                public GGEP getSecureGGEP(GGEP original) {
+                    return original;
+                }
+            },new GGEP());
         }
         
         @Override

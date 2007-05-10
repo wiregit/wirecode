@@ -86,8 +86,8 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         this.returnAddress = retAddr;
     }
     
-    protected RoutableGGEPMessage(byte [] vendor, int selector, int version, GGEP ggep) {
-        super(vendor, selector, version, derivePayload(ggep));
+    protected RoutableGGEPMessage(byte [] vendor, int selector, int version, GGEPSigner signer, GGEP ggep) {
+        super(vendor, selector, version, derivePayload(signer, ggep));
         this.ggep = ggep;
         // nodes cannot create messages with custom return address or version.
         this.returnAddress = null;
@@ -95,10 +95,11 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         this.secureData = null;
     }
     
-    private static byte [] derivePayload(GGEP ggep) {
+    private static byte [] derivePayload(GGEPSigner signer, GGEP ggep) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ggep.write(baos);
+            signer.getSecureGGEP(ggep).write(baos);
         } catch (IOException impossible) {
             ErrorService.error(impossible);
         }
@@ -146,11 +147,18 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         if(sg != null) {
             signature.update(getPayload(), 0, sg.getStartIndex());
             int end = sg.getEndIndex();
-            int length = getPayload().length - 16 - end;
+            int length = getPayload().length - end;
             signature.update(getPayload(), end, length);
         }
         
     }
     
+    public static interface GGEPSigner {
+        /**
+         * @param original the ggep to be signed
+         * @return a secure ggep containing signature of the signed ggep.
+         */
+        GGEP getSecureGGEP(GGEP original);
+    }
     
 }

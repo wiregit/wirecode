@@ -41,12 +41,12 @@ public class AdvancedStatsToggle extends RoutableGGEPMessage {
         }
     }
     
-    public AdvancedStatsToggle(int time) {
-        super(F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, VERSION, deriveGGEP(time));
+    public AdvancedStatsToggle(RoutableGGEPMessage.GGEPSigner signer, long version, int time) {
+        super(F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, VERSION, signer, deriveGGEP(version, time));
         this.time = time;
     }
     
-    private static GGEP deriveGGEP(int time) {
+    private static GGEP deriveGGEP(long version, int time) {
         
         // ggep does not support negative integers, so if this is a
         // shut off just put the shut off key.
@@ -55,6 +55,9 @@ public class AdvancedStatsToggle extends RoutableGGEPMessage {
             g.put(TIME_KEY, time);
         else
             g.put(OFF_KEY);
+        
+        if (version >= 0)
+            g.put(VERSION_KEY, version);
         
         return g;
     }

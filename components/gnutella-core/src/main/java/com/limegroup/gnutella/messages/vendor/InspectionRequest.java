@@ -39,16 +39,16 @@ public class InspectionRequest extends RoutableGGEPMessage {
         this.requested = requested.split(";"); 
     }
     
-    InspectionRequest(String... requested) {
-        this(false, 1, null, requested);
+    InspectionRequest(GGEPSigner signer, String... requested) {
+        this(signer, false, 1, null, requested);
     }
     /**
      * @param timestamp true if the response should contain a timestamp.
      * @param requested requested fields for inspection.  
      * See <tt>InspectionUtils</tt> for description of the format.
      */
-    InspectionRequest(boolean timestamp, int version, IpPort returnAddr, String... requested) {
-        super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION,
+    public InspectionRequest(GGEPSigner signer, boolean timestamp, long version, IpPort returnAddr, String... requested) {
+        super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION, signer,
                 deriveGGEP(timestamp, version, returnAddr, requested));
         this.requested = requested;
         this.timestamp = timestamp;
