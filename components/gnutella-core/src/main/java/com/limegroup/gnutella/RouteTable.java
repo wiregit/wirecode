@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.limewire.collection.Comparators;
 import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
 
@@ -500,7 +499,7 @@ public final class RouteTable  {
             public synchronized Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);
-                Map<Integer,Integer> globalClassC = new HashMap<Integer,Integer>();
+                StatsUtils.ClassCNetworks globalClassC = new StatsUtils.ClassCNetworks();
                 List<Double> classCSizes = new ArrayList<Double>();
                 List<Double> repliesRouted = new ArrayList<Double>();
                 List<Double> ttls = new ArrayList<Double>();
@@ -512,23 +511,12 @@ public final class RouteTable  {
                     ttls.add((double)rte.ttl);
                     for (int classC : rte.classCnetworks.keySet()) {
                         int num = rte.classCnetworks.get(classC);
-                        if (!globalClassC.containsKey(classC))
-                            globalClassC.put(classC, num);
-                        else {
-                            int previous = globalClassC.get(classC);
-                            globalClassC.put(classC, previous + num);
-                        }
+                        globalClassC.add(classC,num);
                     }
                 }
 
-                // we'll lose some duplicates but oh well
-                Map<Integer, Integer> topClassC = 
-                    new TreeMap<Integer, Integer>(Comparators.inverseIntegerComparator());
-                for (Map.Entry<Integer, Integer> entry : globalClassC.entrySet())
-                    topClassC.put(entry.getValue(), entry.getKey());
-
-                List<Integer> top10Networks = new ArrayList<Integer>(10);
-                for (Map.Entry<Integer, Integer> entry : topClassC.entrySet()) {
+                List<Integer> top10Networks = new ArrayList<Integer>(20);
+                for (Map.Entry<Integer, Integer> entry : globalClassC.getTop()) {
                     if (top10Networks.size() >= 20)
                         break;
                     top10Networks.add(entry.getKey());

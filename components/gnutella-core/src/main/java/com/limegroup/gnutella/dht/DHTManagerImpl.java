@@ -7,7 +7,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -366,32 +365,15 @@ public class DHTManagerImpl implements DHTManager {
             
             private List<Integer> getTopNetworks(Collection<? extends Contact> nodes, int count) {
                 // Masked IP -> Count
-                Map<Integer, Integer> top = new HashMap<Integer, Integer>();
-                
+                StatsUtils.ClassCNetworks classCNetworks = new StatsUtils.ClassCNetworks();
                 for (Contact node : nodes) {
                     InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
-                    Integer masked = NetworkUtils.getClassC(addr);
-                    Integer num = top.get(masked);
-                    if (num == null) {
-                        num = Integer.valueOf(0);
-                    }
-                    num = Integer.valueOf(num.intValue() + 1);
-                    top.put(masked, num);
+                    classCNetworks.add(addr, 1);
                 }
-                
-                List<Entry<Integer, Integer>> list = new ArrayList<Entry<Integer, Integer>>();
-                list.addAll(top.entrySet());
-                
-                // Sort in decending order
-                Collections.sort(list, new Comparator<Entry<Integer, Integer>>() {
-                    public int compare(Entry<Integer, Integer> o1, Entry<Integer, Integer> o2) {
-                        return o2.getValue().intValue() - o1.getValue().intValue();
-                    }
-                });
                 
                 // Return the Top IPs and their count
                 List<Integer> ret = new ArrayList<Integer>(2*count);
-                for (Entry<Integer, Integer> e : list) {
+                for (Entry<Integer, Integer> e : classCNetworks.getTop()) {
                     if (ret.size() >= (2*count)) {
                         break;
                     }

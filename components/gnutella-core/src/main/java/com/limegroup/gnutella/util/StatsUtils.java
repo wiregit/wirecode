@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.util;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.limewire.collection.SortedList;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.settings.MessageSettings;
 
@@ -215,6 +220,7 @@ public class StatsUtils {
         return ret;
     }
     
+    
     /**
      * A stats object holding the minimum, maximum, median
      * average, quartiles 1 and 3 and second, third and fourth central moments
@@ -392,6 +398,41 @@ public class StatsUtils {
         }
         public Object getMode() {
             return mode.toByteArray();
+        }
+    }
+
+    /** Utility comparator to use for sorting class C networks */
+    private static final Comparator<Map.Entry<Integer,Integer>> CLASS_C_COMPARATOR =
+        new Comparator<Map.Entry<Integer, Integer>>() {
+        public int compare(Map.Entry<Integer, Integer> a, Map.Entry<Integer, Integer> b) {
+            return b.getValue().compareTo(a.getValue());
+        }
+    };
+    
+    /**
+     * Utility class keeps track of class C networks and an associated count.
+     */
+    public static class ClassCNetworks {
+        private Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
+        
+        public void add(InetAddress addr, int count) {
+            add(NetworkUtils.getClassC(addr), count);
+        }
+        
+        public void add(int masked, int count) {
+            Integer num = counts.get(masked);
+            if (num == null) {
+                num = Integer.valueOf(0);
+            }
+            num = Integer.valueOf(num.intValue() + count);
+            counts.put(masked, num);
+        }
+        
+        public List<Map.Entry<Integer, Integer>> getTop() {
+            List<Map.Entry<Integer, Integer>> ret = 
+                new SortedList<Map.Entry<Integer,Integer>>(CLASS_C_COMPARATOR);
+            ret.addAll(counts.entrySet());
+            return ret;
         }
     }
 }
