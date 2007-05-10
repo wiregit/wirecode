@@ -153,6 +153,7 @@ public class HttpServiceHandlerTest extends TestCase {
         HttpRequest request = new BasicHttpRequest("GET", "/get/nio");
         conn.setHttpRequest(request);
         serviceHandler.requestReceived(conn);
+        assertEquals(nioEntity, conn.getHttpResponse().getEntity());
         
         MockContentEncoder encoder = new MockContentEncoder();
         conn.setContentEncoder(encoder);
@@ -203,12 +204,29 @@ public class HttpServiceHandlerTest extends TestCase {
         HttpRequest request = new BasicHttpRequest("GET", "/get/string");
         conn.setHttpRequest(request);
         serviceHandler.requestReceived(conn);
+        assertEquals(stringEntity, conn.getHttpResponse().getEntity());
         
         MockContentEncoder encoder = new MockContentEncoder();
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
         assertEquals("abc", encoder.data.toString());
         assertTrue(encoder.isCompleted());
+    }
+
+    public void testHeadRequest() throws Exception {
+        MockSocket socket = new MockSocket();
+        MockIOSession session = new MockIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+
+        HttpRequest request = new BasicHttpRequest("HEAD", "/get/string");
+        conn.setHttpRequest(request);
+        serviceHandler.requestReceived(conn);
+        assertNull(conn.getHttpResponse());
     }
 
     public static class MockHttpChannel extends HttpChannel {
