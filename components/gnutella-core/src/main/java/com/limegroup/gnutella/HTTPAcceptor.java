@@ -69,7 +69,7 @@ public class HTTPAcceptor {
 
     private ConnectionEventListener connectionListener;
 
-    private List<HTTPAcceptorListener> responseListeners = Collections
+    private List<HTTPAcceptorListener> acceptorListeners = Collections
             .synchronizedList(new ArrayList<HTTPAcceptorListener>());
 
     private BasicHttpProcessor processor;
@@ -80,7 +80,7 @@ public class HTTPAcceptor {
 
     public HTTPAcceptor() {
         initializeReactor();
-        inititalizeDefaultHandler();
+        inititalizeDefaultHandlers();
     }
 
     private void initializeReactor() {
@@ -129,7 +129,7 @@ public class HTTPAcceptor {
         }
     }
 
-    private void inititalizeDefaultHandler() {
+    private void inititalizeDefaultHandlers() {
         // unsupported requests
         notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
@@ -173,8 +173,8 @@ public class HTTPAcceptor {
     /**
      * Adds a listener for acceptor events.
      */
-    public void addResponseListener(HTTPAcceptorListener listener) {
-        responseListeners.add(listener);
+    public void addAcceptorListener(HTTPAcceptorListener listener) {
+        acceptorListeners.add(listener);
     }
 
     /**
@@ -215,10 +215,10 @@ public class HTTPAcceptor {
     /**
      * Removes <code>listener</code> from the list of acceptor listeners.
      * 
-     * @see #addResponseListener(HTTPAcceptorListener)
+     * @see #addAcceptorListener(HTTPAcceptorListener)
      */
-    public void removeResponseListener(HTTPAcceptorListener listener) {
-        responseListeners.remove(listener);
+    public void removeAcceptorListener(HTTPAcceptorListener listener) {
+        acceptorListeners.remove(listener);
     }
 
     /**
@@ -275,7 +275,7 @@ public class HTTPAcceptor {
     private class ConnectionEventListener implements HttpServiceEventListener {
 
         public void connectionOpen(NHttpConnection conn) {
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.connectionOpen(conn);
@@ -283,7 +283,7 @@ public class HTTPAcceptor {
         }
 
         public void connectionClosed(NHttpConnection conn) {
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.connectionClosed(conn);
@@ -298,7 +298,7 @@ public class HTTPAcceptor {
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
             LOG.debug("HTTP connection error", e);
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.connectionClosed(conn);
@@ -307,7 +307,7 @@ public class HTTPAcceptor {
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
             LOG.debug("HTTP protocol error", e);
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.connectionClosed(conn);
@@ -318,7 +318,7 @@ public class HTTPAcceptor {
             if (LOG.isDebugEnabled())
                 LOG.debug("Processing request: " + conn.getHttpRequest().getRequestLine());
 
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
             .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.requestReceived(conn, conn.getHttpRequest());
@@ -333,7 +333,7 @@ public class HTTPAcceptor {
                             .getValue());
             session.setThrottle(null);
 
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.responseListeners
+            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
                 listener.responseSent(conn, conn.getHttpResponse());

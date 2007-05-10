@@ -41,9 +41,49 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
+ * Manages {@link HTTPUploader} objects that are created by
+ * {@link HttpRequestHandler}s through the {@link HTTPUploadSessionManager}
+ * interface. Since HTTP 1.1 allows multiple requests for a single connection an
+ * {@link UploadSession} is created for each connection. It keeps track of
+ * queuing (which is per connection) and bandwidth and has a reference to the
+ * {@link HTTPUploader} that represents the current request.
+ * <p>
+ * The state of <code>HTTPUploader</code> follows this pattern:
  * 
+ * <pre>
+ *                             |-&gt;---- THEX_REQUEST -------&gt;--|
+ *                             |-&gt;---- UNAVAILABLE_RANGE --&gt;--|
+ *                             |-&gt;---- PUSH_PROXY ---------&gt;--|
+ *                            /--&gt;---- FILE NOT FOUND -----&gt;--|
+ *                           /---&gt;---- MALFORMED REQUEST --&gt;--|
+ *                          /----&gt;---- BROWSE HOST --------&gt;--|
+ *                         /-----&gt;---- UPDATE FILE --------&gt;--|
+ *                        /------&gt;---- QUEUED -------------&gt;--|
+ *                       /-------&gt;---- LIMIT REACHED ------&gt;--|
+ *                      /--------&gt;---- UPLOADING ----------&gt;--|
+ * --&gt;--CONNECTING--&gt;--/                                      |
+ *        |                                                  \|/
+ *        |                                                   |
+ *       /|\                                                  |---&gt;INTERRUPTED
+ *        |--------&lt;---COMPLETE-&lt;------&lt;-------&lt;-------&lt;------/      (done)
+ *                        |
+ *                        |
+ *                      (done)
+ * </pre>
  * 
- *
+ * COMPLETE uploaders may be using HTTP/1.1, in which case the HTTPUploader
+ * recycles back to CONNECTING upon receiving the next GET/HEAD request and
+ * repeats.
+ * <p>
+ * INTERRUPTED HTTPUploaders are never reused. However, it is possible that the
+ * socket may be reused. This case is only possible when a requester is queued
+ * for one file and sends a subsequent request for another file. The first
+ * <code>HTTPUploader</code> is set as interrupted and a second one is created
+ * for the new file, using the same connection as the first one.
+ * <p>
+ * 
+ * @see com.limegroup.gnutella.uploader.HTTPUploader
+ * @see com.limegroup.gnutella.HTTPAcceptor
  */
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadManager, HTTPUploadSessionManager {
@@ -165,7 +205,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         FileUtils.addFileLocker(this);
 
-        acceptor.addResponseListener(responseListener);
+        acceptor.addAcceptorListener(responseListener);
 
         // browse
         acceptor.registerHandler("/", new BrowseRequestHandler(this));
@@ -202,7 +242,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.unregisterHandler("/get*");
         acceptor.unregisterHandler("/uri-res/*");
         
-        acceptor.removeResponseListener(responseListener);
+        acceptor.removeAcceptorListener(responseListener);
         
         FileUtils.removeFileLocker(this);
     }

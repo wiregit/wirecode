@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.auth.StubContentAuthority;
@@ -31,12 +32,11 @@ import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSession;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
 @SuppressWarnings("unchecked")
-public class UploaderTest extends LimeTestCase {
+public class UploaderTest extends BaseTestCase {
 
     //private static RouterService rs;
     private static HTTPUploadManager upManager;

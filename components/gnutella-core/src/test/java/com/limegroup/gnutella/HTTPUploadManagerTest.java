@@ -52,8 +52,6 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
     private BufferedWriter out;
 
-    private static Acceptor acceptor;
-
     private HTTPAcceptor httpAcceptor;
 
     public HTTPUploadManagerTest(String name) {
@@ -70,7 +68,8 @@ public class HTTPUploadManagerTest extends LimeTestCase {
 
         doSettings();
 
-        acceptor = RouterService.getAcceptor();
+        // TODO acceptor shutdown in globalTearDown()
+        Acceptor acceptor = RouterService.getAcceptor();
         acceptor.init();
         acceptor.start();
     }
