@@ -331,9 +331,9 @@ private static class RatingTableInspectables {
                     }
 
                     ret.put("ratings", StatsUtils.quickStatsDouble(ratings).getMap());
-                    ret.put("types", StatsUtils.quickStatsDouble(ratings).getMap());
-                    ret.put("imp", StatsUtils.quickStatsDouble(ratings).getMap());
-                    ret.put("r2tt", StatsUtils.quickStatsDouble(ratings).getTTestMap());
+                    ret.put("types", StatsUtils.quickStatsDouble(types).getMap());
+                    ret.put("imp", StatsUtils.quickStatsDouble(importance).getMap());
+                    ret.put("r2tt", StatsUtils.quickStatsDouble(ratingToType).getTTestMap());
                     return ret;
                 }
             }

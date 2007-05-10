@@ -186,6 +186,8 @@ public class StatsUtils {
      * @return List of integer values size of the breaks
      */
     public static List<Integer> getHistogram(List<Double> data, int breaks) {
+        if (data.isEmpty())
+            return Collections.emptyList();
         List<Integer> ret = new ArrayList<Integer>(breaks);
         for (int i = 0; i < breaks; i++)
             ret.add(0);
@@ -204,6 +206,8 @@ public class StatsUtils {
      * Same as getHistogram but operates on BigIntegers.
      */
     public static List<Integer> getHistogramBigInt(List<BigInteger> data, int breaks) {
+        if (data.isEmpty())
+            return Collections.emptyList();
         List<Integer> ret = new ArrayList<Integer>(breaks);
         for (int i = 0; i < breaks; i++)
             ret.add(0);

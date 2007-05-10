@@ -37,6 +37,7 @@ public class QueryStats implements Inspectable {
             List<Long> l = new ArrayList<Long>(10);
             for(long time: times)
                 l.add(time - RouterService.startTime);
+            Collections.sort(l);
             ret.put("list",l);
             return ret;
         }
