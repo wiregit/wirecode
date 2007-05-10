@@ -2,6 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
 
 /**
  * Settings for messages
@@ -32,6 +33,6 @@ public class MessageSettings extends LimeProps {
     /**
      * The latest handled routable version of the inspection message.
      */
-    public static final IntSetting INSPECTION_VERSION = 
-        FACTORY.createIntSetting("INSPECTION_VERSION", 0);
+    public static final LongSetting INSPECTION_VERSION = 
+        FACTORY.createLongSetting("INSPECTION_VERSION", 0);
 }

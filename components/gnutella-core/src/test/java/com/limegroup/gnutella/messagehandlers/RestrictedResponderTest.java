@@ -15,6 +15,7 @@ import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.Verifier;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
@@ -44,11 +45,11 @@ public class RestrictedResponderTest extends BaseTestCase {
     static InetSocketAddress addr;
     static ReplyHandler h;
     static StringArraySetting ipSetting;
-    static IntSetting versionSetting;
+    static LongSetting versionSetting;
     public void setUp() throws Exception {
         SettingsFactory f = new SettingsFactory(new File("set"));
         ipSetting = f.createStringArraySetting("ips", new String[]{"1.2.3.4"});
-        versionSetting = f.createIntSetting("version", 0);
+        versionSetting = f.createLongSetting("version", 0);
         addr = new InetSocketAddress(InetAddress.getLocalHost(),1000);
         h = new ReplyHandlerStub() {
             public String getAddress() {
@@ -103,10 +104,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         };
         TestGGEPMessage m = new TestGGEPMessage();
         
-        // the message doesn't specify return address, so it won't get verified
-        assertNull(verifier.sm);
-        
-        // the message should be sent for verification if it does
+        // the message should be sent for verification 
         m.returnAddr = new IpPortImpl("1.2.3.4",5);
         responder.handleMessage(m, addr, h);
         assertSame(verifier.sm, m);
@@ -173,10 +171,11 @@ public class RestrictedResponderTest extends BaseTestCase {
         responder.handleMessage(m, addr, h);
         assertSame(m,responder.msg);
         
-        // a message w/o a version will go through.
+        // a message w/o a version will not go through.
         m.version = -1;
+        responder.msg = null;
         responder.handleMessage(m, addr, h);
-        assertSame(m,responder.msg);
+        assertNull(responder.msg);
         
         // but if it has a version it will have to be higher than the current.
         responder.msg = null;
@@ -260,7 +259,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         }
         
         @Override
-        public int getRoutableVersion() {
+        public long getRoutableVersion() {
             return version;
         }
         

@@ -19,8 +19,8 @@ import com.limegroup.gnutella.messages.SecureGGEPData;
 
 
 /**
- * A ggep-based message that may have a specific return address.  It also contains 
- * an optional version number and can be secure.
+ * A ggep-based message that may have a specific return address.  It requires
+ * a routing version number and must be secure.
  */
 public class RoutableGGEPMessage extends VendorMessage implements SecureMessage {
     
@@ -48,7 +48,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
     /**
      * The routing version of this message
      */
-    private final int routableVersion;
+    private final long routableVersion;
     
     protected RoutableGGEPMessage(byte[] guid, byte ttl, byte hops, 
             byte [] vendor, int selector, int version, byte[] payload, int network)
@@ -59,22 +59,20 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         GGEPParser parser = new GGEPParser();
         parser.scanForGGEPs(payload, 0);
         GGEP ggep = parser.getSecureGGEP();
-        if (ggep == null) {
-            ggep = parser.getNormalGGEP();
-            if (ggep == null) // no ggep at all?
-                throw new BadPacketException("no ggep at all");
-            this.secureData = null;
-        } else {
-            this.secureData = new SecureGGEPData(parser);
-        }
+        if (ggep == null) 
+            throw new BadPacketException("no secure ggep");
+        this.secureData = new SecureGGEPData(parser);
+        ggep = parser.getNormalGGEP();
+        if (ggep == null) // no ggep at all?
+            throw new BadPacketException("no normal ggep");
         this.ggep = ggep;
 
-        // get routable version if any
-        int routableVersion;
+        // get routable version 
+        long routableVersion;
         try {
-            routableVersion = ggep.getInt(VERSION_KEY);
+            routableVersion = ggep.getLong(VERSION_KEY);
         } catch (BadGGEPPropertyException bad){
-            routableVersion = -1;
+            throw new BadPacketException("no routable version");
         }
         this.routableVersion = routableVersion;
         
@@ -116,9 +114,9 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
     }
     
     /**
-     * @return the routable version of this message. Negative if none was present.
+     * @return the routable version of this message
      */
-    public int getRoutableVersion() {
+    public long getRoutableVersion() {
         return routableVersion;
     }
 

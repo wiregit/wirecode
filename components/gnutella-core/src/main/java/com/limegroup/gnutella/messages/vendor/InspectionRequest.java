@@ -62,7 +62,7 @@ public class InspectionRequest extends RoutableGGEPMessage {
         return timestamp;
     }
     
-    private static GGEP deriveGGEP(boolean timestamp, int version, IpPort returnAddr, String... requested) {
+    private static GGEP deriveGGEP(boolean timestamp, long version, IpPort returnAddr, String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.

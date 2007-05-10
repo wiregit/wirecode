@@ -6,7 +6,7 @@ import org.limewire.io.IP;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
-import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -29,7 +29,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     /** an optional verifier to very secure messages */
     private final SecureMessageVerifier verifier;
     /** The last version of the routable message that was routed */
-    private final IntSetting lastRoutedVersion;
+    private final LongSetting lastRoutedVersion;
     
     public RestrictedResponder(StringArraySetting setting) {
         this(setting, null, null);
@@ -43,7 +43,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
      */
     public RestrictedResponder(StringArraySetting setting, 
             SecureMessageVerifier verifier,
-            IntSetting lastRoutedVersion) {
+            LongSetting lastRoutedVersion) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
@@ -69,11 +69,8 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     
     public final void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
         if (msg instanceof RoutableGGEPMessage) {
-            RoutableGGEPMessage rgp = (RoutableGGEPMessage) msg;
-            // if we have a verifier and a return address, verify
-            if (verifier != null && 
-                    rgp.getReturnAddress() != null && 
-                    msg instanceof SecureMessage)
+            // if we have a verifier, verify
+            if (verifier != null && msg instanceof SecureMessage)
                 verifier.verify((SecureMessage)msg, new SecureCallback(addr, handler));
             else
                 processRoutableMessage((RoutableGGEPMessage)msg, addr, handler);
@@ -97,9 +94,8 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
             return;
         
         // check if its a newer version than the last we routed.
-        // messages w/o version just go through.
-        int routableVersion = msg.getRoutableVersion();
-        if (routableVersion >= 0 && lastRoutedVersion != null) {
+        long routableVersion = msg.getRoutableVersion();
+        if (lastRoutedVersion != null) {
             synchronized(lastRoutedVersion) {
                 if (routableVersion <= lastRoutedVersion.getValue())
                     return;
