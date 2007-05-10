@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
@@ -372,16 +371,7 @@ public class DHTManagerImpl implements DHTManager {
                 }
                 
                 // Return the Top IPs and their count
-                List<Integer> ret = new ArrayList<Integer>(2*count);
-                for (Entry<Integer, Integer> e : classCNetworks.getTop()) {
-                    if (ret.size() >= (2*count)) {
-                        break;
-                    }
-                    
-                    ret.add(e.getKey());
-                    ret.add(e.getValue());
-                }
-                return ret;
+                return classCNetworks.getTopInspectable(10);
             }
         };
         

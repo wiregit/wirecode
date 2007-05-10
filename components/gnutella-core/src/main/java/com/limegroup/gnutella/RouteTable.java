@@ -515,13 +515,7 @@ public final class RouteTable  {
                     }
                 }
 
-                List<Integer> top10Networks = new ArrayList<Integer>(20);
-                for (Map.Entry<Integer, Integer> entry : globalClassC.getTop()) {
-                    if (top10Networks.size() >= 20)
-                        break;
-                    top10Networks.add(entry.getKey());
-                    top10Networks.add(entry.getValue());
-                }
+                List<Integer> top10Networks = globalClassC.getTopInspectable(10);
 
                 ret.put("top10", top10Networks);
                 ret.put("cs", StatsUtils.quickStatsDouble(classCSizes).getMap());

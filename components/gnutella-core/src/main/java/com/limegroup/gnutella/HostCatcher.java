@@ -32,7 +32,9 @@ import org.limewire.collection.FixedSizeSortedList;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomOrderHashSet;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
 import org.limewire.util.CommonUtils;
@@ -48,6 +50,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.StatsUtils;
 
 
 /**
@@ -314,6 +317,9 @@ public class HostCatcher {
      * Whether or not hosts have been added since we wrote to disk.
      */
     private boolean dirty = false;
+    
+    /** a bunch of inspectables for hostcatcher */
+    public final HCInspectables inspectables = new HCInspectables();
     
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance.
@@ -1635,5 +1641,45 @@ public class HostCatcher {
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
-    //           
+    //
+    
+    private class HCInspectables {
+        
+        public final Inspectable top10classC = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                ret.put("ver",1);
+                StatsUtils.ClassCNetworks permanent = new StatsUtils.ClassCNetworks();
+                StatsUtils.ClassCNetworks restored = new StatsUtils.ClassCNetworks();
+                StatsUtils.ClassCNetworks freeLeaf = new StatsUtils.ClassCNetworks();
+                StatsUtils.ClassCNetworks freeUp = new StatsUtils.ClassCNetworks();
+                StatsUtils.ClassCNetworks all = new StatsUtils.ClassCNetworks();
+                synchronized(HostCatcher.this) {
+                    IpPortSet everybody = new IpPortSet();
+                    everybody.addAll(permanentHostsSet);
+                    everybody.addAll(restoredHosts);
+                    everybody.addAll(FREE_LEAF_SLOTS_SET);
+                    everybody.addAll(FREE_ULTRAPEER_SLOTS_SET);
+                    everybody.addAll(ENDPOINT_SET);
+                    for(IpPort ip : permanentHostsSet) 
+                        permanent.add(ip.getInetAddress(), 1);
+                    for(IpPort ip : restoredHosts) 
+                        restored.add(ip.getInetAddress(), 1);
+                    for(IpPort ip : FREE_LEAF_SLOTS_SET) 
+                        freeLeaf.add(ip.getInetAddress(), 1);
+                    for(IpPort ip : FREE_ULTRAPEER_SLOTS_SET) 
+                        freeUp.add(ip.getInetAddress(), 1);
+                    for(IpPort ip : everybody) 
+                        all.add(ip.getInetAddress(), 1);
+                }
+                
+                ret.put("perm", permanent.getTopInspectable(10));
+                ret.put("rest", restored.getTopInspectable(10));
+                ret.put("fl", freeLeaf.getTopInspectable(10));
+                ret.put("fu", freeUp.getTopInspectable(10));
+                ret.put("all", all.getTopInspectable(10));
+                return ret;
+            }
+        };
+    }
 }

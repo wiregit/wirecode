@@ -434,5 +434,18 @@ public class StatsUtils {
             ret.addAll(counts.entrySet());
             return ret;
         }
+        
+        /** returns the top n class C networks in easy to bencode format */ 
+        public List<Integer> getTopInspectable(int number) {
+            List<Map.Entry<Integer, Integer>> top = getTop();
+            List<Integer> ret = new ArrayList<Integer>(number * 2);
+            for (Map.Entry<Integer, Integer> entry : top) {
+                if (ret.size() >= 2 * number)
+                    break;
+                ret.add(entry.getKey());
+                ret.add(entry.getValue());
+            }
+            return ret;
+        }
     }
 }
