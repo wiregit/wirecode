@@ -93,6 +93,12 @@ public final class RouteTable  {
         private byte ttl = 0;
         /** The class C networks that have returned a reply for this query */
         private final Map<Integer,Integer> classCnetworks = new HashMap<Integer, Integer>();
+        /** Timestamp when this entry was created */
+        private final long creationTime = System.currentTimeMillis();
+        /** The times when results for this query arrived */
+        private final List<Double> resultTimeStamps = new ArrayList<Double>();
+        /** The number of results that came each time */
+        private final List<Double> resultCounts = new ArrayList<Double>();
         
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
@@ -114,6 +120,11 @@ public final class RouteTable  {
                 int previous = classCnetworks.get(classCNetwork);
                 classCnetworks.put(classCNetwork, previous + numReplies);
             }
+        }
+        
+        void timeStampResults(int count) {
+            resultTimeStamps.add((double)(System.currentTimeMillis() - creationTime));
+            resultCounts.add((double)count);
         }
     }
 
@@ -318,6 +329,16 @@ public final class RouteTable  {
             entry.updateClassCNetworks(classCNetwork, numReplies);
         return ret;
     }
+    
+    /** Remembers that the specified number of results came now */
+    public synchronized void timeStampResults(byte [] guid, int numResults) {
+        RouteTableEntry entry = _newMap.get(guid);
+        if (entry==null)
+            entry = _oldMap.get(guid);
+        if (entry==null)
+            return;
+        entry.timeStampResults(numResults);
+    }
 
     /** The return value from getReplyHandler. */
     public static final class ReplyRoutePair {
@@ -503,6 +524,14 @@ public final class RouteTable  {
                 List<Double> classCSizes = new ArrayList<Double>();
                 List<Double> repliesRouted = new ArrayList<Double>();
                 List<Double> ttls = new ArrayList<Double>();
+                List<Double> timeToFirstReply = new ArrayList<Double>();
+                List<Double> timeToSecondReply = new ArrayList<Double>();
+                List<Double> timeToThirdReply = new ArrayList<Double>();
+                List<Double> timeTo10Results = new ArrayList<Double>();
+                List<Double> timeTo50Results = new ArrayList<Double>();
+                List<Double> timeTo100Results = new ArrayList<Double>();
+                List<Double> allResultTimes = new ArrayList<Double>();
+                List<Double> allResultCounts = new ArrayList<Double>();
                 Iterable<RouteTableEntry> bothMaps = 
                     new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
                 for(RouteTableEntry rte : bothMaps) {
@@ -513,6 +542,38 @@ public final class RouteTable  {
                         int num = rte.classCnetworks.get(classC);
                         globalClassC.add(classC,num);
                     }
+                    
+                    // get stats on how long it takes to get the first 3 replies
+                    if (rte.resultTimeStamps.size() > 0)
+                        timeToFirstReply.add(rte.resultTimeStamps.get(0));
+                    if (rte.resultTimeStamps.size() > 1)
+                        timeToSecondReply.add(rte.resultTimeStamps.get(1));
+                    if (rte.resultTimeStamps.size() > 2)
+                        timeToThirdReply.add(rte.resultTimeStamps.get(2));
+                    allResultTimes.addAll(rte.resultTimeStamps);
+                    
+                    // get stats on how long it takes to get # of results
+                    int results = 0;
+                    boolean counted10 = false;
+                    boolean counted50 = false;
+                    boolean counted100 = false;
+                    for (int i = 0; i < rte.resultCounts.size(); i++) {
+                        results+=rte.resultCounts.get(i);
+                        if (results > 10 && !counted10) {
+                            counted10 = true;
+                            timeTo10Results.add(rte.resultTimeStamps.get(i));
+                        }
+                        if (results > 50 && !counted50) {
+                            counted50 = true;
+                            timeTo50Results.add(rte.resultTimeStamps.get(i));
+                        }
+                        if (results > 100 && !counted100) {
+                            counted100 = true;
+                            timeTo100Results.add(rte.resultTimeStamps.get(i));
+                            break; // we don't need to go any further
+                        }
+                    }
+                    allResultCounts.addAll(rte.resultCounts);
                 }
 
                 List<Integer> top10Networks = globalClassC.getTopInspectable(10);
@@ -524,6 +585,18 @@ public final class RouteTable  {
                 ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
                 ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
                 ret.put("ttlh", StatsUtils.getHistogram(classCSizes, 5));
+                ret.put("tt1r", StatsUtils.quickStatsDouble(timeToFirstReply).getMap());
+                ret.put("tt1rh", StatsUtils.getHistogram(timeToFirstReply, 10));
+                ret.put("tt2r", StatsUtils.quickStatsDouble(timeToSecondReply).getMap());
+                ret.put("tt2rh", StatsUtils.getHistogram(timeToSecondReply, 10));
+                ret.put("tt3r", StatsUtils.quickStatsDouble(timeToThirdReply).getMap());
+                ret.put("tt3rh", StatsUtils.getHistogram(timeToThirdReply, 10));
+                ret.put("tt10c", StatsUtils.quickStatsDouble(timeTo10Results).getMap());
+                ret.put("tt10ch", StatsUtils.getHistogram(timeTo10Results, 10));
+                ret.put("tt50c", StatsUtils.quickStatsDouble(timeTo50Results).getMap());
+                ret.put("tt50ch", StatsUtils.getHistogram(timeTo50Results, 10));
+                ret.put("tt100c", StatsUtils.quickStatsDouble(timeTo100Results).getMap());
+                ret.put("tt100ch", StatsUtils.getHistogram(timeTo100Results, 10));
                 return ret;
             }
 
@@ -546,6 +619,8 @@ public final class RouteTable  {
                     m.put("ttl", e.ttl);
                     m.put("rr", e.repliesRouted);
                     m.put("cc", e.classCnetworks);
+                    m.put("rt", e.resultTimeStamps);
+                    m.put("rc", e.resultCounts);
                     ret.put(entry.getKey(), m);
                 }
                 return ret;
