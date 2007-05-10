@@ -30,7 +30,7 @@ import org.limewire.mojito.KUID;
  * An interface for Buckets
  */
 public interface Bucket extends Serializable {
-
+    
     /**
      * Returns the Bucket KUID
      */
@@ -188,6 +188,12 @@ public interface Bucket extends Serializable {
     public int getActiveSize();
     
     /**
+     * Returns the maximum number of active Contacts the
+     * Bucket can hold (aka k).
+     */
+    public int getMaxActiveSize();
+    
+    /**
      * Returns the number of cached Contacts in the Bucket
      */
     public int getCacheSize();
@@ -201,4 +207,14 @@ public interface Bucket extends Serializable {
      * Returns whether or not this Bucket needs to be refreshed
      */
     public boolean isRefreshRequired();
+    
+    /**
+     * Returns true if the given Contact is the local Node
+     */
+    public boolean isLocalNode(Contact node);
+    
+    /**
+     * Returns the ClassfulNetworkCounter of this Bucket
+     */
+    public ClassfulNetworkCounter getClassfulNetworkCounter();
 }

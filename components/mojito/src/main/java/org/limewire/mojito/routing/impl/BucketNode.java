@@ -34,6 +34,7 @@ import org.limewire.collection.TrieUtils;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -47,7 +48,7 @@ import org.limewire.mojito.util.FixedSizeHashMap;
 class BucketNode implements Bucket {
     
     private static final long serialVersionUID = -4116522147032657308L;
-
+    
     private final RouteTable routeTable;
     
     private final KUID bucketId;
@@ -57,6 +58,8 @@ class BucketNode implements Bucket {
     private final PatriciaTrie<KUID, Contact> nodeTrie;
     
     private transient Map<KUID, Contact> cache;
+    
+    private transient ClassfulNetworkCounter counter;
     
     private long timeStamp = 0L;
     
@@ -71,10 +74,27 @@ class BucketNode implements Bucket {
     
     private void init() {
         cache = Collections.emptyMap();
+        
+        counter = new ClassfulNetworkCounter(this);
+        for (Contact node : nodeTrie.values()) {
+            counter.incrementAndGet(node);
+        }
     }
     
     public KUID getBucketID() {
         return bucketId;
+    }
+    
+    public RouteTable getRouteTable() {
+        return routeTable;
+    }
+    
+    public boolean isLocalNode(Contact node) {
+        return routeTable.isLocalNode(node);
+    }
+    
+    public ClassfulNetworkCounter getClassfulNetworkCounter() {
+        return counter;
     }
     
     public int getDepth() {
@@ -98,6 +118,14 @@ class BucketNode implements Bucket {
         
         if(node.isAlive()) {
             touch();
+        }
+        
+        // There's an assert above but if assertions are
+        // not enabled it'd pass and calling increment 
+        // in that case would be fatal! So make explicitly
+        // sure it's null!
+        if (existing == null) {
+            counter.incrementAndGet(node);
         }
     }
     
@@ -185,7 +213,12 @@ class BucketNode implements Bucket {
     }
     
     public boolean removeActiveContact(KUID nodeId) {
-        return nodeTrie.remove(nodeId) != null;
+        Contact node = nodeTrie.remove(nodeId);
+        if (node != null) {
+            counter.decrementAndGet(node);
+            return true;
+        }
+        return false;
     }
     
     public boolean removeCachedContact(KUID nodeId) {
@@ -216,7 +249,7 @@ class BucketNode implements Bucket {
     }
     
     public boolean isActiveFull() {
-        return nodeTrie.size() >= KademliaSettings.REPLICATION_PARAMETER.getValue();
+        return nodeTrie.size() >= getMaxActiveSize();
     }
     
     public boolean isCacheFull() {
@@ -268,7 +301,7 @@ class BucketNode implements Bucket {
     public void purge() {
         for (Iterator<Contact> it = nodeTrie.values().iterator(); it.hasNext(); ) {
             Contact node = it.next();
-            if(!node.isAlive() && !routeTable.isLocalNode(node)) {
+            if(!node.isAlive() && !isLocalNode(node)) {
                 it.remove();
             }
         }
@@ -334,20 +367,10 @@ class BucketNode implements Bucket {
     public int getActiveSize() {
         return nodeTrie.size();
     }
-    
-    /*private int getLiveNotDeadCount() {
-        final int[] notDead = new int[]{ 0 };
-        nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
-                Contact node = entry.getValue();
-                if (!node.isDead()) {
-                    notDead[0]++;
-                }
-                return SelectStatus.CONTINUE;
-            }
-        });
-        return notDead[0];
-    }*/
+   
+    public int getMaxActiveSize() {
+        return KademliaSettings.REPLICATION_PARAMETER.getValue();
+    }
     
     public int getCacheSize() {
         return cache.size();

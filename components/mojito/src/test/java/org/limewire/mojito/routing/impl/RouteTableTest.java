@@ -22,10 +22,12 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
+import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.EntryImpl;
@@ -890,17 +892,94 @@ public class RouteTableTest extends MojitoTestCase {
         assertEquals(1, unknown);
     }
     
-    /*public static void main(String[] args) {
-        StringBuilder buffer = new StringBuilder();
+    public void testNetworkClass() {
+        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        for (int i = 0; i < 500; i++) {
-            buffer.append("\"").append(KUID.createRandomNodeID().toHexString()).append("\", ");
-            
-            if ((i+1) % 3 == 0) {
-                buffer.append("\n");
-            }
+        // Make sure the cache has the same max size as the Buckets.
+        // It'd make counting harder otherwise...!
+        RouteTableSettings.MAX_CACHE_SIZE.setValue(k);
+        
+        // Accept any IP address
+        RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
+        
+        RouteTable routeTable1 = new RouteTableImpl();
+        for (int i = 0; i < (k-1); i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("192.168.1." + i, 1024+ i));
+            routeTable1.add(node);
         }
         
-        System.out.println(buffer.toString());
-    }*/
+        // There should be exactly k Contacts in the Bucket
+        assertEquals(k, routeTable1.size());
+        assertEquals(k, routeTable1.getActiveContacts().size());
+        assertEquals(0, routeTable1.getCachedContacts().size());
+        
+        RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.0f);
+        RouteTable routeTable2 = new RouteTableImpl();
+        for (int i = 0; i < (k-1); i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("192.168.1." + i, 1024+ i));
+            routeTable2.add(node);
+        }
+        
+        // The bucket should contain the local Node and one
+        // of the 192.168.1.x Nodes. The rest is in the replacement
+        // cache
+        assertEquals(k, routeTable2.size());
+        assertEquals(2, routeTable2.getActiveContacts().size());
+        assertEquals(18, routeTable2.getCachedContacts().size());
+        
+        // Allow 50% to be from the same Network
+        RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.5f);
+        RouteTable routeTable3 = new RouteTableImpl();
+        for (int i = 0; i < (k-1); i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("192.168.1." + i, 1024+ i));
+            routeTable3.add(node);
+        }
+        
+        // 50% of them should be in the Bucket and the rest in the
+        // replacement cache
+        assertEquals(k, routeTable3.size());
+        assertEquals(k/2+1, routeTable3.getActiveContacts().size());
+        assertEquals(k/2-1, routeTable3.getCachedContacts().size());
+        
+        // Add a Contact from a different Class C Network
+        // and it should be added
+        Contact node = ContactFactory.createLiveContact(
+                new InetSocketAddress("192.168.2.1", 2000),
+                Vendor.UNKNOWN, 
+                Version.ZERO, 
+                KUID.createRandomID(), 
+                new InetSocketAddress("192.168.2.1", 2000),
+                0,
+                Contact.DEFAULT_FLAG);
+        
+        routeTable3.add(node);
+        assertEquals(k+1, routeTable3.size());
+        assertEquals(k/2+2, routeTable3.getActiveContacts().size());
+        assertEquals(k/2-1, routeTable3.getCachedContacts().size());
+        
+        Bucket bucket = routeTable3.getBucket(node.getNodeID());
+        assertNotNull(bucket);
+        
+        ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
+        int count = counter.get(node);
+        assertEquals(1, count);
+        
+        boolean removed = bucket.remove(node.getNodeID());
+        assertTrue(removed);
+        
+        count = counter.get(node);
+        assertEquals(0, count);
+    }
 }

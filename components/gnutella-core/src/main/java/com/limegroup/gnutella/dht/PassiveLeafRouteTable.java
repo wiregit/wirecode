@@ -7,11 +7,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -28,8 +30,8 @@ class PassiveLeafRouteTable implements RouteTable {
     private final Contact localNode;
     
     public PassiveLeafRouteTable(Vendor vendor, Version version) {
-        bucket = new BucketImpl(KademliaSettings.REPLICATION_PARAMETER.getValue());
         localNode = ContactFactory.createLocalContact(vendor, version, true);
+        bucket = new BucketImpl(this, KademliaSettings.REPLICATION_PARAMETER.getValue());
     }
     
     public synchronized void add(Contact node) {
@@ -41,7 +43,10 @@ class PassiveLeafRouteTable implements RouteTable {
             return;
         }
         
-        bucket.updateContact(node);
+        ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
+        if (counter == null || counter.isOkayToAdd(node)) {
+            bucket.addActiveContact(node);
+        }
     }
 
     public synchronized void addRouteTableListener(RouteTableListener l) {
@@ -144,14 +149,48 @@ class PassiveLeafRouteTable implements RouteTable {
     
     private static class BucketImpl implements Bucket {
         
+        private static final long serialVersionUID = 7625655390844705296L;
+        
+        private final RouteTable routeTable;
+        
+        private final int k;
+        
         private final Map<KUID, Contact> map;
         
-        public BucketImpl(int k) {
-            map = new FixedSizeHashMap<KUID, Contact>(k, 0.75f, true, k);
+        private final ClassfulNetworkCounter counter;
+        
+        public BucketImpl(RouteTable routeTable, int k) {
+            this.routeTable = routeTable;
+            this.k = k;
+            
+            counter = new ClassfulNetworkCounter(this);
+            
+            map = new FixedSizeHashMap<KUID, Contact>(k, 0.75f, true, k) {
+                private static final long serialVersionUID = 4026436727356877846L;
+
+                @Override
+                protected boolean removeEldestEntry(Entry<KUID, Contact> eldest) {
+                    if (super.removeEldestEntry(eldest)) {
+                        getClassfulNetworkCounter().decrementAndGet(eldest.getValue());
+                        return true;
+                    }
+                    return false;
+                }
+            };
+        }
+        
+        public ClassfulNetworkCounter getClassfulNetworkCounter() {
+            return counter;
+        }
+
+        public boolean isLocalNode(Contact node) {
+            return routeTable.isLocalNode(node);
         }
         
         public void addActiveContact(Contact node) {
-            map.put(node.getNodeID(), node);
+            if (map.put(node.getNodeID(), node) == null) {
+                getClassfulNetworkCounter().incrementAndGet(node);
+            }
         }
 
         public Contact addCachedContact(Contact node) {
@@ -241,6 +280,10 @@ class PassiveLeafRouteTable implements RouteTable {
             return false;
         }
 
+        public int getMaxActiveSize() {
+            return k;
+        }
+
         public boolean isCacheFull() {
             return false;
         }
@@ -257,7 +300,12 @@ class PassiveLeafRouteTable implements RouteTable {
         }
 
         public boolean remove(KUID nodeId) {
-            return map.remove(nodeId) != null;
+            Contact node = map.remove(nodeId);
+            if (node != null) {
+                getClassfulNetworkCounter().decrementAndGet(node);
+                return true;
+            }
+            return false;
         }
 
         public boolean removeActiveContact(KUID nodeId) {
@@ -300,7 +348,11 @@ class PassiveLeafRouteTable implements RouteTable {
         }
 
         public Contact updateContact(Contact node) {
-            return map.put(node.getNodeID(), node);
+            Contact existing = map.put(node.getNodeID(), node);
+            if (existing == null) {
+                getClassfulNetworkCounter().incrementAndGet(node);
+            }
+            return existing;
         }
         
         public String toString() {

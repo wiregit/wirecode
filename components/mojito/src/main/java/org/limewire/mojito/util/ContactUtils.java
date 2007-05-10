@@ -215,6 +215,17 @@ public final class ContactUtils {
     }
     
     /**
+     * Returns the masked Class C Network address of the given
+     * Contact. 
+     * 
+     * @see NetworkUtils#getClassC(InetAddress)
+     */
+    public static int getClassC(Contact node) {
+        InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+        return NetworkUtils.getClassC(addr);
+    }
+    
+    /**
      * Returns true if the given Contact's contact address is
      * a private IPv4-compatible IPv6 address
      */

@@ -19,6 +19,7 @@
  
 package org.limewire.mojito.settings;
 
+import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 
@@ -102,4 +103,12 @@ public final class RouteTableSettings extends MojitoProps {
     public static final IntSetting MAX_CONSECUTIVE_FAILURES
         = FACTORY.createRemoteIntSetting("MAX_CONSECUTIVE_FAILURES", 100,
                 "Mojito.MaxConsecutiveFailures", 0, Integer.MAX_VALUE-1);
+    
+    /**
+     * The maximum percentage of Contacts a Bucket can hold that are from
+     * the same Class C Network.
+     */
+    public static final FloatSetting MAX_CONTACTS_PER_NETWORK_CLASS_RATIO
+        = FACTORY.createRemoteFloatSetting("MAX_CONTACTS_PER_NETWORK_CLASS_RATIO", 
+                1.0f, "Mojito.MaxContactsPerNetworkClassRatio", 0.0f, 1.0f);
 }

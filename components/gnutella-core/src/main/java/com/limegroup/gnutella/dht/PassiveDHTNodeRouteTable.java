@@ -19,6 +19,7 @@ import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 
 /**
@@ -130,12 +131,19 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         boolean removed = bucket.removeActiveContact(nodeId);
 
         if (removed) {
-            Contact mrs = bucket.getMostRecentlySeenCachedContact();
-            if (mrs != null) {
-                removed = bucket.removeCachedContact(mrs.getNodeID());
-                assert (removed == true);
+            if (bucket.getCacheSize() > 0) {
+                ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
                 
-                bucket.addActiveContact(mrs);
+                Contact mrs = null;
+                while((mrs = bucket.getMostRecentlySeenCachedContact()) != null) {
+                    removed = bucket.removeCachedContact(mrs.getNodeID());
+                    assert (removed == true);
+                    
+                    if (counter == null || counter.isOkayToAdd(mrs)) {
+                        bucket.addActiveContact(mrs);
+                        break;
+                    }
+                }
             }
         } else {
             removed = bucket.removeCachedContact(nodeId);

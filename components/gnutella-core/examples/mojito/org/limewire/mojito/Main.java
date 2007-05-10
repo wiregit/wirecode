@@ -18,6 +18,7 @@ import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.MojitoUtils;
 
 public class Main {
@@ -56,6 +57,7 @@ public class Main {
             }
         });
         
+        RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         
@@ -72,6 +74,10 @@ public class Main {
         
         if (!NetworkSettings.FILTER_CLASS_C.getValue()) {
             System.out.println("WARNING: FILTER_CLASS_C is set to false!");
+        }
+        
+        if (RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.getValue() >= 1.0f) {
+            System.out.println("WARNING: MAX_CONTACTS_PER_NETWORK_CLASS_RATIO is set to >= 1.0f!");
         }
         
         run(port, dhts, bootstrapHost);

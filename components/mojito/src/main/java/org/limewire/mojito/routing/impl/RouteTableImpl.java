@@ -45,6 +45,7 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -240,7 +241,11 @@ public class RouteTableImpl implements RouteTable {
         if (existing != null) {
             updateContactInBucket(bucket, existing, node);
         } else if (!bucket.isActiveFull()) {
-            addContactToBucket(bucket, node);
+            if (isOkayToAdd(bucket, node)) {
+                addContactToBucket(bucket, node);
+            } else {
+                addContactToBucketCache(bucket, node);
+            }
         } else if (split(bucket)) {
             add(node); // re-try to add
         } else {
@@ -414,6 +419,21 @@ public class RouteTableImpl implements RouteTable {
     }
     
     /**
+     * Adds the given Contact to the Bucket's replacement Cache
+     */
+    protected synchronized void addContactToBucketCache(Bucket bucket, Contact node) {
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Adding " + node + " to " + bucket + " replacement cache");
+        }
+        
+        // If the cache is full the least recently seen
+        // node will be evicted!
+        Contact existing = bucket.addCachedContact(node);
+        fireCachedContactAdded(bucket, existing, node);
+    }
+    
+    /**
      * This method splits the given Bucket into two new Buckets.
      * There are a few conditions in which cases we do split and
      * in which cases we don't.
@@ -477,7 +497,7 @@ public class RouteTableImpl implements RouteTable {
      */
     protected synchronized void replaceContactInBucket(Bucket bucket, Contact node) {
         
-        if (node.isAlive()) {
+        if (node.isAlive() && isOkayToAdd(bucket, node)) {
             Contact leastRecentlySeen = bucket.getLeastRecentlySeenActiveContact();
             
             // If all Contacts in the given Bucket have the same time
@@ -509,16 +529,7 @@ public class RouteTableImpl implements RouteTable {
             }
         }
         
-        if (LOG.isTraceEnabled()) {
-            LOG.info("Adding " + node + " to replacement cache");
-        }
-        
-        // If the cache is full the least recently seen
-        // node will be evicted!
-        Contact existing = bucket.addCachedContact(node);
-        
-        fireCachedContactAdded(bucket, existing, node);
-        
+        addContactToBucketCache(bucket, node);
         pingLeastRecentlySeenNode(bucket);
     }
     
@@ -578,20 +589,25 @@ public class RouteTableImpl implements RouteTable {
                 }
                 
                 // Remove a live-dead Contact only if there's something 
-                // in the replacement cache or if the node is over the limit.
+                // in the replacement cache or if the Node has too many
+                // errors
                 
-                Contact mrs = bucket.getMostRecentlySeenCachedContact();
-                if (mrs != null) {
+                if (bucket.getCacheSize() > 0) {
                     
-                    boolean removed = bucket.removeCachedContact(mrs.getNodeID());
-                    assert (removed == true);
-                    
-                    bucket.removeActiveContact(nodeId);
-                    assert (bucket.isActiveFull() == false);
-                    
-                    bucket.addActiveContact(mrs);
-                    
-                    fireReplaceContact(bucket, node, mrs);
+                    Contact mrs = null;
+                    while((mrs = bucket.getMostRecentlySeenCachedContact()) != null) {
+                        boolean removed = bucket.removeCachedContact(mrs.getNodeID());
+                        assert (removed == true);
+                        
+                        if (isOkayToAdd(bucket, mrs)) {
+                            bucket.removeActiveContact(nodeId);
+                            assert (bucket.isActiveFull() == false);
+                            
+                            bucket.addActiveContact(mrs);
+                            fireReplaceContact(bucket, node, mrs);
+                            break;
+                        }
+                    }
                     
                 } else if (node.getFailures() 
                             >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
@@ -617,6 +633,26 @@ public class RouteTableImpl implements RouteTable {
                 assert (removed == true);
             }
         }
+    }
+    
+    /**
+     * Returns true of it's Okay to add the given Contact to the
+     * givan Bucket as active Contact. See {@link ClassfulNetworkCounter}
+     * for more information!
+     */
+    protected synchronized boolean isOkayToAdd(Bucket bucket, Contact node) {
+        ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
+        boolean okay = (counter == null || counter.isOkayToAdd(node));
+        
+        if (LOG.isTraceEnabled()) {
+            if (okay) {
+                LOG.trace("It's okay to add " + node + " to " + bucket);
+            } else {
+                LOG.trace("It's NOT okay to add " + node + " to " + bucket);
+            }
+        }
+        
+        return okay;
     }
     
     /**

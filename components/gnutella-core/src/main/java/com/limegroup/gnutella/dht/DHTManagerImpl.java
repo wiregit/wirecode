@@ -77,9 +77,9 @@ public class DHTManagerImpl implements DHTManager {
     public final DHTInspectables inspectables = new DHTInspectables();
     
     /**
-     * Constructs the LimeDHTManager, using the given Executor
-     * to invoke blocking methods.  The executor MUST be single-threaded,
-     * otherwise there will be failures.
+     * Constructs the DHTManager, using the given Executor to invoke blocking 
+     * methods. The executor MUST be single-threaded, otherwise there will be 
+     * failures.
      * 
      * @param service
      */
