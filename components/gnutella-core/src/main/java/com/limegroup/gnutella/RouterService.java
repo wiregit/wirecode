@@ -630,7 +630,20 @@ public class RouterService {
         t.start();
         LOG.trace("Started manual GC thread.");
     }
-	                
+	               
+    /**
+     * Returns whether there are any active internet (non-multicast) transfers
+     * going at speed greater than 0.
+     */
+    public static boolean hasActiveUploads() {
+        getUploadSlotManager().measureBandwidth();
+        try {
+            return getUploadSlotManager().getMeasuredBandwidth() > 0;
+        } catch (InsufficientDataException ide) {
+        }
+        return false;
+    }
+
     /**
      * @return the bandwidth for uploads in bytes per second
      */
@@ -816,6 +829,8 @@ public class RouterService {
 	public static UploadSlotManager getUploadSlotManager() {
 		return uploadSlotManager;
 	}
+	
+	
 	
 	/**
 	 * Accessor for the <tt>PushManager</tt> instance.

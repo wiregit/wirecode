@@ -36,12 +36,6 @@ public interface UploadManager extends BandwidthTracker {
     boolean hadSuccesfulUpload();
 
     /**
-     * Returns whether there are any active internet (non-multicast) transfers
-     * going at speed greater than 0.
-     */
-    boolean hasActiveInternetTransfers();
-
-    /**
      * Returns true if any uploader is conneected to <code>addr</code>.  
      */
     boolean isConnectedTo(InetAddress addr);

@@ -226,7 +226,8 @@ public class HttpServiceHandlerTest extends TestCase {
         HttpRequest request = new BasicHttpRequest("HEAD", "/get/string");
         conn.setHttpRequest(request);
         serviceHandler.requestReceived(conn);
-        assertNull(conn.getHttpResponse());
+        assertNotNull(conn.getHttpResponse());
+        assertNull(conn.getHttpResponse().getEntity());
     }
 
     public static class MockHttpChannel extends HttpChannel {

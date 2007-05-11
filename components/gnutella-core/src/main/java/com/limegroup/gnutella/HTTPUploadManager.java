@@ -644,15 +644,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return lastMeasuredBandwidth;
     }
 
-    public boolean hasActiveInternetTransfers() {
-        slotManager.measureBandwidth();
-        try {
-            return slotManager.getMeasuredBandwidth() > 0;
-        } catch (InsufficientDataException ide) {
-        }
-        return false;
-    }
-
     public UploadSlotManager getSlotManager() {
         return slotManager;
     }
