@@ -210,6 +210,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             if (errorMonitor != null) {
                 errorMonitor.stopRunning();
             }
+            errorMonitor = null;
         // If errorMonitor is null, we need to make one.
         } else if (errorMonitor == null) {
             ServerSocket errorServer = null;
