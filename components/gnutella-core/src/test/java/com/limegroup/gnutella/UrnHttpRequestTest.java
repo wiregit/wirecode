@@ -18,6 +18,7 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -53,7 +54,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         if (getSharedDirectory().listFiles().length < 5) {
-            // create 4 shared files with random content
+            // create shared files with random content
             Random random = new Random();
             for (int i = 0; i < 5; i++) {
                 byte[] data = new byte[random.nextInt(255) + 1];
@@ -68,8 +69,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         fm = new MetaFileManager();
         acceptor = new HTTPAcceptor();
-        uploadManager = new HTTPUploadManager(RouterService
-                .getUploadSlotManager());
+        uploadManager = new HTTPUploadManager(new UploadSlotManager());
         
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
