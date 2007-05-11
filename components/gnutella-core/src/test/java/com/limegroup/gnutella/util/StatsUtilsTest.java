@@ -195,6 +195,34 @@ public class StatsUtilsTest extends LimeTestCase {
         assertEquals(74.75f,getSP("Q3", stats));
     }
     
+    public void testRank() throws Exception {
+        List<Double> l = new ArrayList<Double>();
+        for (int i = 0; i < 100; i++)
+            l.add((double)i);
+        List<Double> ranks = StatsUtils.rank(l);
+        for (int i = 1; i <= 100; i++)
+            assertEquals(i,ranks.get(i - 1).intValue());
+        
+        l.clear();
+        l.add((double)1);
+        l.add((double)2);
+        l.add((double)20);
+        l.add((double)20);
+        l.add((double)1000);
+        ranks = StatsUtils.rank(l);
+        assertEquals(1.0, ranks.get(0));
+        assertEquals(2.0, ranks.get(1));
+        assertEquals(3.5, ranks.get(2));
+        assertEquals(3.5, ranks.get(3));
+        assertEquals(5.0, ranks.get(4));
+        
+        l.clear();
+        l.add(1.0);l.add(1.0);l.add(1.0);l.add(1.0);
+        ranks = StatsUtils.rank(l);
+        for (double rank : ranks)
+            assertEquals(2.5,rank);
+    }
+    
     private void assertMatches(double expected, String key, Map<String, Object> stats) 
     throws Exception {
         assertEquals(expected, get(key,stats));

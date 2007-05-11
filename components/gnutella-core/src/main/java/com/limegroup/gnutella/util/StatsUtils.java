@@ -51,11 +51,14 @@ public class StatsUtils {
             sum = sum.add(bi);
         
         ret.avg = sum.divide(BigInteger.valueOf(l.size()));
+        ret.st = BigInteger.valueOf(0);
         
         sum = BigInteger.valueOf(0);
         BigInteger sum3 = BigInteger.valueOf(0);
         BigInteger sum4 = BigInteger.valueOf(0);
         for (BigInteger bi : l) {
+            if (bi.compareTo(ret.avg) > 0)
+                ret.st = ret.st.add(BigInteger.valueOf(1));
             BigInteger dist = bi.subtract(ret.avg);
             BigInteger dist2 = dist.multiply(dist);
             BigInteger dist3 = dist2.multiply(dist);
@@ -115,6 +118,8 @@ public class StatsUtils {
         double sum3 = 0;
         double sum4 = 0;
         for (double i : l) {
+            if (i > ret.avg)
+                ret.st++;
             double dist = i - ret.avg;
             double dist2 = dist * dist; 
             double dist3 = dist2 * dist;
@@ -257,6 +262,7 @@ public class StatsUtils {
             ret.put("M3", getM3());
             ret.put("M4", getM4());
             ret.put("mode", getMode());
+            ret.put("st", getST()); // sign test vs. the mean
             if (number > 6) {
                 ret.put("Q1", getQ1());
                 ret.put("Q3", getQ3());
@@ -293,6 +299,7 @@ public class StatsUtils {
         public abstract Object getM3();
         public abstract Object getM4();
         public abstract Object getMode();
+        public abstract Object getST();
     }
     
     /**
@@ -300,7 +307,7 @@ public class StatsUtils {
      */
     public static class DoubleStats extends Stats {
         DoubleStats() {}
-        double min, max, med, q1, q3, avg, m2, m3, m4, mode;
+        double min, max, med, q1, q3, avg, m2, m3, m4, mode, st;
         public Object getMin() {
             return doubleToBytes(min);
         }
@@ -330,6 +337,10 @@ public class StatsUtils {
         }
         public Object getMode() {
             return doubleToBytes(mode);
+        }
+        
+        public Object getST() {
+            return doubleToBytes(st);
         }
         
         /**
@@ -372,7 +383,7 @@ public class StatsUtils {
      */
     public static class BigIntStats extends Stats {
         BigIntStats(){}
-        BigInteger min, max, med, q1, q3, avg, m2, m3, m4, mode;
+        BigInteger min, max, med, q1, q3, avg, m2, m3, m4, mode, st;
         public Object getMin() {
             return min.toByteArray();
         }
@@ -402,6 +413,9 @@ public class StatsUtils {
         }
         public Object getMode() {
             return mode.toByteArray();
+        }
+        public Object getST() {
+            return st.toByteArray();
         }
     }
 
@@ -451,5 +465,37 @@ public class StatsUtils {
             }
             return ret;
         }
+    }
+    
+    /**
+     * @return list of sample ranks
+     */
+    public static List<Double> rank(List<Double> data) {
+        if (data.isEmpty())
+            return Collections.emptyList();
+        List<Double> ret = new ArrayList<Double>(data.size());
+        if (data.size() == 1) {
+            ret.add(1.0);
+            return ret;
+        }
+        
+        Collections.sort(data);
+        
+        for (int i = 0; i < data.size() ;) {
+            double value = data.get(i);
+            double rank = 0;
+            int j;
+            for (j = i; j < data.size() && data.get(j) == value;)
+                rank += ++j;
+            if (j == i+1) {
+                ret.add((double)++i);
+                continue;
+            }
+            rank /= (j - i);
+            do {
+                ret.add(rank);
+            }while(++i < j);
+        }
+        return ret;
     }
 }
