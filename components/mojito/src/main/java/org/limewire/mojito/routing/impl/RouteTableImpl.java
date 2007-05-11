@@ -148,8 +148,12 @@ public class RouteTableImpl implements RouteTable {
     private void readObject(ObjectInputStream in) 
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
         listeners = new CopyOnWriteArrayList<RouteTableListener>();
+        
+        // Post-Init the Buckets
+        for (Bucket bucket : bucketTrie.values()) {
+            ((BucketNode)bucket).postInit();
+        }
     }
     
     /*

@@ -74,8 +74,10 @@ class BucketNode implements Bucket {
     
     private void init() {
         cache = Collections.emptyMap();
-        
         counter = new ClassfulNetworkCounter(this);
+    }
+    
+    void postInit() {
         for (Contact node : nodeTrie.values()) {
             counter.incrementAndGet(node);
         }
@@ -428,7 +430,6 @@ class BucketNode implements Bucket {
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
         init();
     }
 }
