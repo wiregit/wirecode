@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import junit.framework.Test;
 
@@ -10,7 +11,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
@@ -31,7 +32,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
 
-    private static MetaFileManager fm;
+    private MetaFileManager fm;
 
     private HTTPAcceptor acceptor;
 
@@ -45,55 +46,34 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         return buildTestSuite(UrnHttpRequestTest.class);
     }
 
-    public static void globalSetUp() throws Exception {
-        // create shared files
-        File TEMP_DIR = new File("temp");
-        TEMP_DIR.mkdirs();
-        TEMP_DIR.deleteOnExit();
-
-        String dirString = "com/limegroup/gnutella";
-        File testDir = CommonUtils.getResourceFile(dirString);
-        assertTrue("could not find the images directory", testDir.isDirectory());
-        File[] files = testDir.listFiles();
-
-        if (files != null) {
-            for (int i = 0; i < files.length; i++) {
-                if (!files[i].isFile())
-                    continue;
-                CommonUtils.copyResourceFile(dirString + "/"
-                        + files[i].getName(), new File(TEMP_DIR, files[i]
-                        .getName()
-                        + ".tmp"));
-            }
-        }
-
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        
-        setSharedDirectories(new File[] { TEMP_DIR });
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
-
-        fm = new MetaFileManager();
-        fm.startAndWait(4000);
-        
-        assertGreaterThan("FileManager should have loaded files", 4, fm
-                .getNumFiles());
-    }
-
-    public static void globalTearDown() throws Exception {
-        fm.stop();
-    }
-
-    /**
-     * Runs this test individually.
-     */
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
 
-    protected void setUp() throws Exception {       
+    @Override
+    public void setUp() throws Exception {
+        if (getSharedDirectory().listFiles().length < 5) {
+            // create 4 shared files with random content
+            Random random = new Random();
+            for (int i = 0; i < 5; i++) {
+                byte[] data = new byte[random.nextInt(255) + 1];
+                random.nextBytes(data);
+                FileUtils.writeObject(getSharedDirectory() + File.separator + "file" + i + ".tmp", data);
+            }
+        }
+
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
+
+        fm = new MetaFileManager();
         acceptor = new HTTPAcceptor();
+        uploadManager = new HTTPUploadManager(RouterService
+                .getUploadSlotManager());
         
-        uploadManager = new HTTPUploadManager(RouterService.getUploadSlotManager());
+        fm.startAndWait(4000);
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
+                .getNumFiles());
         uploadManager.setFileManager(fm);
         uploadManager.start(acceptor);
     }
@@ -101,6 +81,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     @Override
     protected void tearDown() throws Exception {
         uploadManager.stop(acceptor);
+        fm.stop();
     }
 
     /**
@@ -110,7 +91,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     public void testLimitReachedRequests() throws Exception {
         int maxUploads = UploadSettings.HARD_MAX_UPLOADS.getValue();
         UploadSettings.HARD_MAX_UPLOADS.setValue(0);
-        
+
         try {
             for (int i = 0; i < fm.getNumFiles(); i++) {
                 FileDesc fd = fm.get(i);
@@ -122,7 +103,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                         .getSHA1Urn()));
 
                 sendRequestThatShouldFail(request, STATUS_503);
-                // sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd,
+                // sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request,
+                // fd,
                 // STATUS_503);
             }
         } finally {
@@ -309,8 +291,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     private void sendRequestThatShouldFail(HttpRequest request, String error)
             throws Exception {
         HttpResponse response = acceptor.process(request);
-        assertEquals("unexpected HTTP response", error,
-                getStatusLine(response));
+        assertEquals("unexpected HTTP response", error, getStatusLine(response));
     }
 
     private String getStatusLine(HttpResponse response) {
