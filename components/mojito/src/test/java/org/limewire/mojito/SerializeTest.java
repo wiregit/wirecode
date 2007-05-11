@@ -60,11 +60,13 @@ public class SerializeTest extends MojitoTestCase {
         RouteTable routeTable2 = (RouteTable)ois.readObject();
         ois.close();
         
+        assertNotSame(routeTable1, routeTable2);
         assertEquals(101, routeTable2.getContacts().size());
         for (Contact node : routeTable1.getContacts()) {
             Contact other = routeTable2.get(node.getNodeID());
             assertNotNull(other);
             assertEquals(node, other);
+            assertNotSame(node, other);
         }
     }
     
@@ -101,8 +103,8 @@ public class SerializeTest extends MojitoTestCase {
         Database database2 = (Database)ois.readObject();
         ois.close();
         
+        assertNotSame(database1, database2);
         assertEquals(100, database2.getValueCount());
-        
         for (DHTValueEntity entity : database1.values()) {
             Map<KUID, DHTValueEntity> bag = database2.get(entity.getPrimaryKey());
             assertNotNull(bag);
@@ -111,6 +113,7 @@ public class SerializeTest extends MojitoTestCase {
             assertNotNull(other);
             
             assertEquals(entity, other);
+            assertNotSame(entity, other);
         }
     }
 }
