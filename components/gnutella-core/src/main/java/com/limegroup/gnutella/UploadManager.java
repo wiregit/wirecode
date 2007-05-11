@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
+import org.apache.http.protocol.HttpRequestHandler;
+
 /**
  * Defines the requirements for classes that manage Gnutella uploads. 
  */
@@ -70,8 +72,14 @@ public interface UploadManager extends BandwidthTracker {
      */
     int measuredUploadSpeed();
 
+    /**
+     * Registers {@link HttpRequestHandler}s with <code>acceptor</code>.
+     */
     void start(HTTPAcceptor acceptor);
 
+    /**
+     * Deregisters {@link HttpRequestHandler}s with <code>acceptor</code>.
+     */
     void stop(HTTPAcceptor acceptor);
     
 }

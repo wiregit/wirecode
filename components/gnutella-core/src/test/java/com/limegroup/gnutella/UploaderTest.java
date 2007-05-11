@@ -61,12 +61,10 @@ public class UploaderTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static void globalSetUp() throws Exception {
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-    }
-
     @Override
-    public void setUp() throws Exception {        
+    public void setUp() throws Exception {
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+        
         // we don't want the tests confused by the stalled
         // watchdog killing stuff.
         // note that the testStalledUploads sets this to the
@@ -459,7 +457,7 @@ public class UploaderTest extends BaseTestCase {
             fail("unable to create piped socket factory", e);
         }
         final Socket sa = psf.getSocketA();
-        RouterService.acceptUpload(sa, false);
+        RouterService.acceptUpload(sa, null);
 //        Thread t = new Thread() {
 //            public void run() {
 //                try {
@@ -1092,7 +1090,7 @@ public class UploaderTest extends BaseTestCase {
         //Socket A either has no limit or a limit of 1000 bytes to write.
         //Socket B has no limit
         final Socket sa=psf.getSocketA();
-        RouterService.acceptUpload(sa, false);
+        RouterService.acceptUpload(sa, null);
 //        Thread runner=new Thread() {
 //            public void run() {
 //                try {

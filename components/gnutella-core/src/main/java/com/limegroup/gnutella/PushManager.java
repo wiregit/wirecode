@@ -14,6 +14,7 @@ import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
+import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -88,12 +89,12 @@ public final class PushManager {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
             UDPConnection socket = new UDPConnection();
-            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true));
+            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, isFWTransfer));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, false));
+                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, isFWTransfer));
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }
@@ -154,7 +155,7 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data));
+            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt));
         }
     }    
 
@@ -167,12 +168,15 @@ public final class PushManager {
 
         private final Socket socket;
 
-        private final PushData data;
+        private HTTPConnectionData data;
 
-        public PushConnector(Socket socket, PushData data) throws IOException {
-            this.data = data;
+        public PushConnector(Socket socket, PushData data, boolean fwTransfer) throws IOException {
             this.socket = socket;
-
+            this.data = new HTTPConnectionData();
+            this.data.setPush(true);
+            this.data.setLocal(data.isLan());
+            this.data.setFirewalled(fwTransfer);
+            
             socket.setSoTimeout(30 * 1000);
 
             String giv = "GIV 0:"  + data.getGuid() + "/file\n\n";
@@ -210,7 +214,8 @@ public final class PushManager {
 //                    UploadStat.PUSH_FAILED.incrementStat();
 //                }
 
-            RouterService.acceptUpload(socket, data.isLan());
+
+            RouterService.acceptUpload(socket, data);
             return false;
         }
 

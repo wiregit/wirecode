@@ -794,7 +794,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                     slotManager.cancelRequest(session);
                     if (stillInQueue) {
-                        assert uploader.getState() == Uploader.QUEUED;
+                        // If it was queued, also set the state to INTERRUPTED
+                        // (changing from COMPLETE)
                         uploader.setState(Uploader.INTERRUPTED);
                     } else if (uploader.getState() != Uploader.COMPLETE) {
                         // the complete state may have been set by

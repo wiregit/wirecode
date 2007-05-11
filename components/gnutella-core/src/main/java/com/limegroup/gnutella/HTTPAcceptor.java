@@ -40,6 +40,7 @@ import org.limewire.http.HttpServiceEventListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 
+import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
@@ -48,7 +49,7 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
- * Processes HTTP requests which are redirected to {@link HttpRequestHandler}
+ * Processes HTTP requests which are forwarded to {@link HttpRequestHandler}
  * objects that can be registered for a URL pattern.
  * <p>
  * The acceptor uses HttpCore and LimeWire's HTTP component for connection
@@ -156,18 +157,11 @@ public class HTTPAcceptor {
     }
 
     /**
-     * Handles an incoming HTTP requests.
+     * Handles an incoming HTTP push request.
      */
-    public void acceptConnection(Socket socket) {
-        reactor.acceptConnection(null, socket);
-    }
-
-    /**
-     * Handles an incoming HTTP push requests.
-     */
-    public void acceptLocalConnection(Socket socket) {
+    public void acceptConnection(Socket socket, HTTPConnectionData data) {
         DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
-        HttpContextParams.setLocal(conn.getContext(), true);
+        HttpContextParams.setConnectionData(conn.getContext(), data);
     }
 
     /**
@@ -298,6 +292,14 @@ public class HTTPAcceptor {
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
             LOG.debug("HTTP connection error", e);
+            
+            if (HttpContextParams.isPush(conn.getContext())) {
+                if (HttpContextParams.isFirewalled(conn.getContext())) {
+                    UploadStat.FW_FW_FAILURE.incrementStat();
+                }
+                UploadStat.PUSH_FAILED.incrementStat();
+            }
+            
             HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
@@ -359,7 +361,7 @@ public class HTTPAcceptor {
                     UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
                 HttpContextParams.setSubsequentRequest(context, true);
             } else {
-                if (HttpContextParams.isLocal(context)) {
+                if (HttpContextParams.isPush(context)) {
                     if ("GET".equals(method))
                         UploadStat.PUSHED_GET.incrementStat();
                     else if ("HEAD".equals(method))

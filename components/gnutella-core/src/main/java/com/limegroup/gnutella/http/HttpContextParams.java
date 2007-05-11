@@ -9,8 +9,8 @@ import org.limewire.http.HttpIOSession;
  */
 public class HttpContextParams {
 
-    /** Key for the local flag. */
-    public final static String LOCAL = "org.limewire.local";
+    /** Key for the connection flags. */
+    public final static String CONNECTION_DATA = "org.limewire.connectionData";
 
     /** Key for the subsequent request flag. */
     public final static String SUBSEQUENT_REQUEST = "org.limewire.subsequentRequest";
@@ -24,13 +24,26 @@ public class HttpContextParams {
         context.setAttribute(SUBSEQUENT_REQUEST, local);
     }
 
+    /** Indicates a connection from the local network. */
     public static boolean isLocal(final HttpContext context) {
-        Object o = context.getAttribute(LOCAL);
-        return (o != null) ? (Boolean) o : false;
+        Object o = context.getAttribute(CONNECTION_DATA);
+        return (o != null) ? ((HTTPConnectionData) o).isLocal() : false;
     }
 
-    public static void setLocal(final HttpContext context, final boolean local) {
-        context.setAttribute(LOCAL, local);
+    /** Indicates a transfer that was pushed. */
+    public static boolean isPush(final HttpContext context) {
+        Object o = context.getAttribute(CONNECTION_DATA);
+        return (o != null) ? ((HTTPConnectionData) o).isPush() : false;
+    }
+
+    /** Indicates a transfer from a firewalled peer. */
+    public static boolean isFirewalled(final HttpContext context) {
+        Object o = context.getAttribute(CONNECTION_DATA);
+        return (o != null) ? ((HTTPConnectionData) o).isFirewalled() : false;
+    }
+
+    public static void setConnectionData(final HttpContext context, final HTTPConnectionData data) {
+        context.setAttribute(CONNECTION_DATA, data);
     }
 
     public static void setIOSession(HttpContext context, HttpIOSession session) {

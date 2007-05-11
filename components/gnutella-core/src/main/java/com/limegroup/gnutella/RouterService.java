@@ -59,6 +59,7 @@ import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -794,12 +795,8 @@ public class RouterService {
     /**
      * Push uploads from firewalled clients.
      */
-    public static void acceptUpload(Socket socket, boolean lan) {
-        if (lan) {
-            getHTTPUploadAcceptor().acceptLocalConnection(socket);
-        } else {
-            getHTTPUploadAcceptor().acceptConnection(socket);
-        }
+    public static void acceptUpload(Socket socket, HTTPConnectionData data) {
+        getHTTPUploadAcceptor().acceptConnection(socket, data);
     }
     
     /** 
