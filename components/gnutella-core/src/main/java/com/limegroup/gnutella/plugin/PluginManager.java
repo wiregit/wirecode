@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.plugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,13 +17,13 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.MutablePropertyResolverImpl;
 import org.apache.felix.framework.util.StringMap;
 import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 import com.limegroup.gnutella.settings.PluginSettings;
 
@@ -40,14 +43,14 @@ public class PluginManager {
         return PLUGIN_MANAGER_REFERENCE.get();
     }
     
-    private final Felix felix;
+    private final Felix platform;
     
     private final CorePluginContext pluginContext;
     
     private final CorePluginActivator pluginActivator;
     
     private PluginManager() {
-        felix = new Felix();
+        platform = new Felix();
         pluginContext = new CorePluginContext();
         pluginActivator = new CorePluginActivator(pluginContext);
     }
@@ -56,7 +59,7 @@ public class PluginManager {
      * Returns true if the Plugin Manager is running
      */
     public synchronized boolean isRunning() {
-        return felix.getStatus() == Felix.RUNNING_STATUS;
+        return platform.getStatus() == Felix.RUNNING_STATUS;
     }
     
     /**
@@ -70,7 +73,7 @@ public class PluginManager {
             list.add(pluginActivator);
             list.addAll(Arrays.asList(activators));
             
-            felix.start(new MutablePropertyResolverImpl(configMap), list);
+            platform.start(new MutablePropertyResolverImpl(configMap), list);
         }
     }
     
@@ -81,7 +84,7 @@ public class PluginManager {
         if (isRunning()) {
             stopAll();
             uninstallAll();
-            felix.shutdown();
+            platform.shutdown();
         }
     }
     
@@ -154,18 +157,35 @@ public class PluginManager {
         }
         configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, cacheDir.getAbsolutePath());
         
-        configMap.put(Constants.FRAMEWORK_BOOTDELEGATION, getFrameworkBootDelegation());
+        //configMap.put(Constants.FRAMEWORK_BOOTDELEGATION, getFrameworkBootDelegation());
         
-        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+        /*configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
                 "org.osgi.framework; version=1.3.0," +
                 "org.osgi.service.packageadmin; version=1.2.0," +
                 "org.osgi.service.startlevel; version=1.0.0," +
-                "org.osgi.service.url; version=1.0.0");
+                "org.osgi.service.url; version=1.0.0");*/
+        
+        InputStream in = null;
+        try {
+            in = CommonUtils.getResourceStream("com/limegroup/gnutella/plugin/framework-systempackages.properties");
+            if (in != null) {
+                Properties props = new Properties();
+                props.load(in);
+                for (Object key : props.keySet()) {
+                    configMap.put(((String)key).trim(), 
+                            props.getProperty((String)key).trim());
+                }
+            }
+        } catch (IOException err) {
+            err.printStackTrace();
+        } finally {
+            IOUtils.close(in);
+        }
         
         return configMap;
     }
     
-    private static String getFrameworkBootDelegation() {
+    /*private static String getFrameworkBootDelegation() {
         // TODO Use Boot-Delegation which supports wild-cards
         // or 'FRAMEWORK_SYSTEMPACKAGES' where you've to specify
         // every package you'd like to make accessable for the
@@ -189,6 +209,7 @@ public class PluginManager {
             "org.limewire.security.*",
             "org.limewire.setting.*",
             "org.limewire.statistic.*",
+            "org.limewire.*"
         };
         
         StringBuilder buffer = new StringBuilder();
@@ -196,7 +217,7 @@ public class PluginManager {
             buffer.append(str).append(",");
         }
         return buffer.toString();
-    }
+    }*/
     
     private static File getCacheProfileDir() {
         return new File(CommonUtils.getUserSettingsDir(), "osgi-cache");
@@ -217,7 +238,12 @@ public class PluginManager {
         }
     }
     
-    public static void main(String[] args) throws BundleException {
+    public static void main(String[] args) throws Exception {
+        /*String s = generateProperties();
+        BufferedWriter out = new BufferedWriter(new FileWriter("framework-systempackages.properties"));
+        out.write(s);
+        out.close();*/
+        
         PluginManager manager = null;
         try {
             manager = new PluginManager();
@@ -229,4 +255,73 @@ public class PluginManager {
             //manager.shutdown();
         }
     }
+    
+    /*public static String generateProperties() {
+        //final String delim = " \\\n";
+        final String delim = " ";
+        
+        StringBuilder buffer = new StringBuilder();
+        //buffer.append(Constants.FRAMEWORK_SYSTEMPACKAGES).append("=").append(delim);
+        buffer.append("org.osgi.framework; version=1.3.0,").append(delim)
+            .append("org.osgi.service.packageadmin; version=1.2.0,").append(delim)
+            .append("org.osgi.service.startlevel; version=1.0.0,").append(delim)
+            .append("org.osgi.service.url; version=1.0.0,").append(delim);
+        
+        BufferedReader in = null;
+        try {
+            // The package-list comes with the J2SE JavaDoc!
+            File pkgList = new File("/Developer/Documentation/j2sdk-1.6/api/package-list");
+            in = new BufferedReader(new FileReader(pkgList));
+            String line = null;
+            while((line = in.readLine()) != null) {
+                buffer.append(line).append(",").append(delim);
+            }
+        } catch (IOException err) {
+            throw new RuntimeException(err);
+        } finally {
+            IOUtils.close(in);
+        }
+        
+        File dir = new File("/Users/roger/Documents/workspace/mainline/bin");
+        packages(buffer, dir, dir, delim);
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
+        }
+        
+        return buffer.toString();
+    }
+    
+    private static void packages(StringBuilder buffer, File root, File dir, String delim) {
+        File[] files = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                if (pathname.isFile()) {
+                    return !pathname.getName().startsWith(".");
+                }
+                return false;
+            }
+        });
+        
+        if (files.length > 0 && !root.equals(dir)) {
+            String pkg = dir.getAbsolutePath().substring(root.getAbsolutePath().length()+1);
+            pkg = pkg.replace('/', '.');
+            buffer.append(pkg).append(",").append(delim);
+        }
+        
+        File[] dirs = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                if (pathname.isDirectory()) {
+                    String path = pathname.getAbsolutePath();
+                    String name = pathname.getName();
+                    return !name.contains("test") 
+                            && (path.contains("com") || path.contains("org"));
+                }
+                return false;
+            }
+        });
+        
+        for (File trav : dirs) {
+            packages(buffer, root, trav, delim);
+        }
+    }*/
 }
