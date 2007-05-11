@@ -63,5 +63,20 @@ public class SearchFieldTest extends GUIBaseTestCase {
         }
         assertEquals(s, doc.getText(0, doc.getLength()));
     }
-
+    
+    public void testSearchFieldDocumentInsertIllegalCharacters() throws Exception {
+        SearchFieldDocument doc = new SearchFieldDocument();
+        char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
+        for (char c : illegalChars) {
+            doc.insertString(0, Character.toString(c), null);
+            assertEquals(0, doc.getLength());
+        }
+        for (int i = 0; i < illegalChars.length; i++) {
+            // test with legal characters appended or prepended
+            String s = i % 2 == 0 ? "a" + illegalChars[i] : illegalChars[i] + "a";
+            doc.remove(0, doc.getLength());
+            doc.insertString(0, s, null);
+            assertEquals("String a of" + s + " was not inserted, " + illegalChars[i], 1, doc.getLength());    
+        }
+    }
 }
