@@ -19,18 +19,18 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
-public class LimeDHTBootstrapperTest extends DHTTestCase {
+public class DHTBootstrapperTest extends DHTTestCase {
     
     private static Context dhtContext;
     
     private DHTBootstrapperImpl bootstrapper;
     
-    public LimeDHTBootstrapperTest(String name) {
+    public DHTBootstrapperTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(LimeDHTBootstrapperTest.class);
+        return buildTestSuite(DHTBootstrapperTest.class);
     }
     
     public static void main(String[] args) {

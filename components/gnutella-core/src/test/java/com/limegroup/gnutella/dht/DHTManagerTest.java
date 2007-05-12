@@ -16,15 +16,15 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
-public class LimeDHTManagerTest extends DHTTestCase {
+public class DHTManagerTest extends DHTTestCase {
     
     
-    public LimeDHTManagerTest(String name) {
+    public DHTManagerTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(LimeDHTManagerTest.class);
+        return buildTestSuite(DHTManagerTest.class);
     }
     
     public static void main(String[] args) {
