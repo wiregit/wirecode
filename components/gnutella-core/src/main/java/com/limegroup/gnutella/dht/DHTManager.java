@@ -84,35 +84,6 @@ public interface DHTManager extends ConnectionLifecycleListener,
         }
         
         /**
-         * Returns true if the Node is inactive (it's DHT capable but 
-         * it's not running)
-         */
-        public boolean isInactive() {
-            return (this == INACTIVE);
-        }
-        
-        /**
-         * Returns true if the Node is in active mode
-         */
-        public boolean isActive() {
-            return (this == ACTIVE);
-        }
-        
-        /**
-         * Returns true if the Node is in passive mode
-         */
-        public boolean isPassive() {
-            return (this == PASSIVE);
-        }
-        
-        /**
-         * Returns true if the Node is in passive leaf mode
-         */
-        public boolean isPassiveLeaf() {
-            return (this == PASSIVE_LEAF);
-        }
-        
-        /**
          * Returns the VM capability name
          */
         public byte[] getCapabilityName() {

@@ -268,7 +268,7 @@ public abstract class AbstractDHTController implements DHTController {
             dht.start();
             
             // Bootstrap only if we're not a passive leaf node
-            if (!getDHTMode().isPassiveLeaf()) {
+            if (getDHTMode() != DHTMode.PASSIVE_LEAF) {
                 bootstrapper.bootstrap();
             }
             
@@ -323,7 +323,7 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     public void addContact(Contact node) {
-        if (getDHTMode().isPassiveLeaf()) {
+        if (getDHTMode() == DHTMode.PASSIVE_LEAF) {
             getMojitoDHT().getRouteTable().add(node);
         }
     }
