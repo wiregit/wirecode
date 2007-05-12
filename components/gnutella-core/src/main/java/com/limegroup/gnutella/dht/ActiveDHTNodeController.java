@@ -36,7 +36,6 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * Active nodes load and persist DHT data, as they keep the same node ID 
  * over multiple sessions and can therefore re-use their local routing table
  * and local database. 
- * 
  */
 public class ActiveDHTNodeController extends AbstractDHTController {
     
@@ -63,20 +62,25 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureInputStream(
                                 new FileInputStream(FILE))));
                 
+                // Pre-condition: The Database depends on the RouteTable
+                // If there's no persisted RouteTable or it's corrupt
+                // then there's no point in reading or setting the 
+                // Database!
+                
                 int routeTableVersion = in.readInt();
                 if (routeTableVersion >= getRouteTableVersion()) {
                     RouteTable routeTable = (RouteTable)in.readObject();
                     
-                    // Do not set the RouteTable here!!! Make sure the Database
-                    // base is not corrupt!!!
-                    
                     Database database = null;
-                    if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
-                        database = (Database)in.readObject();
+                    try {
+                        if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
+                            database = (Database)in.readObject();
+                        }
+                    } catch (Throwable ignored) {
+                        LOG.error("Throwable", ignored);
                     }
                     
-                    // The Database depends on the RouteTable. So if the RouteTable 
-                    // is null then there's no point in setting the Database! 
+                    // The Database depends on the RouteTable!
                     if (routeTable != null) {
                         dht.setRouteTable(routeTable);
                         if (database != null) {
@@ -85,6 +89,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                     }
                 }
             } catch (Throwable ignored) {
+                LOG.error("Throwable", ignored);
             } finally {
                 IOUtils.close(in);
             }

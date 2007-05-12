@@ -90,6 +90,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                     }
                 }
             } catch (Throwable ignored) {
+                LOG.error("Throwable", ignored);
             } finally {
                 IOUtils.close(ois);
             }
