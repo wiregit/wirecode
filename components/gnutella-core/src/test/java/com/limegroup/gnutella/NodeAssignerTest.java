@@ -157,7 +157,7 @@ public class NodeAssignerTest extends LimeTestCase {
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();
         sleep(200);
-        assertEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
+        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
