@@ -205,6 +205,7 @@ com.limegroup.gnutella.gui.notify
 com.limegroup.gnutella.gui.options
 com.limegroup.gnutella.gui.options.panes
 com.limegroup.gnutella.gui.playlist
+com.limegroup.gnutella.gui.plugin
 com.limegroup.gnutella.gui.search
 com.limegroup.gnutella.gui.shell
 com.limegroup.gnutella.gui.statistics
@@ -227,6 +228,7 @@ com.limegroup.gnutella.messagehandlers
 com.limegroup.gnutella.messages
 com.limegroup.gnutella.messages.vendor
 com.limegroup.gnutella.metadata
+com.limegroup.gnutella.plugin
 com.limegroup.gnutella.routing
 com.limegroup.gnutella.rudp
 com.limegroup.gnutella.rudp.messages

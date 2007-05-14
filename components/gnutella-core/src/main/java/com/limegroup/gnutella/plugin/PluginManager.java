@@ -1,19 +1,15 @@
 package com.limegroup.gnutella.plugin;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -84,6 +80,8 @@ public class PluginManager {
             list.addAll(Arrays.asList(activators));
             
             platform.start(new MutablePropertyResolverImpl(configMap), list);
+            
+            
         }
     }
     
@@ -139,6 +137,40 @@ public class PluginManager {
         }
     }
     
+    public synchronized void launchAll() {
+        installAll();
+        startAll();
+    }
+    
+    public synchronized void installAll() {
+        File plugins = getPluginDir();
+        if (!plugins.exists() || !plugins.isDirectory()) {
+            return;
+        }
+        
+        File[] files = plugins.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                if (file.isFile()) {
+                    String name = file.getName().toLowerCase(Locale.US);
+                    return name.endsWith(".jar") || name.endsWith(".zip");
+                }
+                return false;
+            }
+        });
+        
+        BundleContext bundleContext = getBundleContext();
+        
+        for (File file : files) {
+            String location = file.toURI().toString();
+            
+            try {
+                bundleContext.installBundle(location);
+            } catch (BundleException err) {
+                LOG.error("BundleException", err);
+            }
+        }
+    }
+    
     /**
      * Uninstalls all installed Bundles
      */
@@ -160,7 +192,7 @@ public class PluginManager {
         
         configMap.put(BundleCache.CACHE_BUFSIZE_PROP, "4096");
         
-        File cacheDir = getCacheProfileDir();
+        File cacheDir = getCacheDir();
         if (PluginSettings.CACHE_PROFILE_DIR.getValue()
                 && cacheDir.exists() && cacheDir.isDirectory()) {
             FileUtils.deleteRecursive(cacheDir);
@@ -169,7 +201,7 @@ public class PluginManager {
         
         InputStream in = null;
         try {
-            in = CommonUtils.getResourceStream(getLocation());
+            in = CommonUtils.getResourceStream(getPackageList());
             if (in != null) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 
@@ -199,18 +231,22 @@ public class PluginManager {
         return configMap;
     }
     
-    private static String getLocation() {
+    private static String getPackageList() {
         Package pkg = PluginManager.class.getPackage();
         String location = pkg.getName().replace('.', '/') + "/" + PACKAGE_LIST;
         //System.out.println(location);
         return location;
     }
     
-    private static File getCacheProfileDir() {
-        return new File(CommonUtils.getUserSettingsDir(), "osgi-cache");
+    private static File getPluginDir() {
+        return new File(CommonUtils.getUserSettingsDir(), "plugins");
     }
     
-    public void test() {
+    private static File getCacheDir() {
+        return new File(getPluginDir(), "osgi-cache");
+    }
+    
+    /*public void test() {
         try {
             BundleContext bundleContext = getBundleContext();
             
@@ -218,7 +254,7 @@ public class PluginManager {
             //String location = "file:///Users/roger/plugins/SamplePluginTwo_1.0.0.jar";
             //Bundle bundle = bundleContext.installBundle(location);
             
-            FileInputStream fis = new FileInputStream(new File("/Users/roger/plugins/SamplePlugin.jar"));
+            FileInputStream fis = new FileInputStream(new File("/Users/roger/plugins/plugin.jar"));
             Bundle bundle = bundleContext.installBundle("FooBar", fis);
             bundle.start();
         } catch (IllegalStateException e) {
@@ -228,7 +264,7 @@ public class PluginManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
     
     public static void main(String[] args) throws Exception {
         /*String s = generatePackageList();
@@ -236,19 +272,23 @@ public class PluginManager {
         out.write(s);
         out.close();*/
         
-        PluginManager manager = null;
+        /*PluginManager manager = null;
         try {
             manager = new PluginManager();
-            manager.start();
+            
+            CorePluginContext context = new CorePluginContext();
+            CorePluginActivator activator = new CorePluginActivator(context);
+            
+            manager.start(activator);
             
             manager.test();
             
         } finally {
             //manager.shutdown();
-        }
+        }*/
     }
     
-    public static String generatePackageList() {
+    /*public static String generatePackageList() {
         StringBuilder buffer = new StringBuilder();
         
         buffer.append("# ").append(new Date()).append("\n");
@@ -328,5 +368,5 @@ public class PluginManager {
         for (File trav : dirs) {
             packages(buffer, root, trav);
         }
-    }
+    }*/
 }
