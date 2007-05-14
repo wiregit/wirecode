@@ -1,6 +1,6 @@
 package org.limewire.io;
 
-/** An exception to use when invalid data from the network is read. */
+/** Thrown when invalid data from the network is read. */
 public class InvalidDataException extends Exception {
 
     public InvalidDataException() {

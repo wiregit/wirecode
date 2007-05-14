@@ -22,8 +22,10 @@ import org.limewire.util.StringUtils;
 
 
 /**
- * Provides utility I/O methods, used by multiple classes
- * @author Anurag Singla
+ * Provides utility input and output related methods. <code>IOUtils</code> 
+ * includes methods to read and skip over data, and handle exceptions. Furthermore,
+ * this class lets you compress and uncompress data and to close objects and 
+ * sockets.
  */
 public class IOUtils {
     
@@ -98,7 +100,7 @@ public class IOUtils {
      * @param in The input stream from where to read the word
      * @param maxSize The maximum size of the word.
      * @return the first word (i.e., no whitespace) of specified maximum size
-     * @exception IOException if the word of specified maxSize couldnt be read,
+     * @exception IOException if the word of specified maxSize couldn't be read,
      * either due to stream errors, or timeouts
      */
     public static String readWord(InputStream in, int maxSize)

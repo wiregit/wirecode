@@ -21,13 +21,18 @@ import java.util.Set;
 import org.limewire.util.ByteOrder;
 
 /**
- * This class handles common utility functions for networking tasks.
+ * Provides methods for network programming. Like other LimeWire utility classes
+ * <code>NetworkUtils</code> contains static methods.
+ * <code>NetworkUtils</code>' methods check the validity of IP addresses, ports
+ * and socket addresses. <code>NetworkUtils</code> includes both 
+ * IPv4 and 
+ * <a href="http://en.wikipedia.org/wiki/IPv6">IPv6</a> compliant methods.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class NetworkUtils {
     
     /**
-     * Natmask for Class C Networks
+     * Netmask for Class C Networks
      */
     public static final int CLASS_C_NETMASK = 0xFFFFFF00;
     
@@ -157,7 +162,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns whether or not the two ip addresses share the same
+     * Returns whether or not the two IP addresses share the same
      * first octet in their address.  
      * 
      * This method is IPv6 compliant but returns always false if
@@ -171,7 +176,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns whether or not the two ip addresses share the same
+     * Returns whether or not the two IP addresses share the same
      * first octet in their address.  
      * 
      * This method is IPv6 compliant but returns always false if
@@ -189,7 +194,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns whether or not the two ip addresses share the same
+     * Returns whether or not the two IP addresses share the same
      * first two octets in their address -- the most common
      * indication that they may be on the same network.
      *
@@ -217,7 +222,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns whether or not the given ip address shares the same
+     * Returns whether or not the given IP address shares the same
      * first three octets as the address for this node -- the most 
      * common indication that they may be on the same network.
      *
@@ -228,7 +233,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns whether or not the given ip address shares the same
+     * Returns whether or not the given IP address shares the same
      * first three octets as the address for this node -- the most 
      * common indication that they may be on the same network.
      *
@@ -249,7 +254,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Utility method for determing whether or not the given 
+     * Utility method for determining whether or not the given 
      * address is private taking an InetAddress object as argument
      * like the isLocalAddress(InetAddress) method. 
      *
@@ -307,7 +312,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Utility method for determing whether or not the given 
+     * Utility method for determining whether or not the given 
      * address is private.  Delegates to 
      * <tt>isPrivateAddress(InetAddress)</tt>.
      *
@@ -325,7 +330,7 @@ public final class NetworkUtils {
     }
 
     /**
-     * Utility method for determing whether or not the given 
+     * Utility method for determining whether or not the given 
      * address is private taking an InetAddress object as argument
      * like the isLocalAddress(InetAddress) method. Delegates to 
      * <tt>isPrivateAddress(byte[] address)</tt>.
@@ -338,10 +343,10 @@ public final class NetworkUtils {
     }
     
     /** 
-     * Returns the ip (given in BIG-endian) format as standard
+     * Returns the IP (given in BIG-endian) format as standard
      * dotted-decimal, e.g., 192.168.0.1<p> 
      *
-     * @param ip the ip address in BIG-endian format
+     * @param ip the IP address in BIG-endian format
      * @return the IP address as a dotted-quad string
      */
      public static final String ip2string(byte[] ip) {
@@ -349,7 +354,7 @@ public final class NetworkUtils {
      }
          
     /** 
-     * Returns the ip (given in BIG-endian) format of
+     * Returns the IP (given in BIG-endian) format of
      * buf[offset]...buf[offset+3] as standard dotted-decimal, e.g.,
      * 192.168.0.1<p> 
      *
@@ -447,8 +452,8 @@ public final class NetworkUtils {
      * parses an ip:port byte-packed values.  
      * 
      * @return a collection of <tt>IpPort</tt> objects.
-     * @throws InvalidDataException if an invalid Ip is found or the size 
-     * is not divisble by six
+     * @throws InvalidDataException if an invalid IP is found or the size 
+     * is not divisible by six
      */
     public static List<IpPort> unpackIps(byte [] data) throws InvalidDataException {
     	if (data.length % 6 != 0)
@@ -475,7 +480,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Filters unique ips based on a netmask.
+     * Filters unique IPs based on a netmask.
      */
     public static <T extends IpPort> Collection<T> filterUnique(Collection<T> c, int netmask) {
         ArrayList<T> ret = new ArrayList<T>(c.size());
@@ -542,7 +547,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Retuens the IP:Port as byte array.
+     * Returns the IP:Port as byte array.
      * 
      * This method is IPv6 compliant
      */
@@ -556,7 +561,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Retuens the IP:Port as byte array.
+     * Returns the IP:Port as byte array.
      * 
      * This method is IPv6 compliant
      */
@@ -701,7 +706,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if it's an IPv4 InetAddress and the first octed is 0x00.
+     * Returns true if it's an IPv4 InetAddress and the first octet is 0x00.
      */
     private static boolean isInvalidAddress(byte[] address) {
         if (isIPv4Address(address) || isIPv4MappedAddress(address)) {
@@ -811,7 +816,7 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if the given byte-array is a brodcast address
+     * Returns true if the given byte-array is a broadcast address
      * 
      * This method is IPv6 compliant but returns always false if
      * the given address is neither a true IPv4, nor an IPv4-mapped
@@ -859,7 +864,8 @@ public final class NetworkUtils {
     
     /**
      * Returns true if the given InetAddress has a prefix that's used in
-     * Documentation. It's a non-routeable IPv6 address. See RFC 3849 
+     * Documentation. It's a non-routeable IPv6 address. See <a href=
+     * "http://www.ietf.org/rfc/rfc3849.txt">RFC 3849</a>  
      * for more information.
      */
     public static boolean isDocumentationAddress(InetAddress address) {
@@ -871,7 +877,8 @@ public final class NetworkUtils {
     
     /**
      * Returns true if the given byte-array has a prefix that's used in
-     * Documentation. It's a non-routeable IPv6 address. See RFC 3849 
+     * Documentation. It's a non-routeable IPv6 address. See <a href=
+     * "http://www.ietf.org/rfc/rfc3849.txt">RFC 3849</a> 
      * for more information.
      */
     private static boolean isDocumentationAddress(byte[] address) {

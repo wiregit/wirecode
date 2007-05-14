@@ -1,6 +1,11 @@
 package org.limewire.io;
 
-/** A provider of an address and port. */
+/**
+ * Defines the interface for a class to return the local IP address, the local 
+ * port and whether the class considered the local address as private. See 
+ * <a href = "http://en.wikipedia.org/wiki/Private_network">Private Network</a>
+ * for more information. 
+ *  */
 public interface LocalSocketAddressProvider {
     /** Retrieves the current local address. */
     public byte[] getLocalAddress();

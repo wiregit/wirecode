@@ -9,9 +9,11 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * An IpPort for my local machine.  Always returns current port & address.
- * 
- * Its OK to put this in HashSets
+ * Returns the current port and address for the local system. 
+ * <p>
+ * You can use <code>IpPortForSelf</code> for {@link HashSets}.
+ */ 
+/* Its OK to put this in HashSets
  * Its NOT ok to put it in IpPortSets
  * Its NOT ok to put DirectLocs using this in AlternateLocationCollections
  * Its NOT ok to use this in objects whose hashCode or equals will depend on 

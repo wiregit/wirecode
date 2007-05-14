@@ -4,8 +4,11 @@ import java.security.MessageDigest;
 import java.util.zip.CRC32;
 
 /**
- * Technical Note: A CRC is a type of hash function but not 
- * a message digest. As Java provides only MD5 and SHA-1 with
+ * Provides a low overhead checksum of data, Cyclic Redundancy Check (CRC).  
+ * See <a href ="http://en.wikipedia.org/wiki/Cyclic_redundancy_check">
+ * CRC</a> for more information.
+ */
+ /* Technical Note: Since Java provides only MD5 and SHA-1 with
  * 128bit and 160bit respectively we do as if CRC is a message
  * digest to keep the overhead low.
  */

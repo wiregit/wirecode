@@ -5,8 +5,10 @@ package org.limewire.io;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-
-
+/**
+ * Implements {@link IpPort} to return the IP port address as a string or 
+ * an {@link InetAddress}.
+*/
 public class IpPortImpl implements IpPort {
     
     private final InetAddress addr;

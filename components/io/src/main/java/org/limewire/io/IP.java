@@ -3,15 +3,17 @@ package org.limewire.io;
 import org.limewire.util.ByteOrder;
 
 /**
- * An IP address.  More precisely, a set of IP addresses specified by a regular
- * expression (e.g., "18.239.*.*") or a submask (e.g., "18.239.0.0/255.255.0.0".
- * Immutable.  Used to implement IPFilter; the generic usefulness of this
- * class is questionable.
- *
- * This class is heavily optimized, as IP objects are constructed for every
- * PingReply, QueryReply, PushRequest, and internally or externally generated
- * connection.
+ * Represents an Internet Protocol (IP) address with operations to parse, convert 
+ * and compare an IP address. More precisely, <code>IP</code> is a set of IP 
+ * addresses specified by a regular expression (e.g., "18.239.*.*") or a submask 
+ * (e.g., "18.239.0.0/255.255.0.0").
+ * <p>
+ * This class is heavily optimized since IP 
+ * objects are constructed for every PingReply, QueryReply, PushRequest, and 
+ * internally or externally generated connection.
  */
+
+//the generic usefulness of this class is questionable.
 public class IP {
     private static final String MSG = "Could not parse: ";
 
@@ -219,7 +221,7 @@ public class IP {
      * "1.1.1.1/0.0.0.0" DOES equal "2.2.2.2/0.0.0.0", because they
      * denote the same sets of addresses.  But:<ul>
      * <li>"1.1.1.1/255.255.255.255" DOES NOT equal "2.2.2.2/255.255.255.255"
-     * (disjoined sets of addresses, intersection and difference is empty).</li>
+     * (disjoint sets of addresses, intersection and difference is empty).</li>
      * <li>"1.1.1.1/255.255.255.240" DOES NOT equal "1.1.1.1/255.255.255.255"
      * (intersection is not empty, but difference is not empty)</li>
      * </ul>

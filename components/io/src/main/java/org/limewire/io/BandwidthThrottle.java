@@ -1,11 +1,12 @@
 package org.limewire.io;
 
 /** 
- * Limits throughput of a stream to at most N bytes per T seconds.  Mutable and
- * thread-safe.<p>
- * 
- * In the following example, <tt>throttle</tt> is used to send the contents of
- * <tt>buf</tt> to <tt>out</tt> at no more than <tt>N/T</tt> bytes per second:
+ * Limits throughput of a stream to at most N bytes per T seconds. 
+ * <code>BandwidthThrottle</code> is mutable and thread-safe.<p>
+ *
+ * In the following example, <code>throttle</code> is used to send the contents
+ * of <code>buf</code> to <code>out</code> at no more than <code>N/T</code> 
+ * bytes per second:
  * <pre>
  *      BandwidthThrottle throttle=new BandwidthThrottle(N, T);
  *      OutputStream out=...;
@@ -16,21 +17,22 @@ package org.limewire.io;
  *          i+=allowed;
  *      }
  * </pre>
- *
- * This class works by allowing exactly N bytes to be sent every T seconds.  If
- * the number of bytes for a given window have been exceeded, subsequent calls
- * to request(..) will block.  The default value of T is 100 milliseconds.
- * Smaller window values T allow fairer bandwidth sharing and less noticeable
- * pauses but may decrease efficiency slightly.<p>
- *
- * Note that throttles are <i>not</i> cumulative.  In the future, this may allow
- * enable fancier control.  Also, BandwidthThrottle may be able delegate to
- * other throttles.  This would allow, for example, a 15 KB/s Gnutella messaging
- * throttle, with no more than 10 KB/s devoted to uploads.<p>
- * 
- * This implementation is based on the <a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/freenet/freenet/src/freenet/support/io/Bandwidth.java">Bandwidth</a> 
-class from 
- * the Freenet project.  It has been simplified and better documented.<p> 
+ 
+ * <code>BandwidthThrottle</code> class works by allowing exactly N bytes to be
+ * sent every T seconds. If the number of bytes for a given dialog is exceeded,
+ * subsequent calls to the <code>request</code> method block. Smaller T 
+ * values allow fairer bandwidth sharing and less noticeable pauses but may 
+ * slightly decrease efficiency.
+ * <p>
+ * Note that throttles are <b>not</b> cumulative to allow for future control. 
+ * Also, <code>BandwidthThrottle</code> may be able delegate to other
+ * throttles to allow, for example, a 15 KB/s Gnutella messaging throttle, with
+ * no more than 10 KB/s devoted to uploads.
+ * <p>
+ * <code>BandwidthThrottle</code>’s implementation is based on the 
+ * <code>Bandwidth</code> class from the <a href ="http://freenetproject.org/">
+ * Freenet Project</a> Bandwidth class. <code>BandwidthThrottle</code> is a 
+ * simplified version of the Freenet predecessor.
 */
 public class BandwidthThrottle {
     /** The number of windows per second. */
@@ -97,6 +99,7 @@ public class BandwidthThrottle {
     
     /**
      * Sets whether or not this throttle is switching bandwidth on/off.
+     * @param switching
      */
     public void setSwitching(boolean switching) {
         if(_switching != switching)
@@ -108,6 +111,7 @@ public class BandwidthThrottle {
      * Modifies bytesPerTick to either be double or half of what it was.
      * This is necessary because of the 'switching', which can effectively
      * reduce or raise the amount of data transferred.
+     * @param raise
      */
     private void fixBytesPerTick(boolean raise) {
         int newBytesPerTick = _bytesPerTick;
@@ -149,7 +153,9 @@ public class BandwidthThrottle {
         }
     }
     
-    /** Updates _availableBytes and _nextTickTime if possible. */
+    /** Updates _availableBytes and _nextTickTime if possible. 
+     * @param now
+     */
     private void updateWindow(long now) {
         if (now >= _nextTickTime) {
             if(!_switching || ((now/1000)%2)==0) {

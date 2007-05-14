@@ -7,8 +7,13 @@ import java.net.UnknownHostException;
 import org.limewire.util.ByteOrder;
 
 
-/** Another utility class the encapsulates some complexity.
- *  Keep in mind that I very well could have used Endpoint here, but I
+/** 
+ * Provides utility methods for <code>IpPort</code>. <code>IPPortCombo</code> 
+ * includes methods to return the address as an {@link InetAddress}, a string or
+ * as a byte array. Also, <code>IPPortCombo</code> checks if objects are equal.
+ */
+
+/* Keep in mind that I very well could have used Endpoint here, but I
  *  decided against it mainly so I could do validity checking.
  *  This may be a bad decision.  I'm sure someone will let me know during
  *  code review.

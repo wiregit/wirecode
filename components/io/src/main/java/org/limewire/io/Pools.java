@@ -14,7 +14,8 @@ import org.limewire.concurrent.SimpleTimer;
 
 
 /**
- * A collection of pools for commonly used objects.
+ * Returns a {@link Deflater} and, or {@link Inflater} pool object for either 
+ * compressing or decompressing data.
  */
 public class Pools {
     
@@ -78,7 +79,7 @@ public class Pools {
         config.timeBetweenEvictionRunsMillis = 5000; // the amount of time (in milliseconds) to sleep between examining idle objects for eviction
         config.numTestsPerEvictionRun = 10; // the number of idle objects to examine per run within the idle object eviction thread (if any)
         config.testWhileIdle = false; // whether or not to validate objects in the idle object eviction thread, if any
-        config.softMinEvictableIdleTimeMillis = 2000; // the minimum number of milliseconds an object can sit idle in the pool before it is eligable for evcition with the extra condition that at least "minIdle" amount of object remain in the pool. 
+        config.softMinEvictableIdleTimeMillis = 2000; // the minimum number of milliseconds an object can sit idle in the pool before it is eligible for eviction with the extra condition that at least "minIdle" amount of object remain in the pool. 
         return config;
     }
     

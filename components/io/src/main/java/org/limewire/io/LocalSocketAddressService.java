@@ -4,12 +4,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * Allows setting of a service provider that maintains
- * the running program's address & port.
- * 
- * By default, the port is -1 (unknown), and the address
- * is InetAddress.getLocalHost, and local addresses are
- * private.
+ * Returns local IP Address information via a {@link LocalSocketAddressProvider}.
+ * <code>LocalSocketAddresService</code> returns the local address, port and if
+ * the local address is private. 
+ * <p>
+ * The default service provider returns an address of 
+ * <code>Inet.getLocalHost().getAddress()</code>, a port of -1, and the local 
+ * address is considered private.
  */
 public class LocalSocketAddressService {
     

@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 
 /**
- * A SecureOutputStream writes in peridic intervals a checksum 
- * of the written bytes to the OutputStream and a SecureInputStream 
- * can verify whether or not the bytes are still valid.
+ * Writes in periodic intervals a checksum of the written bytes to the output 
+ * stream. {@link SecureInputStream} can verify whether or not the bytes are 
+ * still valid.
  */
 public class SecureOutputStream extends FilterOutputStream {
     

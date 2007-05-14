@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * OutputStream that counts the number of bytes attempted to write.
+ * Writes data and tracks the number of bytes you attempt to write. 
+ * Additionally, you can turn off byte counting.
  */
 public final class CountingOutputStream extends FilterOutputStream {
     

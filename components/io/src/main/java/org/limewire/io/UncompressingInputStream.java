@@ -6,10 +6,9 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
- * The counterpart to CompressingOutputStream.  This class extends
- * InflaterInputStream solely to catch the potential NPE that can occur
- * during the native inflateBytes call if we have concurrently closed
- * the stream.
+ * Extends <code>InflaterInputStream</code> solely to catch a null pointer 
+ * exception that can occur during the native <code>inflateBytes</code> method
+ * call if you concurrently closed the stream.
  */
 public final class UncompressingInputStream extends InflaterInputStream {
     

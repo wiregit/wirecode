@@ -8,27 +8,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Utility interface that allows class containing host information to be 
- * used generically.
+ * Defines the interface for a class to return the {@link InetAddress}, port 
+ * and the host address as a string.
  */
 public interface IpPort {
 
     /**
-     * Accessor for the <tt>InetAddress</tt> for this host.
+     * Assessor for the <tt>InetAddress</tt> for this host.
      * 
      * @return the <tt>InetAddress</tt> for this host
      */
     InetAddress getInetAddress();
     
     /**
-     * Accessor for the port this host is listening on.
+     * Assessor for the port this host is listening on.
      * 
      * @return the port this host is listening on
      */
     int getPort();
 
     /**
-     * Accessor for the address string.
+     * Assessor for the address string.
      * 
      * @return the address of this host as a string
      */
@@ -45,13 +45,14 @@ public interface IpPort {
     public static final Set<IpPort> EMPTY_SET = Collections.emptySet();
     
     /**
-     * A comparator to compare IpPort objects.
+     * Compares <code>IpPort</code> objects.
      *
-     * This is useful for when a variety of objects that implement IpPort
-     * want to be placed in a Set.  Since it is difficult (near impossible)
-     * to enforce that they all maintain a valid contract with regards
-     * to hashCode & equals, the only valid way to enforce Set equality
-     * is to use a Comparator that is based on the IpPortness.
+     * This class is useful when a variety of objects that implement 
+     * <code>IpPort</code>want to be placed in a Set. Since it is difficult
+     * (near impossible) to enforce that they all maintain a valid contract 
+     * with regards to hashCode and equals, the only valid way to enforce 
+     * {@link Set} equality is to use a Comparator that is based on a unique 
+     * IP Port criteria.
      */
     public static class IpPortComparator implements Comparator<IpPort> {
         public int compare(IpPort ip1, IpPort ip2) {

@@ -10,8 +10,9 @@ import java.io.StreamCorruptedException;
 import java.security.MessageDigest;
 
 /**
- * A SecureInputStream reads a stream of bytes that was written 
- * by a SecureOutputStream and ensures they're still valid.
+ * Reads a stream of bytes written by a {@link SecureOutputStream} and checks
+ * if the bytes are still valid. <code>SecureInputStream</code> throws 
+ * exceptions upon problems reading the <code>SecureInputStream</code>.
  */
 public class SecureInputStream extends FilterInputStream {
     
@@ -41,7 +42,6 @@ public class SecureInputStream extends FilterInputStream {
             if (b < 0) {
                 throw new EOFException("Couldn't read the length of the header");
             }
-            
             length = (length << 8) | (b & 0xFF);
         }
         

@@ -7,8 +7,7 @@ import java.util.TreeSet;
 
 
 /**
- * a utility class for easier and cleaner creation of sets that store
- * IpPort objects 
+ * Creates an <code>IpPort</code> collection.
  */
 public class IpPortSet extends TreeSet<IpPort> {
 

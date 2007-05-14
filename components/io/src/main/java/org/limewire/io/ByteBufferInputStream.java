@@ -1,13 +1,17 @@
 package org.limewire.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.limewire.util.BufferUtils;
 
 /**
- * Like ByteArrayInputStream but for ByteBuffer(s) and this Class is not
- * synchronized!
+ * Contains an internal buffer that contains bytes that
+ * may be read from the stream. Similar to {@link ByteArrayInputStream}, 
+ * however <code>ByteBufferInputStream</code> uses {@link ByteBuffer}. 
+ * <p>
+ * <code>ByteBufferInputStream</code> is not synchronized. 
  */
 public class ByteBufferInputStream extends InputStream {
 
