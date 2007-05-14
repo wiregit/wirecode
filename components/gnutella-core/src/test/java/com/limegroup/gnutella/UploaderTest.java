@@ -31,7 +31,7 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
-import com.limegroup.gnutella.uploader.UploadSession;
+import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
@@ -263,8 +263,8 @@ public class UploaderTest extends BaseTestCase {
         //wait till min Poll time + 2 seconds to be safe, we have been
         //burned by this before - if d4 responds too fast it gets
         //disconnected
-        Thread.sleep((UploadSession.MIN_POLL_TIME+
-                      UploadSession.MAX_POLL_TIME)/2);
+        Thread.sleep((HTTPUploadSession.MIN_POLL_TIME+
+                      HTTPUploadSession.MAX_POLL_TIME)/2);
         //test that uploaders cannot jump the line
         try { //still queued - cannot jump line.
             connectDloader(d4,false, rfd4,true);
@@ -293,8 +293,8 @@ public class UploaderTest extends BaseTestCase {
             2, upManager.uploadsInProgress());            
         
         //Test that uploads in queue advance. d4 should have 0th position
-        Thread.sleep((UploadSession.MIN_POLL_TIME+
-                      UploadSession.MAX_POLL_TIME)/2);
+        Thread.sleep((HTTPUploadSession.MIN_POLL_TIME+
+                      HTTPUploadSession.MAX_POLL_TIME)/2);
         try {
             connectDloader(d4,false,rfd4,true);
         } catch(QueuedException qx) {
@@ -336,8 +336,8 @@ public class UploaderTest extends BaseTestCase {
             0, upManager.uploadsInProgress());
             
         // Sleep so we don't hammer with requests.
-        Thread.sleep((UploadSession.MIN_POLL_TIME+
-                      UploadSession.MAX_POLL_TIME)/2);            
+        Thread.sleep((HTTPUploadSession.MIN_POLL_TIME+
+                      HTTPUploadSession.MAX_POLL_TIME)/2);            
 
         //test that second uploader is given a slot.
         try {
@@ -930,8 +930,8 @@ public class UploaderTest extends BaseTestCase {
             fail("not queued", ioe);
         }
         kill(d1);
-        Thread.sleep((UploadSession.MIN_POLL_TIME+
-                      UploadSession.MAX_POLL_TIME)/2);            
+        Thread.sleep((HTTPUploadSession.MIN_POLL_TIME+
+                      HTTPUploadSession.MAX_POLL_TIME)/2);            
         try { //should get the slot
             connectDloader(d3,false,rfd3,true);
         } catch (QueuedException e) {
@@ -1053,7 +1053,7 @@ public class UploaderTest extends BaseTestCase {
     	// have the queued downloader re-poll, it should 
     	// still be queued.
     	
-    	Thread.sleep(UploadSession.MIN_POLL_TIME + UploadSession.MAX_POLL_TIME / 2);
+    	Thread.sleep(HTTPUploadSession.MIN_POLL_TIME + HTTPUploadSession.MAX_POLL_TIME / 2);
     	try {
     		connectDloader(d2, true, rfd2, true);
     		fail("should have been queued");

@@ -18,7 +18,7 @@ public abstract class AbstractUploader implements Uploader {
 
     private static final Log LOG = LogFactory.getLog(AbstractUploader.class);
 
-    private final UploadSession session;
+    private final HTTPUploadSession session;
 
     /** The number of bytes that were transferred in previous sessions. */
     private long totalAmountUploadedBefore;
@@ -70,7 +70,7 @@ public abstract class AbstractUploader implements Uploader {
     /** The upload type of this uploader. */
     private UploadType uploadType;
 
-    public AbstractUploader(String fileName, UploadSession session) {
+    public AbstractUploader(String fileName, HTTPUploadSession session) {
         this.session = session;
         this.filename = fileName;
         this.firstReply = true;
@@ -318,7 +318,7 @@ public abstract class AbstractUploader implements Uploader {
     /**
      * Returns the upload session that is associated with the connection.
      */
-    public UploadSession getSession() {
+    public HTTPUploadSession getSession() {
         return session;
     }
 

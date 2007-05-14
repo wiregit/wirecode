@@ -17,8 +17,8 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
- * An implementation of the UploadState that sends an error message for the
- * limit of uploads allowed has been reached. This is an HTTP 503 error.
+ * Responds with an HTTP 503 error signaling that the limit of allowed uploads
+ * has been reached.
  */
 public class LimitReachedRequestHandler implements HttpRequestHandler {
 
@@ -67,8 +67,8 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
         this(uploader, false);
     }
 
-    // FIXME never used
-    public LimitReachedRequestHandler(HTTPUploader uploader, boolean validating) {
+    /* Note: Never invoked with validating = true, see Uploader.NOT_VALIDATED. */
+    private LimitReachedRequestHandler(HTTPUploader uploader, boolean validating) {
         this.uploader = uploader;
         this.validating = validating;
         this.fd = uploader.getFileDesc();

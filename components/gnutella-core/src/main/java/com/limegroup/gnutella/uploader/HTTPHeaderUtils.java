@@ -16,6 +16,9 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
 
+/**
+ * Provides methods to add commonly used headers to {@link HttpResponse}s.
+ */
 public class HTTPHeaderUtils {
 
     /**

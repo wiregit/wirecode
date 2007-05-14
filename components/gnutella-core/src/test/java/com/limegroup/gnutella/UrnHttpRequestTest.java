@@ -53,14 +53,12 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     @Override
     public void setUp() throws Exception {
-        if (getSharedDirectory().listFiles().length < 5) {
-            // create shared files with random content
-            Random random = new Random();
-            for (int i = 0; i < 5; i++) {
-                byte[] data = new byte[random.nextInt(255) + 1];
-                random.nextBytes(data);
-                FileUtils.writeObject(getSharedDirectory() + File.separator + "file" + i + ".tmp", data);
-            }
+        // create shared files with random content
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            byte[] data = new byte[random.nextInt(255) + 1];
+            random.nextBytes(data);
+            FileUtils.writeObject(getSharedDirectory() + File.separator + "file" + i + ".tmp", data);
         }
 
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());

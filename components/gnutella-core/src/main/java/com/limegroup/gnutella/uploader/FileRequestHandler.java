@@ -324,8 +324,8 @@ public class FileRequestHandler implements HttpRequestHandler {
         Assert.that(position != -1);
 
         String value = "position=" + (position + 1) + ", pollMin="
-                + (UploadSession.MIN_POLL_TIME / 1000) + /* mS to S */
-                ", pollMax=" + (UploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
+                + (HTTPUploadSession.MIN_POLL_TIME / 1000) + /* mS to S */
+                ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
         HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);

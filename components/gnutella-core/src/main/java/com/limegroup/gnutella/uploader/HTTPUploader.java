@@ -40,7 +40,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     private HttpResponse lastResponse;
 
-    public HTTPUploader(String fileName, UploadSession session) {
+    public HTTPUploader(String fileName, HTTPUploadSession session) {
         super(fileName, session);
     }
 

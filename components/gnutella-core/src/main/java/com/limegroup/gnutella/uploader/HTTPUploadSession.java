@@ -7,7 +7,7 @@ import org.limewire.http.HttpIOSession;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
-public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUser {
+public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlotUser {
 
     /**
      * The min and max allowed times (in milliseconds) between requests by
@@ -30,7 +30,7 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
 
     private HttpIOSession ioSession;
 
-    public UploadSession(UploadSlotManager slotManager, InetAddress host, HttpIOSession ioSession) {
+    public HTTPUploadSession(UploadSlotManager slotManager, InetAddress host, HttpIOSession ioSession) {
         this.slotManager = slotManager;
         this.host = host;
         this.ioSession = ioSession;
@@ -76,7 +76,7 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
     public void measureBandwidth() {
         HTTPUploader uploader = getUploader();
         if (uploader != null) {
-            // this will invoke UploadSession.measureBandwidth(int);
+            // this will invoke HTTPUploadSession.measureBandwidth(int);
             uploader.measureBandwidth();
         }
     }

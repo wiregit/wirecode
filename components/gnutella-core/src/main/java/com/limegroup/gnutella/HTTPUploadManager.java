@@ -36,7 +36,7 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
 import com.limegroup.gnutella.uploader.UpdateFileRequestHandler;
-import com.limegroup.gnutella.uploader.UploadSession;
+import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 
@@ -44,7 +44,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  * Manages {@link HTTPUploader} objects that are created by
  * {@link HttpRequestHandler}s through the {@link HTTPUploadSessionManager}
  * interface. Since HTTP 1.1 allows multiple requests for a single connection an
- * {@link UploadSession} is created for each connection. It keeps track of
+ * {@link HTTPUploadSession} is created for each connection. It keeps track of
  * queuing (which is per connection) and bandwidth and has a reference to the
  * {@link HTTPUploader} that represents the current request.
  * <p>
@@ -88,7 +88,7 @@ import com.limegroup.gnutella.uploader.UploadType;
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadManager, HTTPUploadSessionManager {
 
-    /** The key used to store the {@link UploadSession} object. */
+    /** The key used to store the {@link HTTPUploadSession} object. */
     private final static String SESSION_KEY = "org.limewire.session";
 
     private static final Log LOG = LogFactory.getLog(HTTPUploadManager.class);
@@ -440,7 +440,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      *         LIMIT_REACHED. If BANNED, the <code>Uploader</code>'s state
      *         will be set to BANNED_GREEDY.
      */
-    private synchronized QueueStatus checkAndQueue(UploadSession session) {
+    private synchronized QueueStatus checkAndQueue(HTTPUploadSession session) {
         RequestCache rqc = REQUESTS.get(session.getHost());
         if (rqc == null)
             rqc = new RequestCache();
@@ -648,8 +648,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return slotManager;
     }
 
-    public UploadSession getOrCreateSession(HttpContext context) {
-        UploadSession session = (UploadSession) context
+    public HTTPUploadSession getOrCreateSession(HttpContext context) {
+        HTTPUploadSession session = (HTTPUploadSession) context
                 .getAttribute(SESSION_KEY);
         if (session == null) {
             HttpInetConnection conn = (HttpInetConnection) context
@@ -666,7 +666,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     throw new RuntimeException(e);
                 }
             }
-            session = new UploadSession(getSlotManager(), host,
+            session = new HTTPUploadSession(getSlotManager(), host,
                     HttpContextParams.getIOSession(context));
             context.setAttribute(SESSION_KEY, session);
         }
@@ -678,15 +678,15 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * 
      * @return null, if no session exists
      */
-    public UploadSession getSession(HttpContext context) {
-        UploadSession session = (UploadSession) context
+    public HTTPUploadSession getSession(HttpContext context) {
+        HTTPUploadSession session = (HTTPUploadSession) context
                 .getAttribute(SESSION_KEY);
         return session;
     }
 
     public HTTPUploader getOrCreateUploader(HttpRequest request,
             HttpContext context, UploadType type, String filename) {
-        UploadSession session = getOrCreateSession(context);
+        HTTPUploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
         if (uploader != null) {
             if (!uploader.getFileName().equals(filename)
@@ -730,14 +730,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public HTTPUploader getUploader(HttpContext context) {
-        UploadSession session = getSession(context);
+        HTTPUploadSession session = getSession(context);
         HTTPUploader uploader = session.getUploader();
         assert uploader != null;
         return uploader;
     }
 
     public QueueStatus enqueue(HttpContext context, HttpRequest request) {
-        UploadSession session = getSession(context);
+        HTTPUploadSession session = getSession(context);
         assert !session.isAccepted();
 
         if (shouldBypassQueue(request, session.getUploader())) {
@@ -767,7 +767,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     /**
-     * Manages the {@link UploadSession} associated with a connection.
+     * Manages the {@link HTTPUploadSession} associated with a connection.
      */
     private class ResponseListener implements HTTPAcceptorListener {
 
@@ -775,7 +775,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         public void connectionClosed(NHttpConnection conn) {
-            UploadSession session = getSession(conn.getContext());
+            HTTPUploadSession session = getSession(conn.getContext());
             if (session != null) {
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null) {
@@ -804,7 +804,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {
-            UploadSession session = getSession(conn.getContext());
+            HTTPUploadSession session = getSession(conn.getContext());
             if (session != null) {
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null && uploader.getLastResponse() == response) {
@@ -814,7 +814,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
                 if (session.getQueueStatus() == QueueStatus.QUEUED) {
                     session.getIOSession().setSocketTimeout(
-                            UploadSession.MAX_POLL_TIME);
+                            HTTPUploadSession.MAX_POLL_TIME);
                 }
             }
         }

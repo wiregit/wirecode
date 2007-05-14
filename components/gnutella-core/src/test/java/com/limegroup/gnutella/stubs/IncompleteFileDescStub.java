@@ -76,19 +76,6 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     	else return super.containsUrn(urn);
     }
 
-//    public InputStream createInputStream() {
-//        return new InputStream() {
-//            public int read() {
-//                return 'a';
-//            }
-//            public int read(byte[] b) {
-//                for(int i=0; i < b.length; i++)
-//                    b[i] = (byte)'a';
-//                return b.length;
-//            }
-//        };
-//    }
-    
     public long getFileSize() {
         return size;
     }

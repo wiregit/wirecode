@@ -74,31 +74,6 @@ public class FileDescStub extends FileDesc {
         return s;
     }
 
-//    public InputStream createInputStream() {
-//        return new InputStream() {
-//            int read = 0;
-//            int length = (int) getFileSize();
-//            public int read() {
-//                if (read >= length) {
-//                    return -1;
-//                }
-//                read++;
-//                return 'a';
-//            }
-//            public int read(byte[] b) {
-//                if (read >= length) {
-//                    return -1;
-//                }
-//                int start = read;
-//                for(int i=0; i < b.length && read < length; i++) {
-//                    b[i] = (byte)'a';
-//                    read++;
-//                }
-//                return read - start;
-//            }
-//        };
-//    }
-
     public long getFileSize() {
         return DEFAULT_SIZE;
     }
