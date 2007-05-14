@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.disk;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,7 +211,11 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    LOG.debug("flushing");
 	    if (!isOpen())
 	        return;
-		for (RandomAccessFile f : _fos)
-			f.getChannel().force(false);
+		for (RandomAccessFile f : _fos) {
+            FileChannel chan = f.getChannel();
+            if (chan == null)
+                throw new IOException("no channel for "+f);
+			chan.force(false);
+        }
 	}
 }
