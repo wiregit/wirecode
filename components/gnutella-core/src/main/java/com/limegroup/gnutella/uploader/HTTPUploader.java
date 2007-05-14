@@ -555,10 +555,10 @@ public final class HTTPUploader implements Uploader {
 	public String getHost() {return session.getHost();}
 
 	// implements the Uploader interface
-	public boolean isChatEnabled() {return _chatEnabled;}
+	public boolean isChatEnabled() {return _chatEnabled && _nodePort > 0;}
 	
 	// implements the Uploader interface
-	public boolean isBrowseHostEnabled() { return _browseEnabled; }
+	public boolean isBrowseHostEnabled() { return _browseEnabled && _nodePort > 0; }
 
 	// implements the Uploader interface
 	public int getGnutellaPort() {return _nodePort;}
