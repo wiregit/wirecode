@@ -41,7 +41,7 @@ public class InspectionRequest extends RoutableGGEPMessage {
     }
     
     InspectionRequest(GGEPSigner signer, String... requested) {
-        this(new GUID(GUID.makeGuid()),signer, false, 1, null, requested);
+        this(new GUID(),signer, false, 1, null, requested);
     }
     /**
      * @param timestamp true if the response should contain a timestamp.
