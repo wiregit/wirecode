@@ -65,6 +65,8 @@ public abstract class AbstractUploader implements Uploader {
 
     private int index;
     
+    private String host;
+    
     private int port = -1;
 
     /** The upload type of this uploader. */
@@ -81,6 +83,7 @@ public abstract class AbstractUploader implements Uploader {
      */
     public void reinitialize() {
         setState(CONNECTING);
+        host = null;
         port = -1;
         totalAmountUploadedBefore = 0;
         if (!ignoreTotalAmountUploaded) {
@@ -189,7 +192,7 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public String getHost() {
-        return session.getHost();
+        return (host != null) ? host : session.getHost();
     }
 
     public boolean isChatEnabled() {
@@ -351,4 +354,8 @@ public abstract class AbstractUploader implements Uploader {
         this.ignoreTotalAmountUploaded = ignoreTotalAmountUploaded;
     }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
+    
 }

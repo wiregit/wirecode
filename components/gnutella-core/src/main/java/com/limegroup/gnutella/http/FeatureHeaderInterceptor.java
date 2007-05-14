@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -43,6 +45,8 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             ;
         else if (readXDownloadedHeader(header))
             ;
+        else if (readNodeHeader(header))
+            ;
     }
 
     /**
@@ -55,27 +59,11 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             return false;
         }
 
-        String sub = header.getValue();
-        int colon = sub.indexOf(":");
-        if (colon != -1) {
-            String host = sub.substring(0, colon);
-            host = host.trim();
-            String sport = sub.substring(colon + 1);
-            sport = sport.trim();
-
-            int port;
-            try {
-                port = java.lang.Integer.parseInt(sport);
-                if (!NetworkUtils.isValidPort(port)) {
-                    return true;
-                }
-            } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
-            }
-
+        if (setHostAndPort(header.getValue())) {
             uploader.setChatEnabled(true);
             uploader.setBrowseHostEnabled(true);
-            uploader.setGnutellaPort(port);
+        } else {
+            throw new ProblemReadingHeaderException();
         }
         
         return true;
@@ -272,35 +260,48 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
         return true;
     }
 
-    // see PushProxyRequestHandler#getNodeAddress()
-//    /**
-//     * Reads the X-Node header
-//     * 
-//     * @return true if the header had an node description value
-//     */
-//    private boolean readNodeHeader(final Header header) {
-//        if (!HTTPHeaderName.NODE.matches(header))
-//            return false;
-//
-//        StringTokenizer st = new StringTokenizer(header.getValue(), ":");
-//        InetAddress tempAddr = null;
-//        int tempPort = -1;
-//        // we are expecting 2 tokens - only evalute if you see 2
-//        if (st.countTokens() == 2) {
-//            try {
-//                tempAddr = InetAddress.getByName(st.nextToken().trim());
-//                tempPort = Integer.parseInt(st.nextToken().trim());
-//                if (NetworkUtils.isValidPort(tempPort)) {
-//                    // everything checks out....
-//                    uploader.setNodeAddress(tempAddr);
-//                    uploader.setGnutellaPort(tempPort);
-//                }
-//            } catch (UnknownHostException badHost) { // crappy host
-//            } catch (NumberFormatException nfe) {
-//            } // crappy port
-//        }
-//
-//        return true;
-//    }
+    /**
+     * Reads the X-Node header.
+     * 
+     * @return true if the header had an node description value
+     */
+    private boolean readNodeHeader(final Header header) {
+        if (!HTTPHeaderName.NODE.matches(header))
+            return false;
+
+        setHostAndPort(header.getValue());
+
+        return true;
+    }
+    
+    /**
+     * Sets the host and port of <code>uploader</code> from <code>value</code>
+     * if it describes a valid address.
+     * 
+     * @param value host:port
+     * @return true, if host and port were set
+     */
+    private boolean setHostAndPort(String value) {
+        InetAddress host;
+        int port = -1;
+
+        StringTokenizer st = new StringTokenizer(value, ":");
+        if (st.countTokens() == 2) {
+            try {
+                host = InetAddress.getByName(st.nextToken().trim());
+                port = Integer.parseInt(st.nextToken().trim());
+
+                if (NetworkUtils.isValidPort(port)) {
+                    uploader.setHost(host.getHostAddress());
+                    uploader.setGnutellaPort(port);
+                    return true;
+                }
+            } catch (UnknownHostException ignore) {
+            } catch (NumberFormatException ignore) {
+            }
+        }        
+        return false;
+    }
+    
 
 }

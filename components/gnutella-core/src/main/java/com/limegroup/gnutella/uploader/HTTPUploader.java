@@ -225,4 +225,14 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         return lastResponse;
     }
 
+    @Override
+    public boolean isChatEnabled() {
+        return super.isChatEnabled() && getGnutellaPort() != -1;
+    }
+
+    @Override
+    public boolean isBrowseHostEnabled() {
+        return super.isBrowseHostEnabled() && getGnutellaPort() != -1;
+    }
+    
 }
