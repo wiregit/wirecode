@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
@@ -40,16 +41,17 @@ public class InspectionRequest extends RoutableGGEPMessage {
     }
     
     InspectionRequest(GGEPSigner signer, String... requested) {
-        this(signer, false, 1, null, requested);
+        this(new GUID(GUID.makeGuid()),signer, false, 1, null, requested);
     }
     /**
      * @param timestamp true if the response should contain a timestamp.
      * @param requested requested fields for inspection.  
      * See <tt>InspectionUtils</tt> for description of the format.
      */
-    public InspectionRequest(GGEPSigner signer, boolean timestamp, long version, IpPort returnAddr, String... requested) {
+    public InspectionRequest(GUID g, GGEPSigner signer, boolean timestamp, long version, IpPort returnAddr, String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION, signer,
                 deriveGGEP(timestamp, version, returnAddr, requested));
+        setGUID(g);
         this.requested = requested;
         this.timestamp = timestamp;
     }
