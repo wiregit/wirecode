@@ -373,7 +373,7 @@ BTLinkListener {
 		boolean wasActive = false;
 		synchronized(state.getLock()) {
 			if (!isActive() && state.get() != TorrentState.QUEUED)
-				throw new IllegalStateException("torrent not pausable "+state.get());
+				return;
 			
 			wasActive = isActive();
 			state.set(TorrentState.PAUSED);
@@ -394,7 +394,7 @@ BTLinkListener {
 				state.set(TorrentState.QUEUED);
 				return true;
 			default:
-				throw new IllegalStateException("torrent not resumable "+state.get());
+				return false;
 			}
 		}
 	}
