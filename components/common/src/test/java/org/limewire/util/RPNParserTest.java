@@ -180,6 +180,12 @@ public class RPNParserTest extends BaseTestCase {
         assertTrue(p.evaluate(new String[] {"badger","adge","CONTAINS"}));
         assertFalse(p.evaluate(new String[] {"adge","badger","CONTAINS"}));
     }
+    
+    public void testMatches() throws Exception {
+        RPNParser p = new RPNParser();
+        assertTrue(p.evaluate(new String[] {"[a-c]a.*","badger","MATCHES"}));
+        assertFalse(p.evaluate(new String[] {".*er.","badger","MATCHES"}));
+    }
 
     private static class MyLookup extends Properties implements StringLookup {
         public String lookup(String key) {

@@ -3,6 +3,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 
 /**
@@ -25,6 +26,7 @@ public class RPNParser {
         pMap.put("OR", new ORPredicate());
         pMap.put("AND", new ANDPredicate());
         pMap.put("CONTAINS", new ContainsPredicate());
+        pMap.put("MATCHES", new MatchesPredicate());
         predicateByOperand = Collections.unmodifiableMap(pMap);
     }
     
@@ -191,11 +193,26 @@ public class RPNParser {
         }
     }
     
+    /**
+     * Predicate for the String.contains operation
+     */
     static class ContainsPredicate extends Predicate {
         public boolean evaluate (String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
             return operands[0].toLowerCase().contains(operands[1].toLowerCase());
+        }
+    }
+
+    /**
+     * Predicate for matching a pattern
+     */
+    static class MatchesPredicate extends Predicate {
+        public boolean evaluate (String... operands) {
+            if (operands.length != 2)
+                throw new IllegalArgumentException();
+            
+            return Pattern.matches(operands[0],operands[1]);
         }
     }
     
