@@ -18,6 +18,7 @@ import org.limewire.util.RPNParser;
 import org.limewire.util.RPNParser.StringLookup;
 
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -453,9 +454,12 @@ public class FileDesc implements FileDetails, StringLookup {
     }
     
     /**
-     * some factors to consider when deciding if a file is rare.
+     * some factors to consider when deciding if a file fits certain criteria
+     * like being rare.
      */
     public String lookup(String key) {
+        if (key == null)
+            return null;
         if ("verified".equals(key))
             return String.valueOf(isVerified());
         else if ("firewalled".equals(key))
@@ -476,8 +480,21 @@ public class FileDesc implements FileDetails, StringLookup {
             return DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValueAsString();
         else if ("rftSet".equals(key))
             return DHTSettings.RARE_FILE_TIME.getValueAsString();
-        else
-            return null;
+        else if ("hasXML".equals(key))
+            return String.valueOf(getXMLDocument() != null);
+        else if ("size".equals(key))
+            return String.valueOf(_size);
+        else if ("lastM".equals(key))
+            return String.valueOf(lastModified());
+        else if ("numKW".equals(key))
+            return String.valueOf(HashFunction.keywords(getPath()).length);
+        else if ("numKWP".equals(key))
+            return String.valueOf(HashFunction.getPrefixes(HashFunction.keywords(getPath())).length);
+        else if (key.startsWith("xml_") && getXMLDocument() != null) {
+            key = key.substring(4,key.length());
+            return getXMLDocument().lookup(key);
+        }
+        return null;
     }
 }
 

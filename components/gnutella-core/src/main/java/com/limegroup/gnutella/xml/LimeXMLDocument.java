@@ -14,6 +14,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NameValue;
+import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -28,7 +29,7 @@ import com.limegroup.gnutella.licenses.LicenseType;
  * A LimeXMLDocument is basically a hashmap that maps a
  * Names of fields to the values as per a XML document.
  */
-public class LimeXMLDocument implements Serializable {
+public class LimeXMLDocument implements Serializable, StringLookup {
     
     private static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
 
@@ -599,6 +600,26 @@ public class LimeXMLDocument implements Serializable {
             
         // 2 == XMLStringUtils.DELIMITER.length()
         return firstKey.substring(0, idx + 2);
+    }
+    
+    public String lookup(String key) {
+        if (key == null)
+            return null;
+        if ("schema".equals(key))
+            return getSchemaDescription();
+        if ("numKWords".equals(key))
+            return String.valueOf(getKeyWords().size());
+        if ("numKWordsI".equals(key))
+            return String.valueOf(getKeyWordsIndivisible().size());
+        if ("numFields".equals(key))
+            return String.valueOf(getNumFields());
+        if ("ver".equals(key))
+            return String.valueOf(version);
+        if (key.startsWith("field_")) {
+            key = key.substring(6,key.length());
+            return getValue(key);
+        }
+        return null;
     }
 }
 
