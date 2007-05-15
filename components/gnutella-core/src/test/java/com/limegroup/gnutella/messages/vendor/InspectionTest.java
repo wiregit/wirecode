@@ -228,7 +228,7 @@ public class InspectionTest extends ServerSideTestCase {
         UDP_ACCESS.send(pack);
         
         //now read the response       
-        pack = new DatagramPacket(new byte[1000],1000);
+        pack = new DatagramPacket(new byte[10000],10000);
         
         //not catching IOEx here because not replying is a valid scenario.
         

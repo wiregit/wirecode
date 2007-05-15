@@ -22,6 +22,43 @@ public class StatsUtilsTest extends LimeTestCase {
         return buildTestSuite(StatsUtilsTest.class);
     }
     
+    public void testSWilk() throws Exception {
+        // start off with a flat distribution
+        List<Double> l = new ArrayList<Double>();
+        for (int i = 0; i < 100; i++)
+            l.add((double)i);
+        double [] swilk = StatsUtils.swilk(l);
+        double current = swilk[0];
+        double first = swilk[0];
+        
+        // make a small hill, W should increase a little
+        for (int i = 20; i < 80; i++) {
+            l.add((double)i);
+            l.add((double)i);
+        }
+        swilk = StatsUtils.swilk(l);
+        assertGreaterThan(current, swilk[0]);
+        current = swilk[0];
+        
+        // bigger hill - closer to normal, higher W
+        for (int i = 40; i < 60; i++) {
+            l.add((double)i);
+            l.add((double)i);
+            l.add((double)i);
+        }
+        swilk = StatsUtils.swilk(l);
+        assertGreaterThan(current, swilk[0]);
+        current = swilk[0];
+        
+        
+        // now add a ton of values at one end
+        // to break normality, W decreases
+        for (int i = 0; i < 100; i++)
+            l.add(0.0);
+        swilk = StatsUtils.swilk(l);
+        assertLessThan(first,swilk[0]);
+    }
+    
     public void testToMap() throws Exception {
         List<Double> l = new ArrayList<Double>();
         for (int i = 0; i < 100; i++)
