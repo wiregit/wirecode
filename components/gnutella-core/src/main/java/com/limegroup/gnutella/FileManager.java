@@ -47,6 +47,7 @@ import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -109,7 +110,7 @@ public abstract class FileManager {
     public static final List<LimeXMLDocument> EMPTY_DOCUMENTS = Collections.emptyList();
     
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
-
+    
     /**
      * delay between qrp updates should the simpp words change.
      * Not final for testing.
@@ -382,6 +383,9 @@ public abstract class FileManager {
     private final QRPUpdater qrpUpdater = new QRPUpdater();
 
     public final FMInspectables inspectables = new FMInspectables();
+    
+    /** Contains the definition of a rare file */
+    private final RareFileDefinition rareDefinition = new RareFileDefinition();
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
@@ -1746,6 +1750,10 @@ public abstract class FileManager {
 			return false;
 		return true;
 	}
+    
+    public boolean isRareFile(FileDesc fd) {
+        return rareDefinition.evaluate(fd);
+    }
 	
     /** Returns true if file has a shareable extension.  Case is ignored. */
     private static boolean hasShareableExtension(File file) {
@@ -2419,13 +2427,12 @@ public abstract class FileManager {
                 ret.put("crit", MessageSettings.CUSTOM_FD_CRITERIA.getValueAsString());
                 int total = 0;
                 int matched = 0;
-                String[] criteria = MessageSettings.CUSTOM_FD_CRITERIA.getValue();
                 try {
+                    RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
                     synchronized(FileManager.this) {
                         for (FileDesc fd : getAllSharedFileDescriptors()) {
                             total++;
-                            RPNParser parser = new RPNParser(fd);
-                            if (parser.evaluate(criteria))
+                            if (parser.evaluate(fd))
                                 matched++;
                         }
                     }
@@ -2481,7 +2488,7 @@ public abstract class FileManager {
                     if (fds[i] instanceof IncompleteFileDesc)
                         continue;
                     total++;
-                    if (fds[i].isRareFile())
+                    if (isRareFile(fds[i]))
                         rare++;
                     // locking FM->ALM ok.
                     int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn());
@@ -2566,6 +2573,28 @@ public abstract class FileManager {
             ret.put("altsq",topAlts.getRawDump());
             
             return ret;
+        }
+        
+    }
+    
+    private static class RareFileDefinition implements SimppListener {
+        
+        private volatile RPNParser parser;
+        RareFileDefinition() {
+            simppUpdated(0);
+            SimppManager.instance().addListener(this);
+        }
+        
+        public void simppUpdated(int ignored) {
+            parser = new RPNParser(DHTSettings.RARE_FILE_DEFINITION.getValue());
+        }
+        
+        private boolean evaluate(FileDesc fd) {
+            try {
+                return parser.evaluate(fd);
+            } catch (IllegalArgumentException badSimpp) {
+                return false;
+            }
         }
     }
 }

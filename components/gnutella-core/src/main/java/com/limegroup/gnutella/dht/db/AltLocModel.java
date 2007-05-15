@@ -85,7 +85,7 @@ public class AltLocModel implements StorableModel {
                 
                 // Publish only rare FileDescs and removed entities
                 // respectively
-                if (fd == null || (fd.isRareFile() && DatabaseUtils.isPublishingRequired(storable))) {
+                if (fd == null || (fileManager.isRareFile(fd) && DatabaseUtils.isPublishingRequired(storable))) {
                     publish.add(storable);
                 }
             }

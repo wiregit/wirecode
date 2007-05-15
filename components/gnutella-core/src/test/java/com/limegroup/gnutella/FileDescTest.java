@@ -13,6 +13,8 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
@@ -88,6 +90,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testIsRareFile() throws Exception {
+        FileManager fm = new MetaFileManager();
         File file = CommonUtils.getResourceFile("build.xml");
         Set urns = calculateAndCacheURN(file);
         
@@ -100,40 +103,47 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         long delta = System.currentTimeMillis() - fd.getLastAttemptedUploadTime();
         assertLessThan(DHTSettings.RARE_FILE_TIME.getValue(), delta);
         
-        assertFalse(fd.isRareFile());
+        assertFalse(fm.isRareFile(fd));
         
         // Modify the lastAttemptedUploadTime and it should be still not rare
         delta = System.currentTimeMillis() - DHTSettings.RARE_FILE_TIME.getValue();
         PrivilegedAccessor.setValue(fd, "lastAttemptedUploadTime", Long.valueOf(delta));
         Thread.sleep(10);
-        assertFalse(fd.isRareFile());
+        assertFalse(fm.isRareFile(fd));
         
         // Change the _attemptedUploads counter
         PrivilegedAccessor.setValue(fd, "_attemptedUploads", 
                 Integer.valueOf(DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue()));
         
         // And it should be rare
-        assertTrue(fd.isRareFile());
+        assertTrue(fm.isRareFile(fd));
         
         // Simulate an upload attempt and it shoudn't be rare anymore
         fd.incrementAttemptedUploads();
-        assertFalse(fd.isRareFile());
+        assertFalse(fm.isRareFile(fd));
         
         // Change the definition to something bogus like completedUploads == attemptedUploads
         DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
         "cups","ups","=="
         });
-        assertFalse(fd.isRareFile());
+        triggerSimppUpdate(fm);
+        assertFalse(fm.isRareFile(fd));
         fd.incrementCompletedUploads();
-        assertFalse(fd.isRareFile());
+        assertFalse(fm.isRareFile(fd));
         fd.incrementCompletedUploads();
         assertEquals(fd.getAttemptedUploads(), fd.getCompletedUploads());
-        assertTrue(fd.isRareFile());
+        assertTrue(fm.isRareFile(fd));
         
         // test that a broken rule will not make the file rare
         DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
                 "badger","badger"
                 });
-        assertFalse(fd.isRareFile());
+        triggerSimppUpdate(fm);
+        assertFalse(fm.isRareFile(fd));
+    }
+    
+    private void triggerSimppUpdate(FileManager fm) throws Exception {
+        SimppListener lm = (SimppListener) PrivilegedAccessor.getValue(fm, "rareDefinition");
+        lm.simppUpdated(1);
     }
 }

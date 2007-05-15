@@ -17,123 +17,109 @@ public class RPNParserTest extends BaseTestCase {
     }    
     
     public void testArithmetic() throws Exception {
-        RPNParser p = new RPNParser();
+        RPNParser p = new RPNParser("1","2","<");
         // 1 < 2
-        assertTrue(p.evaluate(new String[] {
-                "1","2","<"
-        }));
+        assertTrue(p.evaluate());
 
-        assertFalse(p.evaluate(new String[] {
-                "1","2",">"
-        }));
+        p = new RPNParser("1","2",">");
+        assertFalse(p.evaluate());
 
         // 0 == 0
-        assertTrue(p.evaluate(new String[] {
-                "0","0","=="
-        }));
+        p = new RPNParser("0","0","==");
+        assertTrue(p.evaluate());
     }
     
     public void testOr() throws Exception {
-        RPNParser p = new RPNParser();
         // true or true is true
-        assertTrue(p.evaluate(new String[] {
-                "true","true","OR"
-        }));
+        RPNParser p = new RPNParser("true","true","OR");
+        assertTrue(p.evaluate());
         
         // true or false is true
-        assertTrue(p.evaluate(new String[] {
-                "true","false","OR"
-        }));
+        p = new RPNParser("true","false","OR");
+        assertTrue(p.evaluate());
         
         // false or true is true
-        assertTrue(p.evaluate(new String[] {
-                "false","true","OR"
-        }));
+        p = new RPNParser("false","true","OR");
+        assertTrue(p.evaluate());
         
         // false or false is false
-        assertFalse(p.evaluate(new String[] {
-                "false","false","OR"
-        }));
+        p = new RPNParser("false","false","OR");
+        assertFalse(p.evaluate());
     }
     
     public void testAnd() throws Exception {
-        RPNParser p = new RPNParser();
         // true and true is true
-        assertTrue(p.evaluate(new String[] {
-                "true","true","AND"
-        }));
+        RPNParser p = new RPNParser("true","true","AND");
+        assertTrue(p.evaluate());
         
         // true and false is false
-        assertFalse(p.evaluate(new String[] {
-                "true","false","AND"
-        }));
+        p = new RPNParser("true","false","AND");
+        assertFalse(p.evaluate());
         
         // false and true is true
-        assertFalse(p.evaluate(new String[] {
-                "false","true","AND"
-        }));
+        p = new RPNParser("false","true","AND");
+        assertFalse(p.evaluate());
         
         // false and false is false
-        assertFalse(p.evaluate(new String[] {
-                "false","false","AND"
-        }));
+        p = new RPNParser("false","false","AND");
+        assertFalse(p.evaluate());
     }
     
     public void testNot() throws Exception {
-        RPNParser p = new RPNParser();
         
         // not true is false
-        assertFalse(p.evaluate(new String[] {
-                "true","NOT"
-        }));
+        RPNParser p = new RPNParser("true","NOT");
+        assertFalse(p.evaluate());
         
         // not false is true
-        assertTrue(p.evaluate(new String[] {
-                "false","NOT"
-        }));
+        p = new RPNParser("false","NOT");
+        assertTrue(p.evaluate());
     }
     
     public void testInvalid() throws Exception {
-        RPNParser p = new RPNParser();
-        
+        RPNParser p;
         try {
-            p.evaluate(new String[]{"asdf","NOT"});
+            p = new RPNParser("asdf","NOT");
+            p.evaluate();
             fail("invalid operand");
         } catch (IllegalArgumentException expected){}
         
         try {
-            p.evaluate(new String[]{"3","N"});
+            p = new RPNParser("3","N");
+            p.evaluate();
             fail("invalid operation");
         } catch (IllegalArgumentException expected){}
         
         try {
-            p.evaluate(new String[]{"3","1","NOT"});
+            p = new RPNParser("3","1","NOT");
+            p.evaluate();
             fail("logic on number");
         } catch (IllegalArgumentException expected){}
         
         try {
-            p.evaluate(new String[]{"true","false","<"});
+            p = new RPNParser("true","false","<");
+            p.evaluate();
             fail("arithmetic on boolean");
         } catch (IllegalArgumentException expected){}
         
         try {
-            p.evaluate(new String[]{"false","OR"});
+            p = new RPNParser("false","OR");
+            p.evaluate();
             fail("not enough operands");
         } catch (IllegalArgumentException expected){}
         
         try {
-            p.evaluate(new String[]{"true","true","NOT"});
+            p = new RPNParser("true","true","NOT");
+            p.evaluate();
             fail("too many operands");
         } catch (IllegalArgumentException expected){}
     }
     
     public void testComposite() throws Exception {
-        RPNParser p = new RPNParser();
-        
         // ((5 > 4) && (4 < 3)) || ( 5 > 0 && false) || (0 == 0)
-        assertTrue(p.evaluate(new String[] {
-                "5","4",">","4","3","<","AND","5","0",">","false","AND","OR","0","0","==","OR"
-        }));
+        RPNParser p = new RPNParser("5","4",">","4","3","<","AND","5","0",">","false","AND","OR","0","0","==","OR");
+        
+        assertTrue(p.evaluate());
     }
     
     public void testPropsLookup() throws Exception {
@@ -144,49 +130,50 @@ public class RPNParserTest extends BaseTestCase {
         p.setProperty("no", "false");
         p.setProperty("maybe","whatever");
         
-        RPNParser r = new RPNParser(p);
+        RPNParser r = new RPNParser("maybe","whatever","==");
         
-        assertTrue(r.evaluate(new String[]{
-            "maybe","whatever","=="    
-        }));
+        assertTrue(r.evaluate(p));
         
         // x < y ?
-        assertTrue(r.evaluate(new String[] {
-                "x","y","<"}));
+        r = new RPNParser("x","y","<");
+        assertTrue(r.evaluate(p));
         
         // x > 1 ?
-        assertFalse(r.evaluate(new String[] {
-                "x","1",">"}));
+        r = new RPNParser("x","1",">");
+        assertFalse(r.evaluate(p));
         
         // y == 2 ?
-        assertTrue(r.evaluate(new String[] {
-                "y","2","=="}));
+        r = new RPNParser("y","2","==");
+        assertTrue(r.evaluate(p));
         
         // x > 0 == yes?
-        assertTrue(r.evaluate(new String[] {
-                "x","0",">","yes","=="}));
+        r = new RPNParser("x","0",">","yes","==");
+        assertTrue(r.evaluate(p));
         
         // yes == !no?
-        assertTrue(r.evaluate(new String[] {
-                "yes","no","NOT","=="}));
+        r = new RPNParser("yes","no","NOT","==");
+        assertTrue(r.evaluate(p));
         
         // !yes ?
-        assertFalse(r.evaluate(new String[] {
-                "yes","NOT"}));
+        r = new RPNParser("yes","NOT");
+        assertFalse(r.evaluate(p));
     }
     
     public void testContains() throws Exception {
-        RPNParser p = new RPNParser();
-        assertTrue(p.evaluate(new String[] {"badger","adge","CONTAINS"}));
-        assertFalse(p.evaluate(new String[] {"adge","badger","CONTAINS"}));
+        RPNParser p = new RPNParser("badger","adge","CONTAINS");
+        assertTrue(p.evaluate());
+        p = new RPNParser("adge","badger","CONTAINS");
+        assertFalse(p.evaluate());
     }
     
     public void testMatches() throws Exception {
-        RPNParser p = new RPNParser();
-        assertTrue(p.evaluate(new String[] {"[a-c]a.*","badger","MATCHES"}));
-        assertFalse(p.evaluate(new String[] {".*er.","badger","MATCHES"}));
+        RPNParser p = new RPNParser("[a-c]a.*","badger","MATCHES");
+        assertTrue(p.evaluate());
+        p = new RPNParser(".*er.","badger","MATCHES");
+        assertFalse(p.evaluate());
         try {
-            p.evaluate(false,new String[] {"[a-c]a.*","badger","MATCHES"});
+            p = new RPNParser(false,"[a-c]a.*","badger","MATCHES");
+            p.evaluate();
             fail("experimental was allowed");
         } catch (IllegalArgumentException expected){}
     }

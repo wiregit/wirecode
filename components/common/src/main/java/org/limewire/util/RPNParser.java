@@ -47,39 +47,41 @@ public class RPNParser {
         public String lookup(String key);
     }
     
-    /** Props to look up values */
-    private final StringLookup props;
+    /** expression to evaluate */
+    private final String[] expression;
+    
+    /** Whether experimental predicates are allowed */
+    private final boolean experimental;
     
     /** Stack used for parsing */
     private final Stack<String> stack = new Stack<String>();
     
-    /**
-     * Creates a new parser.
-     */
-    public RPNParser() {
-        this(new StringLookup(){
-            public String lookup(String key) {
-                return key;
-            }
-        });
+    public RPNParser(String... expression) {
+        this(true, expression);
     }
     
     /**
-     * Creates a new Parser.  The provided properties object
-     * will be queried for values of the terms.
+     * Creates a new parser.
+     * @param expression the expression to parse
+     * @param experimental if experimental predicates are allowed
      */
-    public RPNParser(StringLookup props) {
-        this.props = props;
+    public RPNParser(boolean experimental, String... expression) {
+        this.expression = expression;
+        this.experimental = experimental;
     }
-
+    
     /**
      * @param rule an expression in Reverse Polish Notation
      * @return true or false.
      * @throws IllegalArgumentException if either the input or
      * the values returned by the lookups are not valid.
      */
-    public boolean evaluate(String... rule) {
-        return evaluate(true, rule);
+    public boolean evaluate() {
+        return evaluate(new StringLookup() {
+            public String lookup(String key) {
+                return key;
+            }
+        });
     }
     
     /**
@@ -89,16 +91,16 @@ public class RPNParser {
      * @throws IllegalArgumentException if either the input or
      * the values returned by the lookups are not valid.
      */
-    public boolean evaluate(boolean expOk, String... rule) {
-        for (String r : rule) {
+    public boolean evaluate(StringLookup lookup) {
+        for (String r : expression) {
             
             if (r == null)
                 throw new IllegalArgumentException("null input");
             
             if (!predicateByOperand.containsKey(r)) {
-                String val = props.lookup(r);
+                String val = lookup.lookup(r);
                 stack.push(val != null ? val : r);
-            } else if (expOk || !experimentalPredicates.contains(r))
+            } else if (experimental || !experimentalPredicates.contains(r))
                 evaluateOp(r);
         }
         

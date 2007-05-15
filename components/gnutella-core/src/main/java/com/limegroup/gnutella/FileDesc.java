@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.util.I18NConvert;
-import org.limewire.util.RPNParser;
 import org.limewire.util.RPNParser.StringLookup;
 
 import com.limegroup.gnutella.licenses.License;
@@ -31,7 +30,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 
 public class FileDesc implements FileDetails, StringLookup {
-    
+
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
 	 * shared file data structure.
@@ -439,19 +438,6 @@ public class FileDesc implements FileDetails, StringLookup {
     public boolean isVerified() {
         return RouterService.getContentManager().isVerified(SHA1_URN);
     }
-
-    /**
-     * Returns true if the FileDesc is considered rare
-     */
-    public boolean isRareFile() {
-        RPNParser parser = new RPNParser(this);
-        try {
-            return parser.evaluate(false,DHTSettings.RARE_FILE_DEFINITION.getValue());
-        } catch (IllegalArgumentException badRule) { 
-            // shouldn't happen unless simpp breaks.
-            return false;
-        }
-    }
     
     /**
      * some factors to consider when deciding if a file fits certain criteria
@@ -496,6 +482,7 @@ public class FileDesc implements FileDetails, StringLookup {
         }
         return null;
     }
+    
 }
 
 
