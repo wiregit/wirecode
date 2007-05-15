@@ -24,6 +24,7 @@ public class RPNParser {
         pMap.put("NOT", new NOTPredicate());
         pMap.put("OR", new ORPredicate());
         pMap.put("AND", new ANDPredicate());
+        pMap.put("CONTAINS", new ContainsPredicate());
         predicateByOperand = Collections.unmodifiableMap(pMap);
     }
     
@@ -187,6 +188,14 @@ public class RPNParser {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
             return Double.valueOf(operands[0]) < Double.valueOf(operands[1]);
+        }
+    }
+    
+    static class ContainsPredicate extends Predicate {
+        public boolean evaluate (String... operands) {
+            if (operands.length != 2)
+                throw new IllegalArgumentException();
+            return operands[0].toLowerCase().contains(operands[1].toLowerCase());
         }
     }
     

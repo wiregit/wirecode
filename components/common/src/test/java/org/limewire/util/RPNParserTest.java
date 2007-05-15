@@ -174,6 +174,12 @@ public class RPNParserTest extends BaseTestCase {
         assertFalse(r.evaluate(new String[] {
                 "yes","NOT"}));
     }
+    
+    public void testContains() throws Exception {
+        RPNParser p = new RPNParser();
+        assertTrue(p.evaluate(new String[] {"badger","adge","CONTAINS"}));
+        assertFalse(p.evaluate(new String[] {"adge","badger","CONTAINS"}));
+    }
 
     private static class MyLookup extends Properties implements StringLookup {
         public String lookup(String key) {
