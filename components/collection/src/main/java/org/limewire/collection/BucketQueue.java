@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
  * a few additional methods not found in BinaryHeap.  <b>This class is not
  * synchronized.</b>
  */
-public class BucketQueue<E> implements Cloneable {
+public class BucketQueue<E> implements Cloneable, Iterable<E> {
     /** 
      * Within each bucket, elements at the FRONT are newer then the back.  It is
      * assumed that buckets is very small; otherwise additional state could
