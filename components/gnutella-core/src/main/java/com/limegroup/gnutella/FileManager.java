@@ -35,6 +35,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
+import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.FileManagerEvent.Type;
@@ -46,6 +47,7 @@ import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -2408,6 +2410,34 @@ public abstract class FileManager {
         public final Inspectable FDS = new FDInspectable(false);
         /** An inspectable that returns stats about hits, uploads & alts > 0 */
         public final Inspectable FDSNZ = new FDInspectable(true);
+        
+        /** An inspectable that counts how many shared fds match a custom criteria */
+        public final Inspectable CUSTOM = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String,Object>();
+                ret.put("ver",1);
+                ret.put("crit", MessageSettings.CUSTOM_FD_CRITERIA.getValueAsString());
+                int total = 0;
+                int matched = 0;
+                String[] criteria = MessageSettings.CUSTOM_FD_CRITERIA.getValue();
+                try {
+                    synchronized(FileManager.this) {
+                        for (FileDesc fd : getAllSharedFileDescriptors()) {
+                            total++;
+                            RPNParser parser = new RPNParser(fd);
+                            if (parser.evaluate(criteria))
+                                matched++;
+                        }
+                    }
+                } catch (IllegalArgumentException badSimpp) {
+                    ret.put("error",badSimpp.toString());
+                    return ret;
+                }
+                ret.put("match",matched);
+                ret.put("total",total);
+                return ret;
+            }
+        };
     }
     
     /** Inspectable with information about File Descriptors */

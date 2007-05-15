@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringArraySetting;
 
 /**
  * Settings for messages
@@ -35,4 +36,11 @@ public class MessageSettings extends LimeProps {
      */
     public static final LongSetting INSPECTION_VERSION = 
         FACTORY.createLongSetting("INSPECTION_VERSION", 0);
+    
+    /**
+     * A custom criteria for evaluating FileDescs.
+     */
+    public static final StringArraySetting CUSTOM_FD_CRITERIA =
+        FACTORY.createRemoteStringArraySetting("CUSTOM_FD_CRITERIA", 
+                new String[]{"false"}, "MessageSettings.customFDCriteria");
 }
