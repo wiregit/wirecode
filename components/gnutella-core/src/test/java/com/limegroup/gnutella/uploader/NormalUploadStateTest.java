@@ -15,7 +15,6 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 

@@ -1,6 +1,5 @@
 package org.limewire.io;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 

@@ -150,7 +150,7 @@ public class ClassfulNetworkCounter implements Serializable {
     public synchronized boolean isOkayToAdd(Contact node) {
         // We rely on the fact that get() returns 0 for
         // the local Node and for non IPv4 Contacts!
-        float count = (float)get(node);
+        float count = get(node);
         if (count == 0.0f) {
             return true;
         }
@@ -164,7 +164,7 @@ public class ClassfulNetworkCounter implements Serializable {
             return true;
         }
         
-        float k = (float)bucket.getMaxActiveSize();
+        float k = bucket.getMaxActiveSize();
         float ratio = count/k;
         return (ratio < maxRatio);
     }
