@@ -446,7 +446,7 @@ public class FileDesc implements FileDetails, StringLookup {
     public boolean isRareFile() {
         RPNParser parser = new RPNParser(this);
         try {
-            return parser.evaluate(DHTSettings.RARE_FILE_DEFINITION.getValue());
+            return parser.evaluate(false,DHTSettings.RARE_FILE_DEFINITION.getValue());
         } catch (IllegalArgumentException badRule) { 
             // shouldn't happen unless simpp breaks.
             return false;

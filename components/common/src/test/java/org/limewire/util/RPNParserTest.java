@@ -185,6 +185,10 @@ public class RPNParserTest extends BaseTestCase {
         RPNParser p = new RPNParser();
         assertTrue(p.evaluate(new String[] {"[a-c]a.*","badger","MATCHES"}));
         assertFalse(p.evaluate(new String[] {".*er.","badger","MATCHES"}));
+        try {
+            p.evaluate(false,new String[] {"[a-c]a.*","badger","MATCHES"});
+            fail("experimental was allowed");
+        } catch (IllegalArgumentException expected){}
     }
 
     private static class MyLookup extends Properties implements StringLookup {

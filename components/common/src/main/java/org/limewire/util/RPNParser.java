@@ -1,7 +1,9 @@
 package org.limewire.util;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -16,9 +18,11 @@ import java.util.regex.Pattern;
 public class RPNParser {
     
     /** Map from recognized operands to their implementations */
-    private static final Map<String, Predicate> predicateByOperand; 
+    private static final Map<String, Predicate> predicateByOperand;
+    private static final Set<String> experimentalPredicates;
     static {
         Map<String, Predicate> pMap = new HashMap<String, Predicate>();
+        Set<String> eSet = new HashSet<String>();
         pMap.put("==", new EqualsPredicate());
         pMap.put("<", new LessPredicate());
         pMap.put(">", new GreaterPredicate());
@@ -27,7 +31,9 @@ public class RPNParser {
         pMap.put("AND", new ANDPredicate());
         pMap.put("CONTAINS", new ContainsPredicate());
         pMap.put("MATCHES", new MatchesPredicate());
+        eSet.add("MATCHES");
         predicateByOperand = Collections.unmodifiableMap(pMap);
+        experimentalPredicates = Collections.unmodifiableSet(eSet);
     }
     
     /**
@@ -73,6 +79,17 @@ public class RPNParser {
      * the values returned by the lookups are not valid.
      */
     public boolean evaluate(String... rule) {
+        return evaluate(true, rule);
+    }
+    
+    /**
+     * @param rule an expression in Reverse Polish Notation
+     * @param expOk if its ok to use predicates considered experimental.
+     * @return true or false.
+     * @throws IllegalArgumentException if either the input or
+     * the values returned by the lookups are not valid.
+     */
+    public boolean evaluate(boolean expOk, String... rule) {
         for (String r : rule) {
             
             if (r == null)
@@ -81,7 +98,7 @@ public class RPNParser {
             if (!predicateByOperand.containsKey(r)) {
                 String val = props.lookup(r);
                 stack.push(val != null ? val : r);
-            } else 
+            } else if (expOk || !experimentalPredicates.contains(r))
                 evaluateOp(r);
         }
         
