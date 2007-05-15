@@ -7,6 +7,11 @@ import org.limewire.http.HttpIOSession;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
+/**
+ * Stores the state of an HTTP connection that serves multiple requests.
+ * Maintains the queuing status and keeps a reference to an {@link HTTPUploader}
+ * that represents the current request.
+ */
 public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlotUser {
 
     /**
@@ -36,14 +41,26 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
         this.ioSession = ioSession;
     }
 
+    /**
+     * Sets the <code>uploader</code> that represents the current request.
+     */
     public void setUploader(HTTPUploader uploader) {
         this.uploader = uploader;
     }
 
+    /**
+     * Returns the <code>uploader</code> that represents the current request.
+     * 
+     * @return null, if no request has been handled or the session has been
+     *         closed
+     */
     public HTTPUploader getUploader() {
         return uploader;
     }
 
+    /**
+     * @see UploadSlotManager#positionInQueue(UploadSlotUser)
+     */
     int positionInQueue() {
         return slotManager.positionInQueue(this);
     }
@@ -52,6 +69,9 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
         return host.getHostAddress();
     }
 
+    /**
+     * @return the same value as {@link #getHost()}
+     */
     public InetAddress getConnectedHost() {
         return host;
     }
@@ -59,7 +79,7 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
     /**
      * Notifies the session of a queue poll.
      * 
-     * @return true if the poll was too soon.
+     * @return true if the poll was too soon
      */
     public boolean poll() {
         long now = System.currentTimeMillis();
@@ -67,7 +87,8 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
     }
 
     /**
-     * HTTP uploads are not interruptable.
+     * Throws an exception since <code>HTTPUploader</code>s are not
+     * interruptable.
      */
     public void releaseSlot() {
         throw new UnsupportedOperationException();        
@@ -90,14 +111,23 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
         updatePollTime(status);
     }
 
+    /**
+     * Returns true, if the current queue status allows uploading.
+     */
     public boolean canUpload() {
         return queueStatus == QueueStatus.ACCEPTED || queueStatus == QueueStatus.BYPASS;
     }
 
+    /**
+     * Returns true, if the current queue status is {@link QueueStatus#ACCEPTED}.
+     */
     public boolean isAccepted() {
         return queueStatus == QueueStatus.ACCEPTED;
     }
 
+    /**
+     * Returns true, if the current queue status is {@link QueueStatus#QUEUED}.
+     */
     public boolean isQueued() {
         return queueStatus == QueueStatus.QUEUED;
     }
@@ -109,7 +139,10 @@ public class HTTPUploadSession extends BandwidthTrackerImpl implements UploadSlo
             lastPollTime = System.currentTimeMillis();
         }        
     }
-    
+
+    /**
+     * Returns the underlying I/O session for the HTTP connection.
+     */
     public HttpIOSession getIOSession() {
         return ioSession;
     }

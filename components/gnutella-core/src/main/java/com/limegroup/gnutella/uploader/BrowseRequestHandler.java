@@ -75,8 +75,9 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
 
-            // XXX LW can't actually handle chunked responses
+            // XXX LW can't handle chunked responses: CORE-199
             //setChunked(true);
+            
             setContentType(Constants.QUERYREPLY_MIME_TYPE);
         }
 

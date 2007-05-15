@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.4.3 $
- * $Date: 2007-05-08 19:19:26 $
+ * $Revision: 1.1.4.4 $
+ * $Date: 2007-05-15 19:38:53 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -53,9 +53,9 @@ import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.NHttpServiceHandler;
-import org.apache.http.nio.protocol.BufferedContent;
+import org.apache.http.nio.entity.ContentBufferEntity;
+import org.apache.http.nio.entity.ContentOutputStream;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
-import org.apache.http.nio.protocol.ContentOutputStream;
 import org.apache.http.nio.util.ContentInputBuffer;
 import org.apache.http.nio.util.ContentOutputBuffer;
 import org.apache.http.nio.util.SimpleInputBuffer;
@@ -278,7 +278,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 // Create a wrapper entity instead of the original one
                 HttpEntityEnclosingRequest entityReq = (HttpEntityEnclosingRequest) request;
                 if (entityReq.getEntity() != null) {
-                    entityReq.setEntity(new BufferedContent(
+                    entityReq.setEntity(new ContentBufferEntity(
                             entityReq.getEntity(), 
                             connState.getInbuffer()));
                 }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
@@ -9,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -20,12 +19,20 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
 
+/**
+ * Handles push proxy requests by sending a push request to the requested
+ * client.
+ */
 public class PushProxyRequestHandler implements HttpRequestHandler {
+
+    private static final Log LOG = LogFactory.getLog(PushProxyRequestHandler.class);
 
     public static final String P_SERVER_ID = "ServerId";
 
@@ -41,12 +48,21 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        PushProxyRequest pushProxyRequest = getPushProxyRequest(request);
+        HTTPUploader uploader = null;
+        
+        PushProxyRequest pushProxyRequest = parsePushProxyRequest(request);
         UploadStat.PUSH_PROXY.incrementStat();
         if (pushProxyRequest == null) {
             response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+            uploader = sessionManager.getOrCreateUploader(request,
+                    context, UploadType.MALFORMED_REQUEST,
+                    "Malformed Request");
+            uploader.setState(Uploader.MALFORMED_REQUEST);
             UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
         } else {
+            uploader = sessionManager.getOrCreateUploader(request,
+                    context, UploadType.PUSH_PROXY, pushProxyRequest.clientGUID);
+            uploader.setState(Uploader.PUSH_PROXY);
             if (!sendRequest(pushProxyRequest)) {
                 response.setStatusCode(HttpStatus.SC_GONE);
                 response.setReasonPhrase("Servent not connected");
@@ -56,11 +72,17 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
                 response.setReasonPhrase("Message sent");
                 UploadStat.PUSH_PROXY_REQ_SUCCESS.incrementStat();
             }
-
         }
+        
+        sessionManager.sendResponse(uploader, response);
     }
 
-    private PushProxyRequest getPushProxyRequest(HttpRequest request) {
+    /**
+     * Returns the push proxy request from <code>request</code>.
+     *
+     * @return null, if the request was not valid
+     */
+    private PushProxyRequest parsePushProxyRequest(HttpRequest request) {
         String uri = request.getRequestLine().getUri();
         // start after the '?'
         int i = uri.indexOf('?');
@@ -116,6 +138,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
                 .httpStringValue());
         InetSocketAddress address = getNodeAddress(header.getValue());
         if (address == null) {
+            LOG.info("Invalid node address for push proxy request: " + header.getValue());
             return null;
         }
 
@@ -140,6 +163,11 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         return null;
     }
 
+    /**
+     * Sends <code>request</code> through {@link MessageRouter}.
+     * 
+     * @return false, if sending failed
+     */
     private boolean sendRequest(PushProxyRequest request) {
         byte[] clientGUID = GUID.fromHexString(request.getClientGUID());
         PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
@@ -149,6 +177,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         try {
             RouterService.getMessageRouter().sendPushRequest(push);
         } catch (IOException e) {
+            LOG.debug("Sending of push proxy request failed", e);
             return false;
         }
         return true;
