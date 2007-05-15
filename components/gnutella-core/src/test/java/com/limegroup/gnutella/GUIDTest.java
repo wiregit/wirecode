@@ -288,7 +288,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte [] g = GUID.makeGuid();
         GUID.timeStampGuid(g);
         Thread.sleep(10);
-        assertGreaterThan(System.currentTimeMillis() - 1000, GUID.readTimeStamp(g));
+        assertGreaterThan(System.currentTimeMillis() - 2000, GUID.readTimeStamp(g));
     }
 
 }
