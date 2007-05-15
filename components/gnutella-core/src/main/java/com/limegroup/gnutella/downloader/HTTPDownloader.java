@@ -864,6 +864,8 @@ public class HTTPDownloader implements BandwidthTracker {
             	parseFALTHeader(value);
             else if (HTTPHeaderName.PROXIES.is(header))
                 parseProxiesHeader(value);
+            else if (HTTPHeaderName.FWTPORT.is(header))
+                parseFWTPortHeader(value);
             
         }
 
@@ -1453,6 +1455,23 @@ public class HTTPDownloader implements BandwidthTracker {
             // invalid header - ignore it.
         }
         
+    }
+
+    /**
+     * Parses port for firewalled-to-firewalled transfers and updates push
+     * endpoint address with the socket's ip address and the port. 
+     */
+    private void parseFWTPortHeader(String str) {
+        try {
+            int port = Integer.parseInt(str);
+            if (NetworkUtils.isValidPort(port)) {
+                IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), port);
+                PushEndpoint.setAddr(_rfd.getClientGUID(), newAddr);
+            }
+        }
+        catch (NumberFormatException nfe) {
+            // do nothing, invalid network input
+        }
     }
     
     private void updatePEAddress() throws IOException {

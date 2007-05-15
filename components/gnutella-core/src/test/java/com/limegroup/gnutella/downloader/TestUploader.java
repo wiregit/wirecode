@@ -172,6 +172,11 @@ public class TestUploader extends AssertComparisons {
     private boolean stallHeaders = false;
     
     /**
+     * if not -1 X-FWTP is written out with the value
+     */
+    private int FWTPort = -1;
+    
+    /**
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
@@ -325,6 +330,7 @@ public class TestUploader extends AssertComparisons {
         _httpListener = null;
         incomingBadAltLocs = new ArrayList();
         incomingGoodAltLocs = new ArrayList();
+        FWTPort = -1;
     }
 
     public int fullRequestsUploaded() {
@@ -333,6 +339,13 @@ public class TestUploader extends AssertComparisons {
     
     public int getAmountUploaded() {
         return fullRequestsUploaded+amountThisRequest;
+    }
+    
+    /**
+     * If not -1 port is written out in X-FWTP header
+     */
+    public void setFWTPort(int port) {
+        FWTPort = port;
     }
     
     /** Sets the upload throttle rate 
@@ -832,6 +845,9 @@ public class TestUploader extends AssertComparisons {
 
         if (isFirewalled && _proxiesString!=null) {
             HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
+            if (FWTPort != -1) {
+                HTTPUtils.writeHeader(HTTPHeaderName.FWTPORT, FWTPort, out);
+            }
         }
         
         
@@ -1123,4 +1139,5 @@ public class TestUploader extends AssertComparisons {
             }//end of finally
         }
 	}
+    
 }

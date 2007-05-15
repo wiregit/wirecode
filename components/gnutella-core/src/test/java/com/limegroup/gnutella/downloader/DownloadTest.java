@@ -43,6 +43,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.UDPService;
@@ -50,10 +51,12 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
@@ -1310,10 +1313,14 @@ public class DownloadTest extends LimeTestCase {
      * tests that a pushloc which we thought did not support FWT 
      * but actually does updates its status through the headers,
      * as well as that the set of push proxies is getting updated.
+     * 
+     * This test that the X-FWTP is parsed and the push endpoint address and port
+     * are updated with the value
      */
     public void testPushLocUpdatesStatus() throws Exception {
         LOG.info("testing that a push loc updates its status");
         final int RATE=100;
+        final int FWTPort = 7498;
         
         UDPService.instance().setReceiveSolicited(true);
         uploader1.setRate(RATE);
@@ -1326,6 +1333,7 @@ public class DownloadTest extends LimeTestCase {
         pusher2.setFirewalled(true);
         pusher2.setProxiesString("1.2.3.4:5,6.7.8.9:10");
         pusher2.setInterestedInFalts(true);
+        pusher2.setFWTPort(FWTPort);
         
         // create a set of the expected proxies and keep a ref to it
         PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
@@ -1333,14 +1341,17 @@ public class DownloadTest extends LimeTestCase {
         Set expectedProxies = new IpPortSet();
         expectedProxies.addAll(pe.getProxies());
         
+        // register proxies for GUID, this will add 127.0.0.2:10002 to proxies
         PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
                 guid.toHexString()+";5:4.3.2.1;127.0.0.2:"+PPORT_2,TestFile.hash());
         pushLocFWT.updateProxies(true);
         
         assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
         
+        // create rfd for uploader 1, regular download
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
-        
+
+        // create rfd for pusher2, a udp push download
         RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 1, 2);
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
@@ -1349,9 +1360,11 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc [] now = {pushRFD2};
         
+        // start download with rfd that needs udp push request
         ManagedDownloader download=
             (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(2000);
+        // also download from uploader1, so it gets the proxy headers from pusher2
         download.addDownload(openRFD,false);
         waitForComplete();
         
@@ -1363,12 +1376,13 @@ public class DownloadTest extends LimeTestCase {
         assertEquals(UDPConnection.VERSION,pushLoc.supportsFWTVersion());
         
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
+        assertTrue(readRFD.getPushAddr().supportsFWTVersion() > 0);
         assertTrue(readRFD.supportsFWTransfer());
+        assertEquals(readRFD.getPushAddr().getPort(), FWTPort);
         
         assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
         
         assertTrue(expectedProxies.containsAll(readRFD.getPushProxies()));
-        
     }
     
     /**

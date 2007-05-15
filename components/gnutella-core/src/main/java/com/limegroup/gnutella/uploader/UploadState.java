@@ -13,6 +13,7 @@ import org.limewire.io.IpPort;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -152,7 +153,12 @@ public abstract class UploadState implements HTTPMessage {
 	        return;
 	    
 	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
-	    
+        
+        // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
+        // for future fw-fw transfers
+        if (UDPService.instance().canDoFWT()) {
+            HTTPUtils.writeHeader(HTTPHeaderName.FWTPORT, UDPService.instance().getStableUDPPort(), os);
+        }
 	}	
 	
 	
@@ -187,6 +193,11 @@ public abstract class UploadState implements HTTPMessage {
 	    
 	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
 	    
+        // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
+        // for future fw-fw transfers
+        if (UDPService.instance().canDoFWT()) {
+            HTTPUtils.writeHeader(HTTPHeaderName.FWTPORT, UDPService.instance().getStableUDPPort(), os);
+        }
 	}
 
 }

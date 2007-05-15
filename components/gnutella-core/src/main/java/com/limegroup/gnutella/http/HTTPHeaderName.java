@@ -122,8 +122,10 @@ public enum HTTPHeaderName {
     RANGE("Range"),
     
     /** The chat status. */
-    CHAT("Chat");
+    CHAT("Chat"),
 
+    /** The port for firewalled transfers */
+    FWTPORT("X-FWTP");
     
     /**
      * Constant for the HTTP header name as a string.
