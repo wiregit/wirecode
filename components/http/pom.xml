@@ -21,6 +21,11 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-io</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-nio</artifactId>
       <version>${limewire.version}</version>
     </dependency>
@@ -29,6 +34,11 @@
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
 	  <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.0-alpha5-lw-1</version>
     </dependency>
   </dependencies>
 </project>

@@ -33,6 +33,12 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
+/**
+ * Handles upload requests for files and THEX trees.
+ *   
+ * @see FileResponseEntity
+ * @see THEXResponseEntity
+ */
 public class FileRequestHandler implements HttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(FileRequestHandler.class);
@@ -40,7 +46,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     /**
      * Constant for the amount of time to wait before retrying if we are not
      * actively downloading this file. (1 hour)
-     * 
+     * <p>
      * The value is meant to be used only as a suggestion to when newer ranges
      * may be available if we do not have any ranges that the downloader may
      * want.
@@ -114,6 +120,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         sessionManager.sendResponse(uploader, response);
     }
 
+    /**
+     * Looks up file in {@link FileManager} and processes request headers.
+     */
     private HTTPUploader findFileAndProcessHeaders(HttpRequest request,
             HttpResponse response, HttpContext context,
             FileRequest fileRequest, FileDesc fd) throws IOException,
@@ -184,6 +193,10 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setReasonPhrase("Malformed Request");
     }
 
+    /**
+     * Enqueues <code>request</code> and handles <code>uploader</code>
+     * in respect to the returned queue status.
+     */
     private void handleFileUpload(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
@@ -214,6 +227,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
     }
 
+    /**
+     * Processes an accepted file upload by adding headers and setting the entity.
+     */
     private void handleAccept(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
@@ -277,6 +293,10 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
     }
 
+    /**
+     * Processes an accepted THEX tree upload by adding headers and setting the
+     * entity.
+     */
     private void handleTHEXRequest(HttpRequest request, HttpResponse response,
             HttpContext context, HTTPUploader uploader, FileDesc fd)
             throws HttpException, IOException {
@@ -297,6 +317,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setStatusCode(HttpStatus.SC_OK);
     }
 
+    /**
+     * Processes a request for an invalid range.
+     */
     private void handleInvalidRange(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         uploader.getAltLocTracker().addAltLocHeaders(response);
@@ -316,6 +339,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setReasonPhrase("Requested Range Unavailable");
     }
 
+    /**
+     * Processes a queued file upload by adding headers.
+     */
     private void handleQueued(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
@@ -348,6 +374,11 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
+    /**
+     * Returns the description for the file requested by <code>request</code>.
+     * 
+     * @return null, if <code>request</code> does not map to a file
+     */
     private FileDesc getFileDesc(FileRequest request) {
         FileDesc fd = null;
 

@@ -22,20 +22,43 @@ public class FilePieceReader implements PieceReader {
 
     private static final Log LOG = LogFactory.getLog(FilePieceReader.class);
 
+    /**
+     * The number of concurrent threads used to read pieces of the file.
+     */
     private static final int THREAD_COUNT = 2;
 
+    /**
+     * The number of buffers used to cache pieces. 
+     */
     private static final int MAX_BUFFERS = THREAD_COUNT * 2;
 
+    /**
+     * The size of a single piece.
+     */
     private static int BUFFER_SIZE = 4096;
 
+    /**
+     * The list of buffers available for reading.
+     * <p>
+     * Note: Obtain <code>bufferPoolLock</code> when accessing.
+     */
     private final LinkedList<ByteBuffer> bufferPool = new LinkedList<ByteBuffer>();
 
+    /**
+     * The list of cached pieces that have been read already sorted in ascending
+     * order by file offset.
+     * <p>
+     * Note: Obtain <code>this</code> lock when accessing.
+     */
     private final Queue<Piece> pieceQueue = new PriorityQueue<Piece>(
             MAX_BUFFERS);
 
 //    private final ExecutorService QUEUE = ExecutorsHelper
 //            .newProcessingQueue("DiskPieceReader");
 
+    /**
+     * Single queue that is used for all readers.
+     */
     private final static ExecutorService QUEUE =
         ExecutorsHelper.newFixedSizeThreadPool(THREAD_COUNT, "DiskPieceReader");
 
@@ -47,18 +70,36 @@ public class FilePieceReader implements PieceReader {
 
     private final RandomAccessFile raf;
 
-    private final Object bufferLock = new Object();
+    private final Object bufferPoolLock = new Object();
 
     private final ByteBufferCache bufferCache;
 
+    /**
+     * Number of buffers currently in use by jobs. 
+     */
     private volatile int bufferCount;
 
+    /**
+     * The offset of the next piece that is going to be returned by
+     * {@link #next()}. This field keeps track of the pieces read by the
+     * consumer of this reader.
+     */
     private volatile long readOffset;
 
+    /**
+     * The offset of the next piece that is going to be processed by a job. This
+     * field keeps track of how far the file has been read from disk.
+     */
     private long processingOffset;
 
+    /**
+     * The remaining number of bytes to read.
+     */
     private long remaining;
 
+    /**
+     * If true, the reader has been shutdown.
+     */
     private boolean shutdown;
 
     public FilePieceReader(ByteBufferCache bufferCache, File file, long offset,
@@ -82,6 +123,9 @@ public class FilePieceReader implements PieceReader {
         channel = raf.getChannel();
     }
 
+    /**
+     * Invoked when data at <code>offset</code> has been read.
+     */
     private void add(long offset, ByteBuffer buffer) {
         if (shutdown) {
             release(buffer);
@@ -105,10 +149,17 @@ public class FilePieceReader implements PieceReader {
         listener.readFailed(exception);
     }
 
+    /**
+     * Returns the file that is being read.
+     */
     public File getFile() {
         return file;
     }
 
+    /**
+     * Returns true, if a {@link Piece} is available that can be retrieved
+     * through {@link #next()}.
+     */
     public synchronized boolean hasNext() {
         assert !shutdown;
         
@@ -136,7 +187,7 @@ public class FilePieceReader implements PieceReader {
             return;
         }
         
-        synchronized (bufferLock) {
+        synchronized (bufferPoolLock) {
             bufferPool.add(buffer);
             bufferCount--;
         }
@@ -147,10 +198,16 @@ public class FilePieceReader implements PieceReader {
         release(piece.getBuffer());
     }
 
+    /**
+     * Releases all resources and shuts down the processing queue that reads the
+     * file.
+     * <p>
+     * Once the reader is shutdown it is not possible to restart it.
+     */
     public void shutdown() {
         shutdown = true;
         
-        synchronized (bufferLock) {
+        synchronized (bufferPoolLock) {
             for (ByteBuffer buffer : bufferPool) {
                 release(buffer);
             }
@@ -168,14 +225,21 @@ public class FilePieceReader implements PieceReader {
         }
     }
 
+    /**
+     * Starts the processing queue that reads the file. To free resources
+     * {@link #shutdown()} must be invoked when reading has been completed.
+     */
     public void start() {
         assert !shutdown;
         
         spawnJobs();
     }
 
+    /**
+     * Spawns additional reader jobs if buffers are available for reading.
+     */
     private void spawnJobs() {       
-        synchronized (bufferLock) {
+        synchronized (bufferPoolLock) {
             while (!shutdown && remaining > 0 && bufferCount < MAX_BUFFERS) {
                 int length = (int) Math.min(BUFFER_SIZE, remaining);
                 ByteBuffer buffer = bufferPool.remove();
@@ -234,6 +298,9 @@ public class FilePieceReader implements PieceReader {
 //
 //    }
 
+    /**
+     * A simple job that reads a chunk of data form a file channel.
+     */
     private class PieceReaderJob2 implements Runnable {
 
         private ByteBuffer buffer;
