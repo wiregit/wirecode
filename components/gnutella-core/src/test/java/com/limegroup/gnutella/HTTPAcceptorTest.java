@@ -111,6 +111,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             assertEquals("GET", listener.request.getRequestLine().getMethod());
             assertEquals("/", listener.request.getRequestLine().getUri());
             assertEquals(HttpVersion.HTTP_1_1, listener.request.getRequestLine().getHttpVersion());
+            LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
             method.releaseConnection();

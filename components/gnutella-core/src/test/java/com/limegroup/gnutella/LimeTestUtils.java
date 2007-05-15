@@ -10,6 +10,10 @@ public class LimeTestUtils {
             public void run() {
             }
         });
+        NIODispatcher.instance().invokeAndWait(new Runnable() {
+            public void run() {
+            }
+        });
     }
 
     public static void setActivityCallBack(ActivityCallback cb) throws Exception {
