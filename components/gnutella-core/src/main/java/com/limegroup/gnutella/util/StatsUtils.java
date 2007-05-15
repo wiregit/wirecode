@@ -536,7 +536,7 @@ public class StatsUtils {
         SWilk.swilk(init, x, d.size(), d.size(), d.size() / 2, a, w, pw, ifault);
         
         // is there an error?
-        if (ifault[0] != 0 || ifault[0] != 2)
+        if (ifault[0] != 0 && ifault[0] != 2)
             return null;
         
         return new double[]{w[0],pw[0]};
