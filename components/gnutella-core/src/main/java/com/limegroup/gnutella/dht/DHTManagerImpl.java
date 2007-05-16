@@ -28,11 +28,12 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.statistic.StatsUtils;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.util.StatsUtils;
+import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**
  * This DHT manager starts either an active or a passive DHT controller.
@@ -364,7 +365,7 @@ public class DHTManagerImpl implements DHTManager {
             
             private List<Integer> getTopNetworks(Collection<? extends Contact> nodes, int count) {
                 // Masked IP -> Count
-                StatsUtils.ClassCNetworks classCNetworks = new StatsUtils.ClassCNetworks();
+                ClassCNetworks classCNetworks = new ClassCNetworks();
                 for (Contact node : nodes) {
                     InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
                     classCNetworks.add(addr, 1);
