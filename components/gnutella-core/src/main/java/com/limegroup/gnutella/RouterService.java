@@ -55,6 +55,7 @@ import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -238,6 +239,9 @@ public class RouterService {
     
     /** The IP Filter to use. */
     private static IPFilter ipFilter = new IPFilter(false);
+    
+    /** The Hostiles Filter to use */
+    private static HostileFilter hostileFilter = new HostileFilter();
     
     /** A sanity checker for network update requests/responses. */
     private static NetworkUpdateSanityChecker networkSanityChecker = new NetworkUpdateSanityChecker();
@@ -690,6 +694,10 @@ public class RouterService {
     /** Gets the IPFilter that should be shared. */
     public static IPFilter getIpFilter() {
         return ipFilter;
+    }
+    
+    public static HostileFilter getHostileFilter() {
+        return hostileFilter;
     }
     
     /**
@@ -1234,6 +1242,7 @@ public class RouterService {
                 adjustSpamFilters();
             }
         });
+        hostileFilter.refreshHosts();
     }
 
     /**

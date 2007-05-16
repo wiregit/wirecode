@@ -100,6 +100,9 @@ public abstract class SpamFilter {
         //4. BearShare high-bit queries.
         // if (FilterSettings.FILTER_HIGHBIT_QUERIES.getValue())
         //     buf.add(new BearShareFilter());
+        
+        // always filter hostiles
+        buf.add(RouterService.getHostileFilter());
 
         return compose(buf);
     }

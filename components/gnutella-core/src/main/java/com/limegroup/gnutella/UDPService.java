@@ -299,6 +299,10 @@ public class UDPService implements ReadWriteObserver {
                 if (!NetworkUtils.isValidPort(addr.getPort()))
                     continue;
 
+                // don't go further if filtered.
+                if (!RouterService.getHostileFilter().allow(addr.getAddress()))
+                    return;
+                
                 byte[] data = BUFFER.array();
                 int length = BUFFER.position();
                 try {
@@ -334,6 +338,8 @@ public class UDPService implements ReadWriteObserver {
 	 * Processes a single message.
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
+        if (!RouterService.getHostileFilter().allow(message))
+            return;
         if (message instanceof PingReply) 
             mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
         updateState(message, addr);
