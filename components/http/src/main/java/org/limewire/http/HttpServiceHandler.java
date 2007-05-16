@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.4.4 $
- * $Date: 2007-05-15 19:38:53 $
+ * $Revision: 1.1.4.5 $
+ * $Date: 2007-05-16 19:24:43 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -48,6 +48,7 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.http.ProtocolException;
 import org.apache.http.UnsupportedHttpVersionException;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.NHttpConnection;
@@ -225,6 +226,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
 
     public void closed(final NHttpServerConnection conn) {
+        notifyResponseSent(conn);
         if (this.eventListener != null) {
             this.eventListener.connectionClosed(conn);
         }
@@ -300,12 +302,19 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
 
     public void responseReady(final NHttpServerConnection conn) {
+        notifyResponseSent(conn);
+
+        if (conn.isOpen()) {
+            conn.requestInput();
+            if (((DefaultNHttpServerConnection)conn).hasBufferedInput()) {
+                ((DefaultNHttpServerConnection)conn).consumeInput(this);
+            }
+        }
     }
 
     public void outputReady(final NHttpServerConnection conn, final ContentEncoder encoder) {
 
         HttpContext context = conn.getContext();
-        HttpResponse response = conn.getHttpResponse();
 
         ServerConnState connState = (ServerConnState) context.getAttribute(CONN_STATE);
         ContentOutputBuffer buffer = connState.getOutbuffer();
@@ -325,7 +334,8 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             if (encoder.isCompleted()) {
                 connState.setOutputState(ServerConnState.RESPONSE_BODY_DONE);
                 connState.resetOutput();
-                if (!this.connStrategy.keepAlive(response, context)) {
+                
+                if (!this.connStrategy.keepAlive(conn.getHttpResponse(), context)) {
                     conn.close();
                 }
             }
@@ -431,6 +441,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             response.setEntity(null);
         }
         
+        connState.setResponse(response);
         conn.submitResponse(response);
 
         // Update connection state
@@ -449,6 +460,10 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
         } else {
             connState.resetOutput();
+            
+            if (!this.connStrategy.keepAlive(response, context)) {
+                conn.close();
+            }
         }
     }
 
@@ -546,8 +561,18 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
         // LW 
         
+        private HttpResponse response;
+
         private volatile HttpNIOEntity entity;
 
+        public HttpResponse getResponse() {
+            return response;
+        }
+        
+        public void setResponse(HttpResponse response) {
+            this.response = response;
+        }
+        
         public HttpNIOEntity getEntity() {
             return entity;
         }
@@ -562,15 +587,19 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
     public void notifyRequestReceived(NHttpServerConnection conn) {
         if (eventListener != null) {
-            eventListener.requestReceived(conn);
+            eventListener.requestReceived(conn, conn.getHttpRequest());
         }
     }
 
-    public void responseSent(NHttpServerConnection conn) {
+    public void notifyResponseSent(NHttpServerConnection conn) {
+        ServerConnState connState = (ServerConnState) conn.getContext().getAttribute(CONN_STATE);
         if (eventListener != null) {
-            eventListener.responseSent(conn);
+            HttpResponse response = connState.getResponse();
+            if (response != null) {
+                eventListener.responseSent(conn, response);
+            }
         }
-        conn.requestInput();
+        connState.setResponse(null);
     }
     
 }

@@ -59,8 +59,9 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public class HTTPAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
-    
-    private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
+
+    private static final String[] SUPPORTED_METHODS = new String[] { "GET",
+            "HEAD", };
 
     private HttpIOReactor reactor;
 
@@ -103,7 +104,7 @@ public class HTTPAcceptor {
 
         // intercepts HTTP requests and responses
         processor = new BasicHttpProcessor();
-        
+
         processor.addInterceptor(new RequestStatisticTracker());
 
         processor.addInterceptor(new ResponseDate());
@@ -160,7 +161,8 @@ public class HTTPAcceptor {
      * Handles an incoming HTTP push request.
      */
     public void acceptConnection(Socket socket, HTTPConnectionData data) {
-        DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
+        DefaultNHttpServerConnection conn = reactor.acceptConnection(null,
+                socket);
         HttpContextParams.setConnectionData(conn.getContext(), data);
     }
 
@@ -177,7 +179,7 @@ public class HTTPAcceptor {
     public HttpRequestHandler getNotFoundHandler() {
         return notFoundHandler;
     }
-    
+
     /* Simulates the processing of request for testing. */
     protected HttpResponse process(HttpRequest request) throws IOException,
             HttpException {
@@ -234,24 +236,23 @@ public class HTTPAcceptor {
 
     /**
      * Unregisters the handlers for <code>pattern</code>.
-     *  
+     * 
      * @see #registerHandler(String, HttpRequestHandler)
      */
     public synchronized void unregisterHandler(final String pattern) {
         this.registry.unregister(pattern);
     }
-    
+
     /**
      * Registers the acceptor at <code>dispatcher</code> for incoming
      * connections.
      */
     public void start(ConnectionDispatcher dispatcher) {
-        dispatcher.addConnectionAcceptor(
-            new ConnectionAcceptor() {
-                public void acceptConnection(String word, Socket socket) {
-                    reactor.acceptConnection(word + " ", socket);
-                }
-            }, SUPPORTED_METHODS, false, false);
+        dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
+            public void acceptConnection(String word, Socket socket) {
+                reactor.acceptConnection(word + " ", socket);
+            }
+        }, SUPPORTED_METHODS, false, false);
     }
 
     /**
@@ -264,7 +265,8 @@ public class HTTPAcceptor {
     }
 
     /**
-     * Forwards events from the underlying protocol layer to acceptor event listeners.
+     * Forwards events from the underlying protocol layer to acceptor event
+     * listeners.
      */
     private class ConnectionEventListener implements HttpServiceEventListener {
 
@@ -292,14 +294,14 @@ public class HTTPAcceptor {
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
             LOG.debug("HTTP connection error", e);
-            
+
             if (HttpContextParams.isPush(conn.getContext())) {
                 if (HttpContextParams.isFirewalled(conn.getContext())) {
                     UploadStat.FW_FW_FAILURE.incrementStat();
                 }
                 UploadStat.PUSH_FAILED.incrementStat();
             }
-            
+
             HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
@@ -316,18 +318,18 @@ public class HTTPAcceptor {
             }
         }
 
-        public void requestReceived(NHttpConnection conn) {
+        public void requestReceived(NHttpConnection conn, HttpRequest request) {
             if (LOG.isDebugEnabled())
-                LOG.debug("Processing request: " + conn.getHttpRequest().getRequestLine());
+                LOG.debug("Processing request: " + request.getRequestLine());
 
             HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-            .toArray(new HTTPAcceptorListener[0]);
+                    .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
-                listener.requestReceived(conn, conn.getHttpRequest());
+                listener.requestReceived(conn, request);
             }
         }
 
-        public void responseSent(NHttpConnection conn) {
+        public void responseSent(NHttpConnection conn, HttpResponse response) {
             HttpIOSession session = HttpContextParams.getIOSession(conn
                     .getContext());
             session
@@ -338,7 +340,7 @@ public class HTTPAcceptor {
             HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
                     .toArray(new HTTPAcceptorListener[0]);
             for (HTTPAcceptorListener listener : listeners) {
-                listener.responseSent(conn, conn.getHttpResponse());
+                listener.responseSent(conn, response);
             }
         }
 
@@ -373,12 +375,12 @@ public class HTTPAcceptor {
                         HTTPStat.GET_REQUESTS.incrementStat();
                     else if ("HEAD".equals(method))
                         HTTPStat.HEAD_REQUESTS.incrementStat();
-                    else 
+                    else
                         HTTPStat.UNKNOWN_REQUESTS.incrementStat();
                 }
             }
         }
-        
+
     }
 
     /**
@@ -387,9 +389,10 @@ public class HTTPAcceptor {
     private class HeaderStatisticTracker implements HttpResponseInterceptor {
 
         /*
-         * XXX iterating over all headers is rather inefficient since the size of
-         * the headers is known in DefaultNHttpServerConnection.submitResponse() but
-         * can't be easily made accessible
+         * XXX iterating over all headers is rather inefficient since the size
+         * of the headers is known in
+         * DefaultNHttpServerConnection.submitResponse() but can't be easily
+         * made accessible
          */
         public void process(HttpResponse response, HttpContext context)
                 throws HttpException, IOException {

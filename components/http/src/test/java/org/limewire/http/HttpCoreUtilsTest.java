@@ -1,5 +1,7 @@
 package org.limewire.http;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
@@ -10,6 +12,10 @@ public class HttpCoreUtilsTest extends BaseTestCase {
 
     public HttpCoreUtilsTest(String name) {
         super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(HttpCoreUtils.class);
     }
 
     public void testHasHeader() {

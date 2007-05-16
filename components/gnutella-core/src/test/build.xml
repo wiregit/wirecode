@@ -82,8 +82,10 @@
 	<target name="test-all" 
             description="Runs every test in this module."
             depends="compile">
+		<property name="filter" value="**/*Test.class"/>
 	    <do.test-all component="tests"
-	    			 forkmode="perTest"/>
+	    			 forkmode="perTest"
+					 filter="${filter}"/>
 	</target>
     
     <target name="with.clover"

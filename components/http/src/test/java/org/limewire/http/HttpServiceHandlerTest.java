@@ -3,7 +3,7 @@ package org.limewire.http;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
 
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpException;
@@ -26,9 +26,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
 
-public class HttpServiceHandlerTest extends TestCase {
+public class HttpServiceHandlerTest extends BaseTestCase {
 
     private HttpParams parms;
 
@@ -48,6 +49,10 @@ public class HttpServiceHandlerTest extends TestCase {
 
     public HttpServiceHandlerTest(String name) {
         super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(HttpServiceHandlerTest.class);
     }
 
     @Override
@@ -103,6 +108,7 @@ public class HttpServiceHandlerTest extends TestCase {
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
         assertFalse(listener.responseSent);
+        conn.produceOutput(serviceHandler);
         conn.produceOutput(serviceHandler);
         conn.produceOutput(serviceHandler);
         assertEquals("abc", encoder.data.toString());
@@ -214,6 +220,9 @@ public class HttpServiceHandlerTest extends TestCase {
     }
 
     public void testHeadRequest() throws Exception {
+        MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
+        serviceHandler.setEventListener(listener);
+
         MockSocket socket = new MockSocket();
         MockIOSession session = new MockIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
@@ -226,8 +235,10 @@ public class HttpServiceHandlerTest extends TestCase {
         HttpRequest request = new BasicHttpRequest("HEAD", "/get/string");
         conn.setHttpRequest(request);
         serviceHandler.requestReceived(conn);
-        assertNotNull(conn.getHttpResponse());
-        assertNull(conn.getHttpResponse().getEntity());
+        conn.produceOutput(serviceHandler);
+        conn.produceOutput(serviceHandler);
+        assertNotNull(listener.response);
+        assertNull(listener.response.getEntity());
     }
 
     public static class MockHttpChannel extends HttpChannel {

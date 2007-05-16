@@ -2,6 +2,8 @@ package org.limewire.http;
 
 import java.nio.ByteBuffer;
 
+import junit.framework.Test;
+
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpResponseFactory;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -29,6 +31,10 @@ public class HttpChannelTest extends BaseTestCase {
 
     public HttpChannelTest(String name) {
         super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(HttpChannelTest.class);
     }
 
     @Override

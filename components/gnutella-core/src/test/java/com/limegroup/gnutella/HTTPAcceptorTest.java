@@ -106,19 +106,18 @@ public class HTTPAcceptorTest extends BaseTestCase {
         try{ 
             client.executeMethod(method);
             assertTrue(listener.opened);
-            assertFalse(listener.closed);
+            // bad request, so connection should have been closed
+            assertTrue(listener.closed);
             assertNotNull(listener.request);
             assertEquals("GET", listener.request.getRequestLine().getMethod());
             assertEquals("/", listener.request.getRequestLine().getUri());
             assertEquals(HttpVersion.HTTP_1_1, listener.request.getRequestLine().getHttpVersion());
             LimeTestUtils.waitForNIO();
+            LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
             method.releaseConnection();
         }
-        
-        LimeTestUtils.waitForNIO();        
-        assertTrue(listener.closed);
         
         listener.opened = false;
         listener.closed = false;
