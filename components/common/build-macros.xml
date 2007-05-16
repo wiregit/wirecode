@@ -434,6 +434,7 @@
     <target name="with.clover"/> <!-- Must write a real target for this when importing -->
     <target name="initialize"/> <!-- Must write a real target for this when importing -->
     <target name="test-all"/> <!-- Must write a real target for this when importing -->
+    <target name="test-some"/> <!-- Must write a real target for this when importing -->
     <target name="clover2html"/> <!-- Must write a real target for this when importing -->
     
     <target name="clover-all" depends="initialize, clean, with.clover">
