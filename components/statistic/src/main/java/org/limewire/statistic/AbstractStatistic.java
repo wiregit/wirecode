@@ -14,7 +14,6 @@ import org.limewire.collection.IntBuffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.service.ErrorService;
 
-
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>
  * interface, providing such functionality as keeping track of the
@@ -230,11 +229,10 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	}
     
     public Object inspect() {
-        List<Number> ret = new ArrayList<Number>(4);
-        ret.add(getCurrent());
-        ret.add(getTotal());
-        ret.add(getAverage());
-        ret.add(getMax());
-        return ret;
+        List<Double> r = new ArrayList<Double>(_buffer.size());
+        for (int i : _buffer)
+            r.add((double)i);
+        
+        return StatsUtils.quickStatsDouble(r).getMap();
     }
 }

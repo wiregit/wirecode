@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
  * allocated on the first insertion or retrieval, allowing lots of
  * Buffers to be created that may not be used.
  */
-public final class IntBuffer implements Cloneable {
+public final class IntBuffer implements Cloneable, Iterable<Integer> {
     /**
      * The abstraction function is
      *   [ buf[head], buf[head+1], ..., buf[tail-1] ] if head<=tail
@@ -337,7 +337,7 @@ public final class IntBuffer implements Cloneable {
 	 * Specialized <tt>Iterator</tt> for <tt>IntBuffer</tt> that iterates
 	 * over an array of ints.
 	 */
-    private class IntBufferIterator extends UnmodifiableIterator {
+    private class IntBufferIterator extends UnmodifiableIterator<Integer> {
         /** The index of the next element to yield. */
         int index;	
         /** Defensive programming; detect modifications while
@@ -356,8 +356,8 @@ public final class IntBuffer implements Cloneable {
             return index!=tail;
         }
 
-		public Object next() throws NoSuchElementException {
-			throw new UnsupportedOperationException();
+		public Integer next() throws NoSuchElementException {
+			return nextInt();
 		}
 
         public int nextInt() throws NoSuchElementException {
