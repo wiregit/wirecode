@@ -8,9 +8,9 @@ import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.inspection.Inspectable;
+import org.limewire.statistic.StatsUtils;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.StatsUtils;
 
 /**
  * Keeps track and reports some statistics about local queries.

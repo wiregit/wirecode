@@ -30,6 +30,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -53,7 +54,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.StatsUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

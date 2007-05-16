@@ -9,9 +9,10 @@ import java.util.TreeMap;
 
 import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
+import org.limewire.statistic.StatsUtils;
 
 import com.limegroup.gnutella.search.ResultCounter;
-import com.limegroup.gnutella.util.StatsUtils;
+import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**
  * The reply routing table.  Given a GUID from a reply message header,
@@ -520,7 +521,7 @@ public final class RouteTable  {
             public synchronized Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);
-                StatsUtils.ClassCNetworks globalClassC = new StatsUtils.ClassCNetworks();
+                ClassCNetworks globalClassC = new ClassCNetworks();
                 List<Double> classCSizes = new ArrayList<Double>();
                 List<Double> repliesRouted = new ArrayList<Double>();
                 List<Double> ttls = new ArrayList<Double>();

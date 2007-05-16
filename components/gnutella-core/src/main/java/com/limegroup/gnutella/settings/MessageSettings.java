@@ -18,13 +18,6 @@ public class MessageSettings extends LimeProps {
         FACTORY.createIntSetting("MAX_LENGTH", 65536);
     
     /**
-     * Whether to report stats with double precision.
-     */
-    public static final BooleanSetting REPORT_DOUBLE_PRECISION = 
-        FACTORY.createRemoteBooleanSetting("REPORT_DOUBLE_PRECISION", 
-                true, "MessageSettings.reportDoublePrecision");
-    
-    /**
      * Whether to embed a timestamp in the query guids.
      */
     public static final BooleanSetting STAMP_QUERIES =

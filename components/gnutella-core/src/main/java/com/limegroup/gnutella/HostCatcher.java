@@ -49,8 +49,8 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.StatsUtils;
 
 
 /**
@@ -1649,11 +1649,11 @@ public class HostCatcher {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);
-                StatsUtils.ClassCNetworks permanent = new StatsUtils.ClassCNetworks();
-                StatsUtils.ClassCNetworks restored = new StatsUtils.ClassCNetworks();
-                StatsUtils.ClassCNetworks freeLeaf = new StatsUtils.ClassCNetworks();
-                StatsUtils.ClassCNetworks freeUp = new StatsUtils.ClassCNetworks();
-                StatsUtils.ClassCNetworks all = new StatsUtils.ClassCNetworks();
+                ClassCNetworks permanent = new ClassCNetworks();
+                ClassCNetworks restored = new ClassCNetworks();
+                ClassCNetworks freeLeaf = new ClassCNetworks();
+                ClassCNetworks freeUp = new ClassCNetworks();
+                ClassCNetworks all = new ClassCNetworks();
                 synchronized(HostCatcher.this) {
                     IpPortSet everybody = new IpPortSet();
                     everybody.addAll(permanentHostsSet);

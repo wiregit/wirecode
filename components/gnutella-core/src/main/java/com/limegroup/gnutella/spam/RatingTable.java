@@ -22,13 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IOUtils;
+import org.limewire.statistic.StatsUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.StatsUtils;
 
 public class RatingTable {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);

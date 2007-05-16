@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.statistic;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.util.StatsUtils.DoubleStats;
+import org.limewire.statistic.StatsUtils;
+import org.limewire.statistic.StatsUtils.DoubleStats;
+import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
 
-public class StatsUtilsTest extends LimeTestCase {
+public class StatsUtilsTest extends BaseTestCase {
 
     public StatsUtilsTest(String name) {
         super(name);
@@ -71,7 +72,7 @@ public class StatsUtilsTest extends LimeTestCase {
         assertMatches(49.5,"avg", stats);
         assertMatches(24.25,"Q1", stats);
         assertMatches(74.75,"Q3", stats);
-        assertEquals(841.66666, get("M2",stats), 0.00001);
+        assertEquals(841.666, get("M2",stats), 0.001);
     }
     
     public void testQuickStats() throws Exception {
@@ -218,20 +219,6 @@ public class StatsUtilsTest extends LimeTestCase {
         
     }
     
-    public void testSinglePrecision() throws Exception {
-        MessageSettings.REPORT_DOUBLE_PRECISION.setValue(false);
-        List<Double> l = new ArrayList<Double>();
-        for (int i = 0; i < 100; i++)
-            l.add((double)i);
-        Map<String, Object> stats = StatsUtils.quickStatsDouble(l).getMap();
-        assertEquals(0.0f,getSP("min", stats));
-        assertEquals(99.0f,getSP("max",stats));
-        assertEquals(49.5f,getSP("med", stats));
-        assertEquals(49.5f,getSP("avg", stats));
-        assertEquals(24.25f,getSP("Q1", stats));
-        assertEquals(74.75f,getSP("Q3", stats));
-    }
-    
     public void testRank() throws Exception {
         List<Double> l = new ArrayList<Double>();
         for (int i = 0; i < 100; i++)
@@ -266,12 +253,6 @@ public class StatsUtilsTest extends LimeTestCase {
     }
     
     private double get(String key, Map<String,Object>stats) throws Exception {
-        byte [] b = (byte[])stats.get(key);
-        DataInputStream dais = new DataInputStream(new ByteArrayInputStream(b));
-        return Double.longBitsToDouble(dais.readLong());
-    }
-    
-    private float getSP(String key, Map<String,Object>stats) throws Exception {
         byte [] b = (byte[])stats.get(key);
         DataInputStream dais = new DataInputStream(new ByteArrayInputStream(b));
         return Float.intBitsToFloat(dais.readInt());

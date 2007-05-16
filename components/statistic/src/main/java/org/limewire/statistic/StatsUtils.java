@@ -1,18 +1,11 @@
-package com.limegroup.gnutella.util;
+package org.limewire.statistic;
 
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.limewire.collection.SortedList;
-import org.limewire.io.NetworkUtils;
-
-import com.limegroup.gnutella.settings.MessageSettings;
 
 public class StatsUtils {
     private StatsUtils() {}
@@ -359,32 +352,13 @@ public class StatsUtils {
         }
         
         /**
-         * @return byte [] representation of a double, compatible
-         * with DataInputStream.readLong()
-         */
-        private byte [] doubleToBytes(double d) {
-            if (!MessageSettings.REPORT_DOUBLE_PRECISION.getValue())
-                return floatToBytes((float)d);
-            byte [] writeBuffer = new byte[8];
-            long v = Double.doubleToLongBits(d);
-            writeBuffer[0] = (byte)(v >>> 56);
-            writeBuffer[1] = (byte)(v >>> 48);
-            writeBuffer[2] = (byte)(v >>> 40);
-            writeBuffer[3] = (byte)(v >>> 32);
-            writeBuffer[4] = (byte)(v >>> 24);
-            writeBuffer[5] = (byte)(v >>> 16);
-            writeBuffer[6] = (byte)(v >>>  8);
-            writeBuffer[7] = (byte)(v >>>  0);
-            return writeBuffer;
-        }
-        
-        /**
-         * @return byte [] representation of a float, compatible
+         * @return byte [] representation of a double, (cutting it down
+         * to single precision) compatible
          * with DataInputStream.readInt()
          */
-        private byte [] floatToBytes(float f) {
+        private byte [] doubleToBytes(double f) {
             byte [] writeBuffer = new byte[4];
-            int v = Float.floatToIntBits(f);
+            int v = Float.floatToIntBits((float)f);
             writeBuffer[0] = (byte)(v >>> 24);
             writeBuffer[1] = (byte)(v >>> 16);
             writeBuffer[2] = (byte)(v >>>  8);
@@ -434,54 +408,6 @@ public class StatsUtils {
         }
     }
 
-    /** Utility comparator to use for sorting class C networks */
-    private static final Comparator<Map.Entry<Integer,Integer>> CLASS_C_COMPARATOR =
-        new Comparator<Map.Entry<Integer, Integer>>() {
-        public int compare(Map.Entry<Integer, Integer> a, Map.Entry<Integer, Integer> b) {
-            return b.getValue().compareTo(a.getValue());
-        }
-    };
-    
-    /**
-     * Utility class keeps track of class C networks and an associated count.
-     */
-    public static class ClassCNetworks {
-        private Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
-        
-        public void add(InetAddress addr, int count) {
-            add(NetworkUtils.getClassC(addr), count);
-        }
-        
-        public void add(int masked, int count) {
-            Integer num = counts.get(masked);
-            if (num == null) {
-                num = Integer.valueOf(0);
-            }
-            num = Integer.valueOf(num.intValue() + count);
-            counts.put(masked, num);
-        }
-        
-        public List<Map.Entry<Integer, Integer>> getTop() {
-            List<Map.Entry<Integer, Integer>> ret = 
-                new SortedList<Map.Entry<Integer,Integer>>(CLASS_C_COMPARATOR);
-            ret.addAll(counts.entrySet());
-            return ret;
-        }
-        
-        /** returns the top n class C networks in easy to bencode format */ 
-        public List<Integer> getTopInspectable(int number) {
-            List<Map.Entry<Integer, Integer>> top = getTop();
-            List<Integer> ret = new ArrayList<Integer>(number * 2);
-            for (Map.Entry<Integer, Integer> entry : top) {
-                if (ret.size() >= 2 * number)
-                    break;
-                ret.add(entry.getKey());
-                ret.add(entry.getValue());
-            }
-            return ret;
-        }
-    }
-    
     /**
      * @return list of sample ranks
      */
