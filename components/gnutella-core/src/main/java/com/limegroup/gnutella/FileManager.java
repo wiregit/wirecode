@@ -2579,17 +2579,17 @@ public abstract class FileManager {
     
     private static class RareFileDefinition implements SimppListener {
         
-        private volatile RPNParser parser;
+        private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
             SimppManager.instance().addListener(this);
         }
         
-        public void simppUpdated(int ignored) {
+        public synchronized void simppUpdated(int ignored) {
             parser = new RPNParser(DHTSettings.RARE_FILE_DEFINITION.getValue());
         }
         
-        private boolean evaluate(FileDesc fd) {
+        private synchronized boolean evaluate(FileDesc fd) {
             try {
                 return parser.evaluate(fd);
             } catch (IllegalArgumentException badSimpp) {
