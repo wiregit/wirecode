@@ -108,6 +108,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     @Override
     protected void finishLookup() {
         long time = getElapsedTime();
+        int currentHop = getCurrentHop();
         
         Map<Contact, SecurityToken> path = getPath();
         Collection<DHTValueEntity> entities = getDHTValueEntities();
@@ -118,6 +119,9 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         } else {
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
+        
+        lookupStat.setHops(currentHop, true);
+        lookupStat.setTime((int)time, true);
         
         setReturnValue(new FindValueResult(
                 lookupKey, path, entities, entityKeys, time, currentHop));

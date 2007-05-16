@@ -104,7 +104,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     private int activeSearches = 0;
     
     /** The current hop */
-    protected int currentHop = 0;
+    private int currentHop = 0;
     
     /** The expected result set size (aka K) */
     private int resultSetSize;
@@ -741,6 +741,13 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         });
         
         return nearest;
+    }
+    
+    /**
+     * Returns the current hop
+     */
+    public int getCurrentHop() {
+        return currentHop;
     }
     
     public String toString() {

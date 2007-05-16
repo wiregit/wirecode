@@ -98,6 +98,7 @@ public class FindNodeResponseHandler
     protected void finishLookup() {
         long time = getElapsedTime();
         int routeTableFailureCount = getRouteTableFailureCount();
+        int currentHop = getCurrentHop();
         
         lookupStat.setHops(currentHop, false);
         lookupStat.setTime((int)time, false);
