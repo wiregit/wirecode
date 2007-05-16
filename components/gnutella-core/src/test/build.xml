@@ -82,10 +82,21 @@
 	<target name="test-all" 
             description="Runs every test in this module."
             depends="compile">
-		<property name="filter" value="**/*Test.class"/>
 	    <do.test-all component="tests"
-	    			 forkmode="perTest"
-					 filter="${filter}"/>
+	    			 forkmode="perTest"/>
+	</target>
+
+	<target name="test-some" 
+            description="Runs some tests in this module."
+            depends="compile"
+			if="include">
+		  <do.test-all component="tests"
+	    			   forkmode="perTest"
+					   filter="">
+	        <testLocations>
+	            <fileset dir="${build.limewire.components.tests.tests}" includes="${include}"/>
+			</testLocations>
+		  </do.test-all>
 	</target>
     
     <target name="with.clover"
