@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -35,7 +36,7 @@ public class FilePieceReader implements PieceReader {
     /**
      * The size of a single piece.
      */
-    private static int BUFFER_SIZE = 4096;
+    static int BUFFER_SIZE = 4096;
 
     /**
      * The list of buffers available for reading.
@@ -107,18 +108,17 @@ public class FilePieceReader implements PieceReader {
         if (bufferCache == null || file == null || listener == null) {
             throw new IllegalArgumentException();
         }
-
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be > 0");
+        }
+        
         this.bufferCache = bufferCache;
         this.file = file;
         this.readOffset = offset;
         this.processingOffset = offset;
         this.remaining = length;
         this.listener = listener;
-
-        for (int i = 0; i < MAX_BUFFERS; i++) {
-            bufferPool.add(bufferCache.getHeap(BUFFER_SIZE));
-        }
-
+        
         raf = new RandomAccessFile(file, "r");
         channel = raf.getChannel();
     }
@@ -169,8 +169,12 @@ public class FilePieceReader implements PieceReader {
         return pieceQueue.peek().getOffset() == readOffset;
     }
 
-    public synchronized Piece next() {
+    public synchronized Piece next() throws EOFException {
         assert !shutdown;
+        
+        if (remaining == 0 && readOffset == processingOffset) {
+            throw new EOFException();
+        }
         
         Piece piece = pieceQueue.peek();
         if (piece != null && piece.getOffset() == readOffset) {
@@ -232,6 +236,10 @@ public class FilePieceReader implements PieceReader {
     public void start() {
         assert !shutdown;
         
+        for (int i = 0; i < MAX_BUFFERS && (i == 0 || i * BUFFER_SIZE  + 1 <= remaining); i++) {
+            bufferPool.add(bufferCache.getHeap(BUFFER_SIZE));
+        }
+
         spawnJobs();
     }
 
