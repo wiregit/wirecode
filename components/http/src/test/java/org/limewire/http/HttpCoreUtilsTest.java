@@ -15,7 +15,7 @@ public class HttpCoreUtilsTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(HttpCoreUtils.class);
+        return buildTestSuite(HttpCoreUtilsTest.class);
     }
 
     public void testHasHeader() {

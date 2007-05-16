@@ -230,10 +230,11 @@
 	    <attribute name="component"/>
 	    <element name="testLocations"  optional="true"/>
 	    <attribute name="forkmode"     default="once"/>
+	    <attribute name="filter"     default="**/*Test.class"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-	        <do.run-tests-batchunit unit="**/*Test.class"
+	        <do.run-tests-batchunit unit="@{filter}"
 	            					component="@{component}"
 	            					forkmode="@{forkmode}"
 	        >
