@@ -162,7 +162,7 @@ public class HTTPUploadManagerTest extends LimeTestCase {
     }
 
     /**
-     * Sends a GET request for uri.
+     * Sends a GET request for <code>uri</code>.
      * 
      * @return the returned headers
      */

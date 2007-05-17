@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.uploader;
 
-
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;

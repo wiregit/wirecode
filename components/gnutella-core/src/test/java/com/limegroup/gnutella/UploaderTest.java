@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import junit.framework.Test;
 
@@ -30,12 +31,14 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
-@SuppressWarnings("unchecked")
+/*
+ * TODO rename this class to HTTPUploadManagerQueueingTest
+ */
 public class UploaderTest extends BaseTestCase {
 
     //private static RouterService rs;
@@ -72,8 +75,8 @@ public class UploaderTest extends BaseTestCase {
         savedDelayTime = StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
 
-        Map urns = new HashMap();
-        Vector descs = new Vector();
+        Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
+        List<FileDesc> descs = new ArrayList<FileDesc>();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         urn2 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
         urn3 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");

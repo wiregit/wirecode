@@ -11,6 +11,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -80,7 +81,7 @@ public class FilePieceReader implements PieceReader {
     /**
      * Number of buffers currently in use by jobs. 
      */
-    private volatile int bufferCount;
+    private volatile int bufferInUseCount;
 
     /**
      * The offset of the next piece that is going to be returned by
@@ -103,7 +104,7 @@ public class FilePieceReader implements PieceReader {
     /**
      * If true, the reader has been shutdown.
      */
-    private boolean shutdown;
+    private AtomicBoolean shutdown = new AtomicBoolean();
 
     private AtomicInteger jobCount = new AtomicInteger();
 
@@ -131,7 +132,7 @@ public class FilePieceReader implements PieceReader {
      * Invoked when data at <code>offset</code> has been read.
      */
     private void add(long offset, ByteBuffer buffer) {
-        if (shutdown) {
+        if (shutdown.get()) {
             release(buffer);
             return;
         }
@@ -165,7 +166,7 @@ public class FilePieceReader implements PieceReader {
      * through {@link #next()}.
      */
     public synchronized boolean hasNext() throws EOFException {
-        if (shutdown) {
+        if (shutdown.get()) {
             throw new EOFException();
         }
         
@@ -175,8 +176,12 @@ public class FilePieceReader implements PieceReader {
         return pieceQueue.peek().getOffset() == readOffset;
     }
 
+    public boolean isShutdown() {
+        return shutdown.get();
+    }
+    
     public synchronized Piece next() throws EOFException {
-        if (shutdown) {
+        if (shutdown.get()) {
             throw new EOFException();
         }
         
@@ -193,15 +198,15 @@ public class FilePieceReader implements PieceReader {
         return null;
     }
 
-    private void release(ByteBuffer buffer) {
-        if (shutdown) {
-            bufferCache.release(buffer);
-            return;
-        }
-        
+    private void release(ByteBuffer buffer) {       
         synchronized (bufferPoolLock) {
+            if (shutdown.get()) {
+                bufferCache.release(buffer);
+                return;
+            }
+            
             bufferPool.add(buffer);
-            bufferCount--;
+            bufferInUseCount--;
         }
         spawnJobs();
     }
@@ -214,10 +219,15 @@ public class FilePieceReader implements PieceReader {
      * Releases all resources and shuts down the processing queue that reads the
      * file.
      * <p>
-     * Once the reader is shutdown it is not possible to restart it.
+     * Once the reader is shutdown it is not possible to restart it. Does
+     * nothing if shutdown has been invoked before;
+     * 
+     * @return false, if reader has already been shutdown
      */
-    public void shutdown() {
-        shutdown = true;
+    public boolean shutdown() {
+        if (shutdown.getAndSet(true)) {
+            return false;
+        }
         
         synchronized (bufferPoolLock) {
             for (ByteBuffer buffer : bufferPool) {
@@ -241,6 +251,8 @@ public class FilePieceReader implements PieceReader {
         } catch (IOException e) {
             LOG.warn("Error closing file: " + file, e);
         }
+        
+        return true;
     }
 
     public void shutdownAndWait(long timeout) throws InterruptedException, TimeoutException {
@@ -248,25 +260,28 @@ public class FilePieceReader implements PieceReader {
         waitForShutdown(timeout);
     }
     
-    public void waitForShutdown(long timeout) throws InterruptedException, TimeoutException {
+    protected void waitForShutdown(long timeout) throws InterruptedException, TimeoutException {
         long start = System.currentTimeMillis();
         while (jobCount.get() > 0) {
-            synchronized (this) {
-                this.wait(50);
-            }
-            
-            if (System.currentTimeMillis() - start > timeout) {
+            long remaining = timeout - (System.currentTimeMillis() - start);
+            if (remaining <= 0) {
                 throw new TimeoutException();
             }
+            Thread.sleep(50);
         }
     }
     
     /**
      * Starts the processing queue that reads the file. To free resources
      * {@link #shutdown()} must be invoked when reading has been completed.
+     *
+     * @throws IllegalStateException if reader is shutdown
+     *
      */
     public void start() {
-        assert !shutdown;
+        if (shutdown.get()) {
+            throw new IllegalStateException();
+        }
         
         for (int i = 0; i < MAX_BUFFERS && (i == 0 || i * BUFFER_SIZE  + 1 <= remaining); i++) {
             bufferPool.add(bufferCache.getHeap(BUFFER_SIZE));
@@ -280,10 +295,10 @@ public class FilePieceReader implements PieceReader {
      */
     private void spawnJobs() {       
         synchronized (bufferPoolLock) {
-            while (!shutdown && remaining > 0 && bufferCount < MAX_BUFFERS) {
+            while (!shutdown.get() && remaining > 0 && bufferInUseCount < MAX_BUFFERS) {
                 int length = (int) Math.min(BUFFER_SIZE, remaining);
                 ByteBuffer buffer = bufferPool.remove();
-                bufferCount++;
+                bufferInUseCount++;
                 Runnable job = new PieceReaderJob2(buffer, processingOffset,
                         length);
                 processingOffset += length;
@@ -370,8 +385,11 @@ public class FilePieceReader implements PieceReader {
             }
 
             if (exception != null) {
-                FilePieceReader.this.failed(exception);
-                release(buffer);
+                try {
+                    FilePieceReader.this.failed(exception);
+                } finally {
+                    release(buffer);
+                }
             } else {
                 buffer.flip();
                 assert buffer.remaining() == length;

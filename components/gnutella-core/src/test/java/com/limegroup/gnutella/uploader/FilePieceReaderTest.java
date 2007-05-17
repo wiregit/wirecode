@@ -6,12 +6,13 @@ import java.io.IOException;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public class FilePieceReaderTest extends LimeTestCase {
+public class FilePieceReaderTest extends BaseTestCase {
 
     private File file;
 
@@ -40,7 +41,9 @@ public class FilePieceReaderTest extends LimeTestCase {
     @Override
     protected void tearDown() throws Exception {
         if (reader != null) {
-            reader.shutdown();
+            if (!reader.isShutdown()) {
+                reader.shutdownAndWait(5000);
+            }
             reader = null;
         }
     }
@@ -63,7 +66,7 @@ public class FilePieceReaderTest extends LimeTestCase {
                 assertEquals(piece.getBuffer().limit(), piece.getBuffer()
                         .remaining());
                 assertEquals(read, piece.getOffset());
-                assertEqualsToData(piece);
+                assertEqualsToData(data, piece);
                 read += piece.getBuffer().limit();
                 reader.release(piece);
                 if (read == file.length()) {
@@ -139,7 +142,7 @@ public class FilePieceReaderTest extends LimeTestCase {
         } catch (EOFException e) {
         }
     }
-    
+
     public void testReadException() throws Exception {
         int filesize = 20000;
         createFile(filesize);
@@ -160,8 +163,94 @@ public class FilePieceReaderTest extends LimeTestCase {
         reader.release(piece1);
         assertEquals(0, cache.buffers);
     }
-    
-    
+
+    public void testMultipleConcurrentReads() throws Exception {
+        MockByteBufferCache cache = new MockByteBufferCache();
+        class Runner implements Runnable {
+
+            private File file;
+
+            private byte[] data;
+
+            private FilePieceReader reader;
+
+            private IOException exception;
+
+            Runner(ByteBufferCache cache) throws IOException {
+                this.file = FilePieceReaderTest.this.file;
+                this.data = FilePieceReaderTest.this.data;
+                this.reader = new FilePieceReader(cache, file, 0, (int) file
+                        .length(), listener);
+
+            }
+
+            public Runner(MockByteBufferCache cache, IOException exception) throws IOException {
+                this(cache);
+                
+                this.exception = exception;
+            }
+
+            public void run() {
+                reader.start();
+                try {
+                    int read = 0;
+                    Piece piece;
+                    while ((piece = getNext(reader, file)) != null) {
+                        assertEqualsToData(data, piece);
+                        read += piece.getLength();
+                        reader.release(piece);
+                        if (exception != null) {
+                            reader.failed(exception);
+                            return;
+                        }
+                    }
+                    assertEquals(file.length(), read);
+                } finally {
+                    try {
+                        reader.shutdownAndWait(1000);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+        }
+        ;
+
+        createFile(500000);
+        Runner runner1 = new Runner(cache);
+        createFile(100000);
+        Runner runner2 = new Runner(cache);
+        createFile(1000000);
+        Runner runner3 = new Runner(cache, new IOException());
+        Runner runner4 = new Runner(cache);
+        Runner runner5 = new Runner(cache);
+
+        Thread t1 = new ManagedThread(runner1);
+        Thread t2 = new ManagedThread(runner2);
+        Thread t3 = new ManagedThread(runner3);
+        Thread t4 = new ManagedThread(runner4);
+        Thread t5 = new ManagedThread(runner5);
+
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+
+        t1.join(5000);
+        t2.join(5000);
+        t3.join(5000);
+        t4.join(5000);
+        t5.join(5000);
+        
+        assertFalse(t1.isAlive());
+        assertFalse(t2.isAlive());
+        assertFalse(t3.isAlive());
+        assertFalse(t4.isAlive());
+        assertFalse(t5.isAlive());
+    }
+
     private Piece getNext() throws Exception {
         while (read < file.length()) {
             Piece piece = reader.next();
@@ -173,7 +262,22 @@ public class FilePieceReaderTest extends LimeTestCase {
         throw new EOFException();
     }
 
-    private void assertEqualsToData(Piece piece) {
+    private Piece getNext(FilePieceReader reader, File file) {
+        while (true) {
+            Piece piece;
+            try {
+                piece = reader.next();
+            } catch (EOFException e) {
+                return null;
+            }
+            if (piece != null) {
+                read += piece.getBuffer().limit();
+                return piece;
+            }
+        }
+    }
+
+    private void assertEqualsToData(byte[] data, Piece piece) {
         byte[] expectedContent = new byte[piece.getBuffer().remaining()];
         System.arraycopy(data, (int) piece.getOffset(), expectedContent, 0,
                 expectedContent.length);
