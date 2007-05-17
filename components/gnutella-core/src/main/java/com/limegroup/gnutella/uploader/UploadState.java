@@ -171,7 +171,7 @@ public abstract class UploadState implements HTTPMessage {
 	    }
         
         if(!bn.isEmpty())
-            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + ";");
+            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + ",");
 	    
 	    if (proxiesWritten > 0)
 	        buf.deleteCharAt(buf.length()-1);
