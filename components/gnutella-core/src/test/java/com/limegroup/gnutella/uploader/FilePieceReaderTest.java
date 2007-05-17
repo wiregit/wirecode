@@ -137,9 +137,30 @@ public class FilePieceReaderTest extends LimeTestCase {
             Piece piece = getNext();
             fail("Expected EOFException, got: " + piece);
         } catch (EOFException e) {
-            
         }
     }
+    
+    public void testReadException() throws Exception {
+        int filesize = 20000;
+        createFile(filesize);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        reader = new FilePieceReader(cache, file, 0, filesize, listener);
+        reader.start();
+        Piece piece1 = getNext();
+        reader.failed(new IOException());
+        reader.waitForShutdown(1000);
+        assertEquals(1, cache.buffers);
+        try {
+            Piece piece2 = getNext();
+            fail("Expected EOFException, got: " + piece2);
+        } catch (EOFException e) {
+        }
+        assertEquals(1, cache.buffers);
+        reader.release(piece1);
+        assertEquals(0, cache.buffers);
+    }
+    
     
     private Piece getNext() throws Exception {
         while (read < file.length()) {

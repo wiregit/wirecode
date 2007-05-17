@@ -81,6 +81,8 @@ import com.limegroup.gnutella.uploader.UploadType;
  * <code>HTTPUploader</code> is set as interrupted and a second one is created
  * for the new file, using the same connection as the first one.
  * <p>
+ * To initialize the upload manager {@link #start(HTTPAcceptor)} needs to be
+ * invoked which registers handlers with an {@link HTTPAcceptor}.
  * 
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  * @see com.limegroup.gnutella.HTTPAcceptor

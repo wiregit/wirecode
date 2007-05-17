@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,6 +105,8 @@ public class FilePieceReader implements PieceReader {
      */
     private boolean shutdown;
 
+    private AtomicInteger jobCount = new AtomicInteger();
+
     public FilePieceReader(ByteBufferCache bufferCache, File file, long offset,
             long length, PieceListener listener) throws IOException {
         if (bufferCache == null || file == null || listener == null) {
@@ -144,7 +148,7 @@ public class FilePieceReader implements PieceReader {
         }
     }
 
-    private void failed(IOException exception) {
+    protected void failed(IOException exception) {
         shutdown();
         listener.readFailed(exception);
     }
@@ -160,8 +164,10 @@ public class FilePieceReader implements PieceReader {
      * Returns true, if a {@link Piece} is available that can be retrieved
      * through {@link #next()}.
      */
-    public synchronized boolean hasNext() {
-        assert !shutdown;
+    public synchronized boolean hasNext() throws EOFException {
+        if (shutdown) {
+            throw new EOFException();
+        }
         
         if (pieceQueue.isEmpty()) {
             return false;
@@ -170,7 +176,9 @@ public class FilePieceReader implements PieceReader {
     }
 
     public synchronized Piece next() throws EOFException {
-        assert !shutdown;
+        if (shutdown) {
+            throw new EOFException();
+        }
         
         if (remaining == 0 && readOffset == processingOffset) {
             throw new EOFException();
@@ -217,6 +225,12 @@ public class FilePieceReader implements PieceReader {
             }
         }
         
+        synchronized (this) {
+            for (Piece piece : pieceQueue) {
+                release(piece);
+            }
+        }
+        
         try {
             channel.close();
         } catch (IOException e) {
@@ -229,6 +243,24 @@ public class FilePieceReader implements PieceReader {
         }
     }
 
+    public void shutdownAndWait(long timeout) throws InterruptedException, TimeoutException {
+        shutdown();
+        waitForShutdown(timeout);
+    }
+    
+    public void waitForShutdown(long timeout) throws InterruptedException, TimeoutException {
+        long start = System.currentTimeMillis();
+        while (jobCount.get() > 0) {
+            synchronized (this) {
+                this.wait(50);
+            }
+            
+            if (System.currentTimeMillis() - start > timeout) {
+                throw new TimeoutException();
+            }
+        }
+    }
+    
     /**
      * Starts the processing queue that reads the file. To free resources
      * {@link #shutdown()} must be invoked when reading has been completed.
@@ -256,6 +288,7 @@ public class FilePieceReader implements PieceReader {
                         length);
                 processingOffset += length;
                 remaining -= length;
+                jobCount.incrementAndGet();
                 QUEUE.submit(job);
             }
         }
@@ -338,12 +371,15 @@ public class FilePieceReader implements PieceReader {
 
             if (exception != null) {
                 FilePieceReader.this.failed(exception);
+                release(buffer);
             } else {
                 buffer.flip();
                 assert buffer.remaining() == length;
 
                 FilePieceReader.this.add(offset, buffer);
             }
+            
+            jobCount.decrementAndGet();
         }
 
     }
