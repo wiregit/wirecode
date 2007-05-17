@@ -41,16 +41,17 @@ public class InspectionRequest extends RoutableGGEPMessage {
     }
     
     InspectionRequest(GGEPSigner signer, String... requested) {
-        this(new GUID(),signer, false, 1, null, requested);
+        this(new GUID(),signer, false, 1, null, null, requested);
     }
     /**
      * @param timestamp true if the response should contain a timestamp.
      * @param requested requested fields for inspection.  
      * See <tt>InspectionUtils</tt> for description of the format.
      */
-    public InspectionRequest(GUID g, GGEPSigner signer, boolean timestamp, long version, IpPort returnAddr, String... requested) {
+    public InspectionRequest(GUID g, GGEPSigner signer, boolean timestamp, 
+            long version, IpPort returnAddr, IpPort destAddress, String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION, signer,
-                deriveGGEP(timestamp, version, returnAddr, requested));
+                deriveGGEP(timestamp, version, returnAddr, destAddress, requested));
         setGUID(g);
         this.requested = requested;
         this.timestamp = timestamp;
@@ -64,7 +65,11 @@ public class InspectionRequest extends RoutableGGEPMessage {
         return timestamp;
     }
     
-    private static GGEP deriveGGEP(boolean timestamp, long version, IpPort returnAddr, String... requested) {
+    public void setGUID(GUID g) {
+        super.setGUID(g);
+    }
+    
+    private static GGEP deriveGGEP(boolean timestamp, long version, IpPort returnAddr, IpPort destAddr, String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.
@@ -87,6 +92,13 @@ public class InspectionRequest extends RoutableGGEPMessage {
             try {
                 IPPortCombo ipc = new IPPortCombo(returnAddr.getAddress(), returnAddr.getPort());
                 g.put(RETURN_ADDRESS_KEY, ipc.toBytes());
+            } catch (UnknownHostException ignore){}
+        }
+        
+        if (destAddr != null) {
+            try {
+                IPPortCombo ipc = new IPPortCombo(destAddr.getAddress(), destAddr.getPort());
+                g.put(TO_ADDRESS_KEY, ipc.toBytes());
             } catch (UnknownHostException ignore){}
         }
         
