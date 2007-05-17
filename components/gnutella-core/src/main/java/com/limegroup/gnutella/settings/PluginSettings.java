@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -17,4 +18,11 @@ public class PluginSettings extends LimeProps {
     public static final StringSetting CUSTOM_PLUGINS_PATH
         = FACTORY.createStringSetting("CUSTOM_PLUGINS_PATH", 
                 "DEFAULT_CUSTOM_PLUGINS_PATH_VALUE");
+    
+    /**
+     * List of file extensions that might be plugins
+     */
+    public static final StringArraySetting PLUGIN_EXTENSIONS
+        = FACTORY.createStringArraySetting("PLUGIN_EXTENSIONS", 
+                new String[]{".jar", ".zip"});
 }

@@ -149,11 +149,17 @@ public class LimePluginManager {
         
         File[] files = null;
         if (path.isDirectory() && path.getName().equals(PLUGINS)) {
+            final String[] extensions = PluginSettings.PLUGIN_EXTENSIONS.getValue();
+            
             files = path.listFiles(new FileFilter() {
                 public boolean accept(File pathname) {
                     if (pathname.isFile()) {
                         String name = pathname.getName().toLowerCase(Locale.US);
-                        return name.endsWith(".jar") || name.endsWith(".zip");
+                        for (String ext : extensions) {
+                            if (name.endsWith(ext)) {
+                                return true;
+                            }
+                        }
                     }
                     return pathname.isDirectory();
                 }
