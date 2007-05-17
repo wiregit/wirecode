@@ -133,28 +133,38 @@ public class LimePluginManager {
         File libPluginsDir = new File("../lib/", PLUGINS);
         locations.addAll(Arrays.asList(getPluginLocations(libPluginsDir)));
         
-        if (!PluginSettings.CUSTOM_PLUGINS_DIR.isDefault()) {
-            String customPluginsDir = PluginSettings.CUSTOM_PLUGINS_DIR.getValue();
-            locations.addAll(Arrays.asList(getPluginLocations(new File(customPluginsDir))));
+        // "<custom path>"
+        if (!PluginSettings.CUSTOM_PLUGINS_PATH.isDefault()) {
+            String customPluginsPath = PluginSettings.CUSTOM_PLUGINS_PATH.getValue();
+            locations.addAll(Arrays.asList(getPluginLocations(new File(customPluginsPath))));
         }
         
         return (PluginLocation[])locations.toArray(new PluginLocation[0]);
     }
     
-    private static PluginLocation[] getPluginLocations(File dir) {
-        if (dir == null || !dir.exists() || !dir.isDirectory()) {
+    private static PluginLocation[] getPluginLocations(File path) {
+        if (path == null || !path.exists()) {
             return new PluginLocation[0];
         }
         
-        File[] files = dir.listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                if (pathname.isFile()) {
-                    String name = pathname.getName().toLowerCase(Locale.US);
-                    return name.endsWith(".jar") || name.endsWith(".zip");
+        File[] files = null;
+        if (path.isDirectory() && path.getName().equals(PLUGINS)) {
+            files = path.listFiles(new FileFilter() {
+                public boolean accept(File pathname) {
+                    if (pathname.isFile()) {
+                        String name = pathname.getName().toLowerCase(Locale.US);
+                        return name.endsWith(".jar") || name.endsWith(".zip");
+                    }
+                    return pathname.isDirectory();
                 }
-                return pathname.isDirectory();
-            }
-        });
+            });
+        } else if (path.isFile()) {
+            files = new File[] { path };
+        }
+        
+        if (files == null) {
+            return new PluginLocation[0];
+        }
         
         List<PluginLocation> locations = new ArrayList<PluginLocation>();
         for (File file : files) {
