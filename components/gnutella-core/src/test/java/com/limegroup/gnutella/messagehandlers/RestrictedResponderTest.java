@@ -22,6 +22,7 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
@@ -194,6 +195,24 @@ public class RestrictedResponderTest extends BaseTestCase {
         assertEquals(3, versionSetting.getValue());
     }
     
+    public void testDestinationAddress() throws Exception {
+        TestResponder responder = new TestResponder(null);
+        TestGGEPMessage m = new TestGGEPMessage();
+        
+        // a message w/o a version will go through if it has the proper
+        // destination address
+        m.version = -1;
+        m.destAddr = new IpPortImpl(InetAddress.getByAddress(RouterService.getExternalAddress()),1234);
+        responder.handleMessage(m, addr, h);
+        assertSame(m, responder.msg);
+        
+        // if the destination address is wrong, it is dropped.
+        m.destAddr = new IpPortImpl("1.2.3.4",100);
+        responder.msg = null;
+        responder.handleMessage(m, addr, h);
+        assertNull(responder.msg);
+    }
+    
     private static int simppVersion;
     private void triggerSimppUpdate() throws Exception {
         List<SimppListener> l = (List<SimppListener>) 
@@ -253,7 +272,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     
     private static class TestGGEPMessage extends RoutableGGEPMessage {
         int version = 1;
-        IpPort returnAddr;
+        IpPort returnAddr, destAddr;
         protected TestGGEPMessage() throws BadPacketException {
             super(new byte[4], 1, 1, new RoutableGGEPMessage.GGEPSigner() {
                 public GGEP getSecureGGEP(GGEP original) {
@@ -270,6 +289,10 @@ public class RestrictedResponderTest extends BaseTestCase {
         @Override
         public IpPort getReturnAddress() {
             return returnAddr;
+        }
+        @Override
+        public IpPort getDestinationAddress() {
+            return destAddr;
         }
     }
 }

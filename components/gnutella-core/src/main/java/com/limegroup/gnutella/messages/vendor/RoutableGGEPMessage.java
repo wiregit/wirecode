@@ -26,6 +26,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
     
     static final String RETURN_ADDRESS_KEY = "RA";
     static final String VERSION_KEY = "V";
+    static final String TO_ADDRESS_KEY = "TO";
 
     /** Whether or not this message has been verified as secure. */
     private int _secureStatus = SecureMessage.INSECURE;
@@ -44,6 +45,11 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
      * The return address of this message.
      */
     private final IpPort returnAddress;
+    
+    /**
+     * The destination address of this message
+     */
+    private final IpPort destAddress;
     
     /**
      * The routing version of this message
@@ -72,7 +78,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         try {
             routableVersion = ggep.getLong(VERSION_KEY);
         } catch (BadGGEPPropertyException bad){
-            throw new BadPacketException("no routable version");
+            routableVersion = -1;
         }
         this.routableVersion = routableVersion;
         
@@ -84,6 +90,15 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
                 retAddr = IPPortCombo.getCombo(returnAddress);
         } catch (InvalidDataException bleh) {}
         this.returnAddress = retAddr;
+
+        // get destination address if any
+        IpPort destAddr = null;
+        try {
+            byte [] destAddress = ggep.get(TO_ADDRESS_KEY);
+            if (destAddress != null)
+                destAddr = IPPortCombo.getCombo(destAddress);
+        } catch (InvalidDataException bleh) {}
+        this.destAddress = destAddr;
     }
     
     protected RoutableGGEPMessage(byte [] vendor, int selector, int version, GGEPSigner signer, GGEP ggep) {
@@ -91,6 +106,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
         this.ggep = ggep;
         // nodes cannot create messages with custom return address or version.
         this.returnAddress = null;
+        this.destAddress = null;
         this.routableVersion = -1;
         this.secureData = null;
     }
@@ -115,7 +131,16 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
     }
     
     /**
+     * @return the address this message was intended to go to.
+     * null if none was present.
+     */
+    public IpPort getDestinationAddress() {
+        return destAddress;
+    }
+    
+    /**
      * @return the routable version of this message
+     * -1 if none was present
      */
     public long getRoutableVersion() {
         return routableVersion;

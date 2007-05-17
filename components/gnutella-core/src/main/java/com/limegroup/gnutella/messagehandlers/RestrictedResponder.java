@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 
 import org.limewire.io.IP;
 import org.limewire.security.SecureMessage;
@@ -10,6 +11,7 @@ import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.Message;
@@ -82,20 +84,36 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         }
     }
     
-    /** Processes a routable message */
+    /** 
+     * Processes a routable message.
+     * 
+     * If the message has a return address, it must have a routable version.
+     * If not, it must have either a routable version or a destination address.
+     */
     private void processRoutableMessage(RoutableGGEPMessage msg, InetSocketAddress addr, ReplyHandler handler) {
         
         // if the message specifies a return address, use that 
-        if (msg.getReturnAddress() != null)
+        if (msg.getReturnAddress() != null) {
+            // messages with return address MUST have routable version
+            if (msg.getRoutableVersion() < 0)
+                return;
             handler = new UDPReplyHandler(msg.getReturnAddress().getInetAddress(),
                     msg.getReturnAddress().getPort());
+        } else if (msg.getDestinationAddress() != null) {
+            // if there is a destination address, it must match our external address
+            if (!Arrays.equals(RouterService.getExternalAddress(),
+                    msg.getDestinationAddress().getInetAddress().getAddress()))
+                return;
+        } else if (msg.getRoutableVersion() < 0) // no routable version either? drop.
+            return;
+
         
         if (!allowed.contains(new IP(handler.getAddress())))
             return;
         
         // check if its a newer version than the last we routed.
         long routableVersion = msg.getRoutableVersion();
-        if (lastRoutedVersion != null) {
+        if (lastRoutedVersion != null && routableVersion > 0) {
             synchronized(lastRoutedVersion) {
                 if (routableVersion <= lastRoutedVersion.getValue())
                     return;
