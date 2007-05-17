@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,8 @@ import org.java.plugin.registry.PluginRegistry;
 import org.java.plugin.standard.StandardPluginLocation;
 import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.util.CommonUtils;
+
+import com.limegroup.gnutella.settings.PluginSettings;
 
 public class LimePluginManager {
     
@@ -112,12 +115,38 @@ public class LimePluginManager {
     }
     
     private static PluginLocation[] getPluginLocations() {
-        File root = new File(CommonUtils.getUserSettingsDir(), PLUGINS);
-        if (!root.exists() || !root.isDirectory()) {
+        List<PluginLocation> locations = new ArrayList<PluginLocation>();
+        
+        // "./plugins"
+        File mainPluginsDir = new File(PLUGINS);
+        locations.addAll(Arrays.asList(getPluginLocations(mainPluginsDir)));
+        
+        // "~/plugins"
+        File userPluginsDir = new File(CommonUtils.getUserHomeDir(), PLUGINS);
+        locations.addAll(Arrays.asList(getPluginLocations(userPluginsDir)));
+        
+        // "<settings>/plugins"
+        File settingsPluginsDir = new File(CommonUtils.getUserSettingsDir(), PLUGINS);
+        locations.addAll(Arrays.asList(getPluginLocations(settingsPluginsDir)));
+        
+        // "../lib/plugins"
+        File libPluginsDir = new File("../lib/", PLUGINS);
+        locations.addAll(Arrays.asList(getPluginLocations(libPluginsDir)));
+        
+        if (!PluginSettings.CUSTOM_PLUGINS_DIR.isDefault()) {
+            String customPluginsDir = PluginSettings.CUSTOM_PLUGINS_DIR.getValue();
+            locations.addAll(Arrays.asList(getPluginLocations(new File(customPluginsDir))));
+        }
+        
+        return (PluginLocation[])locations.toArray(new PluginLocation[0]);
+    }
+    
+    private static PluginLocation[] getPluginLocations(File dir) {
+        if (dir == null || !dir.exists() || !dir.isDirectory()) {
             return new PluginLocation[0];
         }
         
-        File[] files = root.listFiles(new FileFilter() {
+        File[] files = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
                 if (pathname.isFile()) {
                     String name = pathname.getName().toLowerCase(Locale.US);
@@ -134,7 +163,12 @@ public class LimePluginManager {
                 if (loc != null) {
                     locations.add(loc);
                 }
-                System.out.println(file + " -> " + loc);
+                
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Plugin: " + file + " -> " + loc);
+                }
+                
+                // System.out.println(file + " -> " + loc);
             } catch (MalformedURLException err) {
                 LOG.error("MalformedURLException", err);
                 err.printStackTrace();
