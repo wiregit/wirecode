@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
 import org.limewire.io.IpPortImpl;
@@ -17,6 +19,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -56,9 +59,10 @@ public class DirectAltLoc extends AlternateLocation {
 	 * creates an altloc for myself.
 	 */
 	protected DirectAltLoc(final URN sha1) throws IOException{
-		this(new IpPortImpl(
+	    this(new ConnectableImpl(
 		        NetworkUtils.ip2string(RouterService.getAddress()),
-		        RouterService.getPort())
+		        RouterService.getPort(),
+                ConnectionSettings.TLS_INCOMING.getValue())
 		    ,sha1);
 	}
 	
@@ -88,7 +92,9 @@ public class DirectAltLoc extends AlternateLocation {
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   ALT_VENDOR,//Never displayed, and we don't know
-                                  null, -1, false);
+                                  null, -1, 
+              _node instanceof Connectable ? ((Connectable)_node).isTLSCapable() : false // TLS
+                                );
 		
 		return ret;
 	}
@@ -191,7 +197,7 @@ public class DirectAltLoc extends AlternateLocation {
 	public int hashCode() {
 		if (hashCode ==0) {
 			int result = super.hashCode();
-			result = (37* result)+_node.getInetAddress().hashCode();
+			result = (37* result)+_node.getAddress().hashCode();
 			result = (37* result)+_node.getPort();
 			hashCode=result;
 		}

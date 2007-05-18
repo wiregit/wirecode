@@ -54,5 +54,9 @@ public abstract class MojitoTestCase extends BaseTestCase {
         public boolean isLocalAddressPrivate() {
             return isLocalPrivate; 
         }
+        
+        public boolean isTLSCapable() {
+            return false;
+        }
     }
 }

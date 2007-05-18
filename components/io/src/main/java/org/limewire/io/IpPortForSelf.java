@@ -18,7 +18,7 @@ import org.limewire.service.ErrorService;
  * Its NOT ok to use this in objects whose hashCode or equals will depend on 
  * the values returned by any of the getters.  
  */
-public class IpPortForSelf implements IpPort {
+public class IpPortForSelf implements IpPort, Connectable {
 	
 	private static final IpPort INSTANCE = new IpPortForSelf();
 	private static final InetAddress localhost;
@@ -63,4 +63,7 @@ public class IpPortForSelf implements IpPort {
 	public String toString() {
 		return getAddress() +":"+getPort();
 	}
+    public boolean isTLSCapable() {
+        return LocalSocketAddressService.isTLSCapable();
+    }
 }

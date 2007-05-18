@@ -14,4 +14,10 @@ public interface LocalSocketAddressProvider {
      */ 
     public boolean isLocalAddressPrivate();
     
+    /**
+     * Determines if the socket listening on the local addr/port is
+     * capable of accepting TLS connections.
+     */
+    public boolean isTLSCapable();
+    
 }

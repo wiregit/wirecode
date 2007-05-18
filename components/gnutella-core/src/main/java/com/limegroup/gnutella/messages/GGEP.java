@@ -54,6 +54,8 @@ public class GGEP {
     public static final String GGEP_HEADER_PUSH_PROXY_TLS = "PUSH_TLS";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
+    /** The extension header (key) for AlternateLocations that support TLS */
+    public static final String GGEP_HEADER_ALTS_TLS = "ALT_TLS";
     /** The extention header (key) for IpPort request */
     public static final String GGEP_HEADER_IPPORT="IP";
     /** The extension header (key) for UDP HostCache pongs. */

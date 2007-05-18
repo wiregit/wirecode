@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.StringTokenizer;
 
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
-import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
@@ -118,14 +118,42 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 	 * If the first is given, then the SHA1 in the string MUST match
 	 * the SHA1 given.
 	 * 
-	 * @param good whether the proxies contained in the string representation
-	 * should be added to or removed from the current set of proxies
+	 * @param location the URL or IP[port]
+     * @param URN the urn to use when the location doesn't contain a URN
 	 *
 	 * @throws <tt>IOException</tt> if there is any problem constructing
 	 *  the new instance.
 	 */
 	public static AlternateLocation create(final String location,
 	                                       final URN urn) throws IOException {
+        return create(location, urn, false);
+    }
+    
+    /**
+     * Constructs a new <tt>AlternateLocation</tt> instance based on the
+     * specified string argument and URN.  The location created this way
+     * assumes the name "ALT" for the file.
+     *
+     * @param location a string containing one of the following:
+     *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS" or
+     *  "1.2.3.4[:6346]" or
+     *  http representation of a PushEndpoint.
+     * 
+     * If the first is given, then the SHA1 in the string MUST match
+     * the SHA1 given.
+     * 
+     * @param location the URL or IP[port]
+     * @param URN the urn to use when the location doesn't contain a URN
+     * @param tlsCapable if the alternate location is capable of receiving
+     *                   TLS connections.  valid only if the location was
+     *                   not a full URL.
+     *
+     * @throws <tt>IOException</tt> if there is any problem constructing
+     *  the new instance.
+     */
+    public static AlternateLocation create(String location,
+                                           URN urn,
+                                           boolean tlsCapable) throws IOException {
 	    if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
@@ -143,7 +171,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
         
         // Case 2. Direct Alt Loc
         if (location.indexOf(";")==-1) {
-        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
+        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn, tlsCapable);
 			return new DirectAltLoc(addr, urn);
         }
         
@@ -177,7 +205,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 		    throw new NullPointerException("cannot accept null URN");
 
 		if (!rfd.needsPush()) {
-			return new DirectAltLoc(new IpPortImpl(rfd.getHost(),rfd.getPort()), urn);
+			return new DirectAltLoc(new ConnectableImpl(rfd.getHost(),rfd.getPort(), rfd.isTLSCapable()), urn);
 		} else {
 		    PushEndpoint copy;
             if (rfd.getPushAddr() != null) 
@@ -404,7 +432,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 	 * Creates a new <tt>URL</tt> based on the IP and port in the location
 	 * The location MUST be a dotted IP address.
 	 */
-	private static IpPort createUrlFromMini(final String location, URN urn)
+	private static IpPort createUrlFromMini(final String location, URN urn, boolean tlsCapable)
 	  throws IOException {
 	    int port = location.indexOf(':');
 	    final String loc =
@@ -439,7 +467,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
         if(!NetworkUtils.isValidPort(port))
             throw new IOException("invalid port: " + port);
 	    
-	    return new IpPortImpl(loc,port);
+	    return new ConnectableImpl(loc,port, tlsCapable);
     }
 
 	/**

@@ -6,17 +6,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.collection.BitNumbers;
 import org.limewire.collection.NameValue;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IPPortCombo;
+import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -24,7 +28,6 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
@@ -146,7 +149,7 @@ public class Response {
 		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
-			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
+			    getAsIpPorts(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
 			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
@@ -426,13 +429,13 @@ public class Response {
      * Utility method for converting the non-firewalled elements of an
      * AlternateLocationCollection to a smaller set of endpoints.
      */
-    private static Set<Endpoint> getAsEndpoints(AlternateLocationCollection<DirectAltLoc> col) {
+    private static Set<? extends IpPort> getAsIpPorts(AlternateLocationCollection<DirectAltLoc> col) {
         if( col == null || !col.hasAlternateLocations() )
             return Collections.emptySet();
         
         long now = System.currentTimeMillis();
         synchronized(col) {
-            Set<Endpoint> endpoints = null;
+            Set<IpPort> endpoints = null;
             int i = 0;
             for(Iterator<DirectAltLoc> iter = col.iterator(); iter.hasNext() && i < MAX_LOCATIONS;) {
                 DirectAltLoc al = iter.next();
@@ -440,13 +443,9 @@ public class Response {
                     IpPort host = al.getHost();
                     if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
-                            endpoints = new HashSet<Endpoint>();
+                            endpoints = new IpPortSet();
                         
-                        if (!(host instanceof Endpoint)) {
-                        	endpoints.add(new Endpoint(host.getAddress(),host.getPort()));
-                        } else {
-                            endpoints.add((Endpoint)host);
-                        }
+                        endpoints.add(host);
                         i++;
                         al.send(now, AlternateLocation.MESH_RESPONSE);
                     }
@@ -558,7 +557,7 @@ public class Response {
      * contain the same file described in this <tt>Response</tt>,
      * guaranteed to be non-null, although the set could be empty
      */
-    public Set<Endpoint> getLocations() {
+    public Set<? extends IpPort> getLocations() {
         return ggepData.locations;
     }
     
@@ -669,20 +668,18 @@ public class Response {
             
             GGEP info = new GGEP();
             if(ggep.locations.size() > 0) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                try {
-                    for(Endpoint ep : ggep.locations) {
-                        try {
-                            baos.write(ep.getHostBytes());
-                            ByteOrder.short2leb((short)ep.getPort(), baos);
-                        } catch(UnknownHostException uhe) {
-                            continue;
-                        }
-                    }
-                } catch(IOException impossible) {
-                    ErrorService.error(impossible);
-                }   
-                info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
+                BitNumbers bn = new BitNumbers(ggep.locations.size());
+                int i = 0;
+                for(IpPort ipp : ggep.locations) {
+                    if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                        bn.set(i);
+                    i++;
+                }
+                    
+                byte[] output = NetworkUtils.packIpPorts(ggep.locations);   
+                info.put(GGEP.GGEP_HEADER_ALTS, output);
+                if(!bn.isEmpty())
+                    info.put(GGEP.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
             }
             
             if(ggep.createTime > 0)
@@ -700,14 +697,21 @@ public class Response {
             if (ggep == null)
                 return GGEPContainer.EMPTY;
 
-            Set<Endpoint> locations = null;
+            Set<? extends IpPort> locations = null;
             long createTime = -1;
             
             // if the block has a ALTS value, get it, parse it,
             // and move to the next.
             if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
+                byte[] tlsData = null;
+                if(ggep.hasKey(GGEP.GGEP_HEADER_ALTS_TLS)) {
+                    try {
+                        tlsData = ggep.getBytes(GGEP.GGEP_HEADER_ALTS_TLS);
+                    } catch(BadGGEPPropertyException ignored) {}
+                }
+                BitNumbers bn = tlsData == null ? null : new BitNumbers(tlsData);
                 try {
-                    locations = parseLocations(ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
+                    locations = parseLocations(bn, ggep.getBytes(GGEP.GGEP_HEADER_ALTS));
                 } catch (BadGGEPPropertyException bad) {}
             }
             
@@ -721,28 +725,43 @@ public class Response {
                 GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
         }
         
-        private static Set<Endpoint> parseLocations(byte[] locBytes) {
-            Set<Endpoint> locations = null;
-            IPFilter ipFilter = RouterService.getIpFilter();
- 
-            if (locBytes.length % 6 == 0) {
-                for (int j = 0; j < locBytes.length; j += 6) {
-                    int port = ByteOrder.ushort2int(ByteOrder.leb2short(locBytes, j+4));
-                    if (!NetworkUtils.isValidPort(port))
-                        continue;
-                    byte[] ip = new byte[4];
-                    ip[0] = locBytes[j];
-                    ip[1] = locBytes[j + 1];
-                    ip[2] = locBytes[j + 2];
-                    ip[3] = locBytes[j + 3];
-                    if (!NetworkUtils.isValidAddress(ip) ||
-                        !ipFilter.allow(ip) ||
-                        NetworkUtils.isMe(ip, port))
-                        continue;
-                    if (locations == null)
-                        locations = new HashSet<Endpoint>();
-                    locations.add(new Endpoint(ip, port));
+        /**
+         * Returns a set of IpPorts corresponding to the IpPorts in data.
+         * If BitNumbers is non-null, the addresses in the index corresponding
+         * to any 'on' indexes in BitNumbers are considered tlsCapable.
+         * Whenever an invalid address is encountered, all further hosts
+         * are prevented from being TLS capable.
+         */
+        private static Set<? extends IpPort> parseLocations(BitNumbers tlsHosts, byte[] data) {
+            Set<IpPort> locations = null;
+            
+            if (data.length % 6 != 0)
+                return null;
+            
+            int size = data.length/6;
+            byte [] current = new byte[6];
+            for (int i=0;i<size;i++) {
+                System.arraycopy(data,i*6,current,0,6);
+                IpPort ipp;
+                try {
+                    ipp = IPPortCombo.getCombo(current);
+                } catch(InvalidDataException ide) {
+                    tlsHosts = null; // turn off TLS
+                    continue;
                 }
+                
+                // if we're me or banned, ignore.
+                if(!RouterService.getIpFilter().allow(ipp) || NetworkUtils.isMe(ipp))
+                    continue;
+                
+                if(locations == null)
+                    locations = new IpPortSet();
+                
+                // if this addr was TLS-capable, mark it as such.
+                if(tlsHosts != null && tlsHosts.isSet(i))
+                    ipp = new ConnectableImpl(ipp, true);
+                
+                locations.add(ipp);
             }
             return locations;
         }
@@ -752,7 +771,7 @@ public class Response {
      * A container for information we're putting in/out of GGEP blocks.
      */
     static final class GGEPContainer {
-        final Set<Endpoint> locations;
+        final Set<? extends IpPort> locations;
         final long createTime;
         private static final GGEPContainer EMPTY = new GGEPContainer();
         
@@ -760,7 +779,7 @@ public class Response {
             this(null, -1);
         }
         
-        GGEPContainer(Set<? extends Endpoint> locs, long create) {
+        GGEPContainer(Set<? extends IpPort> locs, long create) {
             if(locs == null)
                 locations = Collections.emptySet();
             else

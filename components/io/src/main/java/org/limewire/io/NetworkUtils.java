@@ -377,8 +377,6 @@ public final class NetworkUtils {
     	int size = data.length/6;
     	List<IpPort> ret = new ArrayList<IpPort>(size);
     	byte [] current = new byte[6];
-    	
-    	
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
     		ret.add(IPPortCombo.getCombo(current));

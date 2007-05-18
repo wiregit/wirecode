@@ -9,10 +9,10 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
@@ -243,7 +243,7 @@ public final class SearchResultHandler {
                 
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             rfd.setSecureStatus(secureStatus);
-            Set<Endpoint> alts = response.getLocations();
+            Set<? extends IpPort> alts = response.getLocations();
             RouterService.getCallback().handleQueryResult(rfd, data, alts);
             
             if (skipSpam || !SpamManager.instance().isSpam(rfd))
