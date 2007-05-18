@@ -186,7 +186,7 @@ public class IPList {
         private static final long TOTAL_SPACE = (long)Math.pow(2,32) - INVALID_SPACE;
         
         /** The maximum IP space (in percent) for this IPList to be valid */
-        private static final float MAX_LIST_SPACE = 0.05f;
+        private static final float MAX_LIST_SPACE = 0.025f;
         
         private boolean isInvalid;
         private long counter;

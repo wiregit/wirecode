@@ -31,7 +31,7 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         list.add("*.*.*.*");
         assertFalse(list.isValidFilter(false));
         
-        //try below max space
+        //try below max space - 2.5% of 4GB = 6 class A networks
         list = new IPList();
         list.add("1.*.*.*");
         list.add("2.*.*.*");
@@ -40,10 +40,7 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         list.add("5.*.*.*");
         list.add("6.*.*.*");
         assertTrue(list.isValidFilter(false));
-        //max space:
-        for(int i = 11; i < 20; i++) {
-            list.add(i+".*.*.*");
-        }
+        list.add("7.*.*.*");
         assertFalse(list.isValidFilter(false));
     }
     
