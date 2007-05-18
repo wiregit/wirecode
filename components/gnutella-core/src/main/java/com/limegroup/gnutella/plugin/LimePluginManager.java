@@ -20,6 +20,7 @@ import org.java.plugin.registry.PluginDescriptor;
 import org.java.plugin.registry.PluginRegistry;
 import org.java.plugin.standard.StandardPluginLocation;
 import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.settings.PluginSettings;
@@ -47,6 +48,10 @@ public class LimePluginManager {
     private boolean running = false;
     
     private LimePluginManager() {
+        //File shadow = new File("shadow");
+        //System.setProperty("org.java.plugin.standard.ShadingPathResolver.shadowFolder", shadow.getAbsolutePath());
+        //System.setProperty("org.java.plugin.standard.ShadingPathResolver.unpackMode", "always");
+        
         manager = ObjectFactory.newInstance().createManager();
     }
     
@@ -96,9 +101,8 @@ public class LimePluginManager {
             if (!manager.isPluginActivated(descriptor)) {
                 try {
                     manager.activatePlugin(descriptor.getId());
-                } catch (PluginLifecycleException err) {
-                    LOG.error("PluginLifecycleException", err);
-                    err.printStackTrace();
+                } catch (Throwable err) {
+                    ErrorService.error(err);
                 }
             }
         }
