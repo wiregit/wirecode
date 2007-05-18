@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Defines the interface for a class to return the {@link InetAddress}, port 
- * and the host address as a string.
+ * Defines the interface for an object to return an {@link InetAddress}, port 
+ * as an integer and the host address as a string.
  */
 public interface IpPort {
 
@@ -48,10 +48,10 @@ public interface IpPort {
      * Compares <code>IpPort</code> objects.
      *
      * This class is useful when a variety of objects that implement 
-     * <code>IpPort</code>want to be placed in a Set. Since it is difficult
+     * <code>IpPort</code> want to be placed in a {@link Set}. Since it is difficult
      * (near impossible) to enforce that they all maintain a valid contract 
      * with regards to hashCode and equals, the only valid way to enforce 
-     * {@link Set} equality is to use a Comparator that is based on a unique 
+     * <code>Set</code> equality is to use a Comparator that is based on a unique 
      * IP Port criteria.
      */
     public static class IpPortComparator implements Comparator<IpPort> {

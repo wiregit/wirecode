@@ -4,7 +4,7 @@ package org.limewire.io;
 import java.io.IOException;
 
 /**
- * Thrown upon problems writing to disk.
+ * Thrown upon problems reading from and writing to disk.
  *
  */
 public class DiskException extends IOException {

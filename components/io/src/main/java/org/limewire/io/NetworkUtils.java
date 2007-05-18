@@ -21,8 +21,7 @@ import java.util.Set;
 import org.limewire.util.ByteOrder;
 
 /**
- * Provides methods for network programming. Like other LimeWire utility classes
- * <code>NetworkUtils</code> contains static methods.
+ * Provides methods for network programming. 
  * <code>NetworkUtils</code>' methods check the validity of IP addresses, ports
  * and socket addresses. <code>NetworkUtils</code> includes both 
  * IPv4 and 
@@ -288,9 +287,6 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      * 
      * @param address the address to check
-     * @param localIsPrivate whether or not private addresses are
-     *          considered private (in other words this method will
-     *          always return false if localIsPrivate is false).
      */
     public static boolean isPrivateAddress(byte[] address) {
         if (!LocalSocketAddressService.isLocalAddressPrivate()) {

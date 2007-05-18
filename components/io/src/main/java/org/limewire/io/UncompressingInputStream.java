@@ -6,9 +6,9 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
- * Extends <code>InflaterInputStream</code> solely to catch a null pointer 
- * exception that can occur during the native <code>inflateBytes</code> method
- * call if you concurrently closed the stream.
+ * Extends <code>InflaterInputStream</code> solely to catch a 
+ * <code>NullPointerException</code> that can occur during the native 
+ * <code>inflateBytes</code> method call if you concurrently closed the stream.
  */
 public final class UncompressingInputStream extends InflaterInputStream {
     

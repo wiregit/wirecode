@@ -4,14 +4,23 @@ import java.security.MessageDigest;
 import java.util.zip.CRC32;
 
 /**
- * Provides a low overhead checksum of data, Cyclic Redundancy Check (CRC).  
- * See <a href ="http://en.wikipedia.org/wiki/Cyclic_redundancy_check">
- * CRC</a> for more information.
+ * Provides a low overhead message digest. Though a CRC is a type of hash 
+ * function that takes input of unlimited size and produces output of a fixed 
+ * size, it is not a message digest. The <code>MessageDigest</code> hash 
+ * functions, such as MD5 or SHA-1, include additional security properties not 
+ * present with a CRC. 
+ *<pre>         
+ *          Output Size in bits
+ *      CRC                 32
+ *      MD5                 128
+ *      SHA-1               160
+ *</pre>
+ * <p>
+ * See <a href ="http://en.wikipedia.org/wiki/Cryptographic_hash_function">
+ * Cryptographic hash function</a> for more information. 
+ * 
  */
- /* Technical Note: Since Java provides only MD5 and SHA-1 with
- * 128bit and 160bit respectively we do as if CRC is a message
- * digest to keep the overhead low.
- */
+
 public class CRC32MessageDigest extends MessageDigest {
     
     private final CRC32 crc = new CRC32();

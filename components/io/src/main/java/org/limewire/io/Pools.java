@@ -14,8 +14,9 @@ import org.limewire.concurrent.SimpleTimer;
 
 
 /**
- * Returns a {@link Deflater} and, or {@link Inflater} pool object for either 
- * compressing or decompressing data.
+ * Contains a global pool of {@link Deflater Deflaters} and {@link Inflater Inflaters}
+ * to reduce the memory associated with constructing many individual deflaters
+ * and inflaters.
  */
 public class Pools {
     
@@ -30,8 +31,6 @@ public class Pools {
      * Returns a shared ObjectPool for Deflaters.
      * The pool will automatically reset the deflater prior to returning it,
      * and end a deflater after it is returned.
-     * 
-     * @return
      */
     public static ObjectPool<Deflater> getDeflaterPool() {
         // Attempt to return the pool without locking.
@@ -50,8 +49,6 @@ public class Pools {
      * Returns a shared ObjectPool for Inflaters.
      * The pool will automatically reset the inflater prior to returning it,
      * and end a deflater after it is returned.
-     * 
-     * @return
      */
     public static ObjectPool<Inflater> getInflaterPool() {
         // Attempt to return the pool without locking.

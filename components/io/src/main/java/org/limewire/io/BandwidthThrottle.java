@@ -1,39 +1,50 @@
 package org.limewire.io;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /** 
  * Limits throughput of a stream to at most N bytes per T seconds. 
- * <code>BandwidthThrottle</code> is mutable and thread-safe.<p>
- *
+ * <code>BandwidthThrottle</code> is mutable and thread-safe.
+ * <p>
  * In the following example, <code>throttle</code> is used to send the contents
  * of <code>buf</code> to <code>out</code> at no more than <code>N/T</code> 
  * bytes per second:
  * <pre>
- *      BandwidthThrottle throttle=new BandwidthThrottle(N, T);
+ *      BandwidthThrottle throttle=new BandwidthThrottle(N / T);
  *      OutputStream out=...;
  *      byte[] buf=...;
- *      for (int i=0; i<buf.length; ) {
+ *      for (int i=0; i < buf.length; ) {
  *          int allowed=throttle.request(buf.length-i);
  *          out.write(buf, i, allowed);
  *          i+=allowed;
  *      }
  * </pre>
- 
- * <code>BandwidthThrottle</code> class works by allowing exactly N bytes to be
+ * The <code>BandwidthThrottle</code> class works by allowing exactly N bytes to be
  * sent every T seconds. If the number of bytes for a given dialog is exceeded,
- * subsequent calls to the <code>request</code> method block. Smaller T 
- * values allow fairer bandwidth sharing and less noticeable pauses but may 
- * slightly decrease efficiency.
+ * subsequent calls to the <code>request</code> method block until bytes become
+ * available. 
  * <p>
- * Note that throttles are <b>not</b> cumulative to allow for future control. 
- * Also, <code>BandwidthThrottle</code> may be able delegate to other
+ * Smaller T values allow fairer bandwidth sharing because many different
+ * {@link Thread Threads} can request smaller amounts of bandwidth in parallel, 
+ * as opposed to one thread hogging the allocated bandwidth. Unlike fairness as 
+ * described in {@link ReentrantLock}, <code>BandwidthThrottle</code> does not 
+ * favor the thread that has waited the longest time. 
+ * <p>
+ * Note that throttles are not cumulative; this may change in the future
+ * which could allow for fancier bandwidth control. 
+ * <p>
+ * <code>BandwidthThrottle</code>'s implementation is based on the 
+ * <code>Bandwidth</code> class from the <a href ="http://freenetproject.org/">
+ * Freenet Project</a> <code>Bandwidth</code> class. <code>BandwidthThrottle</code> 
+ * is a simplified version of the Freenet predecessor.
+*/
+/*
+ * An example of future, fancier controls: 
+ * <code>BandwidthThrottle</code> may be able delegate to other
  * throttles to allow, for example, a 15 KB/s Gnutella messaging throttle, with
  * no more than 10 KB/s devoted to uploads.
- * <p>
- * <code>BandwidthThrottle</code>’s implementation is based on the 
- * <code>Bandwidth</code> class from the <a href ="http://freenetproject.org/">
- * Freenet Project</a> Bandwidth class. <code>BandwidthThrottle</code> is a 
- * simplified version of the Freenet predecessor.
-*/
+ */
+
 public class BandwidthThrottle {
     /** The number of windows per second. */
     private static final int TICKS_PER_SECOND = 10;
@@ -56,11 +67,11 @@ public class BandwidthThrottle {
 
     /**
      * Creates a new bandwidth throttle at the given throttle rate.
-     * The default windows size T is used.  The bytes per windows N
+     * The default windows size T is used. The bytes per windows N
      * is calculated from bytesPerSecond.
      *
-     * @param bytesPerSecond the limits in bytes (not bits!) per second
-     * (not milliseconds!)
+     * @param bytesPerSecond the limits in bytes (not bits) per second
+     * (not milliseconds)
      */    
     public BandwidthThrottle(float bytesPerSecond) {
         setRate(bytesPerSecond);
@@ -70,7 +81,7 @@ public class BandwidthThrottle {
      * Creates a new bandwidth throttle at the given throttle rate, 
      * only allowing bandwidth to be used every other second if
      * switching is true.
-     * The default windows size T is used.  The bytes per windows N
+     * The default windows size T is used. The bytes per windows N
      * is calculated from bytesPerSecond.
      *
      * @param bytesPerSecond the limits in bytes (not bits!) per second
@@ -85,11 +96,11 @@ public class BandwidthThrottle {
     }    
 
     /**
-     * Sets the throttle to the given throttle rate.  The default windows size
-     * T is used.  The bytes per windows N is calculated from bytesPerSecond.
+     * Sets the throttle to the given throttle rate. The default windows size
+     * T is used. The bytes per windows N is calculated from bytesPerSecond.
      *
-     * @param bytesPerSecond the limits in bytes (not bits!) per second
-     * (not milliseconds!)  
+     * @param bytesPerSecond the limits in bytes (not bits) per second
+     * (not milliseconds)  
      */
     public void setRate(float bytesPerSecond) {
         _bytesPerTick = (int)(bytesPerSecond / TICKS_PER_SECOND);
@@ -99,7 +110,6 @@ public class BandwidthThrottle {
     
     /**
      * Sets whether or not this throttle is switching bandwidth on/off.
-     * @param switching
      */
     public void setSwitching(boolean switching) {
         if(_switching != switching)
@@ -111,7 +121,6 @@ public class BandwidthThrottle {
      * Modifies bytesPerTick to either be double or half of what it was.
      * This is necessary because of the 'switching', which can effectively
      * reduce or raise the amount of data transferred.
-     * @param raise
      */
     private void fixBytesPerTick(boolean raise) {
         int newBytesPerTick = _bytesPerTick;
@@ -126,7 +135,7 @@ public class BandwidthThrottle {
 
     /**
      * Blocks until the caller can send at least one byte without violating
-     * bandwidth constraints.  Records the number of byte sent.
+     * bandwidth constraints. Records the number of byte sent.
      *
      * @param desired the number of bytes the caller would like to send
      * @return the number of bytes the sender is expected to send, which
@@ -148,14 +157,12 @@ public class BandwidthThrottle {
                 break;
             try {
                 Thread.sleep(_nextTickTime - now);
-            } catch (InterruptedException e) {  //TODO: propogate
+            } catch (InterruptedException e) {  //TODO: propagate
             }
         }
     }
     
-    /** Updates _availableBytes and _nextTickTime if possible. 
-     * @param now
-     */
+    /** Updates _availableBytes and _nextTickTime if possible.  */
     private void updateWindow(long now) {
         if (now >= _nextTickTime) {
             if(!_switching || ((now/1000)%2)==0) {

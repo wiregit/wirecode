@@ -4,20 +4,25 @@ package org.limewire.io;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 
 import org.limewire.service.ErrorService;
 
 
+
+
 /**
- * Returns the current port and address for the local system. 
+ * Returns the current port and address for the local system. A <a 
+ * href="http://en.wikipedia.org/wiki/Singleton_pattern"> Singleton</a> 
+ * pattern, <code>IpPortForSelf</code> keeps a static reference which can be
+ * reused. 
  * <p>
- * You can use <code>IpPortForSelf</code> for {@link HashSets}.
- */ 
-/* Its OK to put this in HashSets
- * Its NOT ok to put it in IpPortSets
- * Its NOT ok to put DirectLocs using this in AlternateLocationCollections
- * Its NOT ok to use this in objects whose hashCode or equals will depend on 
- * the values returned by any of the getters.  
+ * It's ok to put <code>IpPortForSelf</code> in {@link HashSet HashSets}.<br>
+ * It's not ok to put <code>IpPortForSelf</code> in {@link IpPortSet IpPortSets}.<br>
+ * It's not ok to put <code>DirectAltLoc</code>s using this in 
+ * <code>AlternateLocationCollections</code>.<br>
+ * It's not ok to use <code>IpPortForSelf</code> in objects whose hashCode or 
+ * equals will depend on the values returned by any of the getters.  
  */
 public class IpPortForSelf implements IpPort {
 	

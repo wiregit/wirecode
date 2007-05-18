@@ -7,8 +7,8 @@ import java.io.IOException;
  * <code>I18NConvert</code>'s current implementation delegates the 
  * internationalization conversion through the ICU4J library. 
  * <p>
- * For example, Ã is normalized to a, ™ is normalized to tm and LiMEWirE is 
- * normalized to limewire. See 
+ * For example, &#195 is normalized to a, &#153 is normalized to tm and LiMEWirE is 
+ * normalized to limewire. See
  * <a href = "http://en.wikipedia.org/wiki/International_Components_for_Unicode">
  * Unicode</a> for more information about international components.
  */

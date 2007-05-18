@@ -7,7 +7,8 @@ import java.util.TreeSet;
 
 
 /**
- * Creates an <code>IpPort</code> collection.
+ * A utility class to easily construct a {@link TreeSet} with
+ * {@link IpPort#COMPARATOR}.
  */
 public class IpPortSet extends TreeSet<IpPort> {
 

@@ -1,19 +1,26 @@
 package org.limewire.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
- * Provides methods to make using byte[]'s and {@link ByteBuffer ByteBuffers} 
- * more efficient. <code>ByteBufferOutputStream</code> can optionally grow to 
- * meet the needed size. If, however, the buffer can’t be written, then <code>
- * ByteBufferOutputStream</code> throws an exception. 
+ * Wraps {@link ByteBuffer ByteBuffers} so it can be accessed as an
+ * {@link OutputStream}. This class exposes many methods to make using 
+ * <code>ByteBuffer</code> more convenient. <code>ByteBufferOutputStream</code>
+ * is similar to {@link ByteArrayInputStream}, however it uses 
+ * <code>ByteBuffer</code>. 
+ * <p>
+ * <code>ByteBufferOutputStream</code> can optionally grow to 
+ * meet the needed size. If the optional growth setting is off (default), yet 
+ * growth is needed, then {@link BufferOverflowException} is thrown.
  */
 public class ByteBufferOutputStream extends OutputStream {
     
-    /** The backing ByteBuffer.  If growth is enabled, the buffer may change. */
+    /** The backing ByteBuffer. If growth is enabled, the buffer may change. */
     protected ByteBuffer buffer;
     
     /** Whether or not this can grow. */
@@ -49,21 +56,22 @@ public class ByteBufferOutputStream extends OutputStream {
     
     /**
      * Creates an OutputStream using the given backing array, starting at position
-     * 'pos' and allowing writes for the given length.  The stream cannot grow.
+     * 'pos' and allowing writes for the given length. The stream cannot grow.
      */
     public ByteBufferOutputStream(byte[] backing, int pos, int length) {
         this(ByteBuffer.wrap(backing, pos, length), false);
     }
     
     /**
-     * Creates an OutputStream backed by the given ByteBuffer.  The stream cannot grow.
+     * Creates an OutputStream backed by the given ByteBuffer. The stream cannot 
+     * grow.
      */
     public ByteBufferOutputStream(ByteBuffer backing) {
         this(backing, false);
     }
     
     /**
-     * Creates an OutputStream backed by the given ByteBuffer.  If 'grow' is true,
+     * Creates an OutputStream backed by the given ByteBuffer. If 'grow' is true,
      * then the referenced ByteBuffer may change when the backing array is grown.
      */
     public ByteBufferOutputStream(ByteBuffer backing, boolean grow) {
@@ -113,7 +121,7 @@ public class ByteBufferOutputStream extends OutputStream {
     /**
      * Writes the current data to the given buffer.
      * If the sink cannot hold all the data stored in this buffer,
-     * nothing is written and a BufferOverflowException is thrown.
+     * nothing is written and a <code>BufferOverflowException</code> is thrown.
      * All written bytes are cleared.
      */
     public void writeTo(ByteBuffer sink) {
@@ -125,7 +133,7 @@ public class ByteBufferOutputStream extends OutputStream {
     /**
      * Writes the current data to the given byte[].
      * If the data is larger than the byte[], nothing is written
-     * and a BufferOverflowException is thrown.
+     * and a <code>BufferOverflowException</code> is thrown.
      * All written bytes are cleared.
      */
     public void writeTo(byte[] out) {
@@ -134,8 +142,8 @@ public class ByteBufferOutputStream extends OutputStream {
     
     /**
      * Writes the current data to the given byte[], starting at offset off and going
-     * for length len.  If the data is larger than the length, nothing is written and
-     * a BufferOverflowException is thrown.
+     * for length len. If the data is larger than the length, nothing is written and
+     * a <code>BufferOverflowException</code> is thrown.
      * All written bytes are cleared.
      */
     public void writeTo(byte[] out, int off, int len) {
@@ -173,7 +181,7 @@ public class ByteBufferOutputStream extends OutputStream {
     /**
      * Writes the byte[] to the buffer, starting at off for len bytes.
      * If the buffer cannot grow and this exceeds the size of the buffer, a
-     * BufferOverflowException is thrown and no data is written. 
+     * <code>BufferOverflowException</code> is thrown and no data is written. 
      * If the buffer can grow, a new buffer is created & data is written.
      */
     public void write(byte[] b, int off, int len) {
@@ -184,9 +192,9 @@ public class ByteBufferOutputStream extends OutputStream {
     }
     
     /**
-     * Writes the remaining bytes of the ByteBuffer to the buffer.
+     * Writes the remaining bytes of the <code>ByteBuffer</code> to the buffer.
      * If the buffer cannot grow and this exceeds the size of the buffer, a
-     * BufferOverflowException is thrown and no data is written. 
+     * <code>BufferOverflowException</code> is thrown and no data is written. 
      * If the buffer can grow, a new buffer is created & data is written.
      */
     public void write(ByteBuffer src) {
@@ -198,9 +206,10 @@ public class ByteBufferOutputStream extends OutputStream {
     
     /**
      * Writes the given byte to the buffer.
-     * If the buffer is already full and cannot grow, a BufferOverflowException is thrown
+     * If the buffer is already full and cannot grow, a 
+     * <code>BufferOverflowException</code> is thrown
      * and no data is written. If the buffer can grow, a new buffer is created
-     * & data is written.
+     * and data is written.
      */
     public void write(int b) {
         if(grow && !buffer.hasRemaining())
@@ -210,7 +219,7 @@ public class ByteBufferOutputStream extends OutputStream {
     }
     
     /**
-     * Writes the buffer to the given OutputStream.
+     * Writes the buffer to the given <code>OutputStream</code>.
      * All written bytes are cleared.
      */
     public void writeTo(OutputStream out) throws IOException {

@@ -6,9 +6,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 /**
- * Implements {@link IpPort} to return the IP port address as a string or 
- * an {@link InetAddress}.
-*/
+ * Provides a default {@link IpPort} implementation to return IP information
+ * ({@link InetAddress}, host name, and port number). <code>IpPortImpl</code>
+ * uses constructor arguments (either directly or via parsing) to set IP 
+ * information.
+ */
 public class IpPortImpl implements IpPort {
     
     private final InetAddress addr;

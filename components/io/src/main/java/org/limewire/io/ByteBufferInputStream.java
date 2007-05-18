@@ -7,9 +7,11 @@ import java.nio.ByteBuffer;
 import org.limewire.util.BufferUtils;
 
 /**
- * Contains an internal buffer that contains bytes that
- * may be read from the stream. Similar to {@link ByteArrayInputStream}, 
- * however <code>ByteBufferInputStream</code> uses {@link ByteBuffer}. 
+ * Wraps {@link ByteBuffer ByteBuffers} so it can be accessed as an
+ * {@link InputStream}. <code>ByteBufferInputStream</code> contains an internal
+ * buffer that contains bytes that may be read from the stream. 
+ * <code>ByteBufferInputStream</code> is similar to {@link ByteArrayInputStream}, 
+ * however it uses <code>ByteBuffer</code>. 
  * <p>
  * <code>ByteBufferInputStream</code> is not synchronized. 
  */

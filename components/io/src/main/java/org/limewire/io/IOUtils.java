@@ -24,13 +24,13 @@ import org.limewire.util.StringUtils;
 /**
  * Provides utility input and output related methods. <code>IOUtils</code> 
  * includes methods to read and skip over data, and handle exceptions. Furthermore,
- * this class lets you compress and uncompress data and to close objects and 
- * sockets.
+ * this class lets you compress and uncompress data and to close {@link Closeable}
+ * objects, {@link Socket Sockets} and {@link ServerSocket ServerSockets}.
  */
 public class IOUtils {
     
     /**
-     * Attempts to handle an IOException.  If we know expect the problem,
+     * Attempts to handle an IOException. If we know expect the problem,
      * we can either ignore it or display a friendly error (both returning
      * true, for handled) or expect the outer-world to handle it (and
      * return false).
@@ -90,8 +90,8 @@ public class IOUtils {
 
    /**
      * Returns the first word of specified maximum size up to the first space
-     * and returns it.  This does not read up to the first whitespace
-     * character -- it only looks for a single space.  This is particularly
+     * and returns it. This does not read up to the first whitespace
+     * character -- it only looks for a single space. This is particularly
      * useful for reading HTTP requests, as the request method, the URI, and
      * the HTTP version must all be separated by a single space.
      * Note that only one extra character is read from the stream in the case of
@@ -114,7 +114,7 @@ public class IOUtils {
                 got = in.read();
                 if (got >= 0) { // not EOF
                     if ((char)got != ' ') { //didn't get word. Exclude space.
-                        if (i < maxSize) { //We dont store the last letter
+                        if (i < maxSize) { //We don't store the last letter
                             buf[i++] = (char)got;
                             continue;
                         }
@@ -152,7 +152,7 @@ public class IOUtils {
                         return new String(buf, 0, i);
                 } else if (got >= 0) {
                     if ((char)got != ' ') { //didn't get word. Exclude space.
-                        if (i < maxSize) { //We dont store the last letter
+                        if (i < maxSize) { //We don't store the last letter
                             buf[i++] = (char)got;
                             continue;
                         }

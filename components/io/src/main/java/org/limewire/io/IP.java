@@ -6,9 +6,12 @@ import org.limewire.util.ByteOrder;
  * Represents an Internet Protocol (IP) address with operations to parse, convert 
  * and compare an IP address. More precisely, <code>IP</code> is a set of IP 
  * addresses specified by a regular expression (e.g., "18.239.*.*") or a submask 
- * (e.g., "18.239.0.0/255.255.0.0").
+ * (e.g., "18.239.0.0/255.255.0.0"). 
  * <p>
- * This class is heavily optimized since IP 
+ * Note, <code>IP</code> class is not currently 
+ * <a href="http://www.ipv6.org/">IPv6</a> compliant.
+ */ 
+ /* This class is heavily optimized since IP 
  * objects are constructed for every PingReply, QueryReply, PushRequest, and 
  * internally or externally generated connection.
  */

@@ -1,5 +1,6 @@
 package org.limewire.io;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -7,15 +8,20 @@ import java.io.OutputStream;
  * Wraps a stream to ensure that the caller can write no more than N bytes/sec.
  * The current implementation of <code>ThrottledOutputStream</code> delegates 
  * to a {@link BandwidthThrottle} class to control throughput. By sharing a single 
- * <code>BandwidthThrottle</code> among multiple <code>ThrottledOutputStream<code> 
- * instances, you can approximate fair global bandwidth sharing.
- */
- /* This implementation is based on the <a href="http://freenetproject.org/">
+ * <code>BandwidthThrottle</code> among multiple <code>ThrottledOutputStream</code> 
+ * instances, you can approximate fair global bandwidth sharing. 
+ * <p>
+ * This implementation is based on the <a href="http://freenetproject.org/">
  * ThrottledOutputStream</a> class from the Freenet project. This implementation
  * differs with the Freenet project in that the bandwidth throttle is no longer
- * static and it doesn't longer subclasses {@link FilterOutputStream}, since the 
- * temptation to call <code>super.write()</code> introduced bugs.
+ * static and it no longer subclasses {@link FilterOutputStream}.
  */
+ /*
+  * This implementation differs with the Freenet project in that the bandwidth 
+  * throttle is no longer static and it no longer subclasses 
+  * {@link FilterOutputStream}, since the temptation to call 
+  * <code>super.write()</code> introduced bugs.
+  */
 public class ThrottledOutputStream extends OutputStream {        
     /** The delegate. */
     private OutputStream _delegate;

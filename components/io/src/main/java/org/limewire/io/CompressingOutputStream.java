@@ -6,12 +6,16 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 /**
- * Ensures all remaining data is outputted and reduces the size of output 
- * streams. Works around known Java bugs, 
+ * Ensures that data in the stream can be flushed at any given moment without 
+ * requiring the stream to be closed. Works around known Java bugs, 
  * <a href="http://developer.java.sun.com/developer/bugParade/bugs/4255743.html">
  * Java bug 4255743</a> and 
  * <a href ="http://developer.java.sun.com/developer/bugParade/bugs/4206909.html">
  * Java bug 4206909</a>. 
+ * <p>
+ * <code>CompressingOutputStream</code> simulates 
+ * <a href="http://www.zlib.net/">zlib</a>'s Z_PARTIAL_FLUSH and 
+ * Z_SYNC_FLUSH behavior.
  */
 public final class CompressingOutputStream extends DeflaterOutputStream {
     

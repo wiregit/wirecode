@@ -8,16 +8,19 @@ import org.limewire.util.ByteOrder;
 
 
 /** 
- * Provides utility methods for <code>IpPort</code>. <code>IPPortCombo</code> 
- * includes methods to return the address as an {@link InetAddress}, a string or
- * as a byte array. Also, <code>IPPortCombo</code> checks if objects are equal.
+ * Provides methods for network data. <code>IPPortCombo</code> 
+ * takes arrays of six bytes and determines if the array is a valid
+ * IP:Port value.
+ <pre>
+        byte[] b= {127, 0, 0, 1, 1,1};
+        IPPortCombo ipc = IPPortCombo.getCombo(b);
+        System.out.println(ipc.getAddress() + ":" + ipc.getPort());
+
+    "Standard" output stream:
+        127.0.0.1:257
+ </pre> 
  */
 
-/* Keep in mind that I very well could have used Endpoint here, but I
- *  decided against it mainly so I could do validity checking.
- *  This may be a bad decision.  I'm sure someone will let me know during
- *  code review.
- */
 public class IPPortCombo implements IpPort {
     private final int _port;
     private final InetAddress _addr;
@@ -25,8 +28,8 @@ public class IPPortCombo implements IpPort {
     public static final String DELIM = ":";
 
     /**
-     * Used for reading data from the network.  Throws BadPacketException
-     * if the data is invalid.
+     * Used for reading data from the network. Throws 
+     * <code>BadPacketException</code> if the data is invalid.
      * @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
      */
     public static IPPortCombo getCombo(byte[] fromNetwork)
@@ -36,7 +39,7 @@ public class IPPortCombo implements IpPort {
     
     /**
      * Constructor used for data read from the network.
-     * Throws BadPacketException on errors.
+     * Throws <code>BadPacketException</code> on errors.
      */
     private IPPortCombo(byte[] networkData) throws InvalidDataException {
         if (networkData.length != 6)
@@ -62,7 +65,7 @@ public class IPPortCombo implements IpPort {
 
     /**
      * Constructor used for local data.
-     * Throws IllegalArgumentException on errors.
+     * Throws <code>IllegalArgumentException</code> on errors.
      */
     public IPPortCombo(String hostAddress, int port) 
         throws UnknownHostException, IllegalArgumentException  {
@@ -90,8 +93,9 @@ public class IPPortCombo implements IpPort {
     }
 
     /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
-     *  //TODO if IPv6 kicks in, this may fail, don't worry so much now.
      */
+    //TODO if IPv6 kicks in, this may fail, don't worry so much now.
+    
     public byte[] toBytes() {
         byte[] retVal = new byte[6];
         
