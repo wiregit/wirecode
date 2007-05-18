@@ -6,7 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.inspection.Inspectable;
+import org.limewire.io.IpPort;
+
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.ClassCNetworks;
 
 public class AltLocManager {
 
@@ -20,6 +24,8 @@ public class AltLocManager {
      * LOCKING: itself for all map operations as well as operations on the contained arrays
      */
     private final Map<URN, URNData> urnMap = Collections.synchronizedMap(new HashMap<URN, URNData>());
+    
+    public final Object inspectables = new ALMInspectables();
     
     private AltLocManager() {}
     
@@ -247,5 +253,33 @@ public class AltLocManager {
         public List<AltLocListener> getListeners() {
             return listeners;
         }
+    }
+    
+    private class ALMInspectables {
+        /** Inspectable for class C networks of alternate locations */
+        public final Inspectable classC = new Inspectable() {
+            public Object inspect() {
+                ClassCNetworks direct = new ClassCNetworks();
+                ClassCNetworks pushProxies = new ClassCNetworks();
+                synchronized(urnMap) {
+                    for (URNData data : urnMap.values()) {
+                        for( DirectAltLoc dal : data.direct)
+                            direct.add(dal.getHost().getInetAddress(), 1);
+                        for (PushAltLoc push : data.push) {
+                            for (IpPort ip :push.getPushAddress().getProxies())
+                                pushProxies.add(ip.getInetAddress(), 1);
+                        }
+                        for (PushAltLoc push : data.fwt) {
+                            for (IpPort ip :push.getPushAddress().getProxies())
+                                pushProxies.add(ip.getInetAddress(), 1);
+                        }
+                    }
+                }
+                Map<String, Object> ret = new HashMap<String, Object>();
+                ret.put("direct", direct.getTopInspectable(10));
+                ret.put("proxies", pushProxies.getTopInspectable(10));
+                return ret;
+            }
+        };
     }
 }
