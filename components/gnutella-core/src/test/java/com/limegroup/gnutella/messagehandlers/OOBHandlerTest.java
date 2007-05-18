@@ -436,17 +436,111 @@ public class OOBHandlerTest extends LimeTestCase {
         
         // timeout query
         router.isAlive = false;
+
+        try {
+            // send same five and message should be discarded
+            handler.handleMessage(reply, null, replyHandler);
+            assertNull(router.reply);
+            
+            assertFalse(router.getQueryLocs(guid).isEmpty());
+            point = router.getQueryLocs(guid).iterator().next();
+            assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
+            assertEquals(replyHandler.getPort(), point.getPort());
+        }
+        finally {
+            router.isAlive = true;
+        }
+    }
+    
+    /**
+     * Tests if the ip address of a query reply is overwritten with the address
+     * from the reply handler if they don't match.
+     */
+    public void testMismatchingPublicAddressIsOverwritten() throws Exception {
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+
+        // use different non-private address in reply
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, new byte[] { (byte)129, (byte) 168, 0, 5}, token);
+        assertNotEquals(replyHandler.getInetAddress().getAddress(), reply.getIPBytes());
+        assertFalse(reply.getNeedsPush());
         
-        // send same five and message should be discarded
+        router.reply = null;
         handler.handleMessage(reply, null, replyHandler);
-        assertNull(router.reply);
-        
-        assertFalse(router.getQueryLocs(guid).isEmpty());
-        point = router.getQueryLocs(guid).iterator().next();
-        assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
-        assertEquals(replyHandler.getPort(), point.getPort());
+        assertNotNull(router.reply);
+     
+        QueryReply handled = router.reply;
+        assertEquals(replyHandler.getInetAddress().getAddress(), handled.getIPBytes());
     }
 
+
+    /**
+     * Test case where ip is private, but needs push.
+     */
+    public void testMismatchingPrivateAddressIsOverwrittenForNeedsPush() throws Exception {
+        router.numToRequest = 10;
+        handler.handleMessage(new ReplyNumberVendorMessage(g, 10), null, replyHandler);
+        
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, new byte[] { (byte)192, (byte) 168, 0, 5}, token, true);
+        assertNotEquals(replyHandler.getInetAddress().getAddress(), reply.getIPBytes());
+        assertTrue(reply.getNeedsPush());
+        
+        router.reply = null;
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+
+        QueryReply handled = router.reply;
+        assertEquals(replyHandler.getInetAddress().getAddress(), handled.getIPBytes());
+    }
+
+    /**
+     * Case were ip is private and no need for push indicated, should not change address.
+     */
+    public void testMismatchingPrivateAddressIsNotOverwrittenForNoPush() throws Exception {
+        router.numToRequest = 10;
+        handler.handleMessage(new ReplyNumberVendorMessage(g, 10), null, replyHandler);
+        
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, new byte[] { (byte)192, (byte) 168, 0, 5}, token, false);
+        assertNotEquals(replyHandler.getInetAddress().getAddress(), reply.getIPBytes());
+        assertFalse(reply.getNeedsPush());
+
+        router.reply = null;
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+
+        QueryReply handled = router.reply;
+        assertNotEquals(replyHandler.getInetAddress().getAddress(), handled.getIPBytes());
+        assertEquals(new byte[] { (byte)192, (byte) 168, 0, 5 }, handled.getIPBytes());
+    }
+
+    /**
+     *  Tests that the mismatching address of v2 replies is overwritten. 
+     */
+    public void testOOBv2MismatchingPublicAddressIsOverwritten() throws Exception {
+        ReplyNumberVendorMessage rnvm = ReplyNumberVendorMessage.createV2ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, new byte[] { (byte)129, (byte) 168, 0, 5}, null);
+        assertNotEquals(replyHandler.getInetAddress().getAddress(), reply.getIPBytes());
+        
+        router.reply = null;
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+
+        QueryReply handled = router.reply;
+        assertEquals(replyHandler.getInetAddress().getAddress(), handled.getIPBytes());
+    }
+    
     private static SecurityToken assertACKSent(MyReplyHandler rhandler,
             int numExpected) {
         assertNotNull(rhandler.m);
@@ -458,18 +552,28 @@ public class OOBHandlerTest extends LimeTestCase {
     }
 
     private QueryReply getReplyWithResults(byte[] guid, int numResults,
+            byte[] addr, SecurityToken token, boolean needsPush) {
+        return getReplyWithResults(guid, numResults, addr, token, 0, needsPush);
+    }
+    
+    private QueryReply getReplyWithResults(byte[] guid, int numResults,
             byte[] addr, SecurityToken token) {
-        return getReplyWithResults(guid, numResults, addr, token, 0);
+        return getReplyWithResults(guid, numResults, addr, token, 0, false);
     }
 
     private QueryReply getReplyWithResults(byte[] guid, int numResults,
             byte[] addr, SecurityToken token, int offset) {
+       return getReplyWithResults(guid, numResults, addr, token, offset, false);
+    }
+    
+    private QueryReply getReplyWithResults(byte[] guid, int numResults,
+            byte[] addr, SecurityToken token, int offset, boolean needsPush) {
         Response[] res = new Response[numResults];
         for (int j = 0; j < res.length; j++)
             res[j] = new Response(10, 10, "susheel" + j + offset);
 
         return new QueryReply(guid, (byte) 1, 1, addr, 0, res, GUID.makeGuid(),
-                new byte[0], false, false, true, true, false, false, true,
+                new byte[0], needsPush, false, true, true, false, false, true,
                 null, token);
     }
 

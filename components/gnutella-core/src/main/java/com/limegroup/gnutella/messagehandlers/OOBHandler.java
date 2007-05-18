@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
@@ -101,6 +102,30 @@ public class OOBHandler implements MessageHandler, Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
+        // check if ip address of reply and sender of reply match
+        // and update address of reply if necessary
+        byte[] handlerAddress = handler.getInetAddress().getAddress(); 
+        if (!Arrays.equals(handlerAddress, reply.getIPBytes())) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("IP addresses of sender and packet did not match, sender: " + handler.getInetAddress()
+                        + ", packet: " + reply.getIP());
+            }
+            // override address in packet
+            try {
+                // needs a push, we can update: works for fw-fw case and classic push
+                // or not private, we can update
+                if (reply.getNeedsPush() || !NetworkUtils.isPrivateAddress(reply.getIPBytes())) {
+                    reply.setOOBAddress(handler.getInetAddress(), handler.getPort());
+                }
+                else {
+                    // messed up case: doesn't want a push, but has a private address
+                }
+            }
+            catch (BadPacketException bpe) {
+                // invalid packet, don't handle it
+                return;
+            }
+        }
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
@@ -108,7 +133,8 @@ public class OOBHandler implements MessageHandler, Runnable {
                 router.handleQueryReply(reply, handler);
             return;
         }
-        
+
+        // from here on, it's OOBv3 specific code
         ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
         
         int numResps = reply.getResultCount();

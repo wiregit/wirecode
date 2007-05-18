@@ -24,6 +24,8 @@ import com.limegroup.gnutella.settings.SharingSettings;
 
 public abstract class AbstractDownloader implements Downloader, Serializable {
 
+    private static final long serialVersionUID = -744041982882569509l;
+    
     /** 
      * Make everything transient.  This class does not serialize or deserialize
      * anything, even though it behaves as if propertiesMap would be persisted.
