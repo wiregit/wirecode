@@ -89,6 +89,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.server.StoreServer;
 
 
 /**
@@ -272,6 +273,11 @@ public class RouterService {
      * Selector provider for UDP selectors.
      */
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
+    
+    /**
+     * jpalm: Server for the store.
+     */
+    private static StoreServer STORE_SERVER; // = StoreServer.newDemoInstance();
 
     /**
      * The DHTManager that manages the DHT and its various modes
@@ -597,6 +603,12 @@ public class RouterService {
             ChatManager.instance().initialize();
             LOG.trace("END ChatManager");
 
+            // jpalm
+            LOG.trace("START StoreServer");
+            StoreServer.instance().start();
+            LOG.trace("END StoreServer");
+
+
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             
@@ -864,6 +876,16 @@ public class RouterService {
     /** Gets the SelectorProvider for UDPChannels */
     public static UDPSelectorProvider getUDPSelectorProvider() {
     	return UDP_SELECTOR_PROVIDER;
+    }
+    
+    /**
+     * jpalm:
+     * Returns the {@link StoreServer} instance.
+     * 
+     * @return the {@link StoreServer} instance
+     */
+    public static StoreServer getStoreServer() {
+        return STORE_SERVER;
     }
     
     public static HttpExecutor getHttpExecutor() {

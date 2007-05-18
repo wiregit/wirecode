@@ -38,6 +38,13 @@ public class StatusBarSettings extends LimeProps {
      */
     public static BooleanSetting FIREWALL_DISPLAY_ENABLED =
         FACTORY.createBooleanSetting("FIREWALL_DISPLAY_ENABLED", true);
+    
+    /**
+     * jpalm: Whether or not store status should be displayed.
+     */
+    public static BooleanSetting STORE_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("STORE_DISPLAY_ENABLED", true);
+    
 
     /**
      * Whether or not bandwidth consumption should be displayed.
