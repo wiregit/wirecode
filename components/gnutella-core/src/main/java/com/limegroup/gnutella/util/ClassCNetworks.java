@@ -2,12 +2,14 @@ package com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.SortedList;
+import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 
 /**
@@ -23,6 +25,11 @@ public class ClassCNetworks {
             return b.getValue().compareTo(a.getValue());
         }
     };
+    
+    public void addAll(Collection<? extends IpPort> c) {
+        for (IpPort ip : c)
+            add(ip.getInetAddress(), 1);
+    }
     
     public void add(InetAddress addr, int count) {
         add(NetworkUtils.getClassC(addr), count);

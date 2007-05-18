@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.ClassCNetworks;
 
 /** Utility class for sending GUESS queries.
  */
@@ -260,4 +262,18 @@ public class OnDemandUnicaster {
             }
         }
     }
+    
+    /** inspectable for the class C distribution of the queried addresses */
+    public static final Inspectable classCQueried = new Inspectable() {
+        public Object inspect() {
+            ClassCNetworks cnc = new ClassCNetworks();
+            synchronized(_queriedHosts) {
+                for(Set<IpPort> s : _queriedHosts.values())
+                    cnc.addAll(s);
+            }
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("queried", cnc.getTopInspectable(10));
+            return ret; 
+        }
+    };
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.inspection.Inspectable;
-import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.ClassCNetworks;
@@ -265,14 +264,10 @@ public class AltLocManager {
                     for (URNData data : urnMap.values()) {
                         for( DirectAltLoc dal : data.direct)
                             direct.add(dal.getHost().getInetAddress(), 1);
-                        for (PushAltLoc push : data.push) {
-                            for (IpPort ip :push.getPushAddress().getProxies())
-                                pushProxies.add(ip.getInetAddress(), 1);
-                        }
-                        for (PushAltLoc push : data.fwt) {
-                            for (IpPort ip :push.getPushAddress().getProxies())
-                                pushProxies.add(ip.getInetAddress(), 1);
-                        }
+                        for (PushAltLoc push : data.push) 
+                            pushProxies.addAll(push.getPushAddress().getProxies());
+                        for (PushAltLoc push : data.fwt) 
+                            pushProxies.addAll(push.getPushAddress().getProxies());
                     }
                 }
                 Map<String, Object> ret = new HashMap<String, Object>();
