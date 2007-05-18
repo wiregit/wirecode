@@ -16,7 +16,7 @@ import org.limewire.util.ByteOrder;
         IPPortCombo ipc = IPPortCombo.getCombo(b);
         System.out.println(ipc.getAddress() + ":" + ipc.getPort());
 
-    "Standard" output stream:
+    Output:
         127.0.0.1:257
  </pre> 
  */
@@ -29,7 +29,7 @@ public class IPPortCombo implements IpPort {
 
     /**
      * Used for reading data from the network. Throws 
-     * <code>BadPacketException</code> if the data is invalid.
+     * <code>InvalidDataException</code> if the data is invalid.
      * @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
      */
     public static IPPortCombo getCombo(byte[] fromNetwork)
@@ -39,7 +39,7 @@ public class IPPortCombo implements IpPort {
     
     /**
      * Constructor used for data read from the network.
-     * Throws <code>BadPacketException</code> on errors.
+     * Throws <code>InvalidDataException</code> on errors.
      */
     private IPPortCombo(byte[] networkData) throws InvalidDataException {
         if (networkData.length != 6)
@@ -65,7 +65,8 @@ public class IPPortCombo implements IpPort {
 
     /**
      * Constructor used for local data.
-     * Throws <code>IllegalArgumentException</code> on errors.
+     * Throws <code>UnknownHostException</code> and 
+     * <code>IllegalArgumentException</code> on errors.
      */
     public IPPortCombo(String hostAddress, int port) 
         throws UnknownHostException, IllegalArgumentException  {
