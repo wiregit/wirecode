@@ -19,7 +19,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -28,10 +27,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -39,15 +36,11 @@ import junit.framework.Test;
 import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IOUtils;
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -65,16 +58,10 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -86,7 +73,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -112,8 +98,6 @@ public class UploadTest extends LimeTestCase {
     private static final String incompleteHash =
         "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
     private static final int index=0;
-    /** Our listening port for pushes. */
-    private static final int callbackPort = 6671;
     private UploadManager upMan;
     /** The verifying file for the shared incomplete file */
     private static VerifyingFile vf;
@@ -310,109 +294,7 @@ public class UploadTest extends LimeTestCase {
             
     //} 
 
-    ///////////////////push downloads with HTTP1.0///////////
-    public void testHTTP10Push() throws Exception {
-        boolean passed = false;
-        passed = downloadPush(fileName, null,alphabet);
-        assertTrue("Push download",passed);
-    }
 
-    public void testHTTP10PushEncodedFile() throws Exception {
-        boolean passed = false;        
-        passed=downloadPush(encodedFile, null,alphabet);
-        assertTrue("Push download, encoded file name",passed);
-    }
-
-    public void testHTTP10PushRange() throws Exception {
-        boolean passed = false;
-        passed =downloadPush(fileName, "Range: bytes=2-5","cdef");
-        assertTrue("Push download, middle range, inclusive",passed);
-    }
-
-    ///////////////////push downloads with HTTP1.1///////////////            
-    public void testHTTP11Push() throws Exception {
-        boolean passed = false;
-        passed = downloadPush1(fileName, null, alphabet);
-        assertTrue("Push download with HTTP1.1",passed);
-    }
-    
-    /**
-     * tests the scenario where we receive the same push request message
-     * more than once
-     */
-    public void testDuplicatePushes() throws Exception {
-        
-        Connection c = createConnection();
-        c.initialize(new UltrapeerHeaders(null), new EmptyResponder(), 1000);
-        QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
-        c.flush();
-        QueryReply reply=null;
-        for(int i = 0; i < 10; i++) {
-            Message m=c.receive(2000);
-            if (m instanceof QueryReply) {
-                reply=(QueryReply)m;
-                break;
-            } 
-        }
-        
-        if(reply == null)
-            throw new IOException("didn't get query reply in time");
-        
-        PushRequest push =
-            new PushRequest(GUID.makeGuid(),
-                    (byte)3,
-                    reply.getClientGUID(),
-                    0,
-                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                    callbackPort);
-        
-        //Create listening socket, then send the push a few times
-        ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
-        c.send(push); 
-        c.send(push);
-        c.flush();
-        ss.setSoTimeout(2000);
-        
-        assertNotNull(ss.accept()); // get one.
-        
-        // the last two shouldn't be gotten.
-        try {
-            ss.accept();
-            fail("node replied to duplicate push request");
-        }catch(IOException expected){}
-        
-        try {
-            ss.accept();
-            fail("node replied to duplicate push request");
-        }catch(IOException expected){}
-        
-        ss.close();
-        c.close();
-        
-    }
-     
-
-    public void testHTTP11PushEncodedFile() throws Exception {
-        boolean passed = false;
-        passed =downloadPush1(encodedFile, null,
-                         "abcdefghijklmnopqrstuvwxyz");
-        assertTrue("Push download, encoded file name with HTTP1.1",passed);
-    }
-
-    public void testHTTP11PushRange() throws Exception {
-        boolean passed = false;
-        passed =downloadPush1(fileName, "Range: bytes=2-5","cdef");
-        assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
-    }
-     
-
-    public void testHTTP11Head() throws Exception {
-        assertTrue("Persistent push HEAD requests", 
-                   downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
-    }
-        
                        
 
     //////////////normal downloads with HTTP 1.0//////////////
@@ -572,13 +454,6 @@ public class UploadTest extends LimeTestCase {
         assertTrue("piplining with normal download",passed);
     }
             
-    public void testHTTP11PipeliningDownloadPush() throws Exception {
-        boolean passed = false;
-        passed = pipelineDownloadPush(fileName,null, 
-                                       "abcdefghijklmnopqrstuvwxyz");
-        assertTrue("piplining with push download",passed);
-    }
-         
     public void testHTTP11DownloadMixedPersistent() throws Exception {
         tMixedPersistentRequests();
     }
@@ -1659,101 +1534,6 @@ public class UploadTest extends LimeTestCase {
                    "X-Features: fwalt/0.1, browse/1.0"));
     }
     
-    /**
-     * tests that the node sends a proper proxies header
-     */
-    public void testProxiesHeaderNotSent() throws Exception {
-        
-        // try when we are not firewalled
-        PrivilegedAccessor.setValue(
-                RouterService.getAcceptor(),
-                "_acceptedIncoming",
-                new Boolean(true));
-        
-        assertTrue(RouterService.acceptedIncomingConnection());
-        
-        Socket s = new Socket("localhost", PORT);
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-        
-        assertFalse(
-                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
-        
-        try{in.close();}catch(IOException ignored){}
-        try{out.close();}catch(IOException ignored){}
-        
-        Thread.sleep(1000);
-        
-        // now try with an empty set of proxies
-        s = getSocketFromPush();
-        in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-        
-        in.readLine(); //skip GIV
-		in.readLine(); //skip blank line
-		
-		PrivilegedAccessor.setValue(
-                RouterService.getAcceptor(),
-                "_acceptedIncoming",
-                new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
-		
-        assertFalse(
-                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
-        
-        try{in.close();}catch(IOException ignored){}
-        try{out.close();}catch(IOException ignored){}
-    }
-    
-    public void testProxiesHeaderSent() throws Exception{
-        
-        Socket s = getSocketFromPush();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        Writer out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-        
-        in.readLine(); //skip GIV
-		in.readLine(); //skip blank line
-		
-        // now try with some proxies
-        ConnectionManager original = RouterService.getConnectionManager();
-        
-        final Set proxies = new TreeSet(IpPort.COMPARATOR);
-        IpPort ppi = 
-            new IpPortImpl("1.2.3.4",5);
-        proxies.add(ppi);
-        
-        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
-            public Set getPushProxies() {
-                return proxies;
-            }
-        };
-        
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        
-        
-		
-		PrivilegedAccessor.setValue(
-                RouterService.getAcceptor(),
-                "_acceptedIncoming",
-                new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
-		
-        assertTrue(
-                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
-        
-        try{in.close();}catch(IOException ignored){}
-        try{out.close();}catch(IOException ignored){}
-        
-        PrivilegedAccessor.setValue(RouterService.class,"manager",original);
-                
-    }
-    
     //////////  test thex works /////////////
     public void testThexHeader() throws Exception {
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
@@ -1933,125 +1713,6 @@ public class UploadTest extends LimeTestCase {
     }
 
 
-    /** Does a simple push GET download. */
-    private static boolean downloadPush1(String indexedFile, String header, 
-										 String expResp)
-           		                         throws IOException, BadPacketException{
-        return downloadPush1("GET", makeRequest(indexedFile), header, expResp);        
-    }
-    
-    /**
-     * Does a push & gets a socket from the incoming connection.
-     */
-    private static Socket getSocketFromPush() throws IOException, BadPacketException {
-		Connection c = createConnection();
-		c.initialize(new UltrapeerHeaders(null), new EmptyResponder(), 1000);
-		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
-        c.flush();
-        QueryReply reply=null;
-        for(int i = 0; i < 10; i++) {
-            Message m=c.receive(2000);
-            if (m instanceof QueryReply) {
-                reply=(QueryReply)m;
-                break;
-            } 
-        }
-
-        if(reply == null)
-            throw new IOException("didn't get query reply in time");
-
-        PushRequest push =
-            new PushRequest(GUID.makeGuid(),
-                            (byte)3,
-                            reply.getClientGUID(),
-                            0,
-                            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                            callbackPort);
-
-        //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
-        c.flush();
-        ss.setSoTimeout(2000);
-        Socket s = ss.accept();
-        c.close();
-        ss.close();
-        return s;
-    }
-    
-    /** 
-     * Does an arbitrary push download. 
-     * @param request an HTTP request such as "GET" or "HEAD
-     * @param file the full filename, e.g., "/get/0/file.txt"    
-     */
-    private static boolean downloadPush1(String request,
-                                         String file, String header, 
-										 String expResp) 
-        throws IOException, BadPacketException {
-            //Establish push route
-        Socket s = getSocketFromPush();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-
-        in.readLine(); //skip GIV
-        in.readLine(); //skip blank line
-        
-        //Download from the (incoming) TCP connection.
-        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
-        assertEquals("unexpected HTTP response message body", expResp, retStr);
-        boolean ret = retStr.equals(expResp);
-        
-        // reset string variable
-        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
-        assertEquals("unexpected HTTP response message body in second request", 
-                     expResp, retStr);
-        
-        ret = ret && retStr.equals(expResp);
-        
-        //Cleanup
-        s.close();
-        return ret;
-    }
-
-
-
-
-    private static boolean downloadPush(String file, String header, 
-										String expResp) 
-            throws IOException, BadPacketException {
-        Socket s = getSocketFromPush();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-		in.readLine(); //skip GIV
-		in.readLine(); //skip blank line
-
-        //Download from the (incoming) TCP connection.
-        String retStr=downloadInternal(file, header, out, in);
-		assertNotNull("string returned from download should not be null", retStr);
-		
-        //Cleanup
-        s.close();
-		assertEquals("wrong response", expResp, retStr);
-        return retStr.equals(expResp);
-    }
-
-    /** 
-     * Sends a get request to out, reads the response from in, and returns the
-     * content.  Doesn't close in or out.
-     * @param requiredHeader a header to look for, or null if we don't care
-     */
-    private static String downloadInternal(String file,
-                                           String header,
-                                           BufferedWriter out,
-                                           BufferedReader in) 
-    throws IOException {
-        return downloadInternal(file, header, out, in, null, null);
-    }
     
     /**
      * Sends a get request to out, reads the response from in, and returns the
@@ -2209,116 +1870,9 @@ public class UploadTest extends LimeTestCase {
 		return length;
     }
     
-    private static boolean containsHeader(String requestMethod,
-                                            String file,
-                                            String header,
-                                            Writer out,
-                                            Reader in,
-                                            String requiredHeader)
-    	throws IOException {
-        // send request
-        out.write( requestMethod + " " + makeRequest(file) + " " + 
-            "HTTP/1.1\r\n");
-        if (header != null)
-            out.write(header + "\r\n");
-        out.write("Connection: Keep-Alive\r\n");            
-        out.write("\r\n");
-        out.flush();
-
-        //2. Read response code and headers, remember the content-length.
-        Header expectedHeader = null;
-        
-        if( requiredHeader != null )
-            expectedHeader = new Header(requiredHeader);
-            
-        while (true) { 
-            String line = readLine(in);
-            if( line == null)
-                throw new InterruptedIOException("connection closed");
-            //System.out.println("<< " + line);
-                
-            if (line.equals(""))
-                break;
-            if (requiredHeader != null) {
-                Header found = new Header(line);
-                if( found.title.equals(expectedHeader.title)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-        
-    }
-    
     private static interface Applyable {
         public void apply(String line) throws Exception;
     }
-    
-    private static class Header {
-        final String title;
-        final List contents;
-        
-        public Header(String data) {
-            contents = new LinkedList();
-            int colon = data.indexOf(":");
-            if( colon == -1 ) {
-                title = data;
-            } else {
-                title = data.substring(0, colon);
-                StringTokenizer st =
-                    new StringTokenizer(data.substring(colon+1), ",");
-                while(st.hasMoreTokens()) {
-                    String info = st.nextToken().trim();
-                    contents.add(info);
-                }
-            }       
-        }
-        
-        public boolean equals(Object o) {
-            if(o == this) return true;
-            if(!(o instanceof Header)) return false;
-            Header other = (Header)o;
-            if(!title.toLowerCase().equals(other.title.toLowerCase()))
-                return false;
-            return listEquals(contents, other.contents);
-        }
-        
-        public boolean listEquals(List one, List two) {
-            if( one.size() != two.size() )
-                return false;
-            boolean found;
-            for(Iterator i = one.iterator(); i.hasNext(); ) {
-                found = false;
-                String a = (String)i.next();
-                for(Iterator j = two.iterator(); j.hasNext(); ) {
-                    String b = (String)j.next();
-                    if(a.equalsIgnoreCase(b))
-                        found = true;
-                }
-                if(!found)
-                    return false;
-            }
-            for(Iterator i = two.iterator(); i.hasNext(); ) {
-                found = false;
-                String a = (String)i.next();
-                for(Iterator j = two.iterator(); j.hasNext(); ) {
-                    String b = (String)j.next();
-                    if(a.equalsIgnoreCase(b))
-                        found = true;
-                }
-                if(!found)
-                    return false;
-            }
-            return true;
-        }
-
-        public String toString() {
-            return title + " : " + contents;
-        }
-    }
-                
-        
-    
     
     /** 
      * Sends a get request to out, reads the response from in, and returns the
@@ -2447,69 +2001,6 @@ public class UploadTest extends LimeTestCase {
         return ret && buf.toString().equals(expResp);
     }
 
-    private static boolean pipelineDownloadPush(String file, String 
-                                                header, String expResp)
-        throws IOException , BadPacketException {
-        boolean ret = true;
-        Socket s = getSocketFromPush();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-        in.readLine();  //skip GIV        
-        in.readLine();  //skip blank line
-        
-        //write first request
-        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
-        if (header!=null)
-            out.write(header+"\r\n");
-        out.write("Connection:Keep-Alive\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        //write second request
-        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
-        if (header!=null)
-            out.write(header+"\r\n");
-        out.write("Connection:Keep-Alive\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        int expectedSize = expResp.length();
-        
-        //read...ignore response headers
-        String firstLine = in.readLine();
-        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
-            fail("bad first response line: " + firstLine);
-            
-        while(!in.readLine().equals("")){ }
-        //read first response
-        StringBuffer buf=new StringBuffer();        
-        for(int i=0; i<expectedSize; i++){
-            int c1 = in.read();
-            buf.append((char)c1);
-        }
-        ret = buf.toString().equals(expResp);
-        buf = new StringBuffer();
-        
-        //ingore second header
-        firstLine = in.readLine();
-        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
-            fail("bad first response line: " + firstLine);
-        
-        while(!in.readLine().equals("")){ }
-        //read Second response
-        for(int i=0; i<expectedSize; i++){
-            int c1 = in.read();
-            buf.append((char)c1);
-        }
-        // close all the appropriate streams & sockets.
-        in.close();
-        out.close();
-        s.close();
-        return ret && buf.toString().equals(expResp);
-    }
-
     /** Makes sure that a HEAD request followed by a GET request does the right
      *  thing. */
     public void tMixedPersistentRequests() throws Exception {
@@ -2613,23 +2104,6 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
-	/**
-	 * Creates an Ultrapeer connection.
-	 */
-	private static Connection createConnection() {
-		return new Connection("localhost", PORT);
-	}
-    
-
-    private static class EmptyResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                                         boolean outgoing) {
-            return HandshakeResponse.createResponse(new Properties());
-        }
-        
-        public void setLocalePreferencing(boolean b) {}
-    }
-    
     private static class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized(loaded) {
@@ -2729,6 +2203,69 @@ public class UploadTest extends LimeTestCase {
             cleanup();
             
             activeUploads.clear();
+        }
+    }
+    
+    public static class Header {
+        final String title;
+        final List contents;
+        
+        public Header(String data) {
+            contents = new LinkedList();
+            int colon = data.indexOf(":");
+            if( colon == -1 ) {
+                title = data;
+            } else {
+                title = data.substring(0, colon);
+                StringTokenizer st =
+                    new StringTokenizer(data.substring(colon+1), ",");
+                while(st.hasMoreTokens()) {
+                    String info = st.nextToken().trim();
+                    contents.add(info);
+                }
+            }       
+        }
+        
+        public boolean equals(Object o) {
+            if(o == this) return true;
+            if(!(o instanceof Header)) return false;
+            Header other = (Header)o;
+            if(!title.toLowerCase().equals(other.title.toLowerCase()))
+                return false;
+            return listEquals(contents, other.contents);
+        }
+        
+        public boolean listEquals(List one, List two) {
+            if( one.size() != two.size() )
+                return false;
+            boolean found;
+            for(Iterator i = one.iterator(); i.hasNext(); ) {
+                found = false;
+                String a = (String)i.next();
+                for(Iterator j = two.iterator(); j.hasNext(); ) {
+                    String b = (String)j.next();
+                    if(a.equalsIgnoreCase(b))
+                        found = true;
+                }
+                if(!found)
+                    return false;
+            }
+            for(Iterator i = two.iterator(); i.hasNext(); ) {
+                found = false;
+                String a = (String)i.next();
+                for(Iterator j = two.iterator(); j.hasNext(); ) {
+                    String b = (String)j.next();
+                    if(a.equalsIgnoreCase(b))
+                        found = true;
+                }
+                if(!found)
+                    return false;
+            }
+            return true;
+        }
+
+        public String toString() {
+            return title + " : " + contents;
         }
     }
 }
