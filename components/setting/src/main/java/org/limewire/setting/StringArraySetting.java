@@ -84,4 +84,7 @@ public class StringArraySetting extends Setting {
         return buffer.toString();
     }
 
+    public String toString() {
+        return decode(getValue());
+    }
 }

@@ -1,6 +1,7 @@
 
 package com.limegroup.gnutella.settings;
 
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
@@ -68,6 +69,7 @@ public class FilterSettings extends LimeProps {
     /**
 	 * An array of ip addresses that the user has banned.
 	 */    
+    @InspectablePrimitive
     public static final StringArraySetting BLACK_LISTED_IP_ADDRESSES =
         FACTORY.createStringArraySetting("BLACK_LISTED_IP_ADDRESSES", new String[0]);
     
