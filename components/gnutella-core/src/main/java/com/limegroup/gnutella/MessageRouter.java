@@ -2571,7 +2571,8 @@ public abstract class MessageRouter {
 				}
                 // if the connection has low hops flow, it won't get any routed
                 // queries anyway
-                if (c.isSupernodeClientConnection() && c.getHopsFlowMax() < 3)
+                int chm = c.getHopsFlowMax();
+                if (c.isSupernodeClientConnection() && (chm < 0 || chm > 2))
                     continue;
 			} 				
 			// otherwise, I'm a leaf, and don't send routing
