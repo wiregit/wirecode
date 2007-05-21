@@ -4,7 +4,9 @@ import java.util.Properties;
 
 
 /**
- * Class for an int setting.
+ * Provides an int value key-value pair. 
+ * <p>
+ * Create a <code>IntSetting</code> object with a {@link SettingsFactory}.
  */
 public final class IntSetting extends AbstractNumberSetting<Integer> {
     
@@ -12,10 +14,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
 
 	/**
 	 * Creates a new <tt>IntSetting</tt> instance with the specified
-	 * key and defualt value.
-	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultInt the default value to use for the setting
+	 * key and default value.
 	 */
 	IntSetting(Properties defaultProps, Properties props, String key, 
                                                               int defaultInt) {
@@ -34,7 +33,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
     }
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

@@ -4,7 +4,9 @@ import java.util.Properties;
 
 
 /**
- * Class for a byte setting.
+ * Contains a byte value key-value pair.
+ * <p>
+ * Create a <code>ByteSetting</code> object with a {@link SettingsFactory}.
  */
 public final class ByteSetting extends AbstractNumberSetting<Byte> {
     
@@ -12,7 +14,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
 	 * @param defaultByte the default value to use for the setting
@@ -23,7 +25,6 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
                                                              false, null, null);
 	}
 
-
 	ByteSetting(Properties defaultProps, Properties props, String key, 
                 byte defaultByte, byte min, byte max) {
 		super(defaultProps, props, key, String.valueOf(defaultByte), 
@@ -31,7 +32,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
@@ -59,7 +60,6 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
             revertToDefault();
         }
     }
-    
     protected Comparable<Byte> convertToComparable(String value) {
         return new Byte(value);
     }

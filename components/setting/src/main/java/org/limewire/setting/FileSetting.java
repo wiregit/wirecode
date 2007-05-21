@@ -5,7 +5,9 @@ import java.util.Properties;
 
 
 /**
- * This class handles settings for <tt>File</tt>s.
+ * Provides a {@link File} value key-value pair.
+ * <p>
+ * Create a <code>FileSetting</code> object with a {@link SettingsFactory}.
  */
 public class FileSetting extends Setting {
     
@@ -15,7 +17,7 @@ public class FileSetting extends Setting {
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
 	 * @param defaultFile the default value to use for the setting
@@ -27,9 +29,8 @@ public class FileSetting extends Setting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * Duplicates the setting so it cannot be changed outside of this package.
-	 * 
 	 * @return the value of this setting
 	 */
 	public File getValue() {
@@ -53,7 +54,7 @@ public class FileSetting extends Setting {
         value = new File(sValue);
         absolutePath = value.getAbsolutePath();
     }
-    
+
     public FileSetting setAlwaysSave(boolean on) {
         super.setAlwaysSave(on);
         return this;

@@ -5,7 +5,10 @@ import java.util.Properties;
 
 
 /**
- * Forwards requests to default setting or to setting.
+ * A proxy, aka a substitute, for a <code>FileSetting</code> object that returns
+ * the value of another file setting as its default value.
+ * <p>
+ * Create a <code>ProxyFileSetting</code> object with a {@link SettingsFactory}.
  */
 public class ProxyFileSetting extends FileSetting {
 

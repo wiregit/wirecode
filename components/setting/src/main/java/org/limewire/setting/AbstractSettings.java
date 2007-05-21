@@ -5,8 +5,12 @@ import java.util.Properties;
 
 
 /**
- * Abstract Settings class that all settings classes should extend.
- * Provides basic functionality for all settings classes.
+ * Gives basic features including get, reload and save properties. Your setting 
+ * classes should extend <code>AbstractSettings</code> class since 
+ * <code>AbstractSettings</code> internally includes a {@link SettingsFactory} 
+ * to save data to disk. 
+ * <p>
+ * Furthermore, you can get a {@link SettingsFactory} via this abstract class.
  */
 public abstract class AbstractSettings implements Settings {
         
@@ -36,7 +40,7 @@ public abstract class AbstractSettings implements Settings {
     }
 
     /**
-     * Accessor for the <tt>Properties</tt> instance that stores all settings.
+     * Assessor for the <tt>Properties</tt> instance that stores all settings.
      *
      * @return the <tt>Properties</tt> instance for storing settings
      */
@@ -45,14 +49,14 @@ public abstract class AbstractSettings implements Settings {
 	}
     
     /**
-     * Accessor for the <tt>File</tt> instance taht stores all properties
+     * Assessor for the <tt>File</tt> instance that stores all properties
      */
     public File getPropertiesFile() {
         return PROPS_FILE;
     }
     
     /**
-     * Accessor for the <tt>SettingsFactory</tt> instance that stores the properties.
+     * Assessor for the <tt>SettingsFactory</tt> instance that stores the properties.
      */
     public SettingsFactory getFactory() {
         return FACTORY;
@@ -74,31 +78,23 @@ public abstract class AbstractSettings implements Settings {
         }
     }
     
-    /**
-     * Revert all settings to their default value
-     */
+    /** Revert all settings to their default value     */
     public void revertToDefault() {
         FACTORY.revertToDefault();
     }
     
-    /**
-     * Mutator for shouldSave
-     */
+    /** Mutator for shouldSave     */
     public void setShouldSave(boolean shouldSave) {
         _shouldSave = shouldSave;
     }
     
-    /**
-     * Access for shouldSave
-     */
+    /** Access for shouldSave     */
     public boolean getShouldSave() {
         return _shouldSave;
     }
 
 
-    /**
-     * Used to find any setting based on the key in the appropriate props file
-     */
+    /** Used to find any setting based on the key in the appropriate props file     */
     public Setting getSetting(String key) {
         synchronized(FACTORY) {
             for(Setting currSetting : FACTORY) {

@@ -1,11 +1,10 @@
 package org.limewire.setting;
 
 /**
- * Allows settings to be controlled by an remote entity.
  * 
- * Not all settings are remotely controllable by default.
- * A setting must be created with 'createRemoteXSetting'
- * in order to be remotely controlled.
+ * Defines an interface for a class to control retrieve a remote setting.
+ * Additionally, this interface lists a method to set the
+ * {@link RemoteSettingController} which in turn updates a key-value setting.
  */
 public interface RemoteSettingManager {
     

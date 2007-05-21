@@ -2,10 +2,31 @@ package org.limewire.setting;
 
 import java.util.Properties;
 
+/**
+ * Provides a power of 2 value key-value pair. 
+ * <code>PowerOfTwoSetting</code>'s value must be a power of 2 and 
+ * greater than 0, otherwise the value is set to the previous power of 2.
+ * <p>
+ * Create a <code>PowerOfTwoSetting</code> object with a {@link SettingsFactory}.
+ <pre>
+        File f = new File("setting.txt");
+        SettingsFactory sf = new SettingsFactory(f);
+        PowerOfTwoSetting p2 = sf.createPowerOfTwoSetting("p2", 1);
+        for(int i = 0; i < 10; i++){
+            p2.setValue(i);
+            System.out.print(i + "->" + p2.getValue() + " ");
+        }
+    Output:
+        0->1 1->1 2->2 3->2 4->4 5->4 6->4 7->4 8->8 9->8 
+ </pre>
+ *
+ *
+ */
+
 public final class PowerOfTwoSetting extends LongSetting {
     /**
      * Creates a new <tt>PowerOfTwoSetting</tt> instance with the specified
-     * key and defualt value.  A PowerOfTwoSitting may take on only values
+     * key and default value.  A PowerOfTwoSitting may take on only values
      * that are powers of two.
      *
      * @param key the constant key to use for the setting
@@ -34,7 +55,8 @@ public final class PowerOfTwoSetting extends LongSetting {
         }
     }
     
-    /** Utility method to determine if a long is zero or a power of two */
+    /** Utility method to determine if a long is zero or a power of two 
+     */
     private static final boolean isPowerOfTwo(long x) {
         if (x <= 0) {
             return false;
@@ -42,7 +64,7 @@ public final class PowerOfTwoSetting extends LongSetting {
         return ((~x+1)&x) == x;
     }
     
-    /** Makes value a power of two by rounding down if neccesary
+    /** Makes value a power of two by rounding down if necessary
      * and delegates the rest of the normalization to the superclass.
      * 
      * Non-positive values cannot be made made powers of two by rounding

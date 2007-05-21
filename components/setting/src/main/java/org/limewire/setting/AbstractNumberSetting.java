@@ -2,6 +2,15 @@ package org.limewire.setting;
 
 import java.util.Properties;
 
+/** 
+ * Creates a {@link Number} value key-value pair and ensures the value you hope 
+ * to set falls within a range. If the value is set outside the number range, 
+ * the value is set to the closer value of either the minimum or maximum range 
+ * value.
+ * <p>
+ * Additionally, <code>AbstractNumber</code> defines a method 
+ * for subclasses to convert a string to a {@link Comparable}. 
+ */
 public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> extends Setting {
 
     /**
@@ -64,9 +73,7 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
         return value;
     }
 
-    /**
-     * Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.
-     */
+    /** Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.     */
     abstract protected Comparable<T> convertToComparable(String value);
     
 }

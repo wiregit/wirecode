@@ -1,12 +1,11 @@
 package org.limewire.setting;
 
 /**
- * A controller that is set on RemoteSettingManager.
- * 
- * The controller is set on the manager when the manager is
- * set on the SettingsFactory.  The controller is meant to be
- * used by the Manager in order to retrieve values from the
- * factory.
+ * Defines an interface for a class to remotely change the value for a key-value
+ * pair.
+ * <p> 
+ * You can set the controller through 
+ * {@link RemoteSettingManager#setRemoteSettingController(RemoteSettingController)}
  */
 public interface RemoteSettingController {
     /**

@@ -4,7 +4,9 @@ import java.util.Properties;
 
 
 /**
- * Class for a string setting.
+ * Provides a String value key-value pair.
+ * <p>
+ * Create a <code>StringSetting</code> object with a {@link SettingsFactory}.
  */
 public final class StringSetting extends Setting {
     
@@ -12,8 +14,8 @@ public final class StringSetting extends Setting {
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
-	 *
+	 * key and default value.
+
 	 * @param key the constant key to use for the setting
 	 * @param defaultStr the default value to use for the setting
 	 */
@@ -23,7 +25,7 @@ public final class StringSetting extends Setting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

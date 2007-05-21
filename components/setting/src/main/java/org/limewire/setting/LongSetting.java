@@ -4,25 +4,23 @@ import java.util.Properties;
 
 
 /**
- * Class for a long setting.
+ * Provides a long value key-value pair.
+ * <p>
+ * Create a <code>LongSetting</code> object with a {@link SettingsFactory}.
  */
 public class LongSetting extends AbstractNumberSetting<Long> {
     
     private long value;
 
 	/**
-	 * Creates a new <tt>LongSetting</tt> instance with the specified
-	 * key and defualt value.
-	 *
-	 * @param key the constant key to use for the setting
-	 * @param defaultLong the default value to use for the setting
+	 * Creates a new <code>LongSetting</code> instance with the specified
+	 * key and default value.
 	 */
 	LongSetting(Properties defaultProps, Properties props, String key, 
                                          long defaultLong) {
 		super(defaultProps, props, key, String.valueOf(defaultLong), 
                                                               false, null, null);
 	}
-
 
 	LongSetting(Properties defaultProps, Properties props, String key, 
                 long defaultLong, long min, long max) {
@@ -31,7 +29,7 @@ public class LongSetting extends AbstractNumberSetting<Long> {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

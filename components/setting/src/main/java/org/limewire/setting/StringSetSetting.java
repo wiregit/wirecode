@@ -5,18 +5,27 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-
+/**
+ * Provides a <code>Set</code> of <code>String</code> values for a key. 
+ * <code>StringSetSetting</code> class includes methods to add/remove 
+ * <code>String</code>s, get <code>String</code> values as an array and return 
+ * the number of <code>String</code>s. Unlike {@link StringArraySetting}, you
+ * can add and remove individual <code>String</code>s to the set while 
+ * maintaining the existing set.
+ * <p>
+ * Create a <code>StringSetSetting</code> object with a {@link SettingsFactory}.
+ */
 public class StringSetSetting extends Setting {
 
     private Set<String> value;
-    
-    public StringSetSetting(Properties defaultProps, Properties props,
+
+    StringSetSetting(Properties defaultProps, Properties props,
             String key, String defaultValue) {
         super(defaultProps, props, key, defaultValue);
     }
     
     /**
-     * Accessor for the value of this setting.
+     * Assessor for the value of this setting.
      * 
      * @return the value of this setting
      */
@@ -80,7 +89,7 @@ public class StringSetSetting extends Setting {
     public synchronized void setValue(Set<String> value) {
         super.setValue(decode(value));
     }
-    
+
     public synchronized boolean add(String s) {
         if (value.add(s)) {
             setValue(decode(value));
@@ -96,7 +105,7 @@ public class StringSetSetting extends Setting {
         }
         return false;
     }
-    
+
     public synchronized boolean contains(String s) {
         return value.contains(s);
     }

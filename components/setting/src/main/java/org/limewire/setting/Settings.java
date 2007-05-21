@@ -1,7 +1,8 @@
 package org.limewire.setting;
 
 /**
- * Marks something as being a 'Settings' provider.
+ * Defines the interface for a class to reload and save a value, revert to a 
+ * default value and mark a value as savable.
  */
 public interface Settings {
     

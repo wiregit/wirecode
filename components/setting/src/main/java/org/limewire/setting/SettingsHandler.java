@@ -5,8 +5,9 @@ import java.util.List;
 
 
 /**
- * Controls access to all Settings classes, providing easy ways
- * to reload, save, revert, etc.. all of them at once time.
+ * Groups related {@link Settings} objects in one location to reload, revert to
+ * a default value, save, or mark as save-able all <code>Settings</code> 
+ * objects at once.
  */
 public final class SettingsHandler {
     

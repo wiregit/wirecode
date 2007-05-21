@@ -9,7 +9,10 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * Class for a password setting.
+ * Provides a password value key-value pair. <code>PasswordSetting</code> encrypts 
+ * a password, determines if passwords match and returns the encryption algorithm used.
+ * <p>
+ * Create a <code>PasswordSetting</code> object with a {@link SettingsFactory}.
  */
 public final class PasswordSetting extends Setting {
 
@@ -42,7 +45,7 @@ public final class PasswordSetting extends Setting {
 
     /**
      * Creates a new <tt>PasswordSetting</tt> instance with the specified key
-     * and defualt value.
+     * and default value.
      * 
      * @param key the constant key to use for the setting
      * @param defaultStr the default value to use for the setting
@@ -57,6 +60,7 @@ public final class PasswordSetting extends Setting {
 
     /**
      * Returns the encryption algorithm
+     * @return the encryption algorithm
      */
     public String getAlgorithm() {
         return algorithm;
@@ -83,7 +87,7 @@ public final class PasswordSetting extends Setting {
     }
     
     /**
-     * Accessor for the value of this setting.
+     * Assessor for the value of this setting.
      * 
      * @return the value of this setting
      */
@@ -175,7 +179,7 @@ public final class PasswordSetting extends Setting {
         }
         return buffer.toString();
     }
-    
+
     public static String toEncrypted(String algorithm, String value) {
         for(int i = 0; i < ALGORITHMS.length; i++) {
             if (ALGORITHMS[i].equals(algorithm)) {

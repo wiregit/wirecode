@@ -7,7 +7,12 @@ import org.limewire.util.StringUtils;
 
 
 /**
- * Class for an Array of Strings setting.
+ * Contains a <code>String</code> array value for a key. When you add items to
+ * the setting, you can only add an entire array at once, as opposed to per 
+ * array element. In the same vein, you retrieve the entire array value with
+ * the <code>getValue</code> method.
+ * <p>
+ * Create a <code>StringArraySetting</code> object with a {@link SettingsFactory}.
  */
  
 public class StringArraySetting extends Setting {
@@ -17,9 +22,8 @@ public class StringArraySetting extends Setting {
 	/**
 	 * Creates a new <tt>StringArraySetting</tt> instance with the specified
 	 * key and default value.
-	 *
 	 * @param key the constant key to use for the setting
-	 * @param defaultInt the default value to use for the setting
+	 * @param defaultValue the default value to use for the setting
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
                                                        String[] defaultValue) {
@@ -27,7 +31,7 @@ public class StringArraySetting extends Setting {
 	}
         
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

@@ -4,7 +4,9 @@ import java.util.Properties;
 
 
 /**
- * Class for a setting that's an array of chars.
+ * Provides a character array value key-value pair.
+ * <p>
+ * Create a <code>CharArraySetting</code> object with a {@link SettingsFactory}. 
  */
 public final class CharArraySetting extends Setting {
     
@@ -16,7 +18,7 @@ public final class CharArraySetting extends Setting {
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
-	 * key and defualt value.
+	 * key and default value.
 	 *
      * @param defaultProps the default properties
      * @param props the set properties
@@ -34,7 +36,7 @@ public final class CharArraySetting extends Setting {
 	}
    
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

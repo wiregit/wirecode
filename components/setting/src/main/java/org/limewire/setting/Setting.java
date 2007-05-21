@@ -4,8 +4,28 @@ import java.util.Properties;
 
 
 /**
- * Private abstract class for an individual setting.  Subclasses of this
- * class provide typing for settings.
+ * Provides a key-value property as an abstract class. This class, 
+ * includes fields for the <code>Setting</code>'s visibility (public vs. 
+ * private) and persistence (always save vs don't save). For example, you can 
+ * set the visibility to private if you don't want to store the setting. 
+ * <p>
+ * Also, <code>Setting</code> includes a method to revert to a default value.
+ * <p>
+ * <code>Setting</code> includes an abstract method to load a <code>String</code>
+ * into the key-value property. You are responsible to convert the 
+ * <code>String</code> to the appropriate type in a subclass. 
+ * <p>
+ * For example, if your subclass is for a boolean setting you can
+ * have a boolean field i.e. <code>myBoolValue</code>, in the class. Then you 
+ * would set <code>myBool</code> with true or false depending on the 
+ * <code>String<code> argument. 
+ * <pre>
+ * 
+ *     protected void loadValue(String sValue) {
+           myBoolValue = Boolean.valueOf(sValue.trim()).booleanValue();
+       }
+ * </pre>
+ * <p>
  */
 public abstract class Setting {
 
@@ -50,9 +70,6 @@ public abstract class Setting {
 	 *
 	 * @param key the key for the setting
 	 * @param defaultValue the defaultValue for the setting
-     * @param remoteKey the string used to identify a remote setting. This must
-     * have a valid value for remoteable settings and must be null for
-     * non-remoteable settings.
 	 * @throws <tt>IllegalArgumentException</tt> if the key for this 
 	 *  setting is already contained in the map of default settings
 	 */
@@ -130,16 +147,12 @@ public abstract class Setting {
         return value.equals(DEFAULT_PROPS.getProperty(KEY));
     }
     
-    /**
-     * Get the key for this setting.
-     */
+    /** Get the key for this setting.     */
     public String getKey() {
         return KEY;
     }
     
-    /**
-     * Returns the value as stored in the properties file.
-     */
+    /**  Returns the value as stored in the properties file.    */
     public String getValueAsString() {
         return PROPS.getProperty(KEY);
     }

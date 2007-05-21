@@ -11,7 +11,9 @@ import org.limewire.util.FileUtils;
 
 
 /**
- * Class for an Array of Files setting.
+ * Contains a {@link File} array value for a key.
+ * <p>
+ * Create a <code>FileArraySetting</code> object with a {@link SettingsFactory}.
  */
  
 public class FileArraySetting extends Setting {
@@ -23,7 +25,7 @@ public class FileArraySetting extends Setting {
 	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
-	 * @param defaultInt the default value to use for the setting
+	 * @param defaultValue the default value to use for the setting
 	 */
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
                                                          File[] defaultValue) {
@@ -32,7 +34,7 @@ public class FileArraySetting extends Setting {
 	}
     
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
@@ -52,7 +54,7 @@ public class FileArraySetting extends Setting {
 	/**
 	 * Mutator for this setting.
 	 *
-	 * @param Adds file to the array.
+	 * @param file file to the array.
 	 */
 	public synchronized void add(File file) {
 	    if (file == null)
@@ -67,7 +69,7 @@ public class FileArraySetting extends Setting {
 	/**
 	 * Mutator for this setting.
 	 *
-	 * @param Remove file from the array, if it exists.
+	 * @param file Remove file from the array, if it exists.
 	 * @return false when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
@@ -91,16 +93,12 @@ public class FileArraySetting extends Setting {
 		return true;
 	}
     
-	/**
-	 * Returns true if the given file is contained in this array.
-	 */
+	/** Returns true if the given file is contained in this array. */
 	public synchronized boolean contains(File file) {
 	    return indexOf(file) >= 0;
 	}
 	
-	/**
-	 * Returns the index of the given file in this array, -1 if file is not found.
-	 */
+	/** Returns the index of the given file in this array, -1 if file is not found.	 */
 	public synchronized int indexOf(File file) {
 	    if (file == null)
 	        return -1;
@@ -117,9 +115,7 @@ public class FileArraySetting extends Setting {
 	    return -1;
 	}
 	
-	/**
-	 * Returns the length of the array.
-	 */
+	/** Returns the length of the array.	 */
 	public synchronized int length() {
 	    return value.length;
 	}
@@ -132,9 +128,7 @@ public class FileArraySetting extends Setting {
 		value = encode(sValue);
     }
     
-    /**
-     * Splits the string into an Array
-     */
+    /** Splits the string into an Array     */
     private static final File[] encode(String src) {
         
         if (src == null || src.length()==0) {
@@ -150,9 +144,7 @@ public class FileArraySetting extends Setting {
         return dirs;
     }
     
-    /**
-     * Separates each field of the array by a semicolon
-     */
+    /** Separates each field of the array by a semicolon     */
     private static final String decode(File[] src) {
         
         if (src == null || src.length==0) {
@@ -170,9 +162,7 @@ public class FileArraySetting extends Setting {
         return buffer.toString();
     }
 
-	/**
-	 * Removes non-existent members from this.
-	 */
+	/** Removes non-existent members from this.	 */
 	public synchronized void clean() {
 		List<File> list = new ArrayList<File>(value.length);
 		File file = null;

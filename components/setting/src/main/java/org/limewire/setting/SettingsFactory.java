@@ -19,13 +19,56 @@ import org.limewire.util.FileUtils;
 
 
 /**
- * Class for handling all LimeWire settings that are stored to disk.  To
- * add a new setting, simply add a new public static member to the list
- * of settings.  Each setting constructor takes the name of the key and 
- * the default value, and all settings are typed.  Choose the correct 
- * <tt>Setting</tt> subclass for your setting type.  It is also important
- * to choose a unique string key for your setting name -- otherwise there
- * will be conflicts.
+ * Coordinates the creating, storing and reloading of persistent data to and 
+ * from disk for {@link Setting} objects. Each <code>Setting</code> creation 
+ * method takes the name of the key and the default value, and all settings 
+ * are typed. Since duplicate keys aren't allowed, you must choose a unique 
+ * string for your setting key name.  
+ * <p>
+ * When you add a new setting, add a public synchronized member to 
+ * <code>SettingsFactory</code> to create a setting instance.
+ * <p>
+ * A <code>Setting</code> is stored to disk when the value is altered from the 
+ * default value. For example, with a file font.txt without the key ARIAL included:
+<pre>
+        File f = new File("font.txt");
+        SettingsFactory sf = new SettingsFactory(f);
+
+        FontNameSetting font = sf.createRemoteFontNameSetting("ARIAL", 
+                                                       "defaultValue", 
+                                                       "ARIAL_REMOTE");
+        System.out.println(font.getValue());
+        font.setValue("Arial");
+        System.out.println(font.getValue());
+
+    Output:
+        defaultValue
+        Arial
+
+With the change from defaultValue to Arial, font.txt now includes:
+        ARIAL=Arial
+ </pre>
+ * Additionally, the value stored in disk is loaded for each key
+ * you specify regardless of the default value in create method. For example 
+ * with "ARIAL=Arial" stored in font.txt:
+ <pre>
+        File f = new File("font.txt");
+        SettingsFactory sf = new SettingsFactory(f);
+
+        FontNameSetting font = sf.createRemoteFontNameSetting("ARIAL", 
+                                                        "defaultValue2", 
+                                                        "ARIAL_REMOTE");
+        System.out.println(font.getValue());
+
+    Output:
+        Arial
+    
+    font.txt still includes:
+        ARIAL=Arial
+ </pre>
+ * If font.txt doesn't have the key ARIAL, then the value is "defaultValue2"
+ * and font.txt won't have the ARIAL key and value (since the default value 
+ * didn't change).
  */
 public final class SettingsFactory implements Iterable<Setting> {    
     /** Time interval, after which the accumulated information expires */
@@ -40,7 +83,7 @@ public final class SettingsFactory implements Iterable<Setting> {
     /** The header written to the settings file. */
     private final String HEADING;
 
-    /** <tt>Properties</tt> instance for the defualt values. */
+    /** <tt>Properties</tt> instance for the default values. */
     protected final Properties DEFAULT_PROPS = new Properties();
 
     /** The <tt>Properties</tt> instance containing all settings.  */
@@ -65,7 +108,7 @@ public final class SettingsFactory implements Iterable<Setting> {
      */
     private RemoteSettingManager remoteManager = new NullRemoteManager();
     
-    /** Whether or not expirable settings have expired. */
+    /** Whether or not expire-able settings have expired. */
     private boolean expired = false;
     
     /**
@@ -165,7 +208,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         if (LAST_EXPIRE_TIME == null) {
             LAST_EXPIRE_TIME = createLongSetting("LAST_EXPIRE_TIME", 0);
             
-            // Set flag to true if Settings are expiried. See
+            // Set flag to true if Settings are expired. See
             // createExpirable<whatever>Setting at the bottom
             expired =
                 (LAST_EXPIRE_TIME.getValue() + EXPIRY_INTERVAL <
@@ -257,7 +300,8 @@ public final class SettingsFactory implements Iterable<Setting> {
         return PROPS;
     }
     
-    /** Sets a new RemoteSettingManager to control remote settings. */
+    /** Sets a new RemoteSettingManager to control remote settings. 
+     * */
     public synchronized void setRemoteSettingManager(RemoteSettingManager manager) {
         this.remoteManager = manager;
         manager.setRemoteSettingController(new RemoteSettingController() {
@@ -290,9 +334,6 @@ public final class SettingsFactory implements Iterable<Setting> {
         return result;
     }
 
-    /**
-     * @param useSimpp if true, makes the setting SimppEnabled
-     */
     public synchronized StringSetting createRemoteStringSetting(String key,
                 String defaultValue, String remoteKey) {
         StringSetting result =  new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -339,7 +380,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+
     public synchronized IntSetting createRemoteIntSetting(String key, 
                         int defaultValue, String remoteKey, int min, int max) {
         IntSetting result = new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue, min, max);
@@ -362,7 +403,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+  
     public synchronized ByteSetting createRemoteByteSetting(String key, 
                       byte defaultValue, String remoteKey, byte min, byte max) {
         ByteSetting result = new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue, min, max);
@@ -385,7 +426,7 @@ public final class SettingsFactory implements Iterable<Setting> {
          handleSettingInternal(result, null);
          return result;
     }
-    
+
     public synchronized LongSetting createRemoteLongSetting(String key,
                        long defaultValue, String remoteKey, long min, long max) {
          LongSetting result = 
@@ -409,7 +450,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+
     public synchronized PowerOfTwoSetting createRemotePowerOfTwoSetting(String key,
             long defaultValue, String remoteKey, long min, long max) {
         PowerOfTwoSetting result = 
@@ -439,7 +480,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-
+ 
     public synchronized FileSetting createRemoteFileSetting(String key, 
                       File defaultValue, String remoteKey) {
         String parentString = defaultValue.getParent();
@@ -499,7 +540,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-        
+   
     public synchronized CharArraySetting createRemoteCharArraySetting(
                             String key, char[] defaultValue, String remoteKey) {
         CharArraySetting result =new CharArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -544,7 +585,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+   
     public synchronized StringArraySetting createRemoteStringArraySetting(
               String key, String[] defaultValue, String remoteKey) {
         StringArraySetting result = 
@@ -575,7 +616,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+   
     public synchronized FileArraySetting createRemoteFileArraySetting(
                              String key, File[] defaultValue, String remoteKey) {
         FileArraySetting result = 
@@ -596,7 +637,7 @@ public final class SettingsFactory implements Iterable<Setting> {
         handleSettingInternal(result, null);
         return result;
     }
-    
+   
     public synchronized FileSetSetting createRemoteFileSetSetting(
                              String key, File[] defaultValue, String remoteKey) {
         FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue);

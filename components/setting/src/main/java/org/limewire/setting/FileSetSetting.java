@@ -10,7 +10,12 @@ import java.util.StringTokenizer;
 
 
 /**
- * A setting which has a Set of files.
+ * Provides a <code>Set</code> of {@link File} values for a key. 
+ * <code>FileSetSetting</code> class includes methods to add/remove 
+ * <code>File</code>s, get <code>File</code> values as an array and return 
+ * the length of the <code>File</code> set.
+ * <p>
+ * Create a <code>FileSetSetting</code> object with a {@link SettingsFactory}.
  */
  
 public class FileSetSetting extends Setting {
@@ -22,7 +27,7 @@ public class FileSetSetting extends Setting {
 	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
-	 * @param defaultInt the default value to use for the setting
+	 * @param defaultValue the default value to use for the setting
 	 */
 	FileSetSetting(Properties defaultProps, Properties props, String key, File[] defaultValue) {
         super(defaultProps, props, key, decode(new HashSet<File>(Arrays.asList(defaultValue))));
@@ -30,7 +35,7 @@ public class FileSetSetting extends Setting {
 	}
 
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
@@ -38,9 +43,7 @@ public class FileSetSetting extends Setting {
         return value;
 	}
 	
-	/**
-	 * Gets the value as an array.
-	 */
+	/** Gets the value as an array. */
 	public synchronized File[] getValueAsArray() {
 	    return value.toArray(new File[value.size()]);
     }
@@ -56,8 +59,7 @@ public class FileSetSetting extends Setting {
 
 	/**
 	 * Mutator for this setting.
-	 *
-	 * @param Adds file to the array.
+	 * @param file file to add to the array.
 	 */
 	public synchronized void add(File file) {
 	    value.add(file);
@@ -67,7 +69,7 @@ public class FileSetSetting extends Setting {
 	/**
 	 * Mutator for this setting.
 	 *
-	 * @param Remove file from the array, if it exists.
+	 * @param file Remove file from the array, if it exists.
 	 * @return false when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
@@ -80,16 +82,12 @@ public class FileSetSetting extends Setting {
 	    }
 	}
     
-	/**
-	 * Returns true if the given file is contained in this array.
-	 */
+	/** Returns true if the given file is contained in this array. */
 	public synchronized boolean contains(File file) {
 	    return value.contains(file);
 	}
 	
-	/**
-	 * Returns the length of the array.
-	 */
+	/** Returns the length of the array. */
 	public synchronized int length() {
 	    return value.size();
 	}
@@ -102,9 +100,7 @@ public class FileSetSetting extends Setting {
 		value = encode(sValue);
     }
     
-    /**
-     * Splits the string into a Set
-     */
+    /** Splits the string into a Set    */
     private static final Set<File> encode(String src) {
         if (src == null || src.length()==0)
             return new HashSet<File>();
@@ -117,9 +113,7 @@ public class FileSetSetting extends Setting {
         return set;
     }
     
-    /**
-     * Separates each field of the array by a semicolon
-     */
+    /** Separates each field of the array by a semicolon     */
     private static final String decode(Set<? extends File> src) {
         if (src == null || src.isEmpty())
             return "";
@@ -135,9 +129,7 @@ public class FileSetSetting extends Setting {
         return buffer.toString();
     }
 
-	/**
-	 * Removes non-existent members.
-	 */
+	/** Removes non-existent members.	 */
 	public synchronized void clean() {
 	    for(Iterator<File> i = value.iterator(); i.hasNext(); ) {
 	        File next = i.next();

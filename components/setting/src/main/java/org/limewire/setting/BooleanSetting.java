@@ -6,11 +6,15 @@ import org.limewire.service.Switch;
 
 
 /**
- * Class for a boolean setting.
+ * Provides a boolean key-value pair. 
+ * <code>BooleanSetting</code> provides methods to set, get and switch 
+ * the boolean value.
+ * <p>
+ * Create a <code>BooleanSetting</code> object with a {@link SettingsFactory}.
  */
 public final class BooleanSetting extends Setting implements Switch {
     
-    /** Curernve value of settings */
+    /** Current value of a settings */
     private boolean value;
 
 	/**
@@ -26,7 +30,7 @@ public final class BooleanSetting extends Setting implements Switch {
 	}
  
 	/**
-	 * Accessor for the value of this setting.
+	 * Assessor for the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
