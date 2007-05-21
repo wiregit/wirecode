@@ -204,6 +204,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
+        LimeTestUtils.waitForNIO();
         assertEquals(Uploader.COMPLETE, uploader.getState());
     }
 
