@@ -1,4 +1,4 @@
-﻿################################################################################
+﻿ΚανονικόΣυνθήκηορισμούΛίσταορισμώνΔιεύθυνση################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Greek - Greece & Cyprus (Modern)
 # Thanks to Damianos Aronidis & Andreas Fournaris
@@ -79,11 +79,11 @@ GENERAL_BROWSE_HOST_LABEL=Περιήγηση παρόχου
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
 GENERAL_BROWSE_HOST_TIP=Εμφάνιση όλων των αρχείων στον επιλεγμένο υπολογιστή.
 #### GENERAL_LICENSE_SUB_MENU=License
-#? GENERAL_LICENSE_SUB_MENU=
+GENERAL_LICENSE_SUB_MENU=Άδεια
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
-#? GENERAL_ADVANCED_SUB_MENU=
+GENERAL_ADVANCED_SUB_MENU=Προχωρημένο
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
-#? GENERAL_CLEAR_BUTTON_LABEL=
+GENERAL_CLEAR_BUTTON_LABEL=Καθάρισε
 
 ################################################################################
 # Key/value pairs for right-click context menus.
@@ -109,9 +109,9 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Επαναφορά προεπιλογών
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Επαναφορά όλων των ρυθμίσεων στις εργοστασιακές προεπιλογές.
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=
+OPTIONS_LEARN_MORE_LABEL=Μάθε περισσότερα
 #### OPTIONS_SEARCH_HERE=Search here
-#? OPTIONS_SEARCH_HERE=
+OPTIONS_SEARCH_HERE=Ψάξε εδώ
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".
@@ -171,27 +171,27 @@ ABOUT_SCROLL_CHECK_BOX_LABEL=Αυτόματη κύλιση
 #### ABOUT_BUTTON_TIP=Close This Window
 ABOUT_BUTTON_TIP=Κλείσιμο του παραθύρου «Σχετικά με το...»
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
-#? ABOUT_INTRODUCTION=
+ABOUT_INTRODUCTION=Εμπνευσμένο από τον κάτοχο του Limewire, τον Mark Gorton, το Limewire είναι μια ομαδική <a href="http://www.limewire.org/">προσπάθει ανοικτού λογισμικού</a> περιλαμβάνοντας προγραμματιστές και ερευνητές από όλο τον κόσμο.
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
-#? ABOUT_DEV_BLURB=
+ABOUT_DEV_BLURB=Το LimeWire είναι επίσης, φυσικά, αποτέλεσμα των αμέτρητων ωρών εργασίας των προγραμματιστών του LimeWire.
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 #? ABOUT_BIZDEV_BLURB=
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
-#? ABOUT_WEBDEV_BLURB=
+ABOUT_WEBDEV_BLURB=H <a href="http://www.limewire.com/">ιστοσελίδα</a> του LimeWire και η γραφική επένδυση είναι σκληρή δουλειά της διαδυκτιακής ομάδας του LimeWire.
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
-#? ABOUT_SUPPORT_BLURB=
+ABOUT_SUPPORT_BLURB=Οι ερωτήσεις για το LimeWire PRO απαντώνται με συνέπεια από την τεχνική ομάδα υποστήριξης του LimeWire.
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
-#? ABOUT_PREVIOUS_DEV_BLURB=
+ABOUT_PREVIOUS_DEV_BLURB=Επιπλέον, τα ακόλουθα άτομα έχουν δουλέψει για την ομάδα του LimeWire στο παρελθόν αλλά τώρα έχουν μετακινηθεί σε άλλα project.
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
-#? ABOUT_I18N_BLURB=
+ABOUT_I18N_BLURB=Το LimeWire θα ήθελε επίσης να ευχαριστήσει τους πολλούς χορηγούς του διεθνούς project, και για το ίδιο το πρόγραμμα αλλά και για την ιστοσελίδα του LimeWire.
 #### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
-#? ABOUT_COMMUNITY_BLURB=
+ABOUT_COMMUNITY_BLURB=Πολλοί συνεργάτες από την κοινότητα Gnutella αξίζουν ιδιαίτερα ευχαριστώ. Σε αυτούς περιλαμβάνονται:
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
-#? ABOUT_CONCLUSION=
+ABOUT_CONCLUSION=Τελικά, το LimeWire θα ήθελε να απευθύνει τις ειλικρινές του ευχαριστίες στους προγραμματιστές, τους χρήστες και όλους τους άλλους που έχουν παραθέσει τις ιδέες του στο project. Χωρίς τους χρήστες του LimeWire, το δίκτυο του LimeWire δεν θα υπήρχε. 
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
-#? ABOUT_BT_NOTICE=
+ABOUT_BT_NOTICE=Το Bit Torrent, το λογότυπο του BitTorrent, και το Torrent είναι εμπορικά σήματα του BitTorrent, Inc. 
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
@@ -208,7 +208,7 @@ TOTD_PREVIOUS=Προηγούμενη συμβουλή
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Κλείσιμο
 #### TOTD_LOADING_TIPS=Loading tips...
-#? TOTD_LOADING_TIPS=
+TOTD_LOADING_TIPS=Φόρτωμα συμβουλών...
 
 ###################################################################
 # Key/value pairs for the Getting Started image.
@@ -260,9 +260,9 @@ DOWNLOAD_TITLE=Λήψη αρχείων
 #### UPLOAD_TITLE=Uploads
 UPLOAD_TITLE=Αποστολή αρχείων
 #### CONSOLE_TITLE=Console
-#? CONSOLE_TITLE=
+CONSOLE_TITLE=Κονσόλα
 #### LOGGING_TITLE=Logging
-#? LOGGING_TITLE=
+LOGGING_TITLE=Εισαγωγή
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows.
@@ -276,9 +276,9 @@ CONNECTIONS_TIP=Εμφάνιση συνδέσεων με άλλους χρήστ
 #### LIBRARY_TIP=View Repository of Saved Files
 LIBRARY_TIP=Εμφάνιση αποθήκης αποθηκευμένων αρχείων.
 #### CONSOLE_TIP=View Console Messages
-#? CONSOLE_TIP=
+CONSOLE_TIP=Δείτε τα μυνήματα της Κονσόλας
 #### LOGGING_TIP=View Logging Messages
-#? LOGGING_TIP=
+LOGGING_TIP=Δες μηνύματα εισαγωγής
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window.
@@ -306,63 +306,63 @@ MENU_FILE_DISCONNECT_MNEMONIC=O
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
 MENU_FILE_DISCONNECT_ACCESSIBLE=Αποσύνδεση από το δίκτυο.
 #### MENU_FILE_OPEN_TORRENT=Open .torrent
-#? MENU_FILE_OPEN_TORRENT=
+MENU_FILE_OPEN_TORRENT=Ανοίξτε .torrent
 #### MENU_FILE_OPEN_TORRENT_MNEMONIC=T
-#? MENU_FILE_OPEN_TORRENT_MNEMONIC=
+MENU_FILE_OPEN_TORRENT_MNEMONIC=T
 #### MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Opens a .torrent file from your hard drive
-#? MENU_FILE_OPEN_TORRENT_ACCESSIBLE=
+MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Ανοίγει ένα αρχείο με επέκταση .torrent από το σκληρό δίσκο.
 #### MENU_FILE_DOWNLOAD_TORRENT=Download .torrent
-#? MENU_FILE_DOWNLOAD_TORRENT=
+MENU_FILE_DOWNLOAD_TORRENT=Κατεβάστε .torrent
 #### MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=D
-#? MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=
+MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=K
 #### MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Downloads a .torrent file from the WWW
-#? MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=
+MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Κατεβάζει ένα αρχείο με επέκταση .torrent από το WWW
 #### MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Download .torrent file from the web
-#? MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=
+MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Κατεβάστε ένα αρχείο με επέκταση .torrent από το διαδίκτυο
 #### MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL
-#? MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=
+MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL(Ιστοσελίδα)
 #### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
-#? MENU_FILE_LIBRARY_NEW_FOLDER=
+MENU_FILE_LIBRARY_NEW_FOLDER=Νέος Φάκελος
 #### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-#? MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=Ν
 #### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
-#? MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Προσθέστε ένα φάκελο στον επιλεγμένο φάκελο της βιβλιοθήκης
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER=Σταματήστε να μοιράζεστε το φάκελο
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Σταματήστε να μοιράζεστε τον επιλεγμένο φάκελο της βιβλιοθήκης.
 #### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
-#? MENU_FILE_LIBRARY_RENAME_FOLDER=
+MENU_FILE_LIBRARY_RENAME_FOLDER=Μετονομασία Φακέλου
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-#? MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=Μ
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
-#? MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Μετονομάστε τον επελεγμένο φάκελο της βιβλιοθήκης
 #### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
-#? MENU_FILE_LIBRARY_LAUNCH_FILES=
+MENU_FILE_LIBRARY_LAUNCH_FILES=Άνοιαμα Αρχείου(ων)
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
-#? MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=
+MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
-#? MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Άνοιγμα Επελεγμένου(ων) αρχείου(ων)
 #### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
-#? MENU_FILE_LIBRARY_DELETE_FILES=
+MENU_FILE_LIBRARY_DELETE_FILES=Διαγραφή Αρχείου(ων)
 #### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-#? MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=
+MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=Ε
 #### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
-#? MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Διαγράψε το(α) επελεγμένο(να) αρχείο(α)
 #### MENU_FILE_LIBRARY_REFRESH=Refresh
-#? MENU_FILE_LIBRARY_REFRESH=
+MENU_FILE_LIBRARY_REFRESH=Ανανέωση
 #### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
-#? MENU_FILE_LIBRARY_REFRESH_MNEMONIC=
+MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 #### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
-#? MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=
+MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Ξαναφόρτωσε την βιβλιοθήκη
 #### MENU_FILE_LIBRARY_EXPLORE=Explore
-#? MENU_FILE_LIBRARY_EXPLORE=
+MENU_FILE_LIBRARY_EXPLORE=Εξερεύνησε
 #### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
-#? MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=
+MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=Χ
 #### MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open Library Folder
-#? MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=
+MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Άνοιγμα βιβλιοθήκης φακέλων
 
 #### MENU_NAV_TITLE=Navigation
 MENU_NAV_TITLE=Περιήγηση [P]
@@ -393,17 +393,17 @@ MENU_NAV_LIB_MNEMONIC=R
 #### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
 MENU_NAV_LIB_ACCESSIBLE=Εμφάνιση του πίνακα αρχειοθήκης.
 #### MENU_NAV_CONSOLE=Console
-#? MENU_NAV_CONSOLE=
+MENU_NAV_CONSOLE=Κονσόλα
 #### MENU_NAV_CONSOLE_MNEMONIC=O
-#? MENU_NAV_CONSOLE_MNEMONIC=
+MENU_NAV_CONSOLE_MNEMONIC=Ο
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
-#? MENU_NAV_CONSOLE_ACCESSIBLE=
+MENU_NAV_CONSOLE_ACCESSIBLE=Άνοιξε την οθόνη κονσόλας
 #### MENU_NAV_LOGGING=Logging
-#? MENU_NAV_LOGGING=
+MENU_NAV_LOGGING=Εισαγωγή
 #### MENU_NAV_LOGGING_MNEMONIC=G
-#? MENU_NAV_LOGGING_MNEMONIC=
+MENU_NAV_LOGGING_MNEMONIC=G
 #### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
-#? MENU_NAV_LOGGING_ACCESSIBLE=
+MENU_NAV_LOGGING_ACCESSIBLE=Άνοιξε την οθόνη κονσόλας
 
 
 #### MENU_VIEW_TITLE=View
@@ -447,17 +447,17 @@ MENU_VIEW_LIBRARY_MNEMONIC=R
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
 MENU_VIEW_LIBRARY_ACCESSIBLE=Εμφάνιση παραθύρου αρχειοθήκης.
 #### MENU_VIEW_CONSOLE=Console
-#? MENU_VIEW_CONSOLE=
+MENU_VIEW_CONSOLE=Κονσόλα
 #### MENU_VIEW_CONSOLE_MNEMONIC=O
-#? MENU_VIEW_CONSOLE_MNEMONIC=
+MENU_VIEW_CONSOLE_MNEMONIC=Ο
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
-#? MENU_VIEW_CONSOLE_ACCESSIBLE=
+MENU_VIEW_CONSOLE_ACCESSIBLE=Άνοιξε το παράθυρο της κονσόλας
 #### MENU_VIEW_LOGGING=Logging
-#? MENU_VIEW_LOGGING=
+MENU_VIEW_LOGGING=Εισαγωγή
 #### MENU_VIEW_LOGGING_MNEMONIC=G
-#? MENU_VIEW_LOGGING_MNEMONIC=
+MENU_VIEW_LOGGING_MNEMONIC=G
 #### MENU_VIEW_LOGGING_ACCESSIBLE=Show Logging Window
-#? MENU_VIEW_LOGGING_ACCESSIBLE=
+MENU_VIEW_LOGGING_ACCESSIBLE=Δείξε παράθυρο εισαγωγής
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=Αλλαγή εμφάνισης [A]
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -485,7 +485,7 @@ MENU_VIEW_LANGS_TITLE=Αλλαγή γλώσσας [G]
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_TITLE_MNEMONIC=G
 #### MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Select your Language Prefereces
-#? MENU_VIEW_LANGS_TITLE_ACCESSIBLE=
+MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Διαλέξτε προτιμήσεις γλώσσας
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
 MENU_VIEW_LANGS_RESTART_REQUIRED=Πρέπει να γίνει επανεκκίνηση του LimeWire για την ενεργοποίηση της νέας γλώσσας.
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
@@ -523,9 +523,9 @@ MENU_TOOLS_TITLE=Εργαλεία [R]
 #### MENU_TOOLS_TITLE_MNEMONIC=T
 MENU_TOOLS_TITLE_MNEMONIC=R
 #### MENU_TOOLS_ADVANCED_TITLE=Advanced
-#? MENU_TOOLS_ADVANCED_TITLE=
+MENU_TOOLS_ADVANCED_TITLE=Προχωρημένα
 #### MENU_TOOLS_ADVANCED_TITLE_MNEMONIC=A
-#? MENU_TOOLS_ADVANCED_TITLE_MNEMONIC=
+MENU_TOOLS_ADVANCED_TITLE_MNEMONIC=A
 #### MENU_TOOLS_STATISTICS=Statistics
 MENU_TOOLS_STATISTICS=Στατιστικά στοιχεία [S]
 #### MENU_TOOLS_STATISTICS_MNEMONIC=S
@@ -535,9 +535,9 @@ MENU_TOOLS_STATISTICS_ACCESSIBLE=Εμφάνιση πίνακα στατιστι�
 #### MENU_TOOLS_DHT_ARCS=Mojito DHT Arcs View
 #? MENU_TOOLS_DHT_ARCS=
 #### MENU_TOOLS_DHT_ARCS_MNEMONIC=D
-#? MENU_TOOLS_DHT_ARCS_MNEMONIC=
+MENU_TOOLS_DHT_ARCS_MNEMONIC=D
 #### MENU_TOOLS_DHT_ARCS_ACCESSIBLE=Display a view of the incoming and outgoing DHT messages
-#? MENU_TOOLS_DHT_ARCS_ACCESSIBLE=
+MENU_TOOLS_DHT_ARCS_ACCESSIBLE=Παρουσίασε μια λίστα με τα εισερχόμενα και εξερχόμενα DHT μηνύματα.
 #### MENU_TOOLS_OPTIONS=Options
 MENU_TOOLS_OPTIONS=Επιλογές [E]
 #### MENU_TOOLS_OPTIONS_MNEMONIC=O
@@ -546,21 +546,21 @@ MENU_TOOLS_OPTIONS_MNEMONIC=E
 MENU_TOOLS_OPTIONS_ACCESSIBLE=Εμφάνιση πίνακα επιλογών.
 
 #### MENU_FILTERS_TITLE=Filters
-#? MENU_FILTERS_TITLE=
+MENU_FILTERS_TITLE=F;iltra
 #### MENU_FILTERS_TITLE_MNEMONIC=S
-#? MENU_FILTERS_TITLE_MNEMONIC=
+MENU_FILTERS_TITLE_MNEMONIC=S
 #### MENU_FILTERS_CONFIGURE=Configure Content Filters
-#? MENU_FILTERS_CONFIGURE=
+MENU_FILTERS_CONFIGURE=Ρύθμιση φίλτρων περιεχομένων
 #### MENU_FILTERS_CONFIGURE_MNEMONIC=C
-#? MENU_FILTERS_CONFIGURE_MNEMONIC=
+MENU_FILTERS_CONFIGURE_MNEMONIC=C
 #### MENU_FILTERS_CONFIGURE_ACCESSIBLE=Configure LimeWire's Content Filtering Options
-#? MENU_FILTERS_CONFIGURE_ACCESSIBLE=
+MENU_FILTERS_CONFIGURE_ACCESSIBLE=Τροποποιείστε τις επιλογές του LimeWire για τα φίλτρα περιεχομένων
 #### MENU_FILTERS_LEARN_MORE=Learn More...
-#? MENU_FILTERS_LEARN_MORE=
+MENU_FILTERS_LEARN_MORE=Μάθε περισσότερα...
 #### MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Learn More about LimeWire's Content Filtering System
-#? MENU_FILTERS_LEARN_MORE_ACCESSIBLE=
+MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Μάθε περισσότερα για το σύστημα φίλτρων περιεχομένων του LimeWire
 #### MENU_FILTERS_LEARN_MORE_MNEMONIC=L
-#? MENU_FILTERS_LEARN_MORE_MNEMONIC=
+MENU_FILTERS_LEARN_MORE_MNEMONIC=L
 
 #### MENU_HELP_TITLE=Help
 MENU_HELP_TITLE=Βοήθεια [B]
@@ -607,21 +607,21 @@ MENU_HELP_ERROR_ACCESSIBLE=Παραγάγετε ένα popup σφάλμα για
 # Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
-#? STATUS_BAR_SHOW_CONNECTION_QUALITY=
+STATUS_BAR_SHOW_CONNECTION_QUALITY=Δείξε ποιότητα σύνδεσης
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
-#? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
+STATUS_BAR_SHOW_SHARED_FILES_COUNT=Δείξε άθροισμα μοιρασμένων αρχείων
 #### STATUS_BAR_SHOW_LANGUAGE_STATUS=Show Language Status
-#? STATUS_BAR_SHOW_LANGUAGE_STATUS=
+STATUS_BAR_SHOW_LANGUAGE_STATUS=Δείξε στοιχεία γλώσσας
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
-#? STATUS_BAR_SHOW_FIREWALL_STATUS=
+STATUS_BAR_SHOW_FIREWALL_STATUS=Δείξε στοιχεία τοίχους προστασίας
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
-#? STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=
+STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Προβολή Περίληψης Bandwidth
 #### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
-#? STATUS_BAR_SHOW_MEDIA_PLAYER=
+STATUS_BAR_SHOW_MEDIA_PLAYER=Δείξε τον Media Player
 #### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
-#? STATUS_BAR_FIREWALL_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_FOUND_TOOLTIP=Το LimeWire έχει εντοπίσε ένα τοίχος προστασίας
 #### STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire has not detected a firewall
-#? STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=Το LimeWire δεν έχει εντοπίσε ένα τοίχος προστασίας
 
 ################################################################################
 # Key/value pairs for general tables info.
@@ -645,7 +645,7 @@ SEARCH_DOWNLOAD_BUTTON_LABEL=Λήψη αρχείου
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
 SEARCH_DOWNLOAD_BUTTON_TIP=Λήψη όλων των επιλεγμένων αρχείων.
 #### SEARCH_DOWNLOAD_AS_LABEL=Download As...
-#? SEARCH_DOWNLOAD_AS_LABEL=
+SEARCH_DOWNLOAD_AS_LABEL=Κατέβασε ως...
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
 SEARCH_BROWSE_HOST_BUTTON_LABEL=Περιήγηση παρόχου
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
@@ -659,15 +659,15 @@ SEARCH_STOP_BUTTON_LABEL=Διακοπή
 #### SEARCH_STOP_BUTTON_TIP=Stop Collecting Search Results for Selected Tab
 SEARCH_STOP_BUTTON_TIP=Διακοπή συλλογής αποτελεσμάτων έρευνας για την επιλεγμένη ετικέτα.
 #### SEARCH_SPAM_MARK_AS_LABEL=Mark As
-#? SEARCH_SPAM_MARK_AS_LABEL=
+SEARCH_SPAM_MARK_AS_LABEL=Μαρκάρισε ως
 #### SEARCH_SPAM_BUTTON_LABEL=Junk
-#? SEARCH_SPAM_BUTTON_LABEL=
+SEARCH_SPAM_BUTTON_LABEL=Αμφισβητήσιμο
 #### SEARCH_NOT_SPAM_BUTTON_LABEL=Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_LABEL=
+SEARCH_NOT_SPAM_BUTTON_LABEL=Μη Αμφισβητήσιμο
 #### SEARCH_SPAM_BUTTON_TIP=Mark selected search results as Junk
-#? SEARCH_SPAM_BUTTON_TIP=
+SEARCH_SPAM_BUTTON_TIP=Μαρκάρισε τις επελεγμένες έρευνες ως αμφισβητήσιμες
 #### SEARCH_NOT_SPAM_BUTTON_TIP=Mark selected search results as Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_TIP=
+SEARCH_NOT_SPAM_BUTTON_TIP=Μαρκάρισε τις επελεγμένες έρευνες ως μη αμφισβητήσιμες
 #### SEARCH_PUBLIC_KILL_STRING=Close Search
 SEARCH_PUBLIC_KILL_STRING=Κλείσιμο αναζήτησης
 #### SEARCH_PUBLIC_LAUNCH_STRING=Launch Action
@@ -685,21 +685,21 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Πληροφορίες Magnet για το α�
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Επανάληψη αναζήτησης
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
-#? SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=
+SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Βρες περισσότερα αποτελέσματα
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=Μπλοκάρισμα παρόχου
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Αποτελέσματα
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
-#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
+SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Ψάξε περισσότερο
 #### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
-#? SEARCH_RESULT_SECURE_TIP=
+SEARCH_RESULT_SECURE_TIP=Αυτό είναι ένα ασφαλές αποτέλεσμα. Καμία πληροφορία στο αποτέλεσμα δεν είναι πλαστές
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Ένα από τα επιλεγμένα αρχεία είναι εκτελέσιμο
 #### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
 SEARCH_VIRUS_MSG_TWO=πρόγραμμα και μπορεί να περιέχει κάποιον ιό. Είστε
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
-SEARCH_VIRUS_MSG_THREE=σίγουρος ότι θέλετε να το κατεβάσετε;
+SEARCH_VIRUS_MSG_THREE=σίγουρος ότι θέλετε να το κατεβάσετε?
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=Όνομα αρχείου
 #### SEARCH_MULTIPLE_HOSTS=Multiple
@@ -707,11 +707,11 @@ SEARCH_MULTIPLE_HOSTS=Πολλαπλό
 #### SEARCH_TYPE_KEYWORD=Keyword
 SEARCH_TYPE_KEYWORD=Λέξη κλειδί
 #### SEARCH_TYPE_WHATSNEW=What's New
-SEARCH_TYPE_WHATSNEW=Τι νέο υπάρχει;
+SEARCH_TYPE_WHATSNEW=Τι νέο υπάρχει?
 #### SEARCH_TYPE_BROWSEHOST=Direct Connect
 SEARCH_TYPE_BROWSEHOST=Άμεση σύνδεση
 #### SEARCH_BROWSEHOST_TITLE=Got Friends?
-SEARCH_BROWSEHOST_TITLE=Έχετε φίλους;
+SEARCH_BROWSEHOST_TITLE=Έχετε φίλους?
 #### SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
 SEARCH_BROWSEHOST_DESC=Εισάγετε μία διεύθυνση IP ενός φίλου σας, που θα θέλατε να συνδεθείτε, πατήστε «Άμεση σύνδεση», και το LimeWire θα προσπαθήσει να περιηγηθεί στα αρχεία αυτού του χρήστη.
 #### SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
@@ -725,9 +725,9 @@ SEARCH_WHATSNEW_HIDE_ADULT=Απόκρυψη περιεχομένου για εν
 #### SEARCH_WHATSNEW_TITLE_ONE=Don't Know
 SEARCH_WHATSNEW_TITLE_ONE=Δεν ξέρετε
 #### SEARCH_WHATSNEW_TITLE_TWO=What To Look For?
-SEARCH_WHATSNEW_TITLE_TWO=Τι να ψάξετε;
+SEARCH_WHATSNEW_TITLE_TWO=Τι να ψάξετε?
 #### SEARCH_WHATSNEW_DESC=A "What's New" search will search for files that have been recently added to the network.
-SEARCH_WHATSNEW_DESC=Πατώντας την ετικέτα «Τι νέο υπάρχει;», θα γίνει αναζήτηση για αρχεία που έχουν προστεθεί πρόσφατα στο δίκτυο.
+SEARCH_WHATSNEW_DESC=Πατώντας την ετικέτα «Τι νέο υπάρχει?», θα γίνει αναζήτηση για αρχεία που έχουν προστεθεί πρόσφατα στο δίκτυο.
 #### SEARCH_CURRENT_SEARCH=Current Search:
 SEARCH_CURRENT_SEARCH=Τρέχουσα αναζήτηση:
 #### SEARCH_WHATS_NEW_SMALL=New
@@ -735,15 +735,15 @@ SEARCH_WHATS_NEW_SMALL=Νέο
 #### SEARCH_SELECT_TYPE=Select Search Type:
 SEARCH_SELECT_TYPE=Επιλογή τύπου:
 #### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
-#? SEARCH_MEDIA_DOCUMENTS_TOOLTIP=
+SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Ψάξε για αρχεία Document, συμπεριλαμβανομένων των html, txt, pdf, και άλλα
 #### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
-#? SEARCH_MEDIA_PROGRAMS_TOOLTIP=
+SEARCH_MEDIA_PROGRAMS_TOOLTIP=Ψάξε για αρχεία προγράμματος, συμπεριλαμβανομένων των exe, zip, gz, και άλλα
 #### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
-#? SEARCH_MEDIA_AUDIO_TOOLTIP=
+SEARCH_MEDIA_AUDIO_TOOLTIP=Ψάξε για αρχεία ήχου, συμπεριλαμβανομένων των mp3, wav, ogg και άλλα
 #### SEARCH_MEDIA_VIDEO_TOOLTIP=Search For Video Files, Including avi, mpg, wmv, and More
-#? SEARCH_MEDIA_VIDEO_TOOLTIP=
+SEARCH_MEDIA_VIDEO_TOOLTIP=Ψάξε για αρχεία video, συμπεριλαμβανομένων των avi, mpg, wmv και άλλα
 #### SEARCH_MEDIA_IMAGES_TOOLTIP=Search For Image Files, Including jpg, gif, png and More
-#? SEARCH_MEDIA_IMAGES_TOOLTIP=
+SEARCH_MEDIA_IMAGES_TOOLTIP=Ψάξε για αρχεία εικόνων, συμπεριλαμβανομένων των jpg, gif, png και άλλα
 #### SEARCH_FILTER_RESULTS=Filter Results:
 SEARCH_FILTER_RESULTS=Φιλτράρισμα αποτελεσμάτων:
 #### SEARCH_BACK_TO_SEARCH=Back To Search
@@ -751,48 +751,48 @@ SEARCH_BACK_TO_SEARCH=Πίσω στην αναζήτηση
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=Θέλετε να μπλοκάρετε τα αποτελέσματα της αναζήτησης από τον πάροχο στο
 #### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
-#? SEARCH_RESULTS_OFFICIAL_WARNING=
+SEARCH_RESULTS_OFFICIAL_WARNING=Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του LimeWire.
 #### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
-#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
+SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=Περισσότερες πληροφορίες...
 
 ################################################################################
 # Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_LABEL=
+MAGNET_COPY_MAGNET_LINKS_LABEL=Αντιγραφή συνδέσμων Magnet στο Πρόχειρο
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the Selected Files to the Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
+MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Αντιγραφή συνδέσμων επιλεγμένων αρχείων Magnet στο Πρόχειρο
 #### MAGNET_COPY_MAGNET_LINKS_WARNING=One or more of the created magnet links may not be accessible since their hosts are firewalled.
-#? MAGNET_COPY_MAGNET_LINKS_WARNING=
+MAGNET_COPY_MAGNET_LINKS_WARNING=Ένας ή περισσότεροι από τους δημιουργημένους συνδέσμους magnet ίσως να μην είναι προσβάσιμοι από τη στιγμή που οι διανομείς τους έχουν τοίχος προστασίας.
 
 ################################################################################
 # Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
-#? SEARCH_FOR_KEYWORDS_ACTION_NAME=
+SEARCH_FOR_KEYWORDS_ACTION_NAME=Ψάξε για λέξεις κλειδιά: {0}
 # {0} the title of the search
 #### SEARCH_ACTION_NAME=Search for: {0}
-#? SEARCH_ACTION_NAME=
+SEARCH_ACTION_NAME=Ψάξε για: {0}
 # {0} the already translated mediatype
 #### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
-#? SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=
+SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Ψάξε "Τί είναι νέο" για: {0}
 # {0} the type of the search, e.g. Title, Album, Genre
 # {1} the keywords fo the search, e.g. name of the album
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
-#? SEARCH_XML_FIELD_ACTION_NAME=
+SEARCH_XML_FIELD_ACTION_NAME=Ψάξε για {0}: {1}
 
 ################################################################################
 # CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
-#? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
+CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Επιλογή όλων
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=Marks all Items as Selected
-#? CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=
+CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=Μαρκάρισε όλα τα αντικείμενα σαν επελεγμένα
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Deselect All
-#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=
+CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Απεπιλογή όλων
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
-#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=
+CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Απεπιλογή όλων των αντικειμένων στη λίστα
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
@@ -834,7 +834,7 @@ RESULT_PANEL_ADDED=Δημιουργήθηκε
 #### RESULT_PANEL_LICENSE=License
 RESULT_PANEL_LICENSE=Άδεια
 #### RESULT_PANEL_SPAM=Junk Rating
-#? RESULT_PANEL_SPAM=
+RESULT_PANEL_SPAM=Αμφισβητήσιμη αξιολόγηση
 
 #Filter labels
 #### SEARCH_FILTER_ALL=All
@@ -851,21 +851,21 @@ DOWNLOAD_LAUNCH_BUTTON_LABEL=Προεπισκόπηση
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
 DOWNLOAD_LAUNCH_BUTTON_TIP=Προεπισκόπηση των επιλεγμένων λήψεων.
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Άνοιγμα
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Άνοιγμα Επελεγμένων Downloads
 #### DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Launch Download
-#? DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Άνοιγμα Download
 #### DOWNLOAD_KILL_BUTTON_LABEL=Cancel
 DOWNLOAD_KILL_BUTTON_LABEL=Διακοπή
 #### DOWNLOAD_KILL_BUTTON_TIP=Cancel Selected Downloads
 DOWNLOAD_KILL_BUTTON_TIP=Διακοπή επιλεγμένων λήψεων.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Καθαρισμός
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Καθάρισε τα επιλεγμένα Downloads
 #### DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Clear Download
-#? DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Καθάρισε τo Download
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=Επανάληψη
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
@@ -883,13 +883,13 @@ DOWNLOAD_PAUSE_BUTTON_LABEL=Παύση
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
 DOWNLOAD_PAUSE_BUTTON_TIP=Παύση των επιλεγμένων λήψεων.
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Change File Location...
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Αλλαγή τοποθεσίας αρχείου...
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Edit the Final Filename of the Download
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Επεξεργασία του τελικού ονόματος του Download
 #### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
-#? DOWNLOAD_POPUP_MENU_CLEAR=
+DOWNLOAD_POPUP_MENU_CLEAR=Καθάρισε όλα τα ανενεργά Downloads
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
-#? DOWNLOAD_EXPLORE_BUTTON_TIP=
+DOWNLOAD_EXPLORE_BUTTON_TIP=Άνοιγμα του φακέλου στον οποίον περιέχεται το αρχείο
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Άνοιγμα
@@ -916,9 +916,9 @@ LIBRARY_ANNOTATE_BUTTON_LABEL=Περιγράψτε...
 #### LIBRARY_ANNOTATE_BUTTON_TIP=Add Description to Selected File
 LIBRARY_ANNOTATE_BUTTON_TIP=Περιγράψτε το επιλεγμένο αρχείο.
 #### LIBRARY_PUBLISH_BUTTON_LABEL=Publish...
-#? LIBRARY_PUBLISH_BUTTON_LABEL=
+LIBRARY_PUBLISH_BUTTON_LABEL=Δημοσίευση...
 #### LIBRARY_PUBLISH_BUTTON_TIP=Publish under Creative Commons License
-#? LIBRARY_PUBLISH_BUTTON_TIP=
+LIBRARY_PUBLISH_BUTTON_TIP=Δημοσίευση κάτω από άδεια Creative Commons
 #### LIBRARY_RESUME_BUTTON_LABEL=Resume
 LIBRARY_RESUME_BUTTON_LABEL=Επανάληψη
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
@@ -926,21 +926,21 @@ LIBRARY_RESUME_BUTTON_TIP=Συνέχιση λήψης του επιλεγμέν�
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
 LIBRARY_RENAME_BUTTON_LABEL=Μετονομασία
 #### LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=You can configure the folders you share in LimeWire's Options.
-#? LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=
+LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=Μπορείτε να διαμορφώσετε το φάκελο που μοιράζεστε στις επιλογές του LimeWire.
 #### LIBRARY_SHARED_FILES_CONFIGURE=Configure...
-#? LIBRARY_SHARED_FILES_CONFIGURE=
+LIBRARY_SHARED_FILES_CONFIGURE=Διαμόρφωση...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
-#? LIBRARY_SHARED_FILES_CONFIGURE_MENU=
+LIBRARY_SHARED_FILES_CONFIGURE_MENU=Διαμόρφωση επιλογών μοιράσματος
 
 ################################################################################
 # Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
-#? LIBRARY_SEARCH_PANEL_LABEL=
+LIBRARY_SEARCH_PANEL_LABEL=Ψάξε στα μοιραζόμενα αρχεία
 #### LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=Search Results
-#? LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=
+LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=Αποτελέσματα έρευνας
 #### LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=Holds the Results of the Last Search
-#? LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=
+LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=Κρατά τα αποτελέσματα της τελευταίας έρευνας
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Άνοιγμα...
@@ -977,140 +977,140 @@ MEDIA_REWIND_BUTTON_TIP=Προηγούμενο
 # Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
-#? DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=
+DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Πάντα αποθήκευση ως...
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_APPEND_LABEL=Always Append (#)
-#? DOWNLOADER_DIALOG_DEFAULT_ACTION_APPEND_LABEL=
+DOWNLOADER_DIALOG_DEFAULT_ACTION_APPEND_LABEL=Πάντα Πρόσθεσε (#)
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=Always Ask
-#? DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=
+DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=Πάντα ρώτα
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=Choose a Default Action:
-#? DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=
+DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=Διάλεξε μια τυχαία πράξη
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Save As...
-#? DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Αποθήκευση ως...
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a different location for the Download
-#? DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Διαλέξτε μια διαφορετική τοποθεσία για το Download
 #### DOWNLOADER_DIALOG_APPEND_ACTION_NAME=Append (#)
-#? DOWNLOADER_DIALOG_APPEND_ACTION_NAME=
+DOWNLOADER_DIALOG_APPEND_ACTION_NAME=Πρόσθεσε (#)
 #### DOWNLOADER_DIALOG_APPEND_ACTION_SHORT_DESCRIPTION=Appends (#) to filename
-#? DOWNLOADER_DIALOG_APPEND_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_APPEND_ACTION_SHORT_DESCRIPTION=Πρόσθεσε (#) στο όνομα αρχείου
 #### DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Cancel the Download
-#? DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Ακύρωση Download
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Overwrite
-#? DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=
+DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Αντικατάσταση
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Overwrite the Existing File
-#? DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Γράψε πάνω στο υπάρχον αρχείο
 # {0} a short error message which is localized independently
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
-#? DOWNLOADER_DIALOG_ERROR_LABEL=
+DOWNLOADER_DIALOG_ERROR_LABEL=Σφάλμα: {0}
 # {0} a short warning message which is localized independently
 #### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
-#? DOWNLOADER_DIALOG_WARNING_LABEL=
+DOWNLOADER_DIALOG_WARNING_LABEL=Προειδοποίηση: {0}
 # {0} the full path name of the file in question
 #### DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: A file with the same content already exists in the library at {0}
-#? DOWNLOADER_DIALOG_NOTE_LABEL=
+DOWNLOADER_DIALOG_NOTE_LABEL=<b>Σημείωση</b>: Ένα αρχείο με το ίδιο περιεχόμενο υπάρχει ήδη στη βιβλιοθήκη στο {0}
 #### NO_FILENAME_LABEL=No Filename
-#? NO_FILENAME_LABEL=
+NO_FILENAME_LABEL=Κανένα όνομα αρχείου
 
 ################################################################################
 # Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
-#? DOWNLOAD_LOCATION_DIALOG_TITLE=
+DOWNLOAD_LOCATION_DIALOG_TITLE=Διαλέξτε τοποθεσία αποθήκευσης
 #### DIRECTORY_CHOOSER_FILE_DESCRIPTION=All Folders
-#? DIRECTORY_CHOOSER_FILE_DESCRIPTION=
+DIRECTORY_CHOOSER_FILE_DESCRIPTION=Όλοι οι φάκελοι
 
 ################################################################################
 # Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
-#? SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Το αρχείο ήδη υπάρχει
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Filename Taken
-#? SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Το όνομα υπάρχει ήδη
 #### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
-#? SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Το download έχει ήδη τελειώσει
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=No Write Permission
-#? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=Δεν υπάρχει άδεια Εγγραφής
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Folder Does Not Exist
-#? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=
+SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Ο φάκελος δεν υπάρχει
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Not a Folder
-#? SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=
+SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Δεν είναι φάκελος
 #### SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Invalid Filename
-#? SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=
+SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Άκυρο όνομα αρχείου
 #### SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Not a File
-#? SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=
+SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Δεν είναι αρχείο
 #### SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Filesystem Error
-#? SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=
+SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Σφάλμα Συστήματος
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Same File Already Being Downloaded
-#? SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Το ίδιο αρχείο έχει ήδη κατεβαστεί
 # {0} the full path name of the file
 #### SAVE_LOCATION_ALREADY_EXISTS_ERROR=A file already exists at {0}.
-#? SAVE_LOCATION_ALREADY_EXISTS_ERROR=
+SAVE_LOCATION_ALREADY_EXISTS_ERROR=Ένα αρχείο υπάρχει ήδη στο {0}.
 # {0} the full path name of the file
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Another download is already saving to {0}.
-#? SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Ένα άλλο download έχει ήδη σωθεί στο {0}
 #### SAVE_LOCATION_ALREADY_SAVED_ERROR=Could not set the file location, the download is already finished.
-#? SAVE_LOCATION_ALREADY_SAVED_ERROR=
+SAVE_LOCATION_ALREADY_SAVED_ERROR=Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου, το download έχει ήδη τελειώσει.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Could not save download to the folder {0}, because you do not have write access to it.
-#? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Δεν μπόρεσε να σωσει το download στο φάκελο {0}, επειδή δεν έχειτε πρόσβαση εγγραφής σε αυτόν.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
-#? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=
+SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Δεν μπόρεσε να σωσει το download στο φάκελο {0}, επειδή ο φάκελος δεν υπάρχει.
 # {0} the full path name of the folder/file
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Could not set download folder to {0}, because it represents an individual file, not a folder.
-#? SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=
+SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Δεν μπόρεσε να καθορίσε τον φάκελο {0} για το download, επειδή αντιπροσωπεύει ένα συγκεκριμένο αρχείο, όχι έναν φάκελο.
 # {0} the full path name of the file
 #### SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Could not set file location to {0}, because the filename is invalid and may corrupt your system.
-#? SAVE_LOCATION_SECURITY_VIOLATION_ERROR=
+SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Δεν μπόρεσε να καθορίσε την τοποθεσία του αρχείου σε {0}, επειδή το όνομα του αρχείου είναι άκυρο και ίσως το σύστημά σας καταρρεύσει.
 # {0} the full path name of the file
 #### SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Could not set file location to {0}, because it is not a regular file.
-#? SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=
+SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου σε {0}, επειδή δεν είναι ένα πρόσφατο αρχείο.
 #### SAVE_LOCATION_FILESYSTEM_ERROR=Could not set file location due to an error in the filesystem.
-#? SAVE_LOCATION_FILESYSTEM_ERROR=
+SAVE_LOCATION_FILESYSTEM_ERROR=Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου λόγω ενός σφάλματος του συστήματος.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
-#? SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=
+SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Το ίδιο αρχείο είναι ήδη κατεβασμένο.
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
-#? DOWNLOADER_UTILS_FILECHOOSER_TITLE=
+DOWNLOADER_UTILS_FILECHOOSER_TITLE=Αποθήκευση Download ως
 # {0} the full path name of the file in question
 #### DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=You already have the exact same file at {0}
-#? DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=
+DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=Έχετε το ίδιο ακριβώς αρχείο στο {0}
 #### DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=Do you want to continue downloading anyway?
-#? DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=
+DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=Θέλετε να συνεχίσετε το download παρόλαυτα;
 #### DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Continue
-#? DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=
+DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Συνέχεια
 #### DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Same File Already In Library
-#? DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=
+DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Το ίδιο αρχείο υπάρχει ήδη στη βιβλιοθήκη
 
 ################################################################################
 # Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
-#? SHARE_FILE_POPUP_MENU_LABEL=
+SHARE_FILE_POPUP_MENU_LABEL=Μοιραστείτε το αρχείο
 #### UNSHARE_FILE_POPUP_MENU_LABEL=Stop Sharing File
-#? UNSHARE_FILE_POPUP_MENU_LABEL=
+UNSHARE_FILE_POPUP_MENU_LABEL=Σταματήστε να μοιράζεστε το αρχείο
 #### SHARE_FOLDER_POPUP_MENU_LABEL=Share Folder
-#? SHARE_FOLDER_POPUP_MENU_LABEL=
+SHARE_FOLDER_POPUP_MENU_LABEL=Μοιραστείτε τον φάκελο
 #### UNSHARE_FOLDER_POPUP_MENU_LABEL=Stop Sharing Folder
-#? UNSHARE_FOLDER_POPUP_MENU_LABEL=
+UNSHARE_FOLDER_POPUP_MENU_LABEL=Σταματήστε να μοιράζεστε το φάκελο
 #### SHARE_FILE_ACTION_NAME=Share New File...
-#? SHARE_FILE_ACTION_NAME=
+SHARE_FILE_ACTION_NAME=Μοιραστείτε ένα νέο αρχείο...
 #### SHARE_FILE_ACTION_APPROVE_LABEL=Share
-#? SHARE_FILE_ACTION_APPROVE_LABEL=
+SHARE_FILE_ACTION_APPROVE_LABEL=Μοιραστείτε
 #### SHARE_FILE_ACTION_MNEMONIC=I
-#? SHARE_FILE_ACTION_MNEMONIC=
+SHARE_FILE_ACTION_MNEMONIC=Ι
 #### SHARE_NEW_FOLDER_ACTION_NAME=Share New Folder...
-#? SHARE_NEW_FOLDER_ACTION_NAME=
+SHARE_NEW_FOLDER_ACTION_NAME=Μοιραστείτε ένα νέο φάκελο...
 #### SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Opens a Window and Lets You Choose a New Folder to Share
-#? SHARE_NEW_FOLDER_ACTION_DESCRIPTION=
+SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Ανοίγε ένα παράθυρο και σας επιτρέπει να διαλέξετε ένα φάκελο για να μοιραστείτε
 #### SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
-#? SHARE_NEW_FOLDER_ACTION_MNEMONIC=
+SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
 #### SHARE_FILE_FAILED=LimeWire was unable to share the file "{0}".
-#? SHARE_FILE_FAILED=
+SHARE_FILE_FAILED=Το LimeWire δεν μπορεί να μοιραστεί το αρχείο "{0}".
 #### SHARE_FILE_ALREADY_SHARED=The file "{0}" is already shared.
-#? SHARE_FILE_ALREADY_SHARED=
+SHARE_FILE_ALREADY_SHARED=Το αρχείο "{0}" μοιράζεται ήδη.
 
 ################################################################################
 # Key/value pairs for Statistics String...
@@ -1118,9 +1118,9 @@ MEDIA_REWIND_BUTTON_TIP=Προηγούμενο
 #### STATISTICS_FILES=Files
 STATISTICS_FILES=αρχεία
 #### STATISTICS_FILES_TOOLTIP=files
-#? STATISTICS_FILES_TOOLTIP=
+STATISTICS_FILES_TOOLTIP=αρχεία
 #### STATISTICS_FILES_TOOLTIP_PENDING=files (Loading...)
-#? STATISTICS_FILES_TOOLTIP_PENDING=
+STATISTICS_FILES_TOOLTIP_PENDING=αρχεία (Φόρτωμα...)
 #### STATISTICS_SHARING_TOOLTIP=You are sharing
 STATISTICS_SHARING_TOOLTIP=Ο αριθμός των αρχείων που μοιράζεστε.
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
@@ -1170,9 +1170,9 @@ DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Διαγραφή λήψης
 #### DOWNLOAD_POPUP_MENU_RESUME=Resume Download
 DOWNLOAD_POPUP_MENU_RESUME=Εξαναγκαστική συνέχιση
 #### DOWNLOAD_POPUP_MENU_SOURCES=Find More Sources for Download
-#? DOWNLOAD_POPUP_MENU_SOURCES=
+DOWNLOAD_POPUP_MENU_SOURCES=Βρες περισσότερες πηγές για Download
 #### DOWNLOAD_POPUP_MENU_PAUSE=Pause Download
-#? DOWNLOAD_POPUP_MENU_PAUSE=
+DOWNLOAD_POPUP_MENU_PAUSE=Σταμάτα το Download
 #### DOWNLOAD_POPUP_MENU_LAUNCH=Preview Download
 DOWNLOAD_POPUP_MENU_LAUNCH=Προεπισκόπηση αρχείου
 #### DOWNLOAD_POPUP_MENU_CHAT=Chat with Host
@@ -1206,7 +1206,7 @@ DOWNLOAD_STATUS_QUEUED=Στην ουρά
 #### DOWNLOAD_STATUS_CONNECTING=Connecting...
 DOWNLOAD_STATUS_CONNECTING=Σύνδεση...
 #### DOWNLOAD_STATUS_CONNECTING_TRIED_COUNT=Connecting ({0} hosts tried)...
-#? DOWNLOAD_STATUS_CONNECTING_TRIED_COUNT=
+DOWNLOAD_STATUS_CONNECTING_TRIED_COUNT=Σύνδεση ({0} παροχείς προσπάθησαςν)...
 #### DOWNLOAD_STATUS_WAITING=Waiting On Busy Hosts
 DOWNLOAD_STATUS_WAITING=Αναμονή λόγω απασχολημένων παρόχων
 #### DOWNLOAD_STATUS_COMPLETE=Complete
@@ -1250,31 +1250,31 @@ DOWNLOAD_STATUS_PAUSING=Παύση...
 #### DOWNLOAD_STATUS_PAUSED=Paused
 DOWNLOAD_STATUS_PAUSED=Σταματημένο
 #### DOWNLOAD_STATUS_INVALID=Content Removed
-#? DOWNLOAD_STATUS_INVALID=
+DOWNLOAD_STATUS_INVALID=Περιεχόμενο Διαγράφηκε
 #### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network. To learn more, double-click on the download (or click preview).
-#? DOWNLOAD_INVALID_EXPLAIN=
+DOWNLOAD_INVALID_EXPLAIN=Ο ιδιοκτήτης αυτού του περιεχομένου απαίτησε αυτό το αρχείο να διαγραφεί από το δίκτυο. Για να μάθετε περισσότερα, κάντε κλίκ στο download (ή πατήστε preview).
 #### DOWNLOAD_STATUS_RESUMING=Resuming...
-#? DOWNLOAD_STATUS_RESUMING=
+DOWNLOAD_STATUS_RESUMING=Αποκατάσταση...
 #### DOWNLOAD_STATUS_FETCHING=Downloading .torrent file...
-#? DOWNLOAD_STATUS_FETCHING=
+DOWNLOAD_STATUS_FETCHING=Κατεβάζει .torrent αρχείο...
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=Ίσως χρειάζεται μια πιο συγκεκριμένη αναζήτηση...
 #### DOWNLOAD_BITTORRENT_VENDOR=BitTorrent
-#? DOWNLOAD_BITTORRENT_VENDOR=
+DOWNLOAD_BITTORRENT_VENDOR=BitTorrent
 #### DOWNLOAD_BITTORRENT_UNSAFE_PATHS=The selected .torrent file may contain a security hazard.
-#? DOWNLOAD_BITTORRENT_UNSAFE_PATHS=
+DOWNLOAD_BITTORRENT_UNSAFE_PATHS=Το επελεγμένο .torrent αρχείο ίσως περιέχει κίνδυνο ασφαλείας.
 #### DOWNLOAD_BITTORRENT_FETCH_FAIL=LimeWire could not download a .torrent file from the provided URL.
-#? DOWNLOAD_BITTORRENT_FETCH_FAIL=
+DOWNLOAD_BITTORRENT_FETCH_FAIL=Το LimeWire δεν μπόρεσε να κατεβάσει ένα .torrent αρχείο από τον παροχέα URL.
 # {0} the name of the skin
 # {1} the localized name of the menu item "Refresh Skins"
 # {2} the localized name of the "View" menu
 # {3} the localized name of the "Apply Skins" menu
 #### DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=You have downloaded a skin titled "{0}", you can activate the new skin by clicking "{1}" in the "{2}"->"{3}" menu and then selecting it from the list of available skins.
-#? DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=
+DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=Έχετε κατεβάσει μια εμφάνιση με όνομα "{0}", μπορείτε να ενεργοποιήσετε τη νέα εμφάνιση κάνοντας κλικ στο "{1}" στο "{2}"->"{3}" μενού και μετά επιλέγοντάς το από τη λίστα των διαθέσιμων εμφανίσεων.
 #### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
 DOWNLOAD_APPLY_NEW_THEME_START=Έχετε κατεβάσει μια νέα εμφάνιση με το όνομα «
 #### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
-DOWNLOAD_APPLY_NEW_THEME_END=». Θα θέλατε να χρησιμοποιήσετε αυτή την νέα εμφάνιση;
+DOWNLOAD_APPLY_NEW_THEME_END=». Θα θέλατε να χρησιμοποιήσετε αυτή την νέα εμφάνιση?
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
 DOWNLOAD_POSSIBLE_HOSTS=Πιθανοί πάροχοι
 #### DOWNLOAD_BUSY_HOSTS=Busy Hosts
@@ -1282,7 +1282,7 @@ DOWNLOAD_BUSY_HOSTS=Απασχολημένοι πάροχοι
 #### DOWNLOAD_QUEUED_HOSTS=Remotely Queued
 DOWNLOAD_QUEUED_HOSTS=Στην ουρά από απόσταση
 #### DOWNLOAD_CHUNKS=Chunks
-#? DOWNLOAD_CHUNKS=
+DOWNLOAD_CHUNKS=Κομμάτια
 #### DOWNLOAD_LOST=Lost To Corruption
 #? DOWNLOAD_LOST=
 #### DOWNLOAD_SEARCHING=Locating Sources...
@@ -1290,7 +1290,7 @@ DOWNLOAD_SEARCHING=Εντόπιση πηγών...
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Συγγνώμη, αλλά το LimeWire αδυνατεί να επανεκκινήσει τις παλιές σας λήψεις.
 #### DOWNLOAD_MAGNET_DIALOG_MESSAGE=Would you like to start downloads from the following magnets?
-#? DOWNLOAD_MAGNET_DIALOG_MESSAGE=
+DOWNLOAD_MAGNET_DIALOG_MESSAGE=Θα θέλατε να αρχίσετε το download από τους ακόλουθους magnets;
 #### DOWNLOAD_HASH_ONLY_MAGNET=LimeWire may not be able to start the download you have selected unless you start a search for it.
 DOWNLOAD_HASH_ONLY_MAGNET=Το LimeWire δεν θα μπορέσει να αρχίσει τη λήψη που έχετε επιλέξει, μέχρις ότου κάνετε μία έρευνα γι’ αυτό.
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
@@ -1302,20 +1302,20 @@ DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Μετακινήστε την επιλεγμέ
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=Ουρά
 #### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
-#? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
+DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=Το LimeWire δεν μπόρεσε να εντοπίσε μια άδεια για το αρχείο. Συνέχεια παρόλαυτα;\n\nΠαρακαλώ προσέξτε: Το LimeWire δεν μπορεί να εντοπίσει ή να ελέγξει το περιεχόμενο του δικτύου Gnutella. Παρακαλώ σεβαστείτε τους τοπικούς νόμους copyright.
 #### DOWNLOAD_SEARCH_MENU=Search...
-#? DOWNLOAD_SEARCH_MENU=
+DOWNLOAD_SEARCH_MENU=Ψάξε...
 #### DOWNLOAD_SEARCH_FILENAME_LABEL=Files with this name
-#? DOWNLOAD_SEARCH_FILENAME_LABEL=
+DOWNLOAD_SEARCH_FILENAME_LABEL=Αρχεία με αυτό το όνομα
 #### DOWNLOAD_SEARCH_FILENAME_TIP=Searches for files with the same file name.
-#? DOWNLOAD_SEARCH_FILENAME_TIP=
+DOWNLOAD_SEARCH_FILENAME_TIP=Ψάξε για αρχεία με το ίδιο όνομα
 #### DOWNLOAD_SERACH_ORGINAL_LABEL=Orginal query
-#? DOWNLOAD_SERACH_ORGINAL_LABEL=
+DOWNLOAD_SERACH_ORGINAL_LABEL=Αρχικό ερώτημα
 #### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
-#? DOWNLOAD_SERACH_ORGINAL_TIP=
+DOWNLOAD_SERACH_ORGINAL_TIP=Κάνε την ίδια έρευνα σαν αυτή που βρήκες το προηγούμενο αρχείο.
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
-#? TORRENTS_COULD_NOT_READ_SNAPSHOT=
+TORRENTS_COULD_NOT_READ_SNAPSHOT=Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας torrent.
 #### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
@@ -1373,30 +1373,30 @@ UPLOAD_TABLE_STRING_BANNED_GREEDY=Απαγορευμένος άπληστ πελ
 #### UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash Tree
 UPLOAD_TABLE_STRING_HASH_TREE=Αποστολή hash tree
 #### UPLOAD_TABLE_STRING_VALIDATING=Validation Required
-#? UPLOAD_TABLE_STRING_VALIDATING=
+UPLOAD_TABLE_STRING_VALIDATING=Επικύρωση Αναγκαία
 #### UPLOAD_TABLE_STRING_FNF=File Not Found
 UPLOAD_TABLE_STRING_FNF=Το αρχείο δεν βρέθηκε
 #### UPLOAD_TABLE_STRING_QUEUED=Queued at
 UPLOAD_TABLE_STRING_QUEUED=Στην ουρά στο
 #### UPLOAD_TABLE_STRING_AWAITING_REQUESTS=Awaiting Requests
-#? UPLOAD_TABLE_STRING_AWAITING_REQUESTS=
+UPLOAD_TABLE_STRING_AWAITING_REQUESTS=Περιμένει Απαιτήσεις
 #### UPLOAD_TABLE_STRING_SUSPENDED=Suspended
-#? UPLOAD_TABLE_STRING_SUSPENDED=
+UPLOAD_TABLE_STRING_SUSPENDED=Αναμενόμενο
 #### UPLOAD_ACTIVE=Active
-UPLOAD_ACTIVE=ενεργό
+UPLOAD_ACTIVE=Ενεργό
 #### UPLOAD_QUEUED=Queued
 UPLOAD_QUEUED=στην ουρά
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
 #### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
-#? UPLOAD_BT_STOP=
+UPLOAD_BT_STOP=Αν σταματήσετε το ανέβασμα, το αρχείο με επέκταση torrent θα σταματήσει να κατεβαίνει. Είστε σίγουρος ότι θέλετε να το κάνετε αυτό;
 #### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
 #? UPLOAD_BITTORRENT_HOSTNAME=
 #### UPLOAD_BITTORRENT_AGENTS=Multiple
-#? UPLOAD_BITTORRENT_AGENTS=
+UPLOAD_BITTORRENT_AGENTS=Πολλαπλός
 
 ###################################################################
 # Key/value pairs for MonitorView.
@@ -1440,11 +1440,11 @@ HTML_PAGE_MAGNET=Διευθύνσεις Magnet για γρήγορες λήψε�
 # Key/value pairs for Logging tab.
 ###################################################################
 #### LOGGING_COLUMN_ICON=Icon
-#? LOGGING_COLUMN_ICON=
+LOGGING_COLUMN_ICON=Εικονίδιο
 #### LOGGING_COLUMN_MESSAGE=Message
-#? LOGGING_COLUMN_MESSAGE=
+LOGGING_COLUMN_MESSAGE=Μύνημα
 #### LOGGING_COLUMN_TIME=Time
-#? LOGGING_COLUMN_TIME=
+LOGGING_COLUMN_TIME=Ώρα
 
 ###################################################################
 # Key/value pairs for ConnectionView.
@@ -1538,17 +1538,17 @@ LIBRARY_TABLE_NUMALTLOC=Τοποθεσίες
 #### LIBRARY_TABLE_LICENSE=License
 LIBRARY_TABLE_LICENSE=Άδεια
 #### LIBRARY_TABLE_MODIFICATION_TIME=Last Modified
-#? LIBRARY_TABLE_MODIFICATION_TIME=
+LIBRARY_TABLE_MODIFICATION_TIME=Τελευταία Τροποποίηση
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=Αποστολές
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
-#? LIBRARY_TABLE_SEARCH_POPUP_MENU=
+LIBRARY_TABLE_SEARCH_POPUP_MENU=Ψάξε
 #### LIBRARY_TREE_SHARE_FOLDER_LABEL=Share Folder
-#? LIBRARY_TREE_SHARE_FOLDER_LABEL=
+LIBRARY_TREE_SHARE_FOLDER_LABEL=Μοιράσου τους Φακέλους
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing Folder
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Διακοπή μοιράσματος
 #### LIBRARY_TABLE_SHARING_SUB_MENU=Sharing
-#? LIBRARY_TABLE_SHARING_SUB_MENU=
+LIBRARY_TABLE_SHARING_SUB_MENU=Μοίρασμα
 #### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Στον κατάλογο αναπαραγωγής
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
@@ -1556,27 +1556,27 @@ LIBRARY_TREE_SAVED_DIRECTORY=Αποθηκευμένα αρχεία
 #### LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete Files
 LIBRARY_TREE_INCOMPLETE_DIRECTORY=Ανολοκλήρωτα αρχεία
 #### LIBRARY_TREE_SHARED_FILES_DIRECTORY=Shared Files
-#? LIBRARY_TREE_SHARED_FILES_DIRECTORY=
+LIBRARY_TREE_SHARED_FILES_DIRECTORY=Μοιραζόμενα Αρχεία
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Individually Shared Files
-#? LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Προσωπικά Μοιραζόμενα Αρχεία
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
-#? LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Εμφάνισε όλα τα προσωπικά μοιραζόμενα αρχεία
 #### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
-#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=
+LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent αρχεία
 #### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=List of .torrent files
-#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=
+LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=Εμφάνιση .torrent αρχεία
 #### LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Show .torrent Files
-#? LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=
+LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Δείξε τα .torrent αρχεία
 #### LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Hide .torrent Files
-#? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
+LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Κρύψε τα .torrent αρχεία
 
 ################################################################################
 # Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
-#? CONSOLE_SAVE_BUTTON_LABEL=
+CONSOLE_SAVE_BUTTON_LABEL=Αποθήκευση
 #### CONSOLE_DIALOG_SAVE_TITLE=Save As
-#? CONSOLE_DIALOG_SAVE_TITLE=
+CONSOLE_DIALOG_SAVE_TITLE=Αποθήκευση ως
 
 ###################################################################
 # Key/value pairs for PlayListGUI.
@@ -1588,7 +1588,7 @@ PLAYLIST_TABLE_NAME=Όνομα
 #### PLAYLIST_TABLE_LENGTH=Length
 PLAYLIST_TABLE_LENGTH=Διάρκεια
 #### PLAYLIST_TABLE_BITRATE=Bitrate
-#? PLAYLIST_TABLE_BITRATE=
+PLAYLIST_TABLE_BITRATE=Ρυθμός μετάδοσης
 #### PLAYLIST_OPTIONS_STRING=Play Options:
 PLAYLIST_OPTIONS_STRING=Επιλογές αναπαραγωγής
 #### PLAYLIST_OPTIONS_CONTINUE=Continuous
@@ -1619,15 +1619,15 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Το αρχείο δεν μπορεί να ανα�
 # if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
-#? SETUP_DIALOG_TITLE=
+SETUP_DIALOG_TITLE=Διάλογος Setup του LimeWire
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=Επιλογές γλώσσας
 #### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language:
-#? SETUP_CHOOSE_LANGUAGE_LABEL=
+SETUP_CHOOSE_LANGUAGE_LABEL=Διαλέξτε γλώσσα:
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=Παρακαλώ επιλέξτε την γλώσσα που θα θέλατε να χρησιμοποιεί το LimeWire.
 #### SETUP_MORE_INFO=Learn more about this option...
-#? SETUP_MORE_INFO=
+SETUP_MORE_INFO=Μάθετε περισσότερα γι' αυτή την επιλογή...
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=Καλωσορίσατε
 #### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
@@ -1641,69 +1641,69 @@ SETUP_SAVE_LABEL=Παρακαλώ επιλέξτε ένα φάκελο μέσα 
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=Ταχύτητα σύνδεσης
 #### SETUP_SPEED_TITLED_BORDER=Select Speed
-#? SETUP_SPEED_TITLED_BORDER=
+SETUP_SPEED_TITLED_BORDER=Επιλέξτε ταχύτητα
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=Παρακαλώ επιλέξτε την ταχύτητα της σύνδεσής σας στο Internet. Επιλέγοντας τη σωστή ταχύτητα αυτής της σύνδεσης θα έχετε την καλύτερη δυνατή απόδοση του δικτύου. Εάν δεν είστε σίγουρος για τον τύπο της σύνδεσής σας, ή εάν ο τύπος της σύνδεσής σας δεν υπάρχει στη λίστα, απλά επιλέξτε οποιαδήποτε άλλη που σας φαίνεται πιο κοντινή.
 #### SETUP_STARTUP_TITLE=System Startup
 SETUP_STARTUP_TITLE=Εκκίνηση συστήματος
 #### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
-SETUP_STARTUP_LABEL=Θα θέλατε να εκκινεί το LimeWire όταν ανοίγετε τον υπολογιστή σας; Με αυτό θα πετύχετε γρηγορότερη εκκίνηση όταν το χρησιμοποιήσετε αργότερα.
+SETUP_STARTUP_LABEL=Θα θέλατε να εκκινεί το LimeWire όταν ανοίγετε τον υπολογιστή σας? Με αυτό θα πετύχετε γρηγορότερη εκκίνηση όταν το χρησιμοποιήσετε αργότερα.
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
 SETUP_STARTUP_CHECKBOX=Εκκίνηση αυτόματα
 #### SETUP_FIREWALL_TITLE=Firewall Setup
-#? SETUP_FIREWALL_TITLE=
+SETUP_FIREWALL_TITLE=Διαμόρφωση τοίχους ασφαλείας
 #### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet. If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting. Your firewall software may look different than the below picture.
-#? SETUP_FIREWALL_LABEL=
+SETUP_FIREWALL_LABEL=Το LimeWire λειτουργεί τέλεια όταν έχει πλήρη σύνδεση στο ίντερνετ. Αν το τοίχος προστασίας ή προειδοποιήσεις εμφανίζονται, παρακαλούμε ξεμπλοκάρετε το LimeWire και επιλέξτε να θυμάται τις ρυθμίσεις. Το τοίχος προστασίας ίσως φαίνεται διαφορετικό από αυτό της εικόνας κάτω.
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=Έρευνα για αρχεία
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
-SETUP_SCAN_LABEL=Θα θέλατε το LimeWire να κάνει μία γρήγορη έρευνα στο δίσκο σας για άλλα αρχεία; Θα έχετε την ευκαιρία να προσδιορίσετε ποιες διευθύνσεις θα θέλετε να μοιράζεστε, όταν η έρευνα τελειώσει.
+SETUP_SCAN_LABEL=Θα θέλατε το LimeWire να κάνει μία γρήγορη έρευνα στο δίσκο σας για άλλα αρχεία? Θα έχετε την ευκαιρία να προσδιορίσετε ποιες διευθύνσεις θα θέλετε να μοιράζεστε, όταν η έρευνα τελειώσει.
 #### SETUP_SCAN_TITLED_BORDER=Scan Hard Drive?
-#? SETUP_SCAN_TITLED_BORDER=
+SETUP_SCAN_TITLED_BORDER=Εξέταση σκληρού δίσκου;
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
 SETUP_WAIT_TITLE=Σάρωση σκληρού δίσκου
 #### SETUP_WAIT_PROGRESS_STRING=Scanning Hard Drive...
-#? SETUP_WAIT_PROGRESS_STRING=
+SETUP_WAIT_PROGRESS_STRING=Εξέταση σκληρού δίσκου...
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
 SETUP_WAIT_LABEL=Παρακαλώ περιμένετε καθώς το LimeWire σαρώνει τον δίσκο σας...
 #### SETUP_WAIT_SCAN_CANCELLED_LABEL=Scan cancelled
-#? SETUP_WAIT_SCAN_CANCELLED_LABEL=
+SETUP_WAIT_SCAN_CANCELLED_LABEL=Σάρωση ακυρώθηκε
 #### SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=Cancel Scan
-#? SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=
+SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=Ακύρωση Σάρωσης
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=Επιβεβαίωση σάρωσης
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=Εντοπίσαμε τους παρακάτω καταλόγους πιστεύοντας πως θα θέλατε να τους μοιραστείτε. Αν θα θέλατε να μοιραστείτε ένα από τους καταλόγους αυτούς, τσεκάρετε απλώς το σχετικό κουτάκι. Υποκατάλογοι των μοιραζόμενων καταλόγων θα μοιραστούν επίσης.
 #### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
-#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
+SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=Ο επιλεγμένος φάκελος κάτω (και οι υποφακέλοι) θα μοιραστεί.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=Το LimeWire αδυνατεί να εντοπίσει οποιαδήποτε αρχεία που μοιράζονται. Για να συνεχίσετε να ρυθμίζετε το LimeWire, πατήστε «Επόμενο».
 #### SETUP_FILTER_TITLE=Content Filtering
-#? SETUP_FILTER_TITLE=
+SETUP_FILTER_TITLE=Φιλτράρισμα περιεχομένου
 #### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared. By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content. You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
-#? SETUP_FILTER_LABEL=
+SETUP_FILTER_LABEL=Το LimeWire μπορεί να φιλτράρει τα αρχεία των οποίων οι κάτοχοι του copyright απαιτούν να μη μοιραστούν. Ενεργοποιόντας το φιλτράρισμα, λέτε στο LimeWire να επιβεβαιώσει όλα τα αρχεία που κατεβάζετε ή μοιράζεσται με μια λίστα του διεγραμένου περιεχομένου. Μπορείτε να το αλλάξετε αυτό οποιαδήποτε στιγμή διαλέγοντας Φίλτρα -> Επεξεργασία Φίλτρων Περιεχομένων από το κύριο μενού.
 #### SETUP_FILTER_CHECKBOX=Enable Content Filtering
-#? SETUP_FILTER_CHECKBOX=
+SETUP_FILTER_CHECKBOX=Ενεργοποίηση φιλτραρίσματος περιεχομένου
 #### SETUP_FINISH_TITLE=Finish Setup
 SETUP_FINISH_TITLE=Τέλος ρυθμίσεων
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
 SETUP_FINISH_LABEL=Η διευθέτηση του LimeWire ολοκληρώθηκε επιτυχώς. Παρακαλώ πατήστε το κουμπί «Τέλος» για να αρχίσετε να χρησιμοποιείτε το LimeWire.
 #### SETUP_ASSOCIATIONS_TITLE=File & Protocol Associations
-#? SETUP_ASSOCIATIONS_TITLE=
+SETUP_ASSOCIATIONS_TITLE=Σχέσεις Αρχείου και Πρωτοκόλου
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
-#? SETUP_ASSOCIATIONS_LABEL=
+SETUP_ASSOCIATIONS_LABEL=Τί είδους πηγές πρέπει να χρησιμοποιήσει το LimeWire;
 
 ################################################################################
 # Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
-#? ASSOCIATIONS_MANGET_DESCRIPTION=
+ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" δεσμοί
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
-#? ASSOCIATIONS_TORRENT_DESCRIPTION=
+ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" αρχεία
 #### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
-#? ASSOCIATIONS_UNLINKED_WARNING=
+ASSOCIATIONS_UNLINKED_WARNING=Ένα ή περισσότερα αρχεία ή προτόκολα που το LimeWire χρησιμοποιεί δεν είναι πια συσχετισμένο με το LimeWire. Θα θέλατε το LimeWire να το διορθώσε αυτό;
 #### ASSOCIATIONS_OTHER_OPTION=Details
-#? ASSOCIATIONS_OTHER_OPTION=
+ASSOCIATIONS_OTHER_OPTION=Λεπτομέρειες
 
 ################################################################################
 # Key/value pairs for the file chooser.
@@ -1743,13 +1743,13 @@ PRO_TITLE=Αναβάθμιση στο PRO
 #### PRO_LABEL_THANKS=For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
 PRO_LABEL_THANKS=Για TURBO-σύνδεση λήψεις, αποκτήστε το LimeWire PRO. Σας εγγυόμαστε ότι θα αγαπήσετε την βελτιωμένη απόδοση του PRO. Σας ευχαριστούμε που βοηθάτε να κρατηθεί το Internet ανοιχτό χρησιμοποιώντας το LimeWire.
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
-PRO_LABEL_QUESTION=Αναβάθμιση σε PRO;
+PRO_LABEL_QUESTION=Αναβάθμιση σε PRO?
 #### GO_PRO_TIP=Get LimeWire PRO Now
 GO_PRO_TIP=Αποκτήστε το LimeWire PRO τώρα.
 #### WHYGOPRO=Why
 WHYGOPRO=Γιατί
 #### WHYGOPRO_TIP=What does PRO give me?
-WHYGOPRO_TIP=Τι μου προσφέρει το PRO;
+WHYGOPRO_TIP=Τι μου προσφέρει το PRO?
 #### GO_PRO_LATER=Later
 GO_PRO_LATER=Αργότερα
 #### GO_PRO_LATER_TIP=Get LimeWire PRO Later
@@ -1763,125 +1763,125 @@ JAVA_UPGRADE_TITLE=Αναβαθμίστε το Java σας
 #### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java. LimeWire looks and acts much better with newer versions of Java. Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
 JAVA_UPGRADE_MESSAGE=Το LimeWire εντόπισε ότι χρησιμοποιείτε μια παλαιότερη έκδοση του Java. Το LimeWire φαίνεται και λειτουργεί πολύ καλύτερα με τις νεότερες εκδόσεις του Java. Στα χαρακτηριστικά συμπεριλαμβάνεται υποστήριξη για τη ροδέλα κύλισης στα «ποντίκια», μια Windows XP εμφάνιση, και πολλές άλλες βελτιώσεις.
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
-JAVA_UPGRADE_QUESTION=Θέλετε να αποκτήσετε την δωρεάν αναβάθμιση του Java;
+JAVA_UPGRADE_QUESTION=Θέλετε να αποκτήσετε την δωρεάν αναβάθμιση του Java?
 
 ################################################################################
 # Key/Value pairs for the change language window.
 ################################################################################
 #### LANGUAGE_LOADING=Loading Languages
-#? LANGUAGE_LOADING=
+LANGUAGE_LOADING=Φόρτωμα Γλωσσών
 
 ###################################################################
 # Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
-#? XML_audios__audio=
+XML_audios__audio=Ήχος
 #### XML_audios__audio__title__=Title
-#? XML_audios__audio__title__=
+XML_audios__audio__title__=Τίτλος
 #### XML_audios__audio__artist__=Artist
-#? XML_audios__audio__artist__=
+XML_audios__audio__artist__=Καλλιτέχνης
 #### XML_audios__audio__album__=Album
-#? XML_audios__audio__album__=
+XML_audios__audio__album__=Άλμπουμ
 #### XML_audios__audio__genre__=Genre
-#? XML_audios__audio__genre__=
+XML_audios__audio__genre__=Είδος
 #### XML_audios__audio__track__=Track
-#? XML_audios__audio__track__=
+XML_audios__audio__track__=Τραγούδι
 #### XML_audios__audio__type__=Type
-#? XML_audios__audio__type__=
+XML_audios__audio__type__=Τύπος
 #### XML_audios__audio__seconds__=Length
-#? XML_audios__audio__seconds__=
+XML_audios__audio__seconds__=Μήκος
 #### XML_audios__audio__year__=Year
-#? XML_audios__audio__year__=
+XML_audios__audio__year__=Έτος
 #### XML_audios__audio__language__=Language
-#? XML_audios__audio__language__=
+XML_audios__audio__language__=Γλώσσα
 #### XML_audios__audio__bitrate__=Bitrate
-#? XML_audios__audio__bitrate__=
+XML_audios__audio__bitrate__=Ρυθμός μετάδοσης
 #### XML_audios__audio__comments__=Comments
-#? XML_audios__audio__comments__=
+XML_audios__audio__comments__=Σχόλια
 #### XML_audios__audio__action__=Action
-#? XML_audios__audio__action__=
+XML_audios__audio__action__=Πράξη
 #### XML_audios__audio__license__=Copyright
-#? XML_audios__audio__license__=
+XML_audios__audio__license__=Copyright
 #### XML_audios__audio__licensetype__=License Type
-#? XML_audios__audio__licensetype__=
+XML_audios__audio__licensetype__=Τύπος Άδειας
 
 #### XML_videos__video=Video
-#? XML_videos__video=
+XML_videos__video=Βίντεο
 #### XML_videos__video__title__=Title
-#? XML_videos__video__title__=
+XML_videos__video__title__=Τίτλος
 #### XML_videos__video__director__=Director
-#? XML_videos__video__director__=
+XML_videos__video__director__=Σκηνοθέτης
 #### XML_videos__video__producer__=Producer
-#? XML_videos__video__producer__=
+XML_videos__video__producer__=Παραγωγός
 #### XML_videos__video__studio__=Studio
-#? XML_videos__video__studio__=
+XML_videos__video__studio__=Στούντιο
 #### XML_videos__video__stars__=Stars
-#? XML_videos__video__stars__=
+XML_videos__video__stars__=Αστέρες
 #### XML_videos__video__type__=Type
-#? XML_videos__video__type__=
+XML_videos__video__type__=Τύπος
 #### XML_videos__video__length__=Length
-#? XML_videos__video__length__=
+XML_videos__video__length__=Μήκος
 #### XML_videos__video__year__=Year
-#? XML_videos__video__year__=
+XML_videos__video__year__=Έτος
 #### XML_videos__video__language__=Language
-#? XML_videos__video__language__=
+XML_videos__video__language__=Γλώσσα
 #### XML_videos__video__subtitles__=Subtitles
-#? XML_videos__video__subtitles__=
+XML_videos__video__subtitles__=Υπότιτλοι
 #### XML_videos__video__rating__=Rating
-#? XML_videos__video__rating__=
+XML_videos__video__rating__=Βαθμολογία
 #### XML_videos__video__comments__=Comments
-#? XML_videos__video__comments__=
+XML_videos__video__comments__=Σχόλια
 #### XML_videos__video__action__=Action
-#? XML_videos__video__action__=
+XML_videos__video__action__=Πράξη
 #### XML_videos__video__license__=Copyright
-#? XML_videos__video__license__=
+XML_videos__video__license__=Copyright
 #### XML_videos__video__licensetype__=License Type
-#? XML_videos__video__licensetype__=
+XML_videos__video__licensetype__=Τύπος άδειας
 #### XML_videos__video__height__=Height
-#? XML_videos__video__height__=
+XML_videos__video__height__=Ύψος
 #### XML_videos__video__width__=Width
-#? XML_videos__video__width__=
+XML_videos__video__width__=Μήκος
 #### XML_videos__video__bitrate__=Bitrate
-#? XML_videos__video__bitrate__=
+XML_videos__video__bitrate__=Ρυθμός μετάδοσης
 
 #### XML_images__image=Image
-#? XML_images__image=
+XML_images__image=Εικόνα
 #### XML_images__image__title__=Title
-#? XML_images__image__title__=
+XML_images__image__title__=Τίτλος
 #### XML_images__image__description__=Description
-#? XML_images__image__description__=
+XML_images__image__description__=Περιγραφή
 #### XML_images__image__artist__=Artist
-#? XML_images__image__artist__=
+XML_images__image__artist__=Καλλιτέχνης
 #### XML_images__image__license__=License
-#? XML_images__image__license__=
+XML_images__image__license__=Άδεια
 #### XML_images__image__licensetype__=License Type
-#? XML_images__image__licensetype__=
+XML_images__image__licensetype__=Τύπος άδειας
 
 #### XML_documents__document=Document
-#? XML_documents__document=
+XML_documents__document=Κείμενο
 #### XML_documents__document__title__=Title
-#? XML_documents__document__title__=
+XML_documents__document__title__=Τίτλος
 #### XML_documents__document__topic__=Topic
-#? XML_documents__document__topic__=
+XML_documents__document__topic__=Θέμα
 #### XML_documents__document__author__=Author
-#? XML_documents__document__author__=
+XML_documents__document__author__=Συγγραφέας
 #### XML_documents__document__license__=License
-#? XML_documents__document__license__=
+XML_documents__document__license__=Άδεια
 #### XML_documents__document__licensetype__=License Type
-#? XML_documents__document__licensetype__=
+XML_documents__document__licensetype__=Τύπος Άδειας
 
 #### XML_applications__application=Application
-#? XML_applications__application=
+XML_applications__application=Εφαρμογή
 #### XML_applications__application__name__=Name
-#? XML_applications__application__name__=
+XML_applications__application__name__=Όνομα
 #### XML_applications__application__publisher__=Publisher
-#? XML_applications__application__publisher__=
+XML_applications__application__publisher__=Εκδότης
 #### XML_applications__application__platform__=Platform
-#? XML_applications__application__platform__=
+XML_applications__application__platform__=Πλατφόρμα
 #### XML_applications__application__licensetype__=License Type
-#? XML_applications__application__licensetype__=
+XML_applications__application__licensetype__=Τύπος Άδειας
 #### XML_applications__application__license__=License
-#? XML_applications__application__license__=
+XML_applications__application__license__=Άδεια
 
 #MetaEditorFrame
 #### META_EDITOR_ANNOTATING_FILE=Annotating file
@@ -1909,9 +1909,9 @@ META_EDITOR_CANCEL_BUTTON_LABEL=Άκυρο
 #### META_EDITOR_ADVANCED_BUTTON_LABEL=Advanced
 META_EDITOR_ADVANCED_BUTTON_LABEL=Για προχωρημένους
 #### META_EDITOR_RESET_LABEL=Reset
-#? META_EDITOR_RESET_LABEL=
+META_EDITOR_RESET_LABEL=Επανάληψη
 #### META_EDITOR_MULTIPLE_FILE_INFO_LABEL=Multiple File Information
-#? META_EDITOR_MULTIPLE_FILE_INFO_LABEL=
+META_EDITOR_MULTIPLE_FILE_INFO_LABEL=Πολλαπλές Πληροφορίες Αρχείου
 
 #### META_EDITOR_AUDIO_LABEL=Audio
 META_EDITOR_AUDIO_LABEL=Ήχος
@@ -1934,7 +1934,7 @@ META_EDITOR_LANGUAGE_LABEL=Γλώσσα:
 #### META_EDITOR_SECONDS_LABEL=Length:
 META_EDITOR_SECONDS_LABEL=Διάρκεια:
 #### META_EDITOR_BITRATE_LABEL=Bitrate:
-#? META_EDITOR_BITRATE_LABEL=
+META_EDITOR_BITRATE_LABEL=Ρυθμός μετάδοσης:
 #### META_EDITOR_COMMENTS_LABEL=Comments:
 META_EDITOR_COMMENTS_LABEL=Σχόλια:
 #### META_EDITOR_SHA1_LABEL=SHA1:
@@ -1950,43 +1950,43 @@ META_EDITOR_STARS_LABEL=Αστέρια:
 #### META_EDITOR_LICENSE_LABEL=License:
 META_EDITOR_LICENSE_LABEL=Άδεια:
 #### META_EDITOR_LICENSETYPE_LABEL=License Type:
-#? META_EDITOR_LICENSETYPE_LABEL=
+META_EDITOR_LICENSETYPE_LABEL=Τύπος Άδειας:
 #### META_EDITOR_VIDEO_LABEL=Video
-#? META_EDITOR_VIDEO_LABEL=
+META_EDITOR_VIDEO_LABEL=Βίντεο
 #### META_EDITOR_RATING_LABEL=Rating:
-#? META_EDITOR_RATING_LABEL=
+META_EDITOR_RATING_LABEL=Βαθμολογία:
 #### META_EDITOR_LENGTH_LABEL=Length:
-#? META_EDITOR_LENGTH_LABEL=
+META_EDITOR_LENGTH_LABEL=Μήκος:
 #### META_EDITOR_HEIGHT_LABEL=Height:
-#? META_EDITOR_HEIGHT_LABEL=
+META_EDITOR_HEIGHT_LABEL=Ύψος:
 #### META_EDITOR_DIRECTOR_LABEL=Director:
-#? META_EDITOR_DIRECTOR_LABEL=
+# META_EDITOR_DIRECTOR_LABEL=Σκηνοθέτης:
 #### META_EDITOR_STUDIO_LABEL=Studio:
-#? META_EDITOR_STUDIO_LABEL=
+META_EDITOR_STUDIO_LABEL=Στούντιο:
 #### META_EDITOR_PRODUCER_LABEL=Producer: (Please separate with comma)
-#? META_EDITOR_PRODUCER_LABEL=
+META_EDITOR_PRODUCER_LABEL=Παραγωγός: (Παρακαλώ χωρίστε με κόμμα)
 #### META_EDITOR_SUBTITLES_LABEL=Subtitles: (Please separate with comma)
-#? META_EDITOR_SUBTITLES_LABEL=
+META_EDITOR_SUBTITLES_LABEL=Υπότιτλοι: (Παρακαλώ χωρίστε με κόμμα)
 #### META_EDITOR_DOCUMENT_LABEL=Document
-#? META_EDITOR_DOCUMENT_LABEL=
+META_EDITOR_DOCUMENT_LABEL=Κείμενο
 #### META_EDITOR_APPLICATION_LABEL=Application
-#? META_EDITOR_APPLICATION_LABEL=
+META_EDITOR_APPLICATION_LABEL=Εφαρμογή
 #### META_EDITOR_IMAGE_LABEL=Image
-#? META_EDITOR_IMAGE_LABEL=
+META_EDITOR_IMAGE_LABEL=Εικόνα
 #### META_EDITOR_TOPIC_LABEL=Topic:
-#? META_EDITOR_TOPIC_LABEL=
+META_EDITOR_TOPIC_LABEL=Θέμα:
 #### META_EDITOR_AUTHOR_LABEL=Author:
-#? META_EDITOR_AUTHOR_LABEL=
+META_EDITOR_AUTHOR_LABEL=Συγγραφέας:
 #### META_EDITOR_NAME_LABEL=Name:
-#? META_EDITOR_NAME_LABEL=
+META_EDITOR_NAME_LABEL=Όνομα:
 #### META_EDITOR_PUBLISHER_LABEL=Publisher:
-#? META_EDITOR_PUBLISHER_LABEL=
+META_EDITOR_PUBLISHER_LABEL=Εκδότης:
 #### META_EDITOR_DESCRIPTION_LABEL=Description:
-#? META_EDITOR_DESCRIPTION_LABEL=
+META_EDITOR_DESCRIPTION_LABEL=Περιγραφή:
 #### META_EDITOR_PLATFORM_LABEL=Platform:
-#? META_EDITOR_PLATFORM_LABEL=
+META_EDITOR_PLATFORM_LABEL=Πλατφόρμα:
 #### META_EDITOR_SIZE_LABEL=Size:
-META_EDITOR_SIZE_LABEL=Μέγεθος:
+META_EDITOR_SIZE_LABEL=Μέγεθος
 #### META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
 META_EDITOR_DATE_MODIFIED_LABEL=Ημερομηνία τροποποίησης:
 #### META_EDITOR_KIND_LABEL=Kind:
@@ -1999,80 +1999,80 @@ META_EDITOR_MP4_KIND_LABEL=MPEG-4 Ήχοι
 META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 
 #### CC_PUBLISHER_TITLE=Publish License
-#? CC_PUBLISHER_TITLE=
+CC_PUBLISHER_TITLE=Δημοσίευση Άδειας
 #### CC_PUBLISHER_INTRO=This tool helps you publish audio under a Creative Commons license.
-#? CC_PUBLISHER_INTRO=
+CC_PUBLISHER_INTRO=Αυτό το εργαλείο σας βοηθά να δημοσιεύσετε ήχο υπό την άδεια Creative Commons.
 #### CC_PUBLISHER_CC_INTRO_URL_LABEL=How does it work?
-#? CC_PUBLISHER_CC_INTRO_URL_LABEL=
+CC_PUBLISHER_CC_INTRO_URL_LABEL=Πως δουλεύει;
 #### CC_PUBLISHER_WARNING_CREATE=I understand that to publish a file, I must either own its copyrights or be authorized to publish them under a Creative Commons license.
-#? CC_PUBLISHER_WARNING_CREATE=
+CC_PUBLISHER_WARNING_CREATE=Καταλαβαίνω ότι για να δημοσιεύσω ένα αρχείο, πρέπει είτε να κατέχω τα δικαιώματά του ή να είναι νόμιμα να δημοσιευθούν υπό την άδεια Creative Commons.
 #### CC_PUBLISHER_WARNING_MODIFY=This file already has a license. If you want to modify it, click the checkbox to attest that you either own its copyrights or are authorized to publish them under a Creative Commons license.
-#? CC_PUBLISHER_WARNING_MODIFY=
+CC_PUBLISHER_WARNING_MODIFY=Αυτό το αρχείο έχει ήδη μια άδεια. Αν θέλετε να την τροποποιήσετε, κάντε κλικ στο κουτί για να δείξετε ότι είτε κατέχετε τα δικαιώματά της ή είναι νόμιμη υπό την άδεια Creative Commons.
 #### CC_PUBLISHER_MODIFY_LICENSE=Modify the license of this file
-#? CC_PUBLISHER_MODIFY_LICENSE=
+CC_PUBLISHER_MODIFY_LICENSE=Τροποποιήστε την άδεια του αρχείου
 #### CC_PUBLISHER_REMOVE_LICENSE=Permanently remove the license from this file
-#? CC_PUBLISHER_REMOVE_LICENSE=
+CC_PUBLISHER_REMOVE_LICENSE=Διαγράψτε την άδια από το αρχείο για πάντα
 #### CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=Copyright Holder:
-#? CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=
+CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=Κάτοχος Copyright:
 #### CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=Copyright Year:
-#? CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=
+CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=Έτος Copyright:
 #### CC_PUBLISHER_WORK_TITLE_LABEL=Title of Work:
-#? CC_PUBLISHER_WORK_TITLE_LABEL=
+CC_PUBLISHER_WORK_TITLE_LABEL=Τίτλος Εργασίας:
 #### CC_PUBLISHER_DESCRIPTION_LABEL=Description:
-#? CC_PUBLISHER_DESCRIPTION_LABEL=
+CC_PUBLISHER_DESCRIPTION_LABEL=Περιγραφή:
 #### CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=Allow commercial use of your work?
-#? CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=
+CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=Επιτρέπεται η δημόσια χρήση της δουλειάς σας;
 #### CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=Allow modification of your work?
-#? CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=
+CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=Επιτρέπεται η τροποποίηση της δουλειάς σας;
 #### CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=ShareAlike
-#? CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=
+CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=Μοιράσου όμοια
 #### CC_PUBLISHER_LICENSE_VERIFICATION_URL=Where do you want to store the verification URL?
-#? CC_PUBLISHER_LICENSE_VERIFICATION_URL=
+CC_PUBLISHER_LICENSE_VERIFICATION_URL=Που θέλετε να τοποθετήσετε την επαληθευμένη ιστοσελίδα(URL);
 #### CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=What is this?
-#? CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=
+CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=Τί είναι αυτό;
 #### CC_PUBLISHER_LICENSE_VERIFICATION_SELF=I want to host the verification file myself at the following URL:
-#? CC_PUBLISHER_LICENSE_VERIFICATION_SELF=
+CC_PUBLISHER_LICENSE_VERIFICATION_SELF=Θέλω να παρέχω την επαλήθευση αρχείου για τον εαυτό μου στην παρακάτω ιστοσελίδα(URL):
 #### CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=I want to use the Internet Archive to host the file.
-#? CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=
+CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=Θέλω να χρησιμοποιήσω το "Internet Archive" για να παρέχω το αρχείο.
 #### CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=The verification file is hosted at the following URL:
-#? CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=
+CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=Η επαλήθευση αρχείου παρέχεται στην παρακάτω ιστοσελίδα(URL):
 #### CC_PUBLISHER_RDF_OUTPUT=In order to publish your file, please insert the following code in your verification page at:
-#? CC_PUBLISHER_RDF_OUTPUT=
+CC_PUBLISHER_RDF_OUTPUT=Για να δημοσιεύσετε το αρχείο σας, παρακαλώ εισάγετε τον παρακάτω κωδικό στην σελίδα επαλήθευσής στο:
 #### CC_PUBLISHER_COPY_BUTTON=Copy to Clipboard
-#? CC_PUBLISHER_COPY_BUTTON=
+CC_PUBLISHER_COPY_BUTTON=Αντιγραφή στο Πρόχειρο
 #### CC_PUBLISHER_REMOVELICENSE_LABEL=Are you sure you want to permanently remove the license from your local copy of this file?
-#? CC_PUBLISHER_REMOVELICENSE_LABEL=
+CC_PUBLISHER_REMOVELICENSE_LABEL=Είστε σίγουρος πως θέλετε να διαγράψετε για πάντα την άδεια από το τοπικό αντίγραφο αυτού του αρχείου;
 #### CC_PUBLISHER_LICENSEREMOVED_LABEL=Please press OK to permanently remove license.
-#? CC_PUBLISHER_LICENSEREMOVED_LABEL=
+CC_PUBLISHER_LICENSEREMOVED_LABEL=Παρακαλώ πατήστε ΟΚ για να διαγράψετε για πάντα την άδεια.
 #### CC_PUBLISHER_ARCHIVE_USERNAME_LABEL=Username:
-#? CC_PUBLISHER_ARCHIVE_USERNAME_LABEL=
+CC_PUBLISHER_ARCHIVE_USERNAME_LABEL=Όνομα χρήστη:
 #### CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=Password:
-#? CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=
+CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=Κωδικός:
 #### CC_RDFOUTPUT_TITLE=License RDF Output
-#? CC_RDFOUTPUT_TITLE=
+CC_RDFOUTPUT_TITLE=Εξαγωγή άδειας RDF
 
 #### INTERNETARCHIVE_UPLOADER_TITLE=Upload
-#? INTERNETARCHIVE_UPLOADER_TITLE=
+INTERNETARCHIVE_UPLOADER_TITLE=Ανέβασμα
 #### INTERNETARCHIVE_UPLOADER_LABEL=Please wait while LimeWire is uploading your files to the Internet Archive
-#? INTERNETARCHIVE_UPLOADER_LABEL=
+INTERNETARCHIVE_UPLOADER_LABEL=Παρακαλώ περιμένετε όσο το LimeWire ανεβάζει τα αρχεία σας στο "Internet Archive"
 #### INTERNETARCHIVE_UPLOADER_INIT=Connecting to the Internet Archive...
-#? INTERNETARCHIVE_UPLOADER_INIT=
+INTERNETARCHIVE_UPLOADER_INIT=Σύνδεση στο Internet Archieve...
 #### INTERNETARCHIVE_UPLOADER_CONNECTED=Connected...
-#? INTERNETARCHIVE_UPLOADER_CONNECTED=
+INTERNETARCHIVE_UPLOADER_CONNECTED=Συνδεδεμένο...
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=Uploading file
-#? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=
+INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=Ανέβασμα αρχείου
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
-#? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
+INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=από
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded
-#? INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
+INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Ανεβασμένο
 #### INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes of
-#? INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
+INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes από
 #### INTERNETARCHIVE_UPLOADER_COMPLETED=Successfully uploaded files
-#? INTERNETARCHIVE_UPLOADER_COMPLETED=
+INTERNETARCHIVE_UPLOADER_COMPLETED=Ανέβασμα αρχείων με επιτυχία
 #### INTERNETARCHIVE_UPLOADER_CHECKIN=Checking in...
-#? INTERNETARCHIVE_UPLOADER_CHECKIN=
+INTERNETARCHIVE_UPLOADER_CHECKIN=Έλεγχος
 #### INTERNETARCHIVE_IDRETRIEVER_TITLE=Requesting Identifier...
-#? INTERNETARCHIVE_IDRETRIEVER_TITLE=
+INTERNETARCHIVE_IDRETRIEVER_TITLE=Αίτηση εξακρίβωσης
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component.
@@ -2106,7 +2106,7 @@ GENERAL_LAUNCH_BUTTON_LABEL=Άνοιγμα
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=Άνοιγμα αρχείου.
 #### GENERAL_CLEAR_HISTORY=Clear History
-#? GENERAL_CLEAR_HISTORY=
+GENERAL_CLEAR_HISTORY=Καθαρισμός Ιστορικού
 
 ################################################################################
 # Key/value pairs for ButtonRow labels and tooltips.
@@ -2130,9 +2130,9 @@ CHAT_STOP_BUTTON_TIP=Διακοπή συνομιλίας με έναν πάρο�
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Συνομιλία με
 #### CHAT_CONNECTION_ERROR=A connection error has occurred
-#? CHAT_CONNECTION_ERROR=
+CHAT_CONNECTION_ERROR=Ένα σφάλμα σύνδεσης προέκυψε
 #### CHAT_MESSAGE_ERROR=Could not send chat message
-#? CHAT_MESSAGE_ERROR=
+CHAT_MESSAGE_ERROR=Δεν μπορεί να στείλει μύνημα chat
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
 CHAT_HOST_UNAVAILABLE=Ο πάροχος δεν είναι διαθέσιμος
 #### CHAT_YOU=You
@@ -2142,7 +2142,7 @@ CHAT_YOU=Εσείς
 # Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_LOADING_APPLICATION=Loading LimeWire...
-#? SPLASH_STATUS_LOADING_APPLICATION=
+SPLASH_STATUS_LOADING_APPLICATION=Φόρτωμα LimeWire...
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=Φόρτωση πηγών...
 #### SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
@@ -2174,7 +2174,7 @@ SPLASH_STATUS_CONNECTION_WINDOW=Φόρτωση παραθύρου σύνδεση
 #### SPLASH_STATUS_STATISTICS_WINDOW=Loading Statistics Window...
 SPLASH_STATUS_STATISTICS_WINDOW=Φόρτωση παραθύρου στατιστικών στοχείων...
 #### SPLASH_STATUS_LOGGING_WINDOW=Loading Logging Window...
-#? SPLASH_STATUS_LOGGING_WINDOW=
+SPLASH_STATUS_LOGGING_WINDOW=Φόρτωμα Παραθύρου Εισαγωγής
 #### SPLASH_STATUS_STATUS_WINDOW=Loading Status Window...
 SPLASH_STATUS_STATUS_WINDOW=Φόρτωση παραθύρου κατάστασης...
 #### SPLASH_STATUS_PLAYLIST_WINDOW=Loading Playlist Window...
@@ -2256,7 +2256,7 @@ SUPPORT_LIMEWIRE_11=Bοηθήστε την υποστήριξη του μοιρ�
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Νέα έκδοση διαθέσιμη
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
-UPDATE_MESSAGE_SMALL=Μια νέα έκδοση είναι διαθέσιμη, αναβάθμιση;
+UPDATE_MESSAGE_SMALL=Μια νέα έκδοση είναι διαθέσιμη, αναβάθμιση?
 #### UPDATE_TITLE=A new version of LimeWire is available.
 UPDATE_TITLE=Μια νέα έκδοση του LimeWire είναι διαθέσιμη.
 #### UPDATE_LATER_LABEL=Update Later
@@ -2266,27 +2266,27 @@ UPDATE_NOW_LABEL=Αναβάθμιση τώρα
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 UPDATE_TIP=Επισκεφθείτε τη διεύθυνση: http://www.limewire.com για αναβάθμιση!
 #### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
-#? UPDATE_RESTART=
+UPDATE_RESTART=Το LimeWire πρέπει να επανεκινηθεί για να εγκατασταθεί η αναβάθμιση. Άν επιλέξετε να μην αναβαθμίσετε τώρα, το LimeWire θα αναβαθμιστεί αυτόματα όταν κλείσετε. Θα θέλατε να αναβαθμίσετε τώρα;
 #### UPDATE_RESTART_TITLE=Update Ready
-#? UPDATE_RESTART_TITLE=
+UPDATE_RESTART_TITLE=Αναβάθμιση έτοιμη
 
 ################################################################################
 # Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
-#? SHARED_FILES_DROP_DIALOG_TITLE=
+SHARED_FILES_DROP_DIALOG_TITLE=Μοίρασμα επικολλημένων αρχείων;
 #### SHARED_FILES_DROP_DIALOG_MESSAGE=You dropped the following files/folders on LimeWire, please select the ones you would like to share.
-#? SHARED_FILES_DROP_DIALOG_MESSAGE=
+SHARED_FILES_DROP_DIALOG_MESSAGE=Επικολλήσατε τα ακόλουθα αρχεία στο LimeWire, παρακαλώ διαλέξτε αυτά που θέλετε να μοιραστείτε.
 #### SHARED_FILES_DROP_DIALOG_WARNING=All folders you select will also have their subfolders shared.
-#? SHARED_FILES_DROP_DIALOG_WARNING=
+SHARED_FILES_DROP_DIALOG_WARNING=Όλοι οι υποφάκελοι εκτός από τους φακέλους που διαλέξατε θα μοιραστούν επίσης
 #### SHARED_FILES_DROP_DIALOG_OPTION_YES=Yes, Try Again
-#? SHARED_FILES_DROP_DIALOG_OPTION_YES=
+SHARED_FILES_DROP_DIALOG_OPTION_YES=Ναί, προσπαθήστε ξανά
 #### SHARED_FILES_DROP_DIALOG_OPTION_NO=No, Share Nothing
-#? SHARED_FILES_DROP_DIALOG_OPTION_NO=
+SHARED_FILES_DROP_DIALOG_OPTION_NO=Όχι, μή μοιραστείς τίποτα
 #### SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=Do not show this message again.
-#? SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=
+SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=Μήν δείξεις αυτό το μήνυμα ξανά.
 #### SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=You clicked OK but did not select any files to be shared. Would you like to try again?
-#? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
+SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=Κάνατε κλικ στο ΟΚ αλλά δεν επιλέξατε αρχεία να μοιραστούν. Θα θέλατε να προσπαθήσετε ξανά;
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user.
@@ -2296,21 +2296,21 @@ MESSAGE_CAPTION=Μήνυμα
 #### MESSAGE_ERROR_CAPTION=Error
 MESSAGE_ERROR_CAPTION=Σφάλμα
 #### MESSAGE_WARNING_CAPTION=Warning
-#? MESSAGE_WARNING_CAPTION=
+MESSAGE_WARNING_CAPTION=Προσοχή
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this folder?
-MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Είστε σίγουρος ότι θέλετε να σταματήσετε το μοίρασμα αυτού του καταλόγου;
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Είστε σίγουρος ότι θέλετε να σταματήσετε το μοίρασμα αυτού του καταλόγου?
 #### MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire cannot stop sharing this folder.
-#? MESSAGE_CANNOT_UNSHARE_DIRECTORY=
+MESSAGE_CANNOT_UNSHARE_DIRECTORY=Το LimeWire δεν μπορεί να σταματήσει να μοιράζεται αυτό το φάκελο.
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=Το LimeWire δεν θα ανοίξει το καθορισμένο αρχείο για λόγους ασφάλειας.
 #### MESSAGE_FILE_LAUNCHING_FAILED=LimeWire could not launch the specified file.
-#? MESSAGE_FILE_LAUNCHING_FAILED=
+MESSAGE_FILE_LAUNCHING_FAILED=Το LimeWire δεν μπόρεσε να ανοίξει το συγκεκριμένο αρχείο.
 #### MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=LimeWire could not launch the specified file.\n\nExecuted command: {0}.
-#? MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=
+MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=Το LimeWire δεν μπόρεσε να ανοίξει το συγκεκριμένο αρχείο.\n\nΕκτελέσιμη εντολή: {0}.
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
-MESSAGE_CONFIRM_FILE_DELETE=Είστε σίγουρος ότι θέλετε να διαγράψετε το επιλεγμένο(α) αρχείο(α);
+MESSAGE_CONFIRM_FILE_DELETE=Είστε σίγουρος ότι θέλετε να διαγράψετε το επιλεγμένο(α) αρχείο(α)?
 #### MESSAGE_UNABLE_TO_DELETE_FILES=The following files could not be deleted. They may be in use by another application or are currently being downloaded to.
-#? MESSAGE_UNABLE_TO_DELETE_FILES=
+MESSAGE_UNABLE_TO_DELETE_FILES=Τα ακόλουθα αρχεία δεν μπόρεσαν να διαγραφούν. Ίσως χρησιμοποιούνται από άλλη εφαρμογή ή κατεβάζονται τώρα.
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
 MESSAGE_UNABLE_TO_RENAME_FILE_START=Αδύνατον να μετονομαστεί το αρχείο
 #### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
@@ -2324,13 +2324,14 @@ MESSAGE_INVALID_SAVE_DIRECTORY=Το LimeWire αδυνατεί να χρησιμ�
 #### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
 MESSAGE_FILE_CORRUPT=Το LimeWire έχει εντοπίσει μια αλλοίωση στο αρχείο
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
-MESSAGE_CONTINUE_DOWNLOAD=Θέλετε να συνεχίσετε να το κατεβάζετε;
+MESSAGE_CONTINUE_DOWNLOAD=Θέλετε να συνεχίσετε να το κατεβάζετε?
 #### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
-#? MESSAGE_SENSITIVE_SHARE_TOP=
+MESSAGE_SENSITIVE_SHARE_TOP=Επειχειρείται να μοιραστείται ένα φάκελο που ίσως περιέχει ευαίσθητες πληροφορίες:
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
-#? MESSAGE_SENSITIVE_SHARE_BOTTOM=
+MESSAGE_SENSITIVE_SHARE_BOTTOM=Να μοιραστεί ο φάκελος;
 #### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
-#? WARNING_INSTALLATION_CORRUPTED=
+WARNING_INSTALLATION_CORRUPTED==<html><b>Το LimeWire ίσως έχει προσβληθεί από έναν ιυό ή trojan!</b><br><br>Παρακαλώ επισκευθείτε το <a href="http://www.limewire.com/corrupted">www.limewire.com</a> και κατεβάστε την νεότερη εγκεκριμένη έκδοση του LimeWire.</html>
+
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
@@ -2386,7 +2387,7 @@ ERROR_INTERNAL_TITLE=Εσωτερικό σφάλμα
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=Το LimeWire έχει αντιμετωπίσει ένα εσωτερικό σφάλμα. Είναι δυνατόν για το LimeWire να αναρρώσει και να συνεχίσει κανονικά τη λειτουργία του. Για να βοηθήσετε στην ανίχνευση και εξάλειψη του σφάλματος, παρακαλώ, πατήστε «Αποστολή» για να γνωστοποιήσετε το πρόβλημα στο LimeWire. Εάν θέλετε, μπορείτε να πατήσετε «Αναθεώρηση» για να εξετάσετε τις πληροφορίες που θα σταλούν. Σας ευχαριστούμε.
 #### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
-#? ERROR_INTERNAL_OLD=
+ERROR_INTERNAL_OLD=Αν χρειάζεται, μπορείτε να πατήσετε το Review για να δείτε τις πληροφορίες του σφάλματος.
 #### ERROR_INTERNAL_SEND=Send
 ERROR_INTERNAL_SEND=Αποστολή
 #### ERROR_INTERNAL_REVIEW=Review
@@ -2404,7 +2405,7 @@ ERROR_INTERNAL_ALWAYS_REVIEW=Πάντοτε ερώτηση για αναθεώρ
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=Πάντοτε απόρριψη των προγραμματιστικών λαθών
 #### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
-#? ERROR_INTERNAL_DEADLOCK_OPTION=
+ERROR_INTERNAL_DEADLOCK_OPTION=Στείλε τα σφάλματα αυτόματα αν το LimeWire παγώσει
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=Το LimeWire αδυνατεί να συνδεθεί με τον κεντρικό υπολογιστή προγραμματιστικών λαθών, προκειμένου να σταλεί η παρακάτω έκθεση προγραμματιστικού λάθους. Για να βοηθήσετε στον εντοπισμό και στην εξάλειψη του προγραμματιστικού λάθους, παρακαλώ αντιγράψτε το ακόλουθο κείμενο και στείλτε το σε μήνυμα με το ηλεκτρονικό ταχυδρομείο στο bugs@limewire.com. Σας ευχαριστούμε.
 
@@ -2412,9 +2413,9 @@ ERROR_INTERNAL_SERVLET_FAILED=Το LimeWire αδυνατεί να συνδεθε
 # Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=LimeWire was unable to create your settings directory and is using a temporary directory.  Your settings may be deleted when you close LimeWire.
-#? ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=
+ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=Το LimeWire ήταν ανίκανο να δημιουργήσει το φάκελο ρυθμίσεών σας, και χρησιμοποιεί έναν προσωρινό φάκελο. Οι ρυθμίσεις σας ίσως διαγραφούν όταν κλείσετε το LimeWire.
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
-#? ERROR_INTERNET_IS_BLOCKED=
+ERROR_INTERNET_IS_BLOCKED=Το LimeWire δεν μπόρεσε να ξεκινήσει. Αυτό συνήθως συμβαίνει χάρις σε ένα πρόγραμμα τοίχους προστασίας το οποίο δεν επιτρέπει στο LimeWire να πάρει πρόσβαση στο ίντερνετ. Παρακαλώ επιτρέψτε στο LimeWire να συνδεθεί στο ίντερνετ και επανεκινήστε το πρόγραμμα.
 #### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 ERROR_DAAP_LOOPBACK_FAILED=Το LimeWire ήταν ανίκανο να αρχίσει το ψηφιακό ηχητικό πρωτόκολλο πρόσβασης (για τη διανομή των αρχείων στο iTunes), επειδή ένα patch της Microsoft απαιτείται ή ένα firewall εμποδίζει την πρόσβαση. Το LimeWire μπορεί να σας οδηγήσει στη σελίδα της Microsoft με τις πληροφορίες, εάν θέλετε να χρησιμοποιήσετε αυτό το χαρακτηριστικό. Πατήστε «Ναι» για να πάτε στο patch, «Όχι» για να θέσετε εκτός λειτουργίας αυτό το χαρακτηριστικό, ή «Ακύρωση» για να αποφασίσετε αργότερα.
 #### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
@@ -2441,7 +2442,7 @@ ERROR_INVALID_SAVE_DIRECTORY_SELECTION=Ο επιλεγμένος κατάλογ�
 #### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files. Please use another folder or revert to the default.
 ERROR_INVALID_SHARED_DIRECTORY=Μη έγκυρος κατάλογος για μοίρασμα αρχείων. Παρακαλώ, χρησιμοποιήστε έναν άλλο κατάλογο ή επιστρέψτε στον προκαθορισμένο.
 #### WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=Saving downloads to {0} may not function correctly.  To be sure downloads are saved properly you should save them to a sub-directory of {1}.  Would you like to choose another location?
-#? WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=
+WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=Αν σωθούν τα downloads στο {0} ίσως δεν λειτουργήσουν σωστά. Για να είστε σίγουροι ότι τα downloads σώθηκαν σωστά θα πρέπει να τα σώστετε σε έναν υποφάκελο του {1}. Θα θέλατε να διαλέξετε μια άλλη τοποθεσία;
 #### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
 ERROR_FORCE_IP_PORT_RANGE=Πρέπει να εισέλθετε από μια θύρα μεταξύ 1 και 65535, όταν προσπαθείτε να βρείτε θύρα από μόνοι σας.
 #### ERROR_PORT_RANGE=Please enter a port between 1 and 65535.
@@ -2449,7 +2450,7 @@ ERROR_PORT_RANGE=Παρακαλώ, εισέλθετε από θύρα με αρ�
 #### ERROR_ALREADY_DOWNLOADING=You are already downloading this file to
 ERROR_ALREADY_DOWNLOADING=Κατεβάζετε ήδη
 #### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading this file to "{0}".
-#? FORMATTED_ERROR_ALREADY_DOWNLOADING=
+FORMATTED_ERROR_ALREADY_DOWNLOADING=Ήδη κατεβάζετε το αρχείο στο "{0}".
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=Κατεβάσατε ήδη
 #### NO_PREVIEW_BEGIN=There is nothing to preview for file
@@ -2509,53 +2510,53 @@ ERROR_SEARCH_TOO_LARGE=Η έρευνά σας έχει πολλούς όρους
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 ERROR_XML_SEARCH_TOO_LARGE=Η έρευνά σας είναι πολύ εξειδικευμένη. Παρακαλώ, χρησιμοποιήστε λιγότερους όρους και ξαναδοκιμάστε.
 #### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copright year and title.
-#? ERROR_CCPUBLISHER_MISSING_DETAIL=
+ERROR_CCPUBLISHER_MISSING_DETAIL=Παρακαλώ εισάγετε τον κάτοχο του copyright, το έτος του copyright και τον τίτλο.
 #### ERROR_CCPUBLISHER_MISSING_TITLE=Please enter the title of the file you want to publish.
-#? ERROR_CCPUBLISHER_MISSING_TITLE=
+ERROR_CCPUBLISHER_MISSING_TITLE=Παρακαλώ εισάγετε τον τίτλο του αρχείου που θέλετε να δημοσιεύσετε.
 #### ERROR_CCPUBLISHER_MISSING_YEAR=Please enter the year of the file you want to publish.
-#? ERROR_CCPUBLISHER_MISSING_YEAR=
+ERROR_CCPUBLISHER_MISSING_YEAR=Παρακαλώ εισάγετε το έτος του αρχείου που θέλετε να δημοσιεύσετε.
 #### ERROR_CCPUBLISHER_MISSING_HOLDER=Please enter the copyright holder of the file you want to publish.
-#? ERROR_CCPUBLISHER_MISSING_HOLDER=
+ERROR_CCPUBLISHER_MISSING_HOLDER=Παρακαλώ εισάγετε τον κάτοχο του copyright του αρχείου που θέλετε να δημοσιεύσετε.
 #### ERROR_CCPUBLISHER_MISSING_URL=Please enter a verification URL for the license.
-#? ERROR_CCPUBLISHER_MISSING_URL=
+ERROR_CCPUBLISHER_MISSING_URL=Παρακαλώ εισάγετε μια ιστοσελίδα(URL) πιστοποίησης για την άδεια.
 #### ERROR_CCPUBLISHER_DESCRIPTION_START=The description for this file is too short. Please enter at least {0} words.
-#? ERROR_CCPUBLISHER_DESCRIPTION_START=
+ERROR_CCPUBLISHER_DESCRIPTION_START=Η περιγραφή γι' αυτό το αρχείο είναι πολύ μικρή. Παρακαλώ εισάγετε τουλάχιστον {0} λέξεις.
 #### ERROR_CCPUBLISHER_URL=Please enter a valid verification URL for the license.
-#? ERROR_CCPUBLISHER_URL=
+ERROR_CCPUBLISHER_URL=Παρακαλώ είσάγετε μια έγκυρη ιστοσελίδα(URL) πιστοποίησης για την άδεια.
 #### ERROR_CCPUBLISHER_DATE=Please enter a valid year for the file you want to publish.
-#? ERROR_CCPUBLISHER_DATE=
+ERROR_CCPUBLISHER_DATE=Παρακαλώ εισάγετε ένα έγκυρο έτος για του αρχείο που θέλετε να δημοσιεύσετε.
 #### ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=The default Internet Archive identifier for this file and username is allready taken. Please modify it below or press cancel to return.
-#? ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=
+ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=Το τυχαίο αναγνωριστικό του "Internet Archive" για το όνομα αρχείου και το όνομα χρήστη υπάρχει ήδη. Παρακαλώ αλλάξτε το ή πατήστε ακύρωση για επανεκκίνηση.
 #### ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=Please enter your Internet Archive username and password.
-#? ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=
+ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=Παρακαλώ εισάγετε το όνομα χρήστη και κωδικό για το "Internet Archive".
 #### ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive. Do you want to try again?
-#? ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=
+ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=Υπήρχε ένα σφάλμα στην επικοινωνία με το "Internet Archive". Θέλετε να προσπαθήσετε ξανά;
 #### ERROR_INTERNETARCHIVE_CONNECTION=There was an error while connecting to the internet archive.
-#? ERROR_INTERNETARCHIVE_CONNECTION=
+ERROR_INTERNETARCHIVE_CONNECTION=Υπήρξε ένα σφάλμα κατά τη σύνδεσή σας στο "internet archive".
 #### ERROR_INTERNETARCHIVE_LOGIN=There was an error while logging in to the Internet Archive. Please check your username and password and try again.
-#? ERROR_INTERNETARCHIVE_LOGIN=
+ERROR_INTERNETARCHIVE_LOGIN=Υπήρξε ένα σφάλμα ενώ συνδεόταν στο "Internet Archive". Παρακαλώ ελέγξτε το όνομα χρήστη και κωδικό και προσπαθήστε ξανά.
 #### ERROR_INTERNETARCHIVE_DIRECTORY=There was an error while trying to access the upload directory.
-#? ERROR_INTERNETARCHIVE_DIRECTORY=
+ERROR_INTERNETARCHIVE_DIRECTORY=Υπήρξε ένα σφάλμα κατα την προσπάθεια για πρόσβαση στο φάκελο ανεβάσματος.
 #### ERROR_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive. Please try again later.
-#? ERROR_INTERNETARCHIVE_COMMUNICATION=
+ERROR_INTERNETARCHIVE_COMMUNICATION=Υπήρξε ένα πρόβλημα στην επικοινωνία με το "Internet Archive". Παρακαλώ προσπαθήστε αργότερα.
 #### ERROR_COULD_NOT_OPEN_TORRENT=LimeWire was unable to load the specified torrent file, - it may be malformed or LimeWire does not have permission to access this file.
-#? ERROR_COULD_NOT_OPEN_TORRENT=
+ERROR_COULD_NOT_OPEN_TORRENT=Το LimeWire δεν μπόρεσε να φορτώσε το συγκεκριμένος αρχείο torrent, - ίσως έχει κακή προέκταση ή το LimeWire δεν έχει άδεια για πρόσβαση στο αρχείο.
 #### ERROR_COULD_NOT_OPEN_TORRENT_URL=LimeWire was unable to download the torrent file from the specified URL:
-#? ERROR_COULD_NOT_OPEN_TORRENT_URL=
+ERROR_COULD_NOT_OPEN_TORRENT_URL=Το LimeWire ήταν ανίκανο να κατεβάσει το αρχείο με επέκταση torrent από τη συγκεκριμένη ιστοσελίδα(URL):
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
-#? ERROR_BAD_TORRENT_URL=
+ERROR_BAD_TORRENT_URL=Η προσδιορισμένη ιστοσελίδα(URL) δεν είναι έγκυρη. Παρακαλώ ελέγξτε τα στοιχεία.
 
 ################################################################################
 # Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
-#? LICENSE_VIEW_LICENSE=
+LICENSE_VIEW_LICENSE=Προβολή Άδειας
 #### LICENSE_EDIT_LICENSE=Edit License...
-#? LICENSE_EDIT_LICENSE=
+LICENSE_EDIT_LICENSE=Επεξεργασία Άδειας...
 #### LICENSE_VERIFY=Verify
-#? LICENSE_VERIFY=
+LICENSE_VERIFY=Εξακρίβωσε
 #### LICENSE_SAVE_DETAILS_TO_FILE=Save details to file
-#? LICENSE_SAVE_DETAILS_TO_FILE=
+LICENSE_SAVE_DETAILS_TO_FILE=Σώσε πληροφορίες στο αρχείο
 
 ################################################################################
 # Messages for Creative Commons Licensing.
@@ -2585,33 +2586,33 @@ LICENSE_CC=Creative Commons
 # Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
-#? LICENSE_WEED_TITLE=
+LICENSE_WEED_TITLE=Πληροφορίες για δημόσιο μοίρασμα
 #### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
-#? LICENSE_WEED_LOCATING=
+LICENSE_WEED_LOCATING=Το LimeWire επικοινωνεί με το www.weedshare.com για τις πληροφορίες του αρχείου.
 #### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.
-#? LICENSE_WEED_UNVERIFIED=
+LICENSE_WEED_UNVERIFIED=Το LimeWire δεν έχει εξακριβώσει την άδεια.\ν Πατήστε 'εξακρίβωση' για να εντοπίσετε τις λεπτομέρειες του αρχείου.
 #### LICENSE_WEED_INVALID=LimeWire was unable to locate the details of this Weed file.
-#? LICENSE_WEED_INVALID=
+LICENSE_WEED_INVALID=Το LimeWire ήταν ανίκανο να εντοπίσει τις λεπτομέρειες του αρχείου Weed.
 #### LICENSE_WEED_RETRY=You can try looking up the details again by clicking 'Verify'.
-#? LICENSE_WEED_RETRY=
+LICENSE_WEED_RETRY=Μπορείτε να κοιτάξετε τις λεπτομέρεις πατώντας εξακρίβωση.
 #### LICENSE_WEED_DETAILS=License Details:
-#? LICENSE_WEED_DETAILS=
+LICENSE_WEED_DETAILS=Λεπτομέρειες άδειας:
 #### LICENSE_WEED_CLAIMED_DEED=View Weedshare Usage Rights
-#? LICENSE_WEED_CLAIMED_DEED=
+LICENSE_WEED_CLAIMED_DEED=Δείτε Δικαιώματα Χρήσης για δημόσιο μοίρασμα
 #### LICENSE_WEED_DEED=View Usage Rights
-#? LICENSE_WEED_DEED=
+LICENSE_WEED_DEED=Δείτε δικαιώματα χρήσης
 #### LICENSE_WEED_VERIFICATION=View Verification Page
-#? LICENSE_WEED_VERIFICATION=
+LICENSE_WEED_VERIFICATION=Δείτε Σελίδα Εξακρίβωσης
 #### LICENSE_WEED=Weedshare
-#? LICENSE_WEED=
+LICENSE_WEED=Δημόσιο μοίρασμα
 
 ################################################################################
 # Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
-#? LICENSE_UNKNOWN_TITLE=
+LICENSE_UNKNOWN_TITLE=Λεπτομέρειες άδειας
 #### LICENSE_UNKNOWN_INVALID=This file may require a license in order to open and view.
-#? LICENSE_UNKNOWN_INVALID=
+LICENSE_UNKNOWN_INVALID=Το αρχείο ίσως χρειάζεται μια άδεια για να ανοίξει και να το δείτε.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -2621,15 +2622,15 @@ LICENSE_CC=Creative Commons
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Αποθήκευση
 #### OPTIONS_SAVE_BASIC_MAIN_TITLE=Basic
-#? OPTIONS_SAVE_BASIC_MAIN_TITLE=
+OPTIONS_SAVE_BASIC_MAIN_TITLE=Βασικά
 #### OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Advanced
-#? OPTIONS_SAVE_ADVANCED_MAIN_TITLE=
+OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Προχωρημένο
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=Μοίρασμα
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
 OPTIONS_SPEED_MAIN_TITLE=Ταχύτητα
 #### OPTIONS_PERFORMANCE_MAIN_TITLE=Performance
-#? OPTIONS_PERFORMANCE_MAIN_TITLE=
+OPTIONS_PERFORMANCE_MAIN_TITLE=Απόδοση
 #### OPTIONS_DOWNLOAD_MAIN_TITLE=Downloads
 OPTIONS_DOWNLOAD_MAIN_TITLE=Λήψεις
 #### OPTIONS_UPLOAD_MAIN_TITLE=Uploads
@@ -2641,21 +2642,21 @@ OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Χαραμάδες
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=Συνδέσεις
 #### OPTIONS_BITTORRENT_MAIN_TITLE=BitTorrent
-#? OPTIONS_BITTORRENT_MAIN_TITLE=
+OPTIONS_BITTORRENT_MAIN_TITLE=BitTorrent
 #### OPTIONS_BITTORRENT_BASIC_TITLE=Basic
-#? OPTIONS_BITTORRENT_BASIC_TITLE=
+OPTIONS_BITTORRENT_BASIC_TITLE=Βασικός
 #### OPTIONS_BITTORRENT_ADVANCED_TITLE=Advanced
-#? OPTIONS_BITTORRENT_ADVANCED_TITLE=
+OPTIONS_BITTORRENT_ADVANCED_TITLE=Προχωρημένα
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=Παύση λειτουργίας
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
-#? OPTIONS_UPDATE_MAIN_TITLE=
+OPTIONS_UPDATE_MAIN_TITLE=Αναβαθμίσεις
 #### OPTIONS_CHAT_MAIN_TITLE=Chat
 OPTIONS_CHAT_MAIN_TITLE=Συνομιλία
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
 OPTIONS_PLAYER_MAIN_TITLE=Μέσο αναπαραγωγής
 #### OPTIONS_STATUS_BAR_MAIN_TITLE=Status Bar
-#? OPTIONS_STATUS_BAR_MAIN_TITLE=
+OPTIONS_STATUS_BAR_MAIN_TITLE=Μπάρα στοιχείων
 #### OPTIONS_ITUNES_MAIN_TITLE=iTunes
 OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #### OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
@@ -2681,7 +2682,7 @@ OPTIONS_SEARCH_QUALITY_MAIN_TITLE=Ποιότητα
 #### OPTIONS_SEARCH_SPEED_MAIN_TITLE=Speed
 OPTIONS_SEARCH_SPEED_MAIN_TITLE=Ταχύτητα
 #### OPTIONS_SEARCH_JUNK_MAIN_TITLE=Junk
-#? OPTIONS_SEARCH_JUNK_MAIN_TITLE=
+OPTIONS_SEARCH_JUNK_MAIN_TITLE=Αμφισβητίσιμο
 #### OPTIONS_FILTERS_MAIN_TITLE=Filters
 OPTIONS_FILTERS_MAIN_TITLE=Φίλτρα
 #### OPTIONS_RESULTS_MAIN_TITLE=Keywords
@@ -2699,18 +2700,18 @@ OPTIONS_STARTUP_MAIN_TITLE=Εκκίνηση συστήματος
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
 OPTIONS_PROXY_MAIN_TITLE=Διακομιστής μεσολάβησης
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
-#? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
+OPTIONS_CONTENT_FILTER_MAIN_TITLE=Περιεχόμενο
 #### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
-#? OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
+OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Επιφάνεια δικτύου
 #### OPTIONS_ASSOCIATIONS_MAIN_TITLE=File Associations
-#? OPTIONS_ASSOCIATIONS_MAIN_TITLE=
+OPTIONS_ASSOCIATIONS_MAIN_TITLE=Σχέσεις αρχείων
 
 ################################################################################
 # Key/value pairs for the save directory options window item
 # in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
-OPTIONS_SAVE_ON_CLOSE=Έχετε κάνει αλλαγές σε ορισμένες ρυθμίσεις. Θέλετε να τις αποθηκεύσετε;
+OPTIONS_SAVE_ON_CLOSE=Έχετε κάνει αλλαγές σε ορισμένες ρυθμίσεις. Θέλετε να τις αποθηκεύσετε?
 #### OPTIONS_SAVE_DIR_TITLE=Save Folder
 OPTIONS_SAVE_DIR_TITLE=Κατάλογος αποθήκευσης
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the folder for saving files.
@@ -2726,17 +2727,17 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Επιλέξτε άλλον κατάλογο.
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the Default Folder
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Χρησιμοποιήστε τον προκαθορισμένο κατάλογο.
 #### OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=You can specify a download location for each media type.
-#? OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=
+OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=Μπορείτε να καθορίσετε μια τοποθεσία κατεβάσματος για τον κάθε τύπο αρχείου.
 #### OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Open Dialog to Select a Folder
-#? OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=
+OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Ανοίξτε το διάλογο για να διαλέξετε ένα φάκελο
 #### OPTIONS_SAVE_RESET_BUTTON_LABEL=Reset
-#? OPTIONS_SAVE_RESET_BUTTON_LABEL=
+OPTIONS_SAVE_RESET_BUTTON_LABEL=Επαναφορά
 #### OPTIONS_SAVE_RESET_BUTTON_TIP=Reset to Default Download Folder
-#? OPTIONS_SAVE_RESET_BUTTON_TIP=
+OPTIONS_SAVE_RESET_BUTTON_TIP=Επαναφορά στον αρχικό φάκελο download
 #### OPTIONS_SAVE_MEDIATYPE=Media Type
-#? OPTIONS_SAVE_MEDIATYPE=
+OPTIONS_SAVE_MEDIATYPE=Τύπος Αρχείου Πολυμέσων
 #### OPTIONS_SAVE_DIRECTORY=Save Folder
-#? OPTIONS_SAVE_DIRECTORY=
+OPTIONS_SAVE_DIRECTORY=Αποθήκευση Φακέλου
 
 #### OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Incomplete Files
 OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Ανολοκλήρωτα αρχεία
@@ -2754,19 +2755,19 @@ OPTIONS_SHARED_DIRS_TITLE=Μοιραζόμενοι κατάλογοι
 #### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
 OPTIONS_SHARED_DIRS_LABEL=Μπορείτε να επιλέξετε τους καταλόγους για τα αρχεία που θα μοιράζεστε. Τα αρχεία σ’ αυτούς τους καταλόγους φαίνονται στην αρχειοθήκη.
 #### OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Share Finished Downloads:
-#? OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=
+OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Το μοίρασμα τελείωσε το κατέβασμα των παρακάτω:
 #### OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download Sharing
-#? OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=
+OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Κατέβασμα μοιραζόμενων
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
-#? OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=
+OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Μπορείτε να μοιραστείτε αρχεία που κατεβάζετε σε μη μοιραζόμενους φακέλους.
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
-#? OPTIONS_SHARED_NEW_SAVE_FOLDERS=
+OPTIONS_SHARED_NEW_SAVE_FOLDERS=Θα θέλατε να μοιραστείτε τους νέους φακέλους; Οι ακόλουθοι φάκελοι θα μοιραστούν:\n\n
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
-#? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
+OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Μοίρασμα Torrent
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
-#? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
+OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=Μπορείτε αυτόματα να μοιράζεστε αρχεία με κατάλληξη .torrent.
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
-#? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
+OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Μοίρασμα αρχείων με κατάλληξη .torrent.
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2798,13 +2799,13 @@ OPTIONS_SPEED_BOX_LABEL=Ταχύτητα:
 # Key/Value pairs for disabling capabilities
 ################################################################################
 #### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
-#? OPTIONS_DISABLE_CAPABILITIES_TITLE=
+OPTIONS_DISABLE_CAPABILITIES_TITLE=Ικανότητες
 #### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
-#? OPTIONS_DISABLE_CAPABILITIES_LABEL=
+OPTIONS_DISABLE_CAPABILITIES_LABEL=Αν το κομπιούτερ σας έχει μια γρήγορη σύνδεση ίντερνετ, το LimeWire ίσως λειτουργήσει ως ένας "βοηθός" για αργότερους χρήστες και/ή ίσως συνδεθεί στο Mojito DHT. Μπορείτε να το απενεργοποιήσετε αυτό αν θέλετε.
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Απενεργοποιήστε τις δυνατότητες «ultrapeer»:
 #### OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Disable Mojito DHT Capabilities:
-#? OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=
+OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Απενεργοποίηση ικανοτήτων Mojito DHT.
 
 ################################################################################
 # Key/Value pairs for disabling OOB support.
@@ -2856,11 +2857,11 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ταχύτητα λήψεως:
 # in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
-#? OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=
+OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=Προειδοποίηση άδειας
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_LABEL=You can choose whether to be warned about downloading a file without a license.
-#? OPTIONS_DOWNLOAD_LICENSE_WARNING_LABEL=
+OPTIONS_DOWNLOAD_LICENSE_WARNING_LABEL=Μπορείτε να διαλέξετε αν θα προειδοποιείστε για το κατέβασμα αρχείων χωρίς άδεια.
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Show License Warning:
-#? OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=
+OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Εμφάνιση Προειδοποίησης Άδειας:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -2937,31 +2938,31 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Σύνδεση κατά την εκκ
 # Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
-#? OPTIONS_BITTORRENT_SETTINGS_TITLE=
+OPTIONS_BITTORRENT_SETTINGS_TITLE=Ρυθμίσεις BitTorrent
 #### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
 #### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
-#? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
+OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Άφησε το LimeWire να διαχειριστεί τις ρυθμίσεις του BitTorrent μου. (Προτείνεται)
 #### OPTIONS_BITTORRENT_MAX_UPLOADS=Maximum uploads per torrent
-#? OPTIONS_BITTORRENT_MAX_UPLOADS=
+OPTIONS_BITTORRENT_MAX_UPLOADS=Μέγιστος αριθμός ανεβασμάτων ανά torrent
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
-#? OPTIONS_BITTORRENT_MIN_UPLOADS=
+OPTIONS_BITTORRENT_MIN_UPLOADS=Ελάχιστος αριθμός ανεβασμάτων ανά torrent
 #### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
 #? OPTIONS_BITTORRENT_FLUSH_WRITE=
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
-#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
+OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Εμπειρική πρόσβαση δίσκου
 
 ###############################################################################
 # Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
-#? OPTIONS_BITTORRENT_AUTO_START_TITLE=
+OPTIONS_BITTORRENT_AUTO_START_TITLE=Αυτόματη εκκίνηση torrents
 #### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
-#? OPTIONS_BITTORRENT_AUTO_START_LABEL=
+OPTIONS_BITTORRENT_AUTO_START_LABEL=Μπορείτε να διαλέξετε αν τα torrent θα κατεβαίνουν αυτόματα από το Gnutella.
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
-#? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
+OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Ξεκίνα αυτόματα
 
 ################################################################################
 # Key/Value pairs for shutdown options.
@@ -2977,25 +2978,25 @@ OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Παύση λειτουργίας μετ�
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Ελαχιστοποίηση στη γραμμή εργασιών
 #### OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Show System Tray Icon:
-#? OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=
+OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Εμφάνιση Εικονιδίου Γραμμής Εργασιών
 #### OPTIONS_TRAY_ICON_DISPLAY_TITLE=System Tray Icon
-#? OPTIONS_TRAY_ICON_DISPLAY_TITLE=
+OPTIONS_TRAY_ICON_DISPLAY_TITLE=Εικονίδιο Γραμμής Εργασιών
 #### OPTIONS_TRAY_ICON_DISPLAY_LABEL=You can display the system tray icon while LimeWire is visible.
-#? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
+OPTIONS_TRAY_ICON_DISPLAY_LABEL=Μπορείτε να προβάλετε το Εικονίδιο Γραμμής Εργασιών όταν το LimeWire είναι φανερό.
 
 ################################################################################
 # Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
-#? OPTIONS_UPDATE_TITLE=
+OPTIONS_UPDATE_TITLE=Αναβάθμιση επιλογών
 #### OPTIONS_UPDATE_LABEL=You can choose when you want to be notified of new LimeWire releases.
-#? OPTIONS_UPDATE_LABEL=
+OPTIONS_UPDATE_LABEL=Μπορείτε να επιλέξετε όταν θέλετε να ειδοποιηθείτε για τις νέες εκδόσεις του LimeWire.
 #### OPTIONS_UPDATE_BETA=Beta Releases
-#? OPTIONS_UPDATE_BETA=
+OPTIONS_UPDATE_BETA=Beta Εκδόσεις
 #### OPTIONS_UPDATE_SERVICE=Service Releases
-#? OPTIONS_UPDATE_SERVICE=
+OPTIONS_UPDATE_SERVICE=Εκδόσεις Διορθώσεων
 #### OPTIONS_UPDATE_MAJOR=Major Releases
-#? OPTIONS_UPDATE_MAJOR=
+OPTIONS_UPDATE_MAJOR=Κύριες Εκδόσεις
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window.
@@ -3021,43 +3022,43 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Μπορείτε να χρησιμοποιείτ
 # Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
-#? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
+OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Τσεκάρετε αυτές τις σχέσεις όταν αρχίζετε το LimeWire:
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
-#? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
+OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Σύνδεσμοι και τύποι αρχείων
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
-#? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
+OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=Μπορείτε να χρησιμοποιήσετε το LimeWire για να ανοίξετε συγκεκριμένους τύπους αρχείων και πρωτόκολα. Μπορείτε επίσης να συμβουλεύσετε το LimeWire να επανακτήσει αυτές τις σχέσεις αν ένα άλλο πρόγραμμα τις πάρει.
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
-#? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
+OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Χρησιμοποιήστε το LimeWire για...
 #### OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=What should LimeWire do with the selected associations on startup?
-#? OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=
+OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=Τι πρέπει να κάνει το LimeWire με τις επελεγμένες σχέσεις στην εκκίνηση;
 #### OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=Always take the selected associations.
-#? OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=
+OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=Πάντα να παίρνεις τις επελεγμένες σχέσεις.
 #### OPTIONS_ASSOCIATIONS_GRAB_ASK=Ask me what to do when an association is missing.
-#? OPTIONS_ASSOCIATIONS_GRAB_ASK=
+OPTIONS_ASSOCIATIONS_GRAB_ASK=Ρώτα με τί να κάνω όταν μια σχέση λείπει.
 #### OPTIONS_ASSOCIATIONS_GRAB_NEVER=Ignore all missing associations.
-#? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
+OPTIONS_ASSOCIATIONS_GRAB_NEVER=Αγνόησε όλες τις σχέσεις που λείπουν.
 
 ################################################################################
 # Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Εμφάνιση Μετρητή Ποιότητας Σύδεσης
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Connection Quality Indicator
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Μετρητής Ποιότητας Σύνδεση
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=
 #### OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Show Shared Files Indicator:
-#? OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Εμφάνιση Μετρητή Μοιραζομένων Αρχείων:
 #### OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=Shared Files Indicator
-#? OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=
+OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=Μετρητής Μοιραζόμενων Αρχείων
 #### OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=You can display how many files you are sharing in the status bar.
-#? OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=
+OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=Μπορείτε να εμφανίσετε πόσα αρχεία μοιράζεστε στη γραμμή εργαλείων
 #### OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=Show Firewall Indicator:
-#? OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=Δείξε Μετρητή Τοίχους Προστασίας:
 #### OPTIONS_STATUS_BAR_FIREWALL_TITLE=Firewall Indicator
-#? OPTIONS_STATUS_BAR_FIREWALL_TITLE=
+OPTIONS_STATUS_BAR_FIREWALL_TITLE=Μετρητής Τοίχους Προστασίας
 #### OPTIONS_STATUS_BAR_FIREWALL_LABEL=You can display your firewall status in the status bar.
-#? OPTIONS_STATUS_BAR_FIREWALL_LABEL=
+OPTIONS_STATUS_BAR_FIREWALL_LABEL=Μπορείτε να εμφανίσετε το τοίχος προστασίας σας στη γραμμή εργαλείων.
 #### OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=Show Bandwidth Indicator:
 #? OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=
 #### OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=Bandwidth Indicator
@@ -3065,9 +3066,9 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Μπορείτε να χρησιμοποιείτ
 #### OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=You can display your bandwidth consumption in the status bar.
 #? OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=
 #### OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Downloads:
-#? OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=
+OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Κατεβάσματα:
 #### OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Uploads:
-#? OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=
+OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Ανεβάσματα:
 
 ################################################################################
 # Key/Value pairs for the iTunes options in the options window.
@@ -3096,18 +3097,18 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Απαιτείται κωδικός
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Μπορείτε να περιορίσετε την πρόσβαση σ’ αυτή την υπηρεσία με έναν κωδικό.
 #### OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_CHECKBOX_LABEL=Require Username:
-#? OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_CHECKBOX_LABEL=
+OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_CHECKBOX_LABEL=Απαίτηση ονόματος χρήστη:
 #### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Απαιτείται κωδικός
 #### OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_LABEL=Username:
-#? OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_LABEL=
+OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_LABEL=Όνομα χρήστη:
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Κωδικός:
 
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
-#? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=
+OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Μέγεθος μνήμης
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media. If iTunes or other media players experience frequent rebuffering, increase this value. A higher setting may use more memory.
-#? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
+OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=Μπορείτε να επεξεργαστείτε το μέγεθος της μνήμης για μετάδοση των πολυμέσων. Αν το iTunes ή άλλοι αναπαραγωγείς πολυμέσων παρουσιάζουν συχνή επανεκκίνηση της μνήμης, παρακαλούμε αυξήστε την τιμή. Μια υψηλότερη ρύθμιση ίσως χρησιμοποιεί περισσότερη μνήμη. 
 
 ################################################################################
 # Key/Value pairs for url handler options.
@@ -3165,15 +3166,15 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Επαναφορά στα προκαθο�
 # Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
-#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
+OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=Συμπεριφορά για αρχείο που ήδη υπάρχει
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=You can choose the default action that LimeWire will perform when you try to download a file that already exists on disk.
-#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=
+OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=Μπορείτε να διαλέξετε μια τυχαί πράξη για να εκτελεί το LimeWire όταν προσπαθείτε να κατεβάσετε ένα αρχείο που ήδη υπάρχει στο δίσκο.
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=Always Show the 'Save As' Dialog
-#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=
+OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=Πάντα να εμφανίζεται ο διάλογος 'Αποθήκευση ως'
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=Always Append (#) to the Filename
-#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=
+OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=Πάντα πρόσθετε (#) στο όνομα αρχείου
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Always Ask What to do
-#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=
+OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Πάντα ρώτα τι να κάνω
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
@@ -3261,7 +3262,7 @@ OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Παράβλεψη αρχείων .ht
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Παράβλεψη αρχείων .vbs
 #### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
-#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
+OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Αγνόησε τα αρχεία με κατάληξη .wmv/.asf
 
 ################################################################################
 # Key/Value pairs for message filtering options
@@ -3377,53 +3378,53 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Κωδικός
 # in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
-#? OPTIONS_NETWORK_INTERFACE_TITLE=
+OPTIONS_NETWORK_INTERFACE_TITLE=Επιφάνεια Δικτύου
 #### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
-#? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
+OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Χρησιμοποίησε μια συγκεκριμένη επιφάνεια δικτύου.
 #### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
-#? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
+OPTIONS_NETWORK_INTERFACE_CANT_LIST=Το LimeWire δεν μπόρεσε να διευκρινίσει ποιές επιφάνειες δικτύου  είναι διαθέσιμες στην μηχανή. Οι εξερχόμενες συνδέσεις θα  συνδέονται με κάθε αυθαίρετη επιφάνεια.
 
 ################################################################################
 # Key/value pairs for the content filter options window item
 # in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
-#? OPTIONS_CONTENT_FILTER_TITLE=
+OPTIONS_CONTENT_FILTER_TITLE=Φίλτρα Περιεχομένων
 #### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
-#? OPTIONS_CONTENT_FILTER_LABEL=
+OPTIONS_CONTENT_FILTER_LABEL=Μπορείτε να πείτε στο LimeWire να φιλτράρει τα αρχεία των οποίων οι κατοχείς των copyright τους απαιτούν να μη μοιραστούν. Ενεργοποιόντας το φιλτράρισμα, συμβουλεύετε το LimeWire να επιβεβαιώνει όλα τα αρχεία που κατεβάζετε ή μοιράζεστε με μια λίστα των διεγραμένων περιεχομένων.
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
-#? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
+OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Ενεργοποίηση Φίλτρων Περιεχομένων
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
 # in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
-#? OPTIONS_SEARCH_JUNK_TITLE=
+OPTIONS_SEARCH_JUNK_TITLE=Αμφισβητήσιμο
 #### OPTIONS_SEARCH_JUNK_LABEL=You can disable LimeWire's junk filter and delete all previously collected filter data here, if your junk filter is rating too many files as spam.
-#? OPTIONS_SEARCH_JUNK_LABEL=
+OPTIONS_SEARCH_JUNK_LABEL=Μπορείτε να απενεργοποιήσετε το φίλτρο του LimeWire για αμφισβητήσιμα αρχεία και να διαγράψετε όλα τα δεδομένα που συλλέξατε πριν, αν το φίλτρο αμφισβητήσιμων αρχείων κρίνει πολλά αρχεία σαν spam.
 #### OPTIONS_SEARCH_JUNK_DISPLAY_IN_PLACE=Display junk in place
 #? OPTIONS_SEARCH_JUNK_DISPLAY_IN_PLACE=
 #### OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=Display junk at the bottom of search results
-#? OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=
+OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=Εμφάνιση αμφισβητίσιμων στο πάνω μέρος των αποτελεσμάτων έρευνας
 #### OPTIONS_SEARCH_JUNK_HIDE_SPAM=Do not display junk
-#? OPTIONS_SEARCH_JUNK_HIDE_SPAM=
+OPTIONS_SEARCH_JUNK_HIDE_SPAM=Απόκρυψη αμφισβητήσιμων
 #### OPTIONS_SEARCH_JUNK_DISPLAY=Display:
-#? OPTIONS_SEARCH_JUNK_DISPLAY=
+OPTIONS_SEARCH_JUNK_DISPLAY=Εμφάνιση:
 
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=Sensivity
-#? OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=
+OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=Ευαισθησία
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=Adjust the sensitivity of LimeWire's junk filter
-#? OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=
+OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=Ρύθμιση της ευαισθησίας του LimeWire στο φίλτρο αμφισβητήσιμων
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=Relaxed
-#? OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=
+OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=Χαλαρή
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Strict
-#? OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=
+OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Αυστηρή
 #### OPTIONS_SEARCH_JUNK_RESET_LABEL=Forget Training Data
-#? OPTIONS_SEARCH_JUNK_RESET_LABEL=
+OPTIONS_SEARCH_JUNK_RESET_LABEL=Ξέχαση τα Εκπαιδευόμενα Δεδομένα
 
 ################################################################################
 # Key/value pairs for top-level stats panels.
@@ -3548,9 +3549,9 @@ STATS_QUERY_REQUEST_TTL_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_LABEL=Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον time to live (TTL).
 # Advanced Gnutella Message Special queries
 #### STATS_SPECIAL_QUERIES_TITLE=Special Queries
-#? STATS_SPECIAL_QUERIES_TITLE=
+STATS_SPECIAL_QUERIES_TITLE=Ειδικά ερωτήματα
 #### STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
-#? STATS_SPECIAL_QUERIES_LABEL=
+STATS_SPECIAL_QUERIES_LABEL=Όλα τα ειδικά επελεγμένα ερωτήματα.
 # Advanced Gnutella Message hops/ttl for query hits
 #### STATS_QUERY_REPLY_HOPS_TITLE=Hops
 STATS_QUERY_REPLY_HOPS_TITLE=Hops
@@ -3783,7 +3784,7 @@ QRP_LEAF=Φύλλο
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=Sent
 STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=Σταλέντα
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-#? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=Όλα τα ερωτήματα που διανεμήθηκαν σε άλλους χρήστες την τελευταία φορά, χρησιμοποιόντας πίνακες διανομής ερωτημάτων.
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=Sent
 STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=Σταλέντα
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=Not Sent
@@ -3792,20 +3793,20 @@ STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=Μη σταλέντα
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Sent
 STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Σταλέντα
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to leaves, using query routing tables.
-#? STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=Όλα τα ερωτήματα που διανεμήθηκαν σε φύλλα, χρησιμοποιόντας πίνακες διανομής ερωτημάτων.
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Sent
-STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Σταλέντα
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Σταλθέντα
 #### STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Not Sent
-STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Μη σταλέντα
+STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Μη σταλθέντα
 
 #### STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=Received
 STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=Ληφθέντα
 #### STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=All queries that were received from routed connections.
-#? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=
+STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=Όλα τα ερωτήματα που λήφθηκαν από συνδέσεις διανομής
 #### STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Hit
 STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Χτύποι
 #### STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False Positive
-#? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=
+STATS_QRP_LEAF_ROUTED_QUERIES_MISS=Λάθος Θετικό
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- errors messages.
@@ -4067,27 +4068,27 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Αριθμός kilobyte γι
 # Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
-#? HANDSHAKING=
+HANDSHAKING=Χειραψία
 #### STATS_HANDSHAKING_LEAF_TITLE=Leaf
 STATS_HANDSHAKING_LEAF_TITLE=Φύλλο
 #### STATS_HANDSHAKING_LEAF_LABEL=Statistics for handshaking as a leaf.
-#? STATS_HANDSHAKING_LEAF_LABEL=
+STATS_HANDSHAKING_LEAF_LABEL=Στατιστικά χειραψίας σαν φύλλο.
 #### STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
 STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
 #### STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistics for handshaking as an ultrapeer.
-#? STATS_HANDSHAKING_ULTRAPEER_LABEL=
+STATS_HANDSHAKING_ULTRAPEER_LABEL=Στατιστηκά χειραψίας σαν ανώτερος.
 #### STATS_HANDSHAKING_OUTGOING_TITLE=Outgoing
 STATS_HANDSHAKING_OUTGOING_TITLE=Εξερχόμενο
 #### STATS_HANDSHAKING_OUTGOING_LABEL=Statistics for outgoing Gnutella connection handshaking.
-#? STATS_HANDSHAKING_OUTGOING_LABEL=
+STATS_HANDSHAKING_OUTGOING_LABEL=Στατιστικά για εξερχόμενες συνδέσεις Gnutella χειραψίας.
 #### STATS_HANDSHAKING_INCOMING_TITLE=Incoming
 STATS_HANDSHAKING_INCOMING_TITLE=Εισερχόμενο
 #### STATS_HANDSHAKING_INCOMING_LABEL=Statistics for incoming Gnutella connection handshaking.
-#? STATS_HANDSHAKING_INCOMING_LABEL=
+STATS_HANDSHAKING_INCOMING_LABEL=Στατιστικά για εισερχόμενες συνδέσεις Gnutella χειραψίας.
 #### STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Outgoing Server Reject
 STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Εξερχόμενο απορριψη διακομιστή
 #### STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Statistics for outgoing Gnutella connection handshaking rejections from the server.
-#? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=
+STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Στατιστικά για εξερχόμενες συνδέσεις Gnutella χειραψίας οι οποίες απορρίφθηκαν από τον διακομιστή.
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- compression.
@@ -4424,11 +4425,11 @@ GENERAL_QUERY_REPLY_LABEL=Χτύποι αναζήτησης
 #### GENERAL_PUSH_REQUEST_LABEL=Pushes
 GENERAL_PUSH_REQUEST_LABEL=Αιτήσεις push
 #### GENERAL_ROUTE_TABLE_LABEL=Route Table Reset
-#? GENERAL_ROUTE_TABLE_LABEL=
+GENERAL_ROUTE_TABLE_LABEL=Άδειασμα Πίνακα διανομών
 #### GENERAL_RESET_ROUTE_TABLE_LABEL=Route Table Reset
-#? GENERAL_RESET_ROUTE_TABLE_LABEL=
+GENERAL_RESET_ROUTE_TABLE_LABEL=Άδειασμα Πίνακα διανομών
 #### GENERAL_PATCH_ROUTE_TABLE_LABEL=Route Table Patch
-#? GENERAL_PATCH_ROUTE_TABLE_LABEL=
+GENERAL_PATCH_ROUTE_TABLE_LABEL=Προσθήκη προσθήκης στον πίνακα διανομών
 
 # Hops labels
 #### HOPS1=Hops 1
@@ -4488,19 +4489,19 @@ PUSH_REQUEST_ROUTE_ERRORS=Σφάλματα αιτήσεις push
 
 # Advanced Gnutella Routing errors Query replies
 #### HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Hard Limit
-#? HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=
+HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Ανώτατο όριο
 #### HARD_LIMIT_QR_TTL_0=Hard Limit (TTL 0)
-#? HARD_LIMIT_QR_TTL_0=
+HARD_LIMIT_QR_TTL_0=Ανώτατο όριο(TTL 0)
 #### HARD_LIMIT_QR_TTL_1=Hard Limit (TTL 1)
-#? HARD_LIMIT_QR_TTL_1=
+HARD_LIMIT_QR_TTL_1=Ανώτατο όριο (TTL 1)
 #### HARD_LIMIT_QR_TTL_2=Hard Limit (TTL 2)
-#? HARD_LIMIT_QR_TTL_2=
+HARD_LIMIT_QR_TTL_2=Ανώτατο όριο (TTL 2)
 #### HARD_LIMIT_QR_TTL_3=Hard Limit (TTL 3)
-#? HARD_LIMIT_QR_TTL_3=
+HARD_LIMIT_QR_TTL_3=Ανώτατο όριο (TTL 3)
 #### HARD_LIMIT_QR_TTL_4=Hard Limit (TTL 4)
-#? HARD_LIMIT_QR_TTL_4=
+HARD_LIMIT_QR_TTL_4=Ανώτατο όριο (TTL 4)
 #### HARD_LIMIT_QR_TTL_5=Hard Limit (TTL 5 or above)
-#? HARD_LIMIT_QR_TTL_5=
+HARD_LIMIT_QR_TTL_5=Ανώτατο όριο (TTL 5 ή παραπάνω)
 #### NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=No Route
 NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=Μη δρομολόγηση
 
@@ -4624,7 +4625,7 @@ UPLOAD_STAT_URN_GET=Αποστολή αρχείων URN
 #### UPLOAD_STAT_MALFORMED_REQUEST=Malformed Request
 UPLOAD_STAT_MALFORMED_REQUEST=Δύσμορφη αίτηση
 #### UPLOAD_STAT_LIMIT_REACHED=Limit Reached
-#? UPLOAD_STAT_LIMIT_REACHED=
+UPLOAD_STAT_LIMIT_REACHED=Όριο έφθασε
 #### UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy Request
 UPLOAD_STAT_LIMIT_REACHED_GREEDY=Άπληστη αίτηση
 #### UPLOAD_STAT_BANNED=Banned Client
