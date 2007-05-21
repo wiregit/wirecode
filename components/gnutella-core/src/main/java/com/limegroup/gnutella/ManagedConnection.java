@@ -291,9 +291,6 @@ public class ManagedConnection extends Connection
     /** Whether or not the HandshakeResponder should use locale preferencing during handshaking. */
     private boolean _useLocalPreference;
     
-    /** The number of queryReplies received through this connection */
-    private volatile long queryReplies;
-    
     /** If we've received a capVM before. */
     private boolean receivedCapVM = false;
  
@@ -757,6 +754,7 @@ public class ManagedConnection extends Connection
         if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
             return;
                     
+        
         _outputRunner.send(m);
     }
 
@@ -889,11 +887,13 @@ public class ManagedConnection extends Connection
             _connectionStats.addReceivedDropped();
         } else {
             if(m instanceof QueryReply){ 
-            	queryReplies++;
+            	_connectionStats.replyReceived();
             	if(m.getHops() == 0)
             		clientGUID = ((QueryReply)m).getClientGUID();
             }
         
+            if (m instanceof QueryRequest) 
+                _connectionStats.queryReceived();
             //special handling for proxying.
             if(supernodeClientAtLooping) {
                 if(m instanceof QueryRequest)
@@ -906,7 +906,7 @@ public class ManagedConnection extends Connection
     }
     
     public long getNumQueryReplies() {
-    	return queryReplies;
+    	return _connectionStats.getQueriesRecieved();
     }
     
     /**
@@ -1425,7 +1425,7 @@ public class ManagedConnection extends Connection
 
         public void send(Message m) {
             synchronized (LOCK) {
-                _connectionStats.addSent();
+                _connectionStats.addSent(m);
                 queue.add(m);
                 int dropped = queue.resetDropped();
                 _connectionStats.addSentDropped(dropped);
@@ -1588,7 +1588,7 @@ public class ManagedConnection extends Connection
         data.put("qrpft",getNextQRPForwardTime());
         data.put("nmr",getNumMessagesReceived());
         data.put("nms",getNumMessagesSent());
-        data.put("nqr",getNumQueryReplies());
+        _connectionStats.addStats(data);
         data.put("nrmd",getNumReceivedMessagesDropped());
         data.put("nsmd",getNumSentMessagesDropped());
         data.put("qrteu",getQueryRouteTableEmptyUnits());

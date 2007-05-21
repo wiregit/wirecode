@@ -104,7 +104,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
         if(shutdown)
             return;
         
-        stats.addSent();
+        stats.addSent(m);
         queue.add(m);
         int dropped = queue.resetDropped();
         stats.addSentDropped(dropped);

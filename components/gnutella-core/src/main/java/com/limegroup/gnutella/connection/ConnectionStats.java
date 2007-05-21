@@ -1,21 +1,27 @@
 package com.limegroup.gnutella.connection;
 
+import java.util.Map;
+
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+
 /**
  * Keeps track of sent/received messages & the amount that dropped.
  */
 public class ConnectionStats {
 
     /** The number of messages sent.  This includeds messages that are dropped. */
-    private int _numMessagesSent;
+    private volatile int _numMessagesSent;
     
     /** The number of messages received. This includes messages that are spam. */
-    private int _numMessagesReceived;
+    private volatile int _numMessagesReceived;
     
     /**
      * The number of messages received on this connection either filtered out
      * or dropped because we didn't know how to route them.
      */
-    private int _numReceivedMessagesDropped;
+    private volatile int _numReceivedMessagesDropped;
     
     /**
      * The number of messages I dropped because the
@@ -23,8 +29,15 @@ public class ConnectionStats {
      * cannot receive packets as quickly as I am trying to send them.
      * No synchronization is necessary.
      */
-    private int _numSentMessagesDropped;
+    private volatile int _numSentMessagesDropped;
     
+    private volatile long repliesReceived;
+    
+    private volatile long repliesSent;
+    
+    private volatile long queriesReceived;
+    
+    private volatile long queriesSent;
     /**
      * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
      * of _numMessagesSent/_numSentMessagesDropped and
@@ -32,17 +45,17 @@ public class ConnectionStats {
      * getPercentDropped.  LOCKING: These are synchronized by this;
      * finer-grained schemes could be used. 
      */
-    private int _lastReceived;
-    private int _lastRecvDropped;
-    private int _lastSent;
-    private int _lastSentDropped;
+    private volatile int _lastReceived;
+    private volatile int _lastRecvDropped;
+    private volatile int _lastSent;
+    private volatile int _lastSentDropped;
     
     // Getters.
     public int getSent()  { return _numMessagesSent; }
     public int getReceived() { return _numMessagesReceived; }
     public int getSentDropped() { return _numSentMessagesDropped; }
     public int getReceivedDropped() { return _numReceivedMessagesDropped; }
-
+    public long getQueriesRecieved() { return queriesReceived; }
 
     /** Adds a number of dropped sent messages */
     public void addSentDropped(int dropped) {
@@ -50,8 +63,12 @@ public class ConnectionStats {
     }
     
     /** Adds a sent message */
-    public void addSent() {
+    public void addSent(Message m) {
         _numMessagesSent++;
+        if (m instanceof QueryRequest)
+            queriesSent++;
+        else if (m instanceof QueryReply)
+            repliesSent++;
     }
     
     /** Increments the number of received messages that have been dropped. */
@@ -64,7 +81,12 @@ public class ConnectionStats {
         _numMessagesReceived++;
     }
     
-    
+    public void replyReceived() {
+        repliesReceived++;
+    }
+    public void queryReceived() {
+        queriesReceived++;
+    }
     /**
      * @modifies this
      * @effects Returns the percentage of messages sent on this
@@ -97,5 +119,12 @@ public class ConnectionStats {
         _lastSent = _numMessagesSent;
         _lastSentDropped = _numSentMessagesDropped;
         return percent;
+    }
+    
+    public void addStats(Map<String,Object> m) {
+        m.put("nqr",repliesReceived);
+        m.put("nqs",repliesSent);
+        m.put("npr",queriesReceived);
+        m.put("nps",queriesSent);
     }
 }
