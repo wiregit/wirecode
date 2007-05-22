@@ -57,6 +57,9 @@ public class PushUploadTest extends LimeTestCase {
 
     private static final int PORT = 6668;
 
+    /** Our listening port for pushes. */
+    private static final int PUSH_PORT = 6671;
+
     private static String testDirName = "com/limegroup/gnutella/uploader/data";
 
     private static String fileName = "alphabet test file#2.txt";
@@ -69,9 +72,6 @@ public class PushUploadTest extends LimeTestCase {
 
     /** The file contents. */
     private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-    /** Our listening port for pushes. */
-    private static final int callbackPort = 6671;
 
     private MetaFileManager fm;
 
@@ -356,10 +356,10 @@ public class PushUploadTest extends LimeTestCase {
 
             PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 3, reply
                     .getClientGUID(), 0, new byte[] { (byte) 127, (byte) 0,
-                    (byte) 0, (byte) 1 }, callbackPort);
+                    (byte) 0, (byte) 1 }, PUSH_PORT);
 
             // Create listening socket, then send the push a few times
-            ServerSocket serverSocket = new ServerSocket(callbackPort);
+            ServerSocket serverSocket = new ServerSocket(PUSH_PORT);
             try {
                 serverSocket.setSoTimeout(1000);
 
@@ -419,13 +419,13 @@ public class PushUploadTest extends LimeTestCase {
             }
 
             // create listening socket and wait for push connect
-            ServerSocket serverSocket = new ServerSocket(callbackPort);
+            ServerSocket serverSocket = new ServerSocket(PUSH_PORT);
 
             // send push
             guid = reply.getClientGUID();
             PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 3, guid,
                     0, new byte[] { (byte) 127, (byte) 0, (byte) 0, (byte) 1 },
-                    callbackPort);
+                    PUSH_PORT);
             connection.send(push);
             connection.flush();
 
@@ -537,139 +537,6 @@ public class PushUploadTest extends LimeTestCase {
         }
         return body.toString();
     }
-
-// private static boolean downloadPush(String file, String header,
-// String expResp) throws IOException, BadPacketException {
-// Socket s = getSocketFromPush();
-// BufferedReader in = new BufferedReader(new InputStreamReader(s
-// .getInputStream()));
-// BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s
-// .getOutputStream()));
-// in.readLine(); // skip GIV
-// in.readLine(); // skip blank line
-//
-// // Download from the (incoming) TCP connection.
-// String retStr = downloadInternal(file, header, out, in);
-// assertNotNull("string returned from download should not be null",
-// retStr);
-//
-// // Cleanup
-// s.close();
-// assertEquals("wrong response", expResp, retStr);
-// return retStr.equals(expResp);
-// }
-
-// /**
-// * Sends a get request to out, reads the response from in, and returns the
-// * content. Doesn't close in or out.
-// *
-// * @param requiredHeader a header to look for, or null if we don't care
-// */
-// private static String downloadInternal(String file, String header,
-// BufferedWriter out, BufferedReader in) throws IOException {
-// return downloadInternal(file, header, out, in, null, null);
-// }
-
-// private static boolean pipelineDownloadPush(String file, String header,
-// String expResp) throws IOException, BadPacketException {
-// boolean ret = true;
-// Socket s = getSocketFromPush();
-// BufferedReader in = new BufferedReader(new InputStreamReader(s
-// .getInputStream()));
-// BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s
-// .getOutputStream()));
-// in.readLine(); // skip GIV
-// in.readLine(); // skip blank line
-//
-// // write first request
-// out.write("GET " + makeRequest(file) + " HTTP/1.1\r\n");
-// if (header != null)
-// out.write(header + "\r\n");
-// out.write("Connection:Keep-Alive\r\n");
-// out.write("\r\n");
-// out.flush();
-//
-// // write second request
-// out.write("GET " + makeRequest(file) + " HTTP/1.1\r\n");
-// if (header != null)
-// out.write(header + "\r\n");
-// out.write("Connection:Keep-Alive\r\n");
-// out.write("\r\n");
-// out.flush();
-//
-// int expectedSize = expResp.length();
-//
-// // read...ignore response headers
-// String firstLine = in.readLine();
-// if (firstLine == null || !firstLine.startsWith("HTTP/1.1"))
-// fail("bad first response line: " + firstLine);
-//
-// while (!in.readLine().equals("")) {
-// }
-// // read first response
-// StringBuffer buf = new StringBuffer();
-// for (int i = 0; i < expectedSize; i++) {
-// int c1 = in.read();
-// buf.append((char) c1);
-// }
-// ret = buf.toString().equals(expResp);
-// buf = new StringBuffer();
-//
-// // ignore second header
-// firstLine = in.readLine();
-// if (firstLine == null || !firstLine.startsWith("HTTP/1.1"))
-// fail("bad first response line: " + firstLine);
-//
-// while (!in.readLine().equals("")) {
-// }
-// // read Second response
-// for (int i = 0; i < expectedSize; i++) {
-// int c1 = in.read();
-// buf.append((char) c1);
-// }
-// // close all the appropriate streams & sockets.
-// in.close();
-// out.close();
-// s.close();
-// return ret && buf.toString().equals(expResp);
-// }
-//
-// private static boolean containsHeader(String requestMethod, String file,
-// String header, Writer out, Reader in, String requiredHeader)
-// throws IOException {
-// // send request
-// out.write(requestMethod + " " + makeRequest(file) + " "
-// + "HTTP/1.1\r\n");
-// if (header != null)
-// out.write(header + "\r\n");
-// out.write("Connection: Keep-Alive\r\n");
-// out.write("\r\n");
-// out.flush();
-//
-// // 2. Read response code and headers, remember the content-length.
-// Header expectedHeader = null;
-//
-// if (requiredHeader != null)
-// expectedHeader = new Header(requiredHeader);
-//
-// while (true) {
-// String line = readLine(in);
-// if (line == null)
-// throw new InterruptedIOException("connection closed");
-// // System.out.println("<< " + line);
-//
-// if (line.equals(""))
-// break;
-// if (requiredHeader != null) {
-// Header found = new Header(line);
-// if (found.title.equals(expectedHeader.title)) {
-// return true;
-// }
-// }
-// }
-// return false;
-//
-// }
 
     private static class EmptyResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response,
