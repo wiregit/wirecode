@@ -18,6 +18,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.limewire.util.ByteOrder;
+import org.limewire.util.Decorator;
 
 /**
  * This class handles common utility functions for networking tasks.
@@ -371,6 +372,21 @@ public final class NetworkUtils {
      * is not divisble by six
      */
     public static List<IpPort> unpackIps(byte [] data) throws InvalidDataException {
+        return unpackIps(data, null);
+    }
+    
+    
+    /**
+     * Parses an ip:port byte-packed values.
+     * The decorator is consulted for each IpPort prior to inserted it into the list.  
+     * 
+     * @param data the packed IpPorts.
+     * @param decorator A decorator that can optionally change the IpPort that is added into the returned list.
+     * @return a collection of <tt>IpPort</tt> objects.
+     * @throws InvalidDataException if an invalid Ip is found or the size 
+     * is not divisble by six
+     */
+    public static List<IpPort> unpackIps(byte [] data, Decorator<IpPort, ? extends IpPort> decorator) throws InvalidDataException {
     	if (data.length % 6 != 0)
     		throw new InvalidDataException("invalid size");
     	
@@ -379,7 +395,10 @@ public final class NetworkUtils {
     	byte [] current = new byte[6];
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
-    		ret.add(IPPortCombo.getCombo(current));
+            IpPort ipp = IPPortCombo.getCombo(current);
+            if(decorator != null)
+                ipp = decorator.decorate(ipp);
+    		ret.add(ipp);
     	}
     	
     	return Collections.unmodifiableList(ret);

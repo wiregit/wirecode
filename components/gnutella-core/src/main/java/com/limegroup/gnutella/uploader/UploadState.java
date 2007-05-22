@@ -5,21 +5,30 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
+
+
+// TODO: this whole Writer/OutputStream duopoly sucks.
 
 /**
  * an Upload State.  has some utility methods all upload states can use.
@@ -41,34 +50,54 @@ public abstract class UploadState implements HTTPMessage {
 			FILE_DESC=null;
 	}
 	
+    
 	protected void writeAlts(Writer os) throws IOException {
-		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
-			URN sha1 = FILE_DESC.getSHA1Urn();
-			if(sha1 != null) {
-				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
-									  sha1,
-									  os);
-                Set<? extends AlternateLocation> alts = UPLOADER.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
-					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
+        if(FILE_DESC != null) {
+            // write the URN in case the caller wants it
+            URN sha1 = FILE_DESC.getSHA1Urn();
+            if(sha1 != null) {
+                HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
+                                      sha1,
+                                      os);
+                Set<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
+                if(direct.size() > 0) {
+                    List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
+                    final BitNumbers bn = new BitNumbers(direct.size());
+                    for(DirectAltLoc al : direct) {
+                        IpPort ipp = al.getHost();
+                        if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                            bn.set(ordered.size());
+                        ordered.add(al);
+                    }
+                    
+                    // insert the tls-indexes into the collection,
+                    // if any existed.
+                    if(!bn.isEmpty()) {
+                        ordered.add(0, new HTTPHeaderValue() {
+                            public String httpStringValue() {
+                                return HTTPConstants.TLS_IDX + bn.toHexString();
+                            }
+                        });
+                    }
+                    
+                    HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+                                          new HTTPHeaderValueCollection(ordered),
                                           os);
-				}
-				
-				if (UPLOADER.wantsFAlts()) {
-					alts = UPLOADER.getNextSetOfPushAltsToSend();
-					if (alts.size()>0)
-						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                     new HTTPHeaderValueCollection(alts),
-	                                     os);
-					
-					
-				}
-				
-			}
+                }
+                
+                if (UPLOADER.wantsFAlts()) {
+                    Set<PushAltLoc> pushes = UPLOADER.getNextSetOfPushAltsToSend();
+                    if (pushes.size()>0)
+                        HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+                                         new HTTPHeaderValueCollection(pushes),
+                                         os);
+                    
+                    
+                }
+                
+            }
 
-		}
+        }
     }
 	
 	protected void writeAlts(OutputStream os) throws IOException {
@@ -79,18 +108,37 @@ public abstract class UploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  os);
-                Set<? extends AlternateLocation> alts = UPLOADER.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
+                Set<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
+				if(direct.size() > 0) {
+                    List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
+                    final BitNumbers bn = new BitNumbers(direct.size());
+                    for(DirectAltLoc al : direct) {
+                        IpPort ipp = al.getHost();
+                        if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                            bn.set(ordered.size());
+                        ordered.add(al);
+                    }
+                    
+                    // insert the tls-indexes into the collection,
+                    // if any existed.
+                    if(!bn.isEmpty()) {
+                        ordered.add(0, new HTTPHeaderValue() {
+                            public String httpStringValue() {
+                                return HTTPConstants.TLS_IDX + bn.toHexString();
+                            }
+                        });
+                    }
+                    
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
+                                          new HTTPHeaderValueCollection(ordered),
                                           os);
 				}
 				
 				if (UPLOADER.wantsFAlts()) {
-					alts = UPLOADER.getNextSetOfPushAltsToSend();
-					if (alts.size()>0)
+					Set<PushAltLoc> pushes = UPLOADER.getNextSetOfPushAltsToSend();
+					if (pushes.size()>0)
 						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                     new HTTPHeaderValueCollection(alts),
+	                                     new HTTPHeaderValueCollection(pushes),
 	                                     os);
 					
 					

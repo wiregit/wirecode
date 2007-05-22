@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Function;
 import org.limewire.collection.MultiRRIterator;
 import org.limewire.io.CountingOutputStream;
 import org.limewire.io.NetworkUtils;
@@ -33,6 +34,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -1085,7 +1087,7 @@ public final class HTTPUploader implements Uploader {
             return false;
                 
         if(_fileDesc != null) 
-            parseAlternateLocations(str, true);
+            parseAlternateLocations(str, true, true);
         return true;
     }
 
@@ -1094,7 +1096,7 @@ public final class HTTPUploader implements Uploader {
             return false;
         
         if(_fileDesc != null)
-            parseAlternateLocations(str, false);
+            parseAlternateLocations(str, false, false);
         return true;
     }
     
@@ -1106,7 +1108,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null) 
-            parseAlternateLocations(str, true);
+            parseAlternateLocations(str, true, false);
         return true;
     }
 
@@ -1118,7 +1120,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null)
-            parseAlternateLocations(str, false);
+            parseAlternateLocations(str, false, false);
         return true;
     }
     
@@ -1259,48 +1261,28 @@ public final class HTTPUploader implements Uploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
 	 *  locations should be added to
 	 */
-	private void parseAlternateLocations(final String altHeader, boolean isGood) {
-
-		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-
-		URN sha1 =_fileDesc.getSHA1Urn(); 
-		
-		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return;
-		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        while(st.hasMoreTokens()) {
-            try {
-                // note that the trim method removes any CRLF character
-                // sequences that may be used if the sender is using
-                // continuations.
-                AlternateLocation al = 
-                AlternateLocation.create(st.nextToken().trim(),
-                                         _fileDesc.getSHA1Urn());
-                
-                Assert.that(al.getSHA1Urn().equals(sha1));
-                
-                if (al.isMe())
-                    continue;
-                
-                if(al instanceof PushAltLoc) 
-                    ((PushAltLoc)al).updateProxies(isGood);
+	private void parseAlternateLocations(String altHeader, final boolean isGood, boolean allowTLS) {
+		String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+        AltLocUtils.parseAlternateLocations(_fileDesc.getSHA1Urn(), alternateLocations, allowTLS, new Function<AlternateLocation, Void>() {
+            public Void apply(AlternateLocation location) {
+                if(location instanceof PushAltLoc) 
+                    ((PushAltLoc)location).updateProxies(isGood);
                 // Note: if this thread gets preempted at this point,
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if(isGood) 
-                    RouterService.getAltlocManager().add(al, null);
+                    RouterService.getAltlocManager().add(location, null);
                 else
-                    RouterService.getAltlocManager().remove(al, null);
+                    RouterService.getAltlocManager().remove(location, null);
                         
-                if (al instanceof DirectAltLoc)
-                 	_writtenLocs.add((DirectAltLoc)al);
+                if (location instanceof DirectAltLoc)
+                    _writtenLocs.add((DirectAltLoc)location);
                 else 
-                 	_writtenPushLocs.add((PushAltLoc)al); // no problem if we add an existing pushloc
-            } catch(IOException e) {
-                // just return without adding it.
-                continue;
+                    _writtenPushLocs.add((PushAltLoc)location); // no problem if we add an existing pushloc
+                
+                return null;
             }
-        }
+        });
 	}
 
 	public void measureBandwidth() {

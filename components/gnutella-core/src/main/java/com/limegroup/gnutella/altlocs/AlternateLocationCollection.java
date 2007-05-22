@@ -2,7 +2,6 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.service.ErrorService;

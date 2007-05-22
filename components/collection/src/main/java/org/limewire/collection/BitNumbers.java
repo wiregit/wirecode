@@ -3,7 +3,8 @@ package org.limewire.collection;
 
 /** 
  * Allows storage & retrieval of numbers based on the index of an
- * on or off bit in a byte[].
+ * on or off bit in a byte[] or a hexadecimal String representation
+ * of that byte[].
  */
 public class BitNumbers {
     
@@ -19,6 +20,9 @@ public class BitNumbers {
     
     /** The total size of this bitNumbers. */
     private int size;
+    
+    /** A convenient shared immutable empty BitNumbers. */
+    public static final BitNumbers EMPTY_BN = new ImmutableBitNumbers();
     
     /** Constructs a BitNumbers backed by the given byte[]. */
     public BitNumbers(byte[] data) {
@@ -84,10 +88,20 @@ public class BitNumbers {
     
     /** Returns the byte array that BitNumbers is backed off of. */
     public byte[] toByteArray() {
-        if(data == null)
+        if(data == null) {
             return EMPTY;
-        else
-            return data;
+        } else {
+            int lastNonZero = getLastNonZeroIndex();
+            if(lastNonZero == -1) { // completely empty
+                return EMPTY;
+            } else if(lastNonZero == data.length -1) { // uses full width
+                return data;
+            } else { // must strip out the extra bytes.
+                byte[] shortened = new byte[lastNonZero+1];
+                System.arraycopy(data, 0, shortened, 0, lastNonZero+1);
+                return shortened;
+            }
+        }
     }
     
     /** Returns true if no set bits exist. */
@@ -121,6 +135,28 @@ public class BitNumbers {
                 sb.setLength(sb.length()-1);
             return sb.toString();
         }
+    }
+    
+    /** Returns the last non-empty index. */
+    private int getLastNonZeroIndex() {
+        for(int i = data.length - 1; i >= data.length; i--) {
+            if(data[i] != 0)
+                return i;
+        }
+        return -1;
+    }
+    
+    /** A BitNumbers that is empty and non-settable. */
+    private static class ImmutableBitNumbers extends BitNumbers {
+        @Override
+        public void set(int idx) {
+            throw new UnsupportedOperationException("immutable!");
+        }
+
+        ImmutableBitNumbers() {
+            super(0);
+        }
+        
     }
 
 }

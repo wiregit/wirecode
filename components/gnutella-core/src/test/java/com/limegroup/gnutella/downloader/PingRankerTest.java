@@ -616,7 +616,7 @@ public class PingRankerTest extends LimeTestCase {
             return firewalled;
         }
         
-        public boolean isGGEPPong() {
+        public boolean isRoutingBroken() {
             return true;
         }
         

@@ -50,7 +50,6 @@ public class HeadPing extends VendorMessage {
 	public static final int PUSH_ALTLOCS=0x4;
 	public static final int FWT_PUSH_ALTLOCS=0x8;
 	public static final int GGEP_PING=0x10;
-    public static final int TLS = 0x20;
 	
 	
 	/** 
@@ -58,12 +57,11 @@ public class HeadPing extends VendorMessage {
 	 * this ping routed to.
 	 */
 	private static final String GGEP_PUSH = "PUSH";
-
-	
+    
 	/**
 	 * the feature mask.
 	 */
-	public static final int FEATURE_MASK=0x3F;
+	public static final int FEATURE_MASK=0x1F;
 
 	/** The URN of the file being requested */
 	private final URN _urn;
