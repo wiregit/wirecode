@@ -1,6 +1,8 @@
 package org.limewire.store.storeserver.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,7 +12,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import org.limewire.store.storeserver.core.Constants;
+import org.limewire.store.storeserver.core.Server;
 
 /**
  * Fine, here's a note.
@@ -37,7 +39,7 @@ public final class Util {
     public static Map<String, String> parseArgs(final String rest) {
         return genericParse(rest, "&");
     }
-    
+
     /**
      * This is the grammar. <br>
      * <br>
@@ -143,8 +145,8 @@ public final class Util {
     public static String removeCallback(final String res) {
         if (res == null)
             return null;
-        final String start = "(" + Constants.CALLBACK_QUOTE_STRING;
-        final String end = Constants.CALLBACK_QUOTE_STRING + ")";
+        final String start = "(" + Server.Constants.CALLBACK_QUOTE_STRING;
+        final String end = Server.Constants.CALLBACK_QUOTE_STRING + ")";
         int istart = res.indexOf(start);
         if (istart == -1)
             return res;
@@ -157,7 +159,7 @@ public final class Util {
     private static boolean isValidKey(final String key) {
         if (key == null)
             return false;
-        return key.length() == Constants.KEY_LENGTH;
+        return key.length() == Server.Constants.KEY_LENGTH;
     }
 
     /**
@@ -207,7 +209,7 @@ public final class Util {
      */
     public static String generateKey() {
         final StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < Constants.KEY_LENGTH;) {
+        for (int i = 0; i < Server.Constants.KEY_LENGTH;) {
             final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
             final char c = (char) r;
             if (c == ';')
@@ -219,34 +221,43 @@ public final class Util {
     }
 
     /**
-     * Returns a string with the urlencoded arguments removed with these arguments
-     * separated by {@link Constants#ARGUMENT_SEPARATOR}.  This method has
-     * the side-affect of putting these urlencoded arguments into <tt>args</tt>.
+     * Returns a string with the urlencoded arguments removed with these
+     * arguments separated by {@link Constants#ARGUMENT_SEPARATOR}. This method
+     * has the side-affect of putting these urlencoded arguments into
+     * <tt>args</tt>.
      * 
-     * @param cmd   original command, this can be <code>null</code>
-     * @param args  original arguments (SIDEEFFECT: these are updated)
-     * @return      a string with the urlencoded arguments removed with these arguments
-     *              separated by {@link Constants#ARGUMENT_SEPARATOR}    
+     * @param cmd original command, this can be <code>null</code>
+     * @param args original arguments (SIDEEFFECT: these are updated)
+     * @return a string with the urlencoded arguments removed with these
+     *         arguments separated by {@link Constants#ARGUMENT_SEPARATOR}
      */
-    public static String addURLEncodedArguments(final String cmd, final Map<String, String> args) {
+    public static String addURLEncodedArguments(final String cmd,
+            final Map<String, String> args) {
         if (cmd == null) return null;
-        String newCmd = null;
-        for (StringTokenizer st = new StringTokenizer(cmd, Constants.ARGUMENT_SEPARATOR, false); st.hasMoreTokens();) {
+
+        int ihuh = cmd.indexOf("?");
+        if (ihuh == -1) return cmd;
+
+        final String newCmd = cmd.substring(0, ihuh);
+        String tmpRest = cmd.substring(ihuh + 1);
+        try {
+            tmpRest = URLDecoder.decode(tmpRest, "UTF-8");
+        } catch (Exception e) { e.printStackTrace(); }
+        final String rest = tmpRest;
+        for (StringTokenizer st = new StringTokenizer(rest,Server.Constants.ARGUMENT_SEPARATOR, false); 
+             st.hasMoreTokens();) {
             final String tok = st.nextToken();
-            if (newCmd == null) {
-                newCmd = tok;
+            int ieq = tok.indexOf('=');
+            String key, val;
+            if (ieq == -1) {
+                key = tok;
+                val = null;
             } else {
-                int ieq = tok.indexOf('=');
-                String key, val;
-                if (ieq == -1) {
-                    key = tok;
-                    val = null;
-                } else {
-                    key = tok.substring(0, ieq);
-                    val = tok.substring(ieq + 1);
-                }
-                args.put(key, val);
+                key = tok.substring(0, ieq);
+                val = tok.substring(ieq + 1);
             }
+            args.put(key, val);
+
         }
         return newCmd;
 

@@ -13,5 +13,5 @@ public interface Note {
    * @param msg     message to send
    * @param level   level at which to send <tt>msg</tt>
    */
-  void note(Object msg, Constants.Level level);
+  void note(Object msg, Server.Constants.Level level);
 }

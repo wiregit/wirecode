@@ -241,10 +241,7 @@ public class RouterService {
     /** The IP Filter to use. */
     private static IPFilter ipFilter = new IPFilter(false);
     
-    /** The Hostiles Filter to use */
-
     private static HostileFilter hostileFilter = new HostileFilter();
-
     
     /** A sanity checker for network update requests/responses. */
     private static NetworkUpdateSanityChecker networkSanityChecker = new NetworkUpdateSanityChecker();
@@ -709,7 +706,6 @@ public class RouterService {
     public static HostileFilter getHostileFilter() {
         return hostileFilter;
     }
-
     
     /**
      * Sets full power mode.

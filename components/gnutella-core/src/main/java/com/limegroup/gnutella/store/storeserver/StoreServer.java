@@ -152,6 +152,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
      * @return      result from the handler mapped to <tt>cmd</tt> or {@link ErrorCodes#UNKNOWN_COMMAND}.
      */
     private String dispatch(String cmd, Map<String, String> args) {
+        System.out.println("dispatch: " + cmd + "(" + args + ")");
         if (cmd == null) {
             return localServer.report(ErrorCodes.UNKNOWN_COMMAND);
         }
@@ -165,7 +166,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
             res = h.handle(args, req);
         }
         List<Listener> ls = commands2listenerLists.get(hash);
-        if (!ls.isEmpty()) {
+        if (ls != null && !ls.isEmpty()) {
             handled = true;
             for (Listener l : ls) l.handle(args, req);
         }

@@ -1,0 +1,53 @@
+<html>
+
+	<head>
+		<script type="text/javascript" src="limestore.js"></script>
+		<script type="text/javascript" src="player.js"></script>
+		<style>
+	 .cat {
+	 	font-style: italic;
+	 }
+	 .val {
+	 	text-align: right;
+	 }
+	 .info {
+	 	vertical-align: center;
+	 }
+	 .b {
+	 	border: 0px;
+	 }
+	</style>
+	</head>
+
+	<body onLoad="onLoad()">
+
+		<h1>
+			The Player
+		</h1>
+
+		<div id="main"></div>
+
+		<a href="#" onclick="doBack()"><img class="b" src="Rewind24.gif"></a>
+		<a href="#" onclick="doStop()"><img class="b" src="Stop24.gif"></a>
+		<a href="#" onclick="doPlay()"><img class="b" src="Play24.gif"></a>
+		<a href="#" onclick="doNext()"><img class="b" src="FastForward24.gif"></a>				
+		
+		<br><br>
+		
+		<a href="#" onclick="doPlayURL('http://www.aolcdn.com/_media/ch_music/brighteyes-fourwinds.mp3')">
+			http://www.aolcdn.com/_media/ch_music/brighteyes-fourwinds.mp3
+		</a>
+		
+		<br><br>
+		
+		<button onclick="reAuthentication()">Authenticate</button>
+		<button onclick="doDetatch()">Detatch</button>
+		
+		<br><br>
+		
+		<span id="note"></span>
+		<br>
+		<span id="msg"></span>
+
+	</body>
+</html>

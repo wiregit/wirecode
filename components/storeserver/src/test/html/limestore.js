@@ -54,7 +54,7 @@ function doGiveKey() {
 }
 	
 function doDetatch() {
-	go('Detatch','_nullFunction','8080');
+	go('Detatch','noteDetatched','8080');
 }
 	
 function reAuthenticate() {
