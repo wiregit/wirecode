@@ -47,17 +47,20 @@ public class ProxyTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
-        fps = new FakeProxyServer(9990, 9999);
     }
 
-    public void setUp() {
+    @Override
+    public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
         ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
+        
+        fps = new FakeProxyServer(9990, 9999);
         fps.setMakeError(false);
     }
 
-    public static void globalTeardown() {
+    @Override
+    public void tearDown() throws Exception {
         fps.killServers();
     }
 
