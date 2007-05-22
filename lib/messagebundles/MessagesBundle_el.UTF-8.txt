@@ -1960,7 +1960,7 @@ META_EDITOR_LENGTH_LABEL=Μήκος:
 #### META_EDITOR_HEIGHT_LABEL=Height:
 META_EDITOR_HEIGHT_LABEL=Ύψος:
 #### META_EDITOR_DIRECTOR_LABEL=Director:
-# META_EDITOR_DIRECTOR_LABEL=Σκηνοθέτης:
+#? META_EDITOR_DIRECTOR_LABEL=
 #### META_EDITOR_STUDIO_LABEL=Studio:
 META_EDITOR_STUDIO_LABEL=Στούντιο:
 #### META_EDITOR_PRODUCER_LABEL=Producer: (Please separate with comma)
@@ -2332,7 +2332,6 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Να μοιραστεί ο φάκελος;
 #### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
 WARNING_INSTALLATION_CORRUPTED==<html><b>Το LimeWire ίσως έχει προσβληθεί από έναν ιυό ή trojan!</b><br><br>Παρακαλώ επισκευθείτε το <a href="http://www.limewire.com/corrupted">www.limewire.com</a> και κατεβάστε την νεότερη εγκεκριμένη έκδοση του LimeWire.</html>
 
-
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
 # internet.
@@ -2590,7 +2589,7 @@ LICENSE_WEED_TITLE=Πληροφορίες για δημόσιο μοίρασμα
 #### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
 LICENSE_WEED_LOCATING=Το LimeWire επικοινωνεί με το www.weedshare.com για τις πληροφορίες του αρχείου.
 #### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.
-LICENSE_WEED_UNVERIFIED=Το LimeWire δεν έχει εξακριβώσει την άδεια.\ν Πατήστε 'εξακρίβωση' για να εντοπίσετε τις λεπτομέρειες του αρχείου.
+LICENSE_WEED_UNVERIFIED=Το LimeWire δεν έχει εξακριβώσει την άδεια.ν Πατήστε 'εξακρίβωση' για να εντοπίσετε τις λεπτομέρειες του αρχείου.
 #### LICENSE_WEED_INVALID=LimeWire was unable to locate the details of this Weed file.
 LICENSE_WEED_INVALID=Το LimeWire ήταν ανίκανο να εντοπίσει τις λεπτομέρειες του αρχείου Weed.
 #### LICENSE_WEED_RETRY=You can try looking up the details again by clicking 'Verify'.

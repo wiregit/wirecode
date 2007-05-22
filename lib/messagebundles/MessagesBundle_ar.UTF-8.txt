@@ -179,7 +179,7 @@ ABOUT_DEV_BLURB=LimeWire أيضاً, بكل تأكيد, نتيجة ساعات ل
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 #? ABOUT_WEBDEV_BLURB=
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
-#?ABOUT_SUPPORT_BLURB=
+#? ABOUT_SUPPORT_BLURB=
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 #? ABOUT_PREVIOUS_DEV_BLURB=
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
@@ -278,7 +278,7 @@ LIBRARY_TIP=عرض الملفات المحفوظة
 #### CONSOLE_TIP=View Console Messages
 #? CONSOLE_TIP=
 #### LOGGING_TIP=View Logging Messages
-#? LOGGING_TIP=عرض رسائل الدخول
+LOGGING_TIP=عرض رسائل الدخول
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window.
@@ -533,7 +533,7 @@ MENU_TOOLS_STATISTICS_MNEMONIC=S
 #### MENU_TOOLS_STATISTICS_ACCESSIBLE=Display the Statistics Screen
 MENU_TOOLS_STATISTICS_ACCESSIBLE=عرض شاشة الإحصائيات
 #### MENU_TOOLS_DHT_ARCS=Mojito DHT Arcs View
-#?MENU_TOOLS_DHT_ARCS=
+#? MENU_TOOLS_DHT_ARCS=
 #### MENU_TOOLS_DHT_ARCS_MNEMONIC=D
 MENU_TOOLS_DHT_ARCS_MNEMONIC=D
 #### MENU_TOOLS_DHT_ARCS_ACCESSIBLE=Display a view of the incoming and outgoing DHT messages
@@ -558,7 +558,7 @@ MENU_FILTERS_CONFIGURE_ACCESSIBLE=إعداد خيارات مرشحات محتو�
 #### MENU_FILTERS_LEARN_MORE=Learn More...
 MENU_FILTERS_LEARN_MORE=تعلم أكثر...
 #### MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Learn More about LimeWire's Content Filtering System
-MENU_FILTERS_LEARN_MORE_ACCESSIBLE= تعلم أكثر حول نظام مرشحات محتوى LimeWire's 
+MENU_FILTERS_LEARN_MORE_ACCESSIBLE=تعلم أكثر حول نظام مرشحات محتوى LimeWire's 
 #### MENU_FILTERS_LEARN_MORE_MNEMONIC=L
 MENU_FILTERS_LEARN_MORE_MNEMONIC=L
 
@@ -679,7 +679,7 @@ SEARCH_PUBLIC_BROWSE_STRING=استعراض المضيف
 #### SEARCH_PUBLIC_CHAT_STRING=Chat With Host
 SEARCH_PUBLIC_CHAT_STRING=دردشة مع المضيف
 #### SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Lookup File with Bitzi
-#? SEARCH_PUBLIC_BITZI_LOOKUP_STRING=مشاهدة الملف مع Bitzi
+SEARCH_PUBLIC_BITZI_LOOKUP_STRING=مشاهدة الملف مع Bitzi
 #### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Show Magnet Details
 SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=عرض التفاصيل الأبرز
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
@@ -696,7 +696,7 @@ SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=بحث أكثر
 SEARCH_RESULT_SECURE_TIP=هذه نتيجة مضمونة. لا معلومات في هذه النتيجة قد تم العبث فيها.
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=واحد من الملفات المحددة قابل للتنفيذ
-#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. 
+#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
 SEARCH_VIRUS_MSG_TWO=برنامج وقد يحتوي على فيروس.
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=هل ترغب بالفعل في تنزيله؟
@@ -890,6 +890,7 @@ DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=تحرير اسم ملف التنزيل ا
 DOWNLOAD_POPUP_MENU_CLEAR=مسح جميع التنزيلات الغير نشطة
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
 DOWNLOAD_EXPLORE_BUTTON_TIP=فتح مجلد يحتوي ملف
+
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=تشغيل
 #### LIBRARY_LAUNCH_BUTTON_TIP=Launch Selected Files
@@ -925,7 +926,7 @@ LIBRARY_RESUME_BUTTON_TIP=استئناف تنزيل الملفات المحدد�
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
 LIBRARY_RENAME_BUTTON_LABEL=إعادة تسمية
 #### LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=You can configure the folders you share in LimeWire's Options.
-#? LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=يمكنك إعداد المجلدات التي تشارك بها في خيارات LimeWire's.
+LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=يمكنك إعداد المجلدات التي تشارك بها في خيارات LimeWire's.
 #### LIBRARY_SHARED_FILES_CONFIGURE=Configure...
 LIBRARY_SHARED_FILES_CONFIGURE=إعداد...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
@@ -999,7 +1000,7 @@ DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=الكتابة فوق
 DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=الكتابة فوق الملف الموجود
 # {0} a short error message which is localized independently
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
-DOW{0}NLOADER_DIALOG_ERROR_LABEL=خطأ: {0}
+#? DOWNLOADER_DIALOG_ERROR_LABEL=
 # {0} a short warning message which is localized independently
 #### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
 DOWNLOADER_DIALOG_WARNING_LABEL=تحذير: {0}
@@ -1050,7 +1051,7 @@ SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=تنزيل آخر محفوظ مسب
 SAVE_LOCATION_ALREADY_SAVED_ERROR=لايمكن وضع موقع الملف, التنزيل قد اكتمل.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Could not save download to the folder {0}, because you do not have write access to it.
-SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR= لايمكن حفظ التنزيل في المجلد {0}, بسبب أنك ليس لديك صلاحية الكتابة فيه.
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=لايمكن حفظ التنزيل في المجلد {0}, بسبب أنك ليس لديك صلاحية الكتابة فيه.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
 SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=لايمكن حفظ التنزيل في المجلد {0}, بسبب أن المجلد غير موجود.
@@ -1295,7 +1296,7 @@ DOWNLOAD_HASH_ONLY_MAGNET=LimeWire قد لايتمكن البدء في تنزي�
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
 DOWNLOAD_PRIORITY_ACTIVE=نشط
 #### DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Move the Selected Download Closer to Becoming Active
-DOWNLOAD_PRIORITY_UP_BUTTON_TIP= انقل التنزيلات المحددة القريبة لتصبح نشطة 
+DOWNLOAD_PRIORITY_UP_BUTTON_TIP=انقل التنزيلات المحددة القريبة لتصبح نشطة 
 #### DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Move the Selected Download Further from Becoming Active
 DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=انقل التنزيلات المحددة اللاحقة لتصبح نشطة
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
@@ -1311,7 +1312,7 @@ DOWNLOAD_SEARCH_FILENAME_TIP=البحث عن ملفات بنفس اسم المل
 #### DOWNLOAD_SERACH_ORGINAL_LABEL=Orginal query
 DOWNLOAD_SERACH_ORGINAL_LABEL=استعلام جديد
 #### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
-#? DOWNLOAD_SERACH_ORGINAL_TIP=إجراء البحث المشابه كبحث واحد الذي وجد الملف سابقاً.
+DOWNLOAD_SERACH_ORGINAL_TIP=إجراء البحث المشابه كبحث واحد الذي وجد الملف سابقاً.
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 TORRENTS_COULD_NOT_READ_SNAPSHOT=للآسف, ولكن LimeWire غير قادر على إعادة تشغيل التورنت القديمة.
@@ -1557,7 +1558,7 @@ LIBRARY_TREE_INCOMPLETE_DIRECTORY=الملفات الغير مكتملة
 #### LIBRARY_TREE_SHARED_FILES_DIRECTORY=Shared Files
 LIBRARY_TREE_SHARED_FILES_DIRECTORY=الملفات المشتركة
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Individually Shared Files
-#? LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=الملفات المشتركة الفردية
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=الملفات المشتركة الفردية
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=قائمة جميع الملفات المشتركة الفردية
 #### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
@@ -1610,7 +1611,7 @@ PLAYLIST_FILE_MISSING=لا يمكن إيجاد الملف.
 PLAYLIST_FILE_CORRUPT=الملف تالف.
 #### PLAYLIST_FILE_UNKNOWN=. There is an unknown error with the audio file.
 PLAYLIST_FILE_UNKNOWN=هناك خطأ مجهول مع ملف الصوت
-#### PLAYLIST_FILE_PARSE_PROBLEM=The file cannot be parsed.
+#### PLAYLIST_FILE_PARSE_PROBLEM=. The file cannot be parsed.
 PLAYLIST_FILE_PARSE_PROBLEM=الملف لايمكن تعريبه
 
 ################################################################################
@@ -1618,7 +1619,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=الملف لايمكن تعريبه
 # if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
-#? SETUP_DIALOG_TITLE=مربع حوار تثبيت Limewire
+SETUP_DIALOG_TITLE=مربع حوار تثبيت Limewire
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=خيارات اللغة
 #### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language:
@@ -2071,7 +2072,7 @@ INTERNETARCHIVE_UPLOADER_COMPLETED=تم تحميل الملفات بنجاح
 #### INTERNETARCHIVE_UPLOADER_CHECKIN=Checking in...
 INTERNETARCHIVE_UPLOADER_CHECKIN=جاري الفحص...
 #### INTERNETARCHIVE_IDRETRIEVER_TITLE=Requesting Identifier...
-#? INTERNETARCHIVE_IDRETRIEVER_TITLE=إستعلام محدد...
+INTERNETARCHIVE_IDRETRIEVER_TITLE=إستعلام محدد...
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component.
@@ -2345,6 +2346,7 @@ NO_INTERNET=يبدو أن جهازك ليس لديه اتصال إنترنت ن�
 ################################################################################
 #### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
 NO_INTERNET_RETRYING=يبدو أن جهازك ليس لديه اتصال إنترنت نشط أو أن الجدار الناري قام بحظر LimeWire من الوصول للإنترنت. LimeWire سيقوم تلقائياً بمحاولة اتصالك بالشبكة مالم تقم باختيار " قطع الاتصال" من قائمة ملف.
+
 ################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
@@ -2454,9 +2456,9 @@ ERROR_ALREADY_EXISTS=لقد قمت بالفعل بالتنزيل
 NO_PREVIEW_BEGIN=لا شيء هناك لمعاينة الملف
 #### NO_PREVIEW_END=.
 NO_PREVIEW_END=.
-#### ERROR_CANT_RESUME_START=The file is not a valid incomplete file and cannot be resumed.
+#### ERROR_CANT_RESUME_START=The file
 ERROR_CANT_RESUME_START=.لا يبدو الملف ناقصاً ولا يمكن إكمال تنزيله
-#### ERROR_CANT_RESUME_END=The file.
+#### ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
 ERROR_CANT_RESUME_END=الملف.
 #### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
 ERROR_OPEN_URL=LimeWire لا يمكنه اكتشاف متصفح الويب الخاص بك لعرض الصفحة التالية:
@@ -2500,7 +2502,8 @@ ERROR_THEME_OUT_OF_DATE_LATER=لاحقاً
 ERROR_BAD_MAGNET_LINK=لا يمكن تشغيل الوصلة السيئة البارزة.
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 ERROR_INVALID_URLS_IN_MAGNET=واحدة أو أكثر من الوصلات البارزة غير صالحة. قد لا يتم تنزيل الملف بصورة صحيحة.
-#### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.ERROR_PROPS_CORRUPTED=الملف المستخدم لحفظ تفضيلاتك تالف. LimeWire سيقوم باستخدام قيم افتراضية.
+#### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
+ERROR_PROPS_CORRUPTED=الملف المستخدم لحفظ تفضيلاتك تالف. LimeWire سيقوم باستخدام قيم افتراضية.
 #### ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
 ERROR_SEARCH_TOO_LARGE=البحث الذي قمت به طويل جداً. من فضلك اجعل بحثك أصغر وحاول مرة ثانية.
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
@@ -2696,7 +2699,7 @@ OPTIONS_STARTUP_MAIN_TITLE=بدء  تشغيل النظام
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
 OPTIONS_PROXY_MAIN_TITLE=الوكيل
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
-#? OPTIONS_CONTENT_FILTER_MAIN_TITLE=المحتوى
+OPTIONS_CONTENT_FILTER_MAIN_TITLE=المحتوى
 #### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
 OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=واجهة الشبكة
 #### OPTIONS_ASSOCIATIONS_MAIN_TITLE=File Associations
@@ -2795,7 +2798,7 @@ OPTIONS_SPEED_BOX_LABEL=السرعة
 # Key/Value pairs for disabling capabilities
 ################################################################################
 #### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
-#? OPTIONS_DISABLE_CAPABILITIES_TITLE=إمكانيات
+OPTIONS_DISABLE_CAPABILITIES_TITLE=إمكانيات
 #### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
 #? OPTIONS_DISABLE_CAPABILITIES_LABEL=
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
@@ -3060,7 +3063,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=عرض مؤشر معدل النقل
 #### OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=Bandwidth Indicator
 OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=مؤشر معدل النقل
 #### OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=You can display your bandwidth consumption in the status bar.
-OPTIONS_STATUS_BAR_BANDWIDTH_LABEL= يمكنك عرض إستهلاك معدل النقل في شريط الحالة.
+OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=يمكنك عرض إستهلاك معدل النقل في شريط الحالة.
 #### OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Downloads:
 OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=التنزيلات:
 #### OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Uploads:
@@ -3297,10 +3300,10 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=دائماً
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=تفضيلات الموقع
 #### OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference hosts using the same language as you.
-OPTIONS_CONNECT_LOCALE_PREF_LABEL= يمكنك اختيار تفضيل المضيفيين باستخدام نفس لغتك. 
+OPTIONS_CONNECT_LOCALE_PREF_LABEL=يمكنك اختيار تفضيل المضيفيين باستخدام نفس لغتك. 
 #### OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
 OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=تغيير التفضيلات إلى:
- 
+
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
 # in the options window.
