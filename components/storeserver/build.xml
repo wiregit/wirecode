@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="lw-storeserver" basedir="." default="compile-src">
+
+	<description>
+		LimeWire component 'storeserver'.
+	    This component contains utility classes for dealing with I/O.
+	</description>
+
+	<import file="../common/build-macros.xml" />
+	<import file="../common/build.xml" />
+
+	<target name="initialize" depends="lw-common.initialize">
+		<do.setup-properties component="storeserver">
+			<src-classpath>
+				<pathelement location="${limewire.lib.jars}/commons-logging.jar" />
+				<pathelement location="${limewire.lib.jars}/commons-pool.jar" />
+				<path refid="build.limewire.components.common.buildpath" />
+			</src-classpath>
+		</do.setup-properties>
+	</target>
+
+	<target name="clean" depends="lw-common.clean">
+		<do.clean component="storeserver" />
+	</target>
+
+	<target name="compile" depends="lw-common.compile">
+		<do.compile component="storeserver" />
+	</target>
+
+	<target name="compile-src" depends="lw-common.compile-src">
+		<do.compile-src component="storeserver" />
+	</target>
+
+	<target name="clean-src" depends="lw-common.clean-src">
+		<do.clean-src component="storeserver" />
+	</target>
+
+	<target name="compile-tests" depends="lw-common.compile-tests">
+		<do.compile-tests component="storeserver" />
+	</target>
+	<target name="clean-tests" depends="lw-common.clean-tests">
+		<do.clean-tests component="storeserver" />
+	</target>
+
+	<target name="test" if="class" depends="compile">
+		<do.test component="storeserver" class="${class}" />
+	</target>
+
+	<target name="test-package" if="package" depends="compile">
+		<do.test-package component="storeserver" package="${package}" />
+	</target>
+
+	<target name="test-all" depends="compile">
+		<do.test-all component="storeserver" />
+	</target>
+
+	<target name="jar" depends="initialize, compile-src">
+		<do.jar component="storeserver" />
+	</target>
+
+	<target name="javadoc" depends="initialize, compile-src">
+		<do.javadoc component="storeserver" />
+	</target>
+
+	<target name="clean-dist" depends="initialize">
+		<do.clean-dist component="storeserver" />
+	</target>
+
+	<target name="with.clover" depends="initialize">
+		<do.clover-setup component="storeserver" />
+	</target>
+
+	<target name="clover2html" depends="initialize">
+		<do.clover2html component="storeserver" />
+	</target>
+	
+	<target name="demoserver" depends="compile-tests" description="Runs the demo remote server">
+		<java classname="org.limewire.store.storeserver.local.LocalRemoteServer"
+					classpathref="build.limewire.components.storeserver.tests.classpath" />
+	</target>	
+
+</project>

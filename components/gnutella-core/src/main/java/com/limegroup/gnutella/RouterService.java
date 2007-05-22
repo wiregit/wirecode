@@ -82,6 +82,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.store.storeserver.StoreServer;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -241,7 +242,9 @@ public class RouterService {
     private static IPFilter ipFilter = new IPFilter(false);
     
     /** The Hostiles Filter to use */
+
     private static HostileFilter hostileFilter = new HostileFilter();
+
     
     /** A sanity checker for network update requests/responses. */
     private static NetworkUpdateSanityChecker networkSanityChecker = new NetworkUpdateSanityChecker();
@@ -276,7 +279,7 @@ public class RouterService {
      * Selector provider for UDP selectors.
      */
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
-
+    
     /**
      * The DHTManager that manages the DHT and its various modes
      */
@@ -601,6 +604,13 @@ public class RouterService {
             ChatManager.instance().initialize();
             LOG.trace("END ChatManager");
 
+            // jpalm
+            System.out.println("start store server");
+            LOG.trace("START StoreServer");
+            StoreServer.instance().start();
+            LOG.trace("END StoreServer");
+
+
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             
@@ -699,6 +709,7 @@ public class RouterService {
     public static HostileFilter getHostileFilter() {
         return hostileFilter;
     }
+
     
     /**
      * Sets full power mode.
@@ -872,6 +883,16 @@ public class RouterService {
     /** Gets the SelectorProvider for UDPChannels */
     public static UDPSelectorProvider getUDPSelectorProvider() {
     	return UDP_SELECTOR_PROVIDER;
+    }
+    
+    /**
+     * jpalm:
+     * Returns the {@link StoreServer} instance.
+     * 
+     * @return the {@link StoreServer} instance
+     */
+    public static StoreServer getStoreServer() {
+        return StoreServer.instance();
     }
     
     public static HttpExecutor getHttpExecutor() {
@@ -1242,7 +1263,6 @@ public class RouterService {
                 adjustSpamFilters();
             }
         });
-        hostileFilter.refreshHosts();
     }
 
     /**
