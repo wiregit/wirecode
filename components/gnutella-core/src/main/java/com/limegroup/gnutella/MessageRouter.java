@@ -1991,9 +1991,9 @@ public abstract class MessageRouter {
 
             ReplyHandler rh = rrp.getReplyHandler();
             
-            // if this reply is for us, remember at what time the results came.
+            // if this reply is for us, remember some more stats
             if (rh == FOR_ME_REPLY_HANDLER)
-                _queryRouteTable.timeStampResults(queryReply.getGUID(), queryReply.getUniqueResultCount());
+                _queryRouteTable.timeStampResults(queryReply);
             
             if(!shouldDropReply(rrp, rh, queryReply)) {                
                 rh.handleQueryReply(queryReply, handler);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
 
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
@@ -100,6 +102,10 @@ public final class RouteTable  {
         private final List<Double> resultTimeStamps = new ArrayList<Double>();
         /** The number of results that came each time */
         private final List<Double> resultCounts = new ArrayList<Double>();
+        /** The network from which the replies came */
+        private final int[] networks = new int[4];
+        /** The hops of the replies */
+        private final int[] hops = new int[5];
         
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
@@ -123,9 +129,11 @@ public final class RouteTable  {
             }
         }
         
-        void timeStampResults(int count) {
+        void timeStampResults(int network, byte hop, int count) {
             resultTimeStamps.add((double)(System.currentTimeMillis() - creationTime));
             resultCounts.add((double)count);
+            networks[Math.max(0,Math.min(network,networks.length - 1))]++;
+            hops[Math.min(hops.length - 1, Math.max(0,hop-1))]++;
         }
     }
 
@@ -332,13 +340,13 @@ public final class RouteTable  {
     }
     
     /** Remembers that the specified number of results came now */
-    public synchronized void timeStampResults(byte [] guid, int numResults) {
-        RouteTableEntry entry = _newMap.get(guid);
+    public synchronized void timeStampResults(QueryReply reply) {
+        RouteTableEntry entry = _newMap.get(reply.getGUID());
         if (entry==null)
-            entry = _oldMap.get(guid);
+            entry = _oldMap.get(reply.getGUID());
         if (entry==null)
             return;
-        entry.timeStampResults(numResults);
+        entry.timeStampResults(reply.getNetwork(), reply.getHops(), reply.getUniqueResultCount());
     }
 
     /** The return value from getReplyHandler. */
@@ -533,9 +541,15 @@ public final class RouteTable  {
                 List<Double> timeTo100Results = new ArrayList<Double>();
                 List<Double> allResultTimes = new ArrayList<Double>();
                 List<Double> allResultCounts = new ArrayList<Double>();
+                List<Integer> networks = Arrays.asList(new Integer[4]);
+                List<Integer> hops = Arrays.asList(new Integer[5]);
                 Iterable<RouteTableEntry> bothMaps = 
                     new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
                 for(RouteTableEntry rte : bothMaps) {
+                    for (int i =0 ; i < rte.networks.length; i++)
+                        networks.set(i, networks.get(i)+rte.networks[i]);
+                    for (int i =0 ;i < rte.hops.length; i++)
+                        hops.set(i, hops.get(i)+rte.networks[i]);
                     classCSizes.add((double)(rte.classCnetworks.size()));
                     repliesRouted.add((double)rte.repliesRouted);
                     ttls.add((double)rte.ttl);
@@ -598,6 +612,8 @@ public final class RouteTable  {
                 ret.put("tt50ch", StatsUtils.getHistogram(timeTo50Results, 10));
                 ret.put("tt100c", StatsUtils.quickStatsDouble(timeTo100Results).getMap());
                 ret.put("tt100ch", StatsUtils.getHistogram(timeTo100Results, 10));
+                ret.put("nets", networks);
+                ret.put("hops", hops);
                 return ret;
             }
 
@@ -622,6 +638,8 @@ public final class RouteTable  {
                     m.put("cc", e.classCnetworks);
                     m.put("rt", e.resultTimeStamps);
                     m.put("rc", e.resultCounts);
+                    m.put("nets", Arrays.asList(e.networks));
+                    m.put("hops", Arrays.asList(e.hops));
                     ret.put(entry.getKey(), m);
                 }
                 return ret;
