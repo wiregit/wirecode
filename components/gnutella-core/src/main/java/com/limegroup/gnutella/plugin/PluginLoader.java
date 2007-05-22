@@ -135,7 +135,9 @@ public class PluginLoader {
         for (PluginDescriptor descriptor : descriptors) {
             if (!manager.isPluginActivated(descriptor)) {
                 try {
+                    if (LOG.isTraceEnabled()) { LOG.trace("BEGIN ACTIVATE: " + descriptor); }
                     manager.activatePlugin(descriptor.getId());
+                    if (LOG.isTraceEnabled()) { LOG.trace("END ACTIVATE: " + descriptor); }
                 } catch (Throwable err) {
                     LOG.error("Throwable", err);
                     ErrorService.error(err);
