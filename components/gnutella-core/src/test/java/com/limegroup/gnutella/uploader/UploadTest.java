@@ -35,6 +35,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -49,7 +50,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * lowercase characters a-z.
  */
 public class UploadTest extends LimeTestCase {
-    
+
     private static final int PORT = 6668;
 
     /** The file name, plain and encoded. */
@@ -153,10 +154,10 @@ public class UploadTest extends LimeTestCase {
 
         if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
-            Thread.sleep(2000);
+            // Thread.sleep(2000);
         }
 
-        FileManager fm = RouterService.getFileManager();       
+        FileManager fm = RouterService.getFileManager();
         File incFile = new File(_incompleteDir, incName);
         fm.removeFileIfShared(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
@@ -167,7 +168,7 @@ public class UploadTest extends LimeTestCase {
         fm.addIncompleteFile(incFile, urns, incName, 1981, vf);
         assertEquals(1, fm.getNumIncompleteFiles());
         assertEquals(2, fm.getNumFiles());
-        
+
         FD = fm.getFileDescForFile(new File(_sharedDir, fileName));
         while (FD.getHashTree() == null)
             Thread.sleep(300);
@@ -178,7 +179,7 @@ public class UploadTest extends LimeTestCase {
         assertEquals("Unexpected queued uploads", 0, RouterService
                 .getUploadManager().getNumQueuedUploads());
 
-        client = new HttpClient();
+        client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT);
         client.setHostConfiguration(hostConfig);
@@ -574,9 +575,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
 
         method = new GetMethod(otherFileNameUrl);
         try {
@@ -599,10 +598,8 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
-
+        assertConnectionIsOpen(true);
+        
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
             int response = client.executeMethod(method);
@@ -632,9 +629,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
 
         // add another range and make sure we display it.
         iv = new Interval(150050, 252450);
@@ -651,9 +646,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
 
         // add an interval too small to report and make sure we don't report
         iv = new Interval(102505, 150000);
@@ -670,9 +663,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
 
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
@@ -705,9 +696,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
     }
 
     public void testHTTP11WrongURI() throws Exception {
@@ -720,9 +709,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
     }
 
     public void testHTTP10WrongURI() throws Exception {
@@ -736,9 +723,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
     }
 
     public void testHTTP11MalformedURI() throws Exception {
@@ -751,9 +736,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
     }
 
     public void testHTTP10MalformedURI() throws Exception {
@@ -767,9 +750,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
     }
 
     public void testHTTP11MalformedGet() throws Exception {
@@ -782,9 +763,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
     }
 
     public void testHTTP11MalformedHeader() throws Exception {
@@ -798,9 +777,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
     }
 
     /**
@@ -865,9 +842,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertTrue(connection.isOpen());
+        assertConnectionIsOpen(true);
 
         // feature headers are only sent with the first response
         ChatSettings.CHAT_ENABLED.setValue(false);
@@ -881,9 +856,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
-        assertFalse(connection.isOpen());
+        assertConnectionIsOpen(false);
 
         // try a new connection
         method = new GetMethod(fileNameUrl);
@@ -1024,6 +997,13 @@ public class UploadTest extends LimeTestCase {
                 // good.
             }
         }
+    }
+
+    private void assertConnectionIsOpen(boolean open) {
+        HttpConnection connection = client.getHttpConnectionManager()
+                .getConnection(hostConfig);
+        assertEquals(open, connection.isOpen());
+        client.getHttpConnectionManager().releaseConnection(connection);
     }
 
 }

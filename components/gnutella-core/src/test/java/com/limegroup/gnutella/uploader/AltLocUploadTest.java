@@ -40,6 +40,7 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -168,7 +169,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
-            Thread.sleep(2000);
+            //Thread.sleep(2000);
         }
 
         FD = RouterService.getFileManager().getFileDescForFile(
@@ -178,7 +179,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         RouterService.getAltlocManager().purge();
 
-        client = new HttpClient();
+        client = HttpClientManager.getNewClient();
         HostConfiguration config = new HostConfiguration();
         config.setHost("localhost", PORT);
         client.setHostConfiguration(config);
