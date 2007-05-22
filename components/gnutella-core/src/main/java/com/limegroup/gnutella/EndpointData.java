@@ -21,6 +21,7 @@ public class EndpointData extends Endpoint
     private static final long serialVersionUID = 5045818571228406227L;    
     
     // for deserializing.
+    @SuppressWarnings("unused")
     private EndpointData() { }
     
     /**

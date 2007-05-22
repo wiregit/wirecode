@@ -18,6 +18,7 @@ class ArchiveResponse {
 	private final String _message;
 	private final String _url;
 	
+	@SuppressWarnings("unused")
 	private ArchiveResponse() {
 		_resultType = _resultCode = _message = _url = null;
 	}

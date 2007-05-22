@@ -25,6 +25,7 @@ class ArchiveRequest {
 	private ArchiveResponse _response;
 		
 	/* no default constructor */
+	@SuppressWarnings("unused")
 	private ArchiveRequest() {
 		_url = null;
 		_parameters = null;
