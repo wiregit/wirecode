@@ -106,6 +106,8 @@ public final class RouteTable  {
         private final int[] networks = new int[4];
         /** The hops of the replies */
         private final int[] hops = new int[5];
+        /** The ttls of the replies */
+        private final int[] ttls = new int[5];
         
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
@@ -129,11 +131,15 @@ public final class RouteTable  {
             }
         }
         
-        void timeStampResults(int network, byte hop, int count) {
+        void timeStampResults(int count) {
             resultTimeStamps.add((double)(System.currentTimeMillis() - creationTime));
             resultCounts.add((double)count);
+        }
+        
+        void countHopsTTLNet(int network, byte hop, byte ttl) {
             networks[Math.max(0,Math.min(network,networks.length - 1))]++;
             hops[Math.min(hops.length - 1, Math.max(0,hop-1))]++;
+            ttls[Math.min(ttls.length - 1, Math.max(0,ttl-1))]++;
         }
     }
 
@@ -346,7 +352,16 @@ public final class RouteTable  {
             entry = _oldMap.get(reply.getGUID());
         if (entry==null)
             return;
-        entry.timeStampResults(reply.getNetwork(), reply.getHops(), reply.getUniqueResultCount());
+        entry.timeStampResults(reply.getUniqueResultCount());
+    }
+    
+    public synchronized void countHopsTTLNet(QueryReply reply) {
+        RouteTableEntry entry = _newMap.get(reply.getGUID());
+        if (entry==null)
+            entry = _oldMap.get(reply.getGUID());
+        if (entry==null)
+            return;
+        entry.countHopsTTLNet(reply.getNetwork(), reply.getHops(), reply.getTTL());
     }
 
     /** The return value from getReplyHandler. */
@@ -543,6 +558,7 @@ public final class RouteTable  {
                 List<Double> allResultCounts = new ArrayList<Double>();
                 List<Integer> networks = Arrays.asList(new Integer[4]);
                 List<Integer> hops = Arrays.asList(new Integer[5]);
+                List<Integer> ttlsHist = Arrays.asList(new Integer[5]);
                 Iterable<RouteTableEntry> bothMaps = 
                     new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
                 for(RouteTableEntry rte : bothMaps) {
@@ -550,6 +566,8 @@ public final class RouteTable  {
                         networks.set(i, networks.get(i)+rte.networks[i]);
                     for (int i =0 ;i < rte.hops.length; i++)
                         hops.set(i, hops.get(i)+rte.networks[i]);
+                    for (int i =0 ;i < rte.ttls.length; i++)
+                        ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
                     classCSizes.add((double)(rte.classCnetworks.size()));
                     repliesRouted.add((double)rte.repliesRouted);
                     ttls.add((double)rte.ttl);
@@ -614,6 +632,7 @@ public final class RouteTable  {
                 ret.put("tt100ch", StatsUtils.getHistogram(timeTo100Results, 10));
                 ret.put("nets", networks);
                 ret.put("hops", hops);
+                ret.put("ttls", ttlsHist);
                 return ret;
             }
 
@@ -640,6 +659,7 @@ public final class RouteTable  {
                     m.put("rc", e.resultCounts);
                     m.put("nets", Arrays.asList(e.networks));
                     m.put("hops", Arrays.asList(e.hops));
+                    m.put("ttls", Arrays.asList(e.ttls));
                     ret.put(entry.getKey(), m);
                 }
                 return ret;

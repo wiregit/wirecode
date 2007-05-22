@@ -1991,7 +1991,9 @@ public abstract class MessageRouter {
 
             ReplyHandler rh = rrp.getReplyHandler();
             
-            // if this reply is for us, remember some more stats
+            // remember more stats
+            _queryRouteTable.countHopsTTLNet(queryReply);
+            // if this reply is for us, remember even more stats
             if (rh == FOR_ME_REPLY_HANDLER)
                 _queryRouteTable.timeStampResults(queryReply);
             
