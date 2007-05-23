@@ -182,7 +182,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
 
         private DHTTask.Callback<BootstrapResult> callback;
         
-        private final List<DHTTask> tasks = new ArrayList<DHTTask>();
+        private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
         
         private boolean retriedToBootstrap = false;
         
@@ -477,12 +477,11 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             }
         }
         
-        @SuppressWarnings("unchecked")
 		public void cancel() {
-        	List<DHTTask> copy = null;
+        	List<DHTTask<?>> copy = null;
             synchronized (tasks) {
             	if (!cancelled) {
-            		copy = new ArrayList<DHTTask>(tasks);
+            		copy = new ArrayList<DHTTask<?>>(tasks);
             		tasks.clear();
             		cancelled = true;
             	}
