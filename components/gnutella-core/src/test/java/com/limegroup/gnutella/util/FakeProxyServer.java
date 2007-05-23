@@ -40,6 +40,10 @@ public class FakeProxyServer extends AssertComparisons {
     
     private boolean _isHTTPRequest = false;
     
+    private Thread proxyThread;
+
+    private Thread destThread;
+    
     final static String USER = "Sumeet";
     
     final static String PASS = "Thadani";
@@ -63,7 +67,7 @@ public class FakeProxyServer extends AssertComparisons {
             ErrorService.error(iox);
         }
 
-        Thread proxyThread = ThreadExecutor.newManagedThread(new Runnable() {
+        proxyThread = ThreadExecutor.newManagedThread(new Runnable() {
             public void run() {
                 proxyLoop();
             }
@@ -71,7 +75,7 @@ public class FakeProxyServer extends AssertComparisons {
         proxyThread.setDaemon(true);
         proxyThread.start();
         
-        Thread destThread = ThreadExecutor.newManagedThread(new Runnable() {
+        destThread = ThreadExecutor.newManagedThread(new Runnable() {
             public void run() {
                 destLoop();
             }
@@ -127,8 +131,10 @@ public class FakeProxyServer extends AssertComparisons {
                     incomingProxy.close();
             }
         } catch(IOException iox) {
+            if (!_proxyServer.isClosed()) { 
             ErrorService.error(iox);
         }
+    }
     }
 
     private void checkSOCKS4(InputStream is, OutputStream os) 
@@ -255,8 +261,10 @@ public class FakeProxyServer extends AssertComparisons {
                     incomingDest.close();
             }
         } catch(IOException iox) {
+            if (!_destinationServer.isClosed()) {
             ErrorService.error(iox);
         }
+    }
     }
 
 
@@ -280,13 +288,23 @@ public class FakeProxyServer extends AssertComparisons {
     }
 
 
-    void killServers() {
+    void killServers() throws InterruptedException {
         try {
             if(_proxyServer != null)
                 _proxyServer.close();
             if(_destinationServer != null)
                 _destinationServer.close();
         } catch(IOException iox) {}
+
+        if (proxyThread != null) {
+            proxyThread.join();
+            proxyThread = null;
+        }
+
+        if (destThread != null) {
+            destThread.join();
+            destThread = null;
+        }
     }
 
     void setProxyOn(boolean proxyOn) {
