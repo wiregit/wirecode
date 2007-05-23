@@ -142,25 +142,40 @@ public class BufferUtils {
     }
     
     /**
-     * Reads data from the ByteBuffer, inserting it into the StringBuffer,
-     * until a full line is read.  Returns true if a full line is read, false
-     * if more data needs to be inserted into the buffer until a full line
-     * can be read.
+     * Reads data from <code>src</code>, inserting it into <code>dst</code>,
+     * until a full line is read. Returns true if a full line is read, false if
+     * more data needs to be inserted into the buffer until a full line can be
+     * read.
      */
-    public static boolean readLine(ByteBuffer buffer, StringBuilder sBuffer) {
+    public static boolean readLine(ByteBuffer src, StringBuilder dst) {
         int c = -1; //the character just read        
-        while(buffer.hasRemaining()) {
-            c = buffer.get();
+        while(src.hasRemaining()) {
+            c = src.get();
             switch(c) {
                 // if this was a \n character, we're done.
                 case  '\n': return true;
                 // if this was a \r character, ignore it.
                 case  '\r': continue;                        
                 // if it was any other character, append it to the buffer.
-                default: sBuffer.append((char)c);
+                default: dst.append((char)c);
             }
         }
 
         return false;
     }
+    
+    /**
+     * Reads data from <code>src</code>, inserting it into <code>dst</code>.
+     * 
+     * @return number of bytes read
+     */
+    public static int transfer(ByteBuffer src, StringBuilder dst) {
+        int written = 0;
+        while (src.hasRemaining()) {
+            dst.append((char) src.get());
+            written++;
+        }
+        return written;
+    }
+
 }
