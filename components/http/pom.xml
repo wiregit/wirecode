@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
-      <version>4.0-alpha5-lw-1</version>
+      <version>4.0-alpha5-lw-3</version>
     </dependency>
   </dependencies>
 </project>
