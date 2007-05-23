@@ -906,7 +906,7 @@ public class ManagedConnection extends Connection
     }
     
     public long getNumQueryReplies() {
-    	return _connectionStats.getQueriesRecieved();
+    	return _connectionStats.getRepliesRecieved();
     }
     
     /**

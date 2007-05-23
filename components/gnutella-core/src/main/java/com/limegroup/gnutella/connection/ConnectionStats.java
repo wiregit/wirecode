@@ -55,7 +55,7 @@ public class ConnectionStats {
     public int getReceived() { return _numMessagesReceived; }
     public int getSentDropped() { return _numSentMessagesDropped; }
     public int getReceivedDropped() { return _numReceivedMessagesDropped; }
-    public long getQueriesRecieved() { return queriesReceived; }
+    public long getRepliesRecieved() { return repliesReceived; }
 
     /** Adds a number of dropped sent messages */
     public void addSentDropped(int dropped) {
