@@ -463,20 +463,35 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private <T> void start(DHTTask<T> task, 
                 DHTTask.Callback<T> c) {
+        	
+        	boolean doStart = false;
             synchronized (tasks) {
                 if (!cancelled) {
                     tasks.add(task);
-                    task.start(c);
+                    doStart = true;
                 }
+            }
+            
+            if (doStart) {
+            	task.start(c);
             }
         }
         
-        public void cancel() {
+        @SuppressWarnings("unchecked")
+		public void cancel() {
+        	List<DHTTask> copy = null;
             synchronized (tasks) {
-                cancelled = true;
-                for (DHTTask<?> task : tasks) {
-                    task.cancel();
-                }
+            	if (!cancelled) {
+            		copy = new ArrayList<DHTTask>(tasks);
+            		tasks.clear();
+            		cancelled = true;
+            	}
+            }
+            
+            if (copy != null) {
+	            for (DHTTask<?> task : copy) {
+	                task.cancel();
+	            }
             }
         }
     }
