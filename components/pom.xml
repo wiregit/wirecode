@@ -41,6 +41,7 @@
     <module>common</module>
     <module>collection</module>
     <module>io</module>
+    <module>http</module>
     <module>mojito</module>
     <module>mojito-ui</module>
     <module>nio</module>

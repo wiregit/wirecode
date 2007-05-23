@@ -17,6 +17,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -75,10 +76,10 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    private static class UploadManagerStub extends UploadManager {
+    private static class UploadManagerStub extends HTTPUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
-    		super(null);
+    		super(new UploadSlotManager());
     	}
 		@Override
 		public synchronized boolean isServiceable() {

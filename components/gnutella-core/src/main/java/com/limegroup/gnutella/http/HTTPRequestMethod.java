@@ -26,6 +26,10 @@ public abstract class HTTPRequestMethod {
 		METHOD_NAME = methodName.toUpperCase();
 	}
 
+    public String getMethod() {
+        return METHOD_NAME;
+    }
+    
 	/**
 	 * Abstract method for writing the HTTP response based on the HTTP
 	 * request method.

@@ -110,6 +110,10 @@ public class MulticastTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
+        if (ROUTER_SERVICE == null) {
+            globalSetUp();
+        }
+        
         setSettings();
         
         M_HANDLER.multicasted.clear();

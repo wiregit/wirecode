@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectableChannel;
 import java.util.Arrays;
@@ -52,7 +53,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.HostileFilter;
@@ -61,6 +61,7 @@ import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -84,7 +85,6 @@ import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -178,6 +178,11 @@ public class RouterService {
     private static DownloadManager downloadManager = new DownloadManager();
     
     /**
+     * Acceptor for HTTP connections.
+     */    
+    private static com.limegroup.gnutella.HTTPAcceptor httpUploadAcceptor = new com.limegroup.gnutella.HTTPAcceptor();
+
+    /**
      * <tt>UploadSlotManager</tt> for controlling upload slots.
      */
     private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
@@ -185,8 +190,7 @@ public class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = 
-    	new UploadManager(uploadSlotManager);
+    private static UploadManager uploadManager = new HTTPUploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -506,7 +510,15 @@ public class RouterService {
             callback.componentLoading("ACCEPTOR");
     		acceptor.start();
     		LOG.trace("STOP Acceptor");
-    		
+
+    		LOG.trace("START HTTPUploadAcceptor");
+    		httpUploadAcceptor.start(getConnectionDispatcher()); 
+    		LOG.trace("STOP HTTPUploadAcceptor");
+
+    		LOG.trace("START HTTPUploadManager");
+    		uploadManager.start(httpUploadAcceptor); 
+    		LOG.trace("STOP HTTPUploadManager");
+
             LOG.trace("START loading StaticMessages");
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
@@ -635,6 +647,19 @@ public class RouterService {
     }
 	                
     /**
+     * Returns whether there are any active internet (non-multicast) transfers
+     * going at speed greater than 0.
+     */
+    public static boolean hasActiveUploads() {
+        getUploadSlotManager().measureBandwidth();
+        try {
+            return getUploadSlotManager().getMeasuredBandwidth() > 0;
+        } catch (InsufficientDataException ide) {
+        }
+        return false;
+    }
+
+    /**
      * @return the bandwidth for uploads in bytes per second
      */
     public static float getRequestedUploadSpeed() {
@@ -706,8 +731,9 @@ public class RouterService {
     public static void setFullPower(boolean newValue) {
         if(_fullPower != newValue) {
             _fullPower = newValue;
-            NormalUploadState.setThrottleSwitching(!newValue);
-            HTTPDownloader.setThrottleSwitching(!newValue);
+            // FIXME implement throttle switching for uploads and downloads
+            // NormalUploadState.setThrottleSwitching(!newValue);
+            // HTTPDownloader.setThrottleSwitching(!newValue);
         }
     }
 
@@ -807,6 +833,22 @@ public class RouterService {
 		return uploadSlotManager;
 	}
 	
+	/** 
+	 * Accessor for the <tt>HTTPAcceptor</tt> instance.
+	 *
+	 * @return the <tt>HTTPAcceptor</tt> in use
+	 */
+	public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() {
+	    return httpUploadAcceptor;
+	}
+
+	/**
+	 * Push uploads from firewalled clients.
+	 */
+	public static void acceptUpload(Socket socket, HTTPConnectionData data) {
+	    getHTTPUploadAcceptor().acceptConnection(socket, data);
+	}
+
 	/**
 	 * Accessor for the <tt>PushManager</tt> instance.
 	 *

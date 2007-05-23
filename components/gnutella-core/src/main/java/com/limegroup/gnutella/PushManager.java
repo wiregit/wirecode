@@ -1,19 +1,20 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.channel.ChannelWriter;
+import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -88,12 +89,12 @@ public final class PushManager {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
             UDPConnection socket = new UDPConnection();
-            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true));
+            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, isFWTransfer));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, false));
+                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, isFWTransfer));
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }
@@ -154,56 +155,69 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ThreadExecutor.startThread(new Pusher(data, socket, fwt), "PushUploadThread");
+            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt));
         }
     }    
 
-    /** A runnable that starts a push transfer. */
-    private static class Pusher implements Runnable {
-        PushData data;
-        private Socket socket;
-        private boolean fwTransfer;
+    /** Non-blocking observer for connect events related to pushing. */
+    private static class PushConnector implements ChannelWriter {
         
-        Pusher(PushData data, Socket socket, boolean fwt) {
-            this.data = data;
+        private InterestWritableByteChannel channel;
+
+        private final ByteBuffer buffer;
+
+        private final Socket socket;
+
+        private HTTPConnectionData data;
+
+        public PushConnector(Socket socket, PushData data, boolean fwTransfer) throws IOException {
             this.socket = socket;
-            this.fwTransfer = fwt;
+            this.data = new HTTPConnectionData();
+            this.data.setPush(true);
+            this.data.setLocal(data.isLan());
+            this.data.setFirewalled(fwTransfer);
+            
+            socket.setSoTimeout(30 * 1000);
+
+                String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
+            this.buffer = ByteBuffer.wrap(giv.getBytes());
         }
 
-        public void run() {
-            try {
-                OutputStream ostream = socket.getOutputStream();
-                String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
-                ostream.write(giv.getBytes());
-                ostream.flush();
-
-                // try to read a GET or HEAD for only 30 seconds.
-                socket.setSoTimeout(30 * 1000);
-
-                // read GET or HEAD and delegate appropriately.
-                String word = IOUtils.readWord(socket.getInputStream(), 4);
-                if (fwTransfer)
-                    UploadStat.FW_FW_SUCCESS.incrementStat();
-
-                if (word.equals("GET")) {
-                    UploadStat.PUSHED_GET.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, socket, data.isLan());
-                } else if (word.equals("HEAD")) {
-                    UploadStat.PUSHED_HEAD.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, socket, data.isLan());
-                } else {
-                    UploadStat.PUSHED_UNKNOWN.incrementStat();
-                    throw new IOException();
-                }
-            } catch (IOException ioe) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Failed push connect/transfer to " + data.getHost() + ":" + data.getPort() + ", fwt: " + fwTransfer);
-                if (fwTransfer)
-                    UploadStat.FW_FW_FAILURE.incrementStat();
-                UploadStat.PUSH_FAILED.incrementStat();
-            } finally {
-                IOUtils.close(socket);
+        public boolean handleWrite() throws IOException {
+            if (!buffer.hasRemaining()) {
+                return false;
             }
+
+            while (buffer.hasRemaining()) {
+                int written = channel.write(buffer);
+                if (written == 0) {
+                    return true;
+                }
+            }
+
+            RouterService.acceptUpload(socket, data);
+            return false;
+        }
+
+        public void handleIOException(IOException iox) {
+            throw new RuntimeException();
+        }
+
+        public void shutdown() {
+            // ignore
+        }
+
+        public InterestWritableByteChannel getWriteChannel() {
+            return channel;
+        }
+
+        public void setWriteChannel(InterestWritableByteChannel newChannel) {
+            this.channel = newChannel;
+
+            if (newChannel != null) {
+                newChannel.interestWrite(this, true);
         }
     }
+    }    
+
 }

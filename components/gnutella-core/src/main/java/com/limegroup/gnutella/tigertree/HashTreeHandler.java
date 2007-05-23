@@ -138,6 +138,10 @@ class HashTreeHandler {
         return OUTPUT_TYPE;
     }
 
+    public ThexWriter createAsyncWriter() {
+        return new AsyncHashTreeWriter(GENERATOR.createAsyncWriter());
+    }    
+    
     /**
      * A simple XML DIMERecord.
      */

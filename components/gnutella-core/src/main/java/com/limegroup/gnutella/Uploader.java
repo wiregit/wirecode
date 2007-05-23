@@ -3,8 +3,12 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
- * This interface outlines the basic functionality for a class that 
- * performs uploads.
+ * This interface outlines the basic functionality for a class that performs
+ * uploads.
+ * <p>
+ * A single instance should be reused for multiple chunks of a single file in an
+ * HTTP/1.1 session. However, multiple HTTPUploaders should be used for multiple
+ * files in a single HTTP/1.1 session.
  */
 public interface Uploader extends BandwidthTracker {
 
@@ -24,7 +28,7 @@ public interface Uploader extends BandwidthTracker {
     public static final int BANNED_GREEDY  	  = 14;
     public static final int THEX_REQUEST      = 15;
     public static final int BROWSER_CONTROL   = 16;
-    public static final int NOT_VALIDATED     = 17;
+//    public static final int NOT_VALIDATED     = 17;
     
     /** Some BT-specific states */
     public static final int SUSPENDED = 18;
@@ -52,12 +56,9 @@ public interface Uploader extends BandwidthTracker {
 	public long getFileSize();
 	
 	/**
-	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
-	 * is being uploaded.
+	 * Returns the <tt>FileDesc</tt> of the file being uploaded.
 	 *
-	 * @return the <tt>FileDesc</tt> for this uploader -- the file that
-	 *  is being uploaded, which can be <tt>null</tt> in cases such as when
-	 *  the file can't be found
+	 * @return <tt>null</tt> if the file can not be found
 	 */
 	public FileDesc getFileDesc();
 
@@ -67,9 +68,13 @@ public interface Uploader extends BandwidthTracker {
 	public int getIndex();
 
 	/**
-	 * returns the amount that of data that has been uploaded.
-	 * this method was previously called "amountRead", but the
-	 * name was changed to make more sense.
+     * Returns the amount that of data that has been uploaded. For HTTP/1.1
+     * transfers, this number is the amount uploaded for this specific chunk
+     * only. Uses {@link #getTotalAmountUploaded()} for the entire amount
+     * uploaded.
+     * <p>
+     * Note: This method was previously called "amountRead", but the name was
+     * changed to make more sense.
 	 */ 
 	public long amountUploaded();
 	
