@@ -2,10 +2,10 @@ package org.limewire.nio.timeout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.BinaryHeap;
 
 
 /**
@@ -15,7 +15,7 @@ public class TimeoutController {
     
     private static final Log LOG = LogFactory.getLog(TimeoutController.class);
     
-    private final BinaryHeap<Timeout> items = new BinaryHeap<Timeout>(20, true);
+    private final PriorityQueue<Timeout> items = new PriorityQueue<Timeout>(20);
     
     // used to store timed out items to notify outside of lock.
     private final List<Timeout> timedout = new ArrayList<Timeout>(100);
@@ -28,7 +28,7 @@ public class TimeoutController {
     public synchronized void addTimeout(Timeoutable t, long now, long timeout) {
         if(LOG.isDebugEnabled())
             LOG.debug("Adding timeoutable: " + t + ", now: " + now + ", timeout: " + timeout);
-        items.insert(new Timeout(t, now, timeout));
+        items.offer(new Timeout(t, now, timeout));
     }
 
     /**
@@ -37,7 +37,7 @@ public class TimeoutController {
     public void processTimeouts(long now) {
         synchronized(this) {
             while(!items.isEmpty()) {
-                Timeout t = items.getMax();
+                Timeout t = items.peek();
                 if(t != null && now >= t.expireTime) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Timing out: " + t + ", expired: " + t.expireTime + ", now: " + now + ", length: " + t.timeoutLength);
@@ -47,7 +47,7 @@ public class TimeoutController {
                         LOG.debug("Breaking -- next timeout at: " + t.expireTime + ", now: " + now);
                     break;
                 }
-                items.extractMax(); // remove it -- we only peeked before.
+                items.poll(); // remove it -- we only peeked before.
             }
         }
         
@@ -63,7 +63,7 @@ public class TimeoutController {
         if(items.isEmpty())
             return -1;
         else
-            return items.getMax().expireTime;
+            return items.peek().expireTime;
     }
     
     /** Keep an expireTime & timeoutable together as one happy couple. */
@@ -83,7 +83,7 @@ public class TimeoutController {
          * sorted correctly
          */
         public int compareTo(Timeout b) {
-            return expireTime < b.expireTime ? 1 : expireTime > b.expireTime ? -1 : 0;
+            return expireTime > b.expireTime ? 1 : expireTime < b.expireTime ? -1 : 0;
         }
         
         public String toString() {

@@ -52,6 +52,14 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
         tree=new SortedList<E>(comparator);
         this.capacity=capacity;
     }
+    
+    public void clear() {
+        tree.clear();
+    }
+    
+    public boolean isFull() {
+        return size() >= capacity();
+    }
 
     /**
      * Adds x to this, possibly removing some lower priority entry if necessary
@@ -64,7 +72,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * @return the element ejected, possibly x, or null if none 
      */
     public E insert(E x) {
-        if (size()<capacity()) {
+        if (!isFull()) {
             //a) Size less than capacity.  Just add x.
             boolean added=tree.add(x);
             assert added;
@@ -84,6 +92,12 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
                 return x;
             }
         }
+    }
+    
+    public E extractMax() {
+        E e = getMax();
+        remove(e);
+        return e;
     }
     
     /**
@@ -114,22 +128,12 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
     }
 
     /** 
-     * Removes the first occurence of  o.  Runs in O(N) time, where N is
-     * number of elements in this.
+     * Removes the first occurence of  o.
      *
-     * @param true this contained an x s.t. o.equals(x).  Note that
-     *  priority is ignored in this operation.
+     * @param true this contained an x s.t. o.equals(x).
      */
     public boolean remove(Object o) {
-        //You can't just look up o in tree, as tree is sorted by priority, which
-        //isn't necessarily consistent with equals.
-        for (Iterator<E> iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equals(iter.next())) {
-                iter.remove();
-                return true;
-            }
-        }
-        return false;
+        return tree.remove(o);
     }
 
     /** 

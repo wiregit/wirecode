@@ -49,7 +49,7 @@ import java.util.NoSuchElementException;
  * does use sligtly more memory.
  * 
  * @since Commons Collections 3.1
- * @version $Revision: 1.1 $ $Date: 2007-03-27 20:06:00 $
+ * @version $Revision: 1.2 $ $Date: 2007-05-23 20:30:11 $
  *
  * @author Joerg Schmuecker
  * @author Stephen Colebourne
@@ -207,6 +207,15 @@ public class TreeList<E> extends AbstractList<E> {
         E result = node.value;
         node.setValue(obj);
         return result;
+    }
+    
+    /** Removes the object. */
+    public boolean remove(Object o) {
+        int idx = indexOf(o);
+        if(idx != -1)
+            return remove(idx) != null;
+        else
+            return false;
     }
 
     /**

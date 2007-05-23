@@ -12,7 +12,7 @@ import java.util.Comparator;
  * these comparators are only necessary because the Java 1.1.8 versions of 
  * their classes did not implement the <tt>Comparable</tt> interface.
  */
-public final class Comparators {
+public final class Comparators { 
 
     /**
      * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s.
@@ -135,6 +135,18 @@ public final class Comparators {
      */
     public static Comparator<File> fileComparator() {
         return FILE_COMPARATOR;
+    }
+    
+    /** 
+     * Returns a Comparator that uses the natural compareTo methods on the
+     * given objects.
+     */
+    public static <T extends Comparable<T>> Comparator<T> naturalComparator(Class<? extends T> clazz) {
+        return new Comparator<T>() {
+            public int compare(T o1, T o2) {
+                return o1.compareTo(o2);
+            }
+        };
     }
     
     /**
