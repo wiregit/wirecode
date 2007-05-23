@@ -3,12 +3,12 @@ package com.limegroup.gnutella.util;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.collection.SortedList;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 
@@ -46,8 +46,9 @@ public class ClassCNetworks {
     
     public List<Map.Entry<Integer, Integer>> getTop() {
         List<Map.Entry<Integer, Integer>> ret = 
-            new SortedList<Map.Entry<Integer,Integer>>(CLASS_C_COMPARATOR);
+            new ArrayList<Map.Entry<Integer,Integer>>(counts.size());
         ret.addAll(counts.entrySet());
+        Collections.sort(ret, CLASS_C_COMPARATOR);
         return ret;
     }
     
