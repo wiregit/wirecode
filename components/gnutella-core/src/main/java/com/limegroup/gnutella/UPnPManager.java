@@ -3,9 +3,11 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -19,6 +21,7 @@ import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
@@ -70,7 +73,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * After we discover a router or give up on trying to, we should call stop().
  * 
  */
-public class UPnPManager extends ControlPoint implements DeviceChangeListener {
+public class UPnPManager extends ControlPoint implements DeviceChangeListener, Inspectable {
 
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
@@ -577,4 +580,14 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			}
 		}
 	}
+    
+    public Object inspect() {
+        if (!isNATPresent())
+            return "N/A";
+        Map<String, Object> ret = new HashMap<String,Object>();
+        ret.put("name",_router.getFriendlyName());
+        if (mappingsExist())
+            ret.put("mappings", true);
+        return ret;
+    }
 }
