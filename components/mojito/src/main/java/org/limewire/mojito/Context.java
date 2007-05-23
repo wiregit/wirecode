@@ -869,8 +869,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             }
         }
         
-        executorService.stop();
         messageDispatcher.stop();
+        executorService.stop();
     }
     
     /*
