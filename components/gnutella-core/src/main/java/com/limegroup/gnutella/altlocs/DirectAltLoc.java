@@ -27,7 +27,13 @@ import com.limegroup.gnutella.util.DataUtils;
  */
 public class DirectAltLoc extends AlternateLocation {
 
-	
+    /**
+     * A constant prepending a list of direct locations that is used
+     * to define which locations following it support TLS.
+     */
+    public static final String TLS_IDX = "tls=";
+    
+	/** The node that backs this location. */
 	private final IpPort _node;
 	
     /**

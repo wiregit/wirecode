@@ -49,6 +49,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -1414,10 +1415,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private void addAlternateLocationsToFiles() throws Exception {
         FileDesc[] fds = fman.getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
-            String urn = fds[i].getSHA1Urn().httpStringValue();
+            URN urn = fds[i].getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
-                RouterService.getAltlocManager().add(AlternateLocation.create(loc), null);
+                RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn), null);
             }
         }
     }

@@ -275,7 +275,7 @@ public class HeadPong extends VendorMessage {
             throw new BadPacketException(e);
         }
         
-        byte[] code = getRequired(ggep, CODE);
+        byte[] code = getRequiredGGEPField(ggep, CODE);
         if(!setFieldsFromCode(code[0]))
             return;
         
@@ -283,31 +283,30 @@ public class HeadPong extends VendorMessage {
         _routingBroken = false;
         
         // Otherwise, there's more required.
-        _vendorId = getRequired(ggep, VENDOR);
-        _queueStatus = getRequired(ggep, QUEUE)[0];
-        byte[] features = getIfExists(ggep, FEATURES);
+        _vendorId = getRequiredGGEPField(ggep, VENDOR);
+        _queueStatus = getRequiredGGEPField(ggep, QUEUE)[0];
+        byte[] features = getOptionalGGEPField(ggep, FEATURES);
         if(features.length > 0) {
             _tlsCapable = (features[0] & TLS_CAPABLE) == TLS_CAPABLE;
         }
         
         try {
-            byte[] ranges = getIfExists(ggep, RANGES);
+            byte[] ranges = getOptionalGGEPField(ggep, RANGES);
             if(ranges.length > 0)
                 _ranges = parseRanges(ranges);
             
-            byte[] pushLocs = getIfExists(ggep, PUSH_LOCS);
+            byte[] pushLocs = getOptionalGGEPField(ggep, PUSH_LOCS);
             if(pushLocs.length > 0)
                 _pushLocs = parsePushLocs(pushLocs);
             
-            byte[] altTLS = getIfExists(ggep, TLS_LOCS);
+            byte[] altTLS = getOptionalGGEPField(ggep, TLS_LOCS);
             BitNumbers tls = null;
             if(altTLS.length > 0)
                 tls = new BitNumbers(altTLS);
             
-            byte[] altLocs = getIfExists(ggep, LOCS);
+            byte[] altLocs = getOptionalGGEPField(ggep, LOCS);
             if(altLocs.length > 0)
-                _altLocs = parseAltLocs(altLocs, tls);
-            
+                _altLocs = parseAltLocs(altLocs, tls);            
         } catch(IOException iox) {
             throw new BadPacketException(iox);
         }
@@ -341,7 +340,7 @@ public class HeadPong extends VendorMessage {
     
 
     /** Returns a required field, throwing a BadPacketException if it doesn't exist. */
-    private byte[] getRequired(GGEP ggep, String header) throws BadPacketException {
+    private byte[] getRequiredGGEPField(GGEP ggep, String header) throws BadPacketException {
         try {
             byte[] bytes = ggep.getBytes(header);
             if(bytes.length == 0)
@@ -353,7 +352,7 @@ public class HeadPong extends VendorMessage {
     }
     
     /** Returns the bytes of the field in the GGEP if it exists, otherwise an empty array. */
-    private byte[] getIfExists(GGEP ggep, String header) {
+    private byte[] getOptionalGGEPField(GGEP ggep, String header) {
         if(ggep.hasKey(header)) {
             try {
                 return ggep.getBytes(header);
@@ -604,6 +603,7 @@ public class HeadPong extends VendorMessage {
         return false;
     }
     
+    /** Returns the byte[] of the written GGEP. */
     private static byte[] writeGGEP(GGEP ggep) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -921,7 +921,17 @@ public class HeadPong extends VendorMessage {
 			return true;
 		}
 	}
-	
+    
+    /**
+     * Writes out alternate locations in binary form to the output stream.
+     * This will only write as many locations as possible that can
+     * fit in the PACKET_SIZE.  If tlsIndexes is non-null, the reference
+     * will be set to a BitNumbers whose size is the number of locations
+     * that are attempted to write, with the corresponding bits set
+     * if the location at the index is tls capable.
+     * If includeSize is true, the written data will be prepended by the length
+     * of the amount written.
+     */
 	private static final boolean writeLocs(OutputStream out,
                                            Iterator<DirectAltLoc> altlocs,
                                            AtomicReference<BitNumbers> tlsIndexes,
@@ -939,7 +949,6 @@ public class HeadPong extends VendorMessage {
         
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+ toSend +" locs to pong");
-
         
         BitNumbers bn = null;
         if(tlsIndexes != null) {

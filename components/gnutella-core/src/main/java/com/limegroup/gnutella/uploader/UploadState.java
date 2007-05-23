@@ -20,7 +20,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
@@ -75,7 +74,7 @@ public abstract class UploadState implements HTTPMessage {
                     if(!bn.isEmpty()) {
                         ordered.add(0, new HTTPHeaderValue() {
                             public String httpStringValue() {
-                                return HTTPConstants.TLS_IDX + bn.toHexString();
+                                return DirectAltLoc.TLS_IDX + bn.toHexString();
                             }
                         });
                     }
@@ -124,7 +123,7 @@ public abstract class UploadState implements HTTPMessage {
                     if(!bn.isEmpty()) {
                         ordered.add(0, new HTTPHeaderValue() {
                             public String httpStringValue() {
-                                return HTTPConstants.TLS_IDX + bn.toHexString();
+                                return DirectAltLoc.TLS_IDX + bn.toHexString();
                             }
                         });
                     }

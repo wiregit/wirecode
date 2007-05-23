@@ -614,7 +614,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 final String hex = bn.toHexString();
                 valuesToWrite.add(0, new HTTPHeaderValue() {
                     public String httpStringValue() {
-                        return HTTPConstants.TLS_IDX + "=" + hex;
+                        return DirectAltLoc.TLS_IDX + "=" + hex;
                     }
                 });
             }

@@ -555,8 +555,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         AlternateLocationCollection alc =
             AlternateLocationCollection.create(urn);
         for(int i = 0; i < 20; i++) {
-            AlternateLocation al = AlternateLocation.create(
-                "http://1.2.3." + i + ":1/uri-res/N2R?" + sha1);
+            AlternateLocation al = AlternateLocation.create("1.2.3." + i + ":1", urn);
             alc.add(al);
         }
         

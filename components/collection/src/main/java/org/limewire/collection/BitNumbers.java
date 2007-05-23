@@ -94,7 +94,7 @@ public class BitNumbers {
             int lastNonZero = getLastNonZeroIndex();
             if(lastNonZero == -1) { // completely empty
                 return EMPTY;
-            } else if(lastNonZero == data.length -1) { // uses full width
+            } else if(lastNonZero == data.length - 1) { // uses full width
                 return data;
             } else { // must strip out the extra bytes.
                 byte[] shortened = new byte[lastNonZero+1];
@@ -139,7 +139,7 @@ public class BitNumbers {
     
     /** Returns the last non-empty index. */
     private int getLastNonZeroIndex() {
-        for(int i = data.length - 1; i >= data.length; i--) {
+        for(int i = data.length - 1; i >= 0; i--) {
             if(data[i] != 0)
                 return i;
         }

@@ -104,13 +104,13 @@ public class BitNumbersTest extends BaseTestCase {
         assertEquals("1", bn.toHexString());
     }
     
-    public void testToByteArrayDoesntCutExtra() {
+    public void testToByteArrayCutsExtra() {
         BitNumbers bn = new BitNumbers("100000");
         assertFalse(bn.isEmpty());
         assertEquals(24, bn.getMax());
         for(int i = 0; i < 32; i++) {
             assertEquals(i == 3, bn.isSet(i));
         }
-        assertEquals(new byte[] { 0x10, 0, 0 }, bn.toByteArray() );
+        assertEquals(new byte[] { 0x10 }, bn.toByteArray() );
     }
 }

@@ -567,10 +567,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 	    FileDesc[] fds = fman.getAllSharedFileDescriptors();
 	    for(int i = 0; i < fds.length; i++) {
-	        String urn = fds[i].getSHA1Urn().httpStringValue();
+	        URN urn = fds[i].getSHA1Urn();
 	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-	            String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
-	            RouterService.getAltlocManager().add(AlternateLocation.create(loc),null);
+	            RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn),null);
 	        }
 	    }
         

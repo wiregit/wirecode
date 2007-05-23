@@ -7,7 +7,6 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPUtils;
 
 /** Useful utilities relating to AlternateLocations. */
@@ -37,7 +36,7 @@ public class AltLocUtils {
         int idx = 0;
         while(st.hasMoreTokens()) {
             String token = st.nextToken().trim();
-            if(allowTLS && tlsIdx == null && token.startsWith(HTTPConstants.TLS_IDX)) {
+            if(allowTLS && tlsIdx == null && token.startsWith(DirectAltLoc.TLS_IDX)) {
                 tlsIdx = BitNumbers.EMPTY_BN;
                 try {
                     String value = HTTPUtils.parseValue(token);

@@ -68,9 +68,8 @@ public final class HTTPConstants {
 	public static final String G2_PROTOCOL = "g2";
 	public static final String PUSH_LOCS="fwalt";
 	public static final String FW_TRANSFER="fwt";
-    public static final String TLS_IDX = "pptls=";
     
-	public static final double CHAT_VERSION = 0.1;
+    public static final double CHAT_VERSION = 0.1;
 	public static final double BROWSE_VERSION = 1.0;
 	public static final double QUEUE_VERSION  = 0.1;
 	public static final double G2_VERSION = 1.0;
