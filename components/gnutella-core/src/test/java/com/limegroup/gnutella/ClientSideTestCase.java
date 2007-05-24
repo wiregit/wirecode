@@ -111,7 +111,7 @@ public abstract class ClientSideTestCase
         rs.start();
         RouterService.clearHostCatcher();
         RouterService.connect();
-        Thread.sleep(2000);
+        //Thread.sleep(2000);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         connect();
@@ -138,10 +138,6 @@ public abstract class ClientSideTestCase
                                                   null);
     }
     
-    public static void globalTearDown() throws Exception {
-        shutdown();
-    }
-
      ////////////////////////// Initialization ////////////////////////
 
      private static void connect() 
@@ -243,14 +239,6 @@ public abstract class ClientSideTestCase
         drainAll(testUP);
     }
 
-    private static void shutdown() throws IOException {
-        //System.out.println("\nShutting down.");
-        debug("-Shutting down");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) { }
-    }
-    
     /** Marks the Responses of QueryReply as NOT spam */
     protected void markAsNotSpam(QueryReply qr) throws Exception {
         SpamManager.instance().clearFilterData(); // Start from scratch
