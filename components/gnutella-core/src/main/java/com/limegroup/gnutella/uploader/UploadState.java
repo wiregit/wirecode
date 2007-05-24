@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ public abstract class UploadState implements HTTPMessage {
                 HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
                                       sha1,
                                       os);
-                Set<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
+                Collection<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
                 if(direct.size() > 0) {
                     List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
                     final BitNumbers bn = new BitNumbers(direct.size());
@@ -107,7 +108,7 @@ public abstract class UploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  os);
-                Set<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
+                Collection<DirectAltLoc> direct = UPLOADER.getNextSetOfAltsToSend();
 				if(direct.size() > 0) {
                     List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
                     final BitNumbers bn = new BitNumbers(direct.size());

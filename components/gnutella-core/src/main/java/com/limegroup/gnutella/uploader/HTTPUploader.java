@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,7 +63,7 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
  * file in an HTTP/1.1 session.  However, multiple HTTPUploaders
  * should be used for multiple files in a single HTTP/1.1 session.
  */
-public final class HTTPUploader implements Uploader {
+public class HTTPUploader implements Uploader {
     
 	private static final Log LOG = LogFactory.getLog(HTTPUploader.class);
     /**
@@ -183,6 +184,15 @@ public final class HTTPUploader implements Uploader {
     
     /** The upload type of this uploader. */
     private UploadType _uploadType;
+    
+    /** A simple constructor, for easier testing. */
+    protected HTTPUploader() {
+        _socket = null;
+        STALLED_WATCHDOG = null;
+        _index = -1;
+        _fileName = null;
+        session = null;
+    }
 
     /**
 	 * Consructor for a "normal" non-push upload.  Note that this can
@@ -593,7 +603,7 @@ public final class HTTPUploader implements Uploader {
      * Returns an AlternateLocationCollection of alternates that
      * have not been sent out already.
      */
-    Set<DirectAltLoc> getNextSetOfAltsToSend() {
+    Collection<DirectAltLoc> getNextSetOfAltsToSend() {
         AlternateLocationCollection<DirectAltLoc> coll =
             RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
         Set<DirectAltLoc> ret = null;
