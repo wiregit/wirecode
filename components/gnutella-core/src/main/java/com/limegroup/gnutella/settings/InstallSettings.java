@@ -7,7 +7,7 @@ import org.limewire.setting.SettingsFactory;
 /**
  * Handles installation preferences.
  */
-public final class InstallSettings extends AbstractLimeWireSettings {
+public final class InstallSettings extends LimeWireSettings {
 
     private static final InstallSettings INSTANCE =
         new InstallSettings();

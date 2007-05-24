@@ -23,52 +23,56 @@ import org.limewire.util.FileUtils;
  * from disk for {@link Setting} objects. Each <code>Setting</code> creation 
  * method takes the name of the key and the default value, and all settings 
  * are typed. Since duplicate keys aren't allowed, you must choose a unique 
- * string for your setting key name.  
+ * string for your setting key name, otherwise an exception, 
+ * <code>IllegalArgumentException</code> is thrown.  
  * <p>
- * When you add a new setting, add a public synchronized member to 
- * <code>SettingsFactory</code> to create a setting instance.
+ * When you add a new <code>Setting</code> subclass, add a public synchronized 
+ * method to <code>SettingsFactory</code> to create an instance of the setting.
+ * For example, subclass {@link IntSetting}, <code>SettingsFactory</code> has 
+ * {@link #createIntSetting(String, int)} and
+ * {@link #createRemoteIntSetting(String, int, String, int, int)}.
  * <p>
- * A <code>Setting</code> is stored to disk when the value is altered from the 
- * default value. For example, with a file font.txt without the key ARIAL included:
+ * An example of creating an {@link IntSetting} that uses setting.txt, without the key 
+ * MAX_MESSAGE_SIZE previously included:
 <pre>
-        File f = new File("font.txt");
+        File f = new File("setting.txt");
         SettingsFactory sf = new SettingsFactory(f);
 
-        FontNameSetting font = sf.createRemoteFontNameSetting("ARIAL", 
-                                                       "defaultValue", 
-                                                       "ARIAL_REMOTE");
-        System.out.println(font.getValue());
-        font.setValue("Arial");
-        System.out.println(font.getValue());
+        IntSetting intsetting = sf.createIntSetting("MAX_MESSAGE_SIZE", 1492);
+
+        System.out.println("1: " + intsetting.getValue());
+        intsetting.setValue("2984");
+        System.out.println("2: " + intsetting.getValue());
+        sf.save();
 
     Output:
-        defaultValue
-        Arial
+        1: 1492
+        2: 2984
+ </pre>
 
-With the change from defaultValue to Arial, font.txt now includes:
-        ARIAL=Arial
+With the call sf.save(), setting.txt now includes:
+ <pre>
+        MAX_MESSAGE_SIZE=2984
  </pre>
  * Additionally, the value stored in disk is loaded for each key
- * you specify regardless of the default value in create method. For example 
- * with "ARIAL=Arial" stored in font.txt:
+ * you specify regardless of the default value in the create method. For example 
+ * with "MAX_MESSAGE_SIZE=2984" stored in setting.txt:
  <pre>
-        File f = new File("font.txt");
+        File f = new File("setting.txt");
         SettingsFactory sf = new SettingsFactory(f);
 
-        FontNameSetting font = sf.createRemoteFontNameSetting("ARIAL", 
-                                                        "defaultValue2", 
-                                                        "ARIAL_REMOTE");
-        System.out.println(font.getValue());
-
+        IntSetting intsetting = sf.createIntSetting("MAX_MESSAGE_SIZE", 0);
+        System.out.println(intsetting.getValue());
+        sf.save();
     Output:
-        Arial
-    
+        2984
+  </pre>  
     font.txt still includes:
-        ARIAL=Arial
+ <pre>
+        MAX_MESSAGE_SIZE=2984
  </pre>
- * If font.txt doesn't have the key ARIAL, then the value is "defaultValue2"
- * and font.txt won't have the ARIAL key and value (since the default value 
- * didn't change).
+ * If setting.txt didn't have the key MAX_MESSAGE_SIZE prior to the 
+ * <code>createIntSetting</code> call, then the MAX_MESSAGE_SIZE is 0.
  */
 public final class SettingsFactory implements Iterable<Setting> {    
     /** Time interval, after which the accumulated information expires */
@@ -108,7 +112,7 @@ public final class SettingsFactory implements Iterable<Setting> {
      */
     private RemoteSettingManager remoteManager = new NullRemoteManager();
     
-    /** Whether or not expire-able settings have expired. */
+    /** Whether or not expirable settings have expired. */
     private boolean expired = false;
     
     /**

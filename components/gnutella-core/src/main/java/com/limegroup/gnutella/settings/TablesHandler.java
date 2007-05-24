@@ -15,7 +15,7 @@ import org.limewire.setting.SettingsFactory;
  * because they are accessed less-frequently and must be slightly
  * more mutable than other settings classes.
  */
-public final class TablesHandler extends AbstractLimeWireSettings {
+public final class TablesHandler extends LimeWireSettings {
 
     private static final TablesHandler INSTANCE =
         new TablesHandler();

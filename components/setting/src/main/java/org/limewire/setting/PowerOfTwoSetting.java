@@ -3,20 +3,38 @@ package org.limewire.setting;
 import java.util.Properties;
 
 /**
- * Provides a power of 2 value key-value pair. 
- * <code>PowerOfTwoSetting</code>'s value must be a power of 2 and 
- * greater than 0, otherwise the value is set to the previous power of 2.
+ * Provides a power of 2 setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>PowerOfTwoSetting</code> object with a {@link SettingsFactory}.
+ * <code>PowerOfTwoSetting</code>'s value must be a power of 2 and 
+ * greater than 0. If not a power of two, the value is set to the previous 
+ * power of 2. For example, setting a value of 1023 returns a value of 512 
+ * because 1023 is not a power of 2 (2^9 = 512 and 2^10 = 1024). 
+ * <p>
+ * Create a <code>PowerOfTwoSetting</code> object with a 
+ * {@link SettingsFactory#createPowerOfTwoSetting(String, long)}.
  <pre>
         File f = new File("setting.txt");
         SettingsFactory sf = new SettingsFactory(f);
         PowerOfTwoSetting p2 = sf.createPowerOfTwoSetting("p2", 1);
+        System.out.println("SetValue->GetValue");  
+        for(int i = 1; i < 2000; ){
+            p2.setValue(i);
+            System.out.print(i + "->" + p2.getValue() + " ");
+            i = i * 2;
+        }
+        System.out.print("\n\n");        
         for(int i = 0; i < 10; i++){
             p2.setValue(i);
             System.out.print(i + "->" + p2.getValue() + " ");
         }
+        
+        
+        
     Output:
+        SetValue->GetValue
+        1->1 2->2 4->4 8->8 16->16 32->32 64->64 128->128 256->256 512->512 1024->1024 
+        
         0->1 1->1 2->2 3->2 4->4 5->4 6->4 7->4 8->8 9->8 
  </pre>
  *

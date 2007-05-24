@@ -4,9 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Provides a character array value key-value pair.
+ * Provides a character array setting value. 
+ * As a subclass of <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>CharArraySetting</code> object with a {@link SettingsFactory}. 
+ * Create a <code>CharArraySetting</code> object with a 
+ * {@link SettingsFactory#createCharArraySetting(String, char[])}. 
  */
 public final class CharArraySetting extends Setting {
     
@@ -36,7 +38,7 @@ public final class CharArraySetting extends Setting {
 	}
    
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

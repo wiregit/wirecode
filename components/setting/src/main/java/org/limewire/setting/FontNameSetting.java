@@ -4,32 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Contains a font name value key-value pair.
+ * Provides a font name setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>FontNameSetting</code> object with a {@link SettingsFactory}.
- * For example, with a file font.txt without the key ARIAL included:
-<pre>
-        File f = new File("font.txt");
-        SettingsFactory sf = new SettingsFactory(f);
-        FontNameSetting fn = sf.createRemoteFontNameSetting("key", 
-                                                    "defaultValue", 
-                                                        "remoteKey");
-
-        FontNameSetting font = sf.createRemoteFontNameSetting("ARIAL", 
-                                                       "defaultValue", 
-                                                       "ARIAL_REMOTE");
-        System.out.println(font.getValue());
-        font.setValue("Arial");
-        System.out.println(font.getValue());
-
-    Output:
-        defaultValue
-        Arial
-
-With the change of the value from defaultValue to Arial, font.txt now includes:
-        ARIAL=Arial
- </pre>
- * 
+ * Create a <code>FontNameSetting</code> object with a 
+ * {@link SettingsFactory#createFontNameSetting(String, String)}.
  */
 
  /* TODO: look into creating a true 'FontSetting' that keeps a Font

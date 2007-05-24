@@ -3,11 +3,15 @@ package org.limewire.setting;
 import java.util.Properties;
 
 /**
- * Provides a boolean value key-value pair with a true value a random percentage
- * of time. You set the random percentage of time as a float. 
+ * Provides a boolean setting value that is true a random percentage
+ * of time. As a subclass of 
+ * <code>Setting</code>, the setting has a key. 
+ * <p>
+ * You set the random percentage of time as a float between 0 (never)
+ * and 1 (always). 
  * <p>
  * Create a <code>ProbabilisticBooleanSetting</code> object with a 
- * {@link SettingsFactory}.
+ * {@link SettingsFactory#createProbabilisticBooleanSetting(String, float)}.
  * <p>
  * In the following code example, the probability <code>pb.getBoolean</code>
  * returns true is .001. The probability <code>pb2.getBoolean</code> 
@@ -15,11 +19,11 @@ import java.util.Properties;
 <pre>
         File f = new File("setting.txt");
         SettingsFactory sf = new SettingsFactory(f);
-        ProbabilisticBooleanSetting pb = sf.createProbabilisticBooleanSetting("pb", 5);
+        ProbabilisticBooleanSetting pb = sf.createProbabilisticBooleanSetting("pb", .5f);
         pb.setValue(.001f);//low odds for pb.getBoolean to be true
         System.out.println("pb is " + pb.getBoolean());
 
-        ProbabilisticBooleanSetting pb2 = sf.createProbabilisticBooleanSetting("pb2", 5);
+        ProbabilisticBooleanSetting pb2 = sf.createProbabilisticBooleanSetting("pb2", .5f);
         pb2.setValue(.25f);//return true 25 percent of the time
         System.out.println("pb2 is " + pb2.getBoolean());
 

@@ -8,7 +8,40 @@ import java.util.Properties;
  * A proxy, aka a substitute, for a <code>FileSetting</code> object that returns
  * the value of another file setting as its default value.
  * <p>
- * Create a <code>ProxyFileSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>ProxyFileSetting</code> object with a 
+ * {@link SettingsFactory#createProxyFileSetting(String, FileSetting)}.
+ * <pre>
+        FileSetting genericDownloadFolderSetting = settingsfactory.createFileSetting(
+                                                        "genericDownloadFolder", 
+                                                        new File("/"));
+        ProxyFileSetting audioDownloadFolderSetting = settingsfactory.createProxyFileSetting(
+                                                            "audioDownloadFolder", 
+                                                     genericDownloadFolderSetting);
+        
+        // prints the generic setting's value
+        System.out.println(audioDownloadFolderSetting.getValue());
+        
+        audioDownloadFolderSetting.setValue(new File("/audio"));
+        
+        // audio
+        System.out.println(audioDownloadFolderSetting.getValue());
+        
+        genericDownloadFolderSetting.setValue(new File("/new generic"));
+        
+        //audio
+        System.out.println(audioDownloadFolderSetting.getValue());
+        
+        audioDownloadFolderSetting.revertToDefault();
+        
+        ///new generic
+        System.out.println(audioDownloadFolderSetting.getValue());
+    
+        Output:
+            C:\
+            C:\audio
+            C:\audio
+            C:\new generic
+</pre>
  */
 public class ProxyFileSetting extends FileSetting {
 

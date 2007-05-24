@@ -11,9 +11,11 @@ import org.limewire.util.FileUtils;
 
 
 /**
- * Contains a {@link File} array value for a key.
+ * Provides a {@link File} setting value. As a subclass 
+ * of <code>Setting</code>, the setting has a key. 
  * <p>
- * Create a <code>FileArraySetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>FileArraySetting</code> object with a 
+ * {@link SettingsFactory#createFileArraySetting(String, File[])}.
  */
  
 public class FileArraySetting extends Setting {
@@ -34,7 +36,7 @@ public class FileArraySetting extends Setting {
 	}
     
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

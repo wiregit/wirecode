@@ -5,9 +5,11 @@ import java.util.Properties;
 
 
 /**
- * Provides a {@link File} value key-value pair.
+ * Provides a {@link File} setting value. As a subclass
+ * of <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>FileSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>FileSetting</code> object with a 
+ * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
 public class FileSetting extends Setting {
     
@@ -29,7 +31,7 @@ public class FileSetting extends Setting {
 	}
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * Duplicates the setting so it cannot be changed outside of this package.
 	 * @return the value of this setting
 	 */

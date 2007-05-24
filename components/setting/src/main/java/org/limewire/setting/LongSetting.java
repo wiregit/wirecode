@@ -4,9 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Provides a long value key-value pair.
+ * Provides a long setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>LongSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>LongSetting</code> object with a 
+ * {@link SettingsFactory#createLongSetting(String, long)}.
  */
 public class LongSetting extends AbstractNumberSetting<Long> {
     
@@ -29,7 +31,7 @@ public class LongSetting extends AbstractNumberSetting<Long> {
 	}
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

@@ -9,7 +9,7 @@ import org.limewire.setting.SettingsFactory;
 /**
  * Controls all 'Do not ask this again' or 'Always use this answer' questions.
  */
-public class QuestionsHandler extends AbstractLimeWireSettings {
+public class QuestionsHandler extends LimeWireSettings {
 
     private static final QuestionsHandler INSTANCE =
         new QuestionsHandler();

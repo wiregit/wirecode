@@ -6,9 +6,11 @@ import java.util.Properties;
 
 
 /**
- * Provides a {@link Color} value key-value pair.
+ * Provides a {@link Color} setting value. As a 
+ * subclass of <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>ColorSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>ColorSetting</code> object with a 
+ * {@link SettingsFactory#createColorSetting(String, Color)}.
  */
 public final class ColorSetting extends Setting {
     
@@ -45,7 +47,7 @@ public final class ColorSetting extends Setting {
 	}
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
@@ -62,7 +64,7 @@ public final class ColorSetting extends Setting {
         super.setValue(formatColor(value));
         this.value = value;
 	}
-	/** Assessor for the value of this setting. */
+	/** Returns the value of this setting. */
 	protected void loadValue(String sValue) {
 	    sValue = sValue.trim();
 	    try {
@@ -78,7 +80,7 @@ public final class ColorSetting extends Setting {
 	}
     
     /**
-     * Convert color to string property value
+     * Convert color to string property value.
      * @param color color
      * @return the string property value
      */

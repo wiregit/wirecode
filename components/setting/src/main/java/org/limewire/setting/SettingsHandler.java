@@ -5,7 +5,7 @@ import java.util.List;
 
 
 /**
- * Groups related {@link Settings} objects in one location to reload, revert to
+ * Groups all {@link Settings} objects in one location to reload, revert to
  * a default value, save, or mark as save-able all <code>Settings</code> 
  * objects at once.
  */

@@ -1,11 +1,10 @@
 package org.limewire.setting;
 
 /**
- * Defines an interface for a class to remotely change the value for a key-value
- * pair.
+ * Defines the interface to remotely change the value for a key-value pair.
  * <p> 
  * You can set the controller through 
- * {@link RemoteSettingManager#setRemoteSettingController(RemoteSettingController)}
+ * {@link RemoteSettingManager#setRemoteSettingController(RemoteSettingController)}.
  */
 public interface RemoteSettingController {
     /**

@@ -2,9 +2,14 @@ package org.limewire.setting;
 
 /**
  * 
- * Defines an interface for a class to control retrieve a remote setting.
+ * Defines the interface to control retrieving a remote setting.
  * Additionally, this interface lists a method to set the
  * {@link RemoteSettingController} which in turn updates a key-value setting.
+ * <p>
+ * A setting must be created via 
+ * {@link SettingsFactory SettingsFactory's createRemoteXSetting} in order to 
+ * be remotely controlled.
+ * 
  */
 public interface RemoteSettingManager {
     

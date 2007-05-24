@@ -4,9 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Contains a byte value key-value pair.
+ * Provides a byte setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>ByteSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>ByteSetting</code> object with a 
+ * {@link SettingsFactory#createByteSetting(String, byte)}.
  */
 public final class ByteSetting extends AbstractNumberSetting<Byte> {
     
@@ -32,7 +34,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
 	}
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

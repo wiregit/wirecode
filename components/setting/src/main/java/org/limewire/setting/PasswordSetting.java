@@ -9,10 +9,14 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * Provides a password value key-value pair. <code>PasswordSetting</code> encrypts 
- * a password, determines if passwords match and returns the encryption algorithm used.
+ * Provides a password setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>PasswordSetting</code> object with a {@link SettingsFactory}.
+ * <code>PasswordSetting</code> encrypts a password, determines if passwords 
+ * match and returns the encryption algorithm used.
+ * <p>
+ * Create a <code>PasswordSetting</code> object with a 
+ * {@link SettingsFactory#createPasswordSettingMD5(String, String)}.
  */
 public final class PasswordSetting extends Setting {
 
@@ -87,7 +91,7 @@ public final class PasswordSetting extends Setting {
     }
     
     /**
-     * Assessor for the value of this setting.
+     * Returns the value of this setting.
      * 
      * @return the value of this setting
      */

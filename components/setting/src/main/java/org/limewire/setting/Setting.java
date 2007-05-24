@@ -4,28 +4,46 @@ import java.util.Properties;
 
 
 /**
- * Provides a key-value property as an abstract class. This class, 
- * includes fields for the <code>Setting</code>'s visibility (public vs. 
- * private) and persistence (always save vs don't save). For example, you can 
- * set the visibility to private if you don't want to store the setting. 
+ * Provides a key-value property as an abstract class. The value is typed
+ * in subclasses to avoid casting and ensure your settings are type-safe.
+ * The value has a unique key.
  * <p>
- * Also, <code>Setting</code> includes a method to revert to a default value.
+ * When you add a new <code>Setting</code> subclass, add a public synchronized 
+ * method to {@link SettingsFactory} to create an instance of the setting. 
+ * For example, subclass {@link IntSetting}, <code>SettingsFactory</code> has 
+ * {@link SettingsFactory#createIntSetting(String, int)} and
+ * {@link SettingsFactory#createRemoteIntSetting(String, int, String, int, int)}.
  * <p>
  * <code>Setting</code> includes an abstract method to load a <code>String</code>
  * into the key-value property. You are responsible to convert the 
  * <code>String</code> to the appropriate type in a subclass. 
  * <p>
- * For example, if your subclass is for a boolean setting you can
- * have a boolean field i.e. <code>myBoolValue</code>, in the class. Then you 
- * would set <code>myBool</code> with true or false depending on the 
- * <code>String<code> argument. 
- * <pre>
- * 
- *     protected void loadValue(String sValue) {
-           myBoolValue = Boolean.valueOf(sValue.trim()).booleanValue();
-       }
- * </pre>
+ * For example, if your subclass is for an integer setting you can
+ * have a integer field i.e. <code>myIntValue</code>, in the class. Then you 
+ * would set <code>myIntValue</code> with the integer converted 
+ * <code>String<code> argument, for example: 
+ <pre> 
+   protected void loadValue(String sValue) {
+        try {
+            value = Integer.parseInt(sValue.trim());
+        } catch(NumberFormatException nfe) {
+            revertToDefault();
+        }
+    }
+ </pre>
+ *<p>
+ * This class, includes fields for the <code>Setting</code>'s visibility 
+ * (public vs. private) and persistence (always save vs don't save). 
  * <p>
+ * Visibility and persistence are just fields for a property; what the field 
+ * means to your application is up to you. For example, you could give the 
+ * setting a "don't save" value and when it's time to store the setting to a 
+ * database, you check the setting and take appropriate actions.
+ * <p>
+ * See {@link SettingsFactory} for an example of creating an 
+ * <code>IntSetting</code> object which is a
+ * subclass of <code>Setting</code> . Additionally the
+ * example shows how to load and save the setting to disk.
  */
 public abstract class Setting {
 

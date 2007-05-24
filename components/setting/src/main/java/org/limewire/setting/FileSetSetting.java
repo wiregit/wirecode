@@ -10,12 +10,15 @@ import java.util.StringTokenizer;
 
 
 /**
- * Provides a <code>Set</code> of {@link File} values for a key. 
+ * Provides a {@link File} <code>Set</code> setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
+ * <p> 
  * <code>FileSetSetting</code> class includes methods to add/remove 
  * <code>File</code>s, get <code>File</code> values as an array and return 
  * the length of the <code>File</code> set.
  * <p>
- * Create a <code>FileSetSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>FileSetSetting</code> object with a 
+ * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
  
 public class FileSetSetting extends Setting {
@@ -35,7 +38,7 @@ public class FileSetSetting extends Setting {
 	}
 
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

@@ -6,14 +6,17 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
- * Provides a <code>Set</code> of <code>String</code> values for a key. 
+ * Provides a <code>String</code> <code>Set</code> setting value. As a 
+ * subclass of <code>Setting</code>, the setting has a key.
+ * <p>
  * <code>StringSetSetting</code> class includes methods to add/remove 
  * <code>String</code>s, get <code>String</code> values as an array and return 
  * the number of <code>String</code>s. Unlike {@link StringArraySetting}, you
  * can add and remove individual <code>String</code>s to the set while 
  * maintaining the existing set.
  * <p>
- * Create a <code>StringSetSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>StringSetSetting</code> object with a 
+ * {@link SettingsFactory#createStringSetSetting(String, String)}.
  */
 public class StringSetSetting extends Setting {
 
@@ -25,7 +28,7 @@ public class StringSetSetting extends Setting {
     }
     
     /**
-     * Assessor for the value of this setting.
+     * Returns the value of this setting.
      * 
      * @return the value of this setting
      */

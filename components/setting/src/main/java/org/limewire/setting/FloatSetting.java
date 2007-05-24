@@ -4,9 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Provides a float value key-value pair. 
+ * Provides a float setting value. As a subclass of 
+ * <code>Setting</code>, the setting has a key.
  * <p>
- * Create a <code>FloatSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>FloatSetting</code> object with a 
+ * {@link SettingsFactory#createFloatSetting(String, float)}.
  */
 public class FloatSetting extends AbstractNumberSetting<Float> {
     
@@ -33,7 +35,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
 	}
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */

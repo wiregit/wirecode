@@ -10,7 +10,7 @@ import com.limegroup.gnutella.Assert;
  * the factory via LimeProps.instance().getFactory() and add
  * settings to that factory.
  */
-public class LimeProps extends AbstractLimeWireSettings {
+public class LimeProps extends LimeWireSettings {
         
     private static final LimeProps INSTANCE = new LimeProps();
     

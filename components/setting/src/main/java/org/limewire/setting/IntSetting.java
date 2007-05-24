@@ -4,9 +4,11 @@ import java.util.Properties;
 
 
 /**
- * Provides an int value key-value pair. 
+ * Provides an int setting value. As a subclass of <code>Setting</code>, 
+ * the setting has a key.
  * <p>
- * Create a <code>IntSetting</code> object with a {@link SettingsFactory}.
+ * Create a <code>IntSetting</code> object with a 
+ * {@link SettingsFactory#createIntSetting(String, int)}.
  */
 public final class IntSetting extends AbstractNumberSetting<Integer> {
     
@@ -33,7 +35,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
     }
         
 	/**
-	 * Assessor for the value of this setting.
+	 * Returns the value of this setting.
 	 * 
 	 * @return the value of this setting
 	 */
