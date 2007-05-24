@@ -57,9 +57,6 @@ public class FilePieceReader implements PieceReader {
     private final Queue<Piece> pieceQueue = new PriorityQueue<Piece>(
             MAX_BUFFERS);
 
-//    private final ExecutorService QUEUE = ExecutorsHelper
-//            .newProcessingQueue("DiskPieceReader");
-
     /**
      * Single queue that is used for all readers.
      */
@@ -79,9 +76,10 @@ public class FilePieceReader implements PieceReader {
     private final ByteBufferCache bufferCache;
 
     /**
-     * Number of buffers currently in use by jobs. 
+     * Number of buffers currently in use by jobs. Obtain
+     * {@link #bufferPoolLock} before accessing.
      */
-    private volatile int bufferInUseCount;
+    private int bufferInUseCount;
 
     /**
      * The offset of the next piece that is going to be returned by
@@ -94,7 +92,7 @@ public class FilePieceReader implements PieceReader {
      * The offset of the next piece that is going to be processed by a job. This
      * field keeps track of how far the file has been read from disk.
      */
-    private long processingOffset;
+    private volatile long processingOffset;
 
     /**
      * The remaining number of bytes to read.
@@ -104,9 +102,9 @@ public class FilePieceReader implements PieceReader {
     /**
      * If true, the reader has been shutdown.
      */
-    private AtomicBoolean shutdown = new AtomicBoolean();
+    private final AtomicBoolean shutdown = new AtomicBoolean();
 
-    private AtomicInteger jobCount = new AtomicInteger();
+    private final AtomicInteger jobCount = new AtomicInteger();
 
     public FilePieceReader(ByteBufferCache bufferCache, File file, long offset,
             long length, PieceListener listener) throws IOException {
@@ -144,6 +142,8 @@ public class FilePieceReader implements PieceReader {
             pieceQueue.add(piece);
         }
 
+        // only notify the listener if the next call to next() is guaranteed to
+        // return a valid piece 
         if (offset == readOffset) {
             listener.readSuccessful();
         }
@@ -207,8 +207,9 @@ public class FilePieceReader implements PieceReader {
             
             bufferPool.add(buffer);
             bufferInUseCount--;
+
+            spawnJobs();
         }
-        spawnJobs();
     }
 
     public void release(Piece piece) {
@@ -299,7 +300,7 @@ public class FilePieceReader implements PieceReader {
                 int length = (int) Math.min(BUFFER_SIZE, remaining);
                 ByteBuffer buffer = bufferPool.remove();
                 bufferInUseCount++;
-                Runnable job = new PieceReaderJob2(buffer, processingOffset,
+                Runnable job = new PieceReaderJob(buffer, processingOffset,
                         length);
                 processingOffset += length;
                 remaining -= length;
@@ -309,95 +310,57 @@ public class FilePieceReader implements PieceReader {
         }
     }
 
-//    private class PieceReaderJob implements Runnable {
-//
-//        private ByteBuffer buffer;
-//
-//        private long offset;
-//
-//        private int length;
-//
-//        public PieceReaderJob(ByteBuffer buffer, long offset, int length) {
-//            this.buffer = buffer;
-//            this.offset = offset;
-//            this.length = length;
-//        }
-//
-//        public void run() {
-//            buffer.clear();
-//            buffer.limit(length);
-//
-//            IOException exception = null;
-//            RandomAccessFile raf = null;
-//            try {
-//                raf = new RandomAccessFile(FilePieceReader.this.getFile(), "r");
-//                raf.seek(offset);
-//                raf.readFully(buffer.array(), 0, length);
-//            } catch (IOException e) {
-//                exception = e;
-//            } finally {
-//                if (raf != null) {
-//                    try {
-//                        raf.close();
-//                    } catch (IOException e) {
-//                        LOG.error("Could not close file: ", e);
-//                    }
-//                }
-//            }
-//
-//            if (exception != null) {
-//                FilePieceReader.this.failed(exception);
-//            } else {
-//                FilePieceReader.this.add(offset, buffer);
-//            }
-//        }
-//
-//    }
-
     /**
      * A simple job that reads a chunk of data form a file channel.
      */
-    private class PieceReaderJob2 implements Runnable {
+    private class PieceReaderJob implements Runnable {
 
-        private ByteBuffer buffer;
+        private final ByteBuffer buffer;
 
-        private long offset;
+        private final long offset;
 
-        private int length;
+        private final int length;
 
-        public PieceReaderJob2(ByteBuffer buffer, long offset, int length) {
+        public PieceReaderJob(ByteBuffer buffer, long offset, int length) {
             this.buffer = buffer;
             this.offset = offset;
             this.length = length;
         }
 
         public void run() {
-            buffer.clear();
-            buffer.limit(length);
-
-            IOException exception = null;
             try {
-                while (buffer.hasRemaining()) {
-                    channel.read(buffer, offset + buffer.position());
-                }
-            } catch (IOException e) {
-                exception = e;
-            }
-
-            if (exception != null) {
-                try {
-                    FilePieceReader.this.failed(exception);
-                } finally {
+                if (shutdown.get()) {
                     release(buffer);
+                    return;
                 }
-            } else {
-                buffer.flip();
-                assert buffer.remaining() == length;
 
-                FilePieceReader.this.add(offset, buffer);
+                buffer.clear();
+                buffer.limit(length);
+
+                IOException exception = null;
+                try {
+                    while (buffer.hasRemaining()) {
+                        channel.read(buffer, offset + buffer.position());
+                    }
+                } catch (IOException e) {
+                    exception = e;
+                }
+
+                if (exception != null) {
+                    try {
+                        FilePieceReader.this.failed(exception);
+                    } finally {
+                        release(buffer);
+                    }
+                } else {
+                    buffer.flip();
+                    assert buffer.remaining() == length;
+
+                    FilePieceReader.this.add(offset, buffer);
+                }
+            } finally {            
+                jobCount.decrementAndGet();
             }
-            
-            jobCount.decrementAndGet();
         }
 
     }
