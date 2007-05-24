@@ -37,9 +37,9 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindValueResult;
@@ -81,7 +81,8 @@ public class CommandHandler {
             "rt_gui",
             "tiles_gui",
             "arcs_gui",
-            "test"
+            "test",
+            "bootstrapped"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) {
@@ -449,5 +450,13 @@ public class CommandHandler {
         Class clazz = Class.forName("org.limewire.mojito.visual.ArcsVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
+    }
+    
+    public static void bootstrapped(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+    	Context context = (Context)dht;
+    	
+    	boolean bootstrapped = context.isBootstrapped();
+    	context.setBootstrapped(!bootstrapped);
+    	System.out.println(bootstrapped + " -> " + (!bootstrapped));
     }
 }
