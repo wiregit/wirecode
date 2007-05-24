@@ -63,6 +63,6 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/meverett/lib/mp3spi/MpegAudioSPI1.9.4/lib/basicplayer3.0.jar"/>
+	<classpathentry kind="src" path="/BasicPlayer3.0"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
