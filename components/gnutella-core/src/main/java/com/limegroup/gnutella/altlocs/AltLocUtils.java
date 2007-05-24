@@ -21,7 +21,7 @@ public class AltLocUtils {
      * If either sha1 or locations are null, nothing is done.
      * @param sha1 The expected sha1 of each location.  If mismatched, an AssertionError is thrown.
      * @param locations The comma-separated string of alternate locations.
-     * @param allowTLS Whether or not a pptls=# index is allowed.
+     * @param allowTLS Whether or not a tls=# index is allowed.
      * @param function The closure-like function that each location is passed to.
      */
     public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, 

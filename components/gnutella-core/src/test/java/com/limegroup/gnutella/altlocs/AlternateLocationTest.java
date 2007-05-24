@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -432,6 +433,24 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         for(int i=0; i<HugeTestUtils.SOME_IPS.length; i++) {
             String loc = HugeTestUtils.SOME_IPS[i];
             AlternateLocation.create(loc, HugeTestUtils.URNS[0]);
+        }
+    }
+    
+    public void testAlternateLocationKeepsTLSInfo() throws Exception {
+        for(int i = 0; i < HugeTestUtils.SOME_IPS.length; i++) {
+            AlternateLocation nonTLS = AlternateLocation.create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.SHA1, false);
+            AlternateLocation tls = AlternateLocation.create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.SHA1, true);
+            
+            DirectAltLoc d1 = (DirectAltLoc)nonTLS;
+            DirectAltLoc d2 = (DirectAltLoc)tls;
+            
+            IpPort p1 = d1.getHost();
+            IpPort p2 = d2.getHost();
+            
+            if(p1 instanceof Connectable)
+                assertFalse(((Connectable)p1).isTLSCapable());
+            assertInstanceof(Connectable.class, p2);
+            assertTrue(((Connectable)p2).isTLSCapable());
         }
     }
     
