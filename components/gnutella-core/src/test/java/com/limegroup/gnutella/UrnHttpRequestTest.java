@@ -9,11 +9,12 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.limewire.util.CommonUtils;
-
 import junit.framework.Test;
+
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
@@ -50,6 +51,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     public static void globalSetUp() {
         ROUTER_SERVICE  = new RouterService(new ActivityCallbackStub());
+        ROUTER_SERVICE.start();
     }
     
 	/**
@@ -60,38 +62,20 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 	}
 
 	protected void setUp() throws Exception {
-
-		if(RouterService.isLoaded()) return;
-
-		final File TEMP_DIR = new File("temp");
-		TEMP_DIR.mkdirs();
-		TEMP_DIR.deleteOnExit();
-		setSharedDirectories(new File[] {TEMP_DIR});
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
-		String dirString = "com/limegroup/gnutella";
-		File testDir = CommonUtils.getResourceFile(dirString);
-		assertTrue("could not find the images directory", testDir.isDirectory());
-		File[] files = testDir.listFiles();
-
-        if ( files != null ) {
-    		for(int i=0; i<files.length; i++) {
-    			if(!files[i].isFile()) continue;
-    			CommonUtils.copyResourceFile(dirString+"/"+files[i].getName(), 
-											 new File(TEMP_DIR, files[i].getName() + ".tmp"));
-    		}		
+        // create shared files with random content
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            byte[] data = new byte[random.nextInt(255) + 1];
+            random.nextBytes(data);
+            FileUtils.writeObject(getSharedDirectory() + File.separator + "file" + i + ".tmp", data);
         }
         
-        Thread.sleep(1000); // let the file copying flush to the OS
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 
-		ROUTER_SERVICE.start();
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 
-		try {
-			// sleep to let the file manager initialize
-			Thread.sleep(4000);
-		} catch(InterruptedException e) {
-			fail("thread should not have been interrupted", e);
-		}
-		assertGreaterThan("FileManager should have loaded files", 
+        RouterService.getFileManager().startAndWait(4000);
+        assertGreaterThan("FileManager should have loaded files", 
 				   4, RouterService.getFileManager().getNumFiles());
 
 	}

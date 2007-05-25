@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -431,6 +433,43 @@ public abstract class FileManager {
         cleanIndividualFiles();
 		loadSettings();
         SimppManager.instance().addListener(qrpUpdater);
+    }
+    
+    /**
+     * Invokes {@link #start()} and waits for <code>timeout</code>
+     * milliseconds for the initialization to finish.
+     * 
+     * @param timeout timeout in milliseconds
+     * @throws InterruptedException if interrupted while waiting
+     * @throws TimeoutException if timeout elapsed before initialization completed 
+     */
+    public void startAndWait(long timeout) throws InterruptedException, TimeoutException {
+        final AtomicBoolean done = new AtomicBoolean();
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                    synchronized (done) {
+                        done.set(true);
+                        done.notify();                    
+                    }
+                }
+            }            
+        };
+        addFileEventListener(listener);
+        try {
+            start();
+            synchronized (done) {
+                if (!done.get()) {
+                    done.wait(timeout);
+                }
+            }
+        } finally {
+            removeFileEventListener(listener);
+        }
+
+        if (!done.get()) {
+            throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
+        }
     }
     
     public void stop() {
