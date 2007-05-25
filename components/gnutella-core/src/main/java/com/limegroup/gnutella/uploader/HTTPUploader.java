@@ -815,7 +815,6 @@ public class HTTPUploader implements Uploader {
                 if ( (str==null) || (str.equals("")) ) 
                     break;
 
-
                 if (isForcedShare())
                     BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
                 else 
