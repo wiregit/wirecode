@@ -33,6 +33,7 @@
 	<classpathentry kind="src" path="components/storeserver/src/main/java"/>
 	<classpathentry kind="src" path="components/storeserver/src/test/html"/>
 	<classpathentry kind="src" path="components/storeserver/src/test/java"/>
+	<classpathentry kind="src" path="components/storeserver/doc/main"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
