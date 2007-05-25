@@ -3,9 +3,9 @@ package org.limewire.collection;
 /**
  * A one argument function. 
  */
-public interface Function<K, V> {
+public interface Function<I, O> {
     /** 
      * Applies this function to argument, returning the result.
      */
-    public V apply(K argument);
+    public O apply(I argument);
 }

@@ -6,14 +6,19 @@ import org.limewire.nio.statemachine.IOStateObserver;
 
 public class StubIOStateObserver implements IOStateObserver {
     
-    private boolean statesFinished;
-    private boolean shutdown;
-    private IOException iox;
+    private volatile boolean statesFinished;
+    private volatile boolean shutdown;
+    private volatile IOException iox;
     
     public void clear() {
         statesFinished = false;
         shutdown = false;
         iox = null;
+    }
+    
+    public synchronized void waitForFinish() throws Exception {
+        while(!statesFinished && !shutdown && iox == null)
+            wait();
     }
 
     public synchronized void handleStatesFinished() {

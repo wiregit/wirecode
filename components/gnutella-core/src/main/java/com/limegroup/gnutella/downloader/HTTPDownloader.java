@@ -598,10 +598,11 @@ public class HTTPDownloader implements BandwidthTracker {
                             else
                                 assert false : "empty pushloc in downloader";
                         }
+                    } else if(loc instanceof DirectAltLoc) {
+                        IpPort host = ((DirectAltLoc)loc).getHost();
+                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable())
+                            bn.set(valuesToWrite.size());
                     }
-                    
-                    if(includeTLS && loc instanceof Connectable && ((Connectable)loc).isTLSCapable())
-                        bn.set(valuesToWrite.size());
                     valuesToWrite.add(loc);
                     stored.add(loc);
                 }
@@ -610,11 +611,11 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         if(valuesToWrite != null) {
-            if(bn != null) {
+            if(bn != null && !bn.isEmpty()) {
                 final String hex = bn.toHexString();
                 valuesToWrite.add(0, new HTTPHeaderValue() {
                     public String httpStringValue() {
-                        return DirectAltLoc.TLS_IDX + "=" + hex;
+                        return DirectAltLoc.TLS_IDX + hex;
                     }
                 });
             }
