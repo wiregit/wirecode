@@ -15,15 +15,12 @@ import org.limewire.util.BaseTestCase;
  */
 // TODO: test fairness when sharing one throttle among multiple streams
 public class BandwidthThrottleTest extends BaseTestCase {
-    public BandwidthThrottleTest(String name) {
-        super(name);
-    }
 
     /** Time per test. */
     private final int TIME = 1000; // 1 second
 
     /** bytesSent should be the desired value + or - FUDGE_FACTOR */
-    private final float FUDGE_FACTOR = 0.12f; // 12 percent
+    private static final float FUDGE_FACTOR = 0.12f; // 12 percent
 
     private BandwidthThrottle throttle;
 
@@ -35,68 +32,68 @@ public class BandwidthThrottleTest extends BaseTestCase {
 
     private int bytesSent;
 
-    /** The following are not used for testBandwidthThrottle */
+    private long expectedBytes;
+
     private PipedOutputStream pout;
 
     private PipedInputStream pin;
 
     private OutputStream out;
 
+    public BandwidthThrottleTest(String name) {
+        super(name);
+    }
+
     public static Test suite() {
         return buildTestSuite(BandwidthThrottleTest.class);
     }
 
-    protected void setUp() {
+    @Override
+    protected void setUp() throws IOException {
         // each test sets rate
         throttle = new BandwidthThrottle(0);
         random = new Random();
-        startTime = System.currentTimeMillis();
         bytesSent = 0;
 
-        try {
-            pout = new PipedOutputStream();
-            pin = new PipedInputStream(pout);
-            out = new ThrottledOutputStream(pout, throttle);
-        } catch (IOException e) {
-            fail("Couldn't set up stream", e);
-        }
-
-        stopTime = startTime + TIME; // do this last, since time matters
+        pout = new PipedOutputStream();
+        pin = new PipedInputStream(pout);
+        out = new ThrottledOutputStream(pout, throttle);
     }
 
-    public void testBandwidthThrottle() {
-        final int RATE = 100; // slow, 100 bytes/second
-        throttle.setRate(RATE);
-        final int BYTES = TIME / 1000 * RATE;
-
+    /**
+     * @param rate bytes / second
+     */
+    public void initExpectedBytes(int rate) {
+        throttle.setRate(rate);
+        expectedBytes = TIME / 1000 * rate;
+        startTime = System.currentTimeMillis();
+        stopTime = startTime + TIME; 
+    }
+    
+    public void testBandwidthThrottleSlow() {
+        initExpectedBytes(100);
         while (System.currentTimeMillis() < stopTime) {
-            int bytesToSend = random.nextInt(15); // more or less than N
+            int bytesToSend = random.nextInt(15);
             bytesSent += throttle.request(bytesToSend);
         }
-        assertLessThan("Wrong number of bytes: " + bytesSent, FUDGE_FACTOR
-                * BYTES, Math.abs(bytesSent - BYTES));
+        assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
+                * expectedBytes, Math.abs(bytesSent - expectedBytes));
     }
 
-    public void testThrottledOutputStreamByte() throws Exception {
-        final int RATE = 20000; // fast! 10 KB/second
-        throttle.setRate(RATE);
-        final int BYTES = TIME / 1000 * RATE; // 200 bytes
-
+    public void testThrottledOutputStreamFast() throws Exception {
+        initExpectedBytes(20 * 1000);
         while (System.currentTimeMillis() < stopTime) {
             byte b = (byte) random.nextInt();
             out.write(b);
             assertTrue("Bad byte", (byte) pin.read() == b);
             bytesSent++;
         }
-        assertLessThan("Wrong number of bytes: " + bytesSent, FUDGE_FACTOR
-                * BYTES, Math.abs(bytesSent - BYTES));
+        assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
+                * expectedBytes, Math.abs(bytesSent - expectedBytes));
     }
 
-    public void testThrottledOutputStreamBytes() throws Exception {
-        final int RATE = 1000; // medium fast
-        throttle.setRate(RATE);
-        final int BYTES = TIME / 1000 * RATE;
-
+    public void testThrottledOutputStreamWritePartialByteArray() throws Exception {
+        initExpectedBytes(1000);
         byte[] buf = new byte[150];
         while (System.currentTimeMillis() < stopTime) {
             random.nextBytes(buf);
@@ -106,15 +103,12 @@ public class BandwidthThrottleTest extends BaseTestCase {
                 assertTrue("Bad byte", (byte) pin.read() == buf[i]);
             bytesSent += n;
         }
-        assertLessThan("Wrong number of bytes: " + bytesSent, FUDGE_FACTOR
-                * BYTES, Math.abs(bytesSent - BYTES));
+        assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
+                * expectedBytes, Math.abs(bytesSent - expectedBytes));
     }
 
-    public void testThrottledOutputStreamBytes2() throws Exception {
-        final int RATE = 1000; // medium fast
-        throttle.setRate(RATE);
-        final int BYTES = TIME / 1000 * RATE;
-
+    public void testThrottledOutputStreamWriteFullByteArray() throws Exception {
+        initExpectedBytes(1000);
         byte[] buf = new byte[150];
         while (System.currentTimeMillis() < stopTime) {
             random.nextBytes(buf);
@@ -123,8 +117,8 @@ public class BandwidthThrottleTest extends BaseTestCase {
                 assertTrue("Bad byte", (byte) pin.read() == buf[i]);
             bytesSent += buf.length;
         }
-        assertLessThan("Wrong number of bytes: " + bytesSent, FUDGE_FACTOR
-                * BYTES, Math.abs(bytesSent - BYTES));
+        assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
+                * expectedBytes, Math.abs(bytesSent - expectedBytes));
     }
 
 }
