@@ -86,6 +86,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
             byte b = (byte) random.nextInt();
             out.write(b);
             assertTrue("Bad byte", (byte) pin.read() == b);
+            assertEquals("Too many bytes in stream", 0, pin.available());
             bytesSent++;
         }
         assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
@@ -101,6 +102,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
             out.write(buf, 0, n);
             for (int i = 0; i < n; i++)
                 assertTrue("Bad byte", (byte) pin.read() == buf[i]);
+            assertEquals("Too many bytes in stream", 0, pin.available());
             bytesSent += n;
         }
         assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
@@ -115,6 +117,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
             out.write(buf);
             for (int i = 0; i < buf.length; i++)
                 assertTrue("Bad byte", (byte) pin.read() == buf[i]);
+            assertEquals("Too many bytes in stream", 0, pin.available());
             bytesSent += buf.length;
         }
         assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
