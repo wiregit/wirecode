@@ -64,7 +64,7 @@ public final class NIOSocketTest extends BaseTestCase {
             assertEquals(0, read.position());
             
             socket.setReadObserver(icro);
-            Thread.sleep(500); // let NIODispatcher to its thang.
+            NIOTestUtils.waitForNIO();
             
             assertEquals(100, read.position()); // data was transferred to the reader.
             for(int i = 0; i < 100; i++)
@@ -80,7 +80,7 @@ public final class NIOSocketTest extends BaseTestCase {
             new Random().nextBytes(rnd);
             accepted.getOutputStream().write(rnd); // write some more, make sure it goes to stream
             
-            Thread.sleep(500);
+            NIOTestUtils.waitForNIO();
             assertEquals(0, read.position());
             assertEquals(100, stream.read(readData));
             assertEquals(rnd, readData);
@@ -109,7 +109,7 @@ public final class NIOSocketTest extends BaseTestCase {
 	    for(int i = 0; i < readIn.length; i++)
 	        assertEquals(i, readIn[i]);
 	        
-        Thread.sleep(1000);
+	    NIOTestUtils.waitForNIO();
 	    
 	    // Make sure that the NIOInputStream did gobble up the data.
 	    // This is checking the internal implementation in NIOSocket, so
@@ -123,7 +123,7 @@ public final class NIOSocketTest extends BaseTestCase {
 	    
 	    ReadTester reader = new ReadTester();
 	    socket.setReadObserver(reader);
-	    Thread.sleep(1000); // let the NIO thread pump since setReadObserver is invokedLater
+	    NIOTestUtils.waitForNIO(); // let the NIO thread pump since setReadObserver is invokedLater
 	    ByteBuffer remaining = reader.getRead();
 	    assertEquals(remaining.toString(), data.length - readIn.length, remaining.remaining());
 	    for(int i = readIn.length; i < data.length; i++)
@@ -142,14 +142,14 @@ public final class NIOSocketTest extends BaseTestCase {
         
         RCROAdapter entry = new RCROAdapter();
         socket.setReadObserver(entry);
-        Thread.sleep(1000);
+        NIOTestUtils.waitForNIO();
         assertInstanceof(SocketInterestReadAdapter.class, entry.getReadChannel());
         assertSame(channel, ((SocketInterestReadAdapter)entry.getReadChannel()).getChannel());
         
         RCRAdapter chain1 = new RCRAdapter();
         entry.setReadChannel(chain1);
         socket.setReadObserver(entry);
-        Thread.sleep(1000);
+        NIOTestUtils.waitForNIO();
         assertInstanceof(SocketInterestReadAdapter.class, chain1.getReadChannel());
         assertSame(channel, ((SocketInterestReadAdapter)chain1.getReadChannel()).getChannel());
         assertSame(chain1, entry.getReadChannel());
@@ -157,7 +157,7 @@ public final class NIOSocketTest extends BaseTestCase {
         RCRAdapter chain2 = new RCRAdapter();
         chain1.setReadChannel(chain2);
         socket.setReadObserver(entry);
-        Thread.sleep(1000);
+        NIOTestUtils.waitForNIO();
         assertInstanceof(SocketInterestReadAdapter.class, chain2.getReadChannel());
         assertSame(channel, ((SocketInterestReadAdapter)chain2.getReadChannel()).getChannel());        
         assertSame(chain2, chain1.getReadChannel());
@@ -171,38 +171,59 @@ public final class NIOSocketTest extends BaseTestCase {
         socket.connect(new InetSocketAddress("www.google.com", 80));
         assertTrue(socket.isConnected());
         socket.close();
-        Thread.sleep(500);
+        NIOTestUtils.waitForNIO();
         assertFalse(socket.isConnected());
     }
     
+    public void testBlockingConnectAfterShutdown() throws Exception {
+        NIOSocket socket = new NIOSocket();
+        socket.shutdown();
+        
+        try {
+            socket.connect(new InetSocketAddress("www.google.com", 80), 1000);
+            fail("shouldn't have connected shutdown socket");
+        } catch (ConnectException expected) {
+        } catch (SocketTimeoutException e) {
+            fail("expected ConnectTimeoutException");
+        } finally {
+            socket.close();
+        }
+    }
+
     public void testBlockingConnectFailing() throws Exception {
         NIOSocket socket = new NIOSocket();
         
         // Measure time for testNonBlockingConnectFailing()
         long start = System.currentTimeMillis();
         try {
+            // Google has a firewall that drops packets so this should timeout
+            // this test will fail if Google ever returns connection refused instead   
             socket.connect(new InetSocketAddress("www.google.com", 9999));
             fail("shouldn't have connected");
         } catch(ConnectException iox) {
             assertFalse(socket.isConnected());
+        } finally {
+            socket.close();
         }
+        
         long end = System.currentTimeMillis();
         blockFailTime = (int)(end - start);
-        
-        socket.close();
+
         //System.out.println("Time: " + (end-start));
     }
     
     public void testBlockingConnectTimesOut() throws Exception {
         NIOSocket socket = new NIOSocket();
         try {
+            // Google has a firewall that drops packets so this should timeout
+            // this test will fail if Google ever returns connection refused instead   
             socket.connect(new InetSocketAddress("www.google.com", 9999), 1000);
             fail("shouldn't have connected");
         } catch(SocketTimeoutException iox) {
             assertEquals("operation timed out (1000)", iox.getMessage());
+        } finally {
+            socket.close();
         }
-        
-        socket.close();
     }
     
     public void testNonBlockingConnect() throws Exception {
@@ -215,7 +236,7 @@ public final class NIOSocketTest extends BaseTestCase {
         assertFalse(observer.isShutdown());
         assertNull(observer.getIoException());
         socket.close();
-        Thread.sleep(500);
+        NIOTestUtils.waitForNIO();
         assertFalse(observer.isShutdown()); // doesn't get both connect & shutdown
         assertFalse(socket.isConnected());
     }

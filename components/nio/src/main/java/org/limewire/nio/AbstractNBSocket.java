@@ -10,8 +10,10 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -272,26 +274,39 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     
     /** Connects to addr with the given timeout (in milliseconds) */
     public final void connect(SocketAddress addr, int timeout) throws IOException {
-        BlockingConnecter connecter = new BlockingConnecter();
-        synchronized(connecter) {
-            if(!connect(addr, timeout, connecter)) {
-                long then = System.currentTimeMillis();
-                try {
-                	// wait a little extra to allow other threads to notify
-                    connecter.wait(timeout > 0 ? timeout + 1000 : timeout);
-                } catch(InterruptedException ie) {
-                    shutdown();
-                    throw new InterruptedIOException(ie);
+        if (timeout < 0) {
+            throw new IllegalArgumentException("timeout must not be < 0");
+        }
+        
+        final CountDownLatch connectLatch = new CountDownLatch(1);
+        ConnectObserver connecter = new ConnectObserver() {
+            public void handleConnect(Socket s) { connectLatch.countDown(); }
+            public void shutdown() { connectLatch.countDown(); }            
+            // unused
+            public void handleIOException(IOException e) { }
+        };
+
+        if(!connect(addr, timeout, connecter)) {
+            long then = System.currentTimeMillis();
+            try {
+                if (timeout == 0) {
+                    connectLatch.await();
+                } else {
+                    // wait a little extra to allow other threads to notify
+                    connectLatch.await(timeout + 1000, TimeUnit.MILLISECONDS);
                 }
-                
-                if(!isConnected()) {
-                    shutdown();
-                    long now = System.currentTimeMillis();
-                    if(timeout != 0 && now - then >= timeout)
-                        throw new SocketTimeoutException("operation timed out (" + timeout + ")");
-                    else
-                        throw new ConnectException("Unable to connect!");
-                }
+            } catch(InterruptedException ie) {
+                shutdown();
+                throw new InterruptedIOException(ie);
+            }
+
+            if(!isConnected()) {
+                shutdown();
+                long now = System.currentTimeMillis();
+                if(timeout != 0 && now - then >= timeout)
+                    throw new SocketTimeoutException("operation timed out (" + timeout + ")");
+                else
+                    throw new ConnectException("Unable to connect!");
             }
         }
     }
@@ -506,15 +521,4 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         }
     }
     
-    /** A ConnectObserver to use when someone wants to do a blocking connection. */
-    private static class BlockingConnecter implements ConnectObserver {
-        BlockingConnecter() {}
-         
-        public synchronized void handleConnect(Socket s) { notify(); }
-        public synchronized void shutdown() { notify(); }
-        
-        // unused.
-        public void handleIOException(IOException iox) {}
-    }
-
 }
