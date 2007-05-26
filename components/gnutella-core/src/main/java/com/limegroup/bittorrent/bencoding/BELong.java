@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.bencoding;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
@@ -10,10 +11,12 @@ import org.limewire.util.BEncoder;
 
 /**
  * A token used for the parsing of a Long value.
+ * Values outside Long.MIN_VALUE and Long.MAX_VALUE throw an IOX.
  */
 class BELong extends Token<Long> {
     
     private static final byte MINUS;
+    private static final BigInteger MAX;
     static {
         byte minus = 0;
         try {
@@ -22,6 +25,7 @@ class BELong extends Token<Long> {
             // hook to ErrorService
         }
         MINUS = minus;
+        MAX = BigInteger.valueOf(Long.MAX_VALUE);
     }
     
     /** Storage for the value of the token */
@@ -83,7 +87,10 @@ class BELong extends Token<Long> {
                     multiplier = -1;
                 else if (currentByte[0] == terminator && sb.length() != 0) {
                     try {
-                        result = new Long(Long.parseLong(sb.toString()) * multiplier);
+                        BigInteger b = new BigInteger(sb.toString());
+                        if (b.compareTo(MAX) > 0)
+                            throw new IOException("too big");
+                        result = b.longValue() * multiplier;
                     } catch (NumberFormatException impossible) {
                         throw new IOException(impossible.getMessage());
                     }

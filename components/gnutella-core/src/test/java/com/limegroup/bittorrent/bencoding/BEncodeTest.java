@@ -262,6 +262,20 @@ public class BEncodeTest extends LimeTestCase {
         } catch (IOException expected) {}
         assertNull(t.getResult());
         assertEquals(4, chan.src.position());
+        
+        // too large or too small values
+        chan.setString("i123487129587198257981374598173498751579813458345983297e");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail(" too big didn't throw");
+        } catch (IOException expected) {}
+        chan.setString("i-123487129587198257981374598173498751579813458345983297e");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail(" too small didn't throw");
+        } catch (IOException expected) {}
     }
     
     /**
