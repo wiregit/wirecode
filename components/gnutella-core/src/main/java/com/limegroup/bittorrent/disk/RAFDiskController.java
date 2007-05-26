@@ -3,7 +3,6 @@ package com.limegroup.bittorrent.disk;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +74,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 		_files = files;
 		if (_fos != null)
 		    throw new IOException("Files already open(ing)!");
-		_fos = new RandomAccessFile[_files.size()];
+		RandomAccessFile [] fos = new RandomAccessFile[_files.size()];
 		
 		// position of the first byte of a file in the torrent
 		long pos = 0;
@@ -88,7 +87,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 			// with it
 			if (complete) {
 				LOG.info("opening torrent in read-only mode");
-				_fos[i] = new RandomAccessFile(file, "r");
+				fos[i] = new RandomAccessFile(file, "r");
 			} else {
 				LOG.info("opening torrent in read-write");
 				if (!file.exists()) {
@@ -115,7 +114,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 				} 
 				
 				FileUtils.setWriteable(file);
-				_fos[i] = new RandomAccessFile(file, "rw");
+				fos[i] = new RandomAccessFile(file, "rw");
 				
 				// if a file exists, try to verify it
 				if (isVerifying && _fos[i].length() > 0) {
@@ -129,6 +128,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 			pos += file.length();
 		}
 		
+        _fos = fos;
 		return filesToVerify;
 	}
 	
@@ -154,6 +154,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    // location as they are completed.. cool but not trivial
 	    int index = _files.indexOf(completed);
 	    _fos[index] = setReadOnly(_fos[index], completed.getPath());
+        assert _fos[index] != null;
 	}
 	
 	protected RandomAccessFile setReadOnly(RandomAccessFile f, String path) throws IOException {
@@ -212,10 +213,17 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    if (!isOpen())
 	        return;
 		for (RandomAccessFile f : _fos) {
-            FileChannel chan = f.getChannel();
-            if (chan == null)
-                throw new IOException("no channel for "+f);
-			chan.force(false);
+            if (f != null)
+                f.getChannel().force(false);
+            else {
+                StringBuilder report = new StringBuilder();
+                report.append("flush npe report:");
+                report.append("  files:").append(_files).append("  ");
+                report.append("fos length ").append(_fos.length).append("  ");
+                for (RandomAccessFile f2 : _fos)
+                    report.append(String.valueOf(f2)).append("  ");
+                throw new IllegalStateException(report.toString());
+            }
         }
 	}
 }
