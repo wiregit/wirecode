@@ -36,6 +36,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -74,6 +75,8 @@ public class InspectionTest extends ServerSideTestCase {
     }
     public static void setUpQRPTables() throws Exception {}
     public static void setSettings() throws Exception{
+        SecureMessageVerifier vf = RouterService.getSecureMessageVerifier();
+        PrivilegedAccessor.setValue(InspectionRequestHandler.class,"inspectionVerifier",vf);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
