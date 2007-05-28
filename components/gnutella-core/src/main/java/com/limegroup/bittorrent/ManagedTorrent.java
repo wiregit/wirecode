@@ -211,8 +211,6 @@ BTLinkListener {
 					return;
 				
 				validateTorrent();
-				if (state.get() == TorrentState.INVALID)
-					return;
 				startConnecting();
 			}
 		});
@@ -246,9 +244,8 @@ BTLinkListener {
 	private void startConnecting() {
 		boolean shouldFetch = false;
 		synchronized(state.getLock()) {
-			TorrentState currentState = state.get();
-			if (currentState != TorrentState.VERIFYING && currentState != TorrentState.QUEUED)
-				throw new IllegalArgumentException("cannot start connecting "+currentState);
+			if (state.get() != TorrentState.QUEUED)
+				return;
 			
 			// kick off connectors if we already have some addresses
 			if (_peers.size() > 0) {
@@ -472,8 +469,11 @@ BTLinkListener {
 	public void verificationComplete() {
 		diskInvoker.execute(new Runnable() {
 			public void run() {
-				if (state.get() != TorrentState.VERIFYING) 
-					return;
+			    synchronized(state.getLock()) {
+			        if (state.get() != TorrentState.VERIFYING) 
+			            return;
+			        state.set(TorrentState.QUEUED);
+			    } 
 				startConnecting();
 				if (_folder.isComplete())
 					completeTorrentDownload();
