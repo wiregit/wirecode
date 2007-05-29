@@ -82,50 +82,6 @@ public class HTTPUploadManagerTest extends BaseTestCase {
         assertFalse(upMan.isConnectedTo(InetAddress.getLocalHost()));
     }
 
-// /**
-// * Sends a GET request for <code>uri</code>.
-// *
-// * @return the returned headers
-// */
-// private List<String> connect(String uri, int expectedCode)
-// throws IOException {
-// socket = new Socket("localhost", PORT);
-// socket.setSoTimeout(2000);
-// in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-// out = new BufferedWriter(new OutputStreamWriter(socket
-// .getOutputStream()));
-//
-// out.write("GET " + uri + " HTTP/1.1" + CRLF);
-// out.write(CRLF);
-// out.flush();
-//
-// String response = in.readLine();
-// assertNotNull("Server unexpectedly closed connection", response);
-// if (!response.startsWith("HTTP/1.1")) {
-// fail("Expected HTTP/1.1, got: " + response);
-// }
-//
-// StringTokenizer t = new StringTokenizer(response);
-// t.nextToken();
-// assertEquals("Unexpected response code", "" + expectedCode, t
-// .nextToken());
-//
-// // read headers
-// ArrayList<String> headers = new ArrayList<String>();
-// String line;
-// while ((line = in.readLine()) != null) {
-// if (line.length() == 0) {
-// return headers;
-// }
-// headers.add(line);
-// }
-//
-// fail("Unexpected end of stream");
-//
-// // never reached
-// return null;
-// }
-
     private static class MyActivityCallback extends ActivityCallbackStub {
 
         List<Uploader> uploads = new ArrayList<Uploader>();
