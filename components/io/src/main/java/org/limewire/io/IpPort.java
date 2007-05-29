@@ -35,6 +35,11 @@ public interface IpPort {
     String getAddress();
     
     /**
+     * Comparator for IpPort objects that ignores the port.
+     */
+    public static final Comparator<IpPort> IP_COMPARATOR = new IpComparator();
+    
+    /**
      * The sole comparator to use for IpPort objects.
      */
     public static final Comparator<IpPort> COMPARATOR = new IpPortComparator();
@@ -44,6 +49,31 @@ public interface IpPort {
     /** An empty set, casted to an IpPort. */
     public static final Set<IpPort> EMPTY_SET = Collections.emptySet();
     
+    public static class IpComparator implements Comparator<IpPort> {
+        public int compare(IpPort ip1, IpPort ip2) {
+            if(ip1 == ip2)
+                return 0;
+            byte[] neta = ip1.getInetAddress().getAddress();
+            byte[] netb = ip2.getInetAddress().getAddress();
+            if(neta[0] == netb[0]) {
+                if(neta[1] == netb[1]) {
+                    if(neta[2] == netb[2]) {
+                        if(neta[3] == netb[3]) {
+                            return 0;
+                        } else {
+                            return neta[3] - netb[3];
+                        }
+                    } else {
+                        return neta[2] - netb[2];
+                    }
+                } else {
+                    return neta[1] - netb[1];
+                }
+            } else {
+                return neta[0] - netb[0];
+            }
+        }
+    }
     /**
      * Compares <code>IpPort</code> objects.
      *
@@ -58,29 +88,9 @@ public interface IpPort {
         public int compare(IpPort ip1, IpPort ip2) {
             if(ip1 == ip2)
                 return 0;
-            int diff = ip1.getPort() - ip2.getPort();
-            if(diff == 0) {
-                byte[] neta = ip1.getInetAddress().getAddress();
-                byte[] netb = ip2.getInetAddress().getAddress();
-                if(neta[0] == netb[0]) {
-                    if(neta[1] == netb[1]) {
-                        if(neta[2] == netb[2]) {
-                            if(neta[3] == netb[3]) {
-                                return 0;
-                            } else {
-                                return neta[3] - netb[3];
-                            }
-                        } else {
-                            return neta[2] - netb[2];
-                        }
-                    } else {
-                        return neta[1] - netb[1];
-                    }
-                } else {
-                    return neta[0] - netb[0];
-                }
-            } else
-                return diff;
+            if (ip1.getPort() != ip2.getPort())
+                return ip1.getPort() - ip2.getPort();
+            return IP_COMPARATOR.compare(ip1, ip2);
         }
     }    
         
