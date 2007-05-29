@@ -906,9 +906,27 @@ public class ManagedDownloader extends AbstractDownloader
      * Returns whether or not we should give up 
      */
     private boolean shouldGiveUp() {
-        return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS
-                && (numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
-                        || !RouterService.getDHTManager().isMemberOfDHT());
+    	return shouldGiveUpGnutellaQueries() && shouldGiveUpDHTQueries();
+    }
+    
+    /**
+     * Returns whether or not we should give up Gnutella queries
+     */
+    private boolean shouldGiveUpGnutellaQueries() {
+    	return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS;
+    }
+    
+    /**
+     * Returns whether or not we should give up DHT queries
+     */
+    private boolean shouldGiveUpDHTQueries() {
+    	if (!DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
+    			|| !RouterService.getDHTManager().isMemberOfDHT()) {
+    		
+    		return true;
+    	}
+    	
+    	return numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue();
     }
     
     /**
