@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.SettingsFactory;
+import org.limewire.setting.StringSetting;
 
 
 
@@ -199,4 +200,12 @@ public class QuestionsHandler extends LimeWireSettings {
      */
     public static final IntSetting VISTA_SAVE_LOCATION =
         FACTORY.createIntSetting("VISTA_SAVE_LOCATION", 0);
+    
+    /**
+     * Stores the last Java version that an upgrade recommendation was displayed
+     * for.
+     */
+    public static final StringSetting LAST_CHECKED_JAVA_VERSION =
+        FACTORY.createStringSetting("LAST_CHECKED_JAVA_VERSION", "");
+
 }
