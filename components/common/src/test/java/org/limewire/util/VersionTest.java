@@ -122,5 +122,12 @@ public final class VersionTest extends BaseTestCase {
         assertGreaterThan(v1, v2);
         assertLessThan(v2, v1);
     }
+ 
+    public void testCompareBeta() throws Exception {
+        Version v1, v2;
         
+        v1 = new Version("1.6.0_01");
+        v2 = new Version("1.6.0-beta");
+        assertGreaterThan(0, v1.compareTo(v2));
+    }
 }
