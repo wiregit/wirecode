@@ -5,6 +5,9 @@ import junit.framework.Test;
 import org.limewire.util.BaseTestCase;
 
 public class XorViewTest extends BaseTestCase {
+
+    private XorView xov;
+
     public XorViewTest(String name) {
         super(name);
     }
@@ -13,7 +16,8 @@ public class XorViewTest extends BaseTestCase {
         return buildTestSuite(XorViewTest.class);
     }
     
-    public void testGet(){
+    @Override
+    protected void setUp() throws Exception {
         BitSet bs1 = new BitSet();
         bs1.set(1);
         
@@ -27,24 +31,19 @@ public class XorViewTest extends BaseTestCase {
         BitField bf2 = new BitFieldSet(bs2, 5);//bf2: 00100 
         BitField bf3 = new BitFieldSet(bs3, 5);//bf3: 00010
                
-        XorView xov = new XorView(bf1, bf2, bf3);//xov: 01110
- 
-        for(int i = 0 ; i < xov.maxSize(); i++){
-            switch(i){
-            case 1:
-            case 2:
-            case 3:
-                assertTrue(xov.get(i));
-                break;
-            case 0:
-            case 4:
-                assertFalse(xov.get(i));
-                break;
-            default:
-                fail("received wrong index: " + i);
-            }            
-        }
-
+        xov = new XorView(bf1, bf2, bf3);//xov: 01110    
+    }
+    
+    public void testGet(){
+        assertFalse(xov.get(0));
+        assertTrue(xov.get(1));
+        assertTrue(xov.get(2));
+        assertTrue(xov.get(3));
+        assertFalse(xov.get(4));
+    }
+    
+    public void testMaxSize() {
+        assertEquals(5, xov.maxSize());
     }
 
 }
