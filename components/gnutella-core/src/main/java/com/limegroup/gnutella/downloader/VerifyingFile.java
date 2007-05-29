@@ -572,7 +572,21 @@ public class VerifyingFile {
             wait();
         }
     }
-    
+
+    /**
+     * Waits until all pending write requests have been completed. 
+     */
+    public synchronized void waitForPending(int timeout) throws InterruptedException, DiskException {
+        if(storedException != null)
+            throw new DiskException(storedException);
+
+        synchronized (this) {
+            while (chunksScheduledPerFile > 0) {
+                this.wait(timeout);
+            }
+        }
+    }
+
     /**
      * @return whether we think we will not be able to complete this file
      */

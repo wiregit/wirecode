@@ -2,23 +2,36 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Interval;
-import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class VerifyingFileTest extends LimeTestCase {
+
+    private static final String filename = "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
+
+    private static final File completeFile = CommonUtils
+            .getResourceFile(filename);
+
+    private static final String sha1 = "urn:sha1:UBJSGDTCVZDSBS4K3ZDQJV5VQ3WTBCOK";
+
+    private static RandomAccessFile raf;
+
+    private static HashTree hashTree;
+    
+    private static HashTree defaultHashTree;
+
+    private VerifyingFile vf;
 
     public VerifyingFileTest(String s) {
         super(s);
@@ -28,46 +41,33 @@ public class VerifyingFileTest extends LimeTestCase {
         return buildTestSuite(VerifyingFileTest.class);
     }
 
-    private static final String filename = "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
-
-    private static final File completeFile = CommonUtils
-            .getResourceFile(filename);
-
-    private static RandomAccessFile raf;
-
-    private static HashTree hashTree, defaultHashTree;
-
-    private static final String sha1 = "urn:sha1:UBJSGDTCVZDSBS4K3ZDQJV5VQ3WTBCOK";
-
-    static VerifyingFile vf;
-
     public static void globalSetUp() throws Exception {
-        try {
-            defaultHashTree = (HashTree) PrivilegedAccessor.invokeMethod(
-                    HashTree.class, "createHashTree", //
-                    new Object[] { new Long(completeFile.length()),
-                            new FileInputStream(completeFile),
-                            URN.createSHA1Urn(sha1) }, // 
-                    new Class[] { long.class, InputStream.class, URN.class });
-        } catch (InvocationTargetException ite) {
-            throw (Exception) ite.getCause();
-        }
+        defaultHashTree = (HashTree) PrivilegedAccessor.invokeMethod(
+                HashTree.class, "createHashTree", //
+                new Object[] { new Long(completeFile.length()),
+                        new FileInputStream(completeFile),
+                        URN.createSHA1Urn(sha1) }, // 
+                new Class[] { long.class, InputStream.class, URN.class });
 
         raf = new RandomAccessFile(completeFile, "r");
     }
 
-    public void setUp() {
+    public static void globalTearDown() throws Exception {
+        raf = null;
+        hashTree = null;
+        defaultHashTree = null;
+    }
+    
+    @Override
+    public void setUp() throws Exception {
         hashTree = defaultHashTree;
         vf = new VerifyingFile((int) completeFile.length());
-        try {
-            vf.open(new File("outfile"));
-            vf.setHashTree(defaultHashTree);
-            raf.seek(0);
-        } catch (IOException e) {
-            ErrorService.error(e);
-        }
+        vf.open(new File("outfile"));
+        vf.setHashTree(defaultHashTree);
+        raf.seek(0);
     }
 
+    @Override
     public void tearDown() {
         vf.close();
     }
@@ -186,7 +186,7 @@ public class VerifyingFileTest extends LimeTestCase {
             pos += chunk.length;
 
             // give it some time to verify
-            Thread.sleep(1000);
+            vf.waitForPending(2000);
             assertEquals(pos, vf.getVerifiedBlockSize());
         }
 
@@ -194,7 +194,7 @@ public class VerifyingFileTest extends LimeTestCase {
         chunk = new byte[(int) completeFile.length() - pos];
         raf.read(chunk);
         writeImpl(pos, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(2000);
         assertEquals(completeFile.length(), vf.getVerifiedBlockSize());
     }
 
@@ -210,7 +210,7 @@ public class VerifyingFileTest extends LimeTestCase {
         }
     }
 
-    private static class Writer implements VerifyingFile.WriteCallback {
+    private class Writer implements VerifyingFile.WriteCallback {
         private int filePos;
 
         private int start;
