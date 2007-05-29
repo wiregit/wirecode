@@ -217,7 +217,9 @@ class BucketNode implements Bucket {
     public boolean removeActiveContact(KUID nodeId) {
         Contact node = nodeTrie.remove(nodeId);
         if (node != null) {
-            counter.decrementAndGet(node);
+        	int old = counter.get(node);
+            int now = counter.decrementAndGet(node);
+            assert (now < old) : now + " < " + old + ", " + nodeId + ", " + node + this;
             return true;
         }
         return false;

@@ -604,7 +604,8 @@ public class RouteTableImpl implements RouteTable {
                         assert (removed == true);
                         
                         if (isOkayToAdd(bucket, mrs)) {
-                            bucket.removeActiveContact(nodeId);
+                        	removed = bucket.removeActiveContact(nodeId);
+                        	assert (removed == true);
                             assert (bucket.isActiveFull() == false);
                             
                             bucket.addActiveContact(mrs);

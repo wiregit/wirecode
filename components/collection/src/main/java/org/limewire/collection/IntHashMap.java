@@ -79,7 +79,7 @@ import java.io.Serializable;
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne
  * @since 2.0
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see java.util.HashMap
  */
 public class IntHashMap<V> implements Serializable {
@@ -481,6 +481,7 @@ public class IntHashMap<V> implements Serializable {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder("{");
+        buffer.append("size=").append(size()).append("; ");
         for (Entry<V> entry : table) {
             while(entry != null) {
                 buffer.append(entry.key).append("=").append(entry.value);

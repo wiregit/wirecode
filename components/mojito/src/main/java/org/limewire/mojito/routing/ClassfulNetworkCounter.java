@@ -103,7 +103,9 @@ public class ClassfulNetworkCounter implements Serializable {
         }
         
         assert (nodesPerNetwork.size() <= bucket.getMaxActiveSize())
-            : nodesPerNetwork.size() + " <= " + bucket.getMaxActiveSize();
+            : nodesPerNetwork.size() + " <= " + bucket.getMaxActiveSize()
+            	+ node
+            	+ nodesPerNetwork;
         
         return counter.incrementAndGet();
     }
