@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.Interval;
 import org.limewire.collection.MultiIterable;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -37,6 +39,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.stubs.StubIOStateObserver;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -134,8 +137,45 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                 bn.set(i);
         }        
         assertTrue(originalAlts.startsWith("tls=" + bn.toHexString()));
-
     }
+    
+    public void testReadXAltsWithTLS() throws Exception {
+        String str;        
+        HTTPDownloader dl;
+        Collection<RemoteFileDesc> receivedLocations;
+                
+        str = "HTTP/1.1 200 OK\r\n" + 
+              "X-Alt: tls=AB8,1.2.3.4:5,4.3.2.1,2.3.4.5:6,5.4.3.2:1,3.4.5.6:7,6.5.4.3:2,4.5.6.7:8,7.6.5.4:3,5.6.7.8:9,8.7.6.5:4\r\n"; 
+        dl = newHTTPDownloaderWithHeader(str);
+        assertEquals(0, dl.getLocationsReceived().size());
+        
+        readHeaders(dl);
+        
+        receivedLocations = dl.getLocationsReceived();
+        assertEquals(10, receivedLocations.size());        
+        dl.stop();
+        
+        Set<IpPort> tlsExpected = new IpPortSet(new IpPortImpl("1.2.3.4:5"), new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7"), new IpPortImpl("4.5.6.7:8"), new IpPortImpl("7.6.5.4:3"), new IpPortImpl("5.6.7.8:9"));
+        Set<IpPort> normalExpected = new IpPortSet(new IpPortImpl("4.3.2.1:6346"), new IpPortImpl("5.4.3.2:1"), new IpPortImpl("6.5.4.3:2"), new IpPortImpl("8.7.6.5:4"));
+
+        Set<Connectable> allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.retainAll(tlsExpected);
+        assertEquals(allLocs, tlsExpected);
+        for(Connectable c : allLocs)
+            assertTrue(c.isTLSCapable());
+        
+        allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.retainAll(normalExpected);
+        assertEquals(normalExpected, allLocs);
+        for(Connectable c : allLocs)
+            assertFalse(c.isTLSCapable());
+        
+        allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.removeAll(tlsExpected);
+        allLocs.removeAll(normalExpected);
+        assertTrue(allLocs.isEmpty());
+    }
+    
     
     public void testParseContentRange() throws Throwable {
         int length = 1000;
@@ -208,13 +248,13 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		HTTPDownloader down;
 
 		str = "HTTP/1.1 200 OK\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		readHeaders(down);
         down.stop();
 		
 		
 		str = "HTTP/1.1 301 Moved Permanently\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -222,7 +262,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (IOException e) {}
 
         str = "HTTP/1.1 300 Multiple Choices\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -230,7 +270,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (IOException e) {}
 
 		str = "HTTP/1.1 404 File Not Found \r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -238,7 +278,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (FileNotFoundException e) {}
 
 		str = "HTTP/1.1 410 Not Sharing \r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -246,7 +286,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (NotSharingException e) {}
 
 		str = "HTTP/1.1 412 \r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -254,7 +294,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (IOException e) {}
 
 		str = "HTTP/1.1 503 \r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -262,23 +302,23 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		} catch (TryAgainLaterException e) {}
 
 		str = "HTTP/1.1 210 \r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		readHeaders(down);
 		down.stop();
 
 		str = "HTTP/1.1 204 Partial Content\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
         readHeaders(down);
         down.stop();
 
 
 		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		readHeaders(down);
 		down.stop();
 		
 		str = "200 OK\r\n";
-		down = newHTTPDownloader(str);
+		down = newHTTPDownloaderWithHeader(str);
 		try {
 			readHeaders(down);
 			down.stop();
@@ -297,9 +337,6 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             else throw e;
         }
     }
-    
-    
-
     
     private Map<String, String> getWrittenHeaders(Function<HTTPDownloader, Void> func) throws Exception {
         ServerSocket server = new ServerSocket();
@@ -362,25 +399,35 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     
-    private static HTTPDownloader newHTTPDownloader(String s) throws Throwable {
+    private static HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
-        RemoteFileDesc rfd = new RemoteFileDesc("", 1, 1, "file", 1, new byte[16], 1, 
-                                                false, 1, false, null, Collections.EMPTY_SET,
-                                                false, false, "", Collections.EMPTY_SET, 1, false);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1",
+                                                1,
+                                                1,
+                                                "file",
+                                                1000,
+                                                new byte[16],
+                                                1,
+                                                false,
+                                                1,
+                                                false,
+                                                null,
+                                                HugeTestUtils.URN_SETS[0],
+                                                false,
+                                                false,
+                                                "TEST",
+                                                Collections.EMPTY_SET,
+                                                -1,
+                                                0,
+                                                false);
         HTTPDownloader d = new HTTPDownloader(rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;
     }
     
-    private static void readHeaders(HTTPDownloader d) throws Throwable {
-        try {
-            PrivilegedAccessor.invokeMethod(d, "parseHeaders");
-        } catch(Exception e) {
-            if ( e.getCause() != null ) 
-                throw e.getCause();
-            else throw e;
-        }
+    private static void readHeaders(HTTPDownloader d) throws Exception {
+        d.parseHeaders();
     }
 }
