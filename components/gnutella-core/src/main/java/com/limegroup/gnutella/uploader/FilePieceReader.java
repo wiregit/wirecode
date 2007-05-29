@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +47,7 @@ public class FilePieceReader implements PieceReader {
      * <p>
      * Note: Obtain <code>bufferPoolLock</code> when accessing.
      */
-    private final LinkedList<ByteBuffer> bufferPool = new LinkedList<ByteBuffer>();
+    private final List<ByteBuffer> bufferPool = new LinkedList<ByteBuffer>();
 
     /**
      * The list of cached pieces that have been read already sorted in ascending
@@ -71,13 +72,19 @@ public class FilePieceReader implements PieceReader {
 
     private final RandomAccessFile raf;
 
+    /**
+     * Guards access to the buffer pool and offsets.
+     * <p>
+     * Order of locking: this -> bufferPoolLock 
+     */
     private final Object bufferPoolLock = new Object();
 
     private final ByteBufferCache bufferCache;
 
     /**
-     * Number of buffers currently in use by jobs. Obtain
-     * {@link #bufferPoolLock} before accessing.
+     * Number of buffers currently in use by jobs.
+     * <p>
+     * Note: Obtain {@link #bufferPoolLock} before accessing.
      */
     private int bufferInUseCount;
 
@@ -91,11 +98,15 @@ public class FilePieceReader implements PieceReader {
     /**
      * The offset of the next piece that is going to be processed by a job. This
      * field keeps track of how far the file has been read from disk.
+     * <p>
+     * Note: Obtain {@link #bufferPoolLock} before accessing.
      */
-    private volatile long processingOffset;
+    private long processingOffset;
 
     /**
      * The remaining number of bytes to read.
+     * <p>
+     * Note: Obtain {@link #bufferPoolLock} before accessing.
      */
     private long remaining;
 
@@ -104,6 +115,9 @@ public class FilePieceReader implements PieceReader {
      */
     private final AtomicBoolean shutdown = new AtomicBoolean();
 
+    /**
+     * Number of jobs currently processing pieces.
+     */
     private final AtomicInteger jobCount = new AtomicInteger();
 
     public FilePieceReader(ByteBufferCache bufferCache, File file, long offset,
@@ -185,8 +199,10 @@ public class FilePieceReader implements PieceReader {
             throw new EOFException();
         }
         
-        if (remaining == 0 && readOffset == processingOffset) {
-            throw new EOFException();
+        synchronized (bufferPoolLock) {
+            if (remaining == 0 && readOffset == processingOffset) {
+                throw new EOFException();
+            }
         }
         
         Piece piece = pieceQueue.peek();
@@ -264,8 +280,8 @@ public class FilePieceReader implements PieceReader {
     protected void waitForShutdown(long timeout) throws InterruptedException, TimeoutException {
         long start = System.currentTimeMillis();
         while (jobCount.get() > 0) {
-            long remaining = timeout - (System.currentTimeMillis() - start);
-            if (remaining <= 0) {
+            long remainingTime = timeout - (System.currentTimeMillis() - start);
+            if (remainingTime <= 0) {
                 throw new TimeoutException();
             }
             Thread.sleep(50);
@@ -298,7 +314,7 @@ public class FilePieceReader implements PieceReader {
         synchronized (bufferPoolLock) {
             while (!shutdown.get() && remaining > 0 && bufferInUseCount < MAX_BUFFERS) {
                 int length = (int) Math.min(BUFFER_SIZE, remaining);
-                ByteBuffer buffer = bufferPool.remove();
+                ByteBuffer buffer = bufferPool.remove(0);
                 bufferInUseCount++;
                 Runnable job = new PieceReaderJob(buffer, processingOffset,
                         length);
