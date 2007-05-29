@@ -22,6 +22,7 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -307,7 +308,8 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         markAsQueried(context.getLocalNode());
         
         // Get the first round of alpha nodes and send them requests
-        List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, getParallelism());
+        List<Contact> alphaList = new ArrayList<Contact>(
+        		getContactsToQuery(lookupId, getParallelism()));
         
         // Optimimize the first lookup step if we have enough parallel lookup slots
         if(alphaList.size() >= 3) {
@@ -468,7 +470,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      * until we find a Node with the given ID, the lookup times out
      * or there are no Contacts left to query. 
      */
-    private void nextLookupStep() throws IOException {
+    protected void nextLookupStep() throws IOException {
         
         long totalTime = getElapsedTime();
         
@@ -486,7 +488,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         if (!hasActiveSearches()) {
             
             // Finish if nothing left to query...
-            if (toQuery.isEmpty()) {
+            if (!hasContactsToQuery()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookupId + " terminates after "
                             + currentHop + " hops and " + totalTime + "ms. No contacts left to query.");
@@ -537,7 +539,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         
         int numLookups = getParallelism() - getActiveSearches();
         if (numLookups > 0) {
-            List<Contact> toQueryList = TrieUtils.select(toQuery, lookupId, numLookups);
+            Collection<Contact> toQueryList = getContactsToQuery(lookupId, numLookups);
             for (Contact node : toQueryList) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a find request for " + lookupId);
@@ -556,9 +558,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      * Sends a lookup request to the given Contact
      */
     protected boolean sendLookupRequest(Contact node) throws IOException {
-        SocketAddress addr = node.getContactAddress();
-        
-        LookupRequest request = createLookupRequest(addr);
+        LookupRequest request = createLookupRequest(node);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending " + node + " a " + request);
@@ -576,7 +576,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     /**
      * Creates and returns a LookupRequest message
      */
-    protected abstract LookupRequest createLookupRequest(SocketAddress addr);
+    protected abstract LookupRequest createLookupRequest(Contact node);
     
     /**
      * Calls finishLookup() if the lookup isn't already
@@ -597,14 +597,14 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     /**
      * Increments the 'activeSearches' counter by one
      */
-    private void incrementActiveSearches() {
+    protected void incrementActiveSearches() {
         activeSearches++;
     }
     
     /**
      * Decrements the 'activeSearches' counter by one
      */
-    private void decrementActiveSearches() {
+    protected void decrementActiveSearches() {
         if (activeSearches == 0) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("ActiveSearches counter is already 0");
@@ -626,7 +626,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      * Returns the number of current number of active
      * searches
      */
-    private int getActiveSearches() {
+    protected int getActiveSearches() {
         return activeSearches;
     }
     
@@ -634,27 +634,49 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      * Returns whether or not there are currently any
      * searches active
      */
-    private boolean hasActiveSearches() {
+    protected boolean hasActiveSearches() {
         return getActiveSearches() > 0;
     }
     
-    /** Returns whether or not the Node has been queried */
+    /** 
+     * Returns whether or not the Node has been queried 
+     */
     protected boolean isQueried(Contact node) {
         return queried.contains(node.getNodeID());            
     }
     
-    /** Marks the Node as queried */
-    private void markAsQueried(Contact node) {
+    /** 
+     * Marks the Node as queried 
+     */
+    protected void markAsQueried(Contact node) {
         queried.add(node.getNodeID());
         toQuery.remove(node.getNodeID());
     }
     
-    /** Returns whether or not the Node is in the to-query Trie */
-    private boolean isYetToBeQueried(Contact node) {
+    /** 
+     * Returns whether or not the Node is in the to-query Trie 
+     */
+    protected boolean isYetToBeQueried(Contact node) {
         return toQuery.containsKey(node.getNodeID());            
     }
     
-    /** Adds the Node to the to-query Trie */
+    /**
+     * Returns true if there are more Contact to query
+     */
+    protected boolean hasContactsToQuery() {
+    	return !toQuery.isEmpty();
+    }
+
+    /**
+     * Returns the next Contacts for the lookup
+     */
+    protected Collection<Contact> getContactsToQuery(KUID lookupId, int count) {
+    	return TrieUtils.select(toQuery, lookupId, count);
+    }
+    
+    /** 
+     * Adds the Node to the to-query Trie 
+     */
     protected boolean addYetToBeQueried(Contact node, int hop) {
             
         if (isQueried(node)) {
@@ -676,6 +698,9 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         return true;
     }
     
+    /**
+     * Adds the response to the lookup/response Path
+     */
     protected void addToResponsePath(ResponseMessage response) {
         Contact sender = response.getContact();
         SecurityToken securityToken = null;
@@ -685,8 +710,10 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         addToResponsePath(sender, securityToken);
     }
     
-    /** Adds the Contact-SecurityToken Tuple to the response Trie */
-    private void addToResponsePath(Contact node, SecurityToken securityToken) {
+    /** 
+     * Adds the Contact-SecurityToken Tuple to the response Trie
+     */
+    protected void addToResponsePath(Contact node, SecurityToken securityToken) {
         
         Entry<Contact,SecurityToken> entry 
             = new EntryImpl<Contact,SecurityToken>(node, securityToken, true);
@@ -701,6 +728,9 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         }
     }
     
+    /**
+     * Returns the lookup/response Path
+     */
     protected Map<Contact, SecurityToken> getPath() {
         return getContacts(responsePath.size());
     }

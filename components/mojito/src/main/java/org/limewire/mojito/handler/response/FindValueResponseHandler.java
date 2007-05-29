@@ -189,10 +189,10 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     }
     
     @Override
-    protected LookupRequest createLookupRequest(SocketAddress addr) {
+    protected LookupRequest createLookupRequest(Contact node) {
         Collection<KUID> noKeys = Collections.emptySet();
         return context.getMessageHelper().createFindValueRequest(
-                addr, lookupId, noKeys, lookupKey.getDHTValueType());
+                node.getContactAddress(), lookupId, noKeys, lookupKey.getDHTValueType());
     }
     
     private boolean extractDataFromResponse(FindValueResponse response) {

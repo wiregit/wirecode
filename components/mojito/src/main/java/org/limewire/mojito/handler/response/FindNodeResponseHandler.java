@@ -123,17 +123,21 @@ public class FindNodeResponseHandler
         return collisions;
     }
     
+    @Override
     protected int getDefaultParallelism() {
         return KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
     }
     
+    @Override
     protected boolean isTimeout(long time) {
         long lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }
     
-    protected LookupRequest createLookupRequest(SocketAddress addr) {
-        return context.getMessageHelper().createFindNodeRequest(addr, lookupId);
+    @Override
+    protected LookupRequest createLookupRequest(Contact node) {
+        return context.getMessageHelper().createFindNodeRequest(
+        		node.getContactAddress(), lookupId);
     }
 
     @Override
