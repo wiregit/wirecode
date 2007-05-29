@@ -28,7 +28,7 @@ public class VerifyingFileTest extends LimeTestCase {
     private static RandomAccessFile raf;
 
     private static HashTree hashTree;
-    
+
     private static HashTree defaultHashTree;
 
     private VerifyingFile vf;
@@ -57,7 +57,7 @@ public class VerifyingFileTest extends LimeTestCase {
         hashTree = null;
         defaultHashTree = null;
     }
-    
+
     @Override
     public void setUp() throws Exception {
         hashTree = defaultHashTree;
@@ -269,7 +269,7 @@ public class VerifyingFileTest extends LimeTestCase {
         // write some data, not enough to fill a chunk
         // 0-200k
         writeImpl(0, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(0, vf.getVerifiedBlockSize());
 
         // write some more data filling up the first chunk
@@ -277,7 +277,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.read(chunk);
 
         writeImpl(200 * 1024, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(256 * 1024, vf.getVerifiedBlockSize());
         assertEquals(400 * 1024, vf.getBlockSize());
 
@@ -286,7 +286,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.seek(600 * 1024);
         raf.read(chunk);
         writeImpl(600 * 1024, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(256 * 1024, vf.getVerifiedBlockSize());
         assertEquals(600 * 1024, vf.getBlockSize());
 
@@ -295,7 +295,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.seek(400 * 1024);
         raf.read(chunk);
         writeImpl(400 * 1024, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(768 * 1024, vf.getVerifiedBlockSize());
         assertEquals(800 * 1024, vf.getBlockSize());
 
@@ -307,7 +307,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.seek(completeFile.length() - chunk.length);
         raf.read(chunk);
         writeImpl((int) (completeFile.length() - chunk.length), chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(768 * 1024, vf.getVerifiedBlockSize());
         assertEquals(800 * 1024 + chunk.length, vf.getBlockSize());
 
@@ -316,7 +316,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.seek(completeFile.length() - 2 * chunk.length);
         raf.read(chunk);
         writeImpl((int) (completeFile.length() - 2 * chunk.length), chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(768 * 1024 + completeFile.length() - lastOffset, vf
                 .getVerifiedBlockSize());
         assertEquals(800 * 1024 + 2 * chunk.length, vf.getBlockSize());
@@ -335,7 +335,7 @@ public class VerifyingFileTest extends LimeTestCase {
         // write a good chunk
         raf.read(chunk);
         writeImpl(0, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
 
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
         assertEquals(chunk.length, vf.getBlockSize());
@@ -346,7 +346,7 @@ public class VerifyingFileTest extends LimeTestCase {
             chunk[i] = (byte) i;
 
         writeImpl(chunk.length, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
 
         // the chunk should not be verified or even written to disk
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
@@ -374,7 +374,7 @@ public class VerifyingFileTest extends LimeTestCase {
             for (int i = 0; i < 100; i++)
                 chunk[i] = (byte) i;
             writeImpl((int) (raf.getFilePointer() - chunk.length), chunk);
-            Thread.sleep(1000);
+            vf.waitForPending(1000);
             j++;
         }
         assertTrue(vf.isHopeless());
@@ -387,7 +387,7 @@ public class VerifyingFileTest extends LimeTestCase {
 
         raf.readFully(chunk);
         writeImpl(0, chunk);
-        Thread.sleep(2000);
+        vf.waitForPending(2000);
         assertTrue(vf.isComplete());
     }
 
@@ -399,12 +399,12 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.readFully(chunk);
         writeImpl(0, chunk);
 
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
 
         // write a bad chunk, it should not be discarded
         writeImpl(chunk.length, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
         assertEquals(2 * chunk.length, vf.getBlockSize());
 
@@ -414,7 +414,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.readFully(chunk);
 
         writeImpl(512 * 1024, chunk);
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
 
         assertEquals((int) completeFile.length() - 256 * 1024, vf
                 .getVerifiedBlockSize());
@@ -434,7 +434,7 @@ public class VerifyingFileTest extends LimeTestCase {
         vf.waitForPendingIfNeeded();
         assertLessThanOrEquals(50, System.currentTimeMillis() - now);
 
-        Thread.sleep(1000);
+        vf.waitForPending(1000);
         assertEquals(hashTree.getNodeSize(), vf.getVerifiedBlockSize());
 
         // now fill in the rest of the file. waitForPending should wait until
@@ -463,11 +463,11 @@ public class VerifyingFileTest extends LimeTestCase {
         HashTree exactTree;
         try {
             exactTree = (HashTree) PrivilegedAccessor.invokeMethod(
-                    HashTree.class, "createHashTree", new Object[] {
-                            new Long(exact.length()),
+                    HashTree.class, "createHashTree", //
+                    new Object[] { new Long(exact.length()),
                             new FileInputStream(exact),
-                            URN.createSHA1Urn(exact) }, new Class[] {
-                            long.class, InputStream.class, URN.class });
+                            URN.createSHA1Urn(exact) }, //
+                    new Class[] { long.class, InputStream.class, URN.class });
         } catch (InvocationTargetException ite) {
             throw (Exception) ite.getCause();
         }
@@ -489,7 +489,10 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - data.length), data);
 
         // nothing should be verified
-        Thread.sleep(1000);
+        System.out.println("wait");
+
+        vf.waitForPending(1000);
+        System.out.println("done");
         assertEquals(0, vf.getVerifiedBlockSize());
 
         // now add the second piece of the last chunk
@@ -498,7 +501,9 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - 2 * data.length), data);
 
         // the last chunk should be verified
-        Thread.sleep(1000);
+        System.out.println("wait");
+        vf.waitForPending(1000);
+        System.out.println("done");
         assertEquals(exactTree.getNodeSize(), vf.getVerifiedBlockSize());
     }
 
@@ -514,7 +519,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl(0, full);
 
         // the file should be completed
-        Thread.sleep(500);
+        vf.waitForPending(500);
         assertTrue(vf.isComplete());
 
         synchronized (vf) {
