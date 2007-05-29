@@ -8,8 +8,10 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.Contact.State;
@@ -105,5 +107,37 @@ public class BucketNodeTest extends MojitoTestCase {
     	assertGreaterThan(now, bucket.getTimeStamp());
     	now = System.currentTimeMillis();
     	assertLessThan(now, bucket.getTimeStamp());
+    }
+    
+    public void testUpdateClassfulNetworkCounter() {
+    	RouteTable routeTable = new RouteTableImpl();
+    	Bucket bucket = routeTable.getBucket(KUID.MINIMUM);
+    	ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
+    	assertEquals(0, counter.size());
+    	
+    	KUID nodeId1 = KUID.createRandomID();
+    	Contact node = ContactFactory.createUnknownContact(
+    			Vendor.UNKNOWN, Version.ZERO, nodeId1, new InetSocketAddress("localhost", 5000));
+    	bucket.addActiveContact(node);
+    	assertEquals(1, counter.size());
+    	
+    	node = ContactFactory.createUnknownContact(
+    			Vendor.UNKNOWN, Version.ZERO, nodeId1, new InetSocketAddress("www.apple.com", 5000));
+    	bucket.updateContact(node);
+    	assertEquals(1, counter.size());
+    	
+    	KUID nodeId2 = KUID.createRandomID();
+    	node = ContactFactory.createUnknownContact(
+    			Vendor.UNKNOWN, Version.ZERO, nodeId2, new InetSocketAddress("www.apple.com", 5000));
+    	bucket.addActiveContact(node);
+    	assertEquals(3, bucket.size()); // local Node, first Node and this Node
+    	assertEquals(1, counter.size());
+    	
+    	KUID nodeId3 = KUID.createRandomID();
+    	node = ContactFactory.createUnknownContact(
+    			Vendor.UNKNOWN, Version.ZERO, nodeId3, new InetSocketAddress("www.google.com", 5000));
+    	bucket.addActiveContact(node);
+    	assertEquals(4, bucket.size());
+    	assertEquals(2, counter.size());
     }
 }

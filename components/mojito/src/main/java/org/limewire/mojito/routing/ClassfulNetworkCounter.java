@@ -141,6 +141,13 @@ public class ClassfulNetworkCounter implements Serializable {
     }
     
     /**
+     * Returns the number of Elements
+     */
+    public synchronized int size() {
+    	return nodesPerNetwork.size();
+    }
+    
+    /**
      * Clears the ClassfulNetworkCounter
      */
     public synchronized void clear() {
