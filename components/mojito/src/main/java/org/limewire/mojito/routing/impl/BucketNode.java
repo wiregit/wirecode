@@ -159,7 +159,15 @@ class BucketNode implements Bucket {
         
         KUID nodeId = node.getNodeID();
         if (containsActiveContact(nodeId)) {
-            return nodeTrie.put(nodeId, node);
+        	Contact current = nodeTrie.put(nodeId, node);
+        	assert  (current != null);
+        	
+        	// Remove the old Network
+        	counter.decrementAndGet(current);
+        	
+        	// And add the new Network
+        	counter.incrementAndGet(node);
+            return current;
         } else if (containsCachedContact(nodeId)) {
             return cache.put(nodeId, node);
         }
