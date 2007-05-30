@@ -469,8 +469,8 @@ public abstract class Server implements Runnable, Debuggable {
    * @author jpalm
    */
   public abstract class AbstractListener extends HasName implements Listener {
-      public AbstractListener(String name) { super(name); }
-      public AbstractListener() { super(); }
+      protected AbstractListener(String name) { super(name); }
+      protected AbstractListener() { super(); }
   }
   
   /**
@@ -479,8 +479,8 @@ public abstract class Server implements Runnable, Debuggable {
    * @author jpalm
    */
   public abstract class AbstractHandler extends HasName implements Handler {
-      public AbstractHandler(String name) { super(name); }
-      public AbstractHandler() { super(); }
+      protected AbstractHandler(String name) { super(name); }
+      protected AbstractHandler() { super(); }
   }
   
   /**
