@@ -363,7 +363,7 @@ public class DHTManagerImpl implements DHTManager {
                 return data;
             }
             
-            private List<Integer> getTopNetworks(Collection<? extends Contact> nodes, int count) {
+            private byte [] getTopNetworks(Collection<? extends Contact> nodes, int count) {
                 // Masked IP -> Count
                 ClassCNetworks classCNetworks = new ClassCNetworks();
                 for (Contact node : nodes) {

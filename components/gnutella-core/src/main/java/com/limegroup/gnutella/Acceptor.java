@@ -16,6 +16,7 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.SocketFactory;
@@ -98,6 +99,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	 * Variable for whether or not we have accepted an incoming connection --
 	 * used to determine firewall status.
 	 */
+    @InspectablePrimitive
 	private volatile boolean _acceptedIncoming = false;
 	
     /**

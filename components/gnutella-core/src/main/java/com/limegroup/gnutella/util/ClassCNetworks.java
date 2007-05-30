@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 
 /**
  * Utility class keeps track of class C networks and an associated count.
@@ -53,15 +54,35 @@ public class ClassCNetworks {
     }
     
     /** returns the top n class C networks in easy to bencode format */ 
-    public List<Integer> getTopInspectable(int number) {
+    public byte [] getTopInspectable(int number) {
         List<Map.Entry<Integer, Integer>> top = getTop();
-        List<Integer> ret = new ArrayList<Integer>(number * 2);
+        number = Math.min(top.size(), number);
+        byte [] ret = new byte[8 * number];
+        int i = 0;
         for (Map.Entry<Integer, Integer> entry : top) {
-            if (ret.size() >= 2 * number)
+            if (i == number)
                 break;
-            ret.add(entry.getKey());
-            ret.add(entry.getValue());
+            ByteOrder.int2beb(entry.getKey(), ret, i * 8);
+            ByteOrder.int2beb(entry.getValue(), ret, i * 8 + 4);
+            i++;
         }
         return ret;
+    }
+    
+    /**
+     * @return exposes the map.  
+     */
+    public Map<Integer,Integer> getMap() {
+        return counts;
+    }
+    
+    /**
+     * Combines the provided class C networks into this one
+     */
+    public void addAll(ClassCNetworks... other) {
+        for(ClassCNetworks c : other) {
+            for (int classC : c.getMap().keySet())
+                add(classC,c.getMap().get(classC));
+        }
     }
 }

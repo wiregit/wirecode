@@ -95,7 +95,7 @@ public final class RouteTable  {
         /** The ttl associated with this RTE - meaningful only if > 0. */
         private byte ttl = 0;
         /** The class C networks that have returned a reply for this query */
-        private final Map<Integer,Integer> classCnetworks = new HashMap<Integer, Integer>();
+        private final ClassCNetworks classCnetworks = new ClassCNetworks();
         /** Timestamp when this entry was created */
         private final long creationTime = System.currentTimeMillis();
         /** The times when results for this query arrived */
@@ -123,12 +123,7 @@ public final class RouteTable  {
 		public int getNumResults() { return repliesRouted; }
         
         void updateClassCNetworks(int classCNetwork, int numReplies) {
-            if (!classCnetworks.containsKey(classCNetwork))
-                classCnetworks.put(classCNetwork, numReplies);
-            else {
-                int previous = classCnetworks.get(classCNetwork);
-                classCnetworks.put(classCNetwork, previous + numReplies);
-            }
+            classCnetworks.add(classCNetwork, numReplies);
         }
         
         void timeStampResults(int count) {
@@ -568,13 +563,10 @@ public final class RouteTable  {
                         hops.set(i, hops.get(i)+rte.hops[i]);
                     for (int i =0 ;i < rte.ttls.length; i++)
                         ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
-                    classCSizes.add((double)(rte.classCnetworks.size()));
+                    classCSizes.add((double)(rte.classCnetworks.getMap().size()));
                     repliesRouted.add((double)rte.repliesRouted);
                     ttls.add((double)rte.ttl);
-                    for (int classC : rte.classCnetworks.keySet()) {
-                        int num = rte.classCnetworks.get(classC);
-                        globalClassC.add(classC,num);
-                    }
+                    globalClassC.addAll(rte.classCnetworks);
                     
                     // get stats on how long it takes to get the first 3 replies
                     if (rte.resultTimeStamps.size() > 0)
@@ -609,9 +601,7 @@ public final class RouteTable  {
                     allResultCounts.addAll(rte.resultCounts);
                 }
 
-                List<Integer> top10Networks = globalClassC.getTopInspectable(10);
-
-                ret.put("top10", top10Networks);
+                ret.put("top10", globalClassC.getTopInspectable(10));
                 ret.put("cs", StatsUtils.quickStatsDouble(classCSizes).getMap());
                 ret.put("csh", StatsUtils.getHistogram(classCSizes, 10));
                 ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
