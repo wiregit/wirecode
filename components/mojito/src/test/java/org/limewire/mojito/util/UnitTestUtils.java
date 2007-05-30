@@ -42,7 +42,7 @@ public class UnitTestUtils {
                         throw new UnsupportedOperationException();
                     }
 
-                    public void start(DHTTask.Callback callback) {
+                    public void start(OnewayExchanger exchanger) {
                         throw new UnsupportedOperationException();
                     } 
                 });

@@ -103,7 +103,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    protected synchronized void start() throws DHTException {
+    protected void start() throws DHTException {
         
         if (!pinger.hasNext()) {
             throw new DHTException("No hosts to ping");
@@ -117,16 +117,12 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
             throw new DHTException(e);
         }
     }
-    
-    @Override
-    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
-        response(response.getContact());
-        super.handleResponse(response, time);
-    }
 
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
-        PingResponse response = (PingResponse)message;
+    	decrementActive();
+    	
+    	PingResponse response = (PingResponse)message;
         
         Contact node = response.getContact();
         SocketAddress externalAddress = response.getExternalAddress();
@@ -162,14 +158,11 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
 
     @Override
-    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
-        failed(nodeId, dst);
-        super.handleTimeout(nodeId, dst, request, time);
-    }
-    
-    @Override
     protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        if(LOG.isInfoEnabled()) {
+    	decrementActive();
+        incrementFailures();
+        
+    	if (LOG.isInfoEnabled()) {
             LOG.info("Timeout: " + ContactUtils.toString(nodeId, dst));
         }
         
@@ -183,13 +176,10 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
-        failed(nodeId, dst);
-        super.handleError(nodeId, dst, message, e);
-    }
-
-    @Override
     protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+    	decrementActive();
+    	incrementFailures();
+    	
         if(e instanceof SocketException && !giveUp()) {
             try {
                 timeout(nodeId, dst, message, -1L);
@@ -208,7 +198,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     private void pingNextAndThrowIfDone(DHTException e) throws IOException {
         while(pinger.hasNext() && canMore()) {
             if (pinger.pingNext(context, this)) {
-                active++;
+            	incrementActive();
             }
         }
         
@@ -217,12 +207,15 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         }
     }
     
-    private void response(Contact node) {
+    private void decrementActive() {
         active--;
     }
     
-    private void failed(KUID nodeId, SocketAddress addr) {
-        active--;
+    private void incrementActive() {
+    	active++;
+    }
+    
+    private void incrementFailures() {
         failures++;
     }
     

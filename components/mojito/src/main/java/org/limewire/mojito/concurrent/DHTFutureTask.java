@@ -35,11 +35,10 @@ import org.limewire.mojito.util.OnewayExchanger;
 /**
  * 
  */
-public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFuture<T>, Cancellable {
+public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
-    private final OnewayExchanger<T, ExecutionException> exchanger
-        = new OnewayExchanger<T, ExecutionException>(true);
-    
+	private final OnewayExchanger<T, ExecutionException> exchanger;
+	
     private final Set<DHTFutureListener<T>> listeners 
         = Collections.synchronizedSet(new LinkedHashSet<DHTFutureListener<T>>());
     
@@ -51,16 +50,43 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
     
     private ScheduledFuture<?> watchdog = null;
     
-    public DHTFutureTask(Context context, DHTTask<T> task) {
+    public DHTFutureTask(final Context context, DHTTask<T> task) {
         this.task = task;
         this.context = context;
+        
+        exchanger = new OnewayExchanger<T, ExecutionException>(true) {
+        	@Override
+			public synchronized void setValue(T value) {
+        		if (!isDone()) {
+        			super.setValue(value);
+        			internalDone();
+        		}
+			}
+        	
+			@Override
+			public synchronized void setException(ExecutionException exception) {
+				if (!isDone()) {
+	                super.setException(exception);
+	                internalDone();
+	            }
+			}
+
+			@Override
+			public synchronized boolean cancel() {
+				if (super.cancel()) {
+					internalDone();
+					return true;
+				}
+				return false;
+			}
+        };
     }
     
     public void run() {
         try {
             synchronized (exchanger) {
                 if (!exchanger.isDone()) {
-                    task.start(this);
+                    task.start(exchanger);
                     running = true;
                     
                     if (!exchanger.isDone()) {
@@ -69,7 +95,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
                 }
             }
         } catch (Throwable t) {
-            setException(t);
+            exchanger.setException(new ExecutionException(t));
         }
     }
 
@@ -79,7 +105,10 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
                 synchronized (exchanger) {
                     if (!exchanger.isDone()) {
                     	task.cancel();
-                        setException(new LockTimeoutException(task.toString()));
+                    	
+                        exchanger.setException(
+                        		new ExecutionException(
+                        				new LockTimeoutException(task.toString())));
                     }
                 }
             }
@@ -89,7 +118,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
                 r, task.getLockTimeout(), TimeUnit.MILLISECONDS);
     }
     
-    /**
+	/**
      * Protected method invoked when this task transitions to state isDone 
      * (whether normally or via cancellation). The default implementation 
      * does nothing. Subclasses may override this method to invoke completion 
@@ -105,68 +134,33 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
      * Calls done() and notifies all DHTFutureListeners
      */
     private void internalDone() {
-        done();
-        
-        Runnable r = new Runnable() {
-            public void run() {
-                try {
-                    T value = get();
-                    fireFutureResult(value);
-                } catch (ExecutionException e) {
-                    fireExecutionException(e);
-                } catch (CancellationException e) {
-                    fireCancellationException(e);
-                } catch (InterruptedException e) {
-                    fireInterruptedException(e);
-                }
-            }
-        };
-        
-        context.getDHTExecutorService().execute(r);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.concurrent.DHTTask.Callback#setReturnValue(java.lang.Object)
-     */
-    public void setReturnValue(T value) {
-        boolean done = false;
-        synchronized (exchanger) {
-            if (!exchanger.isDone()) {
-                exchanger.setValue(value);
-                if (watchdog != null) {
-                    watchdog.cancel(true);
-                    watchdog = null;
-                }
-                done = true;
-            }
+    	
+    	// NOTE: YOU ARE HOLDING A LOCK ON THE EXCHANGER RIGHT NOW!!!
+    	
+    	if (watchdog != null) {
+            watchdog.cancel(true);
+            watchdog = null;
         }
-        
-        if (done) {
-            internalDone();
-        }
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.concurrent.DHTTask.Callback#setException(java.lang.Throwable)
-     */
-    public void setException(Throwable t) {
-        boolean done = false;
-        synchronized (exchanger) {
-            if (!exchanger.isDone()) {
-                exchanger.setException(new ExecutionException(t));
-                if (watchdog != null) {
-                    watchdog.cancel(true);
-                    watchdog = null;
-                }
-                done = true;
-            }
-        }
-        
-        if (done) {
-            internalDone();
-        }
+    	
+    	done();
+    	
+    	// Notify the listeners on a different Thread
+    	Runnable task = new Runnable() {
+    		public void run() {
+    	        try {
+    	            T value = get();
+    	            fireFutureResult(value);
+    	        } catch (ExecutionException e) {
+    	            fireExecutionException(e);
+    	        } catch (CancellationException e) {
+    	            fireCancellationException(e);
+    	        } catch (InterruptedException e) {
+    	            fireInterruptedException(e);
+    	        }
+    		}
+    	};
+    	
+    	context.getDHTExecutorService().execute(task);
     }
     
     /*
@@ -216,18 +210,13 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
             if (!exchanger.isDone()) {
                 if (!running || mayInterruptIfRunning) {
                     exchanger.cancel();
-                    task.cancel();
-                    if (watchdog != null) {
-                        watchdog.cancel(true);
-                        watchdog = null;
-                    }
                     done = true;
                 }
             }
         }
         
         if (done) {
-            internalDone();
+        	task.cancel();
         }
         
         return done;

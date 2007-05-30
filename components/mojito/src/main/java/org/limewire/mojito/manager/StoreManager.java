@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +59,7 @@ import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito.util.OnewayExchanger;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -106,16 +108,19 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
     }
     
+    
     /**
      * 
      */
     private class StoreProcess implements DHTTask<StoreResult> {
         
+    	private final Log LOG = LogFactory.getLog(StoreProcess.class);
+    	
         private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
         
         private boolean cancelled = false;
         
-        private DHTTask.Callback<StoreResult> callback;
+        private OnewayExchanger<StoreResult, ExecutionException> exchanger;
         
         private final KUID valueId;
         
@@ -161,8 +166,15 @@ public class StoreManager extends AbstractManager<StoreResult> {
             return NetworkSettings.STORE_TIMEOUT.getValue();
         }
 
-        public void start(DHTTask.Callback<StoreResult> callback) {
-            this.callback = callback;
+        public void start(OnewayExchanger<StoreResult, ExecutionException> exchanger) {
+        	if (exchanger == null) {
+        		if (LOG.isWarnEnabled()) {
+        			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+        		}
+        		exchanger = new OnewayExchanger<StoreResult, ExecutionException>(true);
+        	}
+        	
+            this.exchanger = exchanger;
             
             // Regular store operation
             if (node == null) {
@@ -180,16 +192,22 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
         
         private void findNearestNodes() {
-            DHTTask.Callback<LookupResult> c = new DHTTask.Callback<LookupResult>() {
-                public void setReturnValue(LookupResult value) {
-                    handleNearestNodes(value);
-                }
-                
-                public void setException(Throwable t) {
-                    callback.setException(t);
-                }
-            };
-            
+            OnewayExchanger<LookupResult, ExecutionException> c 
+		    		= new OnewayExchanger<LookupResult, ExecutionException>(true) {
+		    	@Override
+				public synchronized void setValue(LookupResult value) {
+					super.setValue(value);
+					handleNearestNodes(value);
+				}
+		    	
+		    	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					exchanger.setException(exception);
+				}
+		    };
+    
             // Do a lookup for the k-closest Nodes where we're
             // going to store the value
             LookupResponseHandler<LookupResult> handler = createLookupResponseHandler();
@@ -205,16 +223,22 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
         
         private void doGetSecurityToken() {
-            DHTTask.Callback<GetSecurityTokenResult> c = new DHTTask.Callback<GetSecurityTokenResult>() {
-                public void setReturnValue(GetSecurityTokenResult value) {
-                    handleSecurityToken(value);
-                }
-                
-                public void setException(Throwable t) {
-                    callback.setException(t);
-                }
-            };
-            
+            OnewayExchanger<GetSecurityTokenResult, ExecutionException> c 
+		    		= new OnewayExchanger<GetSecurityTokenResult, ExecutionException>(true) {
+		    	@Override
+				public synchronized void setValue(GetSecurityTokenResult value) {
+					super.setValue(value);
+					handleSecurityToken(value);
+				}
+		    	
+		    	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					exchanger.setException(exception);
+				}
+		    };
+    
             GetSecurityTokenHandler handler 
                 = new GetSecurityTokenHandler(context, node.getKey());
             
@@ -224,7 +248,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
         private void handleSecurityToken(GetSecurityTokenResult result) {
             SecurityToken securityToken = result.getSecurityToken();
             if (securityToken == null) {
-                callback.setException(new DHTException("Coult not get SecurityToken from " + node));
+                exchanger.setException(new ExecutionException(
+                		new DHTException("Could not get SecurityToken from " + node)));
             } else {
                 Entry<Contact, SecurityToken> entry 
                     = new EntryImpl<Contact, SecurityToken>(node.getKey(), securityToken);
@@ -237,10 +262,10 @@ public class StoreManager extends AbstractManager<StoreResult> {
             // And store the values along the path
             StoreResponseHandler handler 
                 = new StoreResponseHandler(context, path, values);
-            start(handler, callback);
+            start(handler, exchanger);
         }
         
-        private <T> void start(DHTTask<T> task, DHTTask.Callback<T> c) {
+        private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {
             boolean doStart = false;
             synchronized (tasks) {
                 if (!cancelled) {

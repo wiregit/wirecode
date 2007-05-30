@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +50,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.OnewayExchanger;
 import org.limewire.mojito.util.RouteTableUtils;
 
 /**
@@ -180,7 +182,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      */
     private class BootstrapProcess implements DHTTask<BootstrapResult> {
 
-        private DHTTask.Callback<BootstrapResult> callback;
+        private OnewayExchanger<BootstrapResult, ExecutionException> exchanger;
         
         private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
         
@@ -214,8 +216,15 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             return NetworkSettings.BOOTSTRAP_TIMEOUT.getValue();
         }
 
-        public void start(DHTTask.Callback<BootstrapResult> callback) {
-            this.callback = callback;
+        public void start(OnewayExchanger<BootstrapResult, ExecutionException> exchanger) {
+        	if (exchanger == null) {
+        		if (LOG.isWarnEnabled()) {
+        			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+        		}
+        		exchanger = new OnewayExchanger<BootstrapResult, ExecutionException>(true);
+        	}
+        	
+            this.exchanger = exchanger;
             
             if (node == null) {
                 findInitialContact();
@@ -225,14 +234,20 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void findInitialContact() {
-            DHTTask.Callback<PingResult> c = new DHTTask.Callback<PingResult>() {
-                public void setReturnValue(PingResult value) {
-                    handlePong(value);
-                }
-                
-                public void setException(Throwable t) {
-                    callback.setException(t);
-                }                
+            OnewayExchanger<PingResult, ExecutionException> c 
+            		= new OnewayExchanger<PingResult, ExecutionException>(true) {
+            	@Override
+				public synchronized void setValue(PingResult value) {
+					super.setValue(value);
+					handlePong(value);
+				}
+            	
+            	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					exchanger.setException(exception);
+				}
             };
             
             PingResponseHandler handler = new PingResponseHandler(context, 
@@ -247,16 +262,22 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void findNearestNodes() {
-            DHTTask.Callback<FindNodeResult> c = new DHTTask.Callback<FindNodeResult>() {
-                public void setReturnValue(FindNodeResult value) {
-                    handleNearestNodes(value);
-                }
-                
-                public void setException(Throwable t) {
-                    callback.setException(t);
-                }                
-            };
-            
+            OnewayExchanger<FindNodeResult, ExecutionException> c 
+		    		= new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
+		    	@Override
+				public synchronized void setValue(FindNodeResult value) {
+					super.setValue(value);
+					handleNearestNodes(value);
+				}
+		    	
+		    	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					exchanger.setException(exception);
+				}
+		    };
+    
             startPhaseOne = System.currentTimeMillis();
             FindNodeResponseHandler handler = new FindNodeResponseHandler(
                     context, node, context.getLocalNodeID());
@@ -289,26 +310,34 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void checkCollisions(Collection<? extends Contact> collisions) {
-            DHTTask.Callback<PingResult> c = new DHTTask.Callback<PingResult>() {
-                public void setReturnValue(PingResult value) {
-                    handleCollision(value);
-                }
-                
-                public void setException(Throwable t) {
-                    if (t instanceof DHTTimeoutException) {
+            OnewayExchanger<PingResult, ExecutionException> c 
+		    		= new OnewayExchanger<PingResult, ExecutionException>(true) {
+		    	@Override
+				public synchronized void setValue(PingResult value) {
+					super.setValue(value);
+					handleCollision(value);
+				}
+		    	
+		    	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					
+					Throwable cause = exception.getCause();
+					if (cause instanceof DHTTimeoutException) {
                         // Ignore, everything is fine! Nobody did respond
                         // and we can keep our Node ID which is good!
-                        LOG.info("DHTTimeoutException", t);
+                        LOG.info("DHTTimeoutException", cause);
                         
                         // Continue with finding random Node IDs
                         refreshAllBuckets();
                         
                     } else {
-                        callback.setException(t);
+                        exchanger.setException(exception);
                     }
-                }                
-            };
-            
+				}
+		    };
+    
             Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
             PingIterator pinger = new PingIteratorFactory.CollisionPinger(
                     context, sender, CollectionUtils.toSet(collisions));
@@ -359,16 +388,22 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void refreshBucket(KUID randomId) {
-            DHTTask.Callback<FindNodeResult> c = new DHTTask.Callback<FindNodeResult>() {
-                public void setReturnValue(FindNodeResult value) {
-                    handleBucketRefresh(value);
-                }
-                
-                public void setException(Throwable t) {
-                    callback.setException(t);
-                }                
-            };
-            
+            OnewayExchanger<FindNodeResult, ExecutionException> c 
+		    		= new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
+		    	@Override
+				public synchronized void setValue(FindNodeResult value) {
+					super.setValue(value);
+					handleBucketRefresh(value);
+				}
+		    	
+		    	@Override
+				public synchronized void setException(
+						ExecutionException exception) {
+					super.setException(exception);
+					exchanger.setException(exception);
+				}
+		    };
+    
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, randomId);
             start(handler, c);
@@ -458,12 +493,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             long phaseOne = (startPhaseTwo - startPhaseOne);
             long phaseTwo = (now - startPhaseTwo);
             
-            callback.setReturnValue(new BootstrapResult(node, phaseOne, phaseTwo, type));
+            exchanger.setValue(new BootstrapResult(node, phaseOne, phaseTwo, type));
         }
         
-        private <T> void start(DHTTask<T> task, 
-                DHTTask.Callback<T> c) {
-        	
+        private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {
         	boolean doStart = false;
             synchronized (tasks) {
                 if (!cancelled) {

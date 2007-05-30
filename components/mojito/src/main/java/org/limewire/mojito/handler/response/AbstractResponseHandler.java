@@ -21,6 +21,7 @@ package org.limewire.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +37,7 @@ import org.limewire.mojito.result.Result;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.OnewayExchanger;
 
 
 /**
@@ -57,14 +59,10 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     /** The maximum number of errors that may occur */
     private int maxErrors;
     
-    private volatile boolean cancelled = false;
-    
-    private volatile boolean done = false;
-    
     /** A handle to Context */
     protected final Context context;
     
-    protected DHTTask.Callback<V> callback;
+    private volatile OnewayExchanger<V, ExecutionException> exchanger;
     
     /** The time of the last response we received */
     protected long lastResponseTime = 0L;
@@ -85,28 +83,58 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
         this.context = context;
         
         setTimeout(timeout);
-        
         setMaxErrors(maxErrors);
     }
     
-    public synchronized void start(DHTTask.Callback<V> callback) {        
-        if (isDone() || isCancelled()) {
-            throw new IllegalStateException();
-        }
-        
-        this.callback = callback;
-        
-        try {
-            start();
-        } catch (DHTException t) {
-            setException(t);
-        }
+    /**
+     * Returns the lock Object for the ResponseHandler.
+     */
+    protected Object getLock() {
+    	Object lock = exchanger;
+    	if (lock == null) {
+    		throw new IllegalStateException("Lock is null");
+    	}
+    	return lock;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTTask#start(org.limewire.mojito.util.OnewayExchanger)
+     */
+    public void start(OnewayExchanger<V, ExecutionException> exchanger) {
+    	if (exchanger == null) {
+    		if (LOG.isWarnEnabled()) {
+    			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+    		}
+    		exchanger = new OnewayExchanger<V, ExecutionException>(true);
+    	}
+    	
+    	this.exchanger = exchanger;
+    	
+    	synchronized (getLock()) {
+    		if (isDone() || isCancelled()) {
+                throw new IllegalStateException("Cannot start: " + this);
+            }
+            
+            try {
+                start();
+            } catch (DHTException t) {
+                setException(t);
+            }
+		}
+    }
+    
+    /**
+     * Override this method to start the ResponseHandler
+     */
     protected abstract void start() throws DHTException;
     
-    public synchronized void cancel() {
-        cancelled = true;
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTTask#cancel()
+     */
+    public void cancel() {
+    	exchanger.cancel();
     }
     
     /**
@@ -195,20 +223,21 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleResponse(com.limegroup.mojito.messages.ResponseMessage, long)
      */
-    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
-        
-        if (isCancelled() || isDone()) {
-            return;
-        }
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Received " + response + " from " + response.getContact() 
-                    + " after " + getErrors() + " errors and a total time of " + getElapsedTime() + "ms");
-        }
-        
-        elapsedTime += time;
-        lastResponseTime = System.currentTimeMillis();
-        response(response, time);
+    public void handleResponse(ResponseMessage response, long time) throws IOException {
+        synchronized (getLock()) {
+        	if (isCancelled() || isDone()) {
+                return;
+            }
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Received " + response + " from " + response.getContact() 
+                        + " after " + getErrors() + " errors and a total time of " + getElapsedTime() + "ms");
+            }
+            
+            elapsedTime += time;
+            lastResponseTime = System.currentTimeMillis();
+            response(response, time);
+		}
     }
 
     /**
@@ -220,29 +249,31 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleTimeout(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, long)
      */
-    public synchronized void handleTimeout(KUID nodeId, 
+    public void handleTimeout(KUID nodeId, 
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
-        if (isCancelled() || isDone()) {
-            return;
-        }
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst) 
-                    + " failed after " + time + "ms");
-        }
-        
-        elapsedTime += time;
-        
-        try {
-            if (errors < maxErrors) {
-                resend(nodeId, dst, request);
-            } else {
-                timeout(nodeId, dst, request, getElapsedTime());
+    	synchronized (getLock()) {
+    		if (isCancelled() || isDone()) {
+                return;
             }
-        } finally {
-            errors++;
-        }
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst) 
+                        + " failed after " + time + "ms");
+            }
+            
+            elapsedTime += time;
+            
+            try {
+                if (errors < maxErrors) {
+                    resend(nodeId, dst, request);
+                } else {
+                    timeout(nodeId, dst, request, getElapsedTime());
+                }
+            } finally {
+                errors++;
+            }
+		}
     }
     
     /**
@@ -266,17 +297,19 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleError(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, java.lang.Exception)
      */
-    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
         
-        if (isCancelled() || isDone()) {
-            return;
-        }
-        
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a " + message + " to " + ContactUtils.toString(nodeId, dst) + " failed", e);
-        }
-        
-        error(nodeId, dst, message, e);
+    	synchronized (getLock()) {
+    		if (isCancelled() || isDone()) {
+                return;
+            }
+            
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Sending a " + message + " to " + ContactUtils.toString(nodeId, dst) + " failed", e);
+            }
+            
+            error(nodeId, dst, message, e);
+		}
     }
     
     /**
@@ -289,13 +322,14 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleTick()
      */
-    public synchronized void handleTick() {
-        
-        if (isCancelled() || isDone()) {
-            return;
-        }
-        
-        tick();
+    public void handleTick() {
+    	synchronized (getLock()) {
+    		if (isCancelled() || isDone()) {
+                return;
+            }
+            
+            tick();
+		}
     }
 
     /*
@@ -303,7 +337,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * @see com.limegroup.mojito.handler.ResponseHandler#isCancelled()
      */
     public boolean isCancelled() {
-        return cancelled;            
+        return exchanger.isCancelled();            
     }
     
     /**
@@ -312,31 +346,23 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * Exception
      */
     public boolean isDone() {
-        return done;
+        return exchanger.isDone();
     }
     
     /**
      * Sets the return value which will be returned by the 
      * call() method
      */
-    protected synchronized void setReturnValue(V value) {
-        done = true;
-        DHTTask.Callback<V> callback = this.callback;
-        if (callback != null) {
-            callback.setReturnValue(value);
-        }
+    protected void setReturnValue(V value) {
+    	exchanger.setValue(value);
     }
     
     /**
      * Sets the Exception which will be thrown by the
      * call() method
      */
-    protected synchronized void setException(DHTException ex) {
-        done = true;
-        DHTTask.Callback<V> callback = this.callback;
-        if (callback != null) {
-            callback.setException(ex);
-        }
+    protected void setException(DHTException ex) {
+    	exchanger.setException(new ExecutionException(ex));
     }
     
     /**

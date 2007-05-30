@@ -42,6 +42,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.BootstrapResult;
+import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
@@ -65,6 +66,7 @@ public class CommandHandler {
             "put (key|kuid) (\\w|\\d)+ (value|file) .+",
             "remove (key|kuid) (\\w|\\d)+",
             "get (key|kuid) (\\w|\\d)+",
+            "lookup (key|kuid) (\\w|\\d)+",
             "database",
             "publisher",
             "routetable",
@@ -314,29 +316,28 @@ public class CommandHandler {
             }
             md.reset();
             
-            /*dht.get(key, new LookupAdapter() {
-                public void found(KUID key, Collection values, long time) {
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append(key).append(" in ").append(time).append("ms\n");
-                    buffer.append(values);
-                    buffer.append("\n");
-                    out.println(buffer.toString());
-                    out.flush();
-                }
-
-                public void finish(KUID lookup, Collection c, long time) {
-                    if (c.isEmpty()) {
-                        out.println(lookup + " was not found after " + time + "ms");
-                    } else {
-                        out.println("Lookup for " + lookup + " finished after " 
-                                + time + "ms and " + c.size() + " found locations");
-                    }
-                    out.flush();
-                }
-            });*/
-            
             EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
             FindValueResult evt = dht.get(lookupKey).get();
+            out.println(evt.toString());
+            
+        } catch (Exception e) {
+            e.printStackTrace(out);
+        }
+    }
+    
+    public static void lookup(MojitoDHT dht, String[] args, PrintWriter out) {
+    	try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            
+            KUID key = null;
+            if (args[1].equals("kuid")) {
+                key = KUID.createWithHexString(args[2]);
+            } else {
+                key = KUID.createWithBytes(md.digest(args[2].getBytes("UTF-8")));
+            }
+            md.reset();
+            
+            FindNodeResult evt = ((Context)dht).lookup(key).get();
             out.println(evt.toString());
             
         } catch (Exception e) {

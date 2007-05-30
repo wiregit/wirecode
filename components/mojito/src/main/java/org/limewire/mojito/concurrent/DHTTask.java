@@ -19,6 +19,10 @@
 
 package org.limewire.mojito.concurrent;
 
+import java.util.concurrent.ExecutionException;
+
+import org.limewire.mojito.util.OnewayExchanger;
+
 /**
  * A DHTTask is an asynchronous non-blocking Task
  */
@@ -32,27 +36,10 @@ public interface DHTTask<T> {
     /**
      * Starts the DHTTask
      */
-    public void start(Callback<T> callback);
+    public void start(OnewayExchanger<T, ExecutionException> exchanger);
     
     /**
      * Cancels the DHTTask
      */
     public void cancel();
-    
-    /**
-     * The callback interface for DHTTask
-     */
-    public static interface Callback<T> {
-
-        /**
-         * Setter for the return value
-         */
-        public void setReturnValue(T value);
-        
-        
-        /**
-         * Setter for an Exception
-         */
-        public void setException(Throwable t);
-    }
 }

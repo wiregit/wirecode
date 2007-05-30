@@ -20,6 +20,7 @@
 package org.limewire.mojito.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.util.OnewayExchanger;
 
@@ -29,8 +30,8 @@ import org.limewire.mojito.util.OnewayExchanger;
  */
 public class CallableDHTTask<T> implements Callable<T> {
 
-    private final OnewayExchanger<T, Exception> exchanger
-        = new OnewayExchanger<T, Exception>(true);
+    private final OnewayExchanger<T, ExecutionException> exchanger
+        = new OnewayExchanger<T, ExecutionException>(true);
     
     private final DHTTask<T> task;
     
@@ -40,20 +41,10 @@ public class CallableDHTTask<T> implements Callable<T> {
         this.task = task;
     }
 
-    public T call() throws Exception {
+    public T call() throws InterruptedException, ExecutionException {
         synchronized (exchanger) {
             if (!started) {
-                DHTTask.Callback<T> callback = new DHTTask.Callback<T>() {
-                    public void setException(Throwable t) {
-                        exchanger.setException(new Exception(t));
-                    }
-
-                    public void setReturnValue(T value) {
-                        exchanger.setValue(value);
-                    }
-                };
-                
-                task.start(callback);
+                task.start(exchanger);
                 started = true;
             }
             

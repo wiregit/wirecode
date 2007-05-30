@@ -107,7 +107,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         }
     }
     
-    public synchronized void start() throws DHTException {
+    @Override
+    public void start() throws DHTException {
         processes = processList.iterator();
         sendNextAndExitIfDone();
     }

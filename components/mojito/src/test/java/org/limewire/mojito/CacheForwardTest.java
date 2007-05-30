@@ -121,7 +121,8 @@ public class CacheForwardTest extends MojitoTestCase {
                 
                 SecurityToken securityToken = (SecurityToken)m.invoke(result, new Object[0]);
                 assertNotNull(securityToken);
-            } catch (DHTException err) {
+            } catch (ExecutionException err) {
+            	assertInstanceof(DHTException.class, err.getCause());
                 fail("DHT-1 did not return a SecurityToken", err);
             }
             
