@@ -2,7 +2,7 @@ package org.limewire.store.storeserver.core;
 
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -12,7 +12,7 @@ import org.limewire.store.storeserver.util.Util;
  * 
  * @author jpalm
  */
-public abstract class RemoteServer extends Server {
+public abstract class RemoteServer extends AbstractServer {
 
   public RemoteServer(final int port) {
     super(port);
@@ -60,13 +60,13 @@ public abstract class RemoteServer extends Server {
   class StoreKey extends AbstractHandler {
     
     public String handle(final Map<String, String> args, final Request req) {
-      String publicKey = getArg(args, IServer.Parameters.PUBLIC);
+      String publicKey = getArg(args, Server.Parameters.PUBLIC);
       if (publicKey == null) {
-        return report(ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
+        return report(Server.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
       }
-      String privateKey = getArg(args, IServer.Parameters.PRIVATE);
+      String privateKey = getArg(args, Server.Parameters.PRIVATE);
       if (privateKey == null) {
-        return report(ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
+        return report(Server.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
       }
       String ip = req.getIP();
       //
@@ -75,10 +75,10 @@ public abstract class RemoteServer extends Server {
       if (ip == null)
         ip = "localhost:8080";
       if (Util.isEmpty(publicKey)) {
-        return ErrorCodes.INVALID_PUBLIC_KEY;
+        return Server.ErrorCodes.INVALID_PUBLIC_KEY;
       }
       storeKey(publicKey, privateKey, ip);
-      return IServer.Responses.OK;
+      return Server.Responses.OK;
     }
   }
 
@@ -90,9 +90,9 @@ public abstract class RemoteServer extends Server {
   class GiveKey extends HandlerWithCallback {
     
     public String handleRest(final Map<String, String> args, final Request req) {
-      String publicKey = getArg(args, IServer.Parameters.PUBLIC);
+      String publicKey = getArg(args, Server.Parameters.PUBLIC);
       if (publicKey == null) {
-        return report(ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
+        return report(Server.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
       }
       String ip = req.getIP();
       return lookUpPrivateKey(publicKey, ip);

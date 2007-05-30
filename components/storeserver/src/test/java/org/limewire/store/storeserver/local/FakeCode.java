@@ -4,9 +4,8 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import org.limewire.store.storeserver.core.LocalServer;
+import org.limewire.store.storeserver.core.ServerImpl;
 import org.limewire.store.storeserver.core.RemoteServer;
-import org.limewire.store.storeserver.local.LocalServerDelegate;
 
 
 /**
@@ -32,7 +31,7 @@ public class FakeCode {
 		void handle(String res);
 	}
 	
-	FakeCode(LocalServer local, RemoteServer remote) {
+	FakeCode(ServerImpl local, RemoteServer remote) {
 		this.toLocalServer = new LocalServerDelegate(remote, local.getPort(), false);
 		this.toRemoteServer = new LocalServerDelegate(local, remote.getPort(), false);
 	}

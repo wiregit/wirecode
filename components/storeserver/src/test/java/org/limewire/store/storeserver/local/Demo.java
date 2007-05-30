@@ -3,10 +3,9 @@ package org.limewire.store.storeserver.local;
 import java.util.Map;
 
 import org.limewire.store.storeserver.api.AbstractDispatchee;
-import org.limewire.store.storeserver.core.LocalServer;
+import org.limewire.store.storeserver.core.ServerImpl;
 import org.limewire.store.storeserver.core.RemoteServer;
-import org.limewire.store.storeserver.core.Server;
-import org.limewire.store.storeserver.local.LocalLocalServer;
+import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.local.DemoRemoteServer;
 
 
@@ -21,11 +20,11 @@ public class Demo {
         new Demo().realMain(args);
     }
 
-    private final LocalServer localServer;
+    private final ServerImpl localServer;
 
     private final RemoteServer remoteServer;
 
-    public final LocalServer getLocalServer() {
+    public final ServerImpl getLocalServer() {
         return localServer;
     }
 
@@ -39,8 +38,8 @@ public class Demo {
     }
 
     public void start() {
-        Server.start(localServer);
-        Server.start(remoteServer);
+        AbstractServer.start(localServer);
+        AbstractServer.start(remoteServer);
     }
 
     public void realMain(final String[] args) {

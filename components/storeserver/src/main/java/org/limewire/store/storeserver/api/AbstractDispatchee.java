@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is what receives actual commands from an {@link IServer}.
+ * This is what receives actual commands from an {@link Server}.
  * 
  * @author jpalm
  */
-public abstract class AbstractDispatchee implements IDispatchee {
+public abstract class AbstractDispatchee implements Dispatchee {
 
-    private final org.limewire.store.storeserver.api.IServer server;
+    private final org.limewire.store.storeserver.api.Server server;
 
-    private final List<IConnectionListener> connectionListeners = new ArrayList<IConnectionListener>();
+    private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
 
     private boolean isConnected;
 
-    public AbstractDispatchee(final IServer server) {
+    public AbstractDispatchee(final Server server) {
         this.server = server;
     }
 
-    public final IServer getServer() {
+    public final Server getServer() {
         return this.server;
     }
 
@@ -28,18 +28,18 @@ public abstract class AbstractDispatchee implements IDispatchee {
         this.isConnected = isConnected;
         connectionChanged(this.isConnected);
         if (!connectionListeners.isEmpty()) {
-            for (IConnectionListener lis : connectionListeners) {
+            for (ConnectionListener lis : connectionListeners) {
                 lis.connectionChanged(isConnected);
             }
         }
     }
 
-    public final boolean addConnectionListener(IConnectionListener lis) {
+    public final boolean addConnectionListener(ConnectionListener lis) {
         return connectionListeners.contains(lis) ? false : connectionListeners
                 .add(lis);
     }
 
-    public final boolean removeConnectionListener(IConnectionListener lis) {
+    public final boolean removeConnectionListener(ConnectionListener lis) {
         return !connectionListeners.contains(lis) ? false : connectionListeners
                 .remove(lis);
     }

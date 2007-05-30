@@ -7,14 +7,14 @@ import java.util.Map;
  * 
  * @author jpalm
  */
-public interface IDispatchee extends IConnectionListener.HasSome {
+public interface Dispatchee extends ConnectionListener.HasSome {
 
     /**
      * Returns the local server from which this receives commands.
      * 
      * @return the local server from which this receives commands
      */
-    IServer getServer();
+    Server getServer();
 
     /**
      * Responds to <tt>cmd</tt> with arguments <tt>args</tt>.

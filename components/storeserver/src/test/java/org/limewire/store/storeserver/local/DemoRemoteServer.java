@@ -3,11 +3,9 @@ package org.limewire.store.storeserver.local;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.store.storeserver.core.ErrorCodes;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.core.RemoteServer;
-import org.limewire.store.storeserver.core.Server;
-import org.limewire.store.storeserver.local.LocalLocalServer;
-import org.limewire.store.storeserver.local.LocalServerDelegate;
+import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Numbers;
 
 
@@ -84,11 +82,11 @@ public class DemoRemoteServer extends RemoteServer {
     final Pair p = new Pair(publicKey, ip);
     final String privateKey = pairs2privateKeys.get(p);
     note("found private key: " + privateKey + " for " + p);
-    return privateKey == null ? ErrorCodes.INVALID_PUBLIC_KEY_OR_IP : privateKey;
+    return privateKey == null ? Server.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP : privateKey;
   }
   
   public static void main(String[] args) {
-      Server.start(new DemoRemoteServer(LocalLocalServer.PORT, true));
+      AbstractServer.start(new DemoRemoteServer(LocalLocalServer.PORT, true));
   }
 
 }

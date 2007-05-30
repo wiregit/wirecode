@@ -1,13 +1,13 @@
 package org.limewire.store.storeserver.util;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
 
 import junit.framework.TestCase;
 
 public class RemoveCallbackTest extends TestCase {
 	
-	final static char Q = IServer.Constants.CALLBACK_QUOTE;
+	final static char Q = Server.Constants.CALLBACK_QUOTE;
 	
 	public void testNull() {
 		String s = null;

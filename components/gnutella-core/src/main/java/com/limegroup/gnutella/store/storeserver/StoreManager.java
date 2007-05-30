@@ -2,9 +2,9 @@ package com.limegroup.gnutella.store.storeserver;
 
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IConnectionListener;
-import org.limewire.store.storeserver.api.IServer;
-import org.limewire.store.storeserver.api.IConnectionListener.HasSome;
+import org.limewire.store.storeserver.api.ConnectionListener;
+import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.ConnectionListener.HasSome;
 
 
 /**
@@ -12,7 +12,7 @@ import org.limewire.store.storeserver.api.IConnectionListener.HasSome;
  * 
  * @author jpalm
  */
-public interface IStoreServer extends IConnectionListener.HasSome {
+public interface StoreManager extends ConnectionListener.HasSome {
     
     /**
      * Is able to return and possibly construct an instance.
@@ -26,7 +26,7 @@ public interface IStoreServer extends IConnectionListener.HasSome {
          * 
          * @return and possibly constructs the single instance
          */
-        IStoreServer instance();
+        StoreManager instance();
     }
     
     /**
@@ -93,9 +93,9 @@ public interface IStoreServer extends IConnectionListener.HasSome {
     }
 
     public final static Holder HOLDER = new Holder() {
-        private StoreServer instance;       
-        public StoreServer instance() {
-            if (instance == null) instance = StoreServer.newDemoInstance();
+        private StoreManagerImpl instance;       
+        public StoreManagerImpl instance() {
+            if (instance == null) instance = StoreManagerImpl.newDemoInstance();
             return instance;
         }        
     };
@@ -105,12 +105,12 @@ public interface IStoreServer extends IConnectionListener.HasSome {
      * 
      * @return the local server
      */
-    public abstract IServer getLocalServer();
+    public abstract Server getLocalServer();
 
     /**
      * Starts this service.
      * 
-     * @see IServer#start()
+     * @see Server#start()
      */
     public abstract void start();
 
@@ -118,23 +118,23 @@ public interface IStoreServer extends IConnectionListener.HasSome {
      * Shuts down this service.
      * 
      * @param millis milliseconds to wait before causing an abrupt stop
-     * @see IServer#shutDown(long)
+     * @see Server#shutDown(long)
      */
     public abstract void shutDown(long millis);
 
     /**
-     * @see HasSome#addConnectionListener(IConnectionListener)
+     * @see HasSome#addConnectionListener(ConnectionListener)
      */
-    public abstract boolean addConnectionListener(IConnectionListener lis);
+    public abstract boolean addConnectionListener(ConnectionListener lis);
 
     /**
-     * @see HasSome#removeConnectionListener(IConnectionListener)
+     * @see HasSome#removeConnectionListener(ConnectionListener)
      */
-    public abstract boolean removeConnectionListener(IConnectionListener lis);
+    public abstract boolean removeConnectionListener(ConnectionListener lis);
 
     /**
      * Register a listener for the command <tt>cmd</tt>, and returns <tt>true</tt> on success
-     * and <tt>false</tt> on failure.  There can be only <b>one</b> {@link IStoreServer.Handler} for
+     * and <tt>false</tt> on failure.  There can be only <b>one</b> {@link StoreManager.Handler} for
      * every command.
      * 
      * @param cmd   String that invokes this listener
@@ -142,7 +142,7 @@ public interface IStoreServer extends IConnectionListener.HasSome {
      * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if this command
      *         is already registered
      */
-    public abstract boolean registerHandler(String cmd, IStoreServer.Handler lis);
+    public abstract boolean registerHandler(String cmd, StoreManager.Handler lis);
 
     /**
      * Registers a listener for the command <tt>cmd</tt>.  There can be multiple listeners
@@ -151,6 +151,6 @@ public interface IStoreServer extends IConnectionListener.HasSome {
      * @param lis
      * @return
      */
-    public abstract boolean registerListener(String cmd, IStoreServer.Listener lis);
+    public abstract boolean registerListener(String cmd, StoreManager.Listener lis);
 
 }

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.store.storeserver.api.AbstractDispatchee;
-import org.limewire.store.storeserver.api.IConnectionListener;
-import org.limewire.store.storeserver.api.IDispatchee;
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.ConnectionListener;
+import org.limewire.store.storeserver.api.Dispatchee;
+import org.limewire.store.storeserver.api.Server;
 
 
 /**
@@ -16,16 +16,16 @@ import org.limewire.store.storeserver.api.IServer;
  * 
  * @author jpalm
  */
-final class StoreServer implements IStoreServer {
+final class StoreManagerImpl implements StoreManager {
     
     // -----------------------------------------------------------------
     // Factory
     // -----------------------------------------------------------------
   
-    static StoreServer newDemoInstance() {
-        final IServer s = IServer.FACTORY.newInstance(8090, true);
+    static StoreManagerImpl newDemoInstance() {
+        final Server s = Server.FACTORY.newInstance(8090, true);
         final DispatcheeImpl d = new DispatcheeImpl(s);
-        StoreServer res = new StoreServer(s, d);
+        StoreManagerImpl res = new StoreManagerImpl(s, d);
         d.server = res;
         return res;
     }
@@ -34,13 +34,13 @@ final class StoreServer implements IStoreServer {
     // Instance
     // -----------------------------------------------------------------
 
-    private final IServer localServer;
-    private final Map<String, IStoreServer.Handler> commands2handlers  
-        = new HashMap<String, IStoreServer.Handler>();
-    private final Map<String, List<IStoreServer.Listener>> commands2listenerLists 
-        = new HashMap<String, List<IStoreServer.Listener>>();
+    private final Server localServer;
+    private final Map<String, StoreManager.Handler> commands2handlers  
+        = new HashMap<String, StoreManager.Handler>();
+    private final Map<String, List<StoreManager.Listener>> commands2listenerLists 
+        = new HashMap<String, List<StoreManager.Listener>>();
     
-    private StoreServer(IServer localServer, IDispatchee dispatchee) {
+    private StoreManagerImpl(Server localServer, Dispatchee dispatchee) {
         this.localServer = localServer;
         this.localServer.setDispatchee(dispatchee);
     }
@@ -48,7 +48,7 @@ final class StoreServer implements IStoreServer {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#getLocalServer()
      */
-    public final IServer getLocalServer() {
+    public final Server getLocalServer() {
         return this.localServer;
     }
     
@@ -69,21 +69,21 @@ final class StoreServer implements IStoreServer {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#addConnectionListener(org.limewire.store.storeserver.api.IConnectionListener)
      */
-    public final boolean addConnectionListener(IConnectionListener lis) {
+    public final boolean addConnectionListener(ConnectionListener lis) {
         return this.localServer.getDispatchee().addConnectionListener(lis);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#removeConnectionListener(org.limewire.store.storeserver.api.IConnectionListener)
      */
-    public final boolean removeConnectionListener(IConnectionListener lis) {
+    public final boolean removeConnectionListener(ConnectionListener lis) {
         return this.localServer.getDispatchee().removeConnectionListener(lis);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#registerHandler(java.lang.String, com.limegroup.gnutella.store.storeserver.StoreServer.Handler)
      */
-    public final boolean registerHandler(String cmd, IStoreServer.Handler lis) {
+    public final boolean registerHandler(String cmd, StoreManager.Handler lis) {
         if (cmd == null) {
             throw new NullPointerException("Null command for handler: " + lis.name());
         }
@@ -98,13 +98,13 @@ final class StoreServer implements IStoreServer {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#registerListener(java.lang.String, com.limegroup.gnutella.store.storeserver.StoreServer.Listener)
      */
-    public final boolean registerListener(String cmd, IStoreServer.Listener lis) {
+    public final boolean registerListener(String cmd, StoreManager.Listener lis) {
         if (cmd == null) {
             throw new NullPointerException("Null command for listener: " + lis.name());
         }
         final String hash = hash(cmd);
-        List<IStoreServer.Listener> lst = commands2listenerLists.get(hash);
-        if (lst == null) commands2listenerLists.put(hash, lst = new ArrayList<IStoreServer.Listener>());
+        List<StoreManager.Listener> lst = commands2listenerLists.get(hash);
+        if (lst == null) commands2listenerLists.put(hash, lst = new ArrayList<StoreManager.Listener>());
         return lst.contains(lis) ? false : lst.add(lis);
     }
     
@@ -122,26 +122,26 @@ final class StoreServer implements IStoreServer {
      */
     private String dispatch(String cmd, Map<String, String> args) {
         if (cmd == null) {
-            return localServer.report(IServer.ErrorCodes.UNKNOWN_COMMAND);
+            return localServer.report(Server.ErrorCodes.UNKNOWN_COMMAND);
         }
         final String hash = hash(cmd);
-        IStoreServer.Handler h = commands2handlers.get(hash);
+        StoreManager.Handler h = commands2handlers.get(hash);
         String res = null;
         boolean handled = false;
         if (h != null) {
             handled = true;
             res = h.handle(args);
         }
-        List<IStoreServer.Listener> ls = commands2listenerLists.get(hash);
+        List<StoreManager.Listener> ls = commands2listenerLists.get(hash);
         if (ls != null && !ls.isEmpty()) {
             handled = true;
-            for (IStoreServer.Listener l : ls) l.handle(args);
+            for (StoreManager.Listener l : ls) l.handle(args);
         }
         if (!handled) {
-            return localServer.report(IServer.ErrorCodes.UNKNOWN_COMMAND);
+            return localServer.report(Server.ErrorCodes.UNKNOWN_COMMAND);
         } else {
             if (res == null) {
-                return IServer.Responses.OK;
+                return Server.Responses.OK;
             } else {
                 return res;
             }
@@ -154,15 +154,15 @@ final class StoreServer implements IStoreServer {
     // -----------------------------------------------------------------
         
     /**
-     * Default {@link IDispatchee} class that handles commands from the local server.
+     * Default {@link Dispatchee} class that handles commands from the local server.
      * 
      * @author jpalm
      */
     final static class DispatcheeImpl extends AbstractDispatchee {
         
-        private StoreServer server;
+        private StoreManagerImpl server;
 
-        public DispatcheeImpl(IServer server) {
+        public DispatcheeImpl(Server server) {
             super(server);
         }
 

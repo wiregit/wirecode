@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.limewire.store.storeserver.api.AbstractDispatchee;
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.CenterHelper;
 
 
@@ -66,9 +66,9 @@ public class ShoppingCartDemo {
         final String price = args.get("price");
         pane.setCount(count);
         pane.setPrice(price);
-        return IServer.Responses.OK;
+        return Server.Responses.OK;
       }
-      return IServer.Responses.UNKNOWN_COMMAND + ":" + cmd + ":" + args;
+      return Server.Responses.UNKNOWN_COMMAND + ":" + cmd + ":" + args;
     }
     
     public void postMsg(String msg) {

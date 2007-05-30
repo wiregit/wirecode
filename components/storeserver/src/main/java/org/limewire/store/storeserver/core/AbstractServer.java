@@ -12,7 +12,10 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.DebugPanel;
 import org.limewire.store.storeserver.util.Util;
 import org.limewire.store.storeserver.util.DebugPanel.Debuggable;
@@ -23,13 +26,15 @@ import org.limewire.store.storeserver.util.DebugPanel.Debuggable;
  * 
  * @author jpalm
  */
-public abstract class Server implements Runnable, Debuggable {
+public abstract class AbstractServer implements Runnable, Debuggable {
 
   private final int port;
   private boolean done = false;
   
+  private static final Log LOG = LogFactory.getLog(AbstractServer.class);
+  
   /** 
-   * Set by {@link #start(Server)}.
+   * Set by {@link #start(AbstractServer)}.
    */
   private Thread runner;
   protected final Thread getRunner() {
@@ -44,7 +49,7 @@ public abstract class Server implements Runnable, Debuggable {
    * @param s the server in questions
    * @return a {@link Thread} for <tt>s</tt>
    */
-  public static Thread start(final Server s) {
+  public static Thread start(final AbstractServer s) {
     Thread t = new Thread(s);
     t.start();
     s.runner = t;
@@ -52,7 +57,7 @@ public abstract class Server implements Runnable, Debuggable {
   }
 
 
-  public Server(final int port) {
+  public AbstractServer(final int port) {
     this.port = port;
     Handler[] hs = createHandlers();
     note("creating " + hs.length + " handler(s)...");
@@ -116,11 +121,11 @@ public abstract class Server implements Runnable, Debuggable {
   }
 
   protected final void handle(final Throwable t) {
-    handle(t, null);
+      ErrorService.error(t);
   }
 
   protected final void handle(final Throwable t, final String msg) {
-    t.printStackTrace();
+      ErrorService.error(t, msg);
   }
 
   private void handle(final Socket s, final ServerSocket ss) throws IOException {
@@ -204,12 +209,12 @@ public abstract class Server implements Runnable, Debuggable {
     println(o, String.valueOf(len));
     o.print("Last-modified: ");
     println(o, Util.createCookieDate()); // todo wrong
-    o.print(IServer.Constants.NEWLINE);
+    o.print(Server.Constants.NEWLINE);
   }
 
   private void println(final PrintWriter o, final String line) {
     o.print(line);
-    o.print(IServer.Constants.NEWLINE);
+    o.print(Server.Constants.NEWLINE);
   }
 
   /**
@@ -225,7 +230,7 @@ public abstract class Server implements Runnable, Debuggable {
     final Handler h = names2handlers.get(req.toLowerCase());
     if (h == null) {
       error("!!! Couldn't create a handler for " + req);
-      return report(IServer.ErrorCodes.UNKNOWN_COMMAND);
+      return report(Server.ErrorCodes.UNKNOWN_COMMAND);
     }
     note("have handler: " + h.name());
     final String res = h.handle(getArgs(request), incoming);
@@ -319,7 +324,7 @@ public abstract class Server implements Runnable, Debuggable {
       try {
         runner.join(millis);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        // we don't care
       }
     }
     runner = null;
@@ -332,21 +337,22 @@ public abstract class Server implements Runnable, Debuggable {
     shutDown(1000);
   }
 
-  public final void note(final Object msg, final IServer.Constants.Level level) {
+  public final void note(final Object msg, final Server.Constants.Level level) {
     if (note == null) {
-      final String str = "[" + simpleName() + "] " + msg;
-      System.err.println(str);
+        if (debug) {
+            LOG.debug("[" + simpleName() + "] " + msg);
+        }
     } else {
       note.note(msg, level);
     }
   }
 
   public final void error(final Object msg) {
-    note(msg, IServer.Constants.Level.ERROR);
+    note(msg, Server.Constants.Level.ERROR);
   }
 
   public final void note(final Object msg) {
-    note(msg, IServer.Constants.Level.MESSAGE);
+    note(msg, Server.Constants.Level.MESSAGE);
   }
 
   private String simpleName() {
@@ -368,8 +374,8 @@ public abstract class Server implements Runnable, Debuggable {
     if (Util.isEmpty(callback)) {
       return msg;
     } else {
-      char q = IServer.Constants.CALLBACK_QUOTE;
-      String s = IServer.Constants.CALLBACK_QUOTE_STRING;
+      char q = Server.Constants.CALLBACK_QUOTE;
+      String s = Server.Constants.CALLBACK_QUOTE_STRING;
       return callback + "(" + q + msg.replace(s, "\\" + s) + q + ")";
     }
   }
@@ -384,7 +390,7 @@ public abstract class Server implements Runnable, Debuggable {
    * @return the message <tt>error</tt> in the call back
    */
   public final String report(final String error) {
-    return wrapCallback(IServer.Constants.ERROR_CALLBACK, Util.wrapError(error));
+    return wrapCallback(Server.Constants.ERROR_CALLBACK, Util.wrapError(error));
   }
 
   // ------------------------------------------------------------
@@ -489,9 +495,9 @@ public abstract class Server implements Runnable, Debuggable {
   protected abstract class HandlerWithCallback extends AbstractHandler {
 
     public final String handle(final Map<String, String> args, Request req) {
-      String callback = getArg(args, IServer.Parameters.CALLBACK);
+      String callback = getArg(args, Server.Parameters.CALLBACK);
       if (callback == null) {
-        return report(IServer.ErrorCodes.MISSING_CALLBACK_PARAMETER);
+        return report(Server.ErrorCodes.MISSING_CALLBACK_PARAMETER);
       }
       return wrapCallback(callback, handleRest(args, req));
     }

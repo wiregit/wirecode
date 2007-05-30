@@ -82,7 +82,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
-import com.limegroup.gnutella.store.storeserver.IStoreServer;
+import com.limegroup.gnutella.store.storeserver.StoreManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -604,7 +604,7 @@ public class RouterService {
             
             System.out.println("start store server");
             LOG.trace("START StoreServer");
-            IStoreServer.HOLDER.instance().start();
+            StoreManager.HOLDER.instance().start();
             LOG.trace("END StoreServer");
 
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -881,12 +881,12 @@ public class RouterService {
     }
     
     /**
-     * Returns the {@link StoreServer} instance.
+     * Returns the {@link StoreManagerImpl} instance.
      * 
-     * @return the {@link StoreServer} instance
+     * @return the {@link StoreManagerImpl} instance
      */
-    public static IStoreServer getStoreServer() {
-        return IStoreServer.HOLDER.instance();
+    public static StoreManager getStoreManager() {
+        return StoreManager.HOLDER.instance();
     }
     
     public static HttpExecutor getHttpExecutor() {

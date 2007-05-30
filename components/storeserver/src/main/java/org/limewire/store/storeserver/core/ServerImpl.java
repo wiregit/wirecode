@@ -3,8 +3,8 @@ package org.limewire.store.storeserver.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IDispatchee;
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Dispatchee;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -13,7 +13,7 @@ import org.limewire.store.storeserver.util.Util;
  * 
  * @author jpalm
  */
-public abstract class LocalServer extends Server implements IServer {
+public abstract class ServerImpl extends AbstractServer implements Server {
 
     /** Whether we're using the watcher of not. */
     private final static boolean USING_WATCHER = true;
@@ -21,19 +21,19 @@ public abstract class LocalServer extends Server implements IServer {
     private String publicKey;
     private String privateKey;
     private State state;
-    private IDispatchee dispatchee;
+    private Dispatchee dispatchee;
 
     /* (non-Javadoc)
      * @see org.limewire.store.storeserver.core.I#setDispatchee(org.limewire.store.storeserver.core.Dispatchee)
      */
-    public final void setDispatchee(final IDispatchee dispatchee) {
+    public final void setDispatchee(final Dispatchee dispatchee) {
         this.dispatchee = dispatchee;
     }
     
     /* (non-Javadoc)
      * @see org.limewire.store.storeserver.core.I#getDispatchee()
      */
-    public final IDispatchee getDispatchee() {
+    public final Dispatchee getDispatchee() {
         return this.dispatchee;
     }
     
@@ -50,7 +50,7 @@ public abstract class LocalServer extends Server implements IServer {
         IDLE, STORE, WAITING, COMMUNICATING,
     }
 
-    public LocalServer(final int port) {
+    public ServerImpl(final int port) {
         super(port);
         newState(State.IDLE);
     }
@@ -170,7 +170,7 @@ public abstract class LocalServer extends Server implements IServer {
         public String handleRest(final String privateKey, final Map<String, String> args, final Request req) {
             newState(State.COMMUNICATING);
             if (dispatchee != null) dispatchee.setConnected(true);
-            return IServer.Responses.OK;
+            return Server.Responses.OK;
         }
     }
 
@@ -185,7 +185,7 @@ public abstract class LocalServer extends Server implements IServer {
             privateKey = null;
             publicKey = null;
             if (dispatchee != null) dispatchee.setConnected(false);
-            return IServer.Responses.OK;
+            return Server.Responses.OK;
         }
     }
 
@@ -205,7 +205,7 @@ public abstract class LocalServer extends Server implements IServer {
                 String newCmd = Util.addURLEncodedArguments(cmd, newArgs);
                 return dispatchee.dispatch(newCmd, newArgs);
             }
-            return IServer.Responses.NO_DISPATCHEE;
+            return Server.Responses.NO_DISPATCHEE;
         }
     }
 
@@ -252,16 +252,16 @@ public abstract class LocalServer extends Server implements IServer {
                 //
                 if (!isDone() && !hasShutDown()) {
                     if (getRunner() == null) {
-                        LocalServer.this.privateKey = privateKey;
-                        LocalServer.this.publicKey = publicKey;
-                        LocalServer.this.state = state;
-                        start(LocalServer.this);
+                        ServerImpl.this.privateKey = privateKey;
+                        ServerImpl.this.publicKey = publicKey;
+                        ServerImpl.this.state = state;
+                        start(ServerImpl.this);
                     }
                 }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    // we don't care
                 }
             }
         }

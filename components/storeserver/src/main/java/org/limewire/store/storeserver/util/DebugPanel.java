@@ -25,9 +25,10 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.core.Note;
-import org.limewire.store.storeserver.core.Server;
+import org.limewire.store.storeserver.core.AbstractServer;
 
 /**
  * A simple debugging panel.
@@ -40,7 +41,7 @@ public final class DebugPanel extends JPanel implements Note {
     // Interface
     // ----------------------------------------------------------------------
 
-    private IServer.Constants.Level level = IServer.Constants.Level.ERROR;
+    private Server.Constants.Level level = Server.Constants.Level.ERROR;
 
     private JFrame frame;
 
@@ -58,7 +59,7 @@ public final class DebugPanel extends JPanel implements Note {
      * @arg level the new {@link #Level}
      * @return the level passed in.
      */
-    public IServer.Constants.Level setLevel(final IServer.Constants.Level level) {
+    public Server.Constants.Level setLevel(final Server.Constants.Level level) {
         this.level = level;
         return this.level;
     }
@@ -83,20 +84,20 @@ public final class DebugPanel extends JPanel implements Note {
      * @arg level level at which to print <code>msg</code>
      * @return <code>true</code> if we printed something
      */
-    public void note(final Object msg, final IServer.Constants.Level level) {
+    public void note(final Object msg, final Server.Constants.Level level) {
         //
         // First check whether we should be debugging
         //
         if (!client.getDebug())
             return;
         Color c;
-        if (level == IServer.Constants.Level.MESSAGE) {
+        if (level == Server.Constants.Level.MESSAGE) {
             c = Color.black;
-        } else if (level == IServer.Constants.Level.WARNING) {
+        } else if (level == Server.Constants.Level.WARNING) {
             c = Color.blue;
-        } else if (level == IServer.Constants.Level.ERROR) {
+        } else if (level == Server.Constants.Level.ERROR) {
             c = Color.orange;
-        } else if (level == IServer.Constants.Level.FATAL) {
+        } else if (level == Server.Constants.Level.FATAL) {
             c = Color.red;
         } else {
             throw new IllegalArgumentException("Invalid level '" + level + "'");
@@ -111,7 +112,7 @@ public final class DebugPanel extends JPanel implements Note {
             text.getStyledDocument().insertString(
                     text.getStyledDocument().getLength(), s, attrs);
         } catch (BadLocationException e) {
-            e.printStackTrace();
+            ErrorService.error(e);
         }
     }
 
@@ -254,10 +255,10 @@ public final class DebugPanel extends JPanel implements Note {
         String s = "";
         for (;;) {
             out.println("Options:");
-            out.println(" - 1: " + IServer.Constants.Level.MESSAGE);
-            out.println(" - 2: " + IServer.Constants.Level.WARNING);
-            out.println(" - 3: " + IServer.Constants.Level.ERROR);
-            out.println(" - 4: " + IServer.Constants.Level.FATAL);
+            out.println(" - 1: " + Server.Constants.Level.MESSAGE);
+            out.println(" - 2: " + Server.Constants.Level.WARNING);
+            out.println(" - 3: " + Server.Constants.Level.ERROR);
+            out.println(" - 4: " + Server.Constants.Level.FATAL);
             out.println(" - 5: " + "Status");
             out.println(" - q: quit");
             out.print("> ");
@@ -273,29 +274,29 @@ public final class DebugPanel extends JPanel implements Note {
                 try {
                     val = Integer.parseInt(s);
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    ErrorService.error(e);
                 }
                 if (val == -1) {
                     System.err.println("Level must be between 1 and 4");
                 } else if (val == 5) {
                     dp.setStatus(msg);
                 } else if (1 <= val && val <= 4) {
-                    IServer.Constants.Level level;
+                    Server.Constants.Level level;
                     switch (val) {
                     case 1:
-                        level = IServer.Constants.Level.MESSAGE;
+                        level = Server.Constants.Level.MESSAGE;
                         break;
                     case 2:
-                        level = IServer.Constants.Level.WARNING;
+                        level = Server.Constants.Level.WARNING;
                         break;
                     case 3:
-                        level = IServer.Constants.Level.ERROR;
+                        level = Server.Constants.Level.ERROR;
                         break;
                     case 4:
-                        level = IServer.Constants.Level.FATAL;
+                        level = Server.Constants.Level.FATAL;
                         break;
                     default:
-                        level = IServer.Constants.Level.FATAL;
+                        level = Server.Constants.Level.FATAL;
                         break;
                     }
                     dp.note(msg, level);

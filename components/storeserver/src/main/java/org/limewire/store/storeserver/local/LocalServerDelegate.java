@@ -22,7 +22,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.limewire.store.storeserver.core.Server;
+import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -34,10 +35,10 @@ import org.limewire.store.storeserver.util.Util;
  */
 final class LocalServerDelegate {
 
-  private final Server server;
+  private final AbstractServer server;
   private final int otherPort;
 
-  public LocalServerDelegate(final Server server, final int otherPort, final boolean loud) {
+  public LocalServerDelegate(final AbstractServer server, final int otherPort, final boolean loud) {
     this.server = server;
     this.otherPort = otherPort;
     if (loud) server.beLoud();
@@ -161,7 +162,7 @@ final class LocalServerDelegate {
       sock.close();
       return res;
     } catch (IOException e) {
-      e.printStackTrace();
+        ErrorService.error(e);
     }
     return null;
   }

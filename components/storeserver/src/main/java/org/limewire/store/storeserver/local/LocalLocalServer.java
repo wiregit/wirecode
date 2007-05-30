@@ -3,7 +3,9 @@ package org.limewire.store.storeserver.local;
 import java.rmi.server.RemoteServer;
 import java.util.Map;
 
-import org.limewire.store.storeserver.core.LocalServer;
+import org.limewire.store.storeserver.core.ServerImpl;
+import org.limewire.store.storeserver.core.ServerImpl.State;
+
 
 
 /**
@@ -11,7 +13,7 @@ import org.limewire.store.storeserver.core.LocalServer;
  * 
  * @author jpalm
  */
-public class LocalLocalServer extends LocalServer {
+public class LocalLocalServer extends ServerImpl {
 
   public final static int PORT = 8080;
 

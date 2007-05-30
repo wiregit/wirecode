@@ -5,7 +5,7 @@ package org.limewire.store.storeserver.api;
  * 
  * @author jeff
  */
-public interface IConnectionListener {
+public interface ConnectionListener {
 
     /**
      * Called when a connected event changes.
@@ -16,7 +16,7 @@ public interface IConnectionListener {
     void connectionChanged(boolean isConnected);
 
     /**
-     * Can add and remove {@link IConnectionListener} instances.
+     * Can add and remove {@link ConnectionListener} instances.
      * 
      * @author jeff
      */
@@ -30,7 +30,7 @@ public interface IConnectionListener {
          * @return <tt>true</tt> if <tt>lis</tt> was added as a listener,
          *         <tt>false</tt> otherwise.
          */
-        boolean addConnectionListener(IConnectionListener lis);
+        boolean addConnectionListener(ConnectionListener lis);
 
         /**
          * Returns <tt>true</tt> if <tt>lis</tt> was removed as a listener,
@@ -40,6 +40,6 @@ public interface IConnectionListener {
          * @return <tt>true</tt> if <tt>lis</tt> was removed as a listener,
          *         <tt>false</tt> otherwise.
          */
-        boolean removeConnectionListener(IConnectionListener lis);
+        boolean removeConnectionListener(ConnectionListener lis);
     }
 }

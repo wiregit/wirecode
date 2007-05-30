@@ -2,9 +2,9 @@ package org.limewire.store.storeserver.local;
 
 import java.util.Map;
 
-import org.limewire.store.storeserver.core.LocalServer;
+import org.limewire.store.storeserver.core.ServerImpl;
 import org.limewire.store.storeserver.core.RemoteServer;
-import org.limewire.store.storeserver.core.Server;
+import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -24,7 +24,7 @@ public abstract class DemoSupport extends TestCase {
   private DemoRemoteServer remoteServer;
   private FakeCode code;
 
-  protected final LocalServer getLocalServer() {
+  protected final ServerImpl getLocalServer() {
     return this.localServer;
   }
 
@@ -82,8 +82,8 @@ public abstract class DemoSupport extends TestCase {
 
     localServer = new LocalLocalServer(REMOTE_PORT, false);
     remoteServer = new DemoRemoteServer(LOCAL_PORT, false);
-    Server.start(localServer);
-    Server.start(remoteServer);
+    AbstractServer.start(localServer);
+    AbstractServer.start(remoteServer);
     code = new FakeCode(localServer, remoteServer);
 
     afterSetup();
@@ -106,7 +106,7 @@ public abstract class DemoSupport extends TestCase {
     afterTearDown();
   }
 
-  private void stop(final Server t) {
+  private void stop(final AbstractServer t) {
     if (t != null) {
       t.shutDown();
     }

@@ -7,14 +7,14 @@ import org.limewire.store.storeserver.local.LocalLocalServer;
  * 
  * @author jeff
  */
-public interface IServer {
+public interface Server {
 
     /**
      * Single instance of {@link Factory}.
      */
     public final static Factory FACTORY = new Factory() {
 
-        public IServer newInstance(int port, boolean debug) {
+        public Server newInstance(int port, boolean debug) {
             final LocalLocalServer res = new LocalLocalServer(8090, false);
             res.setDebug(debug);
             return res;
@@ -25,13 +25,13 @@ public interface IServer {
     public interface Factory {
 
         /**
-         * Constructs a new {@link IServer} on port <code>port</code>
+         * Constructs a new {@link Server} on port <code>port</code>
          * 
          * @param port port on which to construct the server
          * @param debug <code>true</code> if we want verbose debugging
-         * @return a new instance of {@link IServer}, not started
+         * @return a new instance of {@link Server}, not started
          */
-        IServer newInstance(int port, boolean debug);
+        Server newInstance(int port, boolean debug);
     }
 
     /**
@@ -48,12 +48,12 @@ public interface IServer {
 
         /**
          * When there was a command sent to the local host, but no
-         * {@link IDispatchee} was set up to handle it.
+         * {@link Dispatchee} was set up to handle it.
          */
         public static final String NO_DISPATCHEE = "no.dispatcher";
 
         /**
-         * When there was a {@link IDispatchee} to handle this command, but it
+         * When there was a {@link Dispatchee} to handle this command, but it
          * didn't understand it.
          */
         public static final String UNKNOWN_COMMAND = "unknown.command";
@@ -75,8 +75,8 @@ public interface IServer {
         /**
          * Sent from Local to Remote with parameters.
          * <ul>
-         * <li>{@link IServer.Parameters#PUBLIC}</li>
-         * <li>{@link IServer.Parameters#PRIVATE}</li>
+         * <li>{@link Server.Parameters#PUBLIC}</li>
+         * <li>{@link Server.Parameters#PRIVATE}</li>
          * </ul>
          */
         public final static String STORE_KEY = "StoreKey";
@@ -84,7 +84,7 @@ public interface IServer {
         /**
          * Sent from Code to Remote with parameters.
          * <ul>
-         * <li>{@link IServer.Parameters#PRIVATE}</li>
+         * <li>{@link Server.Parameters#PRIVATE}</li>
          * </ul>
          */
         public final static String GIVE_KEY = "GiveKey";
@@ -97,7 +97,7 @@ public interface IServer {
         /**
          * Sent from Code to Local with parameters.
          * <ul>
-         * <li>{@link IServer.Parameters#PRIVATE}</li>
+         * <li>{@link Server.Parameters#PRIVATE}</li>
          * </ul>
          */
         public static final String AUTHENTICATE = "Authenticate";
@@ -107,7 +107,7 @@ public interface IServer {
         /**
          * Sent from Code to Local with parameters.
          * <ul>
-         * <li>{@link IServer.Parameters#MSG}</li>
+         * <li>{@link Server.Parameters#MSG}</li>
          * </ul>
          */
         public final static String ECHO = "Echo";
@@ -138,7 +138,7 @@ public interface IServer {
         public static final String PUBLIC = "public";
 
         /**
-         * Name of the command to send to the {@link IDispatchee}.
+         * Name of the command to send to the {@link Dispatchee}.
          */
         public static final String COMMAND = "command";
 
@@ -258,18 +258,18 @@ public interface IServer {
     }
 
     /**
-     * Sets the new {@link IDispatchee} instance.
+     * Sets the new {@link Dispatchee} instance.
      * 
-     * @param d the new {@link IDispatchee} instance
+     * @param d the new {@link Dispatchee} instance
      */
-    void setDispatchee(IDispatchee d);
+    void setDispatchee(Dispatchee d);
 
     /**
-     * Returns the {@link IDispatchee} instance.
+     * Returns the {@link Dispatchee} instance.
      * 
-     * @return the {@link IDispatchee} instance
+     * @return the {@link Dispatchee} instance
      */
-    IDispatchee getDispatchee();
+    Dispatchee getDispatchee();
 
     /**
      * Starts up the server.

@@ -3,7 +3,7 @@ package org.limewire.store.storeserver.local;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -16,7 +16,7 @@ public class CommunicationTest extends DemoSupport {
 
   public void testEchoMsg() {
     final String pk = getPrivateKey();
-    assertEquals(IServer.Responses.OK, doAuthenticate(pk));
+    assertEquals(Server.Responses.OK, doAuthenticate(pk));
     final String want = "test";
     final String have = doEcho(pk, want);
     assertEquals(want, have);
@@ -24,7 +24,7 @@ public class CommunicationTest extends DemoSupport {
 
   public void testAuthenticate() {
     final String res = doAuthenticate();
-    assertEquals(IServer.Responses.OK, res);
+    assertEquals(Server.Responses.OK, res);
   }
 
   public void testGiveKey() {
@@ -39,12 +39,12 @@ public class CommunicationTest extends DemoSupport {
 
   public void testBadMessageBeforeAuthentication() {
     final Map<String, String> args = new HashMap<String, String>();
-    args.put(IServer.Parameters.MSG, "badMsg");
-    getCode().sendLocalMsg("Msg", args, errorHandler(IServer.ErrorCodes.UNKNOWN_COMMAND));
+    args.put(Server.Parameters.MSG, "badMsg");
+    getCode().sendLocalMsg("Msg", args, errorHandler(Server.ErrorCodes.UNKNOWN_COMMAND));
   }
 
   public void testGoodMessageBeforeAuthentication() {
-    getCode().sendLocalMsg("Authenticate", NULLARGS, errorHandler(IServer.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+    getCode().sendLocalMsg("Authenticate", NULLARGS, errorHandler(Server.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
   }
 
   // -------------------------------------------------------
@@ -53,9 +53,9 @@ public class CommunicationTest extends DemoSupport {
 
   private String doEcho(final String privateKey, final String msg) {
     final Map<String, String> args = new HashMap<String, String>();
-    args.put(IServer.Parameters.PRIVATE, privateKey);
-    args.put(IServer.Parameters.MSG, msg);
-    return sendLocalMsg(IServer.Commands.ECHO, args);
+    args.put(Server.Parameters.PRIVATE, privateKey);
+    args.put(Server.Parameters.MSG, msg);
+    return sendLocalMsg(Server.Commands.ECHO, args);
   }
 
   private String doAuthenticate() {
@@ -64,20 +64,20 @@ public class CommunicationTest extends DemoSupport {
 
   private String doAuthenticate(final String privateKey) {
     final Map<String, String> args = new HashMap<String, String>();
-    args.put(IServer.Parameters.PRIVATE, privateKey);
-    return sendLocalMsg(IServer.Commands.AUTHENTICATE, args);
+    args.put(Server.Parameters.PRIVATE, privateKey);
+    return sendLocalMsg(Server.Commands.AUTHENTICATE, args);
   }
 
   private String getPrivateKey() {
     final String publicKey = getPublicKey();
     final Map<String, String> args = new HashMap<String, String>();
-    args.put(IServer.Parameters.PUBLIC, publicKey);
-    return sendRemoteMsg(IServer.Commands.GIVE_KEY, args);
+    args.put(Server.Parameters.PUBLIC, publicKey);
+    return sendRemoteMsg(Server.Commands.GIVE_KEY, args);
   }
 
   private String getPublicKey() {
     final Map<String, String> args = new HashMap<String, String>();
-    return sendLocalMsg(IServer.Commands.START_COM, args);
+    return sendLocalMsg(Server.Commands.START_COM, args);
   }
 
   // -----------------------------------------------------------
@@ -85,7 +85,7 @@ public class CommunicationTest extends DemoSupport {
   // -----------------------------------------------------------
 
   private String sendLocalMsg(final String cmd, final Map<String, String> args) {
-    args.put(IServer.Parameters.CALLBACK, "dummy");
+    args.put(Server.Parameters.CALLBACK, "dummy");
     final String[] result = new String[1];
     final Object lock = new Object();
     final boolean[] shouldWait = new boolean[] {true};
@@ -111,7 +111,7 @@ public class CommunicationTest extends DemoSupport {
   }
 
   private String sendRemoteMsg(final String cmd, final Map<String, String> args) {
-    args.put(IServer.Parameters.CALLBACK, "dummy");
+    args.put(Server.Parameters.CALLBACK, "dummy");
     final String[] result = new String[1];
     final Object lock = new Object();
     final boolean[] shouldWait = new boolean[] {true};

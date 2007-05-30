@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.api.Server;
 
 /**
  * Fine, here's a note.
@@ -144,8 +145,8 @@ public final class Util {
     public static String removeCallback(final String res) {
         if (res == null)
             return null;
-        final String start = "(" + IServer.Constants.CALLBACK_QUOTE_STRING;
-        final String end = IServer.Constants.CALLBACK_QUOTE_STRING + ")";
+        final String start = "(" + Server.Constants.CALLBACK_QUOTE_STRING;
+        final String end = Server.Constants.CALLBACK_QUOTE_STRING + ")";
         int istart = res.indexOf(start);
         if (istart == -1)
             return res;
@@ -158,7 +159,7 @@ public final class Util {
     private static boolean isValidKey(final String key) {
         if (key == null)
             return false;
-        return key.length() == IServer.Constants.KEY_LENGTH;
+        return key.length() == Server.Constants.KEY_LENGTH;
     }
 
     /**
@@ -208,7 +209,7 @@ public final class Util {
      */
     public static String generateKey() {
         final StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < IServer.Constants.KEY_LENGTH;) {
+        for (int i = 0; i < Server.Constants.KEY_LENGTH;) {
             final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
             final char c = (char) r;
             if (c == ';')
@@ -241,9 +242,9 @@ public final class Util {
         String tmpRest = cmd.substring(ihuh + 1);
         try {
             tmpRest = URLDecoder.decode(tmpRest, "UTF-8");
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { ErrorService.error(e); }
         final String rest = tmpRest;
-        for (StringTokenizer st = new StringTokenizer(rest, IServer.Constants.ARGUMENT_SEPARATOR, false); 
+        for (StringTokenizer st = new StringTokenizer(rest, Server.Constants.ARGUMENT_SEPARATOR, false); 
              st.hasMoreTokens();) {
             final String tok = st.nextToken();
             int ieq = tok.indexOf('=');

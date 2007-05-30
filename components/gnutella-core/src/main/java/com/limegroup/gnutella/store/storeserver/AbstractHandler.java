@@ -2,16 +2,16 @@ package com.limegroup.gnutella.store.storeserver;
 
 import java.util.Map;
 
-import org.limewire.store.storeserver.api.IServer;
+import org.limewire.store.storeserver.api.Server;
 
-import com.limegroup.gnutella.store.storeserver.IStoreServer;
+import com.limegroup.gnutella.store.storeserver.StoreManager;
 
 /**
- * Generic base class for {@link IStoreServer.Handler}s.
+ * Generic base class for {@link StoreManager.Handler}s.
  * 
  * @author jpalm
  */
-public abstract class AbstractHandler extends HasName implements IStoreServer.Handler {
+public abstract class AbstractHandler extends HasName implements StoreManager.Handler {
     
     public AbstractHandler(String name) { super(name); }
     public AbstractHandler() { super(); }
@@ -32,7 +32,7 @@ public abstract class AbstractHandler extends HasName implements IStoreServer.Ha
         
         public final String handle(final Map<String, String> args) {
             doHandle(args);
-            return IServer.Responses.OK;
+            return Server.Responses.OK;
         }
     }
 }
