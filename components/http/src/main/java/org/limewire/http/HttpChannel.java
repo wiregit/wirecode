@@ -18,11 +18,11 @@ import org.limewire.util.BufferUtils;
 public class HttpChannel implements ByteChannel, ChannelReadObserver,
         ChannelWriter {
 
-    private HttpIOSession session;
+    private final HttpIOSession session;
+
+    private final IOEventDispatch eventDispatch;
 
     private boolean closed;
-
-    private IOEventDispatch eventDispatch;
 
     private InterestReadableByteChannel readSource;
 
