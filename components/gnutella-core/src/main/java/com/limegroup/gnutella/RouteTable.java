@@ -556,16 +556,16 @@ public final class RouteTable  {
                 List<Double> timeTo100Results = new ArrayList<Double>();
                 List<Double> allResultTimes = new ArrayList<Double>();
                 List<Double> allResultCounts = new ArrayList<Double>();
-                List<Integer> networks = Arrays.asList(new Integer[4]);
-                List<Integer> hops = Arrays.asList(new Integer[5]);
-                List<Integer> ttlsHist = Arrays.asList(new Integer[5]);
+                List<Integer> networks = Arrays.asList(new Integer[]{0,0,0,0});
+                List<Integer> hops = Arrays.asList(new Integer[]{0,0,0,0,0});
+                List<Integer> ttlsHist = Arrays.asList(new Integer[]{0,0,0,0,0});
                 Iterable<RouteTableEntry> bothMaps = 
                     new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
                 for(RouteTableEntry rte : bothMaps) {
                     for (int i =0 ; i < rte.networks.length; i++)
                         networks.set(i, networks.get(i)+rte.networks[i]);
                     for (int i =0 ;i < rte.hops.length; i++)
-                        hops.set(i, hops.get(i)+rte.networks[i]);
+                        hops.set(i, hops.get(i)+rte.hops[i]);
                     for (int i =0 ;i < rte.ttls.length; i++)
                         ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
                     classCSizes.add((double)(rte.classCnetworks.size()));
@@ -617,7 +617,7 @@ public final class RouteTable  {
                 ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
                 ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
                 ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
-                ret.put("ttlh", StatsUtils.getHistogram(classCSizes, 5));
+                ret.put("ttlh", StatsUtils.getHistogram(ttls, 5));
                 ret.put("tt1r", StatsUtils.quickStatsDouble(timeToFirstReply).getMap());
                 ret.put("tt1rh", StatsUtils.getHistogram(timeToFirstReply, 10));
                 ret.put("tt2r", StatsUtils.quickStatsDouble(timeToSecondReply).getMap());
