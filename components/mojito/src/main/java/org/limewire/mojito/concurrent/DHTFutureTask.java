@@ -78,6 +78,7 @@ public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFutur
             public void run() {
                 synchronized (exchanger) {
                     if (!exchanger.isDone()) {
+                    	task.cancel();
                         setException(new LockTimeoutException(task.toString()));
                     }
                 }
