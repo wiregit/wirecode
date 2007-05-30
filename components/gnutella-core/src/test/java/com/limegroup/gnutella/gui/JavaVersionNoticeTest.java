@@ -27,10 +27,9 @@ public class JavaVersionNoticeTest extends BaseTestCase {
     }
 
     public void testUpgradeRecommended() {
-        assertTrue(JavaVersionNotice.upgradeRecommended("1.4.0"));
-        assertTrue(JavaVersionNotice.upgradeRecommended("1.5.0"));
-        assertFalse(JavaVersionNotice.upgradeRecommended(JavaVersionNotice.RECOMMENDED_15));
-        assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0"));
+        assertFalse(JavaVersionNotice.upgradeRecommended("1.4.0"));
+        assertFalse(JavaVersionNotice.upgradeRecommended("1.5.0"));
+        assertFalse(JavaVersionNotice.upgradeRecommended("1.6.0"));
         assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0-beta"));
         assertFalse(JavaVersionNotice.upgradeRecommended(JavaVersionNotice.RECOMMENDED_16));
     }
@@ -39,11 +38,11 @@ public class JavaVersionNoticeTest extends BaseTestCase {
         String orginalValue = QuestionsHandler.LAST_CHECKED_JAVA_VERSION.getValue();
         try {
             QuestionsHandler.LAST_CHECKED_JAVA_VERSION.setValue("1.4.0");
-            assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0"));
-            QuestionsHandler.LAST_CHECKED_JAVA_VERSION.setValue("1.6.0");
-            assertFalse(JavaVersionNotice.upgradeRecommended("1.6.0"));
+            assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0-beta"));
+            QuestionsHandler.LAST_CHECKED_JAVA_VERSION.setValue("1.6.0-beta");
+            assertFalse(JavaVersionNotice.upgradeRecommended("1.6.0-beta"));
             QuestionsHandler.LAST_CHECKED_JAVA_VERSION.setValue("");
-            assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0"));
+            assertTrue(JavaVersionNotice.upgradeRecommended("1.6.0-beta"));
         } finally {
             QuestionsHandler.LAST_CHECKED_JAVA_VERSION.setValue(orginalValue);
         }
