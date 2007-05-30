@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedSizeLIFOSet;
+import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -36,7 +37,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
      * Limit size to 50 for now.
      */
-    private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
+    private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
     
     /**
      * A flag that indicates whether or not we've tried to

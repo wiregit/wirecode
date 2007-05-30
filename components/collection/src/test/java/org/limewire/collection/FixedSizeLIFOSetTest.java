@@ -6,7 +6,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.collection.FixedSizeLIFOSet;
+import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.util.BaseTestCase;
 
 public class FixedSizeLIFOSetTest extends BaseTestCase {
@@ -31,12 +31,12 @@ public class FixedSizeLIFOSetTest extends BaseTestCase {
         String test5 = "test5";
         String test6 = "test6";
         //try a 0 size
-        Set<String> lifo = new FixedSizeLIFOSet<String>(0);
+        Set<String> lifo = new FixedSizeLIFOSet<String>(0, EjectionPolicy.FIFO);
         lifo.add(test);
         assertFalse(lifo.contains(test));
         
         //try going over capacity
-        lifo = new FixedSizeLIFOSet<String>(3);
+        lifo = new FixedSizeLIFOSet<String>(3, EjectionPolicy.FIFO);
         lifo.add(test);
         assertTrue(lifo.contains(test));
         lifo.add(test2);
@@ -56,7 +56,7 @@ public class FixedSizeLIFOSetTest extends BaseTestCase {
         assertFalse(lifo.contains(test2));
         
         //try re-adding
-        lifo = new FixedSizeLIFOSet<String>(3);
+        lifo = new FixedSizeLIFOSet<String>(3, EjectionPolicy.FIFO);
         lifo.add(test);
         lifo.add(test2);
         lifo.add(test);
@@ -68,7 +68,7 @@ public class FixedSizeLIFOSetTest extends BaseTestCase {
         assertTrue(lifo.contains(test3));
         
         //try add-remove
-        lifo = new FixedSizeLIFOSet<String>(3);
+        lifo = new FixedSizeLIFOSet<String>(3, EjectionPolicy.FIFO);
         lifo.add(test);
         lifo.add(test2);
         lifo.add(test3);
@@ -80,7 +80,7 @@ public class FixedSizeLIFOSetTest extends BaseTestCase {
         assertTrue(lifo.contains(test4));
         
         //try adding multiple
-        lifo = new FixedSizeLIFOSet<String>(3);
+        lifo = new FixedSizeLIFOSet<String>(3, EjectionPolicy.FIFO);
         lifo.add(test);
         lifo.add(test2);
         lifo.add(test3);

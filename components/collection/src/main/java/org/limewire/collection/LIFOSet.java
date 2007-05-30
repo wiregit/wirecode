@@ -18,9 +18,9 @@ import java.util.Set;
  */
 public class LIFOSet<E> implements Set<E>{
     
-    private Set<E> set;
+    private final Set<E> set;
     
-    private List<E> list;
+    private final List<E> list;
     
     public LIFOSet() {
         this(50, 0.75F);
@@ -90,10 +90,10 @@ public class LIFOSet<E> implements Set<E>{
      * @return true if the set was changed
      */
     protected boolean removeEldest() {
-        if(list.isEmpty()) {
+        if (list.isEmpty()) {
             return false;
         }
-        return set.remove(list.remove(0));
+        return remove(0);
     }
 
     /**
@@ -105,7 +105,14 @@ public class LIFOSet<E> implements Set<E>{
         if(list.isEmpty()) {
             return false;
         }
-        return set.remove(list.remove(list.size()-1));
+        return remove(list.size()-1);
+    }
+    
+    /**
+     * Removes the element at the given index from the ordered Set
+     */
+    protected boolean remove(int index) {
+    	return set.remove(list.remove(index));
     }
     
     public boolean removeAll(Collection<?> c) {

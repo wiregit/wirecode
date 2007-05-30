@@ -14,6 +14,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedSizeLIFOSet;
+import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
@@ -221,7 +222,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         private Set<SocketAddress> bootstrapHosts;
         
         public DHTBootstrapperStub() {
-            bootstrapHosts = new FixedSizeLIFOSet<SocketAddress>(10);
+            bootstrapHosts = new FixedSizeLIFOSet<SocketAddress>(10, EjectionPolicy.FIFO);
         }
 
         public void addBootstrapHost(SocketAddress hostAddress) {

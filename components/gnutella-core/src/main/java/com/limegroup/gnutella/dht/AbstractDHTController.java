@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedSizeLIFOSet;
+import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
@@ -434,7 +435,7 @@ public abstract class AbstractDHTController implements DHTController {
         private boolean isRunning;
         
         public RandomNodeAdder() {
-            dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
+            dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE, EjectionPolicy.FIFO);
         }
         
         public synchronized void start() {
