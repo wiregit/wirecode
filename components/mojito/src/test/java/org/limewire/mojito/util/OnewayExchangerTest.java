@@ -6,7 +6,6 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.util.OnewayExchanger;
 import org.limewire.util.BaseTestCase;
 
 @SuppressWarnings("unchecked")

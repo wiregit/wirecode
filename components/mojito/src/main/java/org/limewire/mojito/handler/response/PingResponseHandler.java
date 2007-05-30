@@ -210,11 +210,11 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     private void decrementActive() {
         active--;
     }
-    
+
     private void incrementActive() {
-    	active++;
+        active++;
     }
-    
+
     private void incrementFailures() {
         failures++;
     }

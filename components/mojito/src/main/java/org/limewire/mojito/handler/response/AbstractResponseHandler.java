@@ -103,25 +103,25 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      */
     public void start(OnewayExchanger<V, ExecutionException> exchanger) {
     	if (exchanger == null) {
-    		if (LOG.isWarnEnabled()) {
-    			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
-    		}
-    		exchanger = new OnewayExchanger<V, ExecutionException>(true);
-    	}
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+            }
+            exchanger = new OnewayExchanger<V, ExecutionException>(true);
+        }
     	
     	this.exchanger = exchanger;
     	
     	synchronized (getLock()) {
-    		if (isDone() || isCancelled()) {
+            if (isDone() || isCancelled()) {
                 throw new IllegalStateException("Cannot start: " + this);
             }
-            
+
             try {
                 start();
             } catch (DHTException t) {
                 setException(t);
             }
-		}
+        }
     }
     
     /**
@@ -225,19 +225,21 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      */
     public void handleResponse(ResponseMessage response, long time) throws IOException {
         synchronized (getLock()) {
-        	if (isCancelled() || isDone()) {
+            if (isCancelled() || isDone()) {
                 return;
             }
-            
+
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Received " + response + " from " + response.getContact() 
-                        + " after " + getErrors() + " errors and a total time of " + getElapsedTime() + "ms");
+                LOG.trace("Received " + response + " from "
+                        + response.getContact() + " after " + getErrors()
+                        + " errors and a total time of " + getElapsedTime()
+                        + "ms");
             }
-            
+
             elapsedTime += time;
             lastResponseTime = System.currentTimeMillis();
             response(response, time);
-		}
+        }
     }
 
     /**
@@ -253,17 +255,17 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
     	synchronized (getLock()) {
-    		if (isCancelled() || isDone()) {
+            if (isCancelled() || isDone()) {
                 return;
             }
-            
+
             if (LOG.isTraceEnabled()) {
-                LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst) 
+                LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst)
                         + " failed after " + time + "ms");
             }
-            
+
             elapsedTime += time;
-            
+
             try {
                 if (errors < maxErrors) {
                     resend(nodeId, dst, request);
@@ -273,7 +275,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
             } finally {
                 errors++;
             }
-		}
+        }
     }
     
     /**
@@ -300,16 +302,17 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
         
     	synchronized (getLock()) {
-    		if (isCancelled() || isDone()) {
+            if (isCancelled() || isDone()) {
                 return;
             }
-            
+
             if (LOG.isErrorEnabled()) {
-                LOG.error("Sending a " + message + " to " + ContactUtils.toString(nodeId, dst) + " failed", e);
+                LOG.error("Sending a " + message + " to "
+                        + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
-            
+
             error(nodeId, dst, message, e);
-		}
+        }
     }
     
     /**
@@ -324,12 +327,12 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      */
     public void handleTick() {
     	synchronized (getLock()) {
-    		if (isCancelled() || isDone()) {
+            if (isCancelled() || isDone()) {
                 return;
             }
-            
+
             tick();
-		}
+        }
     }
 
     /*

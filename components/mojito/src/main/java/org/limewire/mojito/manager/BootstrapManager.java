@@ -216,16 +216,18 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             return NetworkSettings.BOOTSTRAP_TIMEOUT.getValue();
         }
 
-        public void start(OnewayExchanger<BootstrapResult, ExecutionException> exchanger) {
-        	if (exchanger == null) {
-        		if (LOG.isWarnEnabled()) {
-        			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
-        		}
-        		exchanger = new OnewayExchanger<BootstrapResult, ExecutionException>(true);
-        	}
-        	
-            this.exchanger = exchanger;
+        public void start(OnewayExchanger<BootstrapResult, 
+                ExecutionException> exchanger) {
             
+            if (exchanger == null) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+                }
+                exchanger = new OnewayExchanger<BootstrapResult, ExecutionException>(true);
+            }
+
+            this.exchanger = exchanger;
+
             if (node == null) {
                 findInitialContact();
             } else {
@@ -235,19 +237,18 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private void findInitialContact() {
             OnewayExchanger<PingResult, ExecutionException> c 
-            		= new OnewayExchanger<PingResult, ExecutionException>(true) {
-            	@Override
-				public synchronized void setValue(PingResult value) {
-					super.setValue(value);
-					handlePong(value);
-				}
-            	
-            	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					exchanger.setException(exception);
-				}
+                    = new OnewayExchanger<PingResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(PingResult value) {
+                    super.setValue(value);
+                    handlePong(value);
+                }
+
+                @Override
+                public synchronized void setException(ExecutionException exception) {
+                    super.setException(exception);
+                    exchanger.setException(exception);
+                }
             };
             
             PingResponseHandler handler = new PingResponseHandler(context, 
@@ -263,20 +264,19 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private void findNearestNodes() {
             OnewayExchanger<FindNodeResult, ExecutionException> c 
-		    		= new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
-		    	@Override
-				public synchronized void setValue(FindNodeResult value) {
-					super.setValue(value);
-					handleNearestNodes(value);
-				}
-		    	
-		    	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					exchanger.setException(exception);
-				}
-		    };
+                    = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(FindNodeResult value) {
+                    super.setValue(value);
+                    handleNearestNodes(value);
+                }
+
+                @Override
+                public synchronized void setException(ExecutionException exception) {
+                    super.setException(exception);
+                    exchanger.setException(exception);
+                }
+            };
     
             startPhaseOne = System.currentTimeMillis();
             FindNodeResponseHandler handler = new FindNodeResponseHandler(
@@ -311,32 +311,31 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private void checkCollisions(Collection<? extends Contact> collisions) {
             OnewayExchanger<PingResult, ExecutionException> c 
-		    		= new OnewayExchanger<PingResult, ExecutionException>(true) {
-		    	@Override
-				public synchronized void setValue(PingResult value) {
-					super.setValue(value);
-					handleCollision(value);
-				}
-		    	
-		    	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					
-					Throwable cause = exception.getCause();
-					if (cause instanceof DHTTimeoutException) {
+                    = new OnewayExchanger<PingResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(PingResult value) {
+                    super.setValue(value);
+                    handleCollision(value);
+                }
+
+                @Override
+                public synchronized void setException(ExecutionException exception) {
+                    super.setException(exception);
+
+                    Throwable cause = exception.getCause();
+                    if (cause instanceof DHTTimeoutException) {
                         // Ignore, everything is fine! Nobody did respond
                         // and we can keep our Node ID which is good!
                         LOG.info("DHTTimeoutException", cause);
-                        
+
                         // Continue with finding random Node IDs
                         refreshAllBuckets();
-                        
+
                     } else {
                         exchanger.setException(exception);
                     }
-				}
-		    };
+                }
+            };
     
             Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
             PingIterator pinger = new PingIteratorFactory.CollisionPinger(
@@ -389,20 +388,19 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private void refreshBucket(KUID randomId) {
             OnewayExchanger<FindNodeResult, ExecutionException> c 
-		    		= new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
-		    	@Override
-				public synchronized void setValue(FindNodeResult value) {
-					super.setValue(value);
-					handleBucketRefresh(value);
-				}
-		    	
-		    	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					exchanger.setException(exception);
-				}
-		    };
+                    = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(FindNodeResult value) {
+                    super.setValue(value);
+                    handleBucketRefresh(value);
+                }
+
+                @Override
+                public synchronized void setException(ExecutionException exception) {
+                    super.setException(exception);
+                    exchanger.setException(exception);
+                }
+            };
     
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, randomId);
@@ -509,21 +507,21 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             	task.start(c);
             }
         }
-        
-		public void cancel() {
-        	List<DHTTask<?>> copy = null;
+       
+        public void cancel() {
+            List<DHTTask<?>> copy = null;
             synchronized (tasks) {
-            	if (!cancelled) {
-            		copy = new ArrayList<DHTTask<?>>(tasks);
-            		tasks.clear();
-            		cancelled = true;
-            	}
+                if (!cancelled) {
+                    copy = new ArrayList<DHTTask<?>>(tasks);
+                    tasks.clear();
+                    cancelled = true;
+                }
             }
-            
+
             if (copy != null) {
-	            for (DHTTask<?> task : copy) {
-	                task.cancel();
-	            }
+                for (DHTTask<?> task : copy) {
+                    task.cancel();
+                }
             }
         }
     }

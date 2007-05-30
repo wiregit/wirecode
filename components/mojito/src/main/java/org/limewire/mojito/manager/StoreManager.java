@@ -167,12 +167,13 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
 
         public void start(OnewayExchanger<StoreResult, ExecutionException> exchanger) {
-        	if (exchanger == null) {
-        		if (LOG.isWarnEnabled()) {
-        			LOG.warn("Starting ResponseHandler without an OnewayExchanger");
-        		}
-        		exchanger = new OnewayExchanger<StoreResult, ExecutionException>(true);
-        	}
+            
+            if (exchanger == null) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Starting ResponseHandler without an OnewayExchanger");
+                }
+                exchanger = new OnewayExchanger<StoreResult, ExecutionException>(true);
+            }
         	
             this.exchanger = exchanger;
             
@@ -193,20 +194,20 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         private void findNearestNodes() {
             OnewayExchanger<LookupResult, ExecutionException> c 
-		    		= new OnewayExchanger<LookupResult, ExecutionException>(true) {
-		    	@Override
-				public synchronized void setValue(LookupResult value) {
-					super.setValue(value);
-					handleNearestNodes(value);
-				}
-		    	
-		    	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					exchanger.setException(exception);
-				}
-		    };
+                    = new OnewayExchanger<LookupResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(LookupResult value) {
+                    super.setValue(value);
+                    handleNearestNodes(value);
+                }
+
+                @Override
+                public synchronized void setException(
+                        ExecutionException exception) {
+                    super.setException(exception);
+                    exchanger.setException(exception);
+                }
+            };
     
             // Do a lookup for the k-closest Nodes where we're
             // going to store the value
@@ -224,20 +225,19 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         private void doGetSecurityToken() {
             OnewayExchanger<GetSecurityTokenResult, ExecutionException> c 
-		    		= new OnewayExchanger<GetSecurityTokenResult, ExecutionException>(true) {
-		    	@Override
-				public synchronized void setValue(GetSecurityTokenResult value) {
-					super.setValue(value);
-					handleSecurityToken(value);
-				}
-		    	
-		    	@Override
-				public synchronized void setException(
-						ExecutionException exception) {
-					super.setException(exception);
-					exchanger.setException(exception);
-				}
-		    };
+                    = new OnewayExchanger<GetSecurityTokenResult, ExecutionException>(true) {
+                @Override
+                public synchronized void setValue(GetSecurityTokenResult value) {
+                    super.setValue(value);
+                    handleSecurityToken(value);
+                }
+
+                @Override
+                public synchronized void setException(ExecutionException exception) {
+                    super.setException(exception);
+                    exchanger.setException(exception);
+                }
+            };
     
             GetSecurityTokenHandler handler 
                 = new GetSecurityTokenHandler(context, node.getKey());
