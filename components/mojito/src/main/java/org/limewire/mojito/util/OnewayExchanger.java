@@ -203,6 +203,10 @@ public class OnewayExchanger<V, E extends Throwable> {
      * Sets the Exception that will be thrown by the get() method
      */
     public synchronized void setException(E exception) {
+        if (exception == null) {
+            throw new NullPointerException();
+        }
+        
         if (cancelled) {
             return;
         }
