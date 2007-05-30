@@ -81,7 +81,11 @@ public class LIFOSet<E> implements Set<E>{
     }
 
     public boolean remove(Object o) {
-        return set.remove(o);
+    	if (set.remove(o)) {
+    		list.remove(o);
+    		return true;
+    	}
+        return false;
     }
     
     /**
