@@ -9,12 +9,15 @@
 // The client must provide:
 //
 //  - noteAuthentication(String)
+//  - noteDetatched(String)
 //
 // ------------------------------------------------------------------
  
 var publicKey;
 var privateKey;
 var mainDiv;
+var LOCAL_PORT = '8080';
+var REMOTE_PORT = '8090';
 
 function getPublicKey() {
 	return publicKey;
@@ -42,19 +45,19 @@ function sendMsg(cmd,callback) {
 // ------------------------------------------------------------------
 	
 function doAuthentication() {
-	go('Authenticate?private=' + getPrivateKey(),'noteAuthentication','8080');
+	go('Authenticate?private=' + getPrivateKey(),'noteAuthentication',LOCAL_PORT);
 }
 
 function doStartCom() {
-	go('StartCom','setPublicKey','8080');
+	go('StartCom','setPublicKey',LOCAL_PORT);
 }
 	
 function doGiveKey() {
-	go('GiveKey?public=' + getPublicKey(),'setPrivateKey','8090');
+	go('GiveKey?public=' + getPublicKey(),'setPrivateKey',REMOTE_PORT);
 }
 	
 function doDetatch() {
-	go('Detatch','noteDetatched','8080');
+	go('Detatch','noteDetatched',LOCAL_PORT);
 }
 	
 function reAuthenticate() {
@@ -79,7 +82,6 @@ function go(cmd,callback,port) {
 	url += 'callback=' + callback;
 	url += '&_f=' + Math.random();
 	script.setAttribute('src', url);
-	script.setAttribute('id', 'jsonScript');
 	script.setAttribute('type', 'text/javascript');
   mainDiv.appendChild(script);		
 }

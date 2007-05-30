@@ -12,5 +12,41 @@
 			A <code>IStoreServer.Listener</code> will <b>not</b> respond to a command but will simply do <em>something</em>.
 		</p>
 		
+		<p>
+			An example of adding a listener would be the following.  Here we add a listener
+			to receive events called <em>Play</em> and then call the method <code>play()</code>,
+			assuming it's defined somewhere.
+		</p>
+		
+		<blockquote>
+		<pre>
+RouterService.getStoreServer().registerListener("Play", new AbstractListener("play") {
+  public void handle(Map&lt;String, String&gt; args) {
+    MediaPlayerComponent.instance().play();
+  }
+});
+		</pre>
+		</blockquote>
+		
+		<p>
+			Likewise, we could register a handler to report back the state of the current player.	
+		</p>
+		
+		<blockquote>
+		<pre>
+RouterService.getStoreServer().registerHandler("GetState", new AbstractListener("get.state") {
+  public String handle(Map&lt;String, String&gt; args) {
+    return MediaPlayerComponent.instance().getStateString();
+  }
+});
+		</pre>
+		</blockquote>
+		
+		<p>
+			Note.  That <em>Play</em> and <em>play</em> (as well, <em>GetState</em> and <em>get.state</em>) are not the 
+			same and don't need to.  The capitlized ones refer to the command to which this handler or listener will react;
+			the lower case ones are just names, which currently aren't used.
+		</p>
+		
 	</body>
 </html>
