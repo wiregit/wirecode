@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.store.storeserver.api.IServer;
 import org.limewire.store.storeserver.util.DebugPanel;
 import org.limewire.store.storeserver.util.Util;
 import org.limewire.store.storeserver.util.DebugPanel.Debuggable;
@@ -203,12 +204,12 @@ public abstract class Server implements Runnable, Debuggable {
     println(o, String.valueOf(len));
     o.print("Last-modified: ");
     println(o, Util.createCookieDate()); // todo wrong
-    o.print(Constants.NEWLINE);
+    o.print(IServer.Constants.NEWLINE);
   }
 
   private void println(final PrintWriter o, final String line) {
     o.print(line);
-    o.print(Constants.NEWLINE);
+    o.print(IServer.Constants.NEWLINE);
   }
 
   /**
@@ -224,7 +225,7 @@ public abstract class Server implements Runnable, Debuggable {
     final Handler h = names2handlers.get(req.toLowerCase());
     if (h == null) {
       error("!!! Couldn't create a handler for " + req);
-      return report(ErrorCodes.UNKNOWN_COMMAND);
+      return report(IServer.ErrorCodes.UNKNOWN_COMMAND);
     }
     note("have handler: " + h.name());
     final String res = h.handle(getArgs(request), incoming);
@@ -331,7 +332,7 @@ public abstract class Server implements Runnable, Debuggable {
     shutDown(1000);
   }
 
-  public final void note(final Object msg, final Constants.Level level) {
+  public final void note(final Object msg, final IServer.Constants.Level level) {
     if (note == null) {
       final String str = "[" + simpleName() + "] " + msg;
       System.err.println(str);
@@ -341,11 +342,11 @@ public abstract class Server implements Runnable, Debuggable {
   }
 
   public final void error(final Object msg) {
-    note(msg, Constants.Level.ERROR);
+    note(msg, IServer.Constants.Level.ERROR);
   }
 
   public final void note(final Object msg) {
-    note(msg, Constants.Level.MESSAGE);
+    note(msg, IServer.Constants.Level.MESSAGE);
   }
 
   private String simpleName() {
@@ -367,8 +368,8 @@ public abstract class Server implements Runnable, Debuggable {
     if (Util.isEmpty(callback)) {
       return msg;
     } else {
-      char q = Constants.CALLBACK_QUOTE;
-      String s = Constants.CALLBACK_QUOTE_STRING;
+      char q = IServer.Constants.CALLBACK_QUOTE;
+      String s = IServer.Constants.CALLBACK_QUOTE_STRING;
       return callback + "(" + q + msg.replace(s, "\\" + s) + q + ")";
     }
   }
@@ -383,7 +384,7 @@ public abstract class Server implements Runnable, Debuggable {
    * @return the message <tt>error</tt> in the call back
    */
   public final String report(final String error) {
-    return wrapCallback(Constants.ERROR_CALLBACK, Util.wrapError(error));
+    return wrapCallback(IServer.Constants.ERROR_CALLBACK, Util.wrapError(error));
   }
 
   // ------------------------------------------------------------
@@ -433,7 +434,7 @@ public abstract class Server implements Runnable, Debuggable {
     String name();
   }
   
-  private static abstract class HasName {
+  abstract class HasName {
 
       private final String name;
 
@@ -463,17 +464,6 @@ public abstract class Server implements Runnable, Debuggable {
   }
   
   /**
-   * Generic base class for {@link Handler}s.
-   * 
-   * @author jpalm
-   */
-  public abstract static class AbstractHandler extends HasName implements Handler {
-      public AbstractHandler(String name) { super(name); }
-      public AbstractHandler() { super(); }
-  }  
-
-  
-  /**
    * Generic base class for {@link Listener}s.
    * 
    * @author jpalm
@@ -481,17 +471,27 @@ public abstract class Server implements Runnable, Debuggable {
   public abstract class AbstractListener extends HasName implements Listener {
       public AbstractListener(String name) { super(name); }
       public AbstractListener() { super(); }
-  }  
-
+  }
+  
+  /**
+   * Generic base class for {@link Handler}s.
+   * 
+   * @author jpalm
+   */
+  public abstract class AbstractHandler extends HasName implements Handler {
+      public AbstractHandler(String name) { super(name); }
+      public AbstractHandler() { super(); }
+  }
+  
   /**
    * A {@link Handler} requiring a callback specified by the parameter {@link Parameters#CALLBACK}.
    */
   protected abstract class HandlerWithCallback extends AbstractHandler {
 
     public final String handle(final Map<String, String> args, Request req) {
-      String callback = getArg(args, Parameters.CALLBACK);
+      String callback = getArg(args, IServer.Parameters.CALLBACK);
       if (callback == null) {
-        return report(ErrorCodes.MISSING_CALLBACK_PARAMETER);
+        return report(IServer.ErrorCodes.MISSING_CALLBACK_PARAMETER);
       }
       return wrapCallback(callback, handleRest(args, req));
     }
@@ -507,200 +507,5 @@ public abstract class Server implements Runnable, Debuggable {
      * @return      result <b>IN PLAIN TEXT</b>
      */
     abstract String handleRest(Map<String, String> args, Request req);
-  }
-  
-  /**
-   * Reponses sent back from servers.
-   * 
-   * @author jpalm
-   */  
-  public final static class Responses {
-      
-      private Responses() { }
-
-      /**
-       * Success.
-       */
-      public final static String OK = "ok";
-      
-      /**
-       * When there was a command sent to the local host, but no
-       * {@link Dispatchee} was set up to handle it.
-       */
-      public static final String NO_DISPATCHEE = "no.dispatcher";
-      
-      /**
-       * When there was a {@link Dispatchee} to handle this command, but it didn't understand it.
-       */
-      public static final String UNKNOWN_COMMAND = "unknown.command";
-
-
-  }
-  
-  /**
-   * Collection of all the commands we send.
-   * 
-   * @author jpalm
-   */
-  public final static class Commands {
-
-    private Commands() { }
-
-    /**
-     * Sent from Code to Local with no parameters.
-     */
-    public final static String START_COM      = "StartCom";
-    
-    /**
-     * Sent from Local to Remote with parameters.
-     * <ul>
-     * <li>{@link Parameters#PUBLIC}</li>
-     * <li>{@link Parameters#PRIVATE}</li>
-     * </ul>
-     */  
-    public final static String STORE_KEY      = "StoreKey";
-    
-    /**
-     * Sent from Code to Remote with parameters.
-     * <ul>
-     * <li>{@link Parameters#PRIVATE}</li>
-     * </ul>
-     */ 
-    public final static String GIVE_KEY       = "GiveKey";
-    
-    /**
-     * Send from Code to Local with no parameters.
-     */
-    public final static String DETATCH        = "Detatch";
-    
-    /**
-     * Sent from Code to Local  with parameters.
-     * <ul>
-     * <li>{@link Parameters#PRIVATE}</li>
-     * </ul>
-     */   
-    public static final String AUTHENTICATE   = "Authenticate";
-
-    /* Testing */
-    
-    /**
-     * Sent from Code to Local with parameters.
-     * <ul>
-     * <li>{@link Parameters#MSG}</li>
-     * </ul>
-     */   
-    public final static String ECHO = "Echo";
-    public final static String ALERT = "Alert";
-  }  
-  
-  /**
-   * Parameter names.
-   * 
-   * @author jpalm
-   */
-  public final static class Parameters {
-
-      private Parameters() {
-      }
-
-      /**
-       * Name of the callback function.
-       */
-      public static final String CALLBACK = "callback";
-
-      /**
-       * Private key.
-       */
-      public static final String PRIVATE = "private";
-
-      /**
-       * Public key.
-       */
-      public static final String PUBLIC = "public";
-
-      /**
-       * Name of the command to send to the {@link Dispatchee}.
-       */
-      public static final String COMMAND = "command";
-
-      /**
-       * Message to send to the <tt>ECHO</tt> command.
-       */
-      public static final String MSG = "msg";
-
-      /**
-       * Name of a URL.
-       */
-      public static final String URL = "url";
-
-  }  
-  
-  /**
-   * Codes that are sent to the code (javascript) when an error occurs.
-   * 
-   * @author jpalm
-   */
-  public final static class ErrorCodes {
-
-    private ErrorCodes() { }
-
-    public static final String INVALID_PUBLIC_KEY             = "invalid.public.key";
-    public static final String INVALID_PRIVATE_KEY            = "invalid.private.key";
-    public static final String INVALID_PUBLIC_KEY_OR_IP       = "invalid.public.key.or.ip.address";
-    public static final String MISSING_CALLBACK_PARAMETER     = "missing.callback.parameter";
-    public static final String UNKNOWN_COMMAND                = "unkown.command";
-    public static final String UNITIALIZED_PRIVATE_KEY        = "uninitialized.private.key";
-    public static final String MISSING_PRIVATE_KEY_PARAMETER  = "missing.private.parameter";
-    public static final String MISSING_PUBLIC_KEY_PARAMETER   = "missing.public.parameter";
-    public static final String MISSING_COMMAND_PARAMETER      = "missing.command.parameter";
-    
-  }  
-  
-  /**
-   * A general place for constants.
-   * 
-   * @author jpalm
-   */
-  public final static class Constants {
-      
-      private Constants() {}
-
-      /**
-       * Various levels for messages.
-       */
-      public enum Level {
-          MESSAGE, WARNING, ERROR, FATAL,
-      }
-
-      /**
-       * The length of the public and private keys generated.
-       */
-      public static final int KEY_LENGTH = 10; // TODO
-
-      public final static String NEWLINE = "\r\n";
-
-      /**
-       * The quote used to surround callbacks.  We need to escape this in the
-       * strings that we pass back to the callback.
-       */
-      public static final char CALLBACK_QUOTE = '\'';
-
-      /**
-       * The String version of {@link #CALLBACK_QUOTE}.
-       */
-      public static final String CALLBACK_QUOTE_STRING = String.valueOf(CALLBACK_QUOTE);
-
-      /**
-       * The callback in which error messages are wrapped.
-       */
-      public static final String ERROR_CALLBACK = "error";
-
-      /**
-       * The string that separates arguments in the {@link Parameters#MSG} argument
-       * when the command {@link Parameters#COMMAND} parameter is <tt>Msg</tt>.  This is
-       * the urlencoded version of <tt>&</tt>, which is <tt>%26</tt>. 
-       */
-      public static final String ARGUMENT_SEPARATOR = "%26";
-
   }
 }

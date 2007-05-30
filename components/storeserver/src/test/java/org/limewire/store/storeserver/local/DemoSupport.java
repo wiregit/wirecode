@@ -5,8 +5,6 @@ import java.util.Map;
 import org.limewire.store.storeserver.core.LocalServer;
 import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.Server;
-import org.limewire.store.storeserver.local.LocalLocalServer;
-import org.limewire.store.storeserver.local.DemoRemoteServer;
 import org.limewire.store.storeserver.util.Util;
 
 

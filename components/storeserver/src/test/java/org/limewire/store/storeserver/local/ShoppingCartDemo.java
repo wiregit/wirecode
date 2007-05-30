@@ -13,8 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.limewire.store.storeserver.core.AbstractDispatchee;
-import org.limewire.store.storeserver.core.Responses;
+import org.limewire.store.storeserver.api.AbstractDispatchee;
+import org.limewire.store.storeserver.api.IServer;
 import org.limewire.store.storeserver.util.CenterHelper;
 
 
@@ -66,9 +66,9 @@ public class ShoppingCartDemo {
         final String price = args.get("price");
         pane.setCount(count);
         pane.setPrice(price);
-        return Responses.OK;
+        return IServer.Responses.OK;
       }
-      return Responses.UNKNOWN_COMMAND + ":" + cmd + ":" + args;
+      return IServer.Responses.UNKNOWN_COMMAND + ":" + cmd + ":" + args;
     }
     
     public void postMsg(String msg) {

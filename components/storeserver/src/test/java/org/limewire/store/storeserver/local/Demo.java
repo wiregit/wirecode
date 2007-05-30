@@ -2,7 +2,7 @@ package org.limewire.store.storeserver.local;
 
 import java.util.Map;
 
-import org.limewire.store.storeserver.core.AbstractDispatchee;
+import org.limewire.store.storeserver.api.AbstractDispatchee;
 import org.limewire.store.storeserver.core.LocalServer;
 import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.Server;

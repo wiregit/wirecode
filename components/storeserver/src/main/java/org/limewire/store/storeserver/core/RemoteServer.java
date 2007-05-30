@@ -2,6 +2,7 @@ package org.limewire.store.storeserver.core;
 
 import java.util.Map;
 
+import org.limewire.store.storeserver.api.IServer;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -59,11 +60,11 @@ public abstract class RemoteServer extends Server {
   class StoreKey extends AbstractHandler {
     
     public String handle(final Map<String, String> args, final Request req) {
-      String publicKey = getArg(args, Parameters.PUBLIC);
+      String publicKey = getArg(args, IServer.Parameters.PUBLIC);
       if (publicKey == null) {
         return report(ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
       }
-      String privateKey = getArg(args, Parameters.PRIVATE);
+      String privateKey = getArg(args, IServer.Parameters.PRIVATE);
       if (privateKey == null) {
         return report(ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
       }
@@ -77,7 +78,7 @@ public abstract class RemoteServer extends Server {
         return ErrorCodes.INVALID_PUBLIC_KEY;
       }
       storeKey(publicKey, privateKey, ip);
-      return Responses.OK;
+      return IServer.Responses.OK;
     }
   }
 
@@ -89,7 +90,7 @@ public abstract class RemoteServer extends Server {
   class GiveKey extends HandlerWithCallback {
     
     public String handleRest(final Map<String, String> args, final Request req) {
-      String publicKey = getArg(args, Parameters.PUBLIC);
+      String publicKey = getArg(args, IServer.Parameters.PUBLIC);
       if (publicKey == null) {
         return report(ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
       }

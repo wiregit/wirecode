@@ -2,8 +2,9 @@ package org.limewire.store.storeserver.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
+import org.limewire.store.storeserver.api.IDispatchee;
+import org.limewire.store.storeserver.api.IServer;
 import org.limewire.store.storeserver.util.Util;
 
 
@@ -12,7 +13,7 @@ import org.limewire.store.storeserver.util.Util;
  * 
  * @author jpalm
  */
-public abstract class LocalServer extends Server {
+public abstract class LocalServer extends Server implements IServer {
 
     /** Whether we're using the watcher of not. */
     private final static boolean USING_WATCHER = true;
@@ -20,14 +21,24 @@ public abstract class LocalServer extends Server {
     private String publicKey;
     private String privateKey;
     private State state;
-    private Dispatchee dispatchee;
+    private IDispatchee dispatchee;
 
-    public final void setDispatchee(final Dispatchee dispatchee) {
+    /* (non-Javadoc)
+     * @see org.limewire.store.storeserver.core.I#setDispatchee(org.limewire.store.storeserver.core.Dispatchee)
+     */
+    public final void setDispatchee(final IDispatchee dispatchee) {
         this.dispatchee = dispatchee;
     }
     
-    public final Dispatchee getDispatchee() {
+    /* (non-Javadoc)
+     * @see org.limewire.store.storeserver.core.I#getDispatchee()
+     */
+    public final IDispatchee getDispatchee() {
         return this.dispatchee;
+    }
+    
+    public final void start() {
+        start(this);
     }
 
     /**
@@ -159,7 +170,7 @@ public abstract class LocalServer extends Server {
         public String handleRest(final String privateKey, final Map<String, String> args, final Request req) {
             newState(State.COMMUNICATING);
             if (dispatchee != null) dispatchee.setConnected(true);
-            return Responses.OK;
+            return IServer.Responses.OK;
         }
     }
 
@@ -174,7 +185,7 @@ public abstract class LocalServer extends Server {
             privateKey = null;
             publicKey = null;
             if (dispatchee != null) dispatchee.setConnected(false);
-            return Responses.OK;
+            return IServer.Responses.OK;
         }
     }
 
@@ -194,7 +205,7 @@ public abstract class LocalServer extends Server {
                 String newCmd = Util.addURLEncodedArguments(cmd, newArgs);
                 return dispatchee.dispatch(newCmd, newArgs);
             }
-            return Responses.NO_DISPATCHEE;
+            return IServer.Responses.NO_DISPATCHEE;
         }
     }
 

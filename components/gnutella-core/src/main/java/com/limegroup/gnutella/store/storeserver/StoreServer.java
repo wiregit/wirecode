@@ -5,17 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.store.storeserver.core.AbstractDispatchee;
-import org.limewire.store.storeserver.core.ConnectionListener;
-import org.limewire.store.storeserver.core.Dispatchee;
-import org.limewire.store.storeserver.core.ErrorCodes;
-import org.limewire.store.storeserver.core.LocalServer;
-import org.limewire.store.storeserver.core.Request;
-import org.limewire.store.storeserver.core.Responses;
-import org.limewire.store.storeserver.core.Server;
+import org.limewire.store.storeserver.api.AbstractDispatchee;
+import org.limewire.store.storeserver.api.IConnectionListener;
+import org.limewire.store.storeserver.api.IDispatchee;
+import org.limewire.store.storeserver.api.IServer;
 import org.limewire.store.storeserver.core.Server.Handler;
-import org.limewire.store.storeserver.core.Server.Listener;
-import org.limewire.store.storeserver.local.LocalLocalServer;
 
 
 /**
@@ -23,7 +17,7 @@ import org.limewire.store.storeserver.local.LocalLocalServer;
  * 
  * @author jpalm
  */
-public final class StoreServer implements ConnectionListener.HasSome {
+public final class StoreServer implements IConnectionListener.HasSome {
     
     // -----------------------------------------------------------------
     // Factory
@@ -37,8 +31,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
     }
     
     private static StoreServer newDemoInstance() {
-        final LocalServer s = new LocalLocalServer(8090, false);
-        s.setDebug(true);
+        final IServer s = IServer.FACTORY.newInstance(8090, true);
         final DispatcheeImpl d = new DispatcheeImpl(s);
         StoreServer res = new StoreServer(s, d);
         d.server = res;
@@ -49,11 +42,11 @@ public final class StoreServer implements ConnectionListener.HasSome {
     // Instance
     // -----------------------------------------------------------------
 
-    private final LocalServer localServer;
+    private final IServer localServer;
     private final Map<String, Handler> commands2handlers  = new HashMap<String, Handler>();
     private final Map<String, List<Listener>> commands2listenerLists = new HashMap<String, List<Listener>>();
     
-    public StoreServer(LocalServer localServer, Dispatchee dispatchee) {
+    public StoreServer(IServer localServer, IDispatchee dispatchee) {
         this.localServer = localServer;
         this.localServer.setDispatchee(dispatchee);
     }
@@ -63,7 +56,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
      * 
      * @return the local server
      */
-    public final LocalServer getLocalServer() {
+    public final IServer getLocalServer() {
         return this.localServer;
     }
     
@@ -71,14 +64,14 @@ public final class StoreServer implements ConnectionListener.HasSome {
      * Starts this service.
      */
     public void start() {
-        Server.start(this.localServer);
+        this.localServer.start();
     }
     
-    public final boolean addConnectionListener(ConnectionListener lis) {
+    public final boolean addConnectionListener(IConnectionListener lis) {
         return this.localServer.getDispatchee().addConnectionListener(lis);
     }
 
-    public final boolean removeConnectionListener(ConnectionListener lis) {
+    public final boolean removeConnectionListener(IConnectionListener lis) {
         return this.localServer.getDispatchee().removeConnectionListener(lis);
     }
     
@@ -121,6 +114,100 @@ public final class StoreServer implements ConnectionListener.HasSome {
         return lst.contains(lis) ? false : lst.add(lis);
     }
     
+    // ------------------------------------------------------------
+    // Handlers
+    // ------------------------------------------------------------
+    
+    /** 
+     * Handles commands. 
+     */
+    public interface Handler {
+      
+      /**
+       * Perform some operation on the incoming message and return the result.
+       * 
+       * @param args  CGI params
+       * @return      the result of performing some operation on the incoming message
+       */
+      String handle(Map<String, String> args);
+
+      /**
+       * Returns the unique name of this instance.
+       * 
+       * @return the unique name of this instance
+       */
+      String name();
+    }
+    
+    /** 
+     * Handles commands, but does NOT return a result.
+     */
+    public interface Listener {
+      
+      /**
+       * Perform some operation on the incoming message.
+       * 
+       * @param args  CGI params
+       */
+      void handle(Map<String, String> args);
+
+      /**
+       * Returns the unique name of this instance.
+       * 
+       * @return the unique name of this instance
+       */
+      String name();
+    }
+    
+    abstract static class HasName {
+
+        private final String name;
+
+        public HasName(final String name) {
+          this.name = name;
+        }
+
+        public HasName() {
+          String n = getClass().getName();
+          int ilast;
+          ilast = n.lastIndexOf(".");
+          if (ilast != -1) n = n.substring(ilast + 1);
+          ilast = n.lastIndexOf("$");
+          if (ilast != -1) n = n.substring(ilast + 1);
+          this.name = n;
+        }
+
+        public final String name() {
+          return name;
+        }
+
+        protected final String getArg(final Map<String, String> args, final String key) {
+          final String res = args.get(key);
+          return res == null ? "" : res;
+        }
+        
+    }
+    
+    /**
+     * Generic base class for {@link Listener}s.
+     * 
+     * @author jpalm
+     */
+    public static abstract class AbstractListener extends HasName implements Listener {
+        public AbstractListener(String name) { super(name); }
+        public AbstractListener() { super(); }
+    }
+    
+    /**
+     * Generic base class for {@link Handler}s.
+     * 
+     * @author jpalm
+     */
+    public static abstract class AbstractHandler extends HasName implements Handler {
+        public AbstractHandler(String name) { super(name); }
+        public AbstractHandler() { super(); }
+    }
+    
     /**
      * An event that is generated.
      * 
@@ -154,27 +241,26 @@ public final class StoreServer implements ConnectionListener.HasSome {
     private String dispatch(String cmd, Map<String, String> args) {
         System.out.println("dispatch: " + cmd + "(" + args + ")");
         if (cmd == null) {
-            return localServer.report(ErrorCodes.UNKNOWN_COMMAND);
+            return localServer.report(IServer.ErrorCodes.UNKNOWN_COMMAND);
         }
         final String hash = hash(cmd);
         Handler h = commands2handlers.get(hash);
         String res = null;
         boolean handled = false;
-        final Request req = null;
         if (h != null) {
             handled = true;
-            res = h.handle(args, req);
+            res = h.handle(args);
         }
         List<Listener> ls = commands2listenerLists.get(hash);
         if (ls != null && !ls.isEmpty()) {
             handled = true;
-            for (Listener l : ls) l.handle(args, req);
+            for (Listener l : ls) l.handle(args);
         }
         if (!handled) {
-            return localServer.report(ErrorCodes.UNKNOWN_COMMAND);
+            return localServer.report(IServer.ErrorCodes.UNKNOWN_COMMAND);
         } else {
             if (res == null) {
-                return Responses.OK;
+                return IServer.Responses.OK;
             } else {
                 return res;
             }
@@ -187,7 +273,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
     // -----------------------------------------------------------------
         
     /**
-     * Default {@link Dispatchee} class that handles commands from the local server.
+     * Default {@link IDispatchee} class that handles commands from the local server.
      * 
      * @author jpalm
      */
@@ -195,7 +281,7 @@ public final class StoreServer implements ConnectionListener.HasSome {
         
         private StoreServer server;
 
-        public DispatcheeImpl(LocalServer server) {
+        public DispatcheeImpl(IServer server) {
             super(server);
         }
 
