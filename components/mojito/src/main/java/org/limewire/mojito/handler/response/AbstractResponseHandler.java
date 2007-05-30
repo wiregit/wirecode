@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTTask;
@@ -37,7 +38,6 @@ import org.limewire.mojito.result.Result;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
-import org.limewire.mojito.util.OnewayExchanger;
 
 
 /**

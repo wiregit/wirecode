@@ -22,7 +22,7 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.mojito.util.OnewayExchanger;
+import org.limewire.concurrent.OnewayExchanger;
 
 /**
  * A CallableDHTTask taks a DHTTask, starts it and waits for

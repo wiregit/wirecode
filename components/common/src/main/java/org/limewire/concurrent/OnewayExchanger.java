@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.util;
+package org.limewire.concurrent;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;

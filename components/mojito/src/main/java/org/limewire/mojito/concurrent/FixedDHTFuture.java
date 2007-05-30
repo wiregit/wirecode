@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.limewire.mojito.util.OnewayExchanger;
+import org.limewire.concurrent.OnewayExchanger;
 
 
 /**

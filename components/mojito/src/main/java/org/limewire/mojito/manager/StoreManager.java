@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -59,7 +60,6 @@ import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.mojito.util.OnewayExchanger;
 import org.limewire.security.SecurityToken;
 
 /**

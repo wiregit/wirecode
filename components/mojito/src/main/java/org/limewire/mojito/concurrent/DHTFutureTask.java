@@ -28,9 +28,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.exceptions.LockTimeoutException;
-import org.limewire.mojito.util.OnewayExchanger;
 
 /**
  * 

@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -50,7 +51,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
-import org.limewire.mojito.util.OnewayExchanger;
 import org.limewire.mojito.util.RouteTableUtils;
 
 /**

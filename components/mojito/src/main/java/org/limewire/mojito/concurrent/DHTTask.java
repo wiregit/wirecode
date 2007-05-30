@@ -21,7 +21,7 @@ package org.limewire.mojito.concurrent;
 
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.mojito.util.OnewayExchanger;
+import org.limewire.concurrent.OnewayExchanger;
 
 /**
  * A DHTTask is an asynchronous non-blocking Task

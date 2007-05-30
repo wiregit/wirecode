@@ -1,4 +1,4 @@
-package org.limewire.mojito.util;
+package org.limewire.concurrent;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.util.BaseTestCase;
 
 @SuppressWarnings("unchecked")
