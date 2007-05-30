@@ -129,8 +129,7 @@ public class UploaderTest extends BaseTestCase {
         fm.get(0);
 
         upManager = (HTTPUploadManager) RouterService.getUploadManager();
-        upManager.setFileManager(fm);
-        upManager.start(RouterService.getHTTPUploadAcceptor());
+        upManager.start(RouterService.getHTTPUploadAcceptor(), fm, RouterService.getCallback());
 
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());

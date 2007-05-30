@@ -72,9 +72,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
                 .getNumFiles());
-        uploadManager.setFileManager(fm);
-        uploadManager.start(acceptor);
-		}
+        uploadManager.start(acceptor, fm, RouterService.getCallback());
+    }
 
     @Override
     protected void tearDown() throws Exception {
@@ -291,12 +290,12 @@ public final class UrnHttpRequestTest extends LimeTestCase {
             throws Exception {
         HttpResponse response = acceptor.process(request);
         assertEquals("unexpected HTTP response", error, getStatusLine(response));
-		}
+    }
 
     private String getStatusLine(HttpResponse response) {
         return response.getHttpVersion() + " "
                 + response.getStatusLine().getStatusCode() + " "
                 + response.getStatusLine().getReasonPhrase();
-		}
+    }
 
 }

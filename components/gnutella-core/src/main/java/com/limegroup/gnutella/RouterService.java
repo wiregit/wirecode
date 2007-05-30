@@ -516,7 +516,7 @@ public class RouterService {
     		LOG.trace("STOP HTTPUploadAcceptor");
 
     		LOG.trace("START HTTPUploadManager");
-    		uploadManager.start(httpUploadAcceptor); 
+    		uploadManager.start(httpUploadAcceptor, fileManager, callback); 
     		LOG.trace("STOP HTTPUploadManager");
 
             LOG.trace("START loading StaticMessages");

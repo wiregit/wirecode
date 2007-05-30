@@ -103,10 +103,9 @@ public class HTTPUploaderTest extends LimeTestCase {
         httpAcceptor = new HTTPAcceptor();
 
         upMan = new HTTPUploadManager(new UploadSlotManager());
-        upMan.setFileManager(fm);
 
         httpAcceptor.start(RouterService.getConnectionDispatcher());
-        upMan.start(httpAcceptor);
+        upMan.start(httpAcceptor, fm, cb);
 
         client = new HttpClient();
         HostConfiguration config = new HostConfiguration();

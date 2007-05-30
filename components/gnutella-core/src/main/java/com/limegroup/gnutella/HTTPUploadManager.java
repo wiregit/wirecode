@@ -180,6 +180,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private FileManager fileManager;
 
+    private boolean started;
+    
     public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
@@ -191,20 +193,26 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Registers the upload manager at <code>acceptor</code>.
      * 
+     * @throws IllegalStateException if uploadmanager was already started
      * @see #stop(HTTPAcceptor)
      */
-    public void start(HTTPAcceptor acceptor) {
-        if (activityCallback == null) {
-            activityCallback = RouterService.getCallback();
-        }        
-        if (fileManager == null) {
-            fileManager = RouterService.getFileManager();
-        }
-        
+    public void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback) {
         if (acceptor == null) {
             throw new IllegalArgumentException("acceptor may not be null");
         }
-
+        if (activityCallback == null) {
+            throw new IllegalArgumentException("activityCallback may not be null");
+        }        
+        if (fileManager == null) {
+            throw new IllegalArgumentException("fileManager may not be null");
+        }        
+        if (started) {
+            throw new IllegalStateException();
+        }
+        
+        this.fileManager = fileManager;
+        this.activityCallback = activityCallback;
+        
         FileUtils.addFileLocker(this);
 
         acceptor.addAcceptorListener(responseListener);
@@ -225,6 +233,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         fileRequestHandler.setFileManager(fileManager);
         acceptor.registerHandler("/get*", fileRequestHandler);
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
+        
+        started = true;
     }
 
     /**
@@ -235,6 +245,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public void stop(HTTPAcceptor acceptor) {
         if (acceptor == null) {
             throw new IllegalArgumentException("acceptor may not be null");
+        }
+        if (!started) {
+            throw new IllegalStateException();
         }
 
         acceptor.unregisterHandler("/");
@@ -247,22 +260,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.removeAcceptorListener(responseListener);
         
         FileUtils.removeFileLocker(this);
-    }
-    
-    public ActivityCallback getActivityCallback() {
-        return activityCallback;
-    }
-    
-    public void setActivityCallback(ActivityCallback activityCallback) {
-        this.activityCallback = activityCallback;
-    }
-    
-    public FileManager getFileManager() {
-        return fileManager;
-    }
-    
-    public void setFileManager(FileManager fileManager) {
-        this.fileManager = fileManager;
+        
+        started = false;
     }
     
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
