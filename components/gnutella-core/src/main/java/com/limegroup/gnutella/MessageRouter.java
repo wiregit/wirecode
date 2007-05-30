@@ -1969,13 +1969,11 @@ public abstract class MessageRouter {
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
-        int classC = ByteOrder.beb2int(queryReply.getIPBytes(), 0);
-        classC &= NetworkUtils.CLASS_C_NETMASK;
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
 											 queryReply.getUniqueResultCount(),
-                                             classC);
+                                             ByteOrder.beb2int(queryReply.getIPBytes(), 0));
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());

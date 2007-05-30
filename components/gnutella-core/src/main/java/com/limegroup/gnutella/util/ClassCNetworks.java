@@ -37,6 +37,7 @@ public class ClassCNetworks {
     }
     
     public void add(int masked, int count) {
+        masked &= NetworkUtils.CLASS_C_NETMASK;
         Integer num = counts.get(masked);
         if (num == null) {
             num = Integer.valueOf(0);
