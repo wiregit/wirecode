@@ -43,7 +43,6 @@ public class LimeResponsesTest extends ClientSideTestCase {
     }
     
     public void testResponse() throws Exception {
-        drain(testUP[0]);
         QueryRequest qr = QueryRequest.createNonFirewalledQuery("badger", (byte)1);
         testUP[0].send(qr);
         testUP[0].flush();
@@ -83,24 +82,21 @@ public class LimeResponsesTest extends ClientSideTestCase {
     }
     
     public void testQRP() throws Exception {
-
-        // trigger an update to get the original settings
         ManagedConnection c = RouterService.getConnectionManager().getInitializedConnections().get(0);
         c.incrementNextQRPForwardTime(0);
-        triggerSimppUpdate();
-        Thread.sleep(2000);
-        c.getQueryRouteTableSent();
+        PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
+        QueryRouteTable qrt = new QueryRouteTable();
+        qrt.patch(ptm);
         
         // initially, the qrp words should be included
-        assertTrue(c.getQueryRouteTableSent().contains(QueryRequest.createQuery("badger")));
-        
+        assertTrue(qrt.contains(QueryRequest.createQuery("badger")));
         
         // change some words, an updated qrp should be sent shortly
         SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"mushroom"});
+        c.incrementNextQRPForwardTime(0);
         triggerSimppUpdate();
-        PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
+        ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
         assertNotNull(ptm);
-        QueryRouteTable qrt = new QueryRouteTable();
         qrt.patch(ptm);
         
         // the new word should be there, the old one gone.
