@@ -1,0 +1,26 @@
+// -*- java -*-
+//
+// This is the FSA for the local server.
+//
+// To convert to server.jpg type
+//
+//   % dot -Tjpg localServer.dot -o localServer.jpg
+//
+// Get 'dot' from http://www.graphviz.org
+//
+// @author jpalm
+// @created Wed May 16 14:18:52 2007
+// --------------------------------------------------
+
+digraph G {
+
+  Idle -> StoreKey       [ label="Code:StartCom" ];
+
+  StoreKey -> Idle       [ label="Code:Detatch" ];
+  StoreKey -> Wait       [ label="return PUBLIC_KEY to Code"];
+
+  Wait -> Idle           [ label="Code:Detatch" ];
+
+  Wait -> Communicating  [ label="Code:Authenticate" ];
+  Communicating -> Idle  [ label="Code:Detatch" ];
+}

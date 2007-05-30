@@ -1,0 +1,94 @@
+<html>
+ 
+ <head>
+	<script type="text/javascript" src="limestore.js"></script>
+	<script type="text/javascript" src="search.js"></script>
+	<style>
+	 .cat {
+	 	font-style: italic;
+	 }
+	 .val {
+	 	text-align: right;
+	 }
+	 .info {
+	 	vertical-align: center;
+	 }
+	</style>
+ </head>
+ 
+	<body onLoad="onLoad()">
+
+		<h1>
+			The Yanni Store
+		</h1>
+		
+		<div id="mainDiv"></div>
+		
+		<div style="padding:10px; width:150px; border: 1px solid black" id="cartDiv">
+			<span style="font-weight:bold">Shopping cart</span>
+			<br>
+			<table border="0" cellpadding="1" cellspacing="1">
+			<tr><td class="cat">Count</td><td class="val"><span id="cartCount">0</span></td></tr>
+			<tr><td class="cat">Price</td><td class="val">$<span id="cartPrice">0.0</span></td></tr>
+			</table>
+			<button onclick="clearShoppingCart()">
+				Clear
+			</button>
+		</div>
+		
+		<div id="main" style="display:none"></div>
+
+		<p>
+			<table border="0" cellpadding="1" cellspacing="1" id="item1">
+				<tr>
+					<td><img src="item1.jpg" /></td>
+					<td class="info">
+							<b>Live: The Convert Event</b>
+							<br>
+							$14.00
+							<br>
+							<button onclick="addToCart(14.00)">
+							 Add
+							</button>
+					</td>
+				</tr>
+			</table>
+			
+			<table border="0" cellpadding="1" cellspacing="1" id="item1">
+				<tr>
+					<td><img src="item2.jpg" /></td>
+					<td class="info">
+							<b>Reflections of Passion  </b>
+							<br>
+							$10.00
+							<br>
+							<button onclick="addToCart(10.00)">
+							 Add
+							</button>
+					</td>
+				</tr>
+			</table>
+			
+			<table border="0" cellpadding="1" cellspacing="1" id="item1">
+				<tr>
+					<td><img src="item3.jpg" /></td>
+					<td class="info">
+							<b>Tribute</b>
+							<br>
+							$11.50
+							<br>
+							<button onclick="addToCart(11.50)">
+							 Add
+							</button>
+					</td>
+				</tr>
+			</table>
+			
+		</p>
+		
+		<p>
+			<div id="searchResults"></div>
+		</p>
+		
+	</body>
+</html>

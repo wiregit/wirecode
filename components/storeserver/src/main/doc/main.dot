@@ -1,0 +1,66 @@
+// -*- java -*-
+//
+// This is the main layout of the store server
+//
+// To convert to server.jpg type
+//
+//   % dot -Tjpg main.dot -o main.jpg
+//
+// Get 'dot' from http://www.graphviz.org
+//
+// @author jpalm
+// @created Wed May 23 11:30:55 2007
+// --------------------------------------------------
+
+digraph G {
+
+  compound = true;
+ 
+  subgraph cluster0 {
+    label = "server";
+    WebServer;
+  }
+
+  subgraph cluster1 {
+    label = "client";
+    LocalServer;
+  }
+
+  subgraph cluster2 {
+    label = "code";
+    Code;
+  }
+
+  subgraph cluster3 {
+    label = "core";
+    Dispatchee;
+    StoreServer;
+    Dispatchee -> StoreServer;
+    StoreServer -> Dispatchee;
+  }
+
+  subgraph cluster4 {
+    label = "gui";
+    Component1;
+    Component2;
+    ComponentN;
+  }
+
+  LocalServer -> Dispatchee [ltail=cluster0,lhead=cluster3];
+  Dispatchee -> LocalServer [ltail=cluster3,lhead=cluster0];
+
+  Component1 -> StoreServer [ltail=cluster4,lhead=cluster3];
+  Component2 -> StoreServer [ltail=cluster4,lhead=cluster3];
+  ComponentN -> StoreServer [ltail=cluster4,lhead=cluster3];
+
+  LocalServer -> WebServer [ltail=cluster0,lhead=cluster1];
+  WebServer -> LocalServer [ltail=cluster1,lhead=cluster0];
+
+  LocalServer -> Code [ltail=cluster0,lhead=cluster2];
+  Code -> LocalServer [ltail=cluster2,lhead=cluster0];
+
+  Code -> WebServer [ltail=cluster2,lhead=cluster1];
+  WebServer -> Code [ltail=cluster1,lhead=cluster2];
+  
+
+}

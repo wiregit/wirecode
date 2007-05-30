@@ -82,6 +82,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.store.storeserver.IStoreServer;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -600,6 +601,11 @@ public class RouterService {
             LOG.trace("START ChatManager");
             ChatManager.instance().initialize();
             LOG.trace("END ChatManager");
+            
+            System.out.println("start store server");
+            LOG.trace("START StoreServer");
+            IStoreServer.HOLDER.instance().start();
+            LOG.trace("END StoreServer");
 
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
@@ -872,6 +878,15 @@ public class RouterService {
     /** Gets the SelectorProvider for UDPChannels */
     public static UDPSelectorProvider getUDPSelectorProvider() {
     	return UDP_SELECTOR_PROVIDER;
+    }
+    
+    /**
+     * Returns the {@link StoreServer} instance.
+     * 
+     * @return the {@link StoreServer} instance
+     */
+    public static IStoreServer getStoreServer() {
+        return IStoreServer.HOLDER.instance();
     }
     
     public static HttpExecutor getHttpExecutor() {

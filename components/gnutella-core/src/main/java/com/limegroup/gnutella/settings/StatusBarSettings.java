@@ -44,4 +44,10 @@ public class StatusBarSettings extends LimeProps {
      */
     public static BooleanSetting BANDWIDTH_DISPLAY_ENABLED =
         FACTORY.createBooleanSetting("BANDWIDTH_DISPLAY_ENABLED", true);
+    
+    /**
+     * Whether or not store status should be displayed.
+     */
+    public static BooleanSetting STORE_DISPLAY_ENABLED =
+        FACTORY.createBooleanSetting("STORE_DISPLAY_ENABLED", true);    
 }

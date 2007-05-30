@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+	
+		<style>
+			textarea, .t, input {
+				border: 1px solid black;
+			}
+			button {
+				margin:3px;
+			}
+		</style>
+	
+		<title>test.html</title>
+		<script type="text/javascript">
+	//<!--
+	
+	var publicKey;
+	var privateKey;
+	
+	function error(res) {
+		alert(res);
+	}
+	
+	function getPublicKey() {
+		return getValue("publicKey");
+	}
+	
+	function getPrivateKey() {
+		return getValue("privateKey");
+	}
+	
+	function setPublicKey(key) {
+		note("have public key: " + key);
+		setValue("publicKey", key);
+		publicKey = key;
+	}
+	
+	function setPrivateKey(key) {
+		note("have private key: " + key);
+		setValue("privateKey", key);
+		privateKey = key;
+	}
+	
+	function noteAuthentication(msg) {
+		var s = "authenticated? " + msg;
+		setValue("authenticated", msg);
+		note(s);
+	}
+	
+	function note(msg) {
+		setText("main",msg);
+	}
+	
+	function clearAll() {
+		setText("main", "");
+	}
+	
+	function setText(id,msg) {
+		document.getElementById(id).innerHTML = msg;
+	}
+	
+	function setValue(id,msg) {
+		document.getElementById(id).value = msg;
+	}
+	
+	function getText(id) {
+		return document.getElementById(id).innerHTML;
+	}
+	
+	function getValue(id) {
+		return document.getElementById(id).value;
+	}
+	
+	function clearTextAreas() {
+		var els = document.getElementsByTagName('textarea');
+		for (i in els) els[i].value = "";
+	}
+	
+	function sendMsg() {
+		var txt = getValue("msg");
+		go("Msg?command=" + escape(txt) + "&private=" + getPrivateKey(),"getMsg",'8080');
+		setValue("msg","");
+	}
+	
+	function getMsg(res) {
+		setText("response", res);
+	}
+	
+	// ------------------------------------------------------------------
+	// Convenience methods	
+	// ------------------------------------------------------------------
+	
+	function doAuthentication() {
+		go('Authenticate?private=' + getPrivateKey(),'noteAuthentication','8080');
+	}
+
+	function doStartCom() {
+		go('StartCom','setPublicKey','8080')	
+	}
+	
+	function doGiveKey() {
+		go('GiveKey?public=' + getPublicKey(),'setPrivateKey','8090')	
+	}
+	
+	function doDetatch() {
+		go('Detatch','note','8080')	;
+	}
+	
+	function doAllAuthentication() {
+		N = 200;
+		n = 0;
+		setTimeout('doDetatch()'				,	N*(n++));
+		setTimeout('doStartCom()'				,	N*(n++));
+		setTimeout('doGiveKey()'				,	N*(n++));
+		setTimeout('doAuthentication()'	,	N*(n++));
+	}
+	
+	function go(cmd,callback,port) {
+	
+		document.getElementById("cmd").innerHTML = cmd;
+		
+		// Make the call to the local server
+		var script = document.createElement('script');
+		var url = 'http://localhost:' + port + '/' + cmd;
+		url += url.match(/\?/) ? '&' : '?';
+		url += 'callback=' + callback;
+		url += '&_f=' + Math.random();
+		setText('url',url);
+		script.setAttribute('src', url);
+		script.setAttribute('id', 'jsonScript');
+		script.setAttribute('type', 'text/javascript');
+	  main.appendChild(script);		
+	}
+
+	//-->
+	</script>
+
+	</head>
+
+	<body onUnLoad="doDetatch()" onLoad="clearTextAreas()">
+
+		<h1>
+			test.html
+		</h1>
+
+		<table border="0" cellpadding="1" cellspacing="1">
+
+			<tr>
+				<td width="500px">
+				
+					<p>
+						<button onclick="doAllAuthentication();">
+							All Authenticaton
+						</button>						
+					</p>
+
+					<p>
+						<button onclick="doStartCom();">
+							StartCom
+						</button>
+						<button onclick="alert('public key: ' + getPublicKey())">
+							getPublicKey
+						</button>
+						<br />
+
+						<button onclick="doGiveKey();">
+							GiveKey
+						</button>
+						<button onclick="alert('private key: ' + getPrivateKey())">
+							getPrivateKey
+						</button>						
+						<br />
+						
+						<button onclick="doAuthentication();">
+							Authenticate
+						</button>
+						<br />
+						
+						<input type="text" size="20" id="msg" />
+					  <button onclick="sendMsg()">
+							Send
+						</button>
+						<br />
+						
+						<button onclick="doDetatch();">
+							Detatch
+						</button>
+						<br />
+												
+						<button onclick="clearAll();">
+							Clear
+						</button>
+						
+					</p>
+
+					<p>
+						<b>Command:</b>
+						<blockquote>
+							<span style="text-style:italic" id="cmd"></span>
+						</blockquote>
+					</p>
+
+
+					<p>
+						<b>URL:</b>
+						<blockquote>
+							<span style="text-style:italic" id="url"></span>
+						</blockquote>
+					</p>
+
+					<p>
+						<b>Response:</b>
+					</p>
+					<div class="t" style="overflow:auto; width:300px; height:300px" id="main"></div>
+
+
+					<div id="main"></div>
+
+				</td>
+				<td valign="top">
+					<!--  place the public key here -->
+					<p>
+						<b>public key</b><br/>
+						<textarea id="publicKey"></textarea>
+					</p>
+					
+					<p>
+						<b>private key</b><br/>
+						<textarea id="privateKey"></textarea>
+					</p>
+					
+					<p>
+						<b>authenticated?</b><br/>
+						<textarea id="authenticated"></textarea>
+					</p>
+					
+					<p>
+				  	<b>response</b><br/>
+						<div class="t" style="overflow:auto; width:300px; height:300px" id="response"></div>
+					</p>
+
+				</td>
+			</tr>
+
+		</table>
+
+	</body>
+</html>
