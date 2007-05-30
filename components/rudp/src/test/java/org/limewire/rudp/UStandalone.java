@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.util.AssertComparisons;
 
 /**
  * A standalone program for testing UDPConnections across machines.
@@ -19,12 +20,15 @@ public class UStandalone {
 	/** A boolean that tracks whether the read thread was successful */
     private static boolean readSuccess = false;
 
-	public static boolean echoClient(UDPConnection usock, int numBytes) 
+    /**
+     * Writes numbers to <code>usock</code> and expects to read the same
+     * numbers back.
+     */
+	public static void echoClient(UDPConnection usock, int numBytes) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
-		readSuccess = false;
 		ClientReader reader = new ClientReader(istream, numBytes);
 		reader.start();
 
@@ -37,8 +41,6 @@ public class UStandalone {
 		
 		try { reader.join(); } catch (InterruptedException ie){}
         LOG.debug("Done echoClient test");
-
-		return readSuccess;
 	}
 
 	static class ClientReader extends ManagedThread {
@@ -55,50 +57,40 @@ public class UStandalone {
 			int rval;
 			LOG.debug("Begin read");
 
+			int i = 0;
 			try {
-				for (int i = 0; i < numBytes; i++) {
+				for (; i < numBytes; i++) {
 					rval = istream.read();
-					if ( rval != (i % 256) ) {
-						LOG.debug("Error on read expected: "+i
-						  +" received: "+rval);
-						break;
-					} else
-						LOG.trace("Properly recieved: "+i);
+					AssertComparisons.assertEquals("Read unexpected value at offset " + i, i % 256, rval);
+					LOG.trace("Properly received: "+i);
 					if ( (i % 1000) == 0 ) 
 						LOG.debug("Read status: "+i);
 				}
 				readSuccess = true;
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				AssertComparisons.fail("Unexpected exception at offset " + i + ": " + e);
 			}
 			LOG.debug("Done read");
 		}
 	}
 
-	public static boolean echoServer(UDPConnection usock, int numBytes) 
+	/**
+	 * Echos data read from <code>usock</code> back to <code>usock</code>. 
+	 */
+	public static void echoServer(UDPConnection usock, int numBytes) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
-		boolean success = false;
-
 		int rval;
 		for (int i = 0; i < numBytes; i++) {
 			rval = istream.read();
-			if ( rval != (i % 256) ) {
-				LOG.debug("Error on read expected: "+i
-				  +" received: "+rval);
-				return false;
-			} 
+			AssertComparisons.assertEquals("Read unexpected value at offset " + i, i % 256, rval);
 			if ( (i % 1000) == 0 ) 
 				LOG.debug("Echo status: "+i);
 			ostream.write(rval);
 		}
-		success = true;
 		LOG.trace("Done echo");
-		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        LOG.debug("Done echoServer test");
-		return success;
 	}
 
 	public static boolean echoClientBlock(UDPConnection usock, int numBlocks) 
