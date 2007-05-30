@@ -25,7 +25,7 @@ public class FixedSizeLIFOSet<E> extends LIFOSet<E> {
     public boolean add(E o) {
         boolean added = super.add(o);
         if(added && size() > maxSize) {
-            removeLast();
+            removeEldest();
             assert (size() == maxSize);
         }
         return added;
@@ -36,7 +36,7 @@ public class FixedSizeLIFOSet<E> extends LIFOSet<E> {
         boolean modified = super.addAll(c);
         if(modified) {
             while(size() > maxSize) {
-                removeLast();
+                removeEldest();
             }
         }
         assert (size() == maxSize);

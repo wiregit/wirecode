@@ -31,7 +31,7 @@ public class LIFOSetTest extends BaseTestCase {
         String test3 = "test3";
         String test4 = "test4";
         
-        Set<String> lifo = new LIFOSet<String>();
+        LIFOSet<String> lifo = new LIFOSet<String>();
         assertEquals(lifo.size(),0);
         lifo.add(test);
         assertTrue(lifo.contains(test));
@@ -84,13 +84,21 @@ public class LIFOSetTest extends BaseTestCase {
         assertTrue(lifo.isEmpty());
         assertFalse(lifo.iterator().hasNext());
         
-        //test remove last
-        LIFOSet<String> lifoSet = new LIFOSet<String>();
-        lifoSet.add(test);
-        lifoSet.add(test2);
-        lifoSet.removeLast();
-        assertTrue(lifoSet.contains(test2));
-        assertFalse(lifoSet.contains(test));
+        //test remove first (eldest) element from the Set
+        lifo = new LIFOSet<String>();
+        lifo.add(test);
+        lifo.add(test2);
+        lifo.removeEldest();
+        assertTrue(lifo.contains(test2));
+        assertFalse(lifo.contains(test));
+        
+        //test remove last (newest) element from the Set
+        lifo = new LIFOSet<String>();
+        lifo.add(test);
+        lifo.add(test2);
+        lifo.removeNewest();
+        assertFalse(lifo.contains(test2));
+        assertTrue(lifo.contains(test));
         
         //test toArray
         lifo = new LIFOSet<String>();

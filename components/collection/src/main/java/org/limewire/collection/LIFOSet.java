@@ -85,17 +85,29 @@ public class LIFOSet<E> implements Set<E>{
     }
     
     /**
-     * Removes the last element from the ordered set
+     * Removes the first (eldest) element from the ordered set
      * 
      * @return true if the set was changed
      */
-    public boolean removeLast() {
+    protected boolean removeEldest() {
         if(list.isEmpty()) {
             return false;
         }
         return set.remove(list.remove(0));
     }
 
+    /**
+     * Removes the last (newest) element from the ordered set
+     * 
+     * @return true if the set was changed
+     */
+    protected boolean removeNewest() {
+        if(list.isEmpty()) {
+            return false;
+        }
+        return set.remove(list.remove(list.size()-1));
+    }
+    
     public boolean removeAll(Collection<?> c) {
         list.removeAll(c);
         return set.removeAll(c);
