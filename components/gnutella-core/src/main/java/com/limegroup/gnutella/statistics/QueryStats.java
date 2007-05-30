@@ -9,6 +9,7 @@ import java.util.Map;
 import org.limewire.collection.NumericBuffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.RouterService;
 
@@ -19,26 +20,32 @@ public class QueryStats implements Inspectable {
     
     private NumericBuffer<Long> times = new NumericBuffer<Long>(200);
     
-    public void recordQuery() {
+    public synchronized void recordQuery() {
         times.add(System.currentTimeMillis());
     }
-    public long getLastQueryTime() {
+    
+    public synchronized long getLastQueryTime() {
         if (times.isEmpty())
             return 0;
         return times.first();
     }
     
-    public Object inspect() {
+    public synchronized Object inspect() {
         Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("ver",1);
+        /*
+         * version 1 used to send 10 search times in milliseconds
+         */
+        ret.put("ver",2);
 
-        // if there are less than 10 items (80 bytes) just send them
-        if (times.getSize() <= 10) {
-            List<Long> l = new ArrayList<Long>(10);
-            for(long time: times)
-                l.add(time - RouterService.startTime);
-            Collections.sort(l);
-            ret.put("list",l);
+        // if there are less than 200 items (800 bytes) just send them
+        if (times.getSize() <= 200) {
+            byte[] b = new byte[times.getSize() * 4];
+            for (int i = 0; i < times.getSize(); i++) {
+                int time = Float.floatToIntBits((times.get(i)-RouterService.startTime) / 1000f);
+                ByteOrder.int2beb(time, b, i*4);
+            }
+                
+            ret.put("buf",b);
             return ret;
         }
 
