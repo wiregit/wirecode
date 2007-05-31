@@ -982,4 +982,55 @@ public class RouteTableTest extends MojitoTestCase {
         count = counter.get(node);
         assertEquals(0, count);
     }
+    
+    public void testPurgeWithTime() {
+        RouteTable routeTable = new RouteTableImpl();
+        
+        Contact node1 = ContactFactory.createLiveContact(
+                new InetSocketAddress("localhost", 2000), 
+                Vendor.UNKNOWN, 
+                Version.ZERO, 
+                KUID.createRandomID(), 
+                new InetSocketAddress("localhost", 2000), 
+                0, 
+                Contact.DEFAULT_FLAG);
+        routeTable.add(node1);
+        
+        Contact node2 = ContactFactory.createLiveContact(
+                new InetSocketAddress("localhost", 3000), 
+                Vendor.UNKNOWN, 
+                Version.ZERO, 
+                KUID.createRandomID(), 
+                new InetSocketAddress("localhost", 3000), 
+                0, 
+                Contact.DEFAULT_FLAG);
+        routeTable.add(node2);
+        
+        assertEquals(3, routeTable.size());
+        
+        routeTable.purge(-1L);
+        assertEquals(3, routeTable.size());
+        
+        // Change Node #2's time stamp to the past
+        RemoteContact remote2 = (RemoteContact)node2;
+        long now = System.currentTimeMillis();
+        remote2.setTimeStamp(now-5000);
+        
+        // Nothing should change as the time must be
+        // positive
+        routeTable.purge(-1L);
+        assertEquals(3, routeTable.size());
+        
+        // Purge all Contacts that have not been
+        // contacted for more than 5500ms. Nothing 
+        // should change!
+        routeTable.purge(5500);
+        assertEquals(3, routeTable.size());
+        
+        // Purge all Contacts that have not been contacted
+        // for more than 4500ms. Node #2 should be gone!
+        routeTable.purge(4500);
+        assertEquals(2, routeTable.size());
+        assertNull(routeTable.get(node2.getNodeID()));
+    }
 }

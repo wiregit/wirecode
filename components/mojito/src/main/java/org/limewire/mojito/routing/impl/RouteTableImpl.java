@@ -1048,7 +1048,7 @@ public class RouteTableImpl implements RouteTable {
             // Drop all Contacts that haven't send us messages
             // (requests or responses) for longer than 'lastContactTime'
             if (lastContactTime >= 0L 
-                    && (currentTime - node.getTimeStamp()) < lastContactTime) {
+                    && (currentTime - node.getTimeStamp()) >= lastContactTime) {
                 continue;
             }
 
@@ -1066,7 +1066,7 @@ public class RouteTableImpl implements RouteTable {
                 // Drop all Contacts that haven't send us messages
                 // (requests or responses) for longer than 'lastContactTime'
                 if (lastContactTime >= 0L 
-                        && (currentTime - node.getTimeStamp()) < lastContactTime) {
+                        && (currentTime - node.getTimeStamp()) >= lastContactTime) {
                     continue;
                 }
                 
