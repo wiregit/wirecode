@@ -11,9 +11,9 @@ import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -108,10 +108,13 @@ class PassiveLeafRouteTable implements RouteTable {
     public synchronized void purge() {
     }
 
-    public synchronized void purge(long lastContactTime) {
+    public synchronized void purge(long elapsedTimeSinceLastContact) {
     }
 
     public synchronized void rebuild() {
+    }
+    
+    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
     }
     
     public synchronized Collection<Contact> select(KUID nodeId, int count, SelectMode mode) {

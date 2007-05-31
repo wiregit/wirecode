@@ -176,9 +176,9 @@ public class DHTSettings extends LimeProps {
      * 
      * Default is Long.MAX_VALUE and means purging is turned off!
      */
-    public static final LongSetting PURGE_ACTIVE_DHT_ROUTETABLE
-        = FACTORY.createRemoteLongSetting("PURGE_ACTIVE_DHT_ROUTETABLE", 
-                Long.MAX_VALUE, "DHT.PurgeActiveRouteTable", 60L*60L*1000L, Long.MAX_VALUE);
+    public static final LongSetting MAX_ELAPSED_TIME_SINCE_LAST_CONTACT
+        = FACTORY.createRemoteLongSetting("MAX_ELAPSED_TIME_SINCE_LAST_CONTACT", 
+                Long.MAX_VALUE, "DHT.MaxElapsedTimeSinceLastContact", 60L*60L*1000L, Long.MAX_VALUE);
     
     /**
      * Setting for whether or not the passive RouteTable should be persisted on disk

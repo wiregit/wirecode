@@ -43,9 +43,9 @@ import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -1004,12 +1004,20 @@ public class RouteTableImpl implements RouteTable {
      * @see com.limegroup.mojito.routing.RouteTable#rebuild()
      */
     public synchronized void rebuild() {
+        rebuild(-1L);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.routing.RouteTable#rebuild(long)
+     */
+    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
         }
         
         // Do a true RouteTable rebuild.
-        rebuild(true, -1L);
+        rebuild(true, elapsedTimeSinceLastContact);
     }
     
     /**

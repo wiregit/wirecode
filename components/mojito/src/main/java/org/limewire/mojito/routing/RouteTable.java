@@ -139,6 +139,11 @@ public interface RouteTable extends Serializable {
     public void rebuild();
     
     /**
+     * 
+     */
+    public void rebuild(long elapsedTimeSinceLastContact);
+    
+    /**
      * Returns the number of live and cached Contacts in the Route Table
      */
     public int size();

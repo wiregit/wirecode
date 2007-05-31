@@ -82,9 +82,9 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                     
                     // The Database depends on the RouteTable!
                     if (routeTable != null) {
-                        long maxElaspedTime = DHTSettings.PURGE_ACTIVE_DHT_ROUTETABLE.getValue();
+                        long maxElaspedTime = DHTSettings.MAX_ELAPSED_TIME_SINCE_LAST_CONTACT.getValue();
                         if (maxElaspedTime < Long.MAX_VALUE) {
-                            routeTable.purge(maxElaspedTime);
+                            routeTable.rebuild(maxElaspedTime);
                         }
                         
                         dht.setRouteTable(routeTable);

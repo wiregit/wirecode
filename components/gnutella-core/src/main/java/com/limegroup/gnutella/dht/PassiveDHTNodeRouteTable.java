@@ -226,12 +226,16 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         delegate.rebuild();
     }
     
+    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
+        delegate.rebuild(elapsedTimeSinceLastContact);
+    }
+    
     public synchronized void purge() {
         delegate.purge();
     }
 
-    public synchronized void purge(long lastContactTime) {
-        delegate.purge(lastContactTime);
+    public synchronized void purge(long elapsedTimeSinceLastContact) {
+        delegate.purge(elapsedTimeSinceLastContact);
     }
     
     public synchronized Contact select(KUID nodeId) {
