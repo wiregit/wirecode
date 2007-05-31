@@ -171,6 +171,16 @@ public class DHTSettings extends LimeProps {
                 true, "DHTSettings.PersistActiveRouteTable");
     
     /**
+     * Setting for whether or not the RouteTable should be purged from very
+     * old Contacts. The goal is to merge Buckets and to lower their count.
+     * 
+     * Default is Long.MAX_VALUE and means purging is turned off!
+     */
+    public static final LongSetting PURGE_ACTIVE_DHT_ROUTETABLE
+        = FACTORY.createRemoteLongSetting("PURGE_ACTIVE_DHT_ROUTETABLE", 
+                Long.MAX_VALUE, "DHT.PurgeActiveRouteTable", 60L*60L*1000L, Long.MAX_VALUE);
+    
+    /**
      * Setting for whether or not the passive RouteTable should be persisted on disk
      */
     public static final BooleanSetting PERSIST_PASSIVE_DHT_ROUTETABLE

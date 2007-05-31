@@ -979,7 +979,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#purge(long)
      */
-    public synchronized void purge(long lastContactTime) {
+    public synchronized void purge(long elapsedTimeSinceLastContact) {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
         }
@@ -996,7 +996,7 @@ public class RouteTableImpl implements RouteTable {
         // true rebuild. That means forget the cached Contacts! 
         // This is more about merging Buckets than actually rebuilding
         // the RouteTable.
-        rebuild(false, lastContactTime);
+        rebuild(false, elapsedTimeSinceLastContact);
     }
     
     /*
@@ -1017,7 +1017,7 @@ public class RouteTableImpl implements RouteTable {
      * current RouteTable and re-adds the Contacts from
      * the copies.
      */
-    private void rebuild(boolean isTrueRebuild, long lastContactTime) {
+    private void rebuild(boolean isTrueRebuild, long elapsedTimeSinceLastContact) {
         
         // Get the active Contacts
         Collection<Contact> activeNodes = getActiveContacts();
@@ -1047,8 +1047,8 @@ public class RouteTableImpl implements RouteTable {
             
             // Drop all Contacts that haven't send us messages
             // (requests or responses) for longer than 'lastContactTime'
-            if (lastContactTime >= 0L 
-                    && (currentTime - node.getTimeStamp()) >= lastContactTime) {
+            if (elapsedTimeSinceLastContact >= 0L 
+                    && (currentTime - node.getTimeStamp()) >= elapsedTimeSinceLastContact) {
                 continue;
             }
 
@@ -1065,8 +1065,8 @@ public class RouteTableImpl implements RouteTable {
                 
                 // Drop all Contacts that haven't send us messages
                 // (requests or responses) for longer than 'lastContactTime'
-                if (lastContactTime >= 0L 
-                        && (currentTime - node.getTimeStamp()) >= lastContactTime) {
+                if (elapsedTimeSinceLastContact >= 0L 
+                        && (currentTime - node.getTimeStamp()) >= elapsedTimeSinceLastContact) {
                     continue;
                 }
                 

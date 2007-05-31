@@ -130,7 +130,7 @@ public interface RouteTable extends Serializable {
      * send us messages (requests or responses) for the given
      * time from the routing table
      */
-    public void purge(long lastContactTime);
+    public void purge(long elapsedTimeSinceLastContact);
     
     /**
      * Rebuilds the RouteTable. Meant to be called after a local
