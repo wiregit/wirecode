@@ -19,8 +19,8 @@
 
 package org.limewire.mojito.settings;
 
-import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
+import org.limewire.setting.IntSetting;
 
 /**
  * Settings for the bootstrapping process
@@ -41,7 +41,17 @@ public class BootstrapSettings extends MojitoProps {
      * Enabled or disables the second part of the bootstrapping process that
      * does a full Bucket refresh to fill up the RouteTable.
      */
-    public static final BooleanSetting REFRESH_ALL_BUCKETS
-        = FACTORY.createRemoteBooleanSetting("REFRESH_ALL_BUCKETS", 
-                true, "Mojito.RefreshAllBuckets");
+    //public static final BooleanSetting REFRESH_ALL_BUCKETS
+    //    = FACTORY.createRemoteBooleanSetting("REFRESH_ALL_BUCKETS", 
+    //            true, "Mojito.RefreshAllBuckets");
+    
+    /**
+     * Setting for how many Buckets should be refreshed at most
+     * during bootstrapping. Ideally we want to refresh them all
+     * but it takes too long and leads to bootstrap failures if
+     * there's a big number of Buckets.
+     */
+    public static final IntSetting MAX_BUCKETS_TO_REFRESH
+        = FACTORY.createRemoteIntSetting("MAX_BUCKETS_TO_REFRESH", 
+                Integer.MAX_VALUE, "Mojito.MaxBucketsToRefresh", 0, Integer.MAX_VALUE);
 }

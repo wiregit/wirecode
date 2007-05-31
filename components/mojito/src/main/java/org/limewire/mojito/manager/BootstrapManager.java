@@ -382,11 +382,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             routeTableFailureCount = 0;
             foundNewContacts = false;
             
-            Collection<KUID> ids = Collections.emptySet();
-            if (BootstrapSettings.REFRESH_ALL_BUCKETS.getValue()) {
-                ids = context.getRouteTable().getRefreshIDs(true);
-            }
-            
+            Collection<KUID> ids = getBucketsToRefresh();
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Buckets to refresh: " + CollectionUtils.toString(ids));
             }
@@ -397,6 +393,42 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             } else {
                 bootstrapped(true);
             }
+        }
+        
+        private Collection<KUID> getBucketsToRefresh() {
+            int max = BootstrapSettings.MAX_BUCKETS_TO_REFRESH.getValue();
+            if (max <= 0) {
+                return Collections.emptySet();
+            }
+            
+            List<KUID> bucketIds = CollectionUtils.toList(
+                    context.getRouteTable().getRefreshIDs(true));
+            
+            // If there are less IDs than max then just return them
+            if (bucketIds.size() < max) {
+                return bucketIds;
+            }
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Too many Buckets to refresh, reducing count from " 
+                        + bucketIds.size() + " to " + max);
+            }
+            
+            // Go through the list and select every nth element
+            // We're prefer IDs that are further away because
+            // 'findNearestNodes()' we've already good knowledge
+            // of our nearby area...
+            int offset = bucketIds.size() / max;
+            List<KUID> refresh = new ArrayList<KUID>(max);
+            for (int i = bucketIds.size()-1; i >= 0; i -= offset) {
+                refresh.add(bucketIds.get(i));
+                
+                if (refresh.size() >= max) {
+                    break;
+                }
+            }
+            
+            return refresh;
         }
         
         private void refreshBucket(KUID randomId) {
