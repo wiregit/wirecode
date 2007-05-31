@@ -143,12 +143,16 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      * UDPService
      */
     @Override
-    protected boolean enqueueOutput(Tag tag) {
+    protected boolean submit(Tag tag) {
         InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddress();
         ByteBuffer data = tag.getData();
         UDPService.instance().send(data, dst, true);
-        registerInput(tag);
+        register(tag);
         SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message)tag.getMessage());
+        
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Sent: " + tag);
+        }
         return true;
     }
 
@@ -161,6 +165,10 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
         
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Received message from " + addr + ", " + msg);
+        }
+        
         if (!isRunning()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping message from " + addr + " because DHT is not running");
@@ -171,7 +179,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         ReceivedMessageStatHandler.UDP_DHT_MESSAGE.addMessage(msg);
         DHTMessage dhtMessage = (DHTMessage)msg;
         ((RemoteContact)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
-        
         handleMessage(dhtMessage);
     }
     
@@ -203,15 +210,5 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
         verifier.verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
-    }
-
-    @Override
-    protected SocketAddress receive(ByteBuffer dst) throws IOException {
-        throw new IOException("receive() is not implemented");
-    }
-
-    @Override
-    protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
-        throw new IOException("send() is not implemented");
     }
 }

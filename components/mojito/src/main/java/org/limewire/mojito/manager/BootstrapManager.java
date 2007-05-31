@@ -240,12 +240,17 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                     = new OnewayExchanger<PingResult, ExecutionException>(true) {
                 @Override
                 public synchronized void setValue(PingResult value) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Found initial bootstrap Node: " + value);
+                    }
+                    
                     super.setValue(value);
                     handlePong(value);
                 }
 
                 @Override
                 public synchronized void setException(ExecutionException exception) {
+                    LOG.info("ExecutionException", exception);
                     super.setException(exception);
                     exchanger.setException(exception);
                 }
@@ -267,12 +272,17 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                     = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
                 @Override
                 public synchronized void setValue(FindNodeResult value) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Found nearest Nodes: " + value);
+                    }
+                    
                     super.setValue(value);
                     handleNearestNodes(value);
                 }
 
                 @Override
                 public synchronized void setException(ExecutionException exception) {
+                    LOG.info("ExecutionException", exception);
                     super.setException(exception);
                     exchanger.setException(exception);
                 }
@@ -314,20 +324,23 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                     = new OnewayExchanger<PingResult, ExecutionException>(true) {
                 @Override
                 public synchronized void setValue(PingResult value) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(context.getLocalNode() + " collides with " + value.getContact());
+                    }
+                    
                     super.setValue(value);
                     handleCollision(value);
                 }
 
                 @Override
                 public synchronized void setException(ExecutionException exception) {
+                    LOG.info("ExecutionException", exception);
                     super.setException(exception);
-
+                    
                     Throwable cause = exception.getCause();
                     if (cause instanceof DHTTimeoutException) {
                         // Ignore, everything is fine! Nobody did respond
                         // and we can keep our Node ID which is good!
-                        LOG.info("DHTTimeoutException", cause);
-
                         // Continue with finding random Node IDs
                         refreshAllBuckets();
 
@@ -347,10 +360,6 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void handleCollision(PingResult result) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(context.getLocalNode() + " collides with " + result.getContact());
-            }
-            
             // Change our Node ID
             context.changeNodeID();
             
@@ -378,6 +387,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 ids = context.getRouteTable().getRefreshIDs(true);
             }
             
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Buckets to refresh: " + CollectionUtils.toString(ids));
+            }
+            
             randomIds = ids.iterator();
             if (randomIds.hasNext()) {
                 refreshBucket(randomIds.next());
@@ -387,16 +400,25 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void refreshBucket(KUID randomId) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Begin Bucket refresh for: " + randomId);
+            }
+            
             OnewayExchanger<FindNodeResult, ExecutionException> c 
                     = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
                 @Override
                 public synchronized void setValue(FindNodeResult value) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Finished Bucket refresh: " + value);
+                    }
+                    
                     super.setValue(value);
                     handleBucketRefresh(value);
                 }
 
                 @Override
                 public synchronized void setException(ExecutionException exception) {
+                    LOG.info("ExecutionException", exception);
                     super.setException(exception);
                     exchanger.setException(exception);
                 }
@@ -408,7 +430,6 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void handleBucketRefresh(FindNodeResult result) {
-            
             // The number of Contacts from our RouteTable that didn't
             // respond. Random nodes that we discovered during the
             // lookup are not taken into account!
@@ -462,11 +483,17 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
          */
         private void determinateIfBootstrapped() {
             boolean bootstrapped = false;
+            float alive = purgeAndGetPercenetage();
             
             // Check what percentage of the Contacts are alive
-            if (purgeAndGetPercenetage() 
-                    >= BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue()) {
+            if (alive >= BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue()) {
                 bootstrapped = true;
+            }
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Bootstrapped: " + alive + " >= " 
+                        + BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue() 
+                        + " -> " + bootstrapped);
             }
             
             bootstrapped(bootstrapped);
@@ -481,6 +508,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private void bootstrapped(boolean bootstrapped) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Finishing bootstrapping: " + bootstrapped);
+            }
+            
             ResultType type = ResultType.BOOTSTRAP_FAILED;
             if (bootstrapped) {
                 setBootstrapped(true);
@@ -495,7 +526,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {
-        	boolean doStart = false;
+            boolean doStart = false;
             synchronized (tasks) {
                 if (!cancelled) {
                     tasks.add(task);
@@ -509,6 +540,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
        
         public void cancel() {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Canceling BootstrapProcess");
+            }
+            
             List<DHTTask<?>> copy = null;
             synchronized (tasks) {
                 if (!cancelled) {

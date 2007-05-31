@@ -28,6 +28,8 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.security.PublicKey;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -35,6 +37,9 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
+import org.limewire.mojito.messages.DHTMessage;
+import org.limewire.mojito.messages.MessageFormatException;
+import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
@@ -47,6 +52,18 @@ import org.limewire.security.Verifier;
 public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
+    
+    /**
+     * The receive buffer size for the Socket
+     */
+    private static final int RECEIVE_BUFFER_SIZE 
+        = NetworkSettings.RECEIVE_BUFFER_SIZE.getValue();
+    
+    /**
+     * The send buffer size for the Socket
+     */
+    private static final int SEND_BUFFER_SIZE 
+        = NetworkSettings.SEND_BUFFER_SIZE.getValue();
     
     /**
      * Sleep timeout of the Selector
@@ -89,8 +106,40 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      */
     private final Object channelLock = new Object();
 
+    /**
+     * Buffer for incoming Messages
+     */
+    private final ByteBuffer receiveBuffer;
+    
+    /** Queue of things we have to send */
+    private List<Tag> outputQueue = new LinkedList<Tag>();
+    
+    /**
+     * Whether or not a new ByteBuffer should be allocated for
+     * every message we receive
+     */
+    private volatile boolean allocateNewByteBuffer 
+        = NetworkSettings.ALLOCATE_NEW_BUFFER.getValue();
+    
     public MessageDispatcherImpl(Context context) {
         super(context);
+        
+        receiveBuffer = ByteBuffer.allocate(RECEIVE_BUFFER_SIZE);
+    }
+    
+    /**
+     * Sets whether or not a new ByteBuffer should be allocated
+     */
+    public void setAllocateNewByteBuffer(boolean allocateNewByteBuffer) {
+        this.allocateNewByteBuffer = allocateNewByteBuffer;
+    }
+    
+    /**
+     * Returns whether or not a new ByteBuffer is allocated for
+     * every message
+     */
+    public boolean getAllocateNewByteBuffer() {
+        return allocateNewByteBuffer;
     }
     
     /**
@@ -193,6 +242,80 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     @Override
+    protected boolean submit(Tag tag) {
+        synchronized(outputQueue) {
+            outputQueue.add(tag);
+        }
+        
+        interestWrite(true);
+        return true;
+    }
+    
+    /**
+     * Writes all Messages (if possible) from the output
+     * queue to the Network and returns whether or not some
+     * Messages were left in the output queue.
+     */
+    private boolean handleWrite() throws IOException {
+        
+        // Get a local reference of outputQueue and
+        // replace it with a new List. Stuff that is
+        // being added will end up in the new List and
+        // we work localy with the previous List.
+        List<Tag> queue = null;
+        synchronized (outputQueue) {
+            queue = outputQueue;
+            outputQueue = new LinkedList<Tag>();
+        }
+        
+        Tag tag = null;
+        while (!queue.isEmpty()) {
+            tag = queue.get(0);
+
+            if (tag.isCancelled()) {
+                queue.remove(0);
+                continue;
+            }
+
+            try {
+                SocketAddress dst = tag.getSocketAddress();
+                ByteBuffer data = tag.getData();
+                
+                if (send(dst, data)) {
+                    // Wohoo! Message was sent!
+                    queue.remove(0);
+                    register(tag);
+                } else {
+                    // Dang! Re-Try next time!
+                    break;
+                }
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                queue.remove(0);
+                handleError(tag, err);
+            }
+        }
+
+        // If something was left in the queue then append
+        // everything from the current outputQueue and switch
+        // the reference to queue. In other words, stuff that
+        // was not send stays in the front of the Queue followed
+        // by stuff that was added during the while-loop above.
+        boolean isEmpty = false;
+        synchronized (outputQueue) {
+            if (!queue.isEmpty()) {
+                queue.addAll(outputQueue);
+                outputQueue = queue;
+            }
+            
+            isEmpty = outputQueue.isEmpty();
+        }
+        
+        interestWrite(!isEmpty);
+        return !isEmpty;
+    }
+    
+    @Override
     public void stop() {
         synchronized (getDatagramChannelLock()) {
             // Do not accept any new incoming Requests or Responses
@@ -214,7 +337,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                     }
                 };
                 
-                enqueueOutput(notifier);
+                submit(notifier);
                 
                 try {
                     getDatagramChannelLock().wait(1000L);
@@ -272,6 +395,55 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     @Override
     public boolean isRunning() {
         return running;
+    }
+    
+    /**
+     * Reads all available Message from Network and processes them.
+     */
+    private void handleRead() throws IOException {
+        while(isRunning()) {
+            DHTMessage message = null;
+            try {
+                message = readMessage();
+            } catch (MessageFormatException err) {
+                LOG.error("Message Format Exception: ", err);
+                continue;
+            }
+            
+            if (message == null) {
+                break;
+            }
+            
+            handleMessage(message);
+        }
+        
+        // We're always interested in reading!
+        interestRead(true);
+    }
+    
+    /**
+     * Reads and returns a single DHTMessage from Network or null
+     * if no Messages were in the input queue.
+     */
+    private DHTMessage readMessage() throws MessageFormatException, IOException {
+        SocketAddress src = receive((ByteBuffer)receiveBuffer.clear());
+        if (src != null) {
+            receiveBuffer.flip();
+            
+            ByteBuffer data = null;
+            if (getAllocateNewByteBuffer()) {
+                int length = receiveBuffer.remaining();
+                data = ByteBuffer.allocate(length);
+                data.put(receiveBuffer);
+                data.rewind();
+            } else {
+                data = receiveBuffer.slice();
+            }
+            
+            DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
+            return message;
+        }
+        return null;
     }
     
     @Override
@@ -350,19 +522,27 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             } catch (CancelledKeyException ignore) {}
         }
     }
-
-    @Override
-    protected void interestRead(boolean on) {
+    
+    /** 
+     * Called to indicate an interest in reading something from
+     * the Network. Override this method if you need this functionality!
+     */
+    private void interestRead(boolean on) {
         interest(SelectionKey.OP_READ, on);
     }
     
-    @Override
-    protected void interestWrite(boolean on) {
+    /** 
+     * Called to indicate an interest in writing something to
+     * the Network. Override this method if you need this functionality!
+     */
+    private void interestWrite(boolean on) {
         interest(SelectionKey.OP_WRITE, on);
     }
     
-    @Override
-    protected SocketAddress receive(ByteBuffer dst) throws IOException {
+    /**
+     * The raw read-method.
+     */
+    private SocketAddress receive(ByteBuffer dst) throws IOException {
         synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 throw new IOException("DatagramChannel is not open");
@@ -371,9 +551,22 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             return channel.receive(dst);            
         }
     }
-
-    @Override
-    protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
+    
+    /**
+     * The actual send method. Returns true if the data was
+     * sent or false if there was insufficient space in the
+     * output buffer (that means you'll have to re-try it later
+     * again).
+     * 
+     * IMPORTANT: The expected behavior is the same as 
+     * DatagramChannel.send(BytBuffer,SocketAddress). That means
+     * if you are not able to send the data return false and 
+     * leave the ByteBuffer untouched!
+     */
+    // We could pass a slice to this method to enforce the expected
+    // behavior but there's maybe an use-case like Kadmlia over TCP
+    // where it makes sense to send the data piece-by-piece...
+    private boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
         synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 throw new IOException("DatagramChannel is not open");

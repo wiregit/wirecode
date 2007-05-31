@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -80,29 +79,11 @@ public abstract class MessageDispatcher {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
-    /**
-     * The receive buffer size for the Socket
-     */
-    protected static final int RECEIVE_BUFFER_SIZE 
-        = NetworkSettings.RECEIVE_BUFFER_SIZE.getValue();
-    
-    /**
-     * The send buffer size for the Socket
-     */
-    protected static final int SEND_BUFFER_SIZE 
-        = NetworkSettings.SEND_BUFFER_SIZE.getValue();
-    
     /** 
      * The maximum size of a serialized Message we can send 
      */
     private static final int MAX_MESSAGE_SIZE
         = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
-    
-    /** Queue of things we have to send */
-    private List<Tag> outputQueue = new LinkedList<Tag>();
-    
-    /** The lock Object of the output queue */
-    private final Object outputQueueLock = new Object();
     
     /** Map of Messages (responses) we're awaiting */
     private final ReceiptMap receiptMap = new ReceiptMap(512);
@@ -118,21 +99,9 @@ public abstract class MessageDispatcher {
     private final StatsRequestHandler statsHandler;
     
     /**
-     * Buffer for incoming Messages
-     */
-    private final ByteBuffer receiveBuffer;
-    
-    /**
      * Handle of the cleanup task future
      */
     private ScheduledFuture cleanupTaskFuture;
-    
-    /**
-     * Whether or not a new ByteBuffer should be allocated for
-     * every message we receive
-     */
-    private volatile boolean allocateNewByteBuffer 
-        = NetworkSettings.ALLOCATE_NEW_BUFFER.getValue();
     
     /** A list of MessageDispatcherListeners */
     private final List<MessageDispatcherListener> listeners 
@@ -147,8 +116,6 @@ public abstract class MessageDispatcher {
         findValueHandler = new FindValueRequestHandler(context, findNodeHandler);
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
-        
-        receiveBuffer = ByteBuffer.allocate(RECEIVE_BUFFER_SIZE);
     }
     
     /**
@@ -193,13 +160,13 @@ public abstract class MessageDispatcher {
      */
     public void start() {
         // Start the CleanupTask
-    	synchronized (getReceiptMapLock()) {
+    	synchronized (receiptMap) {
             if (cleanupTaskFuture == null) {
                 long delay = NetworkSettings.CLEANUP_RECEIPTS_DELAY.getValue();
                 
                 Runnable task = new Runnable() {
                     public void run() {
-                        cleanup();
+                        process(new CleanupProcessor());
                     }
                 };
                 
@@ -214,7 +181,7 @@ public abstract class MessageDispatcher {
      */
     public void stop() {
         // Stop the CleanupTask
-    	synchronized (getReceiptMapLock()) {
+    	synchronized (receiptMap) {
             if (cleanupTaskFuture != null) {
                 cleanupTaskFuture.cancel(true);
                 cleanupTaskFuture = null;
@@ -228,21 +195,6 @@ public abstract class MessageDispatcher {
     public void close() {
         stop();
         clear();
-    }
-    
-    /**
-     * Sets whether or not a new ByteBuffer should be allocated
-     */
-    public void setAllocateNewByteBuffer(boolean allocateNewByteBuffer) {
-        this.allocateNewByteBuffer = allocateNewByteBuffer;
-    }
-    
-    /**
-     * Returns whether or not a new ByteBuffer is allocated for
-     * every message
-     */
-    public boolean getAllocateNewByteBuffer() {
-        return allocateNewByteBuffer;
     }
     
     /**
@@ -262,21 +214,6 @@ public abstract class MessageDispatcher {
      * Returns whether or not the MessageDispatcher is running
      */
     public abstract boolean isRunning();
-    
-    /**
-     * The lock Object of the output Queue. Hold this lock
-     * if you must send a bulk of Messages.
-     */
-    public Object getOutputQueueLock() {
-        return outputQueueLock;
-    }
-    
-    /**
-     * The lock Object of the ReceiptMap
-     */
-    private Object getReceiptMapLock() {
-        return receiptMap;
-    }
     
     /**
      * Sends a ResponseMessage to the given Contact
@@ -316,7 +253,7 @@ public abstract class MessageDispatcher {
     /**
      * The actual send method.
      */
-    protected boolean send(Tag tag) throws IOException {
+    protected boolean send(final Tag tag) throws IOException {
         if (!isRunning()) {
             throw new IOException("Cannot send Message because MessageDispatcher is not running");
         }
@@ -407,44 +344,14 @@ public abstract class MessageDispatcher {
         }
         
         tag.setData(data);
-        return enqueueOutput(tag);
+        process(new SubmitProcessor(tag));
+        return true;
     }
     
     /**
      * Enqueues Tag to the Output queue
      */
-    protected boolean enqueueOutput(Tag tag) {
-        synchronized(getOutputQueueLock()) {
-            outputQueue.add(tag);
-        }
-        
-        interestWrite(true);
-        return true;
-    }
-    
-    /**
-     * Reads all available Message from Network and processes them.
-     */
-    public void handleRead() throws IOException {
-        while(isRunning()) {
-            DHTMessage message = null;
-            try {
-                message = readMessage();
-            } catch (MessageFormatException err) {
-                LOG.error("Message Format Exception: ", err);
-                continue;
-            }
-            
-            if (message == null) {
-                break;
-            }
-            
-            handleMessage(message);
-        }
-        
-        // We're always interested in reading!
-        interestRead(true);
-    }
+    protected abstract boolean submit(Tag tag);
     
     /**
      * A helper method to serialize DHTMessage(s)
@@ -459,36 +366,6 @@ public abstract class MessageDispatcher {
     protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         return context.getMessageFactory().createMessage(src, data);
-    }
-    
-    /**
-     * The raw read-method.
-     */
-    protected abstract SocketAddress receive(ByteBuffer dst) throws IOException;
-    
-    /**
-     * Reads and returns a single DHTMessage from Network or null
-     * if no Messages were in the input queue.
-     */
-    private DHTMessage readMessage() throws MessageFormatException, IOException {
-        SocketAddress src = receive((ByteBuffer)receiveBuffer.clear());
-        if (src != null) {
-            receiveBuffer.flip();
-            
-            ByteBuffer data = null;
-            if (getAllocateNewByteBuffer()) {
-                int length = receiveBuffer.remaining();
-                data = ByteBuffer.allocate(length);
-                data.put(receiveBuffer);
-                data.rewind();
-            } else {
-                data = receiveBuffer.slice();
-            }
-            
-            DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
-            return message;
-        }
-        return null;
     }
     
     /**
@@ -586,7 +463,7 @@ public abstract class MessageDispatcher {
             
             Receipt receipt = null;
             
-            synchronized(getReceiptMapLock()) {
+            synchronized(receiptMap) {
                 receipt = receiptMap.get(messageId);
                 
                 if (receipt != null) {
@@ -670,116 +547,16 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Writes all Messages (if possible) from the output
-     * queue to the Network and returns whether or not some
-     * Messages were left in the output queue.
-     */
-    @SuppressWarnings("unused") // for IOException
-    public boolean handleWrite() throws IOException {
-        
-        // Get a local reference of outputQueue and
-        // replace it with a new List. Stuff that is
-        // being added will end up in the new List and
-        // we work localy with the previous List.
-        List<Tag> queue = null;
-        synchronized (getOutputQueueLock()) {
-            queue = outputQueue;
-            outputQueue = new LinkedList<Tag>();
-        }
-        
-        Tag tag = null;
-        while (!queue.isEmpty()) {
-            tag = queue.get(0);
-
-            if (tag.isCancelled()) {
-                queue.remove(0);
-                continue;
-            }
-
-            try {
-                SocketAddress dst = tag.getSocketAddress();
-                ByteBuffer data = tag.getData();
-                
-                if (send(dst, data)) {
-                    // Wohoo! Message was sent!
-                    queue.remove(0);
-                    registerInput(tag);
-                } else {
-                    // Dang! Re-Try next time!
-                    break;
-                }
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-                queue.remove(0);
-                process(new ErrorProcessor(tag, err));
-            }
-        }
-
-        // If something was left in the queue then append
-        // everything from the current outputQueue and switch
-        // the reference to queue. In other words, stuff that
-        // was not send stays in the front of the Queue followed
-        // by stuff that was added during the while-loop above.
-        boolean isEmpty = false;
-        synchronized (getOutputQueueLock()) {
-            if (!queue.isEmpty()) {
-                queue.addAll(outputQueue);
-                outputQueue = queue;
-            }
-            
-            isEmpty = outputQueue.isEmpty();
-        }
-        
-        interestWrite(!isEmpty);
-        return !isEmpty;
-    }
-    
-    /**
-     * The actual send method. Returns true if the data was
-     * sent or false if there was insufficient space in the
-     * output buffer (that means you'll have to re-try it later
-     * again).
-     * 
-     * IMPORTANT: The expected behavior is the same as 
-     * DatagramChannel.send(BytBuffer,SocketAddress). That means
-     * if you are not able to send the data return false and 
-     * leave the ByteBuffer untouched!
-     */
-    // We could pass a slice to this method to enforce the expected
-    // behavior but there's maybe an use-case like Kadmlia over TCP
-    // where it makes sense to send the data piece-by-piece...
-    protected abstract boolean send(SocketAddress dst, ByteBuffer data) throws IOException;
-    
-    /**
      * Called right after a Message has been sent to register
      * its ResponseHandler (if it's a RequestMessage).
      */
-    protected void registerInput(Tag tag) {
-        Receipt receipt = tag.sent();
+    protected void register(Tag tag) {
+        Receipt receipt = tag.receipt();
         if (receipt != null) {
-            synchronized (getReceiptMapLock()) {
-                receiptMap.add(receipt);
-                getReceiptMapLock().notifyAll();
-            }
+            process(new RegisterProcessor(receipt));
         }
         
         fireMessageSend(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
-    }
-    
-    /** 
-     * Called to indicate an interest in reading something from
-     * the Network. Override this method if you need this functionality!
-     */
-    protected void interestRead(boolean on) {
-        // DO NOTHING, OVERRIDE TO ADD FUNCTIONALITY
-    }
-    
-    /** 
-     * Called to indicate an interest in writing something to
-     * the Network. Override this method if you need this functionality!
-     */
-    protected void interestWrite(boolean on) {
-        // DO NOTHING, OVERRIDE TO ADD FUNCTIONALITY
     }
     
     /** Called to process a Task */
@@ -815,22 +592,13 @@ public abstract class MessageDispatcher {
      * Clears the output queue and receipt map
      */
     protected void clear() {
-        synchronized(getReceiptMapLock()) {
-            outputQueue.clear();
-        }
-        
-        synchronized (getReceiptMapLock()) {
+        synchronized (receiptMap) {
             receiptMap.clear();
         }
     }
     
-    /**
-     * Cleans up the receipt mapping.
-     */
-    private void cleanup() {
-        synchronized (getReceiptMapLock()) {
-            receiptMap.cleanup();
-        }
+    protected void handleError(Tag tag, IOException err) {
+        process(new ErrorProcessor(tag, err));
     }
     
     protected void fireMessageSend(KUID nodeId, SocketAddress dst, DHTMessage message) {
@@ -861,12 +629,16 @@ public abstract class MessageDispatcher {
     
     protected void fireMessageDispatcherEvent(KUID nodeId, SocketAddress dst, 
             DHTMessage message, EventType type) {
-        if (listeners.isEmpty())
+        if (listeners.isEmpty()) {
             return;
-        MessageDispatcherEvent evt = 
-            new MessageDispatcherEvent(this, nodeId, dst, message, type);
-        for (MessageDispatcherListener listener : listeners)
+        }
+        
+        MessageDispatcherEvent evt = new MessageDispatcherEvent(
+                this, nodeId, dst, message, type);
+        
+        for (MessageDispatcherListener listener : listeners) {
             listener.handleMessageDispatcherEvent(evt);
+        }
     }
     
     /**
@@ -916,6 +688,52 @@ public abstract class MessageDispatcher {
                 return true;
             }
             return false;
+        }
+    }
+    
+    /**
+     * Calls submit(Tag) from the processor Thread
+     */
+    private class SubmitProcessor implements Runnable {
+        
+        private final Tag tag;
+        
+        private SubmitProcessor(Tag tag) {
+            this.tag = tag;
+        }
+        
+        public void run() {
+            submit(tag);
+        }
+    }
+    
+    /**
+     * Calls ReceiptMap.add(Receipt) from the processor Thread
+     */
+    private class RegisterProcessor implements Runnable {
+        
+        private final Receipt receipt;
+        
+        private RegisterProcessor(Receipt receipt) {
+            this.receipt = receipt;
+        }
+        
+        public void run() {
+            synchronized (receiptMap) {
+                receiptMap.add(receipt);                
+            }
+        }
+    }
+    
+    /**
+     * Calls ReceiptMap.cleanup() from the processor Thread
+     */
+    private class CleanupProcessor implements Runnable {
+        
+        public void run() {
+            synchronized (receiptMap) {
+                receiptMap.cleanup();                
+            }
         }
     }
     

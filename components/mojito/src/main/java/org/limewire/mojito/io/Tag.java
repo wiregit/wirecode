@@ -172,7 +172,7 @@ public class Tag {
      * Marks this Message as sent and returns a Receipt
      * if this is a request
      */
-    public Receipt sent() {
+    public Receipt receipt() {
         sent = System.currentTimeMillis();
         data = null;
         return getReceipt();

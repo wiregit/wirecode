@@ -28,6 +28,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.exceptions.LockTimeoutException;
@@ -37,7 +39,9 @@ import org.limewire.mojito.exceptions.LockTimeoutException;
  */
 public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
-	private final OnewayExchanger<T, ExecutionException> exchanger;
+    private static final Log LOG = LogFactory.getLog(DHTFutureTask.class);
+    
+    private final OnewayExchanger<T, ExecutionException> exchanger;
 	
     private final Set<DHTFutureListener<T>> listeners 
         = Collections.synchronizedSet(new LinkedHashSet<DHTFutureListener<T>>());
@@ -55,30 +59,38 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         this.context = context;
         
         exchanger = new OnewayExchanger<T, ExecutionException>(true) {
-        	@Override
-			public synchronized void setValue(T value) {
-        		if (!isDone()) {
-        			super.setValue(value);
-        			internalDone();
-        		}
-			}
-        	
-			@Override
-			public synchronized void setException(ExecutionException exception) {
-				if (!isDone()) {
-	                super.setException(exception);
-	                internalDone();
-	            }
-			}
+            @Override
+            public synchronized void setValue(T value) {
+                if (!isDone()) {
+                    /*if (LOG.isDebugEnabled()) {
+                        LOG.debug(value);
+                    }*/
+                    
+                    super.setValue(value);
+                    internalDone();
+                }
+            }
 
-			@Override
-			public synchronized boolean cancel() {
-				if (super.cancel()) {
-					internalDone();
-					return true;
-				}
-				return false;
-			}
+            @Override
+            public synchronized void setException(ExecutionException exception) {
+                if (!isDone()) {
+                    /*if (LOG.isDebugEnabled()) {
+                        LOG.debug("ExecutionException", exception);
+                    }*/
+                    
+                    super.setException(exception);
+                    internalDone();
+                }
+            }
+
+            @Override
+            public synchronized boolean cancel() {
+                if (super.cancel()) {
+                    internalDone();
+                    return true;
+                }
+                return false;
+            }
         };
     }
     
@@ -104,11 +116,15 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             public void run() {
                 synchronized (exchanger) {
                     if (!exchanger.isDone()) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Watchdog is canceling " + task);
+                        }
+                        
                     	task.cancel();
                     	
                         exchanger.setException(
-                        		new ExecutionException(
-                        				new LockTimeoutException(task.toString())));
+                                new ExecutionException(
+                                        new LockTimeoutException(task.toString())));
                     }
                 }
             }
@@ -135,30 +151,30 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      */
     private void internalDone() {
     	
-    	// NOTE: YOU ARE HOLDING A LOCK ON THE EXCHANGER RIGHT NOW!!!
+        // NOTE: YOU ARE HOLDING A LOCK ON THE EXCHANGER RIGHT NOW!!!
     	
-    	if (watchdog != null) {
+        if (watchdog != null) {
             watchdog.cancel(true);
             watchdog = null;
         }
     	
-    	done();
+        done();
     	
-    	// Notify the listeners on a different Thread
+        // Notify the listeners on a different Thread
     	Runnable task = new Runnable() {
-    		public void run() {
-    	        try {
-    	            T value = get();
-    	            fireFutureResult(value);
-    	        } catch (ExecutionException e) {
-    	            fireExecutionException(e);
-    	        } catch (CancellationException e) {
-    	            fireCancellationException(e);
-    	        } catch (InterruptedException e) {
-    	            fireInterruptedException(e);
-    	        }
-    		}
-    	};
+            public void run() {
+                try {
+                    T value = get();
+                    fireFutureResult(value);
+                } catch (ExecutionException e) {
+                    fireExecutionException(e);
+                } catch (CancellationException e) {
+                    fireCancellationException(e);
+                } catch (InterruptedException e) {
+                    fireInterruptedException(e);
+                }
+            }
+        };
     	
     	context.getDHTExecutorService().execute(task);
     }
@@ -216,7 +232,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         }
         
         if (done) {
-        	task.cancel();
+            task.cancel();
         }
         
         return done;
