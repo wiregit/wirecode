@@ -48,7 +48,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.RouteTableUtils;
@@ -213,7 +212,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         public long getLockTimeout() {
-            return NetworkSettings.BOOTSTRAP_TIMEOUT.getValue();
+            return BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
         }
 
         public void start(OnewayExchanger<BootstrapResult, 

@@ -12,6 +12,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
+import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
@@ -87,7 +88,7 @@ public abstract class DHTTestCase extends LimeTestCase {
         // We're working on the loopback. Everything should be done
         // in less than 500ms
         NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
-        NetworkSettings.BOOTSTRAP_TIMEOUT.setValue(1000);
+        BootstrapSettings.BOOTSTRAP_TIMEOUT.setValue(1000);
         NetworkSettings.STORE_TIMEOUT.setValue(1000);
         
         // Nothing should take longer than 1.5 seconds. If we start seeing

@@ -21,12 +21,21 @@ package org.limewire.mojito.settings;
 
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
 
 /**
  * Settings for the bootstrapping process
  */
 public class BootstrapSettings extends MojitoProps {
     
+    /**
+     * The maximum amount of time the bootstrapping process can take
+     * before it's interrupted
+     */
+    public static final LongSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+                4L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
+
     private BootstrapSettings() {}
     
     /**
