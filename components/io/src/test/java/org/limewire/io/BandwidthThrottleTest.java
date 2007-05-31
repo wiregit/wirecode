@@ -73,7 +73,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
     public void testBandwidthThrottleSlow() {
         initExpectedBytes(100);
         while (System.currentTimeMillis() < stopTime) {
-            int bytesToSend = random.nextInt(15);
+            int bytesToSend = random.nextInt(12);
             bytesSent += throttle.request(bytesToSend);
         }
         assertLessThan("Sent " + bytesSent + " of " + expectedBytes, FUDGE_FACTOR
@@ -95,7 +95,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
 
     public void testThrottledOutputStreamWritePartialByteArray() throws Exception {
         initExpectedBytes(1000);
-        byte[] buf = new byte[150];
+        byte[] buf = new byte[120];
         while (System.currentTimeMillis() < stopTime) {
             random.nextBytes(buf);
             int n = random.nextInt(buf.length);
@@ -111,7 +111,7 @@ public class BandwidthThrottleTest extends BaseTestCase {
 
     public void testThrottledOutputStreamWriteFullByteArray() throws Exception {
         initExpectedBytes(1000);
-        byte[] buf = new byte[150];
+        byte[] buf = new byte[120];
         while (System.currentTimeMillis() < stopTime) {
             random.nextBytes(buf);
             out.write(buf);
