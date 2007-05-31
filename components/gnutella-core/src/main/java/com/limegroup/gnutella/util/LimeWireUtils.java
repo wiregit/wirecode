@@ -41,6 +41,9 @@ public final class LimeWireUtils {
     
     /** True if this is a beta. */
     private static final boolean betaVersion = true;
+    
+    /** True if this is an alpha */
+    private static final boolean alphaVersion = false;
 
     /**
      * The cached value of the major revision number.
@@ -79,7 +82,7 @@ public final class LimeWireUtils {
      * The cached value of the Ultrapeer minor revision number.
      */
     private static final int _upMinorVersionNumber = 1;
-
+    
     /**
      * The vendor code for QHD and GWebCache.  WARNING: to avoid character
      * encoding problems, this is hard-coded in QueryReply as well.  So if you
@@ -124,6 +127,10 @@ public final class LimeWireUtils {
     /** Returns true if we're a beta. */
     public static boolean isBetaRelease() {
         return betaVersion;
+    }
+    
+    public static boolean isAlphaRelease() {
+        return alphaVersion;
     }
 	
 	/** Gets the major version of GUESS supported.
@@ -212,7 +219,7 @@ public final class LimeWireUtils {
     public static boolean isTestingVersion() {
         return LIMEWIRE_VERSION.equals("@" + "version" + "@");
     }
-
+    
     static int getMinorVersionNumberInternal(String version) {
         if (!version.equals("@" + "version" + "@")) {
             try {
