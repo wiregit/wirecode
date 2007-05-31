@@ -124,7 +124,7 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final LongSetting BOOTSTRAP_TIMEOUT
         = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-                4L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 10L*60L*1000L);
+                4L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The maximum amount of tume the store process can take
