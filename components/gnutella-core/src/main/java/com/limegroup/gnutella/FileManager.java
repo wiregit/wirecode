@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -2375,6 +2376,73 @@ public abstract class FileManager {
         }
     }
     
+    /** 
+     * Returns an iterator for all shared files. 
+     */
+    public Iterator<Response> getIndexingIterator(final boolean includeXML) {
+        return new Iterator<Response>() {
+            int startRevision = _revision;
+            /** Points to the index that is to be examined next. */
+            int index = 0;
+            Response preview;
+
+            private boolean preview() {
+                assert preview == null;
+
+                if (_revision != startRevision) {
+                    return false;
+                }
+
+                synchronized (FileManager.this) {
+                    while (index < _files.size()) {
+                        FileDesc desc = _files.get(index);
+                        index++;
+
+                        // skip, if the file was unshared or is an incomplete file,
+                        if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
+                            continue;
+
+                        preview = new Response(desc);
+                        if(includeXML)
+                            addXMLToResponse(preview, desc);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            public boolean hasNext() {
+                if (_revision != startRevision) {
+                    return false;
+                }
+
+                if (preview != null) {
+                    synchronized (FileManager.this) {
+                        if (_files.get(index - 1) == null) {
+                            // file was removed in the meantime
+                            preview = null;
+                        }
+                    }
+                }
+                return preview != null || preview();
+            }
+
+            public Response next() {
+                if (hasNext()) {
+                    Response item = preview;
+                    preview = null;
+                    return item;
+                }
+                throw new NoSuchElementException();               
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+        };
+    }
+        
     private class QRPUpdater implements SimppListener {
         private boolean buildInProgress;
         private final Set<String> qrpWords = new HashSet<String>();

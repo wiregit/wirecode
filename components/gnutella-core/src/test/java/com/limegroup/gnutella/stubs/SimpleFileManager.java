@@ -19,7 +19,7 @@ public class SimpleFileManager extends FileManager {
     }
     
     public void addXMLToResponse(Response r, FileDesc fd) {
-        ;
+        r.setDocument(fd.getXMLDocument());
     }
     
     public void fileChanged(File f) {

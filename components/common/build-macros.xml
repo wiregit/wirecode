@@ -230,10 +230,11 @@
 	    <attribute name="component"/>
 	    <element name="testLocations"  optional="true"/>
 	    <attribute name="forkmode"     default="once"/>
+	    <attribute name="filter"     default="**/*Test.class"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-	        <do.run-tests-batchunit unit="**/*Test.class"
+	        <do.run-tests-batchunit unit="@{filter}"
 	            					component="@{component}"
 	            					forkmode="@{forkmode}"
 	        >
@@ -433,6 +434,7 @@
     <target name="with.clover"/> <!-- Must write a real target for this when importing -->
     <target name="initialize"/> <!-- Must write a real target for this when importing -->
     <target name="test-all"/> <!-- Must write a real target for this when importing -->
+    <target name="test-some"/> <!-- Must write a real target for this when importing -->
     <target name="clover2html"/> <!-- Must write a real target for this when importing -->
     
     <target name="clover-all" depends="initialize, clean, with.clover">

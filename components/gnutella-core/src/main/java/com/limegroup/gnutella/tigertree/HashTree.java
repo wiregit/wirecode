@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.tigertree;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -127,7 +129,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             LOG.debug("creating hashtree for file " + fd);
         InputStream in = null;
         try {
-            in = fd.createInputStream();
+            in = new BufferedInputStream(new FileInputStream(fd.getFile()));
             return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
         } finally {
             IOUtils.close(in);
@@ -374,6 +376,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         return HashTreeNodeManager.instance().getAllNodes(this);
     }
 
+    public ThexWriter createAsyncWriter() {
+        return getTreeWriter().createAsyncWriter();
+    }
+    
     /**
      * Writes this HashTree to the specified OutputStream using DIME.
      */

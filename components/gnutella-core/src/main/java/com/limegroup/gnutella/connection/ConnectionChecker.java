@@ -232,7 +232,7 @@ public final class ConnectionChecker implements Runnable {
         
         // query the upload slot manager, because multicast
         // uploads do not use slots and we do not care about them.
-        return !RouterService.getUploadManager().hasActiveInternetTransfers();
+        return !RouterService.hasActiveUploads();
     }
     
     /**

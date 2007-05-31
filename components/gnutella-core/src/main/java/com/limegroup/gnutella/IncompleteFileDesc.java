@@ -1,10 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Set;
 
 import org.limewire.collection.Interval;
@@ -70,23 +66,6 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	}
     
     /**
-     * Opens an input stream to the <tt>File</tt> instance for this
-	 * <tt>FileDesc</tt>.
-	 *
-	 * @return an <tt>InputStream</tt> to the <tt>File</tt> instance
-	 * @throws <tt>FileNotFoundException</tt> if the file represented
-	 *  by the <tt>File</tt> instance could not be found
-     */
-    public InputStream createInputStream() throws FileNotFoundException {
-        // if we don't have any available ranges, we should never
-        // have entered the download mesh in the first place!!!
-        if (getFile().length() == 0)
-            throw new FileNotFoundException("nothing downloaded");
-                
-        return new BufferedInputStream(new FileInputStream(getFile()));
-    }
-    
-	/**
      * Returns null, overrides super.getHashTree to prevent us from offering
      * HashTrees for incomplete files.
      * @return null

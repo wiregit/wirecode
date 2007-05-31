@@ -3,7 +3,6 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,11 +52,15 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     public IncompleteFileDescStub(String name) {
         super(new File(name), set, 0,name,size,null);
         localSet=new HashSet();
+        
+        FileDescStub.createStubFile(this);
     }
     
     public IncompleteFileDescStub(String name, URN urn, int index) {
     	super(new File(name), createUrnSet(urn),index,name,size,null);
     	localSet=localSet2;
+    	
+    	FileDescStub.createStubFile(this);
     }
     
     private static Set createUrnSet(URN urn) {
@@ -73,19 +76,6 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     	else return super.containsUrn(urn);
     }
 
-    public InputStream createInputStream() {
-        return new InputStream() {
-            public int read() {
-                return 'a';
-            }
-            public int read(byte[] b) {
-                for(int i=0; i < b.length; i++)
-                    b[i] = (byte)'a';
-                return b.length;
-            }
-        };
-    }
-    
     public long getFileSize() {
         return size;
     }
