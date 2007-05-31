@@ -2565,6 +2565,8 @@ ERROR_XML_SEARCH_TOO_LARGE=検索が特定化されすぎているので、検�
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+#### ERROR_ALPHA_EXPIRED=This Alpha version has expired.  Press Ok to exit.
+#? ERROR_ALPHA_EXPIRED=
 
 ################################################################################
 # Messages for Licensing.
@@ -4766,3 +4768,19 @@ ALL_OOB_BYPASSED=回答バイパス
 STATS_OOB_THROUGHPUT_TITLE=OOB成功率
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 STATS_OOB_THROUGHPUT_LABEL=リクエストされOOBプロトコルを介して受信された回答数
+
+###############################################################################
+# Key/value pairs for Java version upgrade notifications
+###############################################################################
+#### UPGRADE_JAVA=Upgrade Java
+#? UPGRADE_JAVA=
+#### UPGRADE_JAVA_16_BETA_MESSAGE=You are currently using a beta version of Java 1.6.0. This version is known to have caused problems with LimeWire. Please upgrade to the final 1.6.0 release.\n
+#? UPGRADE_JAVA_16_BETA_MESSAGE=
+#### MORE_INFORMATION=More Information
+#? MORE_INFORMATION=
+#### VISIT_URL=Visit {0}
+#? VISIT_URL=
+#### REMIND_ME_LATER=Remind Me Later
+#? REMIND_ME_LATER=
+#### DO_NOT_SHOW_AGAIN=Do not Show Again
+#? DO_NOT_SHOW_AGAIN=
