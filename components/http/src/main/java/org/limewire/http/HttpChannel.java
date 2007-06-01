@@ -3,8 +3,10 @@ package org.limewire.http;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -22,7 +24,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private final IOEventDispatch eventDispatch;
 
-    private boolean closed;
+    private AtomicBoolean closed = new AtomicBoolean(false);
 
     private InterestReadableByteChannel readSource;
 
@@ -87,7 +89,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public boolean isOpen() {
-        return !closed;
+        return !closed.get();
     }
 
     public int write(ByteBuffer buffer) throws IOException {
@@ -110,9 +112,12 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void shutdown() {
-        if (!closed) {
-            closed = true;
-            eventDispatch.disconnected(session);
+        if (!closed.getAndSet(true)) {
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    eventDispatch.disconnected(session);
+                }               
+            });
         }
     }
 
