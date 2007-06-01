@@ -4,11 +4,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.collection.LIFOSet;
 import org.limewire.util.BaseTestCase;
 
 public class LIFOSetTest extends BaseTestCase {
