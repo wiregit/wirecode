@@ -1504,6 +1504,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         void writeDone() {
             doingWrite = false;
+            _stateMachine.handleRead();
         }
 
         protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
@@ -1672,7 +1673,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     }
     
-    private static class DownloadRestarter implements VerifyingFile.WriteCallback {
+    private static class DownloadRestarter implements VerifyingFile.WriteCallback, Runnable {
         private final DownloadState downloader;
         private final InterestReadableByteChannel irc;
         private final ByteBuffer buffer;
@@ -1685,6 +1686,10 @@ public class HTTPDownloader implements BandwidthTracker {
         
         public void writeScheduled() {
             LOG.debug("Delayed write scheduled");
+            NIODispatcher.instance().invokeLater(this);
+        }
+        
+        public void run() {
             buffer.clear();
             downloader.writeDone();
             irc.interestRead(true);
