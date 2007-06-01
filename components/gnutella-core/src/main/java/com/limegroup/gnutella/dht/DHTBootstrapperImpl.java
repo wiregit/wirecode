@@ -148,6 +148,8 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     public void stop() {
         synchronized (lock) {
+            SimppManager.instance().removeListener(this);
+            
             if (pingFuture != null) {
                 pingFuture.cancel(true);
                 pingFuture = null;
@@ -161,8 +163,6 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             stopNodeFetcher();
             triedRouteTable = false;
             fromRouteTable = false;
-            
-            SimppManager.instance().removeListener(this);
         }
     }
     

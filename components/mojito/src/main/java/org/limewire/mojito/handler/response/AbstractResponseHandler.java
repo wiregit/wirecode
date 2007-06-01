@@ -92,7 +92,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     protected Object getLock() {
     	Object lock = exchanger;
     	if (lock == null) {
-    		throw new IllegalStateException("Lock is null");
+    	    throw new IllegalStateException("Lock is null");
     	}
     	return lock;
     }

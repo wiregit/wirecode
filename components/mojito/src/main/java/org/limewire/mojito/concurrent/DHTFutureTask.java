@@ -50,7 +50,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     private final DHTTask<T> task;
     
-    private boolean running = false;
+    private boolean taskIsRunning = false;
     
     private ScheduledFuture<?> watchdog = null;
     
@@ -62,10 +62,6 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             @Override
             public synchronized void setValue(T value) {
                 if (!isDone()) {
-                    /*if (LOG.isDebugEnabled()) {
-                        LOG.debug(value);
-                    }*/
-                    
                     super.setValue(value);
                     internalDone();
                 }
@@ -74,10 +70,6 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             @Override
             public synchronized void setException(ExecutionException exception) {
                 if (!isDone()) {
-                    /*if (LOG.isDebugEnabled()) {
-                        LOG.debug("ExecutionException", exception);
-                    }*/
-                    
                     super.setException(exception);
                     internalDone();
                 }
@@ -99,7 +91,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             synchronized (exchanger) {
                 if (!exchanger.isDone()) {
                     task.start(exchanger);
-                    running = true;
+                    taskIsRunning = true;
                     
                     if (!exchanger.isDone()) {
                         initWatchdog();
@@ -120,8 +112,6 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                             LOG.debug("Watchdog is canceling " + task);
                         }
                         
-                    	task.cancel();
-                    	
                         exchanger.setException(
                                 new ExecutionException(
                                         new LockTimeoutException(task.toString())));
@@ -221,21 +211,17 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * @see java.util.concurrent.Future#cancel(boolean)
      */
     public boolean cancel(boolean mayInterruptIfRunning) {
-        boolean done = false;
+        boolean canceled = false;
         synchronized (exchanger) {
             if (!exchanger.isDone()) {
-                if (!running || mayInterruptIfRunning) {
+                if (!taskIsRunning || mayInterruptIfRunning) {
                     exchanger.cancel();
-                    done = true;
+                    canceled = true;
                 }
             }
         }
         
-        if (done) {
-            task.cancel();
-        }
-        
-        return done;
+        return canceled;
     }
 
     /*
