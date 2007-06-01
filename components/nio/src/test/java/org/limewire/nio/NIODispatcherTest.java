@@ -247,6 +247,23 @@ public class NIODispatcherTest extends BaseTestCase {
         // (If the selector was edge-triggered, we would only be notified once).
         assertGreaterThan(priorReadsHandled + 5, o1.getReadsHandled());
         
+        // Just to do some stricter testing, also make sure that if we turn
+        // interest off & back on again, we'll continue to get notifications
+        // about the existing data...
+        NIODispatcher.instance().interestRead(c1, false);
+        NIOTestUtils.waitForNIO();
+        priorReadsHandled = o1.getReadsHandled();
+        for(int i = 0; i < 10; i++)
+            NIOTestUtils.waitForNIO();
+        //Make sure we got no notifications while reading was off
+        assertEquals(priorReadsHandled, o1.getReadsHandled());
+        
+        // Now turn it back on and make sure notifications skyrocket again.
+        NIODispatcher.instance().interestRead(c1, true);
+        for(int i = 0; i < 10; i++)
+            NIOTestUtils.waitForNIO();
+        assertGreaterThan(priorReadsHandled + 5, o1.getReadsHandled());
+        
         c1.close();
         accepted.close();
     }
