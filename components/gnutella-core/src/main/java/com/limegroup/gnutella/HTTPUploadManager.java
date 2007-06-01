@@ -118,7 +118,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Number of active uploads that are not accounted in the slot manager but
      * whose bandwidth is counted. (i.e. Multicast)
      */
-    private Set<HTTPUploader> forceAllowedUploads = new CopyOnWriteArraySet<HTTPUploader>();
+    private Set<HTTPUploader> localUploads = new CopyOnWriteArraySet<HTTPUploader>();
 
     /**
      * LOCKING: obtain this' monitor before modifying any of the data structures
@@ -309,7 +309,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                         uploader.getTotalAmountUploaded());
             }
             removeFromList(uploader);
-            forceAllowedUploads.remove(uploader);
+            localUploads.remove(uploader);
         }
 
         switch (state) {
@@ -342,7 +342,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (uploader.isForcedShare()) 
             forcedUploads++;
         else if (HttpContextParams.isLocal(context))
-            forceAllowedUploads.add(uploader);
+            localUploads.add(uploader);
         activeUploadList.add(uploader);
         uploader.setStartTime(System.currentTimeMillis());
     }
@@ -610,7 +610,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     public void measureBandwidth() {
         slotManager.measureBandwidth();
-        for (HTTPUploader active : forceAllowedUploads) {
+        for (HTTPUploader active : localUploads) {
             active.measureBandwidth();
         }
     }
@@ -622,7 +622,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         } catch (InsufficientDataException notEnough) {
         }
 
-        for (HTTPUploader forced : forceAllowedUploads) {
+        for (HTTPUploader forced : localUploads) {
             try {
                 bw += forced.getMeasuredBandwidth();
             } catch (InsufficientDataException e) {
