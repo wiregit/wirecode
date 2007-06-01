@@ -106,16 +106,22 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     private void initWatchdog() {
         Runnable r = new Runnable() {
             public void run() {
+                boolean timeout = false;
                 synchronized (exchanger) {
                     if (!exchanger.isDone()) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Watchdog is canceling " + task);
                         }
                         
+                        timeout = true;
                         exchanger.setException(
                                 new ExecutionException(
                                         new LockTimeoutException(task.toString())));
                     }
+                }
+                
+                if (timeout && taskIsRunning) {
+                    task.cancel();
                 }
             }
         };
@@ -219,6 +225,10 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                     canceled = true;
                 }
             }
+        }
+        
+        if (canceled && taskIsRunning) {
+            task.cancel();
         }
         
         return canceled;
