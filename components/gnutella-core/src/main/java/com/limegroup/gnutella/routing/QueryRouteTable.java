@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
@@ -60,6 +61,7 @@ public class QueryRouteTable {
     /** The maximum size of patch messages, in bytes. */
     public static final int MAX_PATCH_SIZE=1<<12;      //4 KB
     
+    private static final AtomicInteger DEFAULT_SIZE = new AtomicInteger(-1);
     /**
      * The current infinity this table is using.  Necessary for creating
      * ResetTableMessages with the correct infinity.
@@ -121,7 +123,8 @@ public class QueryRouteTable {
 
     /** Creates a QueryRouteTable with default sizes. */
     public QueryRouteTable() {
-        long byteCount = 1024 * ConnectionSettings.QRT_SIZE_IN_KIBI_ENTRIES.getValue();
+        DEFAULT_SIZE.compareAndSet(-1, (int)ConnectionSettings.QRT_SIZE_IN_KIBI_ENTRIES.getValue());
+        long byteCount = 1024 * DEFAULT_SIZE.get();
         if (byteCount > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Default QRT size cannot be expressed as an int.");
         }
