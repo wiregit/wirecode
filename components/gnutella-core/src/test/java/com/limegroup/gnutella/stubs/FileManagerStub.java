@@ -21,16 +21,21 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 @SuppressWarnings("unchecked")
 public class FileManagerStub extends FileManager {
 
-	Map _urns,_files;
-	List _descs;
-    FileDescStub fdStub = new FileDescStub();
-    public static URN _notHave =null;
+	private Map _urns,_files;
+    private List _descs;
+    private FileDescStub fdStub = new FileDescStub();
+    
+    public final static URN NOT_HAVE;
+    
     static {
-    	try{
-    	_notHave= URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
-    	}catch(IOException ignored){}
+    	try {
+    	    NOT_HAVE = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
+    	} catch(IOException ignored){
+    	    throw new RuntimeException(ignored);    
+        }
     }
-    List removeRequests = new LinkedList();
+    
+    private List removeRequests = new LinkedList();
 
     public FileDesc get(int i) {
     	if (i < _descs.size())
@@ -42,12 +47,16 @@ public class FileManagerStub extends FileManager {
         return true;
     }
     
+    public void addFileDescForUrn(FileDesc fd, URN urn) {
+        if(_urns == null)
+            _urns = new HashMap();
+        _urns.put(urn, fd);
+    }
+    
     public FileDesc getFileDescForUrn(URN urn) {
-    	
-
         if(urn.toString().equals(FileDescStub.DEFAULT_URN))
             return fdStub;
-        else if (urn.equals(_notHave))
+        else if (urn.equals(NOT_HAVE))
         	return null;
         else if (_urns.containsKey(urn))
         	return (FileDesc)_urns.get(urn);

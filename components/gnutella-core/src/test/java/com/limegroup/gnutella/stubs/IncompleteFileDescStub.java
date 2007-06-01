@@ -7,12 +7,12 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,
@@ -29,9 +29,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     public Set localSet;
     
     private boolean _activelyDownloading;
-    
-    private AlternateLocationCollection _altlocCollection,_pushCollection;
-    
+        
     private byte [] _ranges;
     
     public static final int size = 1126400;
@@ -67,12 +65,14 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     	return localSet2;
     }
     
+    @Override
     public boolean containsUrn(URN urn) {
     	if (globalSet.contains(urn))
     		return true;
     	else return super.containsUrn(urn);
     }
 
+    @Override
     public InputStream createInputStream() {
         return new InputStream() {
             public int read() {
@@ -86,10 +86,12 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
         };
     }
     
+    @Override
     public long getFileSize() {
         return size;
     }
     
+    @Override
     public URN getSHA1Urn() {
     	if (localSet.isEmpty())
     		return super.getSHA1Urn();
@@ -99,6 +101,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.IncompleteFileDesc#getRangesAsByte()
 	 */
+    @Override
 	public byte[] getRangesAsByte() {
 		return _ranges;
 	}
@@ -106,39 +109,19 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	public void setRangesByte(byte [] what) {
 		_ranges=what;
 	}
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
-	 */
-	public AlternateLocationCollection getAlternateLocationCollection() {
-
-		return _altlocCollection;
-	}
-	
-	public AlternateLocationCollection getPushAlternateLocationCollection() {
-
-		return _pushCollection;
-	}
-	
-	public void setAlternateLocationCollection(AlternateLocationCollection what) {
-		_altlocCollection=what;
-	}
-	
-	public void setPushAlternateLocationCollection(AlternateLocationCollection what) {
-		_pushCollection=what;
-	}
-	
-	public boolean addVerified(AlternateLocation al) {
-		return _altlocCollection.add(al);
-	}
-	
-	public boolean remove(AlternateLocation al) {
-	    return _altlocCollection.remove(al);
-	}
+    
+    public void setRangesAsIntervals(Interval... intervals) {
+        IntervalSet set = new IntervalSet();
+        for(Interval intvl : intervals)
+            set.add(intvl);
+        _ranges = set.toBytes();
+    }
 	
 	public void setActivelyDownloading(boolean yes) {
 	    _activelyDownloading=yes;
 	}
 	
+    @Override
 	public boolean isActivelyDownloading() {
 	    return _activelyDownloading;
 	}

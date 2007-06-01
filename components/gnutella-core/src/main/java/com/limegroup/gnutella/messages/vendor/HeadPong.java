@@ -50,6 +50,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -171,9 +172,7 @@ public class HeadPong extends VendorMessage {
      * This will correctly set the fields of this HeadPong, as opposed
      * to the other constructor.
 	 */
-	protected HeadPong(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] payload)
-			throws BadPacketException {
+	protected HeadPong(byte[] guid, byte ttl, byte hops, int version, byte[] payload) throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
 		
 		//we should have some payload
@@ -202,7 +201,7 @@ public class HeadPong extends VendorMessage {
      *       which will construct a HeadPong with the network constructor,
      *       where the fields are correctly set.
 	 */
-	public HeadPong(HeadPing ping) {
+	public HeadPong(HeadPongRequestor ping) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, VERSION, derivePayload(ping));
 		setGUID(new GUID(ping.getGUID()));
 	}
@@ -368,16 +367,16 @@ public class HeadPong extends VendorMessage {
      * 
 	 * @param ping the original UDP head ping to respond to
 	 */
-	private static byte [] derivePayload(HeadPing ping)  {
-        if(ping.getVersion() == 1) {
-            return deriveBinaryPayload(ping);
+	private static byte [] derivePayload(HeadPongRequestor ping)  {
+        if(!ping.isPongGGEPCapable()) {
+            return constructBinaryPayload(ping);
         } else {
-            return deriveGGEPPayload(ping);
+            return constructGGEPPayload(ping);
         }
     }
     
     /** Constructs the payload in binary format. */
-    private static byte[] deriveBinaryPayload(HeadPing ping) {
+    private static byte[] constructBinaryPayload(HeadPongRequestor ping) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		CountingOutputStream caos = new CountingOutputStream(baos);
 		DataOutputStream daos = new DataOutputStream(caos);
@@ -447,51 +446,63 @@ public class HeadPong extends VendorMessage {
 	}
     
     /** Constructs the payload in GGEP format. */
-    private static byte[] deriveGGEPPayload(HeadPing ping) {
+    private static byte[] constructGGEPPayload(HeadPongRequestor ping) {
         GGEP ggep = new GGEP(true);
         
         URN urn = ping.getUrn();
         FileDesc desc = _fileManager.getFileDescForUrn(urn);
         // Easy case: no file, add code & exit.
-        if(urn == null) {
+        if(desc == null) {
             ggep.put(CODE, FILE_NOT_FOUND);
             return writeGGEP(ggep);
         }
         
         // OK, we have the file, now what!
-        int size = 1;
+        int size = 1;  // begin with 1 because of GGEP magic
         
-        // If we're not firewalled, spread word about our TLS status.
-        if(RouterService.acceptedIncomingConnection()) {
+        // If we're not firewalled and support TLS,
+        // spread word about our TLS status.
+        if(RouterService.acceptedIncomingConnection() && 
+           ConnectionSettings.TLS_INCOMING.getValue() ) {
             ggep.put(FEATURES, TLS_CAPABLE);
             size += 4;
         }
         
         byte code = calculateCode(desc);
-        ggep.put(CODE, code); size += 4;
-        ggep.put(VENDOR, F_LIME_VENDOR_ID); size += 3 + F_LIME_VENDOR_ID.length;
-        ggep.put(QUEUE, calculateQueueStatus()); size += 4;        
+        ggep.put(CODE, code); size += ggep.getHeaderOverhead(CODE);
+        ggep.put(VENDOR, F_LIME_VENDOR_ID); size += ggep.getHeaderOverhead(VENDOR);
+        ggep.put(QUEUE, calculateQueueStatus()); size += ggep.getHeaderOverhead(QUEUE);        
         
         if((code & PARTIAL_FILE) == PARTIAL_FILE && ping.requestsRanges()) {
             byte[] ranges = deriveRanges(desc);
-            if(size + ranges.length + 3 <= PACKET_SIZE) {
+            if(ranges.length == 0) {
+                // If we have no ranges available, change queue status to busy,
+                // so that they come back and ask us later, when we may have
+                // more ranges available. (but don't increment size, since that
+                // was already done above.)
+                ggep.put(QUEUE, BUSY);
+            } else if(size + ranges.length + 3 <= PACKET_SIZE) {
                 ggep.put(RANGES, ranges);
-                size += ranges.length + 3;
+                size += ggep.getHeaderOverhead(RANGES);
             }
         }
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         addPushLocations(ping, urn, out, true, size+3, false);
-        byte[] pushLocs = out.toByteArray();
-        ggep.put(PUSH_LOCS, pushLocs);
-        size += 3 + pushLocs.length;
+        if(out.size() > 0) {
+            byte[] pushLocs = out.toByteArray();
+            ggep.put(PUSH_LOCS, pushLocs);
+            size += ggep.getHeaderOverhead(PUSH_LOCS);
+        }
         
         out.reset();
         AtomicReference<BitNumbers> bnRef = new AtomicReference<BitNumbers>();
         addLocations(ping, urn, out, bnRef, size+3, false);
-        byte[] altLocs = out.toByteArray();
-        ggep.put(LOCS, altLocs);
-        size += 3 + altLocs.length;
+        if(out.size() > 0) {
+            byte[] altLocs = out.toByteArray();
+            ggep.put(LOCS, altLocs);
+            size += ggep.getHeaderOverhead(LOCS);
+        }
         
         // If it went over, we screwed up somewhere.
         assert size <= PACKET_SIZE;
@@ -502,12 +513,12 @@ public class HeadPong extends VendorMessage {
             byte[] bnBytes = bn.toByteArray();
             if(bnBytes.length > 0) {
                 ggep.put(TLS_LOCS, bnBytes);
-                size += 3 + bnBytes.length;
+                size += ggep.getHeaderOverhead(TLS_LOCS);
             }
         }
         
         byte[] output = writeGGEP(ggep);
-        assert output.length == size;
+        assert output.length == size : "expected: " + size + ", was: " + output.length;
         return output;
     }
     
@@ -517,7 +528,6 @@ public class HeadPong extends VendorMessage {
         if(!RouterService.acceptedIncomingConnection()) {
             code = FIREWALLED;
         }
-        
         if(fd instanceof IncompleteFileDesc) {
             code |= PARTIAL_FILE;
             
@@ -535,7 +545,7 @@ public class HeadPong extends VendorMessage {
     private static byte calculateQueueStatus() {
         int queueSize = _uploadManager.getNumQueuedUploads();
         
-        if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
+        if (queueSize >= UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
             return BUSY;
         else if (queueSize > 0) 
             return (byte) queueSize;
@@ -546,14 +556,13 @@ public class HeadPong extends VendorMessage {
     }
     
     /** Adds push locations, if possible. */
-    private static boolean addPushLocations(HeadPing ping, URN urn, OutputStream out, boolean includeTLS,
+    private static boolean addPushLocations(HeadPongRequestor ping, URN urn, OutputStream out, boolean includeTLS,
                                             int written, boolean includeSize) {
         if(!ping.requestsPushLocs())
             return true;
         
         try {
-            byte features = ping.getFeatures();
-            boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) == HeadPing.FWT_PUSH_ALTLOCS;           
+            boolean FWTOnly = ping.requestsFWTOnlyPushLocs();           
             if (FWTOnly) {
                 AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPushFWT(urn);
                 synchronized(push) {
@@ -585,7 +594,7 @@ public class HeadPong extends VendorMessage {
     
 
     /** Adds direct locations, if possible. */
-    private static boolean addLocations(HeadPing ping, URN urn, OutputStream out,
+    private static boolean addLocations(HeadPongRequestor ping, URN urn, OutputStream out,
                                         AtomicReference<BitNumbers> tlsIndexes,
                                         int written, boolean includeSize) {
         //now add any non-firewalled altlocs in case they were requested. 
@@ -702,7 +711,10 @@ public class HeadPong extends VendorMessage {
 	 * @return the remote vendor as string
 	 */
 	public String getVendor() {
-		return new String(_vendorId);
+        if(_vendorId != null)
+            return new String(_vendorId);
+        else
+            return null;
 	}
 	
 	/**

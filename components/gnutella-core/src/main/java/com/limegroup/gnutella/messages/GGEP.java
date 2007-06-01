@@ -435,7 +435,26 @@ public class GGEP {
         toWrite = 0x40 | end;
         out.write(toWrite);
     }
-
+    
+    /**
+     * Returns the amount of overhead that will be added 
+     * when the following key/value pair is written.
+     * 
+     * This does *NOT* work for non-ASCII headers, or compressed data.
+     */
+    public int getHeaderOverhead(String key) {
+        byte[] data = get(key);
+        if(data == null)
+            throw new IllegalArgumentException("no data for key: " + key);
+        
+        return 1 + // flags
+               key.length() + // header
+               data.length + // data
+               1 + // required data length
+               (data.length > 0x3F ? 1 : 0) + // optional data
+               (data.length > 0xFFF ? 1 : 0); // more option data
+    }
+    
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
     
     /**
@@ -456,6 +475,8 @@ public class GGEP {
                 put(key, ((Integer)value).intValue());
             else if(value instanceof Long)
                 put(key, ((Long)value).longValue());
+            else if(value instanceof Byte)
+                put(key, ((Byte)value).byteValue());
             else
                 throw new IllegalArgumentException("Unknown value: " + value);
         }
@@ -469,6 +490,16 @@ public class GGEP {
         //validateValue(value); // done when writing.  TODO: do here?
         _props.put(key, new NeedsCompression(value));
     }
+    
+    /** 
+     * Adds a key with byte value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data.
+     */
+    public void put(String key, byte value) throws IllegalArgumentException {
+        put(key, new byte[] { value } );
+    }    
 
     /** 
      * Adds a key with raw byte value.
@@ -484,7 +515,6 @@ public class GGEP {
         validateValue(value);
         _props.put(key, value);
     }
-
 
     /** 
      * Adds a key with string value, using the default character encoding.

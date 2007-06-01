@@ -146,6 +146,10 @@ public class BitNumbers {
         return -1;
     }
     
+    public String toString() {
+        return toHexString();
+    }
+    
     /** A BitNumbers that is empty and non-settable. */
     private static class ImmutableBitNumbers extends BitNumbers {
         @Override

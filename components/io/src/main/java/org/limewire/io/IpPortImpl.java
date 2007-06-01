@@ -36,7 +36,7 @@ public class IpPortImpl implements IpPort {
     /** Constructs an IpPort using the given host:port */
     public IpPortImpl(String hostport) throws UnknownHostException {
         int colonIdx = hostport.indexOf(":");
-        if(colonIdx == hostport.length() -1)
+        if(colonIdx == hostport.length() - 1)
             throw new UnknownHostException("invalid hostport: " + hostport);
         
         String host = hostport;

@@ -119,8 +119,6 @@ public class HeadTest extends LimeTestCase {
 	    
 	    PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
-		_fm = new FileManagerStub();
-		_um = new UploadManagerStub();
 		
 		int base=0;
 		_ranges = new IntervalSet();
@@ -155,7 +153,7 @@ public class HeadTest extends LimeTestCase {
 		}
 		
 		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_notHave =      FileManagerStub._notHave;
+		_notHave =      FileManagerStub.NOT_HAVE;
 		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
         _tlsURN =      URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
 		
@@ -170,6 +168,7 @@ public class HeadTest extends LimeTestCase {
 		descs.add(_partial);
 		descs.add(_complete);
 		
+        _um = new UploadManagerStub();
 		_fm = new FileManagerStub(urns,descs);
 		
 		assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
@@ -434,7 +433,6 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);  
 		
-		_um.setIsBusy(true);
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(new HeadPong(ping));
 		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
@@ -530,7 +528,7 @@ public class HeadTest extends LimeTestCase {
     public void testPushAltLocsWantOnlyFWT() throws Exception {
 		//now ask only for fwt push locs - nothing returned
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
-		assertTrue(ping1.requestsFWTPushLocs());
+		assertTrue(ping1.requestsFWTOnlyPushLocs());
 		HeadPong pong1 = new HeadPong(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);

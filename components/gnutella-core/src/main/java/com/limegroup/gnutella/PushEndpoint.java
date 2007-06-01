@@ -685,6 +685,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         return addr != null ? addr.getInetAddress() : null;
     }
     
+    /** Returns the GUID for this PushEndpoint. */
+    public byte[] getGuid() {
+        return _guid.bytes();
+    }
+    
     /**
      * Implements the IpPort interface, returning a bogus port if we don't know it
      */

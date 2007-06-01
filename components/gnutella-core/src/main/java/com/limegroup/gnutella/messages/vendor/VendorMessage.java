@@ -267,6 +267,10 @@ public abstract class VendorMessage extends Message {
         out.write(_vendorID);
         ByteOrder.short2leb((short)_selector, out);
         ByteOrder.short2leb((short)_version, out);
+        writeVendorPayload(out);
+    }
+    
+    protected void writeVendorPayload(OutputStream out) throws IOException {
         out.write(getPayload());
     }
 

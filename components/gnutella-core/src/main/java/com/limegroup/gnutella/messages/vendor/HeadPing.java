@@ -34,11 +34,17 @@ import com.limegroup.gnutella.messages.GGEP;
  * 
  */
 
-public class HeadPing extends VendorMessage {
+public class HeadPing extends VendorMessage implements HeadPongRequestor {
+    
     /*
      * Version 1: Initial revision.
      * Version 2: Signals support for understanding TLS info about push proxies of push altlocs.
      */
+    
+    /** The initial version; expected a binary (non-GGEP) HeadPong response. */
+    private static final int EXPECTS_BINARY_RESPONSE_VERSION = 1;
+    
+    /** The current version. */
 	public static final int VERSION = 2;
 	
 	/**
@@ -195,37 +201,58 @@ public class HeadPing extends VendorMessage {
 		return baos.toByteArray();
 	}
 	
-	/**
-	 * 
-	 * @return the URN carried in this head request.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#getUrn()
+     */
 	public URN getUrn() {
 		return _urn;
 	}
 	
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#requestsRanges()
+     */
 	public boolean requestsRanges() {
 		return (_features & INTERVALS) == INTERVALS;
 	}
 	
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#requestsAltlocs()
+     */
 	public boolean requestsAltlocs() {
 		return (_features & ALT_LOCS) == ALT_LOCS;
 	}
 	
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#requestsPushLocs()
+     */
 	public boolean requestsPushLocs() {
 		return (_features & PUSH_ALTLOCS) == PUSH_ALTLOCS;
 	}
 	
-	public boolean requestsFWTPushLocs() {
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#requestsFWTPushLocs()
+     */
+	public boolean requestsFWTOnlyPushLocs() {
 		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
 	}
 	
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#getFeatures()
+     */
 	public byte getFeatures() {
 		return _features;
 	}
 	
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#getClientGuid()
+     */
 	public GUID getClientGuid() {
 		return _clientGUID;
 	}
+
+    public boolean isPongGGEPCapable() {
+        return getVersion() > EXPECTS_BINARY_RESPONSE_VERSION;
+    }
 	
 
 }
