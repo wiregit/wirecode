@@ -20,19 +20,33 @@ public abstract class AbstractUploader implements Uploader {
 
     private final HTTPUploadSession session;
 
-    /** The number of bytes that were transferred in previous sessions. */
+    /** 
+     * The number of bytes that were transferred in previous sessions. 
+     * <p>
+     * Note: Obtain {@link #bwLock} before accessing.
+     */
     private long totalAmountUploadedBefore;
 
     /**
      * The number of bytes transfered by all requests represented by this
      * instance.
+     * <p>
+     * Note: Obtain {@link #bwLock} before accessing.
      */
     private long totalAmountUploaded;
 
-    /** The number of bytes transfered for the current request. */
+    /** 
+     * The number of bytes transfered for the current request. 
+     * <p>
+     * Note: Obtain {@link #bwLock} before accessing.
+     */
     private long amountUploaded;
 
+    /**
+     * Lock for bandwidth tracking related fields. 
+     */
     private final Object bwLock = new Object();
+
     private boolean ignoreTotalAmountUploaded;
 
     private long fileSize;
@@ -65,9 +79,9 @@ public abstract class AbstractUploader implements Uploader {
     private FileDesc fileDesc;
 
     private int index;
-    
+
     private String host;
-    
+
     private int port = -1;
 
     /** The upload type of this uploader. */
@@ -86,8 +100,8 @@ public abstract class AbstractUploader implements Uploader {
         setState(CONNECTING);
         host = null;
         port = -1;
-        totalAmountUploadedBefore = 0;
-        synchronized(bwLock) {
+        synchronized (bwLock) {
+            totalAmountUploadedBefore = 0;
             if (!ignoreTotalAmountUploaded) {
                 totalAmountUploaded += amountUploaded;
             }
@@ -108,7 +122,8 @@ public abstract class AbstractUploader implements Uploader {
             LOG.debug("Setting file description for " + this + ": " + fd);
         this.fileDesc = fd;
         this.forcedShare = FileManager.isForcedShare(fd);
-        this.priorityShare = FileManager.isApplicationSpecialShare(fd.getFile());
+        this.priorityShare = FileManager
+                .isApplicationSpecialShare(fd.getFile());
         this.index = fd.getIndex();
         setFileSize(fd.getFileSize());
     }
@@ -136,19 +151,19 @@ public abstract class AbstractUploader implements Uploader {
      * @param amount the number of bytes that have been uploaded
      */
     void setAmountUploaded(long amount) {
-        synchronized(bwLock) {
+        synchronized (bwLock) {
             addAmountUploaded((int) (amount - amountUploaded));
         }
     }
 
     /**
      * Increases the amount of uploaded bytes.
-     *  
+     * 
      * @param written number of bytes transferred
      */
     public void addAmountUploaded(int written) {
         assert written >= 0;
-        
+
         if (written > 0) {
             if (isForcedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
@@ -156,7 +171,7 @@ public abstract class AbstractUploader implements Uploader {
             else
                 BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(written);
         }
-        synchronized(bwLock) {
+        synchronized (bwLock) {
             amountUploaded += written;
         }
     }
@@ -234,11 +249,13 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public long amountUploaded() {
-        return amountUploaded;
+        synchronized (bwLock) {
+            return amountUploaded;
+        }
     }
 
     public long getTotalAmountUploaded() {
-        synchronized(bwLock) {
+        synchronized (bwLock) {
             if (ignoreTotalAmountUploaded)
                 return amountUploaded;
             else if (totalAmountUploadedBefore > 0)
@@ -255,7 +272,7 @@ public abstract class AbstractUploader implements Uploader {
     public void measureBandwidth() {
         // FIXME type conversion
         int written;
-        synchronized(bwLock) {
+        synchronized (bwLock) {
             written = (int) (totalAmountUploaded + amountUploaded);
         }
         session.measureBandwidth(written);
@@ -313,7 +330,9 @@ public abstract class AbstractUploader implements Uploader {
      * uploader.
      */
     public void setTotalAmountUploadedBefore(int totalAmountReadBefore) {
-        this.totalAmountUploadedBefore = totalAmountReadBefore;
+        synchronized (bwLock) {
+            this.totalAmountUploadedBefore = totalAmountReadBefore;
+        }
     }
 
     /**
@@ -369,5 +388,5 @@ public abstract class AbstractUploader implements Uploader {
     public void setHost(String host) {
         this.host = host;
     }
-    
+
 }

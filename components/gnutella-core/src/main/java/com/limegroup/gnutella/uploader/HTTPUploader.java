@@ -180,7 +180,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     public void setUploadEnd(long uploadEnd) {
         this.uploadEnd = uploadEnd;
-        }
+    }
             
     public void setContainedRangeRequest(boolean containedRangeRequest) {
         this.containedRangeRequest = containedRangeRequest;
@@ -191,11 +191,11 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 	 */
     public long getStartTime() {
         return startTime;
-            }
+    }
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
-            	}
+    }
                 
     public boolean isPartial() {
         return getUploadEnd() - getUploadBegin() < getFileSize();
