@@ -841,32 +841,37 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#getRefreshIDs(boolean)
      */
-    public synchronized Collection<KUID> getRefreshIDs(boolean bootstrapping) {
-        List<KUID> randomIds = new ArrayList<KUID>();
-        for (Bucket bucket : bucketTrie.values()) {
-            
-            if (bootstrapping 
-                    && bucket.contains(getLocalNode().getNodeID())) {
+    public synchronized Collection<KUID> getRefreshIDs(final boolean bootstrapping) {
+        final KUID nodeId = getLocalNode().getNodeID();
+        final List<KUID> randomIds = new ArrayList<KUID>();
+        
+        bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
+                Bucket bucket = entry.getValue();
+                
                 // Don't refresh the local Bucket if we're bootstrapping
                 // since phase one takes already care of it.
-                continue;
-            }
-            
-            if (bootstrapping || bucket.isRefreshRequired()) {
-                
-                // Select a random ID with this prefix
-                KUID randomId = KUID.createPrefxNodeID(
-                        bucket.getBucketID(), bucket.getDepth());
-                
-                if(LOG.isTraceEnabled()) {
-                    LOG.trace("Refreshing bucket:" + bucket 
-                            + " with random ID: " + randomId);
+                if (bootstrapping && bucket.contains(getLocalNode().getNodeID())) {
+                    return SelectStatus.CONTINUE;
+                }
+
+                if (bootstrapping || bucket.isRefreshRequired()) {
+                    // Select a random ID with this prefix
+                    KUID randomId = KUID.createPrefxNodeID(
+                            bucket.getBucketID(), bucket.getDepth());
+                    
+                    if(LOG.isTraceEnabled()) {
+                        LOG.trace("Refreshing bucket:" + bucket 
+                                + " with random ID: " + randomId);
+                    }
+                    
+                    randomIds.add(randomId);
+                    touchBucket(bucket);
                 }
                 
-                randomIds.add(randomId);
-                touchBucket(bucket);
+                return SelectStatus.CONTINUE;
             }
-        }
+        });
         
         return randomIds;
     }
