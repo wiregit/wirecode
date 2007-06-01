@@ -7,6 +7,7 @@ import java.nio.channels.ByteChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +40,7 @@ public class HttpIOSession implements IOSession {
 
     private ThrottleWriter throttleWriter;
 
-    private volatile boolean closed = false;
+    private AtomicBoolean closed = new AtomicBoolean(false);
     
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
@@ -61,7 +62,7 @@ public class HttpIOSession implements IOSession {
     }
 
     public void close() {
-        if (this.closed) {
+        if (this.closed.getAndSet(true)) {
             return;
         }
         socket.close();
@@ -88,7 +89,7 @@ public class HttpIOSession implements IOSession {
     }
 
     public boolean isClosed() {
-        return this.closed;
+        return closed.get();
     }
 
     public Object removeAttribute(String name) {
