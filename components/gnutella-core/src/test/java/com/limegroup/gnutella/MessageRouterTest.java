@@ -151,55 +151,63 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testResponsesToQueryReplies() throws Exception {
         ConnectionSettings.LAST_FWT_STATE.setValue(true); 
 
-        Class[] paramTypes = new Class[] {
-            Response[].class, 
-            QueryRequest.class,
-            Integer.TYPE,
-            SecurityToken.class
-        };
-        
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "responsesToQueryReplies",
-                                         paramTypes);
-        Response[] res = new Response[20];
-        Arrays.fill(res, new Response((long)0, (long)10, "test"));
-        QueryRequest query = QueryRequest.createQuery("test");
-        Object[] params = new Object[] {
-            res,
-            query,
-            new Integer(10),
-            null
-        };
+        // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
+        // MessageRouter.responsesToQueryReplies()
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+        RouterService.getUploadManager().start(RouterService.getHTTPUploadAcceptor(), RouterService.getFileManager(), RouterService.getCallback());
+        try {
+            Class[] paramTypes = new Class[] {
+                    Response[].class, 
+                    QueryRequest.class,
+                    Integer.TYPE,
+                    SecurityToken.class
+            };
 
-        Iterable iter = (Iterable)m.invoke(ROUTER, params);
-        int size = 0;
-        for(Object o : iter)
-            size++;
+            Method m = 
+                PrivilegedAccessor.getMethod(ROUTER, 
+                        "responsesToQueryReplies",
+                        paramTypes);
+            Response[] res = new Response[20];
+            Arrays.fill(res, new Response((long)0, (long)10, "test"));
+            QueryRequest query = QueryRequest.createQuery("test");
+            Object[] params = new Object[] {
+                    res,
+                    query,
+                    new Integer(10),
+                    null
+            };
 
-        assertEquals("responses should have been put in 2 hits", 2, size);
-        
-        // make sure the query has high hops to test the threshold
-        query.hop();
-        query.hop();
-        query.hop();
+            Iterable iter = (Iterable)m.invoke(ROUTER, params);
+            int size = 0;
+            for(Object o : iter)
+                size++;
 
-        iter = (Iterable)m.invoke(ROUTER, params);
-        size = 0;
-        for(Object o : iter) {
-            size++;
+            assertEquals("responses should have been put in 2 hits", 2, size);
+
+            // make sure the query has high hops to test the threshold
+            query.hop();
+            query.hop();
+            query.hop();
+
+            iter = (Iterable)m.invoke(ROUTER, params);
+            size = 0;
+            for(Object o : iter) {
+                size++;
+            }
+
+            assertEquals("responses should have been put in 1 hits", 1, size);
+
+            params[2] = new Integer(1);
+            iter = (Iterable)m.invoke(ROUTER, params);
+            size = 0;
+            for(Object o : iter) {
+                size++;
+            }
+
+            assertEquals("responses should have been put in 20 hits", 20, size);
+        } finally {
+            RouterService.getUploadManager().stop(RouterService.getHTTPUploadAcceptor());
         }
-
-        assertEquals("responses should have been put in 1 hits", 1, size);
-
-        params[2] = new Integer(1);
-        iter = (Iterable)m.invoke(ROUTER, params);
-        size = 0;
-        for(Object o : iter) {
-            size++;
-        }
-
-        assertEquals("responses should have been put in 20 hits", 20, size);
     }
 
     /**
