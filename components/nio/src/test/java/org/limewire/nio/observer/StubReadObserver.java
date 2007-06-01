@@ -16,9 +16,15 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
     private volatile int readsHandled;
     private volatile ByteBuffer buffer;
     private volatile boolean ignoreReadData = false;
+    private volatile int amountToRead = -1;
+    private volatile int readsHandledAtLastConsume = -1;
     
     public ByteBuffer getReadBuffer() {
         return buffer;
+    }
+    
+    public void setAmountToRead(int amt) {
+        amountToRead = amt;
     }
     
     public void setIgnoreReadData(boolean ignore) {
@@ -44,6 +50,10 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
     public int getReadsHandled() {
         return readsHandled;
     }
+    
+    public int getReadsHandledAtLastConsume() {
+        return readsHandledAtLastConsume;
+    }
 
     public boolean isShutdown() {
         return shutdown;
@@ -58,7 +68,13 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
         if(!ignoreReadData) {
             if(buffer == null)
                 buffer = ByteBuffer.allocate(1024);
-            while(buffer.hasRemaining() && channel.read(buffer) != 0);
+            if(amountToRead != -1)
+                buffer.limit(amountToRead);
+            
+            int read = 0;
+            while(buffer.hasRemaining() && (read = channel.read(buffer)) != 0);
+            if(read > 0)
+                readsHandledAtLastConsume = readsHandled;
         }
     }
 

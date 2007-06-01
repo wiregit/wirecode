@@ -268,6 +268,80 @@ public class NIODispatcherTest extends BaseTestCase {
         accepted.close();
     }
     
+    public void testLevelTriggerednessIfChannelHadSomeReadingDone() throws Exception {
+        StubReadConnectObserver o1 = new StubReadConnectObserver();
+        SocketChannel c1 = o1.getChannel();
+        connect(c1, LISTEN_ADDR, o1);
+        
+        Socket accepted = LISTEN_SOCKET.accept();
+        
+        // First make sure we get notified of data & can read it.
+        accepted.getOutputStream().write("OUT".getBytes()); 
+        accepted.getOutputStream().flush();
+        NIODispatcher.instance().registerRead(c1, o1);
+        // Let the NIO thread pump a few times to make sure we read it.
+        NIOTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
+        // Really this should be handled in 1 notify, but there's no harm
+        // in the network sucking and it taking more.
+        assertGreaterThan(0, o1.getReadsHandled());
+        assertLessThanOrEquals(3, o1.getReadsHandled());
+        ByteBuffer buffer = o1.getReadBuffer();
+        assertEquals(3, buffer.position());
+        assertEquals("OUT", new String(buffer.array(), 0, 3));
+        
+        // Now that we've read everything, wait a for more cycle and make sure
+        // no more events came in.
+        int priorReadsHandled = o1.getReadsHandled();
+        NIOTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
+        assertEquals(priorReadsHandled, o1.getReadsHandled());
+        
+        // Okay, our precondition is pretty well defined now...
+        // Tell the reader to ignore reading from the actual buffer,
+        // but keep interest on and see how many read notifications we get...
+        o1.getReadBuffer().clear();
+        o1.setAmountToRead(1);
+        accepted.getOutputStream().write("ABC".getBytes());
+        accepted.getOutputStream().flush();
+        for(int i = 0; i < 10; i++)
+            NIOTestUtils.waitForNIO();
+        // Wait a whole bunch of cycles...
+        // We should be notified about this one pending byte of read data
+        // many, many times.
+        // (If the selector was edge-triggered, we would only be notified once).
+        assertGreaterThan(priorReadsHandled + 5, o1.getReadsHandled());
+        // Make sure that when we consumed data, it was on the first notification
+        assertEquals(priorReadsHandled + 1, o1.getReadsHandledAtLastConsume());
+        assertEquals(1, o1.getReadBuffer().position());
+        assertEquals("A", new String(o1.getReadBuffer().array(), 0, 1));
+        
+        // Just to do some stricter testing, also make sure that if we turn
+        // interest off & back on again, we'll continue to get notifications
+        // about the existing data...
+        NIODispatcher.instance().interestRead(c1, false);
+        NIOTestUtils.waitForNIO();
+        priorReadsHandled = o1.getReadsHandled();
+        for(int i = 0; i < 10; i++)
+            NIOTestUtils.waitForNIO();
+        //Make sure we got no notifications while reading was off
+        assertEquals(priorReadsHandled, o1.getReadsHandled());
+        
+        // Now turn it back on and make sure notifications skyrocket again.
+        o1.getReadBuffer().clear();
+        NIODispatcher.instance().interestRead(c1, true);
+        for(int i = 0; i < 10; i++)
+            NIOTestUtils.waitForNIO();
+        assertGreaterThan(priorReadsHandled + 5, o1.getReadsHandled());
+        assertEquals(priorReadsHandled + 1, o1.getReadsHandledAtLastConsume());
+        assertEquals(1, o1.getReadBuffer().position());
+        assertEquals("B", new String(o1.getReadBuffer().array(), 0, 1));
+        
+        c1.close();
+        accepted.close();
+    }
+    
+    
     public void testSimpleReadTimeout() throws Exception {
         StubReadObserver o1 = new StubReadObserver();
         SocketChannel c1 = o1.getChannel();

@@ -26,6 +26,10 @@ public class StubReadConnectObserver implements ReadObserver, ConnectObserver, R
         readDelegate.setIgnoreReadData(ignore);
     }
     
+    public void setAmountToRead(int amt) {
+        readDelegate.setAmountToRead(amt);
+    }
+    
     public IOException getIoException() {
         return ioException;
     }
@@ -70,6 +74,10 @@ public class StubReadConnectObserver implements ReadObserver, ConnectObserver, R
     
     public synchronized int getReadsHandled() {
         return readDelegate.getReadsHandled();
+    }
+    
+    public synchronized int getReadsHandledAtLastConsume() {
+        return readDelegate.getReadsHandledAtLastConsume();
     }
     
     public long getReadTimeout() {
