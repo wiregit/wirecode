@@ -2,6 +2,7 @@ package org.limewire.nio.observer;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.limewire.nio.observer.ConnectObserver;
@@ -16,6 +17,14 @@ public class StubReadConnectObserver implements ReadObserver, ConnectObserver, R
     private volatile SocketChannel channel;
     private volatile long ioxTime;
     private volatile long lastReadTime;
+    
+    public ByteBuffer getReadBuffer() {
+        return readDelegate.getReadBuffer();
+    }
+    
+    public void setIgnoreReadData(boolean ignore) {
+        readDelegate.setIgnoreReadData(ignore);
+    }
     
     public IOException getIoException() {
         return ioException;

@@ -15,6 +15,15 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
     private volatile SocketChannel channel;
     private volatile int readsHandled;
     private volatile ByteBuffer buffer;
+    private volatile boolean ignoreReadData = false;
+    
+    public ByteBuffer getReadBuffer() {
+        return buffer;
+    }
+    
+    public void setIgnoreReadData(boolean ignore) {
+        ignoreReadData = ignore;
+    }
     
     public void setChannel(SocketChannel channel) {
         this.channel = channel;
@@ -46,9 +55,11 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
 
     public void handleRead() throws IOException {
         readsHandled++;
-        if(buffer == null)
-            buffer = ByteBuffer.allocate(1024);
-        while(buffer.hasRemaining() && channel.read(buffer) != 0);
+        if(!ignoreReadData) {
+            if(buffer == null)
+                buffer = ByteBuffer.allocate(1024);
+            while(buffer.hasRemaining() && channel.read(buffer) != 0);
+        }
     }
 
     public synchronized void handleIOException(IOException iox) {
