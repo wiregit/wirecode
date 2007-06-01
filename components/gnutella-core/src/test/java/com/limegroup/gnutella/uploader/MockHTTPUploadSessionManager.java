@@ -12,7 +12,7 @@ import org.apache.http.protocol.HttpContext;
 
 public class MockHTTPUploadSessionManager implements HTTPUploadSessionManager {
 
-    public void addAcceptedUploader(HTTPUploader uploader) {            
+    public void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {            
     }
 
     public QueueStatus enqueue(HttpContext context, HttpRequest request) {

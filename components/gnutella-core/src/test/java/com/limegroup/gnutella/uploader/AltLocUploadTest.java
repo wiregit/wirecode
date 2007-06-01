@@ -21,6 +21,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
+import org.apache.http.protocol.HttpContext;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -1327,9 +1328,9 @@ public class AltLocUploadTest extends LimeTestCase {
             super(RouterService.getUploadSlotManager());
         }
 
-        public synchronized void addAcceptedUploader(HTTPUploader uploader) {
+        public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {
             activeUploads.add(uploader);
-            super.addAcceptedUploader(uploader);
+            super.addAcceptedUploader(uploader, context);
         }
 
         public void clearUploads() {
