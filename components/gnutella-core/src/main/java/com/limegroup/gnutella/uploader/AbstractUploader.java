@@ -32,6 +32,7 @@ public abstract class AbstractUploader implements Uploader {
     /** The number of bytes transfered for the current request. */
     private long amountUploaded;
 
+    private final Object bwLock = new Object();
     private boolean ignoreTotalAmountUploaded;
 
     private long fileSize;
@@ -86,11 +87,13 @@ public abstract class AbstractUploader implements Uploader {
         host = null;
         port = -1;
         totalAmountUploadedBefore = 0;
-        if (!ignoreTotalAmountUploaded) {
-            totalAmountUploaded += amountUploaded;
+        synchronized(bwLock) {
+            if (!ignoreTotalAmountUploaded) {
+                totalAmountUploaded += amountUploaded;
+            }
+            ignoreTotalAmountUploaded = false;
+            amountUploaded = 0;
         }
-        ignoreTotalAmountUploaded = false;
-        amountUploaded = 0;
         firstReply = false;
     }
 
@@ -133,7 +136,9 @@ public abstract class AbstractUploader implements Uploader {
      * @param amount the number of bytes that have been uploaded
      */
     void setAmountUploaded(long amount) {
-        addAmountUploaded((int) (amount - amountUploaded));
+        synchronized(bwLock) {
+            addAmountUploaded((int) (amount - amountUploaded));
+        }
     }
 
     /**
@@ -151,7 +156,9 @@ public abstract class AbstractUploader implements Uploader {
             else
                 BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(written);
         }
-        amountUploaded += written;
+        synchronized(bwLock) {
+            amountUploaded += written;
+        }
     }
 
     /**
@@ -231,12 +238,14 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public long getTotalAmountUploaded() {
-        if (ignoreTotalAmountUploaded)
-            return amountUploaded;
-        else if (totalAmountUploadedBefore > 0)
-            return totalAmountUploadedBefore + amountUploaded;
-        else
-            return totalAmountUploaded + amountUploaded;
+        synchronized(bwLock) {
+            if (ignoreTotalAmountUploaded)
+                return amountUploaded;
+            else if (totalAmountUploadedBefore > 0)
+                return totalAmountUploadedBefore + amountUploaded;
+            else
+                return totalAmountUploaded + amountUploaded;
+        }
     }
 
     public FileDesc getFileDesc() {
@@ -245,7 +254,10 @@ public abstract class AbstractUploader implements Uploader {
 
     public void measureBandwidth() {
         // FIXME type conversion
-        int written = (int) (totalAmountUploaded + amountUploaded);
+        int written;
+        synchronized(bwLock) {
+            written = (int) (totalAmountUploaded + amountUploaded);
+        }
         session.measureBandwidth(written);
     }
 

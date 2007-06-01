@@ -338,11 +338,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         activityCallback.removeUpload(uploader);
     }
 
-    public synchronized void addAcceptedUploader(HTTPUploader uploader) {
-        if (uploader.isForcedShare()) {
-            forceAllowedUploads.add(uploader);
+    public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {
+        if (uploader.isForcedShare()) 
             forcedUploads++;
-        }
+        else if (HttpContextParams.isLocal(context))
+            forceAllowedUploads.add(uploader);
         activeUploadList.add(uploader);
         uploader.setStartTime(System.currentTimeMillis());
     }
@@ -610,8 +610,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     public void measureBandwidth() {
         slotManager.measureBandwidth();
-        for (HTTPUploader forced : forceAllowedUploads) {
-            forced.measureBandwidth();
+        for (HTTPUploader active : forceAllowedUploads) {
+            active.measureBandwidth();
         }
     }
 

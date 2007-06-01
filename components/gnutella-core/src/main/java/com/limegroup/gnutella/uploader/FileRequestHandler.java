@@ -216,7 +216,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 handleQueued(context, request, response, uploader, fd);
                 break;
             case ACCEPTED:
-                sessionManager.addAcceptedUploader(uploader);
+                sessionManager.addAcceptedUploader(uploader, context);
                 break;
             case BYPASS: // ignore
             }

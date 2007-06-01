@@ -34,7 +34,7 @@ public interface HTTPUploadSessionManager {
     /**
      * Adds an accepted HTTPUploader to the internal list of active downloads.
      */
-    void addAcceptedUploader(HTTPUploader uploader);
+    void addAcceptedUploader(HTTPUploader uploader, HttpContext context);
 
     /**
      * Adds <code>uploader</code> to the GUI if it is not visible, yet, and
