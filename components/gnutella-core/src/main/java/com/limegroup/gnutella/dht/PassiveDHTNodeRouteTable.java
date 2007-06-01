@@ -18,8 +18,8 @@ import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ClassfulNetworkCounter;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 
 /**
@@ -222,20 +222,12 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.isLocalNode(node);
     }
 
-    public synchronized void rebuild() {
-        delegate.rebuild();
-    }
-    
-    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
-        delegate.rebuild(elapsedTimeSinceLastContact);
-    }
-    
-    public synchronized void purge() {
-        delegate.purge();
-    }
-
     public synchronized void purge(long elapsedTimeSinceLastContact) {
         delegate.purge(elapsedTimeSinceLastContact);
+    }
+
+    public synchronized void purge(PurgeMode first, PurgeMode... rest) {
+        delegate.purge(first, rest);
     }
     
     public synchronized Contact select(KUID nodeId) {

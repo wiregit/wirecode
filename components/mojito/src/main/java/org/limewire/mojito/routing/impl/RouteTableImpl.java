@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -969,21 +970,77 @@ public class RouteTableImpl implements RouteTable {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#purge()
-     */
-    public synchronized void purge() {
-        purge(-1L);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#purge(long)
+     * @see org.limewire.mojito.routing.RouteTable#purge(long)
      */
     public synchronized void purge(long elapsedTimeSinceLastContact) {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
         }
         
+        if (elapsedTimeSinceLastContact == -1L) {
+            return;
+        }
+        
+        long currentTime = System.currentTimeMillis();
+        for (Contact node : getActiveContacts()) {
+            if (isLocalNode(node)) {
+                continue;
+            }
+            
+            if ((currentTime - node.getTimeStamp()) < elapsedTimeSinceLastContact) {
+                continue;
+            }
+            
+            remove(node);
+        }
+        
+        for (Contact node : getCachedContacts()) {
+            if ((currentTime - node.getTimeStamp()) < elapsedTimeSinceLastContact) {
+                continue;
+            }
+            
+            remove(node);
+        }
+        
+        mergeBuckets();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.routing.RouteTable#purge(org.limewire.mojito.routing.RouteTable.PurgeMode, org.limewire.mojito.routing.RouteTable.PurgeMode[])
+     */
+    public synchronized void purge(PurgeMode first, PurgeMode... rest) {
+        if (localNode == null) {
+            throw new IllegalStateException("RouteTable is not initialized");
+        }
+        
+        EnumSet<PurgeMode> modes = EnumSet.of(first, rest);
+        
+        if (modes.contains(PurgeMode.DROP_CACHE)) {
+            dropCache();
+        }
+        
+        if (modes.contains(PurgeMode.PURGE_CONTACTS)) {
+            purgeContacts();
+        }
+        
+        if (modes.contains(PurgeMode.MERGE_BUCKETS)) {
+            mergeBuckets();
+        }
+        
+        if (modes.contains(PurgeMode.STATE_TO_UNKNOWN)) {
+            changeStateToUnknown(getActiveContacts());
+            changeStateToUnknown(getCachedContacts());
+        }
+    }
+    
+    private synchronized void dropCache() {
+        for (Contact node : getCachedContacts()) {
+            remove(node);
+        }
+    }
+    
+    private synchronized void purgeContacts() {
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
@@ -991,52 +1048,16 @@ public class RouteTableImpl implements RouteTable {
                 return SelectStatus.CONTINUE;
             }
         });
-        
-        // Rebuild the RouteTable (merge Buckets) but don't do a 
-        // true rebuild. That means forget the cached Contacts! 
-        // This is more about merging Buckets than actually rebuilding
-        // the RouteTable.
-        rebuild(false, elapsedTimeSinceLastContact);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#rebuild()
-     */
-    public synchronized void rebuild() {
-        rebuild(-1L);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.routing.RouteTable#rebuild(long)
-     */
-    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
-        if (localNode == null) {
-            throw new IllegalStateException("RouteTable is not initialized");
-        }
-        
-        // Do a true RouteTable rebuild.
-        rebuild(true, elapsedTimeSinceLastContact);
-    }
-    
-    /**
-     * Gets copies of the current RouteTable, clears the
-     * current RouteTable and re-adds the Contacts from
-     * the copies.
-     */
-    private void rebuild(boolean isTrueRebuild, long elapsedTimeSinceLastContact) {
-        
+    private synchronized void mergeBuckets() {
         // Get the active Contacts
         Collection<Contact> activeNodes = getActiveContacts();
         activeNodes = ContactUtils.sortAliveToFailed(activeNodes);
         
         // Get the cached Contacts
-        Collection<Contact> cachedNodes = null;
-        if (isTrueRebuild) {
-            cachedNodes = getCachedContacts();
-            cachedNodes = ContactUtils.sort(cachedNodes);
-        }
+        Collection<Contact> cachedNodes = getCachedContacts();
+        cachedNodes = ContactUtils.sort(cachedNodes);
         
         // We count on the fact that getActiveContacts() and 
         // getCachedContacts() return copies!
@@ -1047,40 +1068,20 @@ public class RouteTableImpl implements RouteTable {
         boolean removed = activeNodes.remove(localNode);
         assert (removed);
         
-        // Get the current time
-        long currentTime = System.currentTimeMillis();
-        
         // Re-add the active Contacts
         for (Contact node : activeNodes) {
-            
-            // Drop all Contacts that haven't send us messages
-            // (requests or responses) for longer than 'lastContactTime'
-            if (elapsedTimeSinceLastContact >= 0L 
-                    && (currentTime - node.getTimeStamp()) >= elapsedTimeSinceLastContact) {
-                continue;
-            }
-
-            if (isTrueRebuild) {
-                node.unknown();
-            }
-            
             add(node);
         }
         
         // And re-add the cached Contacts
-        if (isTrueRebuild) {
-            for (Contact node : cachedNodes) {
-                
-                // Drop all Contacts that haven't send us messages
-                // (requests or responses) for longer than 'lastContactTime'
-                if (elapsedTimeSinceLastContact >= 0L 
-                        && (currentTime - node.getTimeStamp()) >= elapsedTimeSinceLastContact) {
-                    continue;
-                }
-                
-                node.unknown();
-                add(node);
-            }
+        for (Contact node : cachedNodes) {
+            add(node);
+        }
+    }
+
+    private synchronized void changeStateToUnknown(Collection<Contact> nodes) {
+        for (Contact node : nodes) {
+            node.unknown();
         }
     }
     

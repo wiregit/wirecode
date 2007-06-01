@@ -35,10 +35,52 @@ import org.limewire.mojito.result.PingResult;
  */
 public interface RouteTable extends Serializable {
     
+    /**
+     * Selection mode for the RouteTable's select() operation
+     */
     public static enum SelectMode {
+        /**
+         * Selects all Contacts
+         */
         ALL,
+        
+        /**
+         * Selects only alive Contacts
+         */
         ALIVE,
+        
+        /**
+         * Selects only alive and the local Contacts
+         */
         ALIVE_WITH_LOCAL;
+    }
+    
+    /**
+     * Rebuild mode for the RouteTable's purge() operation
+     */
+    public static enum PurgeMode {
+        /**
+         * Drops all Contacts in the replacement cache
+         */
+        DROP_CACHE,
+        
+        /**
+         * Deletes all non-alive Contacts from the active
+         * RouteTable and fill up the new slots with alive
+         * Contacts from the replacement cache
+         */
+        PURGE_CONTACTS,
+        
+        /**
+         * Merges all Buckets by essentially rebuilding the
+         * entire RouteTable
+         */
+        MERGE_BUCKETS,
+        
+        /**
+         * Marks all Contacts as unknown
+         */
+        STATE_TO_UNKNOWN,
     }
     
     /**
@@ -57,7 +99,7 @@ public interface RouteTable extends Serializable {
     
     /**
      * Selects the best matching Contact for the provided KUID.
-     * This method will gueanteed return a non-null value if the
+     * This method will guaranteed return a non-null value if the
      * RoutingTable is not empty.
      */
     public Contact select(KUID nodeId);
@@ -77,7 +119,7 @@ public interface RouteTable extends Serializable {
     
     /**
      * Notifies the RoutingTable that the Contact with the provided
-     * KUID has failed to answert to a request.
+     * KUID has failed to answer to a request.
      */
     public void handleFailure(KUID nodeId, SocketAddress address);
     
@@ -121,27 +163,15 @@ public interface RouteTable extends Serializable {
     public void clear();
     
     /**
-     * Clears all unknown and dead nodes from the routing table
-     */
-    public void purge();
-    
-    /**
-     * Clears all unknown and dead nodes and nodes that haven't
-     * send us messages (requests or responses) for the given
-     * time from the routing table
+     * Purges all Contacts from the RouteTable whose time stamp 
+     * is older than the given time and merges all Buckets
      */
     public void purge(long elapsedTimeSinceLastContact);
     
     /**
-     * Rebuilds the RouteTable. Meant to be called after a local
-     * Node ID change.
+     * Purges/Rebuilds the RouteTable based on the given Modes
      */
-    public void rebuild();
-    
-    /**
-     * 
-     */
-    public void rebuild(long elapsedTimeSinceLastContact);
+    public void purge(PurgeMode first, PurgeMode... rest);
     
     /**
      * Returns the number of live and cached Contacts in the Route Table

@@ -84,7 +84,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                     if (routeTable != null) {
                         long maxElaspedTime = DHTSettings.MAX_ELAPSED_TIME_SINCE_LAST_CONTACT.getValue();
                         if (maxElaspedTime < Long.MAX_VALUE) {
-                            routeTable.rebuild(maxElaspedTime);
+                            routeTable.purge(maxElaspedTime);
                         }
                         
                         dht.setRouteTable(routeTable);
@@ -101,7 +101,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
         }
         return dht;
     }
-
+    
     @Override
     public void stop() {
         if (!isRunning()) {

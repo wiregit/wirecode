@@ -46,6 +46,7 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
@@ -503,7 +504,11 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             
             // The RouteTable is stale! Remove all non-alive Contacts,
             // rebuild the RouteTable and start over!
-            context.getRouteTable().purge();
+            context.getRouteTable().purge(
+                    PurgeMode.DROP_CACHE,
+                    PurgeMode.PURGE_CONTACTS, 
+                    PurgeMode.MERGE_BUCKETS,
+                    PurgeMode.STATE_TO_UNKNOWN);
             
             // And Start over!
             findNearestNodes();
@@ -533,7 +538,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         private float purgeAndGetPercenetage() {
             RouteTable routeTable = context.getRouteTable();
             synchronized (routeTable) {
-                routeTable.purge();
+                routeTable.purge(PurgeMode.DROP_CACHE,
+                                PurgeMode.PURGE_CONTACTS, 
+                                PurgeMode.MERGE_BUCKETS);
+                
                 return RouteTableUtils.getPercentageOfAliveContacts(routeTable);
             }
         }

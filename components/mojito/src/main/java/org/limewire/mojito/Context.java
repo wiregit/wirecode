@@ -73,6 +73,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
@@ -296,7 +297,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         synchronized (routeTable) {
             // Change the Node ID
             getLocalNode().setNodeID(localNodeID);
-            routeTable.rebuild();
+            
+            routeTable.purge(PurgeMode.PURGE_CONTACTS, 
+                    PurgeMode.MERGE_BUCKETS,
+                    PurgeMode.STATE_TO_UNKNOWN);
             
             assert(getLocalNode().equals(routeTable.get(localNodeID)));
         }

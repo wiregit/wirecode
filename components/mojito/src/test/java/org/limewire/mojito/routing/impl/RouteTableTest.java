@@ -20,12 +20,13 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
@@ -764,7 +765,7 @@ public class RouteTableTest extends MojitoTestCase {
         assertTrue(node.isDead());
         
         // Purge the RouteTable
-        routeTable.purge();
+        routeTable.purge(PurgeMode.PURGE_CONTACTS);
         
         // The dead Node should be gone
         assertNull(routeTable.get(node.getNodeID()));

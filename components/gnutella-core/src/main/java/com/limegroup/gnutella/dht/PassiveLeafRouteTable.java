@@ -105,16 +105,10 @@ class PassiveLeafRouteTable implements RouteTable {
         return localNode.equals(node);
     }
 
-    public synchronized void purge() {
-    }
-
     public synchronized void purge(long elapsedTimeSinceLastContact) {
     }
 
-    public synchronized void rebuild() {
-    }
-    
-    public synchronized void rebuild(long elapsedTimeSinceLastContact) {
+    public synchronized void purge(PurgeMode first, PurgeMode... rest) {
     }
     
     public synchronized Collection<Contact> select(KUID nodeId, int count, SelectMode mode) {
