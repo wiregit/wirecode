@@ -117,7 +117,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 				fos[i] = new RandomAccessFile(file, "rw");
 				
 				// if a file exists, try to verify it
-				if (isVerifying && _fos[i].length() > 0) {
+				if (isVerifying && fos[i].length() > 0) {
 					if (filesToVerify == null)
 						filesToVerify = new ArrayList<F>(_files.size());
 					filesToVerify.add(file);
