@@ -28,11 +28,9 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,26 +90,28 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private DatagramChannel channel;
     
     /**
-     * The ExecutorService where processes are executed
+     * The DatagramChannel lock Object
      */
-    private ExecutorService executor;
-    
+    private final Object lock = new Object();
+
     /**
      * The Thread this MD is running on
      */
     private Thread thread;
     
     /**
-     * The DatagramChannel lock Object
-     */
-    private final Object channelLock = new Object();
-
-    /**
      * Buffer for incoming Messages
      */
     private final ByteBuffer receiveBuffer;
     
-    /** Queue of things we have to send */
+    /**
+     * Lists of tasks we've to execute
+     */
+    private List<Runnable> tasks = new ArrayList<Runnable>();
+    
+    /** 
+     * Queue of things we have to send 
+     */
     private List<Tag> outputQueue = new LinkedList<Tag>();
     
     /**
@@ -142,18 +142,11 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         return allocateNewByteBuffer;
     }
     
-    /**
-     * Returns the DatagramChannel lock
-     */
-    protected Object getDatagramChannelLock() {
-        return channelLock;
-    }
-    
     @Override
     public void bind(SocketAddress address) throws IOException {
-        synchronized (getDatagramChannelLock()) {
-            if (isOpen()) {
-                throw new IOException("DatagramChannel is already open");
+        synchronized (lock) {
+            if (isBound()) {
+                throw new IOException("DatagramChannel is already bound");
             }
             
             channel = DatagramChannel.open();
@@ -175,14 +168,14 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * Returns true if the DatagramChannel is open
      */
     public boolean isOpen() {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             return channel != null && channel.isOpen();
         }
     }
     
     @Override
     public boolean isBound() {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             return channel != null && channel.socket().isBound();
         }
     }
@@ -191,7 +184,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * Returns the DatagramChannel
      */
     public DatagramChannel getDatagramChannel() {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             return channel;
         }
     }
@@ -200,7 +193,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * Returns the DatagramChannel Socket's local SocketAddress
      */
     public SocketAddress getLocalSocketAddress() {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             if (channel != null && channel.isOpen()) {
                 return channel.socket().getLocalSocketAddress();
             }
@@ -211,25 +204,14 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     public void start() {
-        synchronized (getDatagramChannelLock()) {
-            if (!isOpen()) {
+        synchronized (lock) {
+            if (!isBound()) {
                 throw new IllegalStateException("MessageDispatcher is not bound");
             }
             
             if (!running) {
-                ThreadFactory factory = new ThreadFactory() {
-                    public Thread newThread(Runnable r) {
-                        Thread thread = context.getDHTExecutorService().getThreadFactory().newThread(r);
-                        thread.setName(context.getName() + "-MessageDispatcherExecutor");
-                        thread.setDaemon(true);
-                        return thread;
-                    }
-                };
-                
                 accepting = true;
                 running = true;
-                
-                executor = Executors.newFixedThreadPool(1, factory);
                 
                 thread = context.getDHTExecutorService().getThreadFactory().newThread(this);
                 thread.setName(context.getName() + "-MessageDispatcherThread");
@@ -242,12 +224,15 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     @Override
-    protected boolean submit(Tag tag) {
-        synchronized(outputQueue) {
-            outputQueue.add(tag);
-        }
+    protected boolean submit(final Tag tag) {
+        Runnable task = new Runnable() {
+            public void run() {
+                outputQueue.add(tag);
+                interestWrite(true);
+            }
+        };
         
-        interestWrite(true);
+        process(task);
         return true;
     }
     
@@ -256,24 +241,14 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * queue to the Network and returns whether or not some
      * Messages were left in the output queue.
      */
-    private boolean handleWrite() throws IOException {
-        
-        // Get a local reference of outputQueue and
-        // replace it with a new List. Stuff that is
-        // being added will end up in the new List and
-        // we work localy with the previous List.
-        List<Tag> queue = null;
-        synchronized (outputQueue) {
-            queue = outputQueue;
-            outputQueue = new LinkedList<Tag>();
-        }
+    private void handleWrite() throws IOException {
         
         Tag tag = null;
-        while (!queue.isEmpty()) {
-            tag = queue.get(0);
+        while (!outputQueue.isEmpty()) {
+            tag = outputQueue.get(0);
 
             if (tag.isCancelled()) {
-                queue.remove(0);
+                outputQueue.remove(0);
                 continue;
             }
 
@@ -283,7 +258,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 if (send(dst, data)) {
                     // Wohoo! Message was sent!
-                    queue.remove(0);
+                    outputQueue.remove(0);
                     register(tag);
                 } else {
                     // Dang! Re-Try next time!
@@ -291,73 +266,47 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 }
             } catch (IOException err) {
                 LOG.error("IOException", err);
-                queue.remove(0);
+                outputQueue.remove(0);
                 handleError(tag, err);
             }
         }
-
-        // If something was left in the queue then append
-        // everything from the current outputQueue and switch
-        // the reference to queue. In other words, stuff that
-        // was not send stays in the front of the Queue followed
-        // by stuff that was added during the while-loop above.
-        boolean isEmpty = false;
-        synchronized (outputQueue) {
-            if (!queue.isEmpty()) {
-                queue.addAll(outputQueue);
-                outputQueue = queue;
-            }
-            
-            isEmpty = outputQueue.isEmpty();
-        }
         
-        interestWrite(!isEmpty);
-        return !isEmpty;
+        interestWrite(!outputQueue.isEmpty());
     }
     
     @Override
     public void stop() {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             // Do not accept any new incoming Requests or Responses
             accepting = false;
             
-            if (running) {
-                // The idea is to enqueue this fake Tag and to wait
-                // for the MessageDispatcher. Once it's being processed
-                // we know eveything in front of the queue was sent...
-                // This is specific to MessageDispatcherImpl!
-                Tag notifier = new Tag(context.getLocalNode(), null) {
-                    // Called right before send
-                    @Override
-                    public boolean isCancelled() {
-                        synchronized (getDatagramChannelLock()) {
-                            getDatagramChannelLock().notifyAll();
+            if (isRunning()) {
+                Runnable shutdown = new Runnable() {
+                    public void run() {
+                        synchronized (lock) {
+                            running = false;
+                            lock.notifyAll();
                         }
-                        return true;
                     }
                 };
                 
-                submit(notifier);
+                process(shutdown);
                 
                 try {
-                    getDatagramChannelLock().wait(1000L);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException", e);
+                    lock.wait(5000L);
+                } catch (InterruptedException err) {
+                    LOG.error("InterruptedException", err);
                 }
                 
-                running = false;
-            }
-            
-            super.stop();
-            
-            if (executor != null) {
-                executor.shutdownNow();
-                executor = null;
-            }
-            
-            if (thread != null) {
-                thread.interrupt();
-                thread = null;
+                super.stop();
+                
+                if (thread != null) {
+                    thread.interrupt();
+                    thread = null;
+                }
+                
+                tasks.clear();
+                outputQueue.clear();
             }
         }
     }
@@ -366,7 +315,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     public void close() {
         super.close();
         
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             if (selector != null) {
                 try {
                     selector.close();
@@ -448,11 +397,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected void process(Runnable runnable) {
-        synchronized (getDatagramChannelLock()) {
+        synchronized (lock) {
             if (isRunning()) {
-                executor.execute(runnable);
+                tasks.add(runnable);            
+                selector.wakeup();
             }
-        }
+        }        
     }
     
     @Override
@@ -500,27 +450,18 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     private void interest(int ops, boolean on) {
-        synchronized (getDatagramChannelLock()) {
-            if (!isOpen()) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("DatagramChannel is not open");
-                }
-                return;
-            }
-            
-            try {
-                SelectionKey sk = channel.keyFor(selector);
-                if (sk != null && sk.isValid()) {
-                    synchronized(channel.blockingLock()) {
-                        if (on) {
-                            sk.interestOps(sk.interestOps() | ops);
-                        } else {
-                            sk.interestOps(sk.interestOps() & ~ops);
-                        }
+        try {
+            SelectionKey sk = channel.keyFor(selector);
+            if (sk != null && sk.isValid()) {
+                synchronized(channel.blockingLock()) {
+                    if (on) {
+                        sk.interestOps(sk.interestOps() | ops);
+                    } else {
+                        sk.interestOps(sk.interestOps() & ~ops);
                     }
                 }
-            } catch (CancelledKeyException ignore) {}
-        }
+            }
+        } catch (CancelledKeyException ignore) {}
     }
     
     /** 
@@ -543,13 +484,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * The raw read-method.
      */
     private SocketAddress receive(ByteBuffer dst) throws IOException {
-        synchronized (getDatagramChannelLock()) {
-            if (!isOpen()) {
-                throw new IOException("DatagramChannel is not open");
-            }
-            
-            return channel.receive(dst);            
-        }
+        return channel.receive(dst);
     }
     
     /**
@@ -567,18 +502,34 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     // behavior but there's maybe an use-case like Kadmlia over TCP
     // where it makes sense to send the data piece-by-piece...
     private boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
-        synchronized (getDatagramChannelLock()) {
-            if (!isOpen()) {
-                throw new IOException("DatagramChannel is not open");
+        return channel.send(data, dst) > 0;
+    }
+    
+    private void processAll() {
+        List<Runnable> process = null;
+        synchronized (lock) {
+            process = tasks;
+            tasks = new ArrayList<Runnable>();
+        }
+        
+        for (Runnable task : process) {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                LOG.error("Throwable", t);
             }
-            
-            return channel.send(data, dst) > 0;            
         }
     }
-
+    
     public void run() {
         try {
-            while (isRunning()) {
+            while (true) {
+                
+                processAll();
+                
+                if (!isRunning() || !isOpen()) {
+                    break;
+                }
                 
                 selector.select(SELECTOR_SLEEP);
                 
@@ -591,12 +542,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 try {
                     // WRITE
-                    /*boolean done = !handleWrite();
-                    if (done && !isAccepting()) {
-                        synchronized (getDatagramChannelLock()) {
-                            getDatagramChannelLock().notifyAll();
-                        }
-                    }*/
                     handleWrite();
                 } catch (IOException err) {
                     LOG.error("IOException-WRITE", err);

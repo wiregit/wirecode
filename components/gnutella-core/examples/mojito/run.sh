@@ -29,7 +29,7 @@ done
 export CLASSPATH
 
 javac org/limewire/mojito/Main.java
-java -ea -Djava.nio.preferSelect=true org.limewire.mojito.Main $*
-#java -ea org.limewire.mojito.Main $*
+#java -ea -Djava.nio.preferSelect=true org.limewire.mojito.Main $*
+java -ea org.limewire.mojito.Main $*
 
 exit 0
