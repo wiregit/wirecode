@@ -117,7 +117,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
 
     public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
         EventType type = evt.getEventType();
-        if (type.equals(EventType.MESSAGE_SEND)) {
+        if (type.equals(EventType.MESSAGE_SENT)) {
             KUID nodeId = evt.getNodeID();
             if (nodeId != null) {
                 paintTile(nodeId, true);
