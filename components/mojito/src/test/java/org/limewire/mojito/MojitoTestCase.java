@@ -3,7 +3,6 @@ package org.limewire.mojito;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.BaseTestCase;
@@ -27,7 +26,7 @@ public abstract class MojitoTestCase extends BaseTestCase {
         MojitoProps.instance().revertToDefault();
         
         // DHT Settings
-        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);

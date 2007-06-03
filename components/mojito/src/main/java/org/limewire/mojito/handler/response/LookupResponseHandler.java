@@ -143,7 +143,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         setMaxErrors(0); // Don't retry on timeout - takes too long!
         setParallelism(-1); // Default number of parallel lookups
         setResultSetSize(-1); // Default result set size
-        setDeleteFurthest(KademliaSettings.DELETE_FURTHEST_CONTACT.getValue());
+        setDeleteFurthest(LookupSettings.DELETE_FURTHEST_CONTACT.getValue());
     }
     
     /**

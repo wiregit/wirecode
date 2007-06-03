@@ -36,7 +36,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.PingSettings;
 import org.limewire.mojito.util.ContactUtils;
 
 
@@ -77,7 +77,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
 
     public void setParallelism(int parallelism) {
         if (parallelism < 0) {
-            this.parallelism = KademliaSettings.PARALLEL_PINGS.getValue();
+            this.parallelism = PingSettings.PARALLEL_PINGS.getValue();
         } else if (parallelism > 0) {
             this.parallelism = parallelism;
         } else {
@@ -92,7 +92,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     public void setMaxParallelPingFailures(int maxParallelPingFailures) {
         if (maxParallelPingFailures < 0) {
             this.maxParallelPingFailures 
-                = KademliaSettings.MAX_PARALLEL_PING_FAILURES.getValue();
+                = PingSettings.MAX_PARALLEL_PING_FAILURES.getValue();
         } else {
             this.maxParallelPingFailures = maxParallelPingFailures;
         }

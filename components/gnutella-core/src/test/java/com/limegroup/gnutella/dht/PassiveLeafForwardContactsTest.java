@@ -103,7 +103,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         
-        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);

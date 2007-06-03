@@ -209,9 +209,8 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * The maximum time we're waiting on a lock. Subclasses
      * may overwrite this method to customize the timeout.
      */
-    public long getLockTimeout() {
-        return Math.max((long)(getTimeout() * 1.5f), 
-                ContextSettings.WAIT_ON_LOCK.getValue());
+    public long getWaitOnLockTimeout() {
+        return ContextSettings.getWaitOnLock(getTimeout());
     }
     
     /**

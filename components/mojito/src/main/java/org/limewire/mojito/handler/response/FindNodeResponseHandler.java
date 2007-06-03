@@ -32,7 +32,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.FindNodeLookupStatisticContainer;
 import org.limewire.security.SecurityToken;
 
@@ -125,12 +125,12 @@ public class FindNodeResponseHandler
     
     @Override
     protected int getDefaultParallelism() {
-        return KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
+        return LookupSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
     }
     
     @Override
     protected boolean isTimeout(long time) {
-        long lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        long lookupTimeout = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }
     

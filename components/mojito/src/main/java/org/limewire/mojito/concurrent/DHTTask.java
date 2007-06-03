@@ -29,9 +29,10 @@ import org.limewire.concurrent.OnewayExchanger;
 public interface DHTTask<T> {
     
     /**
-     * The maximum amount of time an
+     * The maximum amout of time this DHTTask may be
+     * active before it's being interrupted. 
      */
-    public long getLockTimeout();
+    public long getWaitOnLockTimeout();
     
     /**
      * Starts the DHTTask

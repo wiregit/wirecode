@@ -39,7 +39,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
@@ -72,7 +72,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         super(context, lookupKey.getPrimaryKey());
         this.lookupKey = lookupKey;
         
-        setExhaustive(KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        setExhaustive(LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
     }
     
@@ -179,12 +179,12 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     
     @Override
     protected int getDefaultParallelism() {
-        return KademliaSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
+        return LookupSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
     }
     
     @Override
     protected boolean isTimeout(long time) {
-        long lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+        long lookupTimeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }
     

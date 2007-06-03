@@ -20,6 +20,7 @@
 package org.limewire.mojito.settings;
 
 import org.limewire.setting.FloatSetting;
+import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 
 /**
@@ -29,17 +30,16 @@ public class BootstrapSettings extends MojitoProps {
     
     private BootstrapSettings() {}
     
-    public static final LongSetting FIND_CONTACT_LOCK_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_CONTACT_LOCK_TIMEOUT", 
-                60L*60L*1000L, "Mojito.FindContactLockTimeout", 10L*1000L, 5L*60L*60L*1000L);
-    
-    public static final LongSetting FIND_NEAREST_CONTACTS_LOCK_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_NEAREST_CONTACTS_LOCK_TIMEOUT", 
-                60L*60L*1000L, "Mojito.FindNearestContactsLockTimeout", 10L*1000L, 5L*60L*60L*1000L);
-    
+    /**
+     * The maximum number of bootstrap failures before bootstrapping 
+     * is given up.
+     */
+    public static final IntSetting MAX_BOOTSTRAP_FAILURES
+        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
+
     public static final LongSetting REFRESH_BUCKETS_LOCK_TIMEOUT
         = FACTORY.createRemoteLongSetting("REFRESH_BUCKETS_LOCK_TIMEOUT", 
-                7L*60L*1000L, "Mojito.RefreshBucketsLockTimeout", 60L*1000L, 30L*60L*1000L);
+                8L*60L*1000L, "Mojito.RefreshBucketsLockTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The maximum amount of time the bootstrapping process can take
@@ -74,4 +74,24 @@ public class BootstrapSettings extends MojitoProps {
     //public static final IntSetting MAX_BUCKETS_TO_REFRESH
     //    = FACTORY.createRemoteIntSetting("MAX_BUCKETS_TO_REFRESH", 
     //            10, "Mojito.MaxBucketsToRefresh", 0, Integer.MAX_VALUE);
+    
+    /**
+     * Returns the lock timeout for the BootstrapProcess
+     */
+    public static long getWaitOnLock(boolean hasInitialNode) {
+        long waitOnLock = 0L;
+        
+        // 1) Ping Nodes to find inital bootstrap Node
+        if (!hasInitialNode) {
+            waitOnLock += PingSettings.getWaitOnLock();
+        }
+        
+        // 2) Do a lookup for your own Node ID
+        waitOnLock += LookupSettings.getWaitOnLock();
+        
+        // 3) Refresh all Buckets
+        waitOnLock += BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
+        
+        return waitOnLock;
+    }
 }

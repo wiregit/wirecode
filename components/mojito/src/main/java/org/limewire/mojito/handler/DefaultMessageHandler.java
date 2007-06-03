@@ -41,6 +41,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
@@ -158,7 +159,7 @@ public class DefaultMessageHandler {
             return;
         }
         
-        if (KademliaSettings.STORE_FORWARD_ENABLED.getValue()) {
+        if (StoreSettings.STORE_FORWARD_ENABLED.getValue()) {
             // Only do store forward if it is a new node in our routing table 
             // (we are (re)connecting to the network) or a node that is reconnecting
             Contact existing = routeTable.get(nodeId);
@@ -230,7 +231,7 @@ public class DefaultMessageHandler {
                 securityToken = ((SecurityTokenProvider)message).getSecurityToken();
                 
                 if (securityToken == null
-                        && KademliaSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
+                        && StoreSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info(node + " sent us a null SecurityToken");
                     }

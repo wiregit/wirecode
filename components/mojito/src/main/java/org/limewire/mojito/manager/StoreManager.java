@@ -54,9 +54,8 @@ import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntryImpl;
@@ -128,6 +127,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         private final Collection<? extends DHTValueEntity> values;
         
+        private final long waitOnLock;
+        
         public StoreProcess(Collection<? extends DHTValueEntity> values) {
             this(null, values);
         }
@@ -160,10 +161,11 @@ public class StoreManager extends AbstractManager<StoreResult> {
             }
             
             this.valueId = valueId;
+            this.waitOnLock = StoreSettings.getWaitOnLock(node != null);
         }
 
-        public long getLockTimeout() {
-            return NetworkSettings.STORE_TIMEOUT.getValue();
+        public long getWaitOnLockTimeout() {
+            return waitOnLock;
         }
 
         public void start(OnewayExchanger<StoreResult, ExecutionException> exchanger) {
@@ -184,7 +186,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
             // Get the SecurityToken and store the value(s) 
             // at the given Node 
             } else if (node.getValue() == null
-                    && KademliaSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
+                    && StoreSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
                 doGetSecurityToken();
                 
             } else {
@@ -299,7 +301,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         @SuppressWarnings("unchecked")
         private LookupResponseHandler<LookupResult> createLookupResponseHandler() {
             LookupResponseHandler<? extends LookupResult> handler = null;
-            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+            if (LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
                 handler = new FindNodeResponseHandler(context, valueId);
             } else {
                 EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.ANY);
@@ -335,7 +337,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
         
         private RequestMessage createLookupRequest() {
-            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+            if (LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
                 return context.getMessageHelper()
                         .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
             } else {

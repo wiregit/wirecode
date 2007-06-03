@@ -13,7 +13,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
 import com.limegroup.gnutella.RouterService;
@@ -79,7 +78,7 @@ public abstract class DHTTestCase extends LimeTestCase {
         // DHT Settings
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
-        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);

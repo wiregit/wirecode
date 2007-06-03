@@ -35,6 +35,14 @@ public class ContextSettings extends MojitoProps {
     private ContextSettings() {}
     
     /**
+     * A multiplier that is used to determinate the number
+     * of Nodes to where we're sending shutdown messages.
+     */
+    public static final IntSetting SHUTDOWN_MESSAGES_MULTIPLIER
+        = FACTORY.createRemoteIntSetting("SHUTDOWN_MESSAGES_MULTIPLIER", 2, 
+                "Mojito.ShutdownMessagesMultiplier", 0, 20);
+    
+    /**
      * The time interval to compute the locally estimated Network size
      */
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
@@ -144,4 +152,12 @@ public class ContextSettings extends MojitoProps {
      */
     public static final BooleanSetting THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED
         = FACTORY.createBooleanSetting("THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED", true);
+    
+    /**
+     * 
+     */
+    public static long getWaitOnLock(long timeout) {
+        return Math.max((long)(timeout * 1.5f), 
+                ContextSettings.WAIT_ON_LOCK.getValue());
+    }
 }

@@ -39,7 +39,7 @@ public class UnitTestUtils {
                         throw new UnsupportedOperationException();
                     }
 
-                    public long getLockTimeout() {
+                    public long getWaitOnLockTimeout() {
                         throw new UnsupportedOperationException();
                     }
 

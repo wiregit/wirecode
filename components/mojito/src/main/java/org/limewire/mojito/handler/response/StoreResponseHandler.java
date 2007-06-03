@@ -46,6 +46,7 @@ import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -67,7 +68,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private Map<KUID, StoreProcess> activeProcesses = new HashMap<KUID, StoreProcess>();
     
     /** The number of parallel stores */
-    private final int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
+    private final int parallelism = StoreSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, 
             Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path, 

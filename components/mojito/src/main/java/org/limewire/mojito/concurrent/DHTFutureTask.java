@@ -127,7 +127,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         };
     
         watchdog = context.getDHTExecutorService().schedule(
-                r, task.getLockTimeout(), TimeUnit.MILLISECONDS);
+                r, task.getWaitOnLockTimeout(), TimeUnit.MILLISECONDS);
     }
     
 	/**

@@ -119,14 +119,6 @@ public final class NetworkSettings extends MojitoProps {
                 true, "Mojito.FilterClassC");
     
     /**
-     * The maximum amount of tume the store process can take
-     * before it's interrupted
-     */
-    public static final LongSetting STORE_TIMEOUT
-        = FACTORY.createRemoteLongSetting("STORE_TIMEOUT", 
-                4L*60L*1000L, "Mojito.StoreTimeout", 60L*1000L, 10L*60L*1000L);
-    
-    /**
      * Setting for whether or not RESPONSE messages should be dropped if 
      * the SENDER (remote Node) is firewalled.
      * 

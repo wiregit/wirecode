@@ -48,7 +48,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.settings.BootstrapSettings;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.RouteTableUtils;
@@ -209,20 +208,15 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         public BootstrapProcess(Contact node) {
             this.node = node;
-            
-            waitOnLock = BootstrapSettings.FIND_NEAREST_CONTACTS_LOCK_TIMEOUT.getValue()
-                       + BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
+            waitOnLock = BootstrapSettings.getWaitOnLock(true);
         }
         
         public BootstrapProcess(Set<? extends SocketAddress> dst) {
             this.dst = dst;
-            
-            waitOnLock = BootstrapSettings.FIND_CONTACT_LOCK_TIMEOUT.getValue()
-                       + BootstrapSettings.FIND_NEAREST_CONTACTS_LOCK_TIMEOUT.getValue()
-                       + BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
+            waitOnLock = BootstrapSettings.getWaitOnLock(false);
         }
         
-        public long getLockTimeout() {
+        public long getWaitOnLockTimeout() {
             return waitOnLock;
         }
 
@@ -456,7 +450,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             routeTableFailureCount += result.getRouteTableFailureCount();
             
             if (routeTableFailureCount 
-                    >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    >= BootstrapSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
                 
                 // Is it the first time? If so prune the RouteTable
                 // and try again!

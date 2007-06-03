@@ -14,8 +14,8 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.settings.PingSettings;
 
 public class PingManagerTest extends MojitoTestCase {
     
@@ -42,7 +42,7 @@ public class PingManagerTest extends MojitoTestCase {
     }
 
     public void testParallelPings() throws Exception {
-        KademliaSettings.PARALLEL_PINGS.setValue(3);
+        PingSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
         MojitoDHT dht1 = null, dht2 = null;

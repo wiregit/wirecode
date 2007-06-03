@@ -21,14 +21,64 @@ package org.limewire.mojito.settings;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
 
 /**
  * Setting for Kademlia lookups
  */
 public class LookupSettings extends MojitoProps {
     
+    /**
+     * Use FIND_NODE (default) or FIND_VALUE to get the SecurityToken of
+     * a remote Node. 
+     */
+    public static final BooleanSetting FIND_NODE_FOR_SECURITY_TOKEN
+        = FACTORY.createBooleanSetting("FIND_NODE_FOR_SECURITY_TOKEN", true);
+
+    /**
+     * Whether or not the (k+1)-closest Contact should be
+     * removed from the response Set
+     */
+    public static final BooleanSetting DELETE_FURTHEST_CONTACT
+        = FACTORY.createBooleanSetting("DELETE_FURTHEST_CONTACT", true);
+
     private LookupSettings() {}
     
+    /**
+     * The FIND_NODE lookup timeout
+     */
+    public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 
+                60L*1000L, "Mojito.FindNodeLookupTimeout", 30L*1000L, 3L*60L*1000L);
+
+    /**
+     * The FIND_VALUE lookup timeout
+     */
+    public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
+                60L*1000L, "Mojito.FindValueLookupTimeout", 45L*1000L, 4L*60L*1000L);
+
+    /**
+     * Whether or not a value lookup is exhaustive
+     */
+    public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
+        = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
+
+    /**
+     * The number of parallel FIND_VALUE lookups
+     */
+    public static final IntSetting FIND_VALUE_PARALLEL_LOOKUPS
+        = FACTORY.createRemoteIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, 
+                "Mojito.FindValueParallelLookups", 1, 30);
+
+    /**
+     * The number of parallel FIND_NODE lookups
+     */
+    public static final IntSetting FIND_NODE_PARALLEL_LOOKUPS
+        = FACTORY.createRemoteIntSetting("FIND_NODE_PARALLEL_LOOKUPS", 5, 
+                "Mojito.FindNodeParallelLookups", 1, 15);
+
     /**
      * Bootstrapping Node return an empty Collection of Contacts
      * for our FIND_NODE requests. This Setting controls whether or 
@@ -46,4 +96,13 @@ public class LookupSettings extends MojitoProps {
     public static final FloatSetting CONTACTS_SCRUBBER_REQUIRED_RATIO
         = FACTORY.createRemoteFloatSetting("CONTACTS_SCRUBBER_REQUIRED_RATIO", 
                 0.0f, "Mojito.ContactsScrubberRequiredRatio", 0.0f, 1.0f);
+    
+    /**
+     * 
+     */
+    public static long getWaitOnLock() {
+        long waitOnLock = 0L;
+        
+        return waitOnLock;
+    }
 }

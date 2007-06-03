@@ -10,6 +10,7 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 
 public class ContextTest extends MojitoTestCase {
@@ -90,9 +91,9 @@ public class ContextTest extends MojitoTestCase {
     
     public void testShutdown() throws Exception {
         setLocalIsPrivate(false);
-        KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
-        int m = KademliaSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
+        int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         int expected = m*k;
         

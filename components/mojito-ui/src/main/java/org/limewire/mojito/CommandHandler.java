@@ -50,7 +50,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.CollectionUtils;
 
@@ -122,11 +122,11 @@ public class CommandHandler {
     }
     
     public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) {
-        boolean current = KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
-        KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
-                !KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        boolean current = LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
+        LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
+                !LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         
-        out.println("Exhaustive: " + current + " -> " + KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        out.println("Exhaustive: " + current + " -> " + LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) {
