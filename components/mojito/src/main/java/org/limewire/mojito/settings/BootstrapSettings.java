@@ -20,7 +20,6 @@
 package org.limewire.mojito.settings;
 
 import org.limewire.setting.FloatSetting;
-import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 
 /**
@@ -30,13 +29,25 @@ public class BootstrapSettings extends MojitoProps {
     
     private BootstrapSettings() {}
     
+    public static final LongSetting FIND_CONTACT_LOCK_TIMEOUT
+        = FACTORY.createRemoteLongSetting("FIND_CONTACT_LOCK_TIMEOUT", 
+                60L*60L*1000L, "Mojito.FindContactLockTimeout", 10L*1000L, 5L*60L*60L*1000L);
+    
+    public static final LongSetting FIND_NEAREST_CONTACTS_LOCK_TIMEOUT
+        = FACTORY.createRemoteLongSetting("FIND_NEAREST_CONTACTS_LOCK_TIMEOUT", 
+                60L*60L*1000L, "Mojito.FindNearestContactsLockTimeout", 10L*1000L, 5L*60L*60L*1000L);
+    
+    public static final LongSetting REFRESH_BUCKETS_LOCK_TIMEOUT
+        = FACTORY.createRemoteLongSetting("REFRESH_BUCKETS_LOCK_TIMEOUT", 
+                7L*60L*1000L, "Mojito.RefreshBucketsLockTimeout", 60L*1000L, 30L*60L*1000L);
+    
     /**
      * The maximum amount of time the bootstrapping process can take
      * before it's interrupted
      */
-    public static final LongSetting BOOTSTRAP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-                8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
+    //public static final LongSetting BOOTSTRAP_TIMEOUT
+    //    = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+    //            8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
@@ -60,7 +71,7 @@ public class BootstrapSettings extends MojitoProps {
      * but it takes too long and leads to bootstrap failures if
      * there's a big number of Buckets.
      */
-    public static final IntSetting MAX_BUCKETS_TO_REFRESH
-        = FACTORY.createRemoteIntSetting("MAX_BUCKETS_TO_REFRESH", 
-                Integer.MAX_VALUE, "Mojito.MaxBucketsToRefresh", 0, Integer.MAX_VALUE);
+    //public static final IntSetting MAX_BUCKETS_TO_REFRESH
+    //    = FACTORY.createRemoteIntSetting("MAX_BUCKETS_TO_REFRESH", 
+    //            10, "Mojito.MaxBucketsToRefresh", 0, Integer.MAX_VALUE);
 }

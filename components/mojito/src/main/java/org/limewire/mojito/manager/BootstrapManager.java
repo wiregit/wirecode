@@ -52,6 +52,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.RouteTableUtils;
+import org.limewire.mojito.util.TimeAwareIterable;
 
 /**
  * The BootstrapManager manages the bootstrap process and determinates
@@ -194,7 +195,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private boolean cancelled = false;
         
-        private Iterator<KUID> randomIds;
+        private Iterator<KUID> bucketsToRefresh;
         
         private Contact node;
         
@@ -204,16 +205,25 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private long startPhaseTwo;
         
+        private final long waitOnLock;
+        
         public BootstrapProcess(Contact node) {
             this.node = node;
+            
+            waitOnLock = BootstrapSettings.FIND_NEAREST_CONTACTS_LOCK_TIMEOUT.getValue()
+                       + BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
         }
         
         public BootstrapProcess(Set<? extends SocketAddress> dst) {
             this.dst = dst;
+            
+            waitOnLock = BootstrapSettings.FIND_CONTACT_LOCK_TIMEOUT.getValue()
+                       + BootstrapSettings.FIND_NEAREST_CONTACTS_LOCK_TIMEOUT.getValue()
+                       + BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
         }
         
         public long getLockTimeout() {
-            return BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
+            return waitOnLock;
         }
 
         public void start(OnewayExchanger<BootstrapResult, 
@@ -382,53 +392,31 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             routeTableFailureCount = 0;
             foundNewContacts = false;
             
-            Collection<KUID> ids = getBucketsToRefresh();
+            Collection<KUID> bucketIds = getBucketsToRefresh();
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Buckets to refresh: " + CollectionUtils.toString(ids));
+                LOG.trace("Buckets to refresh: " + CollectionUtils.toString(bucketIds));
             }
             
-            randomIds = ids.iterator();
-            if (randomIds.hasNext()) {
-                refreshBucket(randomIds.next());
-            } else {
-                bootstrapped(true);
-            }
+            bucketsToRefresh = new TimeAwareIterable<KUID>(
+                    BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue(),
+                    bucketIds).iterator();
+            
+            refreshNextBucket();
         }
         
         private Collection<KUID> getBucketsToRefresh() {
-            int max = BootstrapSettings.MAX_BUCKETS_TO_REFRESH.getValue();
-            if (max <= 0) {
-                return Collections.emptySet();
-            }
-            
             List<KUID> bucketIds = CollectionUtils.toList(
                     context.getRouteTable().getRefreshIDs(true));
-            
-            // If there are less IDs than max then just return them
-            if (bucketIds.size() < max) {
-                return bucketIds;
+            Collections.reverse(bucketIds);
+            return bucketIds;
+        }
+        
+        private void refreshNextBucket() {
+            if (bucketsToRefresh.hasNext()) {
+                refreshBucket(bucketsToRefresh.next());
+            } else {
+                bootstrapped(true);
             }
-            
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Too many Buckets to refresh, reducing count from " 
-                        + bucketIds.size() + " to " + max);
-            }
-            
-            // Go through the list and select every nth element
-            // We're prefer IDs that are further away because
-            // 'findNearestNodes()' we've already good knowledge
-            // of our nearby area...
-            int offset = bucketIds.size() / max;
-            List<KUID> refresh = new ArrayList<KUID>(max);
-            for (int i = bucketIds.size()-1; i >= 0; i -= offset) {
-                refresh.add(bucketIds.get(i));
-                
-                if (refresh.size() >= max) {
-                    break;
-                }
-            }
-            
-            return refresh;
         }
         
         private void refreshBucket(KUID randomId) {
@@ -489,11 +477,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 foundNewContacts = true;
             }
             
-            if (randomIds.hasNext()) {
-                refreshBucket(randomIds.next());
-            } else {
-                bootstrapped(true);
-            }
+            refreshNextBucket();
         }
         
         private void handleStaleRouteTable() {

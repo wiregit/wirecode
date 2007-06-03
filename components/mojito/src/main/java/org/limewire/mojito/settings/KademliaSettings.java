@@ -68,15 +68,15 @@ public class KademliaSettings extends MojitoProps {
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, 
-                "Mojito.FindNodeLookupTimeout", 30L*1000L, 3L*60L*1000L);
+        = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 
+                60L*1000L, "Mojito.FindNodeLookupTimeout", 30L*1000L, 3L*60L*1000L);
     
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, 
-                "Mojito.FindValueLookupTimeout", 45L*1000L, 4L*60L*1000L);
+        = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
+                60L*1000L, "Mojito.FindValueLookupTimeout", 45L*1000L, 4L*60L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive

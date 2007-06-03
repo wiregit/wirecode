@@ -89,7 +89,6 @@ public class DHTManagerImpl implements DHTManager {
     }
     
     public synchronized void start(final DHTMode mode) {
-        
         stopped = false;
         Runnable task = new Runnable() {
             public void run() {

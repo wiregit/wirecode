@@ -130,7 +130,7 @@ public class FindNodeResponseHandler
     
     @Override
     protected boolean isTimeout(long time) {
-        long lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+        long lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }
     

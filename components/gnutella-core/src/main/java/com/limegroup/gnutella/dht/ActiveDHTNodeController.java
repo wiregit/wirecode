@@ -120,7 +120,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                         new BufferedOutputStream(
                             new SecureOutputStream(
                                 new FileOutputStream(FILE))));
-                
+        
                 out.writeInt(getRouteTableVersion());
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
