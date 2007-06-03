@@ -14,11 +14,13 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.observer.AcceptChannelObserver;
 import org.limewire.nio.observer.AcceptObserver;
+import org.limewire.util.VersionUtils;
 
 /**
  * A ServerSocket that does all of its accepting using NIO, but psuedo-blocks.
@@ -166,17 +168,44 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     
     /** Shuts down this NIOServerSocket */
     public void close() throws IOException {
-        IOException exception = null;
-        try {
-            socket.close();
-        } catch(IOException iox) {
-            exception = iox;
+        IOException exception;
+        
+        // Workaround for bugid: 4744057, fixed in Java 1.5.0_10.
+        // Bug: If the channel is closed in a thread other than the selector thread,
+        //      there is a potential for deadlock.
+        // Note: We ONLY offload the actual shutting of the socket/channel,
+        //       as we don't want to expose the observer shutdowns to the
+        //       invokeAndWait, which could introduce a lot of potential deadlock.
+        if(VersionUtils.isJavaVersionOrAbove("1.5.0_10") || NIODispatcher.instance().isDispatchThread()) {
+            exception = shutdownSocketAndChannels();
+        } else {
+            final AtomicReference<IOException> exRef = new AtomicReference<IOException>();
+            try {
+                NIODispatcher.instance().invokeAndWait(new Runnable() {
+                    public void run() {
+                        exRef.set(shutdownSocketAndChannels());
+                    }
+                });
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+            exception = exRef.get();
         }
         
         observer.shutdown();
         
         if(exception != null)
             throw exception;
+    }
+    
+    private IOException shutdownSocketAndChannels() {        
+        IOException exception = null;
+        try {
+            socket.close();
+        } catch(IOException iox) {
+            exception = iox;
+        }
+        return exception;
     }
     
     /** Wraps the accepted Socket in a delegating socket. */
