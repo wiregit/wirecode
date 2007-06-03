@@ -114,7 +114,7 @@ class SnowMan extends Painter {
             this.stroke = getStrokeForOpCode(opcode);
             
             if (nodeId == null) {
-                assert (request && type.equals(EventType.MESSAGE_SEND));
+                assert (request && type.equals(EventType.MESSAGE_SENT));
             }
         }
         
@@ -171,7 +171,7 @@ class SnowMan extends Painter {
             int green = 0;
             int blue = 0;
             
-            if (type.equals(EventType.MESSAGE_SEND)) {
+            if (type.equals(EventType.MESSAGE_SENT)) {
                 red = 255;
                 if (!request) {
                     blue = 255;

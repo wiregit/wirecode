@@ -35,6 +35,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,14 +56,19 @@ import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
+import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
+import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
+import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.manager.FindNodeManager;
 import org.limewire.mojito.manager.FindValueManager;
 import org.limewire.mojito.manager.GetValueManager;
 import org.limewire.mojito.manager.PingManager;
 import org.limewire.mojito.manager.StoreManager;
+import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
+import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
@@ -853,20 +860,57 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            Collection<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, SelectMode.ALIVE);
-            for (Contact node : nodes) {
-                if (!node.equals(localNode)) {
-                    // We are not interested in the responses as we're going
-                    // to shutdown. Send pings without a response handler.
-                    RequestMessage request = getMessageFactory()
-                        .createPingRequest(localNode, node.getContactAddress());
+            Collection<Contact> nodes = getRouteTable().select(
+                    localNode.getNodeID(), count, SelectMode.ALIVE);
+            
+            final CountDownLatch latch = new CountDownLatch(nodes.size());
+            MessageDispatcherListener listener = new MessageDispatcherListener() {
+                public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
+                    if (evt.getEventType() != EventType.MESSAGE_SENT) {
+                        return;
+                    }
                     
-                    try {
-                        messageDispatcher.send(node, request, null);
-                    } catch (IOException err) {
-                        LOG.error("IOException", err);
+                    DHTMessage message = evt.getMessage();
+                    if (!(message instanceof PingRequest)) {
+                        return;
+                    }
+                    
+                    latch.countDown();
+                }
+            };
+            
+            try {
+                // Register the listener
+                messageDispatcher.addMessageDispatcherListener(listener);
+                
+                // Send the shutdown Messages
+                for (Contact node : nodes) {
+                    if (!node.equals(localNode)) {
+                        // We are not interested in the responses as we're going
+                        // to shutdown. Send pings without a response handler.
+                        RequestMessage request = getMessageFactory()
+                            .createPingRequest(localNode, node.getContactAddress());
+                        
+                        try {
+                            messageDispatcher.send(node, request, null);
+                        } catch (IOException err) {
+                            LOG.error("IOException", err);
+                        }
                     }
                 }
+                
+                // Wait for the messages being sent
+                try {
+                    if (!latch.await(1000L, TimeUnit.MILLISECONDS)) {
+                        LOG.info("Not all shutdown messages were sent");
+                    }
+                } catch (InterruptedException err) {
+                    LOG.error("InterruptedException", err);
+                }
+                
+            } finally {
+                // Remove the listener
+                messageDispatcher.removeMessageDispatcherListener(listener);
             }
         }
         

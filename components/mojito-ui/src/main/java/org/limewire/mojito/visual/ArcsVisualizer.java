@@ -160,7 +160,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         if (type.equals(EventType.MESSAGE_RECEIVED)) {
             nodeId = evt.getMessage().getContact().getNodeID();
-        } else if (type.equals(EventType.MESSAGE_SEND)) {
+        } else if (type.equals(EventType.MESSAGE_SENT)) {
             nodeId = evt.getNodeID();
         } else {
             return;
@@ -195,7 +195,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             if (generator.nextBoolean()) {
                 type = EventType.MESSAGE_RECEIVED;
             } else {
-                type = EventType.MESSAGE_SEND;
+                type = EventType.MESSAGE_SENT;
             }
             
             OpCode opcode = OpCode.valueOf(1 + generator.nextInt(OpCode.values().length-1));
@@ -209,10 +209,10 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             // Send every now an then a response
             if (generator.nextBoolean()) {
-                if (type.equals(EventType.MESSAGE_SEND)) {
+                if (type.equals(EventType.MESSAGE_SENT)) {
                     arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, opcode, false);
                 } else {
-                    arcs.painter.handle(EventType.MESSAGE_SEND, nodeId, opcode, false);
+                    arcs.painter.handle(EventType.MESSAGE_SENT, nodeId, opcode, false);
                 }
             }
         }

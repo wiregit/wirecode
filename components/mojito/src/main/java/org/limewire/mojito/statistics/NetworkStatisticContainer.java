@@ -186,7 +186,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
         public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
             
             EventType type = evt.getEventType();
-            if (type.equals(EventType.MESSAGE_SEND)) {
+            if (type.equals(EventType.MESSAGE_SENT)) {
                 networkStats.SENT_MESSAGES_COUNT.incrementStat();
             } else if (type.equals(EventType.MESSAGE_RECEIVED)) {
                 networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();

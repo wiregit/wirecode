@@ -556,7 +556,7 @@ public abstract class MessageDispatcher {
             process(new RegisterProcessor(receipt));
         }
         
-        fireMessageSend(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
+        fireMessageSent(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
     }
     
     /** Called to process a Task */
@@ -601,8 +601,8 @@ public abstract class MessageDispatcher {
         process(new ErrorProcessor(tag, err));
     }
     
-    protected void fireMessageSend(KUID nodeId, SocketAddress dst, DHTMessage message) {
-        fireMessageDispatcherEvent(nodeId, dst, message, EventType.MESSAGE_SEND);
+    protected void fireMessageSent(KUID nodeId, SocketAddress dst, DHTMessage message) {
+        fireMessageDispatcherEvent(nodeId, dst, message, EventType.MESSAGE_SENT);
     }
     
     protected void fireMessageReceived(DHTMessage message) {
@@ -976,7 +976,7 @@ public abstract class MessageDispatcher {
         public static enum EventType {
             
             /** Fired if a DHTMessage was send */
-            MESSAGE_SEND,
+            MESSAGE_SENT,
             
             /** Fired if a DHTMessage was received */
             MESSAGE_RECEIVED,
