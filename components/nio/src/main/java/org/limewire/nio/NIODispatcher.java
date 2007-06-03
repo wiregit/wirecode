@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.nio.observer.AcceptChannelObserver;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.IOErrorObserver;
@@ -84,6 +85,7 @@ public class NIODispatcher implements Runnable {
     
     private final TransportListener TRANSPORT_LISTENER = 
     	new MyTransportListener();
+    
     
     /**
      * Constructs the sole NIODispatcher, starting its thread.
@@ -160,6 +162,16 @@ public class NIODispatcher implements Runnable {
     
     /** The last time the ByteBufferCache was cleared. */
     private long lastCacheClearTime;
+    
+    /** Number of select() calls this session */
+    @InspectablePrimitive
+    public volatile long numSelects;
+    /** Average time spent in select() call in nanoseconds */
+    @InspectablePrimitive
+    public volatile long avgSelectTime;
+    /** Number of selectNow() calls this session */
+    @InspectablePrimitive
+    public volatile long immediateSelects;
     
     /** Returns true if the NIODispatcher is merrily chugging along. */
     public boolean isRunning() {
@@ -637,12 +649,19 @@ public class NIODispatcher implements Runnable {
                 	if (delay == 0)
                 		immediate = true;
                 	else {
-                        primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
+                        long nanoNow = System.nanoTime();
+                        try {
+                            primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
+                        } finally {
+                            updateSelectTime(System.nanoTime() - nanoNow);
+                        }
                     }
                 }
                 
-                if (immediate)
+                if (immediate) {
+                    immediateSelects = Math.max(0, immediateSelects+1);
                     primarySelector.selectNow();
+                }
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -736,6 +755,18 @@ public class NIODispatcher implements Runnable {
     	if (nextScheduled != null) 
     		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));
     	return Math.max(0, next);
+    }
+    
+    /** Updates the counters for the select times */
+    private void updateSelectTime(long thisSelect) {
+        // the Math.max calls are to account for overflow
+        long avg = avgSelectTime;
+        long num = numSelects;
+        avg = Math.max(0, avg * Math.max(1, num));
+        num = Math.max(1,++num);
+        avg = Math.max(0, avg+thisSelect) / num;
+        numSelects = num;
+        avgSelectTime = avg;
     }
     
     /**
