@@ -1,5 +1,8 @@
 package org.limewire.store.storeserver.api;
 
+import java.io.IOException;
+import java.net.Socket;
+
 import org.limewire.store.storeserver.local.LocalLocalServer;
 
 /**
@@ -11,10 +14,8 @@ public interface Server {
      * Single instance of {@link Factory}.
      */
     public final static Factory FACTORY = new Factory() {
-        public Server newInstance(int port, boolean debug) {
-            final LocalLocalServer res = new LocalLocalServer(8090, false);
-            res.setDebug(debug);
-            return res;
+        public Server newInstance(int port, OpensSocket openner) {
+            return new LocalLocalServer("localhost", 8090, openner);
         }
     };
     
@@ -59,10 +60,31 @@ public interface Server {
          * Constructs a new {@link Server} on port <code>port</code>
          * 
          * @param port port on which to construct the server
-         * @param debug <code>true</code> if we want verbose debugging
+         * @param openner delegate which opens streams on our behalf
          * @return a new instance of {@link Server}, not started
          */
-        Server newInstance(int port, boolean debug);
+        Server newInstance(int port, OpensSocket openner);
+    }
+
+    /**
+     * Something that can open an input stream on behalf of this component. The
+     * default implementation would be <code>new URL(url).openConnection()</code>
+     * but due to the <em>core's</em> connection manager we'll have to have a
+     * way of hooking into that without this component knowing about it.
+     * 
+     * @see URLSocketOpenner
+     */
+    public interface OpensSocket {
+        
+        /**
+         * Opens a connection based on the passed in URL <code>url</code>.
+         * 
+         * @param host  URL to open
+         * @param port TODO
+         * @return a connection based on the passed in URL <code>url</code>.
+         * @throws IOException if an IO error occurs
+         */
+        Socket open(String host, int port) throws IOException;
     }
 
     /**
@@ -238,17 +260,13 @@ public interface Server {
     public interface Constants {
 
         /**
-         * Various levels for messages.
-         */
-        public enum Level {
-            MESSAGE, WARNING, ERROR, FATAL,
-        }
-
-        /**
          * The length of the public and private keys generated.
          */
         int KEY_LENGTH = 10; // TODO
 
+        /**
+         * Carriage return and line feed.
+         */
         String NEWLINE = "\r\n";
 
         /**

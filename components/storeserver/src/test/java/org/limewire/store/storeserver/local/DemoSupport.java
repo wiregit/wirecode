@@ -80,8 +80,8 @@ public abstract class DemoSupport extends BaseTestCase {
 
     beforeSetup();
 
-    localServer = new LocalLocalServer(REMOTE_PORT, false);
-    remoteServer = new DemoRemoteServer(LOCAL_PORT, false);
+    localServer = new LocalLocalServer("localhost", REMOTE_PORT);
+    remoteServer = new DemoRemoteServer(LOCAL_PORT);
     AbstractServer.start(localServer);
     AbstractServer.start(remoteServer);
     code = new FakeCode(localServer, remoteServer);

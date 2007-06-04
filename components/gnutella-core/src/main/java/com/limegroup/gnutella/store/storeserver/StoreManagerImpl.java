@@ -9,6 +9,7 @@ import org.limewire.store.storeserver.api.AbstractDispatchee;
 import org.limewire.store.storeserver.api.ConnectionListener;
 import org.limewire.store.storeserver.api.Dispatchee;
 import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.URLSocketOpenner;
 
 
 /**
@@ -21,7 +22,7 @@ final class StoreManagerImpl implements StoreManager {
     // -----------------------------------------------------------------
   
     static StoreManagerImpl newDemoInstance() {
-        final Server s = Server.FACTORY.newInstance(8090, true);
+        final Server s = Server.FACTORY.newInstance(8090, new URLSocketOpenner());
         final DispatcheeImpl d = new DispatcheeImpl(s);
         StoreManagerImpl res = new StoreManagerImpl(s, d);
         d.server = res;

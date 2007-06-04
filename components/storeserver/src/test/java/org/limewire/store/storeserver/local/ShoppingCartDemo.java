@@ -23,7 +23,7 @@ import org.limewire.store.storeserver.util.CenterHelper;
  * 
  * @author jpalm
  */
-public class ShoppingCartDemo {
+class ShoppingCartDemo {
 
   public static void main(String[] args) {
     new ShoppingCartDemo().realMain(args);

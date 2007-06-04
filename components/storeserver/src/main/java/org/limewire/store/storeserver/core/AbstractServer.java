@@ -22,14 +22,12 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.service.ErrorService;
 import org.limewire.store.storeserver.api.Server;
-import org.limewire.store.storeserver.util.DebugPanel;
 import org.limewire.store.storeserver.util.Util;
-import org.limewire.store.storeserver.util.DebugPanel.Debuggable;
 
 /**
  * Base class for servers, both local and remote.
  */
-public abstract class AbstractServer implements Runnable, Debuggable {
+public abstract class AbstractServer implements Runnable  {
 
     private static final Log LOG = LogFactory.getLog(AbstractServer.class);
     private final static int NUM_WORKERS = 5;
@@ -39,15 +37,10 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     private boolean done = false;
 
-    /** We want the debug panels to tile. */
-    private static int numDebugPanels = 0;
-
     private final List<Thread> threads = new ArrayList<Thread>(NUM_WORKERS);
     private final List<Worker> workers = new ArrayList<Worker>(NUM_WORKERS);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
 
-    private Note note;
-    private boolean debug;
     private boolean hasShutDown;
     private Thread runner;
 
@@ -62,7 +55,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
      * @return a {@link Thread} for <tt>s</tt>
      */
     public static Thread start(final AbstractServer s) {
-        Thread t = new Thread(s);
+        Thread t = new ManagedThread(s);
         t.start();
         s.runner = t;
         return t;
@@ -111,32 +104,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     public final String getName() {
         return name;
-    }
-
-    public final boolean getDebug() {
-        return debug;
-    }
-
-    public final void setDebug(final boolean debug) {
-        this.debug = debug;
-    }
-
-    /**
-     * Turns debugging on and pops up a {@link DebugPanel}.
-     */
-    public final void beLoud() {
-        setDebug(true);
-        DebugPanel d = DebugPanel.showNewInstance(this);
-        setNote(d);
-        if (numDebugPanels == 1) {
-            Toolkit tk = Toolkit.getDefaultToolkit();
-            d.setFrameLocation(0, tk.getScreenSize().height / 2);
-        }
-        numDebugPanels++;
-    }
-
-    public final void setNote(final Note note) {
-        this.note = note;
     }
 
     /**
@@ -433,7 +400,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
         final String req = makeFile(request);
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
-            error("Couldn't create a handler for " + req);
+            LOG.error("Couldn't create a handler for " + req);
             return report(Server.ErrorCodes.UNKNOWN_COMMAND);
         }
         note("have handler: {0}", h.name());
@@ -495,39 +462,8 @@ public abstract class AbstractServer implements Runnable, Debuggable {
         shutDown(1000);
     }
 
-    public final void note(final String pattern,
-            final Server.Constants.Level level, final Object... os) {
-        if (debug)
-            note(MessageFormat.format(pattern, os), level);
-    }
-
     public final void note(final String pattern, final Object... os) {
-        if (debug)
-            note(MessageFormat.format(pattern, os));
-    }
-
-    public final void note(final Object msg, final Server.Constants.Level level) {
-        if (note == null) {
-            if (debug) {
-                LOG.debug("[" + simpleName() + "] " + msg);
-            }
-        } else {
-            note.note(msg, level);
-        }
-    }
-
-    public final void error(final Object msg) {
-        note(msg, Server.Constants.Level.ERROR);
-    }
-
-    public final void note(final Object msg) {
-        note(msg, Server.Constants.Level.MESSAGE);
-    }
-
-    private String simpleName() {
-        String s = getClass().getName();
-        int ilastDot = s.lastIndexOf(".");
-        return ilastDot == -1 ? s : s.substring(ilastDot + 1);
+        if (LOG.isDebugEnabled()) LOG.debug(MessageFormat.format(pattern, os));
     }
 
     // ------------------------------------------------------------

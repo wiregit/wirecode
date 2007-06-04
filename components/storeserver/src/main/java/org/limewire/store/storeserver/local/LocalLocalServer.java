@@ -3,6 +3,8 @@ package org.limewire.store.storeserver.local;
 import java.rmi.server.RemoteServer;
 import java.util.Map;
 
+import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.URLSocketOpenner;
 import org.limewire.store.storeserver.core.ServerImpl;
 
 /**
@@ -14,9 +16,13 @@ public class LocalLocalServer extends ServerImpl {
 
   private final LocalServerDelegate del;
 
-  public LocalLocalServer(final int otherPort, final boolean loud) {
+  public LocalLocalServer(final String host, final int otherPort, final Server.OpensSocket openner) {
     super(PORT, "Local Server");
-    this.del = new LocalServerDelegate(this, otherPort, loud);
+    this.del = new LocalServerDelegate(this, host, otherPort, openner);
+  }
+  
+  public LocalLocalServer(final String host, final int otherPort) {
+      this(host, otherPort, new URLSocketOpenner());
   }
 
   public String toString() {
@@ -32,5 +38,4 @@ public class LocalLocalServer extends ServerImpl {
   protected void noteNewState(State newState) {
       note("new state: {0}", newState);
   }
-
 }

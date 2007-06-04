@@ -14,7 +14,7 @@ import org.limewire.store.storeserver.core.RemoteServer;
  * 
  * @author jpalm
  */
-public class FakeCode {
+final class FakeCode {
 
 	private final LocalServerDelegate toLocalServer;
 	private final LocalServerDelegate toRemoteServer;
@@ -25,15 +25,14 @@ public class FakeCode {
 			public void handle(String res) {
 				JOptionPane.showMessageDialog(null, res);
 			}
-			
 		};
 
 		void handle(String res);
 	}
 	
 	FakeCode(ServerImpl local, RemoteServer remote) {
-		this.toLocalServer = new LocalServerDelegate(remote, local.getPort(), false);
-		this.toRemoteServer = new LocalServerDelegate(local, remote.getPort(), false);
+		this.toLocalServer = new LocalServerDelegate(remote, "localhost", local.getPort());
+		this.toRemoteServer = new LocalServerDelegate(local, "localhost", remote.getPort());
 	}
 	
 	protected final void sendLocalMsg(String msg, Map<String, String> args, Handler h) {

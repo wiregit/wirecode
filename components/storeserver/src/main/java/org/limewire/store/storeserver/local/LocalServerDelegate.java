@@ -23,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.URLSocketOpenner;
 import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Util;
 
@@ -34,13 +36,19 @@ import org.limewire.store.storeserver.util.Util;
 final class LocalServerDelegate {
 
   private final AbstractServer server;
-  private final int otherPort;
+  private final int port;
+  private final Server.OpensSocket openner;
+  private final String host;
 
-  public LocalServerDelegate(final AbstractServer server, final int otherPort, final boolean loud) {
+  public LocalServerDelegate(final AbstractServer server, String host, final int port, final Server.OpensSocket openner) {
     this.server = server;
-    this.otherPort = otherPort;
-    if (loud) server.beLoud();
-    if (false) showSendWindow();
+    this.host = host;
+    this.port = port;
+    this.openner = openner;
+  }
+  
+  public LocalServerDelegate(final AbstractServer server, final String host, final int port) {
+      this(server, host, port, new URLSocketOpenner());
   }
 
   /** We want to tile the send windows. */
@@ -126,11 +134,8 @@ final class LocalServerDelegate {
   public String sendMsg(final String msg, final Map<String, String> args) {
     try {
       server.note("sending " + msg + ":" + args);
-      InetAddress addr = InetAddress.getByName("localhost");
-      SocketAddress sockaddr = new InetSocketAddress(addr, otherPort);
-      Socket sock = new Socket();
+      Socket sock = openner.open(host, port);
       server.note("have socket: " + sock);
-      sock.connect(sockaddr, 1000);
       BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
       String message = msg;
       String params = null;

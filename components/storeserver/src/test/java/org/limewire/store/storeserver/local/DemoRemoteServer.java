@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.URLSocketOpenner;
 import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.AbstractServer;
 
@@ -19,9 +20,13 @@ public class DemoRemoteServer extends RemoteServer {
 
   private final LocalServerDelegate del;
 
-  public DemoRemoteServer(final int otherPort, final boolean loud) {
+  public DemoRemoteServer(final int otherPort, final Server.OpensSocket openner) {
     super(PORT);
-    this.del = new LocalServerDelegate(this, otherPort, loud);
+    this.del = new LocalServerDelegate(this, "localhost", otherPort, openner);
+  }
+  
+  public DemoRemoteServer(final int otherPort) {
+      this(otherPort, new URLSocketOpenner());
   }
 
   @Override
@@ -86,7 +91,7 @@ public class DemoRemoteServer extends RemoteServer {
   }
   
   public static void main(String[] args) {
-      AbstractServer.start(new DemoRemoteServer(LocalLocalServer.PORT, true));
+      AbstractServer.start(new DemoRemoteServer(LocalLocalServer.PORT));
   }
 
 }

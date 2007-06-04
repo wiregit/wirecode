@@ -3,6 +3,7 @@ package org.limewire.store.storeserver.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.store.storeserver.api.Dispatchee;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
@@ -276,7 +277,7 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     protected void noteRun() {
         if (USING_WATCHER)
-            new Thread(this.watcher).start();
+            new ManagedThread(this.watcher).start();
     }
 
     /**

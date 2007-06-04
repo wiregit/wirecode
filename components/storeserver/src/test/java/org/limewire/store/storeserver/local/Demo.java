@@ -21,7 +21,6 @@ public class Demo {
     }
 
     private final ServerImpl localServer;
-
     private final RemoteServer remoteServer;
 
     public final ServerImpl getLocalServer() {
@@ -33,8 +32,8 @@ public class Demo {
     }
 
     Demo() {
-        localServer = new LocalLocalServer(DemoRemoteServer.PORT, true);
-        remoteServer = new DemoRemoteServer(LocalLocalServer.PORT, true);
+        localServer = new LocalLocalServer("localhost", DemoRemoteServer.PORT);
+        remoteServer = new DemoRemoteServer(LocalLocalServer.PORT);
     }
 
     public void start() {
