@@ -417,6 +417,13 @@ public final class LimeWireUtils {
     public static void setTemporaryDirectoryInUse(boolean inUse) {
         temporaryDirectoryInUse = inUse;
     }
+    
+    /**
+     * Returns true if this LimeWire is a CVS version
+     */
+    public static boolean isCVS() {
+        return getLimeWireVersion().equals("@" + "version" + "@");
+    }
 }
 
 
