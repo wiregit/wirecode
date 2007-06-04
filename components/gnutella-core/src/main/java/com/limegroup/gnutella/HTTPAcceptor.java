@@ -42,6 +42,7 @@ import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
@@ -258,14 +259,19 @@ public class HTTPAcceptor {
             throw new IllegalStateException();
         }
 
+        final AtomicBoolean inited = new AtomicBoolean(false);
         try {
             NIODispatcher.instance().invokeAndWait(new Runnable() {
                 public void run() {
                     initializeReactor();
+                    inited.set(true);
                 }
             });
         } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting for reactor initialization", e);
+            if (inited.get())
+                LOG.warn("Interrupted while waiting for reactor initialization", e);
+            else
+                ErrorService.error(e); // this is a problem.
         }
 
         dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
