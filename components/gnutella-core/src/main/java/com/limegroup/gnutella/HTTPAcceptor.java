@@ -2,10 +2,10 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +40,8 @@ import org.limewire.http.HttpIOSession;
 import org.limewire.http.HttpServiceEventListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
+import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
+import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
@@ -64,28 +66,42 @@ public class HTTPAcceptor {
     private static final String[] SUPPORTED_METHODS = new String[] { "GET",
             "HEAD", };
 
+    private final HttpRequestHandlerRegistry registry;
+
+    private final HttpRequestHandler notFoundHandler;
+
+    private final List<HTTPAcceptorListener> acceptorListeners = new CopyOnWriteArrayList<HTTPAcceptorListener>();
+
     private HttpIOReactor reactor;
 
     private HttpParams params;
 
-    private HttpRequestHandlerRegistry registry;
-
     private ConnectionEventListener connectionListener;
-
-    private List<HTTPAcceptorListener> acceptorListeners = Collections
-            .synchronizedList(new ArrayList<HTTPAcceptorListener>());
 
     private BasicHttpProcessor processor;
 
     private DefaultHttpResponseFactory responseFactory;
 
-    private HttpRequestHandler notFoundHandler;
+    private AtomicBoolean started = new AtomicBoolean();
 
     public HTTPAcceptor() {
-        initializeReactor();
+        this.registry = new SynchronizedHttpRequestHandlerRegistry();
+        this.notFoundHandler = new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                UploadStat.FILE_NOT_FOUND.incrementStat();
+
+                response.setReasonPhrase("Feature Not Active");
+                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+            }
+        };
+        
         inititalizeDefaultHandlers();
     }
 
+    /**
+     * Note: Needs to be called from the NIODispatcher thread.
+     */
     private void initializeReactor() {
         this.params = new BasicHttpParams();
         this.params.setIntParameter(HttpConnectionParams.SO_TIMEOUT,
@@ -100,7 +116,6 @@ public class HTTPAcceptor {
         this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
                 LimeWireUtils.getHttpServer());
 
-        this.registry = new HttpRequestHandlerRegistry();
         this.connectionListener = new ConnectionEventListener();
 
         // intercepts HTTP requests and responses
@@ -133,16 +148,6 @@ public class HTTPAcceptor {
     }
 
     private void inititalizeDefaultHandlers() {
-        // unsupported requests
-        notFoundHandler = new HttpRequestHandler() {
-            public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws HttpException, IOException {
-                UploadStat.FILE_NOT_FOUND.incrementStat();
-
-                response.setReasonPhrase("Feature Not Active");
-                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-            }
-        };
         registerHandler("/browser-control", notFoundHandler);
         registerHandler("/gnutella/file-view*", notFoundHandler);
         registerHandler("/gnutella/res/*", notFoundHandler);
@@ -230,9 +235,9 @@ public class HTTPAcceptor {
      * @param pattern the URI pattern to handle requests for
      * @param handler the handler that processes the request
      */
-    public synchronized void registerHandler(final String pattern,
+    public void registerHandler(final String pattern,
             final HttpRequestHandler handler) {
-        this.registry.register(pattern, handler);
+        registry.register(pattern, handler);
     }
 
     /**
@@ -240,8 +245,8 @@ public class HTTPAcceptor {
      * 
      * @see #registerHandler(String, HttpRequestHandler)
      */
-    public synchronized void unregisterHandler(final String pattern) {
-        this.registry.unregister(pattern);
+    public void unregisterHandler(final String pattern) {
+        registry.unregister(pattern);
     }
 
     /**
@@ -249,6 +254,20 @@ public class HTTPAcceptor {
      * connections.
      */
     public void start(ConnectionDispatcher dispatcher) {
+        if (started.getAndSet(true)) {
+            throw new IllegalStateException();
+        }
+
+        try {
+            NIODispatcher.instance().invokeAndWait(new Runnable() {
+                public void run() {
+                    initializeReactor();
+                }
+            });
+        } catch (InterruptedException e) {
+            LOG.warn("Interrupted while waiting for reactor initialization", e);
+        }
+
         dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
             public void acceptConnection(String word, Socket socket) {
                 reactor.acceptConnection(word + " ", socket);
@@ -263,6 +282,8 @@ public class HTTPAcceptor {
      */
     public void stop(ConnectionDispatcher dispatcher) {
         dispatcher.removeConnectionAcceptor(SUPPORTED_METHODS);
+
+        started.set(false);
     }
 
     /**
@@ -272,17 +293,13 @@ public class HTTPAcceptor {
     private class ConnectionEventListener implements HttpServiceEventListener {
 
         public void connectionOpen(NHttpConnection conn) {
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.connectionOpen(conn);
             }
         }
 
         public void connectionClosed(NHttpConnection conn) {
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.connectionClosed(conn);
             }
         }
@@ -303,18 +320,14 @@ public class HTTPAcceptor {
                 UploadStat.PUSH_FAILED.incrementStat();
             }
 
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.connectionClosed(conn);
             }
         }
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
             LOG.debug("HTTP protocol error", e);
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.connectionClosed(conn);
             }
         }
@@ -323,9 +336,7 @@ public class HTTPAcceptor {
             if (LOG.isDebugEnabled())
                 LOG.debug("Processing request: " + request.getRequestLine());
 
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.requestReceived(conn, request);
             }
         }
@@ -338,9 +349,7 @@ public class HTTPAcceptor {
                             .getValue());
             session.setThrottle(null);
 
-            HTTPAcceptorListener[] listeners = HTTPAcceptor.this.acceptorListeners
-                    .toArray(new HTTPAcceptorListener[0]);
-            for (HTTPAcceptorListener listener : listeners) {
+            for (HTTPAcceptorListener listener : acceptorListeners) {
                 listener.responseSent(conn, response);
             }
         }
