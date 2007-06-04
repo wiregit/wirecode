@@ -29,6 +29,8 @@ import org.limewire.setting.LongSetting;
  */
 public class LookupSettings extends MojitoProps {
     
+    private LookupSettings() {}
+    
     /**
      * Use FIND_NODE (default) or FIND_VALUE to get the SecurityToken of
      * a remote Node. 
@@ -42,22 +44,20 @@ public class LookupSettings extends MojitoProps {
      */
     public static final BooleanSetting DELETE_FURTHEST_CONTACT
         = FACTORY.createBooleanSetting("DELETE_FURTHEST_CONTACT", true);
-
-    private LookupSettings() {}
     
     /**
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
         = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 
-                60L*1000L, "Mojito.FindNodeLookupTimeout", 30L*1000L, 3L*60L*1000L);
+                90L*1000L, "Mojito.FindNodeLookupTimeout", 10L*1000L, 5L*60L*1000L);
 
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
         = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
-                60L*1000L, "Mojito.FindValueLookupTimeout", 45L*1000L, 4L*60L*1000L);
+                90L*1000L, "Mojito.FindValueLookupTimeout", 10L*1000L, 5L*60L*1000L);
 
     /**
      * Whether or not a value lookup is exhaustive
