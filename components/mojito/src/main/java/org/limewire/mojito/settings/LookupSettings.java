@@ -100,8 +100,14 @@ public class LookupSettings extends MojitoProps {
     /**
      * 
      */
-    public static long getWaitOnLock() {
+    public static long getWaitOnLock(boolean findNode) {
         long waitOnLock = 0L;
+        
+        if (findNode) {
+            waitOnLock += LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        } else {
+            waitOnLock += LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+        }
         
         return waitOnLock;
     }

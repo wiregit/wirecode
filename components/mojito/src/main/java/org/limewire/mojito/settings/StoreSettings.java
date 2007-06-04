@@ -61,7 +61,8 @@ public class StoreSettings extends MojitoProps {
         long waitOnLock = 0L;
         
         if (!hasLocations) {
-            waitOnLock += LookupSettings.getWaitOnLock();
+            waitOnLock += LookupSettings.getWaitOnLock(
+                    LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue());
         }
         
         waitOnLock += StoreSettings.STORE_TIMEOUT.getValue();

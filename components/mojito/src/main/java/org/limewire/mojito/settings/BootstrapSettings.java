@@ -87,7 +87,7 @@ public class BootstrapSettings extends MojitoProps {
         }
         
         // 2) Do a lookup for your own Node ID
-        waitOnLock += LookupSettings.getWaitOnLock();
+        waitOnLock += LookupSettings.getWaitOnLock(true);
         
         // 3) Refresh all Buckets
         waitOnLock += BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
