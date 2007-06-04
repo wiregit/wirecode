@@ -98,15 +98,19 @@ public class LookupSettings extends MojitoProps {
                 0.0f, "Mojito.ContactsScrubberRequiredRatio", 0.0f, 1.0f);
     
     /**
+     * Returns the lock timeout for a lookup process
      * 
+     * @param findNode Whether it's a FIND_NODE or FIND_VALUE operation
      */
     public static long getWaitOnLock(boolean findNode) {
         long waitOnLock = 0L;
         
         if (findNode) {
-            waitOnLock += LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+            waitOnLock += ContextSettings.getWaitOnLock(
+                    LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue());
         } else {
-            waitOnLock += LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+            waitOnLock += ContextSettings.getWaitOnLock(
+                    LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue());
         }
         
         return waitOnLock;

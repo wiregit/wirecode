@@ -39,7 +39,7 @@ public final class RouteTableSettings extends MojitoProps {
                 "Mojito.MaxCacheSize", 1, 256);
     
     /**
-     * The maximum number of failures a node may have before beeing completely
+     * The maximum number of failures a node may have before being completely
      * evicted from the routing table. This also serves as a basis for the 
      * probability of a node to be included in the list of k closest nodes.
      */

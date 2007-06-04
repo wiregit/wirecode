@@ -37,17 +37,14 @@ public class BootstrapSettings extends MojitoProps {
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
         = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
 
-    public static final LongSetting REFRESH_BUCKETS_LOCK_TIMEOUT
-        = FACTORY.createRemoteLongSetting("REFRESH_BUCKETS_LOCK_TIMEOUT", 
-                8L*60L*1000L, "Mojito.RefreshBucketsLockTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The maximum amount of time the bootstrapping process can take
      * before it's interrupted
      */
-    //public static final LongSetting BOOTSTRAP_TIMEOUT
-    //    = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-    //            8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
+    public static final LongSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+                8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
@@ -81,7 +78,7 @@ public class BootstrapSettings extends MojitoProps {
     public static long getWaitOnLock(boolean hasInitialNode) {
         long waitOnLock = 0L;
         
-        // 1) Ping Nodes to find inital bootstrap Node
+        // 1) Ping Nodes to find initial bootstrap Node
         if (!hasInitialNode) {
             waitOnLock += PingSettings.getWaitOnLock();
         }
@@ -90,7 +87,8 @@ public class BootstrapSettings extends MojitoProps {
         waitOnLock += LookupSettings.getWaitOnLock(true);
         
         // 3) Refresh all Buckets
-        waitOnLock += BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue();
+        waitOnLock += ContextSettings.getWaitOnLock(
+                BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue());
         
         return waitOnLock;
     }

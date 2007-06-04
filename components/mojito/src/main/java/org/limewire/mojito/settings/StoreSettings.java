@@ -47,7 +47,7 @@ public class StoreSettings extends MojitoProps {
         = FACTORY.createIntSetting("PARALLEL_STORES", 5);
     
     /**
-     * The maximum amount of tume the store process can take
+     * The maximum amount of time the store process can take
      * before it's interrupted
      */
     public static final LongSetting STORE_TIMEOUT
@@ -56,6 +56,9 @@ public class StoreSettings extends MojitoProps {
     
     /**
      * Returns the lock timeout for the StoreProcess
+     * 
+     * @param hasLocations Pass true if the StoreProcess already knows 
+     *                  the locations where to store the value
      */
     public static long getWaitOnLock(boolean hasLocations) {
         long waitOnLock = 0L;
@@ -65,7 +68,9 @@ public class StoreSettings extends MojitoProps {
                     LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue());
         }
         
-        waitOnLock += StoreSettings.STORE_TIMEOUT.getValue();
+        waitOnLock += ContextSettings.getWaitOnLock(
+                StoreSettings.STORE_TIMEOUT.getValue());
+        
         return waitOnLock;
     }
 }

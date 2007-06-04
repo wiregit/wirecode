@@ -154,7 +154,7 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createBooleanSetting("THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED", true);
     
     /**
-     * 
+     * Returns the lock timeout
      */
     public static long getWaitOnLock(long timeout) {
         return Math.max((long)(timeout * 1.5f), 

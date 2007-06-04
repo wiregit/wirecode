@@ -392,7 +392,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             }
             
             bucketsToRefresh = new TimeAwareIterable<KUID>(
-                    BootstrapSettings.REFRESH_BUCKETS_LOCK_TIMEOUT.getValue(),
+                    BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue(),
                     bucketIds).iterator();
             
             refreshNextBucket();
