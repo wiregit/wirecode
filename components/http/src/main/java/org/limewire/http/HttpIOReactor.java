@@ -30,9 +30,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
 
     static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
     
-    private HttpParams params;
+    private final HttpParams params;
     
-    protected IOEventDispatch eventDispatch = null;
+    protected volatile IOEventDispatch eventDispatch = null;
 
     // copied from DefaultServerIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
