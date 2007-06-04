@@ -62,9 +62,9 @@ import org.limewire.security.SecurityToken;
 
 /**
  * The LookupResponseHandler class handles the entire Kademlia 
- * lookup process. Subclasses implement lookup specific feautues
+ * lookup process. Subclasses implement lookup specific features
  * like the type of the lookup (FIND_NODE and FIND_VALUE) or
- * different lookup termintation conditions.
+ * different lookup termination conditions.
  * 
  * Think of the LookupResponseHandler as some kind of State-Machine.
  */
@@ -134,6 +134,9 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      */
     private boolean deleteFurthest = true;
     
+    /**
+     * Creates a new LookupResponseHandler
+     */
     protected LookupResponseHandler(Context context, KUID lookupId) {
         super(context);
         
@@ -188,7 +191,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     }
     
     /**
-     * Returns the default number of parallel lookums this
+     * Returns the default number of parallel lookups this
      * handler maintains 
      */
     protected abstract int getDefaultParallelism();
@@ -210,8 +213,8 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     }
     
     /**
-     * Returns an unmodifiyable collection of Contacts
-     * that must be conacted during the lookup
+     * Returns an unmodifieable collection of Contacts
+     * that must be contacted during the lookup
      */
     public Collection<Contact> getForcedContacts() {
         return Collections.unmodifiableSet(forcedContacts);
@@ -254,8 +257,8 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     }
     
     /**
-     * Returns whether or not onlt alive Contacts should be
-     * selected for the first hop
+     * Returns whether or not only alive Contacts should be
+     * selected (from the RouteTable) for the first hop
      */
     public boolean isSelectAliveNodesOnly() {
         return selectAliveNodesOnly;
@@ -264,7 +267,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     /**
      * Sets whether or not the furthest of the (k+1)-closest Contacts
      * that did respond should be deleted from the response Set.
-     * This is primarly a memory optimization as we're only intersted
+     * This is primarily a memory optimization as we're only interested
      * in the k-closest Contacts.
      * 
      * For caching we need the lookup path though (that means we'd set
@@ -311,7 +314,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         List<Contact> alphaList = new ArrayList<Contact>(
         		getContactsToQuery(lookupId, getParallelism()));
         
-        // Optimimize the first lookup step if we have enough parallel lookup slots
+        // Optimize the first lookup step if we have enough parallel lookup slots
         if(alphaList.size() >= 3) {
             // Get the MRS node of the k closest nodes
             nodes = ContactUtils.sort(nodes);
@@ -343,7 +346,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         startTime = System.currentTimeMillis();  
         for(Contact node : alphaList) {
             try {
-                sendLookupRequest(node);
+                lookup(node);
             } catch (IOException err) {
                 throw new DHTException(err);
             }
@@ -506,7 +509,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookupId + " terminates after "
-                            + currentHop + " hops. Found traget ID!");
+                            + currentHop + " hops. Found target ID!");
                 }
                 
                 // finishLookup() gets called if activeSearches is zero!
@@ -546,9 +549,9 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
                 }
                 
                 try {
-                    sendLookupRequest(node);
+                    lookup(node);
                 } catch (SocketException err) {
-                    LOG.error("A SocketException occured", err);
+                    LOG.error("A SocketException occurred", err);
                 }
             }
         }
@@ -557,7 +560,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     /**
      * Sends a lookup request to the given Contact
      */
-    protected boolean sendLookupRequest(Contact node) throws IOException {
+    protected boolean lookup(Contact node) throws IOException {
         LookupRequest request = createLookupRequest(node);
         
         if (LOG.isTraceEnabled()) {
@@ -584,7 +587,6 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
      */
     private void finishLookupIfDone() {
         if (!isDone() && !isCancelled() && !hasActiveSearches()) {
-            //finished = true;
             finishLookup();
         }
     }

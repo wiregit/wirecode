@@ -86,8 +86,8 @@ public class FindNodeResponseHandler
     }
 
     @Override
-    protected boolean sendLookupRequest(Contact node) throws IOException {
-        if (super.sendLookupRequest(node)) {
+    protected boolean lookup(Contact node) throws IOException {
+        if (super.lookup(node)) {
             lookupStat.addRequest();
             return true;
         }
