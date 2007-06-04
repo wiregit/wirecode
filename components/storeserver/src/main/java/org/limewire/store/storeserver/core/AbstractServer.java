@@ -2,26 +2,24 @@ package org.limewire.store.storeserver.core;
 
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.service.ErrorService;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.DebugPanel;
@@ -30,19 +28,13 @@ import org.limewire.store.storeserver.util.DebugPanel.Debuggable;
 
 /**
  * Base class for servers, both local and remote.
- * 
- * @author jpalm
  */
 public abstract class AbstractServer implements Runnable, Debuggable {
 
     private static final Log LOG = LogFactory.getLog(AbstractServer.class);
-
     private final static int NUM_WORKERS = 5;
-
     private static final byte[] NEWLINE = { (byte) '\r', (byte) '\n' };
-
     private final int port;
-
     private final String name;
 
     private boolean done = false;
@@ -50,18 +42,13 @@ public abstract class AbstractServer implements Runnable, Debuggable {
     /** We want the debug panels to tile. */
     private static int numDebugPanels = 0;
 
-    private final List<Thread> threads = new Vector<Thread>(NUM_WORKERS);
-
-    private final List<Worker> workers = new Vector<Worker>(NUM_WORKERS);
-
+    private final List<Thread> threads = new ArrayList<Thread>(NUM_WORKERS);
+    private final List<Worker> workers = new ArrayList<Worker>(NUM_WORKERS);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
 
     private Note note;
-
     private boolean debug;
-
     private boolean hasShutDown;
-
     private Thread runner;
 
     // --------------------------------------------------------
@@ -251,7 +238,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     private void createWorkers() {
         for (int i = 0; i < NUM_WORKERS; ++i) {
-            addNewThread(new Worker(), "worker #" + i);
+            addNewThread(new Worker(), "store server worker #" + i);
         }
     }
 
@@ -264,7 +251,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
                     if (workers.isEmpty()) {
                         Worker ws = new Worker();
                         ws.setSocket(s);
-                        addNewThread(ws, "additional worker");
+                        addNewThread(ws, "store server additional worker");
                     } else {
                         Worker w = workers.get(0);
                         workers.remove(0);
@@ -281,63 +268,13 @@ public abstract class AbstractServer implements Runnable, Debuggable {
     }
 
     private void addNewThread(Worker w, String name) {
-        Thread t = new Thread(w, name);
+        Thread t = new ManagedThread(w, name);
         threads.add(t);
         workers.add(w);
         t.start();
     }
 
-    /**
-     * http://java.sun.com/developer/technicalArticles/Networking/Webserver/WebServer.java
-     */
-
-    interface HttpConstants {
-
-        /** 2XX: generally "OK" */
-        int HTTP_OK = 200;
-        int HTTP_CREATED = 201;
-        int HTTP_ACCEPTED = 202;
-        int HTTP_NOT_AUTHORITATIVE = 203;
-        int HTTP_NO_CONTENT = 204;
-        int HTTP_RESET = 205;
-        int HTTP_PARTIAL = 206;
-
-        /** 3XX: relocation/redirect */
-        int HTTP_MULT_CHOICE = 300;
-        int HTTP_MOVED_PERM = 301;
-        int HTTP_MOVED_TEMP = 302;
-        int HTTP_SEE_OTHER = 303;
-        int HTTP_NOT_MODIFIED = 304;
-        int HTTP_USE_PROXY = 305;
-
-        /** 4XX: client error */
-        int HTTP_BAD_REQUEST = 400;
-        int HTTP_UNAUTHORIZED = 401;
-        int HTTP_PAYMENT_REQUIRED = 402;
-        int HTTP_FORBIDDEN = 403;
-        int HTTP_NOT_FOUND = 404;
-        int HTTP_BAD_METHOD = 405;
-        int HTTP_NOT_ACCEPTABLE = 406;
-        int HTTP_PROXY_AUTH = 407;
-        int HTTP_CLIENT_TIMEOUT = 408;
-        int HTTP_CONFLICT = 409;
-        int HTTP_GONE = 410;
-        int HTTP_LENGTH_REQUIRED = 411;
-        int HTTP_PRECON_FAILED = 412;
-        int HTTP_ENTITY_TOO_LARGE = 413;
-        int HTTP_REQ_TOO_LONG = 414;
-        int HTTP_UNSUPPORTED_TYPE = 415;
-
-        /** 5XX: server error */
-        int HTTP_SERVER_ERROR = 500;
-        int HTTP_INTERNAL_ERROR = 501;
-        int HTTP_BAD_GATEWAY = 502;
-        int HTTP_UNAVAILABLE = 503;
-        int HTTP_GATEWAY_TIMEOUT = 504;
-        int HTTP_VERSION = 505;
-    }
-
-    class Worker implements HttpConstants, Runnable {
+    class Worker implements Runnable {
 
         final static int BUF_SIZE = 2048;
 
@@ -394,8 +331,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
              * fail with java.io.InterruptedIOException, at which point we will
              * abandon the connection.
              */
-            // s.setSoTimeout(AbstractServer.this.timeout);
-            s.setTcpNoDelay(true);
             /* zero out the buffer from last time */
             for (int i = 0; i < BUF_SIZE; i++) {
                 buf[i] = 0;
@@ -436,8 +371,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
                     index = 5;
                 } else {
                     /* we don't support this method */
-                    ps.print("HTTP/1.1 " + HTTP_BAD_METHOD
-                            + " unsupported method type: ");
+                    ps.print("HTTP/1.1 " + HttpURLConnection.HTTP_BAD_METHOD + " unsupported method type: ");
                     ps.write(buf, 0, 5);
                     ps.write(NEWLINE);
                     ps.flush();
@@ -455,8 +389,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
                         break;
                     }
                 }
-                String request = (new String(buf, 0, index, i - index))
-                        .replace('/', File.separatorChar);
+                String request = (new String(buf, 0, index, i - index)).replace('/', File.separatorChar);
                 if (request.startsWith(File.separator)) {
                     request = request.substring(1);
                 }
@@ -464,7 +397,7 @@ public abstract class AbstractServer implements Runnable, Debuggable {
                 final Request incoming = new Request(ip);
                 String res = handle(request, ps, incoming);
                 ps.print("HTTP/1.1 ");
-                ps.print(HTTP_OK);
+                ps.print(HttpURLConnection.HTTP_OK);
                 ps.print(" OK");
                 ps.write(NEWLINE);
                 ps.print("Last-modified: ");
@@ -547,7 +480,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     private void stop(final Thread t, final long millis) {
         synchronized (t) {
-            t.interrupt();
             try {
                 t.join(millis);
             } catch (InterruptedException e) {
@@ -648,8 +580,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     /**
      * Something with a name.
-     * 
-     * @author jpalm
      */
     abstract class HasName {
 
@@ -685,8 +615,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     /**
      * Generic base class for {@link Listener}s.
-     * 
-     * @author jpalm
      */
     public abstract class AbstractListener extends HasName implements Listener {
         protected AbstractListener(String name) {
@@ -700,8 +628,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
 
     /**
      * Generic base class for {@link Handler}s.
-     * 
-     * @author jpalm
      */
     public abstract class AbstractHandler extends HasName implements Handler {
         protected AbstractHandler(String name) {
@@ -716,8 +642,6 @@ public abstract class AbstractServer implements Runnable, Debuggable {
     /**
      * A {@link Handler} requiring a callback specified by the parameter
      * {@link Parameters#CALLBACK}.
-     * 
-     * @author jpalm
      */
     protected abstract class HandlerWithCallback extends AbstractHandler {
 

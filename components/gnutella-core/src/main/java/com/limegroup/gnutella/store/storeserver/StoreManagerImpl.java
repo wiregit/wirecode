@@ -13,8 +13,6 @@ import org.limewire.store.storeserver.api.Server;
 
 /**
  * Encapsulates a local server and dispatchee.
- * 
- * @author jpalm
  */
 final class StoreManagerImpl implements StoreManager {
     

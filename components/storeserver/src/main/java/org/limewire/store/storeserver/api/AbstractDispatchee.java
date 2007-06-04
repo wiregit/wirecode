@@ -5,8 +5,6 @@ import java.util.List;
 
 /**
  * This is what receives actual commands from an {@link Server}.
- * 
- * @author jpalm
  */
 public abstract class AbstractDispatchee implements Dispatchee {
 
@@ -33,13 +31,11 @@ public abstract class AbstractDispatchee implements Dispatchee {
     }
 
     public final boolean addConnectionListener(ConnectionListener lis) {
-        return connectionListeners.contains(lis) ? false : connectionListeners
-                .add(lis);
+        return connectionListeners.contains(lis) ? false : connectionListeners.add(lis);
     }
 
     public final boolean removeConnectionListener(ConnectionListener lis) {
-        return !connectionListeners.contains(lis) ? false : connectionListeners
-                .remove(lis);
+        return !connectionListeners.contains(lis) ? false : connectionListeners.remove(lis);
     }
 
     /**

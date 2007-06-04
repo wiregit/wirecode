@@ -8,8 +8,6 @@ import com.limegroup.gnutella.store.storeserver.StoreManager;
 
 /**
  * Generic base class for {@link StoreManager.Handler}s.
- * 
- * @author jpalm
  */
 public abstract class AbstractHandler extends HasName implements StoreManager.Handler {
     
@@ -18,8 +16,6 @@ public abstract class AbstractHandler extends HasName implements StoreManager.Ha
     
     /**
      * A {@link Handler} that doesn't respond with anything.
-     * 
-     * @author jpalm
      */
     public abstract static class OK extends AbstractHandler {
         

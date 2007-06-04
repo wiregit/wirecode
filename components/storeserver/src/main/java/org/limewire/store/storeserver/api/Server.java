@@ -4,8 +4,6 @@ import org.limewire.store.storeserver.local.LocalLocalServer;
 
 /**
  * This represents an instance of a local server.
- * 
- * @author jeff
  */
 public interface Server {
 
@@ -69,8 +67,6 @@ public interface Server {
 
     /**
      * Reponses sent back from servers.
-     * 
-     * @author jpalm
      */
     public interface Responses {
 
@@ -95,8 +91,6 @@ public interface Server {
 
     /**
      * Collection of all the commands we send.
-     * 
-     * @author jpalm
      */
     public interface Commands {
 
@@ -150,8 +144,6 @@ public interface Server {
 
     /**
      * Parameter names.
-     * 
-     * @author jpalm
      */
     public interface Parameters {
 
@@ -189,8 +181,6 @@ public interface Server {
 
     /**
      * Codes that are sent to the code (javascript) when an error occurs.
-     * 
-     * @author jpalm
      */
     public interface ErrorCodes {
 
@@ -244,8 +234,6 @@ public interface Server {
 
     /**
      * A general place for constants.
-     * 
-     * @author jpalm
      */
     public interface Constants {
 

@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.text.DateFormat;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -28,7 +27,6 @@ import javax.swing.text.StyleConstants;
 import org.limewire.service.ErrorService;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.core.Note;
-import org.limewire.store.storeserver.core.AbstractServer;
 
 /**
  * A simple debugging panel.
@@ -103,7 +101,6 @@ public final class DebugPanel extends JPanel implements Note {
             throw new IllegalArgumentException("Invalid level '" + level + "'");
         }
         c = c.darker();
-        DateFormat df = DateFormat.getTimeInstance();
         String s = "[" + simpleName() + "] " + msg
                 + System.getProperty("line.separator");
         SimpleAttributeSet attrs = new SimpleAttributeSet();
@@ -182,8 +179,6 @@ public final class DebugPanel extends JPanel implements Note {
 
     /**
      * Simple implementation.
-     * 
-     * @author jpalm
      */
     private static abstract class DebuggableImpl implements Debuggable {
         private boolean debug;
@@ -215,7 +210,8 @@ public final class DebugPanel extends JPanel implements Note {
         //
         // text pane
         //
-        text = new JTextPane(doc = new DefaultStyledDocument());
+        doc = new DefaultStyledDocument();
+        text = new JTextPane(doc);
         text.setPreferredSize(new Dimension(900, Toolkit.getDefaultToolkit()
                 .getScreenSize().height / 2 - 100));
         text.setEditable(false);

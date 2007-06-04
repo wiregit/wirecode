@@ -2,16 +2,29 @@ package org.limewire.store.storeserver.core;
 
 import java.util.regex.Pattern;
 
+import org.limewire.store.storeserver.util.RemoveCallbackTest;
 import org.limewire.store.storeserver.util.Util;
+import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.textui.TestRunner;
 
-public class CreateCookieDateTest extends TestCase {
+public class CreateCookieDateTest extends BaseTestCase {
     
-    public CreateCookieDateTest() { super("CreateCookieDateTest"); }
+    public CreateCookieDateTest(String s) { super(s); }
+    
+    public static Test suite() {
+        return buildTestSuite(CookieGenTest.class);
+    }
+    
+    
+    public static void main(String[] args) {
+        TestRunner.run(suite());
+    }
 
 	public void test() {
 		String str = Util.createCookieDate();

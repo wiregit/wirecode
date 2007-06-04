@@ -4,8 +4,6 @@ import java.util.Map;
 
 /**
  * Recieves messages from the local server.
- * 
- * @author jpalm
  */
 public interface Dispatchee extends ConnectionListener.HasSome {
 

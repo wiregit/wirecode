@@ -16,8 +16,6 @@ import org.limewire.store.storeserver.api.Server;
 
 /**
  * Fine, here's a note.
- * 
- * @author jpalm
  */
 public final class Util {
 

@@ -6,8 +6,6 @@ import java.awt.Toolkit;
 
 /**
  * Centers windows.
- * 
- * @author jpalm
  */
 public class CenterHelper {
 

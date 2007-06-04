@@ -3,13 +3,22 @@ package org.limewire.store.storeserver.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.textui.TestRunner;
 
-public class AddURLEncodedArgumentsTest extends TestCase {
+public class AddURLEncodedArgumentsTest extends BaseTestCase {
     
-    public AddURLEncodedArgumentsTest() { super("AddURLEncodedArgumentsTest"); }
+    public AddURLEncodedArgumentsTest(String s) { super(s); }
+    
+    public static Test suite() {
+        return buildTestSuite(AddURLEncodedArgumentsTest.class);
+    }
+    
+    public static void main(String[] args) {
+        TestRunner.run(suite());
+    }
 
     public void testNull() {
         String cmd = null;

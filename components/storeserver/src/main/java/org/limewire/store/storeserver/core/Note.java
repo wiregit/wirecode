@@ -4,8 +4,6 @@ import org.limewire.store.storeserver.api.Server;
 
 /**
  * Something with the ability to take a note -- e.g. print to stderr.
- * 
- * @author jpalm
  */
 public interface Note {
 

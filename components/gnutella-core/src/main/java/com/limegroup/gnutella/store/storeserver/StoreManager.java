@@ -16,8 +16,6 @@ public interface StoreManager extends ConnectionListener.HasSome {
     
     /**
      * Is able to return and possibly construct an instance.
-     * 
-     * @author jpalm
      */
     public interface Holder {
         
@@ -31,8 +29,6 @@ public interface StoreManager extends ConnectionListener.HasSome {
     
     /**
      * An event that is generated.
-     * 
-     * @author jeff
      */
     public interface Event {
     
@@ -105,14 +101,14 @@ public interface StoreManager extends ConnectionListener.HasSome {
      * 
      * @return the local server
      */
-    public abstract Server getLocalServer();
+   Server getLocalServer();
 
     /**
      * Starts this service.
      * 
      * @see Server#start()
      */
-    public abstract void start();
+    void start();
 
     /**
      * Shuts down this service.
@@ -120,17 +116,17 @@ public interface StoreManager extends ConnectionListener.HasSome {
      * @param millis milliseconds to wait before causing an abrupt stop
      * @see Server#shutDown(long)
      */
-    public abstract void shutDown(long millis);
+    void shutDown(long millis);
 
     /**
      * @see HasSome#addConnectionListener(ConnectionListener)
      */
-    public abstract boolean addConnectionListener(ConnectionListener lis);
+    boolean addConnectionListener(ConnectionListener lis);
 
     /**
      * @see HasSome#removeConnectionListener(ConnectionListener)
      */
-    public abstract boolean removeConnectionListener(ConnectionListener lis);
+    boolean removeConnectionListener(ConnectionListener lis);
 
     /**
      * Register a listener for the command <tt>cmd</tt>, and returns <tt>true</tt> on success
@@ -142,7 +138,7 @@ public interface StoreManager extends ConnectionListener.HasSome {
      * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if this command
      *         is already registered
      */
-    public abstract boolean registerHandler(String cmd, StoreManager.Handler lis);
+    boolean registerHandler(String cmd, StoreManager.Handler lis);
 
     /**
      * Registers a listener for the command <tt>cmd</tt>.  There can be multiple listeners
@@ -151,6 +147,6 @@ public interface StoreManager extends ConnectionListener.HasSome {
      * @param lis
      * @return
      */
-    public abstract boolean registerListener(String cmd, StoreManager.Listener lis);
+    boolean registerListener(String cmd, StoreManager.Listener lis);
 
 }

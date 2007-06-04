@@ -30,8 +30,6 @@ import org.limewire.store.storeserver.util.Util;
 /**
  * This is a composite element of the demo servers. They are each a remote or local server, but this
  * takes care of the debugging stuff and sending messages.
- * 
- * @author jpalm
  */
 final class LocalServerDelegate {
 

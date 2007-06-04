@@ -6,18 +6,14 @@ import org.limewire.store.storeserver.core.ServerImpl;
 import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Util;
-
-import com.limegroup.gnutella.util.LimeTestCase;
-
-
-import junit.framework.TestCase;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Skeleton code for test cases using the servers.
  * 
  * @author jpalm
  */
-public abstract class DemoSupport extends TestCase {
+public abstract class DemoSupport extends BaseTestCase {
     
   public DemoSupport(String s) { super(s); }
 

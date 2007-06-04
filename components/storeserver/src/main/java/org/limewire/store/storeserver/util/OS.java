@@ -2,8 +2,6 @@ package org.limewire.store.storeserver.util;
 
 /**
  * A simple representation of an OS.
- * 
- * @author jpalm
  */
 public final class OS {
   

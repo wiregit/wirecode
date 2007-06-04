@@ -4,8 +4,6 @@ import com.limegroup.gnutella.store.storeserver.StoreManager;
 
 /**
  * Generic base class for {@link StoreManager.Listener}s.
- * 
- * @author jpalm
  */
 public abstract class AbstractListener extends HasName implements StoreManager.Listener {
     public AbstractListener(String name) { super(name); }

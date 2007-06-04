@@ -9,8 +9,6 @@ import org.limewire.store.storeserver.util.Util;
 /**
  * Reference implementation for a remote server.  This would
  * actually be done as a JSP of PHP or something.
- * 
- * @author jpalm
  */
 public abstract class RemoteServer extends AbstractServer {
 
@@ -89,8 +87,6 @@ public abstract class RemoteServer extends AbstractServer {
 
   /**
    * Sent from local code to retrieve the private key with parameter {@link Parameters#PUBLIC}.
-   * 
-   * @author jpalm
    */
   class GiveKey extends HandlerWithCallback {
     

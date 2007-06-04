@@ -3,14 +3,11 @@ package org.limewire.store.storeserver.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
-import junit.framework.TestCase;
-
-abstract class AbstractParseTestCase extends TestCase {
+abstract class AbstractParseTestCase extends BaseTestCase {
     
     public AbstractParseTestCase(String s) { super(s); }
-
 	
 	public void allTest() {
 		t("", new String[]{ });

@@ -2,12 +2,22 @@ package org.limewire.store.storeserver.util;
 
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
+import org.limewire.util.BaseTestCase;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.textui.TestRunner;
 
-public class RemoveCallbackTest extends TestCase {
+public class RemoveCallbackTest extends BaseTestCase {
     
-    public RemoveCallbackTest() { super("RemoveCallbackTest"); }
+    public RemoveCallbackTest(String s) { super(s); }
+    
+    public static Test suite() {
+        return buildTestSuite(RemoveCallbackTest.class);
+    }
+    
+    public static void main(String[] args) {
+        TestRunner.run(suite());
+    }
 	
 	final static char Q = Server.Constants.CALLBACK_QUOTE;
 	

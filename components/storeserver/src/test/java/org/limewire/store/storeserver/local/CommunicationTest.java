@@ -3,9 +3,11 @@ package org.limewire.store.storeserver.local;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.Test;
+import junit.textui.TestRunner;
+
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.util.Util;
-
 
 /**
  * Tests basic communication.
@@ -14,13 +16,14 @@ import org.limewire.store.storeserver.util.Util;
  */
 public class CommunicationTest extends DemoSupport {
     
-  public CommunicationTest() { super("CommunicationTest"); }
+  public CommunicationTest(String s) { super(s); }
   
-  public static void main(String[] args) throws Exception {
-      CommunicationTest t = new CommunicationTest();
-      t.setUp();
-      t.testGiveKey();
-      t.tearDown();
+  public static Test suite() {
+      return buildTestSuite(CommunicationTest.class);
+  }
+  
+  public static void main(String[] args) {
+      TestRunner.run(suite());
   }
 
   public void testEchoMsg() {

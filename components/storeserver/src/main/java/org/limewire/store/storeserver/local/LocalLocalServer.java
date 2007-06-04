@@ -4,14 +4,9 @@ import java.rmi.server.RemoteServer;
 import java.util.Map;
 
 import org.limewire.store.storeserver.core.ServerImpl;
-import org.limewire.store.storeserver.core.ServerImpl.State;
-
-
 
 /**
  * Sample local server that connects to a {@link RemoteServer} running on <tt>localhost:8090</tt>.
- * 
- * @author jpalm
  */
 public class LocalLocalServer extends ServerImpl {
 

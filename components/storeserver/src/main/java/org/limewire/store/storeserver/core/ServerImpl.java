@@ -9,8 +9,6 @@ import org.limewire.store.storeserver.util.Util;
 
 /**
  * Base class for local servers.
- * 
- * @author jpalm
  */
 public abstract class ServerImpl extends AbstractServer implements Server {
 
@@ -18,11 +16,8 @@ public abstract class ServerImpl extends AbstractServer implements Server {
     private final static boolean USING_WATCHER = true;
 
     private String publicKey;
-
     private String privateKey;
-
     private State state;
-
     private Dispatchee dispatchee;
 
     /*
@@ -73,8 +68,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
      *  +--&gt; | Communicating |
      *       +---------------+
      * &lt;pre&gt;
-     * 
-     * @author jpalm
      * 
      */
     public enum State {
@@ -198,8 +191,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     /**
      * Issues a command to start authentication.
-     * 
-     * @author jpalm
      */
     class StartCom extends HandlerWithCallback {
         public String handleRest(final Map<String, String> args,
@@ -220,8 +211,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     /**
      * Sent from code with private key to authenticate.
-     * 
-     * @author jpalm
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
         public String handleRest(final String privateKey,
@@ -235,8 +224,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     /**
      * Send from code to end session.
-     * 
-     * @author jpalm
      */
     class Detatch extends HandlerWithCallback {
         public String handleRest(final Map<String, String> args,
@@ -252,8 +239,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     /**
      * Sent from code with parameter {@link Parameters#COMMAND}.
-     * 
-     * @author jpalm
      */
     class Msg extends HandlerWithCallbackWithPrivateKey {
         public String handleRest(final String privateKey,
@@ -274,8 +259,6 @@ public abstract class ServerImpl extends AbstractServer implements Server {
 
     /**
      * Sent from code with parameter {@link Parameters#MSG}.
-     * 
-     * @author jpalm
      */
     class Echo extends HandlerWithCallbackWithPrivateKey {
         public String handleRest(final String privateKey,

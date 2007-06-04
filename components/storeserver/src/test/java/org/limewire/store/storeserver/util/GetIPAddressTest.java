@@ -4,13 +4,21 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.store.storeserver.util.Util;
+import org.limewire.util.BaseTestCase;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.textui.TestRunner;
 
-public class GetIPAddressTest extends TestCase {
+public class GetIPAddressTest extends BaseTestCase {
 
-    public GetIPAddressTest() {
-        super("GetIPAddressTest");
+    public GetIPAddressTest(String s) { super(s); }
+    
+    public static Test suite() {
+        return buildTestSuite(GetIPAddressTest.class);
+    }
+    
+    public static void main(String[] args) {
+        TestRunner.run(suite());
     }
 
     public void testNull() {

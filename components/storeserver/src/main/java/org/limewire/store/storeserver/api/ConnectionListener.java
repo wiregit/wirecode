@@ -2,8 +2,6 @@ package org.limewire.store.storeserver.api;
 
 /**
  * Listens for notification to when we are connected and disconnected.
- * 
- * @author jeff
  */
 public interface ConnectionListener {
 
@@ -17,8 +15,6 @@ public interface ConnectionListener {
 
     /**
      * Can add and remove {@link ConnectionListener} instances.
-     * 
-     * @author jeff
      */
     public interface HasSome {
 
