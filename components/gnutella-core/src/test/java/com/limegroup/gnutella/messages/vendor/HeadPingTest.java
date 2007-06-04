@@ -39,5 +39,23 @@ public class HeadPingTest extends LimeTestCase {
         HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
         assertTrue(ping.isPongGGEPCapable());
     }
+    
+    public void testCurrentVersionPingIsPongGGEPCapable() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(0);
+        out.write(HugeTestUtils.SHA1.httpStringValue().getBytes());
+        
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION, out.toByteArray());
+        assertTrue(ping.isPongGGEPCapable());
+    }
+    
+    public void testVersionXPlus1PingIsStillPongGGEPCapable() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(0);
+        out.write(HugeTestUtils.SHA1.httpStringValue().getBytes());
+        
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION+1, out.toByteArray());
+        assertTrue(ping.isPongGGEPCapable());
+    }
 
 }

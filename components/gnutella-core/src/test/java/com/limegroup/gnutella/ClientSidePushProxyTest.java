@@ -40,11 +40,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
-/**
- * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.  The test includes a leaf attached to 3 
- * Ultrapeers.
- */
 @SuppressWarnings("unchecked")
 public class ClientSidePushProxyTest extends ClientSideTestCase {
     protected static final int PORT=6669;

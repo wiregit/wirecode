@@ -1301,10 +1301,21 @@ public class Connection implements IpPort, Connectable {
     }
     
     /**
-     * Returns true if this connection is using SSL/TLS.
-     * @return
+     * Returns true if no capabilites VM is received and the connection
+     * is TLS encoded, or if a capabilites VM is received and it advertises
+     * support for TLS.  Otherwise, returns false.
      */
     public boolean isTLSCapable() {
+        if(_capabilities == null && isTLSEncoded())
+            return true;
+        else if(_capabilities != null && _capabilities.supportsTLS() >= 1)
+            return true;
+        else
+            return false;
+    }
+    
+    /** Returns true if the connection is currently over TLS. */
+    public boolean isTLSEncoded() {
         return _connectType == ConnectType.TLS;
     }
 

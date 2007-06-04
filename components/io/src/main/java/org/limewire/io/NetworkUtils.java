@@ -396,8 +396,11 @@ public final class NetworkUtils {
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
             IpPort ipp = IPPortCombo.getCombo(current);
-            if(decorator != null)
+            if(decorator != null) {
                 ipp = decorator.decorate(ipp);
+                if(ipp == null)
+                    throw new InvalidDataException("decorator returned null");
+            }
     		ret.add(ipp);
     	}
     	

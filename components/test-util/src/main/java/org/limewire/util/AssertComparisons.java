@@ -1135,7 +1135,7 @@ public abstract class AssertComparisons extends TestCase {
         } else if (actual instanceof java.lang.Comparable) {
             ret = -1 * ((java.lang.Comparable)actual).compareTo(expected);
         } else { //neither implement either interface.
-            fail("Neither " + expected + " nor " + actual + 
+            fail("Neither " + expected.getClass().getName() + " nor " + actual.getClass().getName() + 
                  " implement expected Comparable interface.");
         }
         

@@ -11,13 +11,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Function;
 import org.limewire.collection.IntPair;
 import org.limewire.collection.RoundRobinQueue;
 import org.limewire.concurrent.ManagedThread;
@@ -30,6 +30,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -78,7 +79,7 @@ public class TestUploader extends AssertComparisons {
     private float corruptPercentage;
 
 	private AlternateLocationCollection storedGoodLocs,storedBadLocs;
-	public List incomingGoodAltLocs, incomingBadAltLocs;
+	public List<AlternateLocation> incomingGoodAltLocs, incomingBadAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
@@ -1011,36 +1012,21 @@ public class TestUploader extends AssertComparisons {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private void readAlternateLocations (final String altHeader,boolean good) {
-		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-        
-		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) 
-            return;
-        
-		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        
-		while(st.hasMoreTokens()) {
-			try {
-				// note that the trim method removes any CRLF character
-				// sequences that may be used if the sender is using
-				// continuations.
-				AlternateLocation al = 
-				    AlternateLocation.create(st.nextToken().trim(), _sha1);
-				if(al instanceof PushAltLoc)
-				    ((PushAltLoc)al).updateProxies(good);
-                
-                LOG.debug("adding good "+good+" al "+al);
+	private void readAlternateLocations (String altHeader, final boolean good) {
+        String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, new Function<AlternateLocation, Void>() {
+            public Void apply(AlternateLocation location) {
+                if(location instanceof PushAltLoc)
+                    ((PushAltLoc)location).updateProxies(good);
                 
                 if (good) 
-                    incomingGoodAltLocs.add(al);
+                    incomingGoodAltLocs.add(location);
                 else 
-                    incomingBadAltLocs.add(al);
-			} catch(IOException e) {
-				// just return without adding it.
-				continue;
-			}
-		}
+                    incomingBadAltLocs.add(location);
+                
+                return null;
+            }
+        });
 	}
 
 	/**

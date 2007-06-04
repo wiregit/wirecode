@@ -29,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
@@ -50,6 +52,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -189,6 +192,9 @@ public class DownloadTest extends LimeTestCase {
         dm.clearAllDownloads();
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        
         // Don't wait for network connections for testing
         ManagedDownloader.NO_DELAY = true;
         
@@ -513,6 +519,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSSwarm() throws Exception {
         LOG.info("-Testing swarming from two sources...");
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -521,8 +528,8 @@ public class DownloadTest extends LimeTestCase {
         //between the time it sent byte 50% and the time it receives the FIN
         //segment from the downloader.  Half a second latency is tolerable.  
         final int FUDGE_FACTOR=RATE*1024;  
-        uploader1.setRate(RATE);
-        uploader2.setRate(RATE);
+        tlsUploader1.setRate(RATE);
+        tlsUploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(TPORT_1, true);
         RemoteFileDesc rfd2=newRFDWithURN(TPORT_2, true);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
@@ -530,8 +537,8 @@ public class DownloadTest extends LimeTestCase {
         tGeneric(rfds);
         
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
+        int u1 = tlsUploader1.fullRequestsUploaded();
+        int u2 = tlsUploader2.fullRequestsUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
@@ -1159,8 +1166,8 @@ public class DownloadTest extends LimeTestCase {
 
         //Prepare to check the alternate locations
         //Note: adiff should be blank
-        List alt1 = uploader1.incomingGoodAltLocs;
-        List alt2 = uploader2.incomingGoodAltLocs;
+        List<AlternateLocation> alt1 = uploader1.incomingGoodAltLocs;
+        List<AlternateLocation> alt2 = uploader2.incomingGoodAltLocs;
 
         AlternateLocation al1 = AlternateLocation.create(rfd1);
         AlternateLocation al2 = AlternateLocation.create(rfd2);
@@ -1171,6 +1178,61 @@ public class DownloadTest extends LimeTestCase {
         assertEquals("incorrect number of locs ",1,alt1.size());
         assertTrue("uploader got wrong alt", !alt2.contains(al2));
         assertEquals("incorrect number of locs ",1,alt2.size());
+        
+        AlternateLocation read1 = alt1.iterator().next();
+        AlternateLocation read2 = alt2.iterator().next();
+        assertInstanceof(DirectAltLoc.class, read1);
+        assertInstanceof(DirectAltLoc.class, read2);
+        IpPort ipp1 = ((DirectAltLoc)read1).getHost();
+        IpPort ipp2 = ((DirectAltLoc)read2).getHost();
+        if(ipp1 instanceof Connectable)
+            assertFalse(((Connectable)ipp1).isTLSCapable());
+        if(ipp2 instanceof Connectable)
+            assertFalse(((Connectable)ipp2).isTLSCapable());
+    }
+    
+    public void testTwoTLSAlternateLocations() throws Exception {
+        LOG.info("-Testing Two AlternateLocations w/ TLS...");
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        
+        final int RATE = 50;
+        tlsUploader1.setRate(RATE);
+        tlsUploader2.setRate(RATE);
+        
+        RemoteFileDesc rfd1=
+                         newRFDWithURN(TPORT_1, TestFile.hash().toString(), true);
+        RemoteFileDesc rfd2=
+                         newRFDWithURN(TPORT_2, TestFile.hash().toString(), true);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        tGeneric(rfds);
+
+        //Prepare to check the alternate locations
+        //Note: adiff should be blank
+        List<AlternateLocation> alt1 = tlsUploader1.incomingGoodAltLocs;
+        List<AlternateLocation> alt2 = tlsUploader2.incomingGoodAltLocs;
+
+        AlternateLocation al1 = AlternateLocation.create(rfd1);
+        AlternateLocation al2 = AlternateLocation.create(rfd2);
+        
+        assertTrue("uploader didn't recieve alt", !alt1.isEmpty());
+        assertTrue("uploader didn't recieve alt", !alt2.isEmpty());
+        assertTrue("uploader got wrong alt", !alt1.contains(al1));
+        assertEquals("incorrect number of locs ",1,alt1.size());
+        assertTrue("uploader got wrong alt", !alt2.contains(al2));
+        assertEquals("incorrect number of locs ",1,alt2.size());
+        
+        AlternateLocation read1 = alt1.iterator().next();
+        AlternateLocation read2 = alt2.iterator().next();
+        assertInstanceof(DirectAltLoc.class, read1);
+        assertInstanceof(DirectAltLoc.class, read2);
+        IpPort ipp1 = ((DirectAltLoc)read1).getHost();
+        IpPort ipp2 = ((DirectAltLoc)read2).getHost();
+        assertInstanceof(Connectable.class, ipp1);
+        assertTrue(((Connectable)ipp1).isTLSCapable());
+        assertInstanceof(Connectable.class, ipp2);
+        assertTrue(((Connectable)ipp2).isTLSCapable());
+        
     }
 
     public void testUploaderAlternateLocations() throws Exception {  
@@ -1218,6 +1280,54 @@ public class DownloadTest extends LimeTestCase {
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
+    
+    public void testTLSUploaderAlternateLocations() throws Exception { 
+        // This is a modification of simple swarming based on alternate location
+        // for the second swarm
+        LOG.info("-Testing swarming from two sources one based on alt w/ TLS...");
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        tlsUploader2.setRate(RATE);
+        RemoteFileDesc rfd1=
+                          newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
+        RemoteFileDesc rfd2=
+                          newRFDWithURN(TPORT_2,TestFile.hash().toString(), true);
+        RemoteFileDesc[] rfds = {rfd1};
+
+        //Prebuild an uploader alts in lieu of rdf2
+        AlternateLocationCollection ualt = 
+            AlternateLocationCollection.create(rfd2.getSHA1Urn());
+
+        
+        AlternateLocation al2 =
+            AlternateLocation.create(rfd2);
+        ualt.add(al2);
+
+        uploader1.setGoodAlternateLocations(ualt);
+
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = tlsUploader2.fullRequestsUploaded();
+        LOG.debug("\tu1: "+u1+"\n");
+        LOG.debug("\tu2: "+u2+"\n");
+        LOG.debug("\tTotal: "+(u1+u2)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }
+    
     /**
      * tests that an uploader will pass a push loc which will be included in the swarm
      */
@@ -1295,8 +1405,6 @@ public class DownloadTest extends LimeTestCase {
         
         assertTrue("interested uploader didn't get first loc",
                 second.incomingGoodAltLocs.contains(firstLoc));
-        
-        
     }
     
     /**
@@ -1478,7 +1586,7 @@ public class DownloadTest extends LimeTestCase {
         assertTrue(uploader1.incomingGoodAltLocs.contains(AlternateLocation.create(rfd2)));
         
         assertEquals(1,uploader1.incomingBadAltLocs.size());
-        AlternateLocation current = (AlternateLocation)uploader1.incomingBadAltLocs.get(0);
+        AlternateLocation current = uploader1.incomingBadAltLocs.get(0);
         
         assertTrue(current instanceof PushAltLoc);
         PushAltLoc pcurrent = (PushAltLoc)current;
@@ -1981,6 +2089,37 @@ public class DownloadTest extends LimeTestCase {
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }    
+    
+    public void testSimpleDownloadWithInitialTLSAlts() throws Exception {
+        LOG.info("-Testing download with initial TLS alts");
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        tlsUploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
+        RemoteFileDesc rfd2=newRFDWithURN(TPORT_2, false);
+        RemoteFileDesc[] rfds1 = {rfd1};
+        List rfds2 = new LinkedList();
+        rfds2.add(rfd2);
+        
+        tGeneric(rfds1, rfds2);
+        
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = tlsUploader2.fullRequestsUploaded();
+        LOG.debug("\tu1: "+u1+"\n");
+        LOG.debug("\tu2: "+u2+"\n");
+        LOG.debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }   
     
 
     /**

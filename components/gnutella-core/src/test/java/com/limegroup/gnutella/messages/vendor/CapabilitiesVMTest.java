@@ -13,12 +13,13 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
-public class CapabilitiesVMTest 
-    extends com.limegroup.gnutella.util.LimeTestCase {
+public class CapabilitiesVMTest  extends LimeTestCase {
     public CapabilitiesVMTest(String name) {
         super(name);
     }
@@ -32,6 +33,9 @@ public class CapabilitiesVMTest
         junit.textui.TestRunner.run(suite());
     }
 
+    public void setUp() {
+        CapabilitiesVM.reconstructInstance();
+    }
     
     public void testStaticConstructor() throws Exception {
         CapabilitiesVM vmp = CapabilitiesVM.instance();
@@ -42,10 +46,8 @@ public class CapabilitiesVMTest
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
-        ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmpRead = 
-            (CapabilitiesVM) MessageFactory.read(bais);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        CapabilitiesVM vmpRead = (CapabilitiesVM) MessageFactory.read(bais);
         assertEquals(vmp, vmpRead);
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
@@ -64,6 +66,19 @@ public class CapabilitiesVMTest
         CapabilitiesVM.reconstructInstance();
         vmp = CapabilitiesVM.instance();
         assertGreaterThan(-1, vmp.isActiveDHTNode());
+    }
+    
+    public void testTLSCapability() throws Exception {
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        assertEquals(-1, vmp.supportsTLS());
+        assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
+        
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        CapabilitiesVM.reconstructInstance();
+        vmp = CapabilitiesVM.instance();
+        assertEquals(1, vmp.supportsTLS());
+        assertEquals(1, vmp.supportsCapability("TLS!".getBytes()));
     }
 
     public void testNetworkConstructor() throws Exception {

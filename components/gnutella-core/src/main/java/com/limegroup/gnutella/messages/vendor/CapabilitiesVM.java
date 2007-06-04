@@ -16,6 +16,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -45,6 +46,9 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
     
+    /** Bytes for supporting incoming TLS. */
+    private static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
+    
     /**
      * The current version of this message.
      */
@@ -58,7 +62,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * The current instance of this CVM that this node will forward to others
      */
-    private static CapabilitiesVM _instance;
+    private volatile static CapabilitiesVM _instance;
 
     /**
      * Constructs a new CapabilitiesVM from data read off the network.
@@ -139,6 +143,11 @@ public final class CapabilitiesVM extends VendorMessage {
             hashSet.add(smp);
         }
         
+        if(ConnectionSettings.TLS_INCOMING.getValue()) {
+            smp = new SupportedMessageBlock(TLS_SUPPORT_BYTES, 1);
+            hashSet.add(smp);
+        }
+        
     }
 
 
@@ -163,6 +172,15 @@ public final class CapabilitiesVM extends VendorMessage {
                 return version;
         }
         return -1;
+    }
+    
+    /**
+     * Return 1 or higher if TLS is supported by the connection.
+     * This does not necessarily mean the connection is over
+     * TLS though.
+     */
+    public int supportsTLS() {
+        return supportsCapability(TLS_SUPPORT_BYTES);
     }
 
 
