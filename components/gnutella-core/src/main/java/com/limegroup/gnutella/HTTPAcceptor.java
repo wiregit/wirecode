@@ -25,6 +25,7 @@ import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
@@ -186,7 +187,7 @@ public class HTTPAcceptor {
         HttpExecutionContext context = new HttpExecutionContext(null);
         HttpResponse response = responseFactory.newHttpResponse(request
                 .getRequestLine().getHttpVersion(), HttpStatus.SC_OK, context);
-        response.getParams().setDefaults(this.params);
+        HttpParamsLinker.link(response, this.params);
 
         // HttpContextParams.setLocal(context, true);
         context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
