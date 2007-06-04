@@ -6,7 +6,6 @@ import java.util.Map;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.AbstractServer;
-import org.limewire.store.storeserver.util.Numbers;
 
 
 /**
@@ -60,7 +59,7 @@ public class DemoRemoteServer extends RemoteServer {
     }
 
     public int hashCode() {
-      return this.key.hashCode() << Numbers.SIXTEEN + this.ip.hashCode();
+      return this.key.hashCode() << 16 + this.ip.hashCode();
     }
 
     public String toString() {
