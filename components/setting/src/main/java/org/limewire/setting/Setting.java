@@ -1,6 +1,12 @@
 package org.limewire.setting;
 
+import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.setting.evt.SettingEvent.Type;
 
 
 /**
@@ -46,8 +52,7 @@ import java.util.Properties;
  * example shows how to load and save the setting to disk.
  */
 public abstract class Setting {
-
-
+    
 	/**
 	 * Protected default <tt>Properties</tt> instance for subclasses.
 	 */
@@ -72,14 +77,15 @@ public abstract class Setting {
 	/**
 	 * Value for whether or not this setting should always save.
 	 */
-	private boolean _alwaysSave = false;
+	private boolean alwaysSave = false;
 	
 	/**
 	 * Setting for whether or not this setting is private and should
 	 * not be reported in bug reports.
 	 */
-	private boolean _isPrivate = false;
+	private boolean isPrivate = false;
 
+    private Collection<SettingListener> listeners = new CopyOnWriteArrayList<SettingListener>();
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -103,13 +109,38 @@ public abstract class Setting {
         loadValue(defaultValue);
 	}
     
+	/**
+	 * 
+	 */
+	public void addSettingListener(SettingListener l) {
+        if (l == null) {
+            throw new NullPointerException("SettingListener is null");
+        }
+        
+        listeners.add(l);
+    }
+    
+	/**
+	 * 
+	 */
+    public void removeSettingListener(SettingListener l) {
+        if (l == null) {
+            throw new NullPointerException("SettingListener is null");
+        }
+        
+        listeners.remove(l);
+    }
+    
     /**
      * Reload value from properties object
      */
     public void reload() {
         String value = PROPS.getProperty(KEY);
-        if (value == null) value = DEFAULT_VALUE;
+        if (value == null) {
+            value = DEFAULT_VALUE;
+        }
         loadValue(value);
+        fireSettingEvent(Type.RELOAD);
     }
 
 	/**
@@ -121,13 +152,14 @@ public abstract class Setting {
 	 */
 	public void revertToDefault() {
         setValue(DEFAULT_VALUE);
+        fireSettingEvent(Type.REVERT_TO_DEFAULT);
 	}
 	
 	/**
 	 * Determines whether or not this value should always be saved to disk.
 	 */
     public boolean shouldAlwaysSave() {
-        return _alwaysSave;
+        return alwaysSave;
     }
     
     /**
@@ -135,16 +167,22 @@ public abstract class Setting {
      * it is default.
      * Returns this so it can be used during assignment.
      */
-    public Setting setAlwaysSave(boolean save) {
-        _alwaysSave = save;
+    public Setting setAlwaysSave(boolean alwaysSave) {
+        if (this.alwaysSave != alwaysSave) {
+            this.alwaysSave = alwaysSave;
+            fireSettingEvent(Type.ALWAYS_SAVE_CHANGED);
+        }
         return this;
     }
     
     /**
      * Sets whether or not this setting should be reported in bug reports.
      */
-    public Setting setPrivate(boolean priv) {
-        _isPrivate = priv;
+    public Setting setPrivate(boolean isPrivate) {
+        if (this.isPrivate != isPrivate) {
+            this.isPrivate = isPrivate;
+            fireSettingEvent(Type.PRIVACY_CANGED);
+        }
         return this;
     }
     
@@ -152,7 +190,7 @@ public abstract class Setting {
      * Determines whether or not a setting is private.
      */
     public boolean isPrivate() {
-        return _isPrivate;
+        return isPrivate;
     }
 	
     /**
@@ -184,8 +222,12 @@ public abstract class Setting {
      * StringSetting updates the access to public.
      */
     protected void setValue(String value) {
-        PROPS.put(KEY, value);
-        loadValue(value);
+        String old = PROPS.getProperty(KEY);
+        if (old == null || !old.equals(value)) {
+            PROPS.put(KEY, value);
+            loadValue(value);
+            fireSettingEvent(Type.VALUE_CHANGED);
+        }
     }
 
     /**
@@ -194,4 +236,27 @@ public abstract class Setting {
      */
     abstract protected void loadValue(String sValue);    
 
+    public String toString() {
+        return KEY + "=" + getValueAsString();
+    }
+    
+    protected void fireSettingEvent(Type type) {
+        fireSettingEvent(new SettingEvent(type, this));
+    }
+    
+    protected void fireSettingEvent(final SettingEvent evt) {
+        if (evt == null) {
+            throw new NullPointerException("SettingEvent is null");
+        }
+        
+        Runnable command = new Runnable() {
+            public void run() {
+                for (SettingListener l : listeners) {
+                    l.handleSettingEvent(evt);
+                }
+            }
+        };
+        
+        SettingsHandler.instance().fireEvent(command);
+    }
 }

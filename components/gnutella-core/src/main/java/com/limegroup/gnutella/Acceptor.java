@@ -239,7 +239,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         
         if (_port != oldPort || tryingRandom) {
             ConnectionSettings.PORT.setValue(_port);
-            SettingsHandler.save();
+            SettingsHandler.instance().save();
             RouterService.addressChanged();
         }
 

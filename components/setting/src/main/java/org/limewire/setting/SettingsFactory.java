@@ -297,6 +297,10 @@ public final class SettingsFactory implements Iterable<Setting> {
         }
     }
     
+    public String toString() {
+        return PROPS.toString();
+    }
+    
     /**
      * Return settings properties
      */

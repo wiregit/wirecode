@@ -4,15 +4,16 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.setting.Settings;
+import org.limewire.setting.AbstractSettings;
 import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.evt.SettingsEvent.Type;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A container of LibraryData.
  */
-public class LibraryData implements Settings {
+public class LibraryData extends AbstractSettings {
     
     /**
      * The Container data, storing all the information.
@@ -47,23 +48,20 @@ public class LibraryData implements Settings {
     public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
-     * Whether or not a 'save' operation is actually going to save to disk.
-     */
-    private boolean shouldSave = true;
-    
-    /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
-        SettingsHandler.addSettings(this);
+        SettingsHandler.instance().addSettings(this);
     }
     
     /**
      * Saves all the settings to disk.
      */
     public void save() {
-        if(shouldSave)
+        if (getShouldSave()) {
             DATA.save();
+            fireSettingsEvent(Type.SAVE);
+        }
     }
     
     /**
@@ -71,13 +69,7 @@ public class LibraryData implements Settings {
      */
     public void revertToDefault() {
         DATA.clear();
-    }
-    
-    /**
-     * Sets whether or not these settings should be saved to disk.
-     */
-    public void setShouldSave(boolean save) {
-        shouldSave = save;
+        fireSettingsEvent(Type.REVERT_TO_DEFAULT);
     }
     
     /**
@@ -85,6 +77,7 @@ public class LibraryData implements Settings {
      */
     public void reload() {
         DATA.load();
+        fireSettingsEvent(Type.RELOAD);
     }
     
 	/**

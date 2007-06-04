@@ -1187,7 +1187,7 @@ public class RouterService {
             } catch (IOException e) {}
             
             // save limewire.props & other settings
-            SettingsHandler.save();
+            SettingsHandler.instance().save();
 			
 			RatingTable.instance().ageAndSave();
             

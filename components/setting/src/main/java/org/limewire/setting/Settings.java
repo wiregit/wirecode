@@ -1,5 +1,7 @@
 package org.limewire.setting;
 
+import org.limewire.setting.evt.SettingsListener;
+
 /**
  * Defines the interface to reload and save a value, revert to a 
  * default value and mark a value as always saving. 
@@ -19,4 +21,7 @@ public interface Settings {
     
     public void setShouldSave(boolean save);
     
+    public void addSettingsListener(SettingsListener l);
+    
+    public void removeSettingsListener(SettingsListener l);
 }

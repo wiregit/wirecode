@@ -203,8 +203,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Ensures that no settings are saved.
      */
     public static void setupSettings() throws Exception{
-        SettingsHandler.setShouldSave(false);
-        SettingsHandler.revertToDefault();
+        SettingsHandler.instance().setShouldSave(false);
+        SettingsHandler.instance().revertToDefault();
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
@@ -309,7 +309,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sets standard settings for a pristine test environment.
      */
     public static void setStandardSettings() {
-        SettingsHandler.revertToDefault();
+        SettingsHandler.instance().revertToDefault();
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 		ConnectionSettings.NUM_CONNECTIONS.setValue(4);
 		SearchSettings.GUESS_ENABLED.setValue(true);
