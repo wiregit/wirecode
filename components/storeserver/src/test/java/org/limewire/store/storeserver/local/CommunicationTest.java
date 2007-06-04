@@ -13,6 +13,15 @@ import org.limewire.store.storeserver.util.Util;
  * @author jpalm
  */
 public class CommunicationTest extends DemoSupport {
+    
+  public CommunicationTest() { super("CommunicationTest"); }
+  
+  public static void main(String[] args) throws Exception {
+      CommunicationTest t = new CommunicationTest();
+      t.setUp();
+      t.testGiveKey();
+      t.tearDown();
+  }
 
   public void testEchoMsg() {
     final String pk = getPrivateKey();
@@ -44,7 +53,7 @@ public class CommunicationTest extends DemoSupport {
   }
 
   public void testGoodMessageBeforeAuthentication() {
-    getCode().sendLocalMsg("Authenticate", NULLARGS, errorHandler(Server.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+    getCode().sendLocalMsg(Server.Commands.AUTHENTICATE, NULLARGS, errorHandler(Server.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
   }
 
   // -------------------------------------------------------

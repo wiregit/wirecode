@@ -20,7 +20,7 @@ public class LocalLocalServer extends ServerImpl {
   private final LocalServerDelegate del;
 
   public LocalLocalServer(final int otherPort, final boolean loud) {
-    super(PORT);
+    super(PORT, "Local Server");
     this.del = new LocalServerDelegate(this, otherPort, loud);
   }
 
@@ -35,7 +35,7 @@ public class LocalLocalServer extends ServerImpl {
 
   @Override
   protected void noteNewState(State newState) {
-      note("new state: " + newState);
+      note("new state: {0}", newState);
   }
 
 }

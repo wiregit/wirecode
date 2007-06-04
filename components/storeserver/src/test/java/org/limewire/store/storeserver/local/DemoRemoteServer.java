@@ -80,7 +80,8 @@ public class DemoRemoteServer extends RemoteServer {
   protected String lookUpPrivateKey(final String publicKey, final String ip) {
     final Pair p = new Pair(publicKey, ip);
     final String privateKey = pairs2privateKeys.get(p);
-    note("found private key: " + privateKey + " for " + p);
+    note("pairs: {0}", pairs2privateKeys);
+    note("found private key {0} for {1}", privateKey, p);
     return privateKey == null ? Server.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP : privateKey;
   }
   

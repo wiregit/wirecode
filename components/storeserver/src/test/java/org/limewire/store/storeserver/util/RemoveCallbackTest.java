@@ -6,6 +6,8 @@ import org.limewire.store.storeserver.util.Util;
 import junit.framework.TestCase;
 
 public class RemoveCallbackTest extends TestCase {
+    
+    public RemoveCallbackTest() { super("RemoveCallbackTest"); }
 	
 	final static char Q = Server.Constants.CALLBACK_QUOTE;
 	

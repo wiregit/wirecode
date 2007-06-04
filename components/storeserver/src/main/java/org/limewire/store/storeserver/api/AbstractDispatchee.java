@@ -11,9 +11,7 @@ import java.util.List;
 public abstract class AbstractDispatchee implements Dispatchee {
 
     private final org.limewire.store.storeserver.api.Server server;
-
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
-
     private boolean isConnected;
 
     public AbstractDispatchee(final Server server) {

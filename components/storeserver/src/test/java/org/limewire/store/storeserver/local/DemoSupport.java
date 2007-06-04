@@ -7,6 +7,8 @@ import org.limewire.store.storeserver.core.RemoteServer;
 import org.limewire.store.storeserver.core.AbstractServer;
 import org.limewire.store.storeserver.util.Util;
 
+import com.limegroup.gnutella.util.LimeTestCase;
+
 
 import junit.framework.TestCase;
 
@@ -16,6 +18,8 @@ import junit.framework.TestCase;
  * @author jpalm
  */
 public abstract class DemoSupport extends TestCase {
+    
+  public DemoSupport(String s) { super(s); }
 
   public final static int LOCAL_PORT  = 8080;
   public final static int REMOTE_PORT = 8090;

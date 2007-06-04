@@ -8,6 +8,8 @@ import org.limewire.store.storeserver.util.Util;
 import junit.framework.TestCase;
 
 public class ParseArgsTest extends AbstractParseTestCase {
+    
+    public ParseArgsTest() { super("ParseArgsTest"); }
 
 	public void test() {
 		allTest();

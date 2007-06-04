@@ -1,7 +1,8 @@
 package org.limewire.store.storeserver.core;
 
 /**
- * Contains information about the incoming request.
+ * Contains information about the incoming request. This could expand, but
+ * currently just holds an IP address.
  * 
  * @author jpalm
  */

@@ -6,10 +6,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.StringTokenizer;
 
 import org.limewire.store.storeserver.core.CookieGenTest;
+import org.limewire.store.storeserver.core.CreateCookieDateTest;
+import org.limewire.store.storeserver.local.CommunicationTest;
+import org.limewire.store.storeserver.util.AddURLEncodedArgumentsTest;
+import org.limewire.store.storeserver.util.GetIPAddressTest;
+import org.limewire.store.storeserver.util.ParseArgsTest;
+import org.limewire.store.storeserver.util.ParseHeaderTest;
+import org.limewire.store.storeserver.util.RemoveCallbackTest;
 import org.limewire.store.storeserver.util.TestUtil;
-
+import org.limewire.util.LimeTestSuite;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -18,13 +26,25 @@ import junit.framework.TestSuite;
  * @author jpalm
  */
 public final class AllTests {
-  
-  private AllTests() { }
 
-  public static Test suite() {
-    final StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), File.pathSeparator);
-    final String bin = st.nextToken();
-    return TestUtil.addAllTestCases(bin, new TestSuite("Test for com.limewire.store.server"));
-  }
+    private AllTests() {
+    }
+
+    public static Test suite() throws InstantiationException,
+            IllegalAccessException {
+        final TestSuite res = new TestSuite();
+        final Class[] ts = { 
+                AddURLEncodedArgumentsTest.class,
+                CookieGenTest.class, 
+                CreateCookieDateTest.class,
+                GetIPAddressTest.class,
+                ParseArgsTest.class, 
+                ParseHeaderTest.class,
+                RemoveCallbackTest.class, 
+                CommunicationTest.class,
+        };
+        for (Class t : ts) res.addTest((TestCase) t.newInstance());
+        return res;
+    }
 
 }

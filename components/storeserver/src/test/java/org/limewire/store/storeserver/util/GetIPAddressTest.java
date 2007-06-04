@@ -9,19 +9,23 @@ import junit.framework.TestCase;
 
 public class GetIPAddressTest extends TestCase {
 
-  public void testNull() {
-    InetAddress addr = null;
-    String ip = Util.getIPAddress(addr);
-    assertNull(ip);
-  }
-
-  public void testSimple() {
-    try {
-      InetAddress addr = InetAddress.getByName("localhost");
-      String ip = Util.getIPAddress(addr);
-      assertEquals("127.0.0.1", ip);
-    } catch (UnknownHostException e) {
-      e.printStackTrace();
+    public GetIPAddressTest() {
+        super("GetIPAddressTest");
     }
-  }
+
+    public void testNull() {
+        InetAddress addr = null;
+        String ip = Util.getIPAddress(addr);
+        assertNull(ip);
+    }
+
+    public void testSimple() {
+        try {
+            InetAddress addr = InetAddress.getByName("localhost");
+            String ip = Util.getIPAddress(addr);
+            assertEquals("127.0.0.1", ip);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 }

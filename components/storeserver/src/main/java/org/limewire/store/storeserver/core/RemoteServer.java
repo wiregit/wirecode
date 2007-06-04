@@ -14,8 +14,12 @@ import org.limewire.store.storeserver.util.Util;
  */
 public abstract class RemoteServer extends AbstractServer {
 
+  public RemoteServer(final int port, final String name) {
+    super(port, name);
+  }
+  
   public RemoteServer(final int port) {
-    super(port);
+    this(port, "Remote Server");
   }
 
   @Override
@@ -60,6 +64,7 @@ public abstract class RemoteServer extends AbstractServer {
   class StoreKey extends AbstractHandler {
     
     public String handle(final Map<String, String> args, final Request req) {
+        
       String publicKey = getArg(args, Server.Parameters.PUBLIC);
       if (publicKey == null) {
         return report(Server.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
@@ -90,6 +95,9 @@ public abstract class RemoteServer extends AbstractServer {
   class GiveKey extends HandlerWithCallback {
     
     public String handleRest(final Map<String, String> args, final Request req) {
+        
+        note("hargs : " + args);
+        
       String publicKey = getArg(args, Server.Parameters.PUBLIC);
       if (publicKey == null) {
         return report(Server.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
