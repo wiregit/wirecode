@@ -81,7 +81,6 @@ public class CommandHandler {
             "select .+",
             "nextid",
             "rt_gui",
-            "tiles_gui",
             "arcs_gui",
             "test",
             "bootstrapped"
@@ -435,13 +434,6 @@ public class CommandHandler {
     @SuppressWarnings("unchecked")
     public static void rt_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("org.limewire.mojito.visual.RouteTableVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
-        show.invoke(null, dht);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static void tiles_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("org.limewire.mojito.visual.TilesVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
     }
