@@ -27,7 +27,7 @@ public final class SettingsHandler {
     
     private final Collection<Settings> PROPS = Collections.synchronizedList(new ArrayList<Settings>());
 
-    private final Collection<SettingsHandlerListener> listeners = new CopyOnWriteArrayList<SettingsHandlerListener>();
+    private volatile Collection<SettingsHandlerListener> listeners;
     
     private volatile Executor executor = Executors.newSingleThreadExecutor();
     
@@ -43,6 +43,12 @@ public final class SettingsHandler {
             throw new NullPointerException("SettingsHandlerListener is null");
         }
         
+        synchronized (this) {
+            if (listeners == null) {
+                listeners = new CopyOnWriteArrayList<SettingsHandlerListener>();
+            }
+        }
+        
         listeners.add(l);
     }
     
@@ -54,7 +60,9 @@ public final class SettingsHandler {
             throw new NullPointerException("SettingsHandlerListener is null");
         }
         
-        listeners.remove(l);
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     /**
@@ -137,15 +145,17 @@ public final class SettingsHandler {
             throw new NullPointerException("SettingsHandlerEvent is null");
         }
         
-        Runnable command = new Runnable() {
-            public void run() {
-                for (SettingsHandlerListener l : listeners) {
-                    l.handleSettingsHandlerEvent(evt);
+        if (listeners != null && listeners.isEmpty()) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    for (SettingsHandlerListener l : listeners) {
+                        l.handleSettingsHandlerEvent(evt);
+                    }
                 }
-            }
-        };
-        
-        fireEvent(command);
+            };
+            
+            fireEvent(command);
+        }
     }
     
     public void setExecutor(Executor executor) {

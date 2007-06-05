@@ -12,7 +12,7 @@ public abstract class AbstractSettings implements Settings {
     /**
      * 
      */
-    private final Collection<SettingsListener> listeners = new CopyOnWriteArrayList<SettingsListener>();
+    private volatile Collection<SettingsListener> listeners;
     
     /**
      * Value for whether or not settings should be saved to file.
@@ -24,7 +24,23 @@ public abstract class AbstractSettings implements Settings {
             throw new NullPointerException("SettingsListener is null");
         }
         
+        synchronized (this) {
+            if (listeners == null) {
+                listeners = new CopyOnWriteArrayList<SettingsListener>();
+            }
+        }
+        
         listeners.add(l);
+    }
+    
+    public void removeSettingsListener(SettingsListener l) {
+        if (l == null) {
+            throw new NullPointerException("SettingsListener is null");
+        }
+        
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     /** Mutator for shouldSave     */
@@ -40,14 +56,6 @@ public abstract class AbstractSettings implements Settings {
         return shouldSave;
     }
     
-    public void removeSettingsListener(SettingsListener l) {
-        if (l == null) {
-            throw new NullPointerException("SettingsListener is null");
-        }
-        
-        listeners.remove(l);
-    }
-    
     protected void fireSettingsEvent(Type type) {
         fireSettingsEvent(new SettingsEvent(type, this));
     }
@@ -57,14 +65,16 @@ public abstract class AbstractSettings implements Settings {
             throw new NullPointerException("SettingsEvent is null");
         }
         
-        Runnable command = new Runnable() {
-            public void run() {
-                for (SettingsListener l : listeners) {
-                    l.handleSettingsEvent(evt);
+        if (listeners != null && listeners.isEmpty()) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    for (SettingsListener l : listeners) {
+                        l.handleSettingsEvent(evt);
+                    }
                 }
-            }
-        };
-        
-        SettingsHandler.instance().fireEvent(command);
+            };
+            
+            SettingsHandler.instance().fireEvent(command);
+        }
     }
 }

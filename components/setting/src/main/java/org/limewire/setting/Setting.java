@@ -85,7 +85,7 @@ public abstract class Setting {
 	 */
 	private boolean isPrivate = false;
 
-    private Collection<SettingListener> listeners = new CopyOnWriteArrayList<SettingListener>();
+    private volatile Collection<SettingListener> listeners = null;
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -117,6 +117,12 @@ public abstract class Setting {
             throw new NullPointerException("SettingListener is null");
         }
         
+        synchronized (this) {
+            if (listeners == null) {
+                listeners = new CopyOnWriteArrayList<SettingListener>();
+            }
+        }
+        
         listeners.add(l);
     }
     
@@ -128,7 +134,9 @@ public abstract class Setting {
             throw new NullPointerException("SettingListener is null");
         }
         
-        listeners.remove(l);
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     /**
@@ -249,14 +257,16 @@ public abstract class Setting {
             throw new NullPointerException("SettingEvent is null");
         }
         
-        Runnable command = new Runnable() {
-            public void run() {
-                for (SettingListener l : listeners) {
-                    l.handleSettingEvent(evt);
+        if (listeners != null && !listeners.isEmpty()) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    for (SettingListener l : listeners) {
+                        l.handleSettingEvent(evt);
+                    }
                 }
-            }
-        };
-        
-        SettingsHandler.instance().fireEvent(command);
+            };
+            
+            SettingsHandler.instance().fireEvent(command);
+        }
     }
 }
