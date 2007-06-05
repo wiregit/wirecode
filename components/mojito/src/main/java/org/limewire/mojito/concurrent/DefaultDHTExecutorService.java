@@ -45,6 +45,8 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     private final String name;
     
+    private volatile boolean running = false;
+    
     public DefaultDHTExecutorService(String name) {
         this.name = name;
         threadFactory = new DefaultThreadFactory(name);
@@ -55,8 +57,11 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
      * @see com.limegroup.mojito.concurrent.DHTExecutorService#start()
      */
     public void start() {
-        initScheduledExecutor();
-        initCachedExecutor();
+        if (!running) {
+            initScheduledExecutor();
+            initCachedExecutor();
+            running = true;
+        }
     }
     
     /*
@@ -64,8 +69,11 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
      * @see com.limegroup.mojito.concurrent.DHTExecutorService#stop()
      */
     public void stop() {
-        cancel(scheduledExecutor.shutdownNow());
-        cancel(cachedExecutor.shutdownNow());
+        if (running) {
+            running = false;
+            cancel(scheduledExecutor.shutdownNow());
+            cancel(cachedExecutor.shutdownNow());
+        }
     }
 
     /**
@@ -125,7 +133,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.concurrent.DHTExecutorService#getThreadFactory()
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#getThreadFactory()
      */
     public ThreadFactory getThreadFactory() {
         return threadFactory;
@@ -133,7 +141,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
 
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.concurrent.DHTExecutorService#setThreadFactory(java.util.concurrent.ThreadFactory)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#setThreadFactory(java.util.concurrent.ThreadFactory)
      */
     public void setThreadFactory(ThreadFactory threadFactory) {
         this.threadFactory = threadFactory;
@@ -141,7 +149,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
 
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
      */
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
             long delay, long period, TimeUnit unit) {
@@ -150,7 +158,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
             long initialDelay, long delay, TimeUnit unit) {
@@ -159,7 +167,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#schedule(java.util.concurrent.Callable, long, java.util.concurrent.TimeUnit)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#schedule(java.util.concurrent.Callable, long, java.util.concurrent.TimeUnit)
      */
     public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
         return scheduledExecutor.schedule(task, delay, unit);
@@ -175,7 +183,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#submit(java.util.concurrent.Callable)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#submit(java.util.concurrent.Callable)
      */
     public <V> Future<V> submit(Callable<V> task) {
         return cachedExecutor.submit(task);
@@ -183,9 +191,11 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#execute(java.lang.Runnable)
+     * @see org.limewire.mojito.concurrent.DHTExecutorService#execute(java.lang.Runnable)
      */
     public void execute(Runnable command) {
-        cachedExecutor.execute(command);
+        if (running) {
+            cachedExecutor.execute(command);
+        }
     }
 }

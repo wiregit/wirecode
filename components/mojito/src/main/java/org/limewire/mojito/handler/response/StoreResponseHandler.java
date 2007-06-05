@@ -413,7 +413,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             StoreStatusCode statusCode = statusCodes.iterator().next();
             if (!statusCode.isFor(entity)) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " sent a wrong " + statusCode + " " + entity);
+                    LOG.error(node + " sent a wrong [" + statusCode + "] for " + entity);
                 }
                 return;
             }
