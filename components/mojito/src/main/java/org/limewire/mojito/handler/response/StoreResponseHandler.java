@@ -47,6 +47,7 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -413,7 +414,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             StoreStatusCode statusCode = statusCodes.iterator().next();
             if (!statusCode.isFor(entity)) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " sent a wrong [" + statusCode + "] for " + entity);
+                    LOG.error(node + " sent a wrong [" + statusCode + "] for " + entity
+                            + "\n" + CollectionUtils.toString(entities));
                 }
                 return;
             }

@@ -58,6 +58,7 @@ import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ContactsScrubber;
+import org.limewire.mojito.util.EntityUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 
@@ -121,46 +122,44 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         private OnewayExchanger<StoreResult, ExecutionException> exchanger;
         
-        private final KUID valueId;
+        private final KUID primaryKey;
         
         private final Entry<? extends Contact, ? extends SecurityToken> node;
         
-        private final Collection<? extends DHTValueEntity> values;
+        private final Collection<? extends DHTValueEntity> entities;
         
         private final long waitOnLock;
         
-        public StoreProcess(Collection<? extends DHTValueEntity> values) {
-            this(null, values);
+        public StoreProcess(Collection<? extends DHTValueEntity> entities) {
+            this(null, entities);
         }
         
         public StoreProcess(Entry<? extends Contact, ? extends SecurityToken> node,
-                Collection<? extends DHTValueEntity> values) {
+                Collection<? extends DHTValueEntity> entities) {
             
-            this.values = values;
+            this.entities = entities;
             this.node = node;
             
             if (node != null && node.getKey() == null) {
                 throw new IllegalArgumentException("Contact is null");
             }
             
-            if (values.isEmpty()) {
+            if (entities.isEmpty()) {
                 throw new IllegalArgumentException("No Values to store");
             }
             
-            KUID valueId = null;
+            // If Node is null it means we've to search for the
+            // k-closest Nodes first which only works if all
+            // DHTValueEntities have the same primary key!
             if (node == null) {
-                for (DHTValueEntity value : values) {
-                    if (valueId == null) {
-                        valueId = value.getPrimaryKey();
-                    }
-                    
-                    if (!valueId.equals(value.getPrimaryKey())) {
-                        throw new IllegalArgumentException("All DHTValues must have the same Value ID");
-                    }
+                this.primaryKey = EntityUtils.getPrimaryKey(entities);
+                if (primaryKey == null) {
+                    throw new IllegalArgumentException("All DHTValues must have the same primary key");
                 }
+            } else {
+                this.primaryKey = null;
             }
             
-            this.valueId = valueId;
             this.waitOnLock = StoreSettings.getWaitOnLock(node != null);
         }
 
@@ -263,7 +262,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         private void doStoreOnPath(Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path) {
             // And store the values along the path
             StoreResponseHandler handler 
-                = new StoreResponseHandler(context, path, values);
+                = new StoreResponseHandler(context, path, entities);
             start(handler, exchanger);
         }
         
@@ -302,9 +301,9 @@ public class StoreManager extends AbstractManager<StoreResult> {
         private LookupResponseHandler<LookupResult> createLookupResponseHandler() {
             LookupResponseHandler<? extends LookupResult> handler = null;
             if (LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
-                handler = new FindNodeResponseHandler(context, valueId);
+                handler = new FindNodeResponseHandler(context, primaryKey);
             } else {
-                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.ANY);
+                EntityKey lookupKey = EntityKey.createEntityKey(primaryKey, DHTValueType.ANY);
                 handler = new FindValueResponseHandler(context, lookupKey);
             }
             return (LookupResponseHandler<LookupResult>)handler;
