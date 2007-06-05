@@ -39,6 +39,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     private HTTPUploadManager uploadManager;
 
+    private ConnectionDispatcher connectionDispatcher;
+
     public UrnHttpRequestTest(String name) {
         super(name);
     }
@@ -69,15 +71,18 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fm = new MetaFileManager();
         acceptor = new HTTPAcceptor();
         uploadManager = new HTTPUploadManager(new UploadSlotManager());
-
+        connectionDispatcher = new ConnectionDispatcher();
+        
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
                 .getNumFiles());
         uploadManager.start(acceptor, fm, RouterService.getCallback());
+        acceptor.start(connectionDispatcher);
     }
 
     @Override
     protected void tearDown() throws Exception {
+        acceptor.stop(connectionDispatcher);
         uploadManager.stop(acceptor);
         fm.stop();
     }

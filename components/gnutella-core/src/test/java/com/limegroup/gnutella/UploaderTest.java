@@ -131,6 +131,8 @@ public class UploaderTest extends BaseTestCase {
         upManager = (HTTPUploadManager) RouterService.getUploadManager();
         upManager.start(RouterService.getHTTPUploadAcceptor(), fm, RouterService.getCallback());
 
+        RouterService.getHTTPUploadAcceptor().start(RouterService.getConnectionDispatcher());
+        
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
     }
@@ -138,6 +140,8 @@ public class UploaderTest extends BaseTestCase {
     @Override
     public void tearDown() {
         StalledUploadWatchdog.DELAY_TIME = savedDelayTime;
+        
+        RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
         
         upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager.cleanup();
