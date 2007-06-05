@@ -2,6 +2,7 @@ package org.limewire.io;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,13 +36,17 @@ public interface IpPort {
     String getAddress();
     
     /**
-     * Comparator for IpPort objects that ignores the port.
+     * Accessor for the InetSocketAddress that can describe the IP & Port.
+     * 
+     * @return the InetSocketAddress of this host.
      */
-    public static final Comparator<IpPort> IP_COMPARATOR = new IpComparator();
+    InetSocketAddress getInetSocketAddress();
+
     
-    /**
-     * The sole comparator to use for IpPort objects.
-     */
+    /** Comparator for IpPort objects that ignores the port. */
+    public static final Comparator<IpPort> IP_COMPARATOR = new IpComparator();
+        
+    /** The sole comparator to use for IpPort objects. */
     public static final Comparator<IpPort> COMPARATOR = new IpPortComparator();
     
     /** An empty list, casted to an IpPort. */
@@ -49,6 +54,7 @@ public interface IpPort {
     /** An empty set, casted to an IpPort. */
     public static final Set<IpPort> EMPTY_SET = Collections.emptySet();
     
+    /** An IpPort Comparator that only looks at the IP portion, not the port. */
     public static class IpComparator implements Comparator<IpPort> {
         public int compare(IpPort ip1, IpPort ip2) {
             if(ip1 == ip2)

@@ -295,7 +295,7 @@ public class AltLocFinder {
             }
             
             Set<? extends IpPort> proxies = pushProxies.getPushProxies();
-            int features = pushProxies.getFeatures();
+            byte features = pushProxies.getFeatures();
             int fwtVersion = pushProxies.getFwtVersion();
             IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
             

@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.SocketTimeoutException;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.PrivilegedAccessor;
@@ -29,14 +31,28 @@ public class LimeTestUtils {
     }
 
     public static void waitForNIO() throws InterruptedException {
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
             }
         });
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        try {
+            future.get();
+        } catch(ExecutionException ee) {
+            throw new IllegalStateException(ee);
+        }
+        
+        // the runnable is run at the beginning of the processing cycle so 
+        // we need a second runnable to make sure the cycle has been completed
+        future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
             }
         });
+        try {
+            future.get();
+        } catch(ExecutionException ee) {
+            throw new IllegalStateException(ee);
+        }
+        
     }
 
     public static void setActivityCallBack(ActivityCallback cb)

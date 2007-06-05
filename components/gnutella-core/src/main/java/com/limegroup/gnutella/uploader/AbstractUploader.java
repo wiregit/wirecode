@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.ssl.SSLUtils;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -388,5 +391,35 @@ public abstract class AbstractUploader implements Uploader {
     public void setHost(String host) {
         this.host = host;
     }
+ 
+    /** Returns true if the socket this is on is currently using TLS. */
+    public boolean isTLSCapable() {
+        return SSLUtils.isTLSEnabled(getSession().getIOSession().getSocket());
+    }
+
+    /** Returns the address of the host that initiated this upload. */
+    public String getAddress() {
+        return getSession().getHost();
+    }
+
+   /** Returns the address of the host that initiated this session. */
+    public InetAddress getInetAddress() {
+        return getSession().getIOSession().getSocket().getInetAddress();
+    }
+
+    /** Returns a combination of getInetAddress and getPort. */
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
+    }
+
+    /** Returns the Gnutella Port, if one was provided.  Otherwise, the remote port from the socket. */
+    public int getPort() {
+        int gnutellaPort = getGnutellaPort();
+        if(gnutellaPort != -1)
+            return gnutellaPort;
+        else
+            return ((InetSocketAddress)getSession().getIOSession().getRemoteAddress()).getPort();
+    }
+    
 
 }

@@ -4,23 +4,23 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.LinkedList;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.channel.DelayedBufferWriter;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.IOErrorObserver;
 import org.limewire.util.BufferUtils;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
-import com.limegroup.bittorrent.messages.BTMessage;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 
 public class BTMessageWriter implements BTChannelWriter {
 
@@ -96,7 +96,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		myKeepAlive.flip();
 	}
 
-	public void init(SchedulingThreadPool scheduler, int keepAliveInterval) {
+	public void init(ScheduledExecutorService scheduler, int keepAliveInterval) {
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getWriteThrottle());
 		delayer = new DelayedBufferWriter(1400, 3000);

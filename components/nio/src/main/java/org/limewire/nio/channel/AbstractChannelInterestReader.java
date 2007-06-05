@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import org.limewire.util.BufferUtils;
 
 public abstract class AbstractChannelInterestReader implements ChannelReadObserver, InterestScatteringByteChannel {
+    
     protected ByteBuffer buffer;
     protected InterestReadableByteChannel source;
     protected boolean shutdown;

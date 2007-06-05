@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.io.Connectable;
+
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
@@ -10,7 +12,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  * HTTP/1.1 session. However, multiple HTTPUploaders should be used for multiple
  * files in a single HTTP/1.1 session.
  */
-public interface Uploader extends BandwidthTracker {
+public interface Uploader extends BandwidthTracker, Connectable {
 
 	public static final int CONNECTING        = 0;
 	public static final int FREELOADER        = 1;

@@ -59,6 +59,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -84,6 +85,7 @@ import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
@@ -310,6 +312,19 @@ public class ManagedConnection extends Connection
      */
     public ManagedConnection(String host, int port) {
         super(host, port);
+        _manager = RouterService.getConnectionManager();
+    }
+    
+    /**
+     * Creates a new outgoing connection to the specified host on the
+     * specified port, using the specified kind of ConnectType.
+     *
+     * @param host the address of the host we're connecting to
+     * @param port the port the host is listening on
+     * @param type the type of outgoing connection we want to make (TLS, PLAIN, etc)
+     */
+    public ManagedConnection(String host, int port, ConnectType type) {
+        super(host, port, type);
         _manager = RouterService.getConnectionManager();
     }
       
@@ -745,9 +760,6 @@ public class ManagedConnection extends Connection
      * @modifies the network underlying this
      */
     public void send(Message m) {
-        if (! supportsGGEP())
-            m=m.stripExtendedPayload();
-
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
     	int smh = hopsFlowMax;
@@ -912,8 +924,8 @@ public class ManagedConnection extends Connection
     /**
      * Returns the network that the MessageReceiver uses -- Message.N_TCP.
      */
-    public int getNetwork() {
-        return Message.N_TCP;
+    public Network getNetwork() {
+        return Network.TCP;
     }
     
 

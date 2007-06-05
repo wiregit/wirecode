@@ -34,6 +34,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -573,7 +574,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
                 return null;
             try {
                 socket.setSoTimeout(timeout);
-                Message m=MessageFactory.read(socket.getInputStream(), Message.N_TCP);
+                Message m=MessageFactory.read(socket.getInputStream(), Network.TCP);
                 if(type.isInstance(m))
                     return (T)m;
                 else if(m == null) //interruptedIOException thrown

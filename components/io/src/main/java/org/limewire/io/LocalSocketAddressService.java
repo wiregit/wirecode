@@ -41,6 +41,11 @@ public class LocalSocketAddressService {
         return activeService.isLocalAddressPrivate();
     }
     
+    /** Utility method for calling getSharedProvider().isTLSCapable() */
+    public static boolean isTLSCapable() {
+        return activeService.isTLSCapable();
+    }
+    
     private static class DefaultProvider implements LocalSocketAddressProvider {
         public byte[] getLocalAddress() {
             try {
@@ -56,6 +61,10 @@ public class LocalSocketAddressService {
 
         public boolean isLocalAddressPrivate() {
             return true;
+        }
+        
+        public boolean isTLSCapable() {
+            return false;
         }
         
     }

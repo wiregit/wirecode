@@ -7,12 +7,16 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
+import org.limewire.nio.NBSocketFactory;
+import org.limewire.nio.NIOSocketFactory;
+
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.StubConnectObserver;
 
 public class LimitedSocketControllerTest extends LimeTestCase {
     
     private static final int TIMEOUT = 30000;
+    private static final NBSocketFactory FACTORY = new NIOSocketFactory();
     
     private int BAD_PORT = 9998;
     private InetSocketAddress BAD_ADDR = new InetSocketAddress("127.0.0.1", BAD_PORT);
@@ -69,8 +73,8 @@ public class LimitedSocketControllerTest extends LimeTestCase {
     public void testWaitsForTurn() throws Exception {
         StubConnectObserver o1 = new StubConnectObserver();
         StubConnectObserver o2 = new StubConnectObserver();
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o1);
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o1);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(false, true);
@@ -81,8 +85,8 @@ public class LimitedSocketControllerTest extends LimeTestCase {
     public void testWaitsForTurnNB() throws Exception {
         StubConnectObserver o1 = new StubConnectObserver();
         StubConnectObserver o2 = new StubConnectObserver();
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o1);
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o1);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(true, true);
@@ -92,16 +96,16 @@ public class LimitedSocketControllerTest extends LimeTestCase {
     
     public void testRemoveObserver() throws Exception {
         StubConnectObserver o1 = new StubConnectObserver();
-        CONTROLLER.connect(LISTEN_ADDR, 0, o1);
+        CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, o1);
         assertFalse(CONTROLLER.removeConnectObserver(o1));
         
         StubConnectObserver o2 = new StubConnectObserver();
         StubConnectObserver o3 = new StubConnectObserver();
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o3);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o3);
 
         StubConnectObserver o4 = new StubConnectObserver();
-        CONTROLLER.connect(LISTEN_ADDR, 0, o4);
+        CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, o4);
         assertTrue(CONTROLLER.removeConnectObserver(o4));
         o3.waitForResponse(60000); // wait until o2 & o3 finish, make sure 4 didn't try
         Thread.sleep(1000);
@@ -116,16 +120,16 @@ public class LimitedSocketControllerTest extends LimeTestCase {
         ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
         
         StubConnectObserver o1 = new StubConnectObserver();
-        CONTROLLER.connect(LISTEN_ADDR, 0, o1);
+        CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, o1);
         assertFalse(CONTROLLER.removeConnectObserver(o1));
         
         StubConnectObserver o2 = new StubConnectObserver();
         StubConnectObserver o3 = new StubConnectObserver();
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o2);
-        CONTROLLER.connect(BAD_GOOGLE_ADDR, TIMEOUT, o3);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        CONTROLLER.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o3);
 
         StubConnectObserver o4 = new StubConnectObserver();
-        CONTROLLER.connect(LISTEN_ADDR, 0, o4);
+        CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, o4);
         assertTrue(CONTROLLER.removeConnectObserver(o4));
         o3.waitForResponse(60000); // wait until o2 & o3 finish, make sure 4 didn't try
         Thread.sleep(1000);
@@ -138,10 +142,10 @@ public class LimitedSocketControllerTest extends LimeTestCase {
         if (success) {
             Socket s;
             if (!nb) {
-                s = CONTROLLER.connect(LISTEN_ADDR, 0, null);
+                s = CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, null);
             } else {
                 StubConnectObserver o = new StubConnectObserver();
-                s = CONTROLLER.connect(LISTEN_ADDR, 0, o);
+                s = CONTROLLER.connect(FACTORY, LISTEN_ADDR, 0, o);
                 o.waitForResponse(60000);
                 assertEquals(s, o.getSocket());
                 assertNull(o.getIoException());
@@ -152,14 +156,14 @@ public class LimitedSocketControllerTest extends LimeTestCase {
         } else {
             if (!nb) {
                 try {
-                    CONTROLLER.connect(BAD_ADDR, 0, null);
+                    CONTROLLER.connect(FACTORY, BAD_ADDR, 0, null);
                     fail("acceptedConnection from a bad proxy server");
                 } catch (IOException iox) {
                     // Good -- expected behaviour
                 }
             } else {
                 StubConnectObserver o = new StubConnectObserver();
-                CONTROLLER.connect(BAD_ADDR, 0, o);
+                CONTROLLER.connect(FACTORY, BAD_ADDR, 0, o);
                 o.waitForResponse(60000);
                 assertNull(o.getSocket());
                 assertNull(o.getIoException());

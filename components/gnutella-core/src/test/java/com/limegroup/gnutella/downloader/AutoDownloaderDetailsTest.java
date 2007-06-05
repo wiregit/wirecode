@@ -33,7 +33,7 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.LimeT
             rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
                                          i, GUID.makeGuid(),
                                          3, false, 3, false,null, null,
-                                         false, false,"",null, -1);
+                                         false, false,"",null, -1, false);
 
         //Test serialization by writing to disk and rereading.  All the methods
         //should still work afterwards.

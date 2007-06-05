@@ -33,6 +33,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
@@ -133,7 +134,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
                                  QueryRequest.SPECIAL_FIREWALL_MASK |
                                  QueryRequest.SPECIAL_FWTRANS_MASK,
                                  "berkeley", "", null, 
-                                 null, null, false, Message.N_UNKNOWN, false, 
+                                 null, null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
         testUP[0].send(query);
         testUP[0].flush();

@@ -89,7 +89,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
-        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500, null);
+        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
@@ -113,7 +113,7 @@ public class HttpIOReactorTest extends BaseTestCase {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);
                     }
-                }, new String[] { "GET", "HEAD", "POST" }, false, false);
+                }, false, false, "GET", "HEAD", "POST" );
 
         final HttpTestClient client = new HttpTestClient();
         MyHttpRequestExecutionHandler executionHandler = new MyHttpRequestExecutionHandler();

@@ -584,7 +584,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
 
@@ -699,7 +699,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = TestFile.hash();
         RemoteFileDesc rfd = makeRFD(urn);
@@ -817,7 +817,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         ((MyCallback)getCallback()).clearGUID();
 
         // create a new Uploader to service the download
-        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT+1);
+        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT+1, false);
         uploader2.setRate(100);
 
         { // send back a query request, the TestUploader should service upload
@@ -883,7 +883,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         RemoteFileDesc rfd = makeRFD(urn);
@@ -1019,11 +1019,11 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         
-        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT*2);
+        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT*2, false);
         uploader2.setBusy(true);
         RemoteFileDesc rfd2 = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
 
@@ -1141,7 +1141,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
 
@@ -1292,7 +1292,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                                   "whatever", 10, GUID.makeGuid(),
                                   1, false, 3, false, null, 
                                   urns, false, false, 
-                                  "LIME", new HashSet(), -1);
+                                  "LIME", new HashSet(), -1, false);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {

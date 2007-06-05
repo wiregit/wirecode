@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.chat;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ public class InstantMessenger implements Chatter {
     public void start() {
         if (outgoing) {
             try {
-                Sockets.connect(host, port, Constants.TIMEOUT,
+                Sockets.connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)
                                     throws IOException {

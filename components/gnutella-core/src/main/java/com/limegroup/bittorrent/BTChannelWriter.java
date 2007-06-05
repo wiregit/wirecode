@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
-import org.limewire.concurrent.SchedulingThreadPool;
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.limewire.nio.channel.ChannelWriter;
 
 import com.limegroup.bittorrent.messages.BTMessage;
@@ -26,6 +27,6 @@ public interface BTChannelWriter extends ChannelWriter {
 	 * @param keepAliveInterval how often to send keepalives if there is no
 	 * other traffic
 	 */
-	public void init(SchedulingThreadPool scheduler, int keepAliveInterval);
+	public void init(ScheduledExecutorService scheduler, int keepAliveInterval);
 
 }

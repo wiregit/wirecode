@@ -71,7 +71,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
      * Factory method for testing purposes
      */
     static PushProxiesValue createPushProxiesValue(Version version, byte[] guid, 
-                int features, int fwtVersion, 
+                byte features, int fwtVersion, 
                 int port, Set<? extends IpPort> proxies) {
         return new PushProxiesValueImpl(version, guid, features, fwtVersion, port, proxies);
     }
@@ -117,7 +117,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
     /**
      * The supported features of the Gnutella Node
      */
-    public abstract int getFeatures();
+    public abstract byte getFeatures();
     
     /**
      * The version of the firewalls-to-firewall 
@@ -149,7 +149,8 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
     protected static byte[] serialize(PushProxiesValue value) {
         GGEP ggep = new GGEP();
         ggep.put(CLIENT_ID, value.getGUID());
-        ggep.put(FEATURES, value.getFeatures());
+        // Preserve insertion as an int, not a byte, for backwards compatability.
+        ggep.put(FEATURES, (int)value.getFeatures());
         ggep.put(FWT_VERSION, value.getFwtVersion());
         
         byte[] port = new byte[2];
@@ -187,7 +188,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
         /**
          * Gnutella features bit-field
          */
-        private final int features;
+        private final byte features;
         
         /**
          * Gnutella Firewall-2-Firewall Transfer Protocol version
@@ -214,7 +215,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
          * Constructor for testing purposes
          */
         public PushProxiesValueImpl(Version version, byte[] guid, 
-                int features, int fwtVersion, 
+                byte features, int fwtVersion, 
                 int port, Set<? extends IpPort> proxies) {
             super(version);
             
@@ -247,7 +248,10 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
                     throw new DHTValueException("Illegal GUID length: " + guid.length);
                 }
                 
-                this.features = ggep.getInt(FEATURES);
+                // Ideally this would be changed to getByte and getByte would be added,
+                // but since clients in the field are inserting features as an int,
+                // we need to preserve the functionality.
+                this.features = (byte)ggep.getInt(FEATURES);
                 this.fwtVersion = ggep.getInt(FWT_VERSION);
                 
                 byte[] portBytes = ggep.getBytes(PORT);
@@ -326,7 +330,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
          * (non-Javadoc)
          * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getFeatures()
          */
-        public int getFeatures() {
+        public byte getFeatures() {
             return features;
         }
 
@@ -390,7 +394,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
             return RouterService.getMyGUID();
         }
         
-        public int getFeatures() {
+        public byte getFeatures() {
             return PushEndpointForSelf.instance().getFeatures();
         }
 

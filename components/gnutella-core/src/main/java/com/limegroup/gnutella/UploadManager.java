@@ -6,7 +6,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 
 /**
  * Defines the requirements for classes that manage Gnutella uploads. 
-	 */
+ */
 public interface UploadManager extends BandwidthTracker {
     
     /**
@@ -61,19 +61,17 @@ public interface UploadManager extends BandwidthTracker {
 	/**
      * Returns the estimated upload speed in <b>KILOBITS/s</b> [sic] of the
      *  next transfer, assuming the client (i.e., downloader) has infinite
-     * bandwidth. Returns -1 if not enough data is available for an accurate
-     * estimate.
-		 */
+     */
     int measuredUploadSpeed();
   		
-		/**
+	/**
      * Registers {@link HttpRequestHandler}s with <code>acceptor</code>.
-		 */
+	 */
     void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback);
         
-		/**
+	/**
      * Deregisters {@link HttpRequestHandler}s with <code>acceptor</code>.
-		 */
+	 */
     void stop(HTTPAcceptor acceptor);
     
 }

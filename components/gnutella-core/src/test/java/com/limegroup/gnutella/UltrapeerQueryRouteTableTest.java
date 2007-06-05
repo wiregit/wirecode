@@ -14,6 +14,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 
 /**
@@ -82,7 +83,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         ROUTER_SERVICE.start();
         
         RouterService.connectToHostAsynchronously("localhost", 
-            Backend.BACKEND_PORT);    
+            Backend.BACKEND_PORT, ConnectType.PLAIN);    
         
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.

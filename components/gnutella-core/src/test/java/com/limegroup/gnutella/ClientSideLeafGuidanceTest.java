@@ -332,7 +332,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                 null, Collections.EMPTY_SET,
                 false,false,
                 "ALT",
-                Collections.EMPTY_SET, 0l);
+                Collections.EMPTY_SET, 0l, false);
         
         SpamManager.instance().handleUserMarkedSpam(new RemoteFileDesc[]{anita});
         assertTrue(SpamManager.instance().isSpam(anita));

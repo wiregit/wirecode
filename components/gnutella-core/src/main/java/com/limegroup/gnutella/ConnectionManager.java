@@ -23,8 +23,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.SystemUtils;
 
@@ -50,6 +50,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.StrictIpPortSet;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -309,9 +311,10 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         RouterService.getConnectionDispatcher().
         addConnectionAcceptor(this,
-        		new String[]{ConnectionSettings.CONNECT_STRING_FIRST_WORD,"LIMEWIRE"},
         		false,
-        		false);
+        		false,
+        		ConnectionSettings.CONNECT_STRING_FIRST_WORD,
+                "LIMEWIRE");
         
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
@@ -355,8 +358,8 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(String hostname, int portnum) throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum);
+    public ManagedConnection createConnectionBlocking(String hostname, int portnum, ConnectType type) throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum, type);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c, null);
@@ -368,15 +371,13 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
-    public void createConnectionAsynchronously(
-            String hostname, int portnum) {
-
-		Runnable outgoingRunner =
-			new OutgoingConnector(new ManagedConnection(hostname, portnum),
-								  true);
-        // Initialize and loop for messages on another thread.
-
-		ThreadExecutor.startThread(outgoingRunner, "OutgoingConnectionThread");
+    public void createConnectionAsynchronously(String hostname, int portnum, ConnectType type) {
+        ManagedConnection mc = new ManagedConnection(hostname, portnum, type);
+        try {
+            initializeExternallyGeneratedConnection(mc, new IncomingGNetObserver(mc));
+        } catch(IOException iox) {
+            mc.close(); // ensure it's closed.
+        }
     }
 
 
@@ -1140,11 +1141,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     }
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Returns a list of this' initialized connections.
      */
     public List<ManagedConnection> getInitializedConnections() {
         return _initializedConnections;
@@ -1165,11 +1162,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     }
 
     /**
-     * @requires returned value not modified
-     * @effects returns a list of this' initialized connections.  <b>This
-     *  exposes the representation of this, but is needed in some cases
-     *  as an optimization.</b>  All lookup values in the returned value
-     *  are guaranteed to run in linear time.
+     * Returns a list of this' initialized connections.
      */
     public List<ManagedConnection> getInitializedClientConnections() {
         return _initializedClientConnections;
@@ -1206,12 +1199,12 @@ public class ConnectionManager implements ConnectionAcceptor,
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set<IpPort> getPushProxies() {
+    public Set<? extends Connectable> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
-            Set<IpPort> proxies = new IpPortSet();
+            Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
             for(ManagedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;
@@ -2209,8 +2202,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections created through createConnectionAsynchronously and
-     * createConnectionBlocking
+     * ManagedConnections created by createConnectionBlocking
      */
     private class OutgoingConnector implements Runnable {
         private final ManagedConnection _connection;
@@ -2249,6 +2241,8 @@ public class ConnectionManager implements ConnectionAcceptor,
 		if(conn.isGUESSUltrapeer())
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
+        if(LOG.isDebugEnabled())
+            LOG.debug("Looping for messages with conn: " + conn);
 		// this can throw IOException
 		conn.loopForMessages();
 	}
@@ -2258,12 +2252,14 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Not as robust as ConnectionFetcher because less accounting is needed.
      */
     private class IncomingGNetObserver implements GnetConnectObserver {
-        private ManagedConnection connection;
+        private final ManagedConnection connection;
         IncomingGNetObserver(ManagedConnection connection) {
             this.connection = connection;
         }
 
         public void handleConnect() {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Completing IncomingGNetObserver.handleConnect for: " + connection);
             try {
                 if(completeInitializeExternallyGeneratedConnection(connection))
                     startConnection(connection);
@@ -2281,6 +2277,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
 
         public void shutdown() {
+            LOG.debug("Shutting down IncomingGNetobserver for: " + connection);
             cleanupBrokenExternallyGeneratedConnection(connection);
         }
         
@@ -2298,9 +2295,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     private class ConnectionFetcher implements GnetConnectObserver, HostCatcher.EndpointObserver {
         // set if this connectionfetcher is a preferencing fetcher
-        private boolean _pref = false;
-        private ManagedConnection connection;
-        private Endpoint endpoint;
+        private final boolean _pref;
+        private volatile ManagedConnection connection;
+        private volatile Endpoint endpoint;
         private volatile boolean stoppedEarly = false;
 
         public ConnectionFetcher() {
@@ -2343,22 +2340,36 @@ public class ConnectionManager implements ConnectionAcceptor,
         /** Does nothing right now. */
         public void finish() {
         }
+        
+        /** Returns true if we are able to make a connection attempt to this host. */
+        private boolean isConnectableHost(IpPort host) {
+            return RouterService.getIpFilter().allow(host)
+                && !isConnectedTo(host.getAddress()) 
+                && !isConnectingTo(host);
+        }
 
         /** Callback that an endpoint is available for connecting. */
-        public void handleEndpoint(Endpoint endpoint) {
-            Assert.that(endpoint != null);
+        public void handleEndpoint(Endpoint incoming) {
+            assert incoming != null;
             
             // If this was an invalid endpoint, try again.
-            if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
-                || isConnectedTo(endpoint.getAddress())
-                || isConnectingTo(endpoint)
-                || (!isSupernode() && attemptClassC(endpoint))) {
-                _catcher.getAnEndpoint(this);
-                return;
+            while(!isConnectableHost(incoming) || attemptClassC(incoming)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Ignoring unconnectable host: " + incoming);
+                incoming = _catcher.getAnEndpointImmediate(this);
+                if(incoming == null) {
+                    LOG.debug("No hosts available, waiting on a new one...");
+                    return; // if we didn't get one immediate, the callback is scheduled
+                }
             }
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("Starting fetch for connectable host: " + incoming);
 
-            this.endpoint = endpoint;
-            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort());
+            this.endpoint = incoming;
+            ConnectType type = endpoint.isTLSCapable() && ConnectionSettings.TLS_OUTGOING.getValue() ? 
+                                        ConnectType.TLS : ConnectType.PLAIN;
+            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();
             _connectionAttempts++;

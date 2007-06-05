@@ -3,6 +3,7 @@ package org.limewire.io;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 
@@ -24,7 +25,7 @@ import org.limewire.service.ErrorService;
  * It's not ok to use <code>IpPortForSelf</code> in objects whose hashCode or 
  * equals will depend on the values returned by any of the getters.  
  */
-public class IpPortForSelf implements IpPort {
+public class IpPortForSelf implements IpPort, Connectable {
 	
 	private static final IpPort INSTANCE = new IpPortForSelf();
 	private static final InetAddress localhost;
@@ -61,8 +62,15 @@ public class IpPortForSelf implements IpPort {
 	public int getPort() {
 		return LocalSocketAddressService.getLocalPort();
 	}
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
+    }
 	
 	public String toString() {
 		return getAddress() +":"+getPort();
 	}
+    public boolean isTLSCapable() {
+        return LocalSocketAddressService.isTLSCapable();
+    }
 }

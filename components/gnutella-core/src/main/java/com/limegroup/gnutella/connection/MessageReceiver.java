@@ -3,6 +3,7 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 
 /**
  * Notifications & information about asynchronous message processing.
@@ -22,7 +23,7 @@ public interface MessageReceiver {
     /**
      * The network this message-receiver uses for creating messages.
      */
-    public int getNetwork();
+    public Network getNetwork();
     
     /**
      * Notification that the stream is closed.

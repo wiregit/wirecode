@@ -21,6 +21,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
@@ -256,7 +257,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
                                               "whatever", null, null, null, 
                                               null, false, 
-                                              Message.N_UNKNOWN, false, 0,
+                                              Network.UNKNOWN, false, 0,
                                               true, 0);
         sendF(LEAF[0], query);
         
@@ -653,7 +654,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     	QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
                 "not proxied", null, null, null, 
                 null, false, 
-                Message.N_UNKNOWN, false, 0,
+                Network.UNKNOWN, false, 0,
                 true, 0);
     	
     	sendF(LEAF[0], query);

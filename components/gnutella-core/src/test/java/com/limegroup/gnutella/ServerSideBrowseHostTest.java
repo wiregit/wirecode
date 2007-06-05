@@ -11,6 +11,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -83,7 +84,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
-                                              null, false, 0, false, 0);
+                                              null, false, Network.UNKNOWN, false, 0);
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 

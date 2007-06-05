@@ -2,7 +2,6 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.service.ErrorService;
@@ -74,47 +73,6 @@ public class AlternateLocationCollection<T extends AlternateLocation>
      */
 	public static <T extends AlternateLocation> AlternateLocationCollection<T> create(URN sha1) {
 		return new AlternateLocationCollection<T>(sha1);
-	}
-
-	/**
-	 * Creates a new <tt>AlternateLocationCollection</tt> with all alternate
-	 * locations contained in the given comma-delimited HTTP header value
-	 * string.  The returned <tt>AlternateLocationCollection</tt> may be empty.
-	 *
-	 * @param value the HTTP header value containing alternate locations
-	 * @return a new <tt>AlternateLocationCollection</tt> with any valid
-	 *  <tt>AlternateLocation</tt>s from the HTTP string, or <tt>null</tt>
-	 *  if no valid locations could be found
-	 * @throws <tt>NullPointerException</tt> if <tt>value</tt> is <tt>null</tt>
-	 * 
-	 * Note: this method requires the full altloc syntax (including the SHA1 in it)
-	 * In other words, you cannot use the httpStringValue() output as an input to 
-	 * this method if you want to recreate the collection.  It seems to be used only
-	 * in downloader.HeadRequester 
-	 */
-	public static AlternateLocationCollection<AlternateLocation> 
-		createCollectionFromHttpValue(final String value) {
-		if(value == null) {
-			throw new NullPointerException("cannot create an "+
-                                           "AlternateLocationCollection "+
-										   "from a null value");
-		}
-		StringTokenizer st = new StringTokenizer(value, ",");
-		AlternateLocationCollection<AlternateLocation> alc = null;
-		while(st.hasMoreTokens()) {
-			String curTok = st.nextToken();
-			try {
-				AlternateLocation al = AlternateLocation.create(curTok);
-				if(alc == null)
-					alc = new AlternateLocationCollection<AlternateLocation>(al.getSHA1Urn());
-
-				if(al.getSHA1Urn().equals(alc.getSHA1Urn()))
-					alc.add(al);
-			} catch(IOException e) {
-				continue;
-			}
-		}
-		return alc;
 	}
 
 	/**

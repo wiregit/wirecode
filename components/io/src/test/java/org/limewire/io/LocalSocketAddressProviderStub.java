@@ -7,7 +7,8 @@ public class LocalSocketAddressProviderStub implements LocalSocketAddressProvide
     private byte[] localAddress;
     private int localPort;
     private boolean localAddressPrivate;
-
+    private boolean tlsCapable;
+    
     public byte[] getLocalAddress() {
         return localAddress;
     }
@@ -30,6 +31,14 @@ public class LocalSocketAddressProviderStub implements LocalSocketAddressProvide
 
     public void setLocalPort(int localPort) {
         this.localPort = localPort;
+    }
+    
+    public boolean isTLSCapable() {
+        return tlsCapable;
+    }
+    
+    public void setTLSCapable(boolean tlsCapable) {
+        this.tlsCapable = tlsCapable;
     }
 
 }

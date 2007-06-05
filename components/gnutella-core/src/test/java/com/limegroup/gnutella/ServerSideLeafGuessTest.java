@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Iterator;
 
@@ -89,8 +90,8 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(),
-                                       SERVER_PORT, 1200);
+                sock = Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                       SERVER_PORT), 1200);
                 os = sock.getOutputStream();
                 os.write("CONNECT BACK\r\n\r\n".getBytes());
                 os.flush();

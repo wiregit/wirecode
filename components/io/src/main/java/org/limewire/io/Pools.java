@@ -1,6 +1,7 @@
 package org.limewire.io;
 
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -132,7 +133,7 @@ public class Pools {
             }
             if(delay > 0) {
                 _evictor = new Evictor();
-                SimpleTimer.sharedTimer().schedule(_evictor, delay, delay);
+                SimpleTimer.sharedTimer().scheduleWithFixedDelay(_evictor, delay, delay, TimeUnit.MILLISECONDS);
             }
         }
         

@@ -88,35 +88,35 @@ public class UploaderTest extends BaseTestCase {
         descs.add(descStub);
         rfd1 = new RemoteFileDesc("1.1.1.1",1,0,"abc1.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"", null, -1);
+                                  false, null, descStub.getUrns(), false, false,"", null, -1, false);
         
         descStub = new FileDescStub("abc2.txt",urn2,1);
         urns.put(urn2,descStub);
         descs.add(descStub);
         rfd2 = new RemoteFileDesc("1.1.1.2",1,1,"abc2.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1, false);
         
         descStub = new FileDescStub("abc3.txt",urn3,2);
         urns.put(urn3,descStub);
         descs.add(descStub);
         rfd3 = new RemoteFileDesc("1.1.1.3",1,2,"abc3.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1, false);
         
         descStub = new FileDescStub("abc4.txt",urn4,3);
         urns.put(urn4,descStub);
         descs.add(descStub);
         rfd4 = new RemoteFileDesc("1.1.1.4",1,3,"abc4.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1, false);
         
         descStub = new FileDescStub("abc5.txt",urn5,4);
         urns.put(urn5,descStub);
         descs.add(descStub);
         rfd5 = new RemoteFileDesc("1.1.1.5",1,4,"abc5.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1, false);
         
         //UploadSlotManager slotManager = new UploadSlotManager();
         //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
@@ -1124,7 +1124,7 @@ public class UploaderTest extends BaseTestCase {
     private static void connectDloader(HTTPDownloader dloader, boolean tcp, 
                                        RemoteFileDesc rfd,boolean queue) throws Exception {  
         if(tcp)
-            dloader.connectTCP(0); //may throw TryAgainLater, etc.
+            dloader.initializeTCP();
         connectHTTP(dloader, 0, rfd.getSize(), queue);
     }
     
@@ -1132,7 +1132,7 @@ public class UploaderTest extends BaseTestCase {
                                                 boolean tcp)
                                                 throws Exception {
         if(tcp)
-            dloader.connectTCP(0);
+            dloader.initializeTCP();
         addThexHeader(dloader);
         return requestHashTree(dloader);
     }

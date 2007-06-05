@@ -51,6 +51,10 @@ public abstract class MojitoTestCase extends BaseTestCase {
             public boolean isLocalAddressPrivate() {
                 return NetworkSettings.LOCAL_IS_PRIVATE.getValue();
             }
+
+            public boolean isTLSCapable() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
         });
     }
     

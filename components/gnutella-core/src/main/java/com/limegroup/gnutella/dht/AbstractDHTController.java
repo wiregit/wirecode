@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -416,6 +416,10 @@ public abstract class AbstractDHTController implements DHTController {
         public SocketAddress getSocketAddress() {
             return addr;
         }
+
+        public InetSocketAddress getInetSocketAddress() {
+            return addr;
+        }
     }
     
     /**
@@ -430,7 +434,7 @@ public abstract class AbstractDHTController implements DHTController {
         
         private final Set<SocketAddress> dhtNodes;
         
-        private TimerTask timerTask;
+        private ScheduledFuture<?> timerTask;
         
         private boolean isRunning;
         
@@ -483,7 +487,8 @@ public abstract class AbstractDHTController implements DHTController {
         
         synchronized void stop() {
             if(timerTask != null) {
-                timerTask.cancel();
+                // TODO: should this attempt to cancel the running task, or not?
+                timerTask.cancel(true);
             }
             dhtNodes.clear();
             isRunning = false;

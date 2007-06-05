@@ -11,9 +11,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.net.ssl.SSLServerSocket;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.service.ErrorService;
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.nio.ssl.SSLUtils;
 
 
 /**
@@ -27,25 +30,37 @@ public class TestBootstrapServer {
     private static final Log LOG =
         LogFactory.getLog(TestBootstrapServer.class);
     
-    ServerSocket _ss;
-    List _sockets = new LinkedList();
+    private ServerSocket _ss;
+    private List _sockets = new LinkedList();
 
-    volatile String _request;
-    volatile String _response;
-    volatile String _responseData="";
+    private volatile String _request;
+    private volatile String _response;
+    private volatile String _responseData="";
     
-    boolean _allowConnectionReuse = false;
+    private boolean _allowConnectionReuse = false;
     
-    int _numConnections = 0;
-    int _numRequests = 0;
+    private int _numConnections = 0;
+    private int _numRequests = 0;
 
     /** Starts a single bootstrap server listening on the given port
      *  Call setResponse() to set abnormal HTTP responses.
      *  Call setResponseData() to modify the response data. 
      *  @exception IOException this couldn't list on the port */    
-    public TestBootstrapServer(int port) throws IOException { 
+    public TestBootstrapServer(int port) throws IOException {
+        this(port, false);
+    }
+    
+    public TestBootstrapServer(int port, boolean useTLS) throws IOException { 
         setResponse("HTTP/1.0 200 OK");
-        _ss=new ServerSocket();
+        if(useTLS) {
+            SSLServerSocket sslServer = (SSLServerSocket)SSLUtils.getTLSContext().getServerSocketFactory().createServerSocket();
+            sslServer.setNeedClientAuth(false);
+            sslServer.setWantClientAuth(false);
+            sslServer.setEnabledCipherSuites(new String[] {"TLS_DH_anon_WITH_AES_128_CBC_SHA"});
+            _ss = sslServer;
+        } else {
+            _ss=new ServerSocket();
+        }
         _ss.setReuseAddress(true);
         _ss.bind(new InetSocketAddress(port));
         Thread runner=new RunnerThread();
@@ -108,13 +123,11 @@ public class TestBootstrapServer {
         }
     }
 
-    private class RunnerThread extends Thread {
+    private class RunnerThread extends ManagedThread {
         public void run() {
             try {
                 run2();
             } catch (IOException e) {
-            } catch(Throwable e) {
-                ErrorService.error(e);
             }
         }
         

@@ -17,17 +17,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.nio.observer.AcceptChannelObserver;
@@ -79,17 +79,6 @@ public class NIODispatcher implements Runnable {
     
     private static final NIODispatcher INSTANCE = new NIODispatcher();
     public static final NIODispatcher instance() { return INSTANCE; }
-    
-    private final SchedulingThreadPool SCHEDULER =
-    	new MyThreadPool();
-    
-    private final TransportListener TRANSPORT_LISTENER = 
-    	new MyTransportListener();
-    
-    
-    /**
-     * Constructs the sole NIODispatcher, starting its thread.
-     */
     private NIODispatcher() {
         boolean failed = false;
         try {
@@ -104,6 +93,8 @@ public class NIODispatcher implements Runnable {
         } else {
             dispatchThread = null;
         }
+        
+        EXECUTOR = new NIOExecutorService(dispatchThread);
     }
     
     /**
@@ -124,6 +115,12 @@ public class NIODispatcher implements Runnable {
     /** Queue lock. */
     private final Object Q_LOCK = new Object();
     
+    /** A listener to notify the NIO thread when a selector has a pending event. */
+    private final TransportListener TRANSPORT_LISTENER = new MyTransportListener();
+    
+    /** An ExecutorService that invokes runnables on the NIO thread. */
+    private final ScheduledExecutorService EXECUTOR;
+    
     /**
      * A map of classes of SelectableChannels to the Selector that should
      * be used to register that channel with.
@@ -137,7 +134,8 @@ public class NIODispatcher implements Runnable {
     /** The invokeLater queue. */
     private Collection <Runnable> LATER = new LinkedList<Runnable>();
     
-    private final BlockingQueue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
+    /** A queue of DelayedRunnables to process tasks. */
+    private final BlockingQueue<ScheduledFutureTask> DELAYED = new DelayQueue<ScheduledFutureTask>();
     
     /** The throttle queue. */
     private final List <NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
@@ -199,7 +197,7 @@ public class NIODispatcher implements Runnable {
         if(Thread.currentThread() == dispatchThread)
             THROTTLE.add(t);
         else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     THROTTLE.add(t);
                 }
@@ -321,11 +319,6 @@ public class NIODispatcher implements Runnable {
         handler.shutdown();
     }
     
-    /** Attaches the given attachment to the SelectionKey. */
-    public void attach(SelectionKey key, IOErrorObserver attachment) {
-        key.attach(new Attachment(attachment));
-    }
-    
     /**
      * Registers a new Selector that should be used when SelectableChannels
      * assignable from the given class are registered.
@@ -335,7 +328,7 @@ public class NIODispatcher implements Runnable {
             POLLERS.add(newSelector);
             OTHER_SELECTORS.put(channelClass, newSelector);
         } else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     POLLERS.add(newSelector);
                     OTHER_SELECTORS.put(channelClass, newSelector);
@@ -352,7 +345,7 @@ public class NIODispatcher implements Runnable {
             POLLERS.remove(selector);
             OTHER_SELECTORS.remove(selector);
         } else {
-            invokeLater(new Runnable() {
+            executeLaterAlways(new Runnable() {
                 public void run() {
                     POLLERS.remove(selector);
                     OTHER_SELECTORS.remove(selector);
@@ -361,78 +354,25 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Invokes the method in the NIODispatch thread. */
-   public void invokeLater(Runnable runner) {
-        if(Thread.currentThread() == dispatchThread) {
-            runner.run();
-        } else 
-            invokeReallyLater(runner);
+    /**
+     * Retrieves the ExecutorService this NIODispatcher uses to
+     * run things on the NIO Thread.
+     * If tasks are submitted for execution while already on the NIO thread,
+     * the task will be immediately run.  Otherwise,
+     * the tasks will be scheduled for running as soon as possible on the
+     * NIO Thread.
+     */
+    public ScheduledExecutorService getScheduledExecutorService() {
+        return EXECUTOR;
     }
-   
-   /** Same as invokeLater, except forces the Runnable to be done later on. */
-   public void invokeReallyLater(Runnable runner) {
+    
+    /** Submits the runnable for execution later, even if the current thread is the NIO thread. */
+    public void executeLaterAlways(Runnable runner) {
         synchronized(Q_LOCK) {
             LATER.add(runner);
         }
         wakeup();
     }
-   
-   /**
-    * Invokes a Runnable that will run as soon as possible.
-    * The returned Future can be used to cancel the Runnable from running.
-    * Attempting to call 'get' on the Future will return null.
-    */
-   public Future<?> submit(Runnable runner) {
-       FutureTask<?> ft = new FutureTask<Object>(runner, null);
-       invokeLater(ft);
-       return ft;
-   }
-   
-   /**
-    * Invokes a Callable that will run as soon as possible.
-    * The returned Future can be used to cancel the Runnable from running,
-    * and retrieve the result, after it finishes.
-    */
-   public <T> Future<T> submit(Callable<T> caller) {
-       FutureTask<T> ft = new FutureTask<T>(caller);
-       invokeLater(ft);
-       return ft;
-   }
-   
-   /**
-    * Invokes a Runnable at some point in the future, and returns
-    * a Future that can be used to cancel the Runnable from running.
-    */
-   public Future<?> submit(Runnable runner, long delay) {
-	   DelayedRunnable ret = new DelayedRunnable(runner, delay);
-	   DELAYED.add(ret);
-	   wakeup();
-	   return ret;
-   }
-   
-   /** Invokes the method in the NIODispatcher thread & returns after it ran. */
-   public void invokeAndWait(final Runnable runner) throws InterruptedException {
-       if(Thread.currentThread() == dispatchThread) {
-           runner.run();
-       } else {
-           Runnable waiter = new Runnable() {
-               public void run() {
-                   runner.run();
-                   synchronized(this) {
-                       notify();
-                   }
-               }
-           };
-           
-           synchronized(waiter) {
-               synchronized(Q_LOCK) {
-                   LATER.add(waiter);
-               }
-               wakeup();
-               waiter.wait();
-           }
-       }
-   }
     
     /** Gets the underlying attachment for the given SelectionKey's attachment. */
     public IOErrorObserver attachment(Object proxyAttachment) {
@@ -513,6 +453,12 @@ public class NIODispatcher implements Runnable {
     private void registerImpl(Selector selector, SelectableChannel channel, int op,
                               IOErrorObserver attachment, int timeout) {
         try {
+            SelectionKey existing = channel.keyFor(selector);
+            if(existing != null) {
+                Attachment old = (Attachment)existing.attachment();
+                old.discard();
+            }
+            
             Attachment guard = new Attachment(attachment);
             SelectionKey key = channel.register(selector, op, guard);
             guard.setKey(key);
@@ -646,9 +592,9 @@ public class NIODispatcher implements Runnable {
                 
                 if(!immediate) {
                 	long delay = nextSelectTimeout();
-                	if (delay == 0)
+                	if (delay == 0) {
                 		immediate = true;
-                	else {
+                    } else {
                         long nanoNow = System.nanoTime();
                         try {
                             primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
@@ -770,6 +716,29 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
+     * Returns true if this channel is going to have handleRead called on its
+     * attachment in this iteration of the NIODispatcher's processing.
+     * 
+     * This must be called from the NIODispatch thread to have any meaningful impact.
+     */
+    boolean isReadReadyThisIteration(SelectableChannel channel) {
+        SelectionKey sk = channel.keyFor(getSelectorFor(channel));
+        Object proxyAttachment = sk.attachment();
+        if(proxyAttachment instanceof Attachment) {
+            Attachment proxy = (Attachment)sk.attachment();
+            if(proxy.lastMod == iteration+1) {
+                if(sk.isValid()) {
+                    try {
+                        return (sk.readyOps() & (~proxy.handled) & SelectionKey.OP_READ) != 0;
+                    } catch(CancelledKeyException ignored) {}
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Processes a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
@@ -793,19 +762,19 @@ public class NIODispatcher implements Runnable {
                     int notHandled = ~proxy.handled;
                     int readyOps = sk.readyOps();
                     if ((allowedOps & readyOps & notHandled & SelectionKey.OP_ACCEPT) != 0)  {
-                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                         proxy.handled |= SelectionKey.OP_ACCEPT;
+                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                     } else if((allowedOps & readyOps & notHandled & SelectionKey.OP_CONNECT) != 0) {
-                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                         proxy.handled |= SelectionKey.OP_CONNECT;
+                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     } else {
                         if ((allowedOps & readyOps & notHandled & SelectionKey.OP_READ) != 0) {
-                            processRead(now, (ReadObserver)attachment, proxy);
                             proxy.handled |= SelectionKey.OP_READ;
+                            processRead(now, (ReadObserver)attachment, proxy);
                         }
                         if ((allowedOps & readyOps & notHandled & SelectionKey.OP_WRITE) != 0) {
-                            processWrite(now, (WriteObserver)attachment, proxy);
                             proxy.handled |= SelectionKey.OP_WRITE;
+                            processWrite(now, (WriteObserver)attachment, proxy);
                         }
                     }
                 } catch (CancelledKeyException err) {
@@ -924,6 +893,8 @@ public class NIODispatcher implements Runnable {
         private long storedTimeoutLength = Long.MAX_VALUE;
         private long storedExpireTime = Long.MAX_VALUE;
         
+        private volatile boolean discarded;
+        
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
@@ -932,73 +903,85 @@ public class NIODispatcher implements Runnable {
             return "Attachment for: " + attachment;
         }
         
+        void discard() {
+            discarded = true;
+        }
+        
         synchronized void clearTimeout() {
             timeoutActive = false;
         }
         
         synchronized void updateReadTimeout(long now) {
-            if(attachment instanceof ReadTimeout) {
-                long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
-                if(timeoutLength != 0) {
-                    long expireTime = now + timeoutLength;
-                    // We need to add a new timeout if none is scheduled or we need
-                    // to timeout before the next one.
-                    if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
-                        addTimeout(now, timeoutLength);
+            if(!discarded) {
+                if(attachment instanceof ReadTimeout) {
+                    long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
+                    if(timeoutLength != 0) {
+                        long expireTime = now + timeoutLength;
+                        // We need to add a new timeout if none is scheduled or we need
+                        // to timeout before the next one.
+                        if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
+                            addTimeout(now, timeoutLength);
+                        } else {
+                            // Otherwise, store the timeout info so when we get notified
+                            // we can reschedule it for the future.
+                            storedExpireTime = expireTime;
+                            storedTimeoutLength = timeoutLength;
+                            timeoutActive = true;
+                        }
                     } else {
-                        // Otherwise, store the timeout info so when we get notified
-                        // we can reschedule it for the future.
-                        storedExpireTime = expireTime;
-                        storedTimeoutLength = timeoutLength;
-                        timeoutActive = true;
+                        clearTimeout();
                     }
-                } else {
-                    clearTimeout();
                 }
             }
         }
         
         synchronized void changeReadStatus(boolean reading) {
-            if(reading)
-                updateReadTimeout(System.currentTimeMillis());
-            else
-                clearTimeout();
+            if(!discarded) {
+                if(reading)
+                    updateReadTimeout(System.currentTimeMillis());
+                else
+                    clearTimeout();
+            }
         }
 
         synchronized void addTimeout(long now, long timeoutLength) {
-            timeoutActive = true;
-            storedTimeoutLength = timeoutLength;
-            storedExpireTime = now + timeoutLength;
-            TIMEOUTER.addTimeout(this, now, timeoutLength);
+            if(!discarded) {
+                timeoutActive = true;
+                storedTimeoutLength = timeoutLength;
+                storedExpireTime = now + timeoutLength;
+                TIMEOUTER.addTimeout(this, now, timeoutLength);
+            }
         }
         
         public void notifyTimeout(long now, long expireTime, long timeoutLength) {
-            boolean cancel = false;
-            long timeToUse = 0;
-            synchronized(this) {
-                if(timeoutActive) {
-                    if(expireTime == storedExpireTime) {
-                        cancel = true;
-                        timeoutActive = false;
-                        timeToUse = storedTimeoutLength;
+            if(!discarded) {
+                boolean cancel = false;
+                long timeToUse = 0;
+                synchronized(this) {
+                    if(timeoutActive) {
+                        if(expireTime == storedExpireTime) {
+                            cancel = true;
+                            timeoutActive = false;
+                            timeToUse = storedTimeoutLength;
+                            storedExpireTime = -1;
+                        } else if(expireTime < storedExpireTime) {
+                            TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
+                        } else { // expireTime > storedExpireTime
+                            storedExpireTime = -1;
+                            if(LOG.isWarnEnabled())
+                                LOG.warn("Ignoring extra timeout for: " + attachment);
+                        }
+                    } else {
                         storedExpireTime = -1;
-                    } else if(expireTime < storedExpireTime) {
-                        TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
-                    } else { // expireTime > storedExpireTime
-                        storedExpireTime = -1;
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Ignoring extra timeout for: " + attachment);
+                        storedTimeoutLength = -1;
                     }
-                } else {
-                    storedExpireTime = -1;
-                    storedTimeoutLength = -1;
                 }
-            }
-            
-            // must do cancel & IOException outside of the lock.
-            if(cancel) {
-                cancel(key, attachment);
-                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
+                
+                // must do cancel & IOException outside of the lock.
+                if(cancel) {
+                    cancel(key, attachment);
+                    attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
+                }
             }
         }
         
@@ -1035,26 +1018,72 @@ public class NIODispatcher implements Runnable {
         public ProcessingException(Throwable t) { super(t); }
     }
     
-    public SchedulingThreadPool getSchedulingThreadPool() {
-    	return SCHEDULER;
-    }
-    
-    private static class MyThreadPool implements SchedulingThreadPool {
+    /** An ExecutorService that runs all tasks on the NIODispatch thread. */
+    private static class NIOExecutorService extends AbstractExecutorService implements ScheduledExecutorService {
+        private final Thread nioThread;
+        
+        private NIOExecutorService(Thread nioThread) {
+            this.nioThread = nioThread;
+        }
+        
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            Thread.sleep(unit.toMillis(timeout));
+            return false;
+        }
 
-		public Future invokeLater(Runnable r, long delay) {
-			return instance().submit(r, delay);
-		}
+        public boolean isShutdown() {
+            return false;
+        }
 
-		public void invokeLater(Runnable runner) {
-			instance().invokeLater(runner);
-		}
-    	
+        public boolean isTerminated() {
+            return false;
+        }
+
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void execute(Runnable command) {
+            if(Thread.currentThread() == nioThread) {
+                command.run();
+            } else {
+                instance().executeLaterAlways(command);
+            }
+        }
+
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+           ScheduledFutureTask<?> ret = new ScheduledFutureTask<Void>(command, null, unit.toNanos(delay));
+           instance().DELAYED.add(ret);
+           instance().wakeup();
+           return ret;
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            ScheduledFutureTask<V> ret = new ScheduledFutureTask<V>(callable, unit.toNanos(delay));
+            instance().DELAYED.add(ret);
+            instance().wakeup();
+            return ret;
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+        
     }
 
     public TransportListener getTransportListener() {
     	return TRANSPORT_LISTENER;
     }
     
+    /** A transport listener that wakes up the selector when an event is pending. */
     private class MyTransportListener implements TransportListener {
     	public void eventPending() {
     		wakeup();

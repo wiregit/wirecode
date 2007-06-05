@@ -24,6 +24,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
@@ -39,6 +40,8 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
     public static final String P_GUID = "guid";
 
     public static final String P_FILE = "file";
+    
+    public static final String P_TLS = "tls";
 
     private HTTPUploadSessionManager sessionManager;
 
@@ -99,6 +102,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
         String clientGUID = null;
         int fileIndex = 0;
+        boolean useTLS = false;
 
         while (t.hasMoreTokens()) {
             final String key = t.nextToken();
@@ -126,7 +130,8 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
                 }
                 if (fileIndex < 0)
                     return null;
-
+            } else if (key.equalsIgnoreCase(P_TLS)) {
+                useTLS = "true".equalsIgnoreCase(val);
             }
         }
 
@@ -142,7 +147,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
             return null;
         }
 
-        return new PushProxyRequest(clientGUID, fileIndex, address);
+        return new PushProxyRequest(clientGUID, fileIndex, address, useTLS);
     }
 
     private InetSocketAddress getNodeAddress(String value) {
@@ -173,7 +178,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
                 clientGUID, request.getFileIndex(), request.getAddress()
                         .getAddress().getAddress(), request.getAddress()
-                        .getPort());
+                        .getPort(), Network.TCP, request.isUseTLS());
         try {
             RouterService.getMessageRouter().sendPushRequest(push);
         } catch (IOException e) {
@@ -190,12 +195,15 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         private int fileIndex;
 
         private InetSocketAddress address;
+        
+        private boolean useTLS;
 
         public PushProxyRequest(String clientGUID, int fileIndex,
-                InetSocketAddress address) {
+                InetSocketAddress address, boolean useTLS) {
             this.clientGUID = clientGUID;
             this.fileIndex = fileIndex;
             this.address = address;
+            this.useTLS = useTLS;
         }
 
         public String getClientGUID() {
@@ -208,6 +216,10 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
         public InetSocketAddress getAddress() {
             return address;
+        }
+        
+        public boolean isUseTLS() {
+            return useTLS;
         }
 
     }

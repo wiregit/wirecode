@@ -227,6 +227,14 @@ public final class ConnectionSettings extends LimeProps {
     public static final BooleanSetting UPNP_IN_USE =
     	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
     
+    /** Whether or not we want to accept incoming TLS connections. */
+    public static final BooleanSetting TLS_INCOMING =
+        FACTORY.createBooleanSetting("TLS_INCOMING", true);
+    
+    /** Whether or not we want to make outgoing connections with TLS. */
+    public static final BooleanSetting TLS_OUTGOING =
+        FACTORY.createBooleanSetting("TLS_OUTGOING", false);
+    
     public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     
     public static final StringSetting CONNECT_STRING =

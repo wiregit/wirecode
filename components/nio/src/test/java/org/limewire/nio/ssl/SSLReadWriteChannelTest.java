@@ -7,13 +7,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -21,6 +24,7 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
@@ -28,6 +32,7 @@ import org.limewire.nio.channel.ReadBufferChannel;
 import org.limewire.nio.channel.WriteBufferChannel;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.BufferUtils;
 
 public class SSLReadWriteChannelTest extends BaseTestCase {
     
@@ -37,6 +42,11 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
 
     public static Test suite() {
         return buildTestSuite(SSLReadWriteChannelTest.class);
+    }
+    
+    public void tearDown() throws Exception {
+        // Make sure the NIODispatcher queue is flushed after each test.
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get();
     }
     
     public void testClientTLS() throws Exception {
@@ -75,6 +85,10 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             channel.read(readTo);
             fail("should have failed!");
         } catch(SSLException expected) {}
+        
+        writeSink.close();
+        readSink.close();
+        channel.shutdown();
     }
     
     public void testServerTLSFails() throws Exception {
@@ -93,6 +107,9 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             channel.read(readTo);
             fail("should have failed!");
         } catch(SSLException expected) {}
+        
+        readSink.close();
+        channel.shutdown();
     }
     
     public void testNonBlockingTLSExchange() throws Exception {
@@ -103,12 +120,12 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
         final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
                 clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
                 serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
             }
-        });
+        }).get();
         
         Pipe clientToServer = Pipe.open();
         Pipe serverToClient = Pipe.open();
@@ -131,7 +148,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final ByteBuffer clientRead = ByteBuffer.allocate(100);
         final ByteBuffer serverRead = ByteBuffer.allocate(100);
         for(int i = 0; i < 10; i++) {
-            NIODispatcher.instance().invokeAndWait(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
                 public void run() {
                     try {
                         clientChannel.read(clientRead);
@@ -142,7 +159,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
                         throw new RuntimeException(iox);
                     }
                 }
-            });
+            }).get();
             Thread.sleep(100);
         }
         
@@ -152,8 +169,243 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         serverToClient.source().close();
         serverToClient.sink().close();
         clientToServer.source().close();
-        clientToServer.sink().close();
+        clientToServer.sink().close(); 
+        clientChannel.shutdown();
+        serverChannel.shutdown();
     }
+    
+    public void testShutdown() throws Exception {
+        Executor executor = ExecutorsHelper.newProcessingQueue("TLSTest");
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
+        
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+            public void run() {
+                clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+                serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
+            }
+        }).get();
+        
+        Pipe clientToServer = Pipe.open();
+        Pipe serverToClient = Pipe.open();
+        
+        serverToClient.source().configureBlocking(false);
+        serverToClient.sink().configureBlocking(false);
+        clientToServer.source().configureBlocking(false);
+        clientToServer.sink().configureBlocking(false);
+        
+        clientChannel.setReadChannel(new IRWrapper(serverToClient.source()));
+        clientChannel.setWriteChannel(new IWWrapper(clientToServer.sink()));
+        serverChannel.setReadChannel(new IRWrapper(clientToServer.source()));
+        serverChannel.setWriteChannel(new IWWrapper(serverToClient.sink()));
+        
+        String serverOut = "I AM A SERVER\r\n, HELLO\r\n";
+        String clientOut = "A CLIENT I AM\r\n, GOODBYE\r\n";
+        new WriteBufferChannel(serverOut.getBytes(), serverChannel);
+        new WriteBufferChannel(clientOut.getBytes(), clientChannel);
+        
+        final ByteBuffer clientRead = ByteBuffer.allocate(100);
+        final ByteBuffer serverRead = ByteBuffer.allocate(100);
+        for(int i = 0; i < 10; i++) {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                public void run() {
+                    try {
+                        clientChannel.shutdown(); // these do nothing, since the Pipes are still open
+                        serverChannel.shutdown();
+                        clientChannel.read(clientRead);
+                        serverChannel.read(serverRead);
+                        clientChannel.handleWrite();
+                        serverChannel.handleWrite();
+                    } catch(IOException iox) {
+                        throw new RuntimeException(iox);
+                    }
+                }
+            }).get();
+            Thread.sleep(100);
+        }
+        
+        assertEquals(serverOut, new String(clientRead.array(), 0, clientRead.position()));
+        assertEquals(clientOut, new String(serverRead.array(), 0, serverRead.position()));
+        
+        serverToClient.source().close();
+        serverToClient.sink().close();
+        clientToServer.source().close();
+        clientToServer.sink().close(); 
+        
+        clientChannel.shutdown(); // now they do something.
+        serverChannel.shutdown();
+        
+        try {
+            clientChannel.read(BufferUtils.getEmptyBuffer());
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+        try {
+            serverChannel.read(BufferUtils.getEmptyBuffer());
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+        try {
+            clientChannel.write(BufferUtils.getEmptyBuffer());
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+        try {
+            serverChannel.write(BufferUtils.getEmptyBuffer());
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+        try {
+            clientChannel.handleWrite();
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+        try {
+            serverChannel.handleWrite();
+            fail("expected ClosedChannelException");
+        } catch(ClosedChannelException expected) {}
+        
+    }
+    
+    public void testShutdownCancelsInitialize() throws Exception {
+        Executor executor = ExecutorsHelper.newProcessingQueue("TLSTest");
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        
+        final SSLReadWriteChannel channel1 = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel channel2 = new SSLReadWriteChannel(context, executor);
+        
+        ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
+        cache.clearCache();
+        // Test shutting down before initialize -- no session or buffers created.
+        channel1.shutdown();
+        SSLSession session1 = NIODispatcher.instance().getScheduledExecutorService().submit(new Callable<SSLSession>() {
+            public SSLSession call() {
+                channel1.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+                return channel1.getSession();
+            }
+        }).get();
+        assertNull(session1);
+        assertEquals(0, cache.getHeapCacheSize());
+        
+        cache.clearCache();
+        // And initializing before shutting down will create the buffers / session,
+        // but later shutting will will then remove them.
+        SSLSession session2 = NIODispatcher.instance().getScheduledExecutorService().submit(new Callable<SSLSession>() {
+            public SSLSession call() {
+                channel2.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+                return channel2.getSession();
+            }
+        }).get();
+        assertNotNull(session2);
+        assertEquals(0, cache.getHeapCacheSize()); // objects are still leased.
+        // Now if we shutdown the channel, the buffers are returned.
+        channel2.shutdown();
+        // wait for the shutdown to process completely.
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get();
+        assertNotEquals(0, cache.getHeapCacheSize());
+        // A little stricter than necessary: check the correct size was taken.
+        assertEquals(session2.getApplicationBufferSize() + session2.getPacketBufferSize(), cache.getHeapCacheSize());
+    }
+    
+    public void testParentInterestOffDoesntKillHandshake() throws Exception {
+        Executor executor = ExecutorsHelper.newProcessingQueue("TLSTest");
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
+        
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+            public void run() {
+                clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+                serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
+            }
+        }).get();
+        
+        Pipe clientToServer = Pipe.open();
+        Pipe serverToClient = Pipe.open();
+        
+        serverToClient.source().configureBlocking(false);
+        serverToClient.sink().configureBlocking(false);
+        clientToServer.source().configureBlocking(false);
+        clientToServer.sink().configureBlocking(false);
+        
+        final IRWrapper clientReadSink = new IRWrapper(serverToClient.source());
+        final IWWrapper clientWriteSink = new IWWrapper(clientToServer.sink());
+        final IRWrapper serverReadSink = new IRWrapper(clientToServer.source());
+        final IWWrapper serverWriteSink = new IWWrapper(serverToClient.sink());
+        clientChannel.setReadChannel(clientReadSink);
+        clientChannel.setWriteChannel(clientWriteSink);
+        serverChannel.setReadChannel(serverReadSink);
+        serverChannel.setWriteChannel(serverWriteSink);
+        
+        String serverOut = "I AM A SERVER\r\n, HELLO\r\n";
+        String clientOut = "A CLIENT I AM\r\n, GOODBYE\r\n";
+        final InterestWritableByteChannel serverSource = new WriteBufferChannel(serverOut.getBytes(), serverChannel);
+        final InterestWritableByteChannel clientSource = new WriteBufferChannel(clientOut.getBytes(), clientChannel);
+        
+        final ByteBuffer clientRead = ByteBuffer.allocate(100);
+        final ByteBuffer serverRead = ByteBuffer.allocate(100);
+        for(int i = 0; i < 10; i++) {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                public void run() {
+                    try {
+                        // If the various interests were on, which would
+                        // only be from handshaking, them turn them off
+                        // and make sure that the interest stays on --
+                        // That is, make sure that handshaking remains
+                        // interested, despite what the callers want.
+                        
+                        clientChannel.read(clientRead);
+                        if(clientReadSink.getLastReadInterest()) {
+                            clientChannel.interestRead(false);
+                            assertTrue(clientReadSink.getLastReadInterest());
+                        }
+                        
+                        serverChannel.read(serverRead);
+                        if(serverReadSink.getLastReadInterest()) {
+                            serverChannel.interestRead(false);
+                            assertTrue(serverReadSink.getLastReadInterest());
+                        }
+                        
+                        clientChannel.handleWrite();
+                        if(clientWriteSink.getLastWriteInterest()) {
+                            clientChannel.interestWrite(null, false);
+                            assertTrue(clientWriteSink.getLastWriteInterest());
+                            // Now turn interest back on, to make sure it keeps
+                            // the handle to the writer.
+                            clientChannel.interestWrite(clientSource, true);
+                        }                        
+                        
+                        serverChannel.handleWrite();
+                        if(serverWriteSink.getLastWriteInterest()) {
+                            serverChannel.interestWrite(null, false);
+                            assertTrue(serverWriteSink.getLastWriteInterest());
+                            serverChannel.interestWrite(serverSource, true);
+                        }
+                    } catch(IOException iox) {
+                        throw new RuntimeException(iox);
+                    }
+                }
+            }).get();
+            Thread.sleep(100);
+        }
+        
+        assertEquals(serverOut, new String(clientRead.array(), 0, clientRead.position()));
+        assertEquals(clientOut, new String(serverRead.array(), 0, serverRead.position()));
+        
+        serverToClient.source().close();
+        serverToClient.sink().close();
+        clientToServer.source().close();
+        clientToServer.sink().close(); 
+        clientChannel.shutdown();
+        serverChannel.shutdown();
+    }
+    
     
     // TODO: Test underflows & overflows
     
@@ -184,13 +436,15 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final Socket accepted = server.accept();
         
         // Wrap the channel around the accepted socket.
-        NIODispatcher.instance().invokeAndWait(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
                 channel.initialize(accepted.getRemoteSocketAddress(), new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, testServer, false);
             }
-        });
-        channel.setReadChannel(new IRWrapper(accepted.getInputStream()));
-        channel.setWriteChannel(new IWWrapper(accepted.getOutputStream()));
+        }).get(); // wait for this to complete.
+        IRWrapper irw = new IRWrapper(accepted.getInputStream());
+        IWWrapper iww = new IWWrapper(accepted.getOutputStream());
+        channel.setReadChannel(irw);
+        channel.setWriteChannel(iww);
        
         final String INCOMING = "THIS IS A TEST\r\n";
         final String OUTGOING = "OUTGOING DATA\r\n";
@@ -214,7 +468,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final ByteBuffer channelRead = ByteBuffer.allocate(100);
         // Try short pumps of data until the handshake is complete.
         for(int i = 0; i < 10; i++) {
-            NIODispatcher.instance().invokeAndWait(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
                 public void run() {
                     try {
                         channel.read(channelRead);
@@ -223,7 +477,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
                         throw new RuntimeException(iox);
                     }
                 }
-            });
+            }).get();
             Thread.sleep(100);
         }
 
@@ -232,14 +486,25 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         assertEquals(INCOMING, new String(channelRead.array(), 0, channelRead.position()));
         assertEquals(OUTGOING, new String(b, 0, OUTGOING.length()));
         
+        assertEquals(irw.getTotalRead(), channel.getReadBytesConsumed());
+        assertEquals(INCOMING.length(), channel.getReadBytesProduced());
+        assertEquals(iww.getTotalWrote(), channel.getWrittenBytesProduced());
+        assertEquals(OUTGOING.length(), channel.getWrittenBytesConsumed());
+        assertGreaterThan(channel.getReadBytesProduced(), channel.getReadBytesConsumed());
+        assertGreaterThan(channel.getWrittenBytesConsumed(), channel.getWrittenBytesProduced());
+        
         sslSocket.close();
         server.close();
         accepted.close();
+        channel.close();
+        channel.shutdown();
     }
 
     private static class IRWrapper implements InterestReadableByteChannel {
         private final ReadableByteChannel channel;
         private final InputStream in;
+        private volatile boolean lastReadInterest;
+        private volatile int totalRead;
         
         IRWrapper(InputStream in) {
             this.in = in;
@@ -250,14 +515,25 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             this.channel = channel;
             this.in = null;
         }
+        
+        public boolean getLastReadInterest() {
+            return lastReadInterest;
+        }
 
         public void interestRead(boolean status) {
+            lastReadInterest = status;
+        }
+        
+        public int getTotalRead() {
+            return totalRead;
         }
 
         public int read(ByteBuffer dst) throws IOException {
-            if(in == null || in.available() > 0) // prevents blocking
-                return channel.read(dst);
-            else
+            if(in == null || in.available() > 0) { // prevents blocking
+                int read = channel.read(dst);
+                totalRead += read;
+                return read;
+            } else
                 return 0;
         }
 
@@ -272,6 +548,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
     
     private static class IWWrapper implements InterestWritableByteChannel {
         private final WritableByteChannel channel;
+        private volatile boolean lastWriteInterest;
+        private volatile int totalWrote;
         
         public IWWrapper(OutputStream out) {
             this.channel = Channels.newChannel(out);
@@ -281,11 +559,22 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             this.channel = channel;
         }
         
+        public boolean getLastWriteInterest() {
+            return lastWriteInterest;
+        }
+        
         public void interestWrite(WriteObserver observer, boolean status) {
+            lastWriteInterest = status;
+        }
+        
+        public int getTotalWrote() { 
+            return totalWrote;
         }
 
         public int write(ByteBuffer src) throws IOException {
-            return channel.write(src); // assumes this will never block
+            int wrote = channel.write(src); // assumes this will never block
+            totalWrote += wrote;
+            return wrote;
         }
 
         public void close() throws IOException {

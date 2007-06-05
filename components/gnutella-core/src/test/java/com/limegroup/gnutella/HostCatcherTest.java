@@ -17,6 +17,7 @@ import java.util.Set;
 import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
+import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -721,6 +722,27 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(4, uhc.getSize());
     }
     
+    public void testImmediateEndpointObserverNoHosts() throws Exception {
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(0, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        assertNull(hc.getAnEndpointImmediate(observer));
+        assertNull(observer.getEndpoint());
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        assertEquals(p, observer.getEndpoint());
+    }
+    
+    public void testImmediateEndpointObserverWithHosts() throws Exception {
+        Endpoint p = new Endpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        StubEndpointObserver observer = new StubEndpointObserver();
+        assertEquals(1, hc.getNumHosts());
+        assertNull(observer.getEndpoint());
+        assertEquals(p, hc.getAnEndpointImmediate(observer));
+        assertNull(observer.getEndpoint());
+    }
+    
     public void testAsyncEndpointObserver() throws Exception {
         StubEndpointObserver observer = new StubEndpointObserver();
         assertEquals(0, hc.getNumHosts());
@@ -873,7 +895,7 @@ public class HostCatcherTest extends LimeTestCase {
         ByteOrder.short2leb((short)6000, payload, 0);
         System.arraycopy(InetAddress.getByName("127.0.0.1").getAddress(),0,payload,2,4);
         PingReply pong = 
-            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.N_UDP);
+            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
         UDPService.instance().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6000));
         
@@ -890,7 +912,7 @@ public class HostCatcherTest extends LimeTestCase {
         // another address, it will be ignored
         System.arraycopy(InetAddress.getByName("127.0.0.2").getAddress(),0,payload,2,4);
         pong = 
-            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.N_UDP);
+            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
         UDPService.instance().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 6000));
         
@@ -898,8 +920,81 @@ public class HostCatcherTest extends LimeTestCase {
         assertNotEquals(expectedGUID,pong.getGUID());
         Thread.sleep(1000);
         assertEquals(0,hc.getNumHosts());
-        
+
         tmp.delete();
+    }
+    
+    public void testIsTLSCapable() throws Exception {
+        assertEquals(0, hc.getNumHosts());
+        ExtendedEndpoint p = new ExtendedEndpoint("231.123.254.1", 1);
+        hc.add(p, true);
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("231.123.254.1", 1)));
+        assertFalse(hc.isHostTLSCapable(p));
+        
+        p = new ExtendedEndpoint("21.81.1.1", 1);
+        p.setTLSCapable(true);
+        hc.add(p, true);
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("21.81.1.1", 1)));
+        assertTrue(hc.isHostTLSCapable(p));
+        
+        p = new ExtendedEndpoint("1.2.3.101", 1);
+        p.setTLSCapable(true);
+        assertTrue(hc.isHostTLSCapable(p));
+        
+        // Hand-craft a PingReply w/ TLS IPPs to see if they're added as
+        // TLS capable hosts.
+        assertEquals(2, hc.getNumHosts());
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        // mark the second & third items as TLS
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
+        ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
+            0, 0, false, ggep);
+        hc.add(pr);
+        assertEquals(7, hc.getNumHosts());
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("1.1.1.1:1")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.2.3.4:2")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("3.4.2.3:3")));
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("254.0.0.3:4")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.0.1.0:1")));
+
+        // The order of these checks are a little stricter than necessary
+        Endpoint ep = hc.getAnEndpointImmediate(null);
+        assertEquals("254.0.0.3", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("3.4.2.3", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.2.3.4", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.1.1.1", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("21.81.1.1", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("231.123.254.1", ep.getAddress());
+        assertFalse(ep.isTLSCapable());
+        
+        ep = hc.getAnEndpointImmediate(null);
+        assertEquals("1.0.1.0", ep.getAddress());
+        assertTrue(ep.isTLSCapable());
+        
+        assertNull(hc.getAnEndpointImmediate(null));
     }
    
     private static class StubGWebBootstrapper extends BootstrapServerManager {

@@ -14,7 +14,7 @@ import com.limegroup.gnutella.http.AltLocTracker;
 
 /**
  * Maintains state for an HTTP upload.
-     */
+ */
 public class HTTPUploader extends AbstractUploader implements Uploader {
 
 	/**
@@ -111,7 +111,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     
         if (first >= last) {
             return false;
-    }
+        }
         if (getFileDesc() instanceof IncompleteFileDesc) {
             // If we are allowing, see if we have the range.
             IncompleteFileDesc ifd = (IncompleteFileDesc) getFileDesc();
@@ -158,7 +158,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 	 */
     private boolean isValidQueueingAgent() {
         if (getUserAgent() == null)
-        return true;
+            return true;
 
         return !getUserAgent().startsWith("Morpheus 3.0.2");
     }
@@ -170,7 +170,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public AltLocTracker getAltLocTracker() {
         if (altLocTracker == null) {
             altLocTracker = new AltLocTracker(getFileDesc().getSHA1Urn());
-    }
+        }
         return altLocTracker;
     }	
 

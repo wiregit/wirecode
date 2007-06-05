@@ -2,14 +2,13 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -31,23 +30,6 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    public void setUp() {
-        // runs before every testX method
-    }
-    
-    public void tearDown() {
-        // runs after every testX method
-    }
-    
-    public static void globalSetUp() {
-        // runs before the first testX
-    }
-    
-    public static void globalTearDown() {
-        // runs after the last textX
-    }
-
 
     //TODO: test other parts of ping!
 
@@ -162,29 +144,6 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("bad length", 16, bigPing.getLength());
         //Came this far means its all OK
     }
-
-    public void testStripNoPayload() {
-        byte[] guid=new byte[16];  guid[0]=(byte)0xFF;        
-        PingRequest pr=new PingRequest(guid, (byte)3, (byte)4);
-        assertEquals(pr, pr.stripExtendedPayload());
-    }
-
-
-    public void testStripPayload() throws Exception  {
-        byte[] guid=new byte[16];  guid[0]=(byte)0xFF;       
-        byte[] payload=new byte[20]; payload[3]=(byte)0xBC;
-        PingRequest pr=new PingRequest(guid, (byte)3, (byte)4, payload);
-        PingRequest pr2=(PingRequest)pr.stripExtendedPayload();
-        assertEquals(pr.getHops(), pr2.getHops());
-        assertEquals(pr.getTTL(), pr2.getTTL());
-        assertTrue(Arrays.equals(pr.getGUID(), pr2.getGUID()));
-        
-        assertEquals(pr2.getTotalLength(),23);
-        ByteArrayOutputStream out=new ByteArrayOutputStream();
-        pr2.write(out);
-        assertEquals(out.toByteArray().length, 23);
-        
-    }
     
     public void testAddIP() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -239,24 +198,48 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         PingRequest pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         
+        // Test +UP +TLS
         UltrapeerSettings.MIN_CONNECT_TIME.setValue(0);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         assertTrue(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
         byte[] data = pr.getSupportsCachedPongData();
         assertEquals(0x1, data[0] & 0x1);
+        assertEquals(0x2, data[0] & 0x2);
         
+        // +UP -TLS
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        assertTrue(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        data = pr.getSupportsCachedPongData();
+        assertEquals(0x1, data[0] & 0x1);
+        assertEquals(0x0, data[0] & 0x2);
+        
+        // Test -UP +TLS
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+        ConnectionSettings.TLS_INCOMING.setValue(true);
         assertFalse(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
         assertEquals(0x0, data[0] & 0x1);
+        assertEquals(0x2, data[0] & 0x2);
+        
+        // Test -UP -TLS
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        assertFalse(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        data = pr.getSupportsCachedPongData();
+        assertEquals(0x0, data[0] & 0x1);
+        assertEquals(0x0, data[0] & 0x2);
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         pr = PingRequest.createUDPPing();

@@ -45,7 +45,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
                     }
                 }
             }
-        }, RouterService.getSchedulingThreadPool());
+        }, RouterService.getScheduledExecutorService());
     }
     
     @Override

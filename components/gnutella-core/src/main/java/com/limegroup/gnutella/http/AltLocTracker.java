@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.http;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,10 +65,10 @@ public class AltLocTracker {
      * Returns an AlternateLocationCollection of alternates that have not been
      * sent out already.
      */
-    public Set<DirectAltLoc> getNextSetOfAltsToSend() {
+    public Collection<DirectAltLoc> getNextSetOfAltsToSend() {
         AlternateLocationCollection<DirectAltLoc> coll = RouterService
                 .getAltlocManager().getDirect(urn);
-        Set<DirectAltLoc> ret = null;
+        Collection<DirectAltLoc> ret = null;
         long now = System.currentTimeMillis();
         synchronized (coll) {
             Iterator<DirectAltLoc> iter = coll.iterator();
@@ -94,20 +95,20 @@ public class AltLocTracker {
 
     }
 
-    public Set<PushAltLoc> getNextSetOfPushAltsToSend() {
+    public Collection<PushAltLoc> getNextSetOfPushAltsToSend() {
         if (!wantsFAlts)
             return Collections.emptySet();
 
         AlternateLocationCollection<PushAltLoc> fwt = RouterService
-                .getAltlocManager().getPush(urn, true);
+                .getAltlocManager().getPushFWT(urn);
 
         AlternateLocationCollection<PushAltLoc> push;
         if (fwtVersion > 0)
             push = AlternateLocationCollection.getEmptyCollection();
         else
-            push = RouterService.getAltlocManager().getPush(urn, false);
+            push = RouterService.getAltlocManager().getPushNoFWT(urn);
 
-        Set<PushAltLoc> ret = null;
+        Collection<PushAltLoc> ret = null;
         long now = System.currentTimeMillis();
         synchronized (push) {
             synchronized (fwt) {
@@ -176,7 +177,7 @@ public class AltLocTracker {
 
     public void addAltLocHeaders(HttpResponse response) {
         response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(urn));
-        Set<? extends AlternateLocation> alts = getNextSetOfAltsToSend();
+        Collection<? extends AlternateLocation> alts = getNextSetOfAltsToSend();
         if(alts.size() > 0) {
             response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
         }

@@ -57,7 +57,7 @@ public class RoutableGGEPMessage extends VendorMessage implements SecureMessage 
     private final long routableVersion;
     
     protected RoutableGGEPMessage(byte[] guid, byte ttl, byte hops, 
-            byte [] vendor, int selector, int version, byte[] payload, int network)
+            byte [] vendor, int selector, int version, byte[] payload, Network network)
     throws BadPacketException {
         super(guid, ttl, hops, vendor, selector, version, payload, network);
 

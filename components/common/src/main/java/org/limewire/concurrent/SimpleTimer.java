@@ -1,9 +1,16 @@
 package org.limewire.concurrent;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -14,11 +21,11 @@ import org.limewire.service.ErrorService;
 /**
  * An extension for {@link Timer}, allowing you to schedule a {@link Runnable} task instead
  * of scheduling a {@link TimerTask}.
- *
- * <code>SimpleTimer</code> does not expose the methods for scheduling at fixed rates.
+ * 
+ * This also exposes all the functionality of a {@link ScheduledExecutorService}.
  */
-public class SimpleTimer implements SchedulingThreadPool {
-    
+public class SimpleTimer extends AbstractExecutorService implements ScheduledExecutorService {
+        
     /** Timer to be shared. */
     private static final SimpleTimer sharedTimer = new SimpleTimer(true);
     
@@ -27,14 +34,10 @@ public class SimpleTimer implements SchedulingThreadPool {
         return sharedTimer;
     }
     
-    /**
-     * The underlying Timer of this SimpleTimer.
-     */
+    /** The underlying Timer of this SimpleTimer. */
     private final Timer TIMER;
     
-    /**
-     * Whether or not we actively canceled the timer.
-     */
+    /** Whether or not we actively cancelled the timer. */
     private volatile boolean cancelled = false;
     
     /**
@@ -44,110 +47,169 @@ public class SimpleTimer implements SchedulingThreadPool {
     public SimpleTimer(boolean isDaemon) {
         TIMER = new Timer(isDaemon);
     }
-    
-    /**
-     * Schedules the given task for fixed-delay execution after the
-     * given delay, repeating every period.
-     * 
-     * @param task the task to run repeatedly
-     * @param delay the initial delay, in milliseconds
-     * @param period the delay between executions, in milliseconds
-     *  or zero if it should not be rescheduled
-     * @exception IllegalStateException this is canceled
-     * @exception IllegalArgumentException delay or period negative
-     * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
-     */
-    public TimerTask schedule(final Runnable task, long delay, long period) 
-            throws IllegalStateException {
-        if (delay<0)
-            throw new IllegalArgumentException("Negative delay: "+delay);
-        if (period<0)
-            throw new IllegalArgumentException("Negative period: "+period);
-            
-        MyTimerTask tt = new MyTimerTask(new Runnable(){
+
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        ScheduledTimerTask<?> future = new ScheduledTimerTask<Object>(command);
+        scheduleInternal(future, unit.toMillis(delay), 0, false);
+        return future;
+    }
+
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+        ScheduledTimerTask<V> future = new ScheduledTimerTask<V>(callable);
+        scheduleInternal(future, unit.toMillis(delay), 0, false);
+        return future;
+    }
+
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        ScheduledTimerTask<?> future = new ScheduledTimerTask<Object>(command);
+        scheduleInternal(future, unit.toMillis(initialDelay), unit.toMillis(period), true);
+        return future;
+    }
+
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        ScheduledTimerTask<?> future = new ScheduledTimerTask<Object>(command);
+        scheduleInternal(future, unit.toMillis(initialDelay), unit.toMillis(delay), false);
+        return future;
+    }
+
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isShutdown() {
+        return cancelled;
+    }
+
+    public boolean isTerminated() {
+        return cancelled;
+    }
+
+    public void shutdown() {
+        cancelled = true;
+        TIMER.cancel();
+    }
+
+    public List<Runnable> shutdownNow() {
+        shutdown();
+        return Collections.emptyList();
+    }
+
+    // Does not use ScheduledTimerTask so as to avoid creating the Future.
+    public void execute(final Runnable command) {
+        TimerTask tt = new TimerTask() {
             public void run() {
                 try {
-                    task.run();
+                    command.run();
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 }
             }
-        });
-
+        };
+        scheduleInternal(tt, 0, 0, false);
+    }
+    
+    /** Schedules the task as necessary. */
+    private void scheduleInternal(TimerTask task, long delay, long period, boolean fixedRate) {
         try {
-            if(period == 0)
-                TIMER.schedule(tt, delay);
-            else
-                TIMER.schedule(tt, delay, period);
+            if(period == 0) {
+                if(fixedRate) {
+                    throw new IllegalArgumentException("cannot support 0 period w/ fixedRate");
+                } else {
+                    TIMER.schedule(task, delay);
+                }
+            } else {
+                if(fixedRate) {
+                    TIMER.scheduleAtFixedRate(task, delay, period);
+                } else {
+                    TIMER.schedule(task, delay, period);
+                }
+            }
         } catch(IllegalStateException ise) {
-            // swallow ISE's if the Timer canceled itself.
             if(cancelled)
                 throw ise;
         }
+    }
+
+    /** A TimerTask that delegates to a FutureTask for a ScheduledFuture. */
+    private static class ScheduledTimerTask<V> extends TimerTask implements ScheduledFuture<V> {
+        private final ResetableFutureTask<V> task;
         
-        return tt;
-    }      
-    public void invokeLater(Runnable r) {
-    	schedule(r, 0, 0);
+        public ScheduledTimerTask(final Runnable r) {
+            task = new ResetableFutureTask<V>(new Runnable() {
+                public void run() {
+                    try {
+                        r.run();
+                    } catch(Throwable t) {
+                        ErrorService.error(t);
+                    }
+                }
+            }, null);
+        }
+        
+        public ScheduledTimerTask(final Callable<V> c) {
+            task = new ResetableFutureTask<V>(new Callable<V>() {
+                public V call() {
+                    try {
+                        V v = c.call();
+                        return v;
+                    } catch(Throwable t) {
+                        ErrorService.error(t);
+                        return null;
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void run() {
+            task.runAndReset();            
+        }
+
+        public long getDelay(TimeUnit unit) {
+            return -1;
+        }
+
+        public int compareTo(Delayed o) {
+            return 0;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            task.cancel(true);
+            return cancel();
+        }
+
+        public V get() throws InterruptedException, ExecutionException {
+            return task.get();
+        }
+
+        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return task.get(timeout, unit);
+        }
+
+        public boolean isCancelled() {
+            return task.isCancelled();
+        }
+
+        public boolean isDone() {
+            return task.isDone();
+        }
     }
     
-    public Future invokeLater(Runnable r, long delay) {
-    	MyTimerTask tt = (MyTimerTask)schedule(r, delay, 0);
-    	return new TTFuture(tt);
-    }
-    /**
-     * Cancels this.  No more tasks can be scheduled or executed.
-     */ 
-    public void cancel() {
-        cancelled = true;
-        TIMER.cancel();
-    }
-    
-    private class MyTimerTask extends TimerTask {
-    	volatile boolean done;
-    	volatile Runnable r; 
-    	MyTimerTask(Runnable r) {
-    		this.r = r;
-    	}
-    	
-    	public boolean cancel() {
-    		boolean ret = super.cancel();
-    		r = null;
-    		return ret;
-    	}
-    	
-    	public void run (){
-    		Runnable toRun = r;
-    		if (toRun == null)
-    			return;
-    		try {
-    			toRun.run();
-    		} finally  {
-    			done = true;
-    		}
-    	}
+    /** A FutureTask that allows someone to call runAndReset. */
+    private static class ResetableFutureTask<V> extends FutureTask<V> {
+        @Override
+        public boolean runAndReset() {
+            return super.runAndReset();
+        }
+
+        public ResetableFutureTask(Runnable runnable, V result) {
+            super(runnable, result);
+        }
+
+        public ResetableFutureTask(Callable<V> callable) {
+            super(callable);
+        }
+        
     }
     
-    private class TTFuture implements Future {
-    	final MyTimerTask task;
-    	volatile boolean cancelled;
-    	TTFuture(MyTimerTask task) {
-    		this.task = task;
-    	}
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return task.cancel();
-		}
-		public Object get() throws InterruptedException, ExecutionException {
-			return null;
-		}
-		public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-			return null;
-		}
-		public boolean isCancelled() {
-			return task.r == null;
-		}
-		public boolean isDone() {
-			return task.done;
-		}
-    }
 }

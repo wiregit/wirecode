@@ -29,6 +29,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Sets up a Test Scenario of a Leaf connected to some Ultrapeers (default of
@@ -151,7 +152,7 @@ public abstract class ClientSideTestCase
                                        Class callingClass) 
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
-         RouterService.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          

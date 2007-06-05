@@ -32,7 +32,7 @@ public class PushProxiesValueTest extends DHTTestCase {
     
     public void testSerialization() {
         byte[] guid = GUID.makeGuid();
-        int futures = 1;
+        byte features = 1;
         int fwtVersion = 2;
         int port = 1234;
         
@@ -46,10 +46,10 @@ public class PushProxiesValueTest extends DHTTestCase {
         
         PushProxiesValue value1 
             = PushProxiesValue.createPushProxiesValue(Version.ZERO, 
-                    guid, futures, fwtVersion, port, proxies);
+                    guid, features, fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
-        assertEquals(futures, value1.getFeatures());
+        assertEquals(features, value1.getFeatures());
         assertEquals(fwtVersion, value1.getFwtVersion());
         assertEquals(port, value1.getPort());
         assertEquals(2, value1.getPushProxies().size());

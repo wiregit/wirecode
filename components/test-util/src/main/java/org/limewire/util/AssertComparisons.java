@@ -478,6 +478,69 @@ public abstract class AssertComparisons extends TestCase {
             fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
     }
     
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(byte[] expected, byte[] actual, int actualOff, int actualLen) {
+        assertNotEquals(null, expected, actual, actualOff, actualLen);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, byte[] expected, byte[] actual, int actualOff, int actualLen) {
+        byte[] newActual = new byte[actualLen];
+        for(int i = 0; i < actualLen; i++)
+            newActual[i] = actual[actualOff + i];
+        
+        if(Arrays.equals(expected, newActual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(newActual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(byte[] expected, int expectedOff, int expectedLen, byte[] actual) {
+        assertNotEquals(null, expected, expectedOff, expectedLen, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, byte[] expected, int expectedOff, int expectedLen, byte[] actual) {
+        byte[] newExpected = new byte[expectedLen];
+        for(int i = 0; i < expectedLen; i++)
+            newExpected[i] = expected[expectedOff + i];
+        
+        if(Arrays.equals(newExpected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(newExpected), asList(actual)));
+    }       
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(byte[] expected, int expectedOff, int expectedLen, byte[] actual, int actualOff, int actualLen) {
+        assertNotEquals(null, expected, expectedOff, expectedLen, actual, actualOff, actualLen);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, byte[] expected, int expectedOff, int expectedLen, byte[] actual, int actualOff, int actualLen) {
+        byte[] newActual = new byte[actualLen];
+        for(int i = 0; i < actualLen; i++)
+            newActual[i] = actual[actualOff + i];
+        
+        byte[] newExpected = new byte[expectedLen];
+        for(int i = 0; i < expectedLen; i++)
+            newExpected[i] = expected[expectedOff + i];
+        
+        if(Arrays.equals(newExpected, newActual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(newExpected), asList(newActual)));
+    }
 
     /**
      * Assert that the two arrays are not equal.
@@ -1072,8 +1135,8 @@ public abstract class AssertComparisons extends TestCase {
         } else if (actual instanceof java.lang.Comparable) {
             ret = -1 * ((java.lang.Comparable)actual).compareTo(expected);
         } else { //neither implement either interface.
-            fail("Neither " + expected + " nor " + actual + 
-                 "implement expected Comparable interface.");
+            fail("Neither " + expected.getClass().getName() + " nor " + actual.getClass().getName() + 
+                 " implement expected Comparable interface.");
         }
         
         // break out of here if the comparison failed.

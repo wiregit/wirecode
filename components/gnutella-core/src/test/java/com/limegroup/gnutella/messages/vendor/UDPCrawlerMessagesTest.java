@@ -37,6 +37,7 @@ import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -654,7 +655,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     
     private static class UDPCrawlerPongParserStub implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
+                byte[] restOf, Network network) throws BadPacketException {
             return null;
         }
     }

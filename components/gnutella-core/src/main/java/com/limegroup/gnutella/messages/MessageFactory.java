@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -93,7 +94,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in) throws BadPacketException,
             IOException {
-        return MessageFactory.read(in, new byte[23], Message.N_UNKNOWN, SOFT_MAX);
+        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, SOFT_MAX);
     }
 
     /**
@@ -111,7 +112,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, byte softMax)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, new byte[23], Message.N_UNKNOWN, softMax);
+        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, softMax);
     }
 
     /**
@@ -127,7 +128,7 @@ public class MessageFactory {
      *          The client is not expected to recover from this.
      *          </ul>
      */
-    public static Message read(InputStream in, int network)
+    public static Message read(InputStream in, Network network)
             throws BadPacketException, IOException {
         return MessageFactory.read(in, new byte[23], network, SOFT_MAX);
     }
@@ -142,14 +143,14 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, byte[] buf, byte softMax)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, buf, Message.N_UNKNOWN, softMax);
+        return MessageFactory.read(in, buf, Network.UNKNOWN, softMax);
     }
 
     /**
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public static Message read(InputStream in, byte[] buf, int network)
+    public static Message read(InputStream in, byte[] buf, Network network)
             throws BadPacketException, IOException {
         return MessageFactory.read(in, buf, network, SOFT_MAX);
     }
@@ -164,7 +165,7 @@ public class MessageFactory {
      *          returns, but the contents are not guaranteed to contain any
      *          useful data.
      */
-    public static Message read(InputStream in, byte[] buf, int network,
+    public static Message read(InputStream in, byte[] buf, Network network,
             byte softMax) throws BadPacketException, IOException {
 
         // 1. Read header bytes from network. If we timeout before any
@@ -207,7 +208,7 @@ public class MessageFactory {
                 int got = in.read(payload, i, length - i);
                 if (got == -1) {
                     ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
-                    throw new IOException("Connection closed.");
+                    throw new IOException("Read EOF before EOM.");
                 }
                 i += got;
             }
@@ -227,7 +228,7 @@ public class MessageFactory {
      * byte[].
      */
     public static Message createMessage(byte[] header, byte[] payload,
-            byte softMax, int network) throws BadPacketException, IOException {
+            byte softMax, Network network) throws BadPacketException, IOException {
         if (header.length < 19) {
             throw new IllegalArgumentException("header must be >= 19 bytes.");
         }
@@ -249,7 +250,7 @@ public class MessageFactory {
      */
     public static interface MessageParser {
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, int network) throws BadPacketException, IOException;
+                byte softMax, Network network) throws BadPacketException, IOException;
     }
     
     /**
@@ -258,7 +259,7 @@ public class MessageFactory {
     public static abstract class GnutellaMessageParser implements MessageParser {
         
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, int network) throws BadPacketException, IOException {
+                byte softMax, Network network) throws BadPacketException, IOException {
             
             // 4. Check values. These are based on the recommendations from the
             // GnutellaDev page. This also catches those TTLs and hops whose
@@ -300,12 +301,12 @@ public class MessageFactory {
         }
         
         protected abstract Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException;
+                byte[] payload, Network network) throws BadPacketException;
     }
     
     private static class PingRequestParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             if (payload.length > 0) { // Big ping
                 return new PingRequest(guid, ttl, hops, payload);
             } else {
@@ -316,14 +317,14 @@ public class MessageFactory {
     
     private static class PingReplyParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             return PingReply.createFromNetwork(guid, ttl, hops, payload, network);
         }
     }
     
     private static class QueryRequestParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             if (payload.length < 3) {
                 throw new BadPacketException("Query request too short: " + payload.length);
             }
@@ -334,7 +335,7 @@ public class MessageFactory {
     
     private static class QueryReplyParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             if (payload.length < 26) {
                 throw new BadPacketException("Query reply too short: " + payload.length);
             }
@@ -345,14 +346,14 @@ public class MessageFactory {
     
     private static class PushRequestParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             return new PushRequest(guid, ttl, hops, payload, network);
         }
     }
     
     private static class RouteTableUpdateParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             // The exact subclass of RouteTableMessage returned depends on
             // the variant stored within the payload. So leave it to the
             // static read(..) method of RouteTableMessage to actually call
@@ -363,14 +364,14 @@ public class MessageFactory {
     
     private static class VendorMessageParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
     private static class VendorMessageStableParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
+                byte[] payload, Network network) throws BadPacketException {
             return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }

@@ -107,6 +107,10 @@ public class LimeCoreGlue {
             public boolean isLocalAddressPrivate() {
                 return ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
             }
+            
+            public boolean isTLSCapable() {
+                return ConnectionSettings.TLS_INCOMING.getValue();
+            }
         });
         
         SettingsProvider settingsProvider = new SettingsProvider() {

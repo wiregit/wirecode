@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import org.limewire.nio.NIOSocket;
@@ -18,7 +19,7 @@ import org.limewire.nio.observer.ConnectObserver;
  *  - TLS_DH_anon_WITH_AES_128_CBC_SHA
  */
 public class TLSNIOSocket extends NIOSocket {
-    
+
     private volatile SSLReadWriteChannel tlsLayer;
     private volatile InterestReadableByteChannel baseReader;
     private volatile InterestWritableByteChannel baseWriter;
@@ -82,6 +83,34 @@ public class TLSNIOSocket extends NIOSocket {
         super.initOutgoingSocket();
         tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
     }
+    
+    
+    /** Ensures the TLS layer is closed properly. */
+    @Override
+    protected void shutdownImpl() {
+        super.shutdownImpl();
+        if(tlsLayer != null)
+            tlsLayer.shutdown();
+    }
+    
+    /* package */ SSLReadWriteChannel getSSLChannel() {
+        return tlsLayer;
+    }
+    
+    @Override
+    /* Overriden to retrieve the soTimeout from the socket if we're still handshaking. */
+    public long getReadTimeout() {
+        if(tlsLayer != null && tlsLayer.isHandshaking()) {
+            try {
+                return getSoTimeout();
+            } catch(SocketException se) {
+                return 0;
+            }
+        } else {
+            return super.getReadTimeout();
+        }
+    }
+    
     
     /**
      * A delegating connector that forces the TLS Layer to be initialized

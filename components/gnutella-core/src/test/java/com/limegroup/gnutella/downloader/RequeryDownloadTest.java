@@ -114,7 +114,7 @@ public class RequeryDownloadTest
         _mgr.scheduleWaitingPump();
         boolean ok=_mgr.readSnapshot(_snapshot);
         assertTrue("Couldn't read snapshot file", ok);
-        _uploader=new TestUploader("uploader 6666", 6666);
+        _uploader=new TestUploader("uploader 6666", 6666, false);
         _uploader.setRate(Integer.MAX_VALUE);
         RouterService.getDownloadManager().clearAllDownloads();
         
@@ -160,7 +160,7 @@ public class RequeryDownloadTest
                                                _filename, TestFile.length(),
                                                new byte[16], 56, false, 4, 
                                                true, null, urns,  false, 
-                                               false,"",null, -1);
+                                               false,"",null, -1, false);
 
        //Create incompleteFile, write a few bytes
        _incompleteFile=ifm.getFile(rfd);

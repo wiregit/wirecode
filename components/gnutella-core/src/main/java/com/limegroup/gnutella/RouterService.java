@@ -16,16 +16,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
@@ -88,6 +90,7 @@ import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -940,14 +943,14 @@ public class RouterService {
      * @exception IllegalArgumentException delay or period negative
      * @see org.limewire.concurrent.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public static TimerTask schedule(Runnable task, long delay, long period) {
-        return SimpleTimer.sharedTimer().schedule(task, delay, period);
+    public static ScheduledFuture<?> schedule(Runnable task, long delay, long period) {
+        return SimpleTimer.sharedTimer().scheduleWithFixedDelay(task, delay, period, TimeUnit.MILLISECONDS);
     }
     
     /**
-     * @return an object that can be used as a <tt>SchedulingThreadPool</tt>
+     * @return an object that can be used as a <tt>getScheduledExecutorService</tt>
      */
-    public static SchedulingThreadPool getSchedulingThreadPool() {
+    public static ScheduledExecutorService getScheduledExecutorService() {
     	return SimpleTimer.sharedTimer();
     }
 
@@ -958,9 +961,9 @@ public class RouterService {
      * @return a connection to the request host
      * @exception IOException the connection failed
      */
-    public static ManagedConnection connectToHostBlocking(String hostname, int portnum)
+    public static ManagedConnection connectToHostBlocking(String hostname, int portnum, ConnectType type)
 		throws IOException {
-        return manager.createConnectionBlocking(hostname, portnum);
+        return manager.createConnectionBlocking(hostname, portnum, type);
     }
 
     /**
@@ -968,7 +971,7 @@ public class RouterService {
      * Returns immediately without blocking.  If hostname would connect
      * us to ourselves, returns immediately.
      */
-    public static void connectToHostAsynchronously(String hostname, int portnum) {
+    public static void connectToHostAsynchronously(String hostname, int portnum, ConnectType type) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
@@ -992,7 +995,7 @@ public class RouterService {
         }
 
         if (!acceptor.isBannedIP(cIP)) {
-            manager.createConnectionAsynchronously(hostname, portnum);
+            manager.createConnectionAsynchronously(hostname, portnum, type);
 		}
     }
     
@@ -1875,13 +1878,13 @@ public class RouterService {
      * @param canDoFWTransfer true if the remote host supports fw transfer
 	 */
 	public static BrowseHostHandler doAsynchronousBrowseHost(
-	  final String host, final int port, GUID guid, GUID serventID, 
+	  final Connectable host, GUID guid, GUID serventID, 
 	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
-                handler.browseHost(host, port, proxies, canDoFWTransfer);
+                handler.browseHost(host, proxies, canDoFWTransfer);
             }
         }, "BrowseHoster" );
         

@@ -58,7 +58,7 @@ public final class StalledUploadWatchdog extends Periodic {
     }
     
     public StalledUploadWatchdog(long delayTime) {
-    	super(new Closer(), RouterService.getSchedulingThreadPool());
+    	super(new Closer(), RouterService.getScheduledExecutorService());
     	this.closer = (Closer)getRunnable();
     	this.delayTime = delayTime;
     }

@@ -27,7 +27,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     private PushEndpointForSelf() {
         super(RouterService.getMyGUID(),
                 IpPort.EMPTY_SET,
-                0,
+                PushEndpoint.PLAIN,
                 UDPConnection.VERSION);
     
     }
@@ -42,14 +42,14 @@ public class PushEndpointForSelf extends PushEndpoint {
     /**
      * delegate the call to connection manager
      */
-    public Set<IpPort> getProxies() {
+    public Set<? extends IpPort> getProxies() {
         return RouterService.getConnectionManager().getPushProxies();
     }
     
     /**
      * we always have the same features
      */
-    public int getFeatures() {
+    public byte getFeatures() {
     	return 0;
     }
     

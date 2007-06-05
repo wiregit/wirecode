@@ -23,8 +23,9 @@ import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -304,13 +305,13 @@ public class PushUploadTest extends LimeTestCase {
         // now try with some proxies
         ConnectionManager original = RouterService.getConnectionManager();
         try {
-            final Set<IpPort> proxies = new TreeSet<IpPort>(IpPort.COMPARATOR);
-            IpPort ppi = new IpPortImpl("1.2.3.4", 5);
+            final Set<Connectable> proxies = new TreeSet<Connectable>(IpPort.COMPARATOR);
+            Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
             proxies.add(ppi);
 
             ConnectionManagerStub cmStub = new ConnectionManagerStub() {
                 @Override
-                public java.util.Set<IpPort> getPushProxies() {
+                public Set<Connectable> getPushProxies() {
                     return proxies;
                 }
             };

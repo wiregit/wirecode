@@ -98,6 +98,17 @@ public class FileDesc implements FileDetails, StringLookup {
 	 * The number of times this file has had completed uploads
 	 */
 	private int _completedUploads;
+    
+    /** A simple constructor, for easier testing. */
+    protected FileDesc() {
+        SHA1_URN = null;
+        _size = -1;
+        _name = null;
+        FILE = null;
+        _index = -1;
+        URNS = null;
+        _path = null;
+    }
 
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -401,7 +412,7 @@ public class FileDesc implements FileDetails, StringLookup {
 				"docs:     "+ _limeXMLDocs);
 	}
 	
-	public InetSocketAddress getSocketAddress() {
+	public InetSocketAddress getInetSocketAddress() {
 		// TODO maybe cache this, even statically
 		try {
 			return new InetSocketAddress(InetAddress.getByAddress

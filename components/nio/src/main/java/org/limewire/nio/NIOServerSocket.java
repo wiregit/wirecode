@@ -14,7 +14,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,11 +114,11 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     
     /**
      * Initializes the connection.
-     * Currently this sets the channel to blocking & reuse addr to true.
+     * Currently this sets the channel to blocking.
      */
     private void init() throws IOException {
         channel.configureBlocking(false);
-        socket.setReuseAddress(true);
+       // socket.setReuseAddress(true);
     }
 
     /**
@@ -179,17 +181,20 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
         if(VersionUtils.isJavaVersionOrAbove("1.5.0_10") || NIODispatcher.instance().isDispatchThread()) {
             exception = shutdownSocketAndChannels();
         } else {
-            final AtomicReference<IOException> exRef = new AtomicReference<IOException>();
-            try {
-                NIODispatcher.instance().invokeAndWait(new Runnable() {
-                    public void run() {
-                        exRef.set(shutdownSocketAndChannels());
+            Future<IOException> future = NIODispatcher.instance().getScheduledExecutorService()
+                .submit(new Callable<IOException>() {
+                    public IOException call() {
+                        return shutdownSocketAndChannels();
                     }
-                });
+            });
+            
+            try {
+                exception = future.get();
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
+            } catch (ExecutionException ee) {
+                throw new IllegalStateException(ee);
             }
-            exception = exRef.get();
         }
         
         observer.shutdown();

@@ -203,7 +203,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
     
     public void testHTTP10DownloadRange() throws Exception {
@@ -308,7 +308,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
@@ -435,7 +435,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 1-3");
@@ -445,7 +445,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cd", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 3-10");
@@ -455,7 +455,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("defg", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
             
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 0-20");
@@ -465,7 +465,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdefg", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testHTTP11PipeliningDownload() throws Exception {
@@ -493,7 +493,7 @@ public class UploadTest extends LimeTestCase {
                     .readBody(response));
         } finally {
             client.close();
-    }
+        }
     }        
     
     /**
@@ -520,7 +520,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
         } finally {
             method.releaseConnection();
-    }
+        }
     
         method = new GetMethod(url);
         try {
@@ -530,7 +530,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     
         method = new GetMethod(url);
         try {
@@ -540,7 +540,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }        
+        }        
 
         method = new HeadMethod(url);
         try {
@@ -548,7 +548,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
         } finally {
             method.releaseConnection();
-    }
+        }
     
         method = new GetMethod(url);
         try {
@@ -558,7 +558,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
     
     /**
@@ -573,7 +573,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     
         assertConnectionIsOpen(true);
     
@@ -585,7 +585,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
     
     public void testIncompleteFileUpload() throws Exception {
@@ -596,7 +596,7 @@ public class UploadTest extends LimeTestCase {
                     response);
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(true);
                    
@@ -607,7 +607,7 @@ public class UploadTest extends LimeTestCase {
                     response);
         } finally {
             method.releaseConnection();
-    }
+        }
     }
     
     public void testIncompleteFileWithRanges() throws Exception {
@@ -627,7 +627,7 @@ public class UploadTest extends LimeTestCase {
                     "X-Available-Ranges").getValue());
         } finally {
             method.releaseConnection();
-            }
+        }
         
         assertConnectionIsOpen(true);
 		
@@ -694,7 +694,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Requested Range Unavailable", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
     
         assertConnectionIsOpen(true);
     }
@@ -707,7 +707,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Not Found", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
                        
         assertConnectionIsOpen(true);
     }
@@ -721,7 +721,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Not Found", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
     
         assertConnectionIsOpen(false);
     }
@@ -734,7 +734,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
@@ -748,7 +748,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
@@ -775,7 +775,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
@@ -799,7 +799,7 @@ public class UploadTest extends LimeTestCase {
                     "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testCreationTimeHeaderReturnedForIncompleteFile()
@@ -824,8 +824,8 @@ public class UploadTest extends LimeTestCase {
                     "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
-                }
-            }
+        }
+    }
                             
     public void testChatFeatureHeader() throws Exception {
         ChatSettings.CHAT_ENABLED.setValue(true);
@@ -854,7 +854,7 @@ public class UploadTest extends LimeTestCase {
             assertNull(method.getResponseHeader("X-Features"));
         } finally {
             method.releaseConnection();
-    }
+        }
     
         assertConnectionIsOpen(false);
 
@@ -870,8 +870,8 @@ public class UploadTest extends LimeTestCase {
             assertFalse(header.contains("chat/0.1"));
         } finally {
             method.releaseConnection();
-            }
         }
+    }
 
     public void testThexHeader() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
@@ -896,7 +896,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-	}
+        }
     
         // the request is checked for a valid bitprint length
         method = new GetMethod("/uri-res/N2R?urn:bitprint:" + baseHash + "."
@@ -906,7 +906,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response);
         } finally {
             method.releaseConnection();
-	}
+        }
 
         // but not for the valid base32 root -- in the future we may
         // and this test will break
@@ -919,7 +919,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         // make sure "bitprint:" is required for bitprint uploading.
         method = new GetMethod("/uri-res/N2R?urn:sha1:" + baseHash + "."
@@ -969,8 +969,8 @@ public class UploadTest extends LimeTestCase {
                     for (int j = 0; j < current.length; j++) {
                         assertEquals("offset: " + offset + ", idx: " + j,
                                 current[j], data[offset++]);
-	}
-        }
+                	}
+                }
             }
             assertEquals(data.length, offset);
             // more extensive validity checks are in HashTreeTest
@@ -995,15 +995,15 @@ public class UploadTest extends LimeTestCase {
                 loaded.wait();
             } catch (InterruptedException e) {
                 // good.
-    } 
-    }
+            } 
         }
+    }
         
     private void assertConnectionIsOpen(boolean open) {
         HttpConnection connection = client.getHttpConnectionManager()
                 .getConnection(hostConfig);
         assertEquals(open, connection.isOpen());
         client.getHttpConnectionManager().releaseConnection(connection);
-        }
+    }
         
 }

@@ -4,16 +4,17 @@ package com.limegroup.bittorrent.handshaking;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.nio.AbstractNBSocket;
@@ -94,7 +95,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 */
 	private volatile int _triedHosts;
 	
-	BTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
+	BTConnectionFetcher(ManagedTorrent torrent, ScheduledExecutorService scheduler) {
 		_torrent = torrent;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19
@@ -157,8 +158,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		connecting.add(connector);
 		++_triedHosts;
 		try {
-			connector.toCancel = Sockets.connect(ep.getAddress(),
-					ep.getPort(), Constants.TIMEOUT, connector);
+			connector.toCancel = Sockets.connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
+                                                 Constants.TIMEOUT, connector);
 		} catch (IOException impossible) {
 			connecting.remove(connector); // remove just in case
 		}
@@ -284,5 +285,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		public int getPort() {
 			return destination.getPort();
 		}
+        public InetSocketAddress getInetSocketAddress() {
+            return destination.getInetSocketAddress();
+        }
 	}
 }

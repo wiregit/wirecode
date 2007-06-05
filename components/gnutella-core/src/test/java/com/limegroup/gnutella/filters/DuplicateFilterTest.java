@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.filters;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -38,7 +38,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         guid[9]++;
 		byte[] payload = { 0, 0, 65 };
         qr=QueryRequest.createNetworkQuery(
-            guid, pr.getTTL(), pr.getHops(), payload, Message.N_UNKNOWN);
+            guid, pr.getTTL(), pr.getHops(), payload, Network.UNKNOWN);
         assertTrue(filter.allow(pr));
         assertTrue(!filter.allow(qr));
         pr=new PingRequest((byte)2);

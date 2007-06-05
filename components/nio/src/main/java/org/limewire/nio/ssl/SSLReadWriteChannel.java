@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -16,6 +17,7 @@ import javax.net.ssl.SSLEngineResult.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
@@ -35,17 +37,65 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     
     private static final Log LOG = LogFactory.getLog(SSLReadWriteChannel.class);
 
+    /** The context from which to retrieve a new SSLEngine. */
     private final SSLContext context;
+    /** An executor to perform blocking tasks. */
     private final Executor executor;
+    /** The engine managing this SSL session. */
     private SSLEngine engine;
+    /** A temporary buffer which data is unwrapped to. */
     private ByteBuffer readIncoming;
+    /** The buffer which the underlying readSink is read into. */
     private ByteBuffer readOutgoing;
+    /** The buffer which we wrap writes to. */
     private ByteBuffer writeOutgoing;
+    /** The underlying channel to read from. */
     private volatile InterestReadableByteChannel readSink;
+    /** The underlying channel to write to. */
     private volatile InterestWritableByteChannel writeSink;
+    /** The last WriteObserver that indicated write interested. */
     private WriteObserver writeWanter;
+    /** True if handshaking indicated we need to immediately perform a wrap. */
     private volatile boolean needsHandshakeWrap = false;
+    /** True if handshaking indicated we need to immediately perform an unwrap. */
+    private volatile boolean needsHandshakeUnwrap = false;
+    /** True if a read finished and data was still buffered. */
     private volatile boolean readDataLeft = false;
+    /** True only after a single read has been performed. */
+    private final AtomicBoolean firstReadDone = new AtomicBoolean(false);
+    
+    /* Statistic gathering variables. */
+    private volatile long readConsumed;
+    private volatile long readProduced;
+    private volatile long writeConsumed;
+    private volatile long writeProduced;
+    
+    /**
+     * Whether or not this has been shutdown.
+     * Shutting down must be atomic wrt initializing, so that
+     * we can guarantee all allocated buffers are released
+     * properly.
+     * 
+     * Shutdown is volatile so read/write/handleWrite can quickly
+     * get it w/o locking.
+     */
+    private volatile boolean shutdown = false;
+    private final Object initLock = new Object();
+    
+    /**
+     * The last state of who interested us in readinng must be kept,
+     * so that after handshaking finishes, we can put reading into
+     * the correct interest state.  otherwise, our options are:
+     *  1) leave interest on, which could potentially loop forever
+     *     if the connected socket closes.
+     *  2) turn interest off, which could confuse any callers that
+     *     had wanted to read data.
+     * 
+     * Note that we don't have to do this for writing because writing
+     * can succesfully turn itself off.
+     */
+    private boolean readInterest = false;
+    private final Object readInterestLock = new Object();
     
     public SSLReadWriteChannel(SSLContext context, Executor executor) {
         this.executor = executor;
@@ -62,44 +112,56 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      * @param cipherSuites
      */
     void initialize(SocketAddress addr, String[] cipherSuites, boolean clientMode, boolean needClientAuth) {
-        if(addr != null) {
-            if(!(addr instanceof InetSocketAddress))
-                throw new IllegalArgumentException("unsupported SocketAddress");
-            InetSocketAddress iaddr = (InetSocketAddress)addr;
-            String host = iaddr.getAddress().getHostAddress();
-            int port = iaddr.getPort();
-            engine = context.createSSLEngine(host, port);
-        } else {
-            engine = context.createSSLEngine();
+        synchronized(initLock) {
+            if(shutdown) {
+                LOG.debug("Not initializing because already shutdown.");
+                return;
+            }
+            
+            if(addr != null) {
+                if(!(addr instanceof InetSocketAddress))
+                    throw new IllegalArgumentException("unsupported SocketAddress");
+                InetSocketAddress iaddr = (InetSocketAddress)addr;
+                String host = iaddr.getAddress().getHostAddress();
+                int port = iaddr.getPort();
+                engine = context.createSSLEngine(host, port);
+            } else {
+                engine = context.createSSLEngine();
+            }
+            engine.setEnabledCipherSuites(cipherSuites);
+            engine.setUseClientMode(clientMode);
+            if(!clientMode) {
+                engine.setWantClientAuth(needClientAuth);
+                engine.setNeedClientAuth(needClientAuth);
+            }
+            SSLSession session = engine.getSession();
+            readIncoming = NIODispatcher.instance().getBufferCache().getHeap(session.getApplicationBufferSize());
+            writeOutgoing = NIODispatcher.instance().getBufferCache().getHeap(session.getPacketBufferSize());
+            if(LOG.isTraceEnabled())
+                LOG.trace("Initialized engine: " + engine + ", session: " + session);
         }
-        engine.setEnabledCipherSuites(cipherSuites);
-        engine.setUseClientMode(clientMode);
-        if(!clientMode) {
-            engine.setWantClientAuth(needClientAuth);
-            engine.setNeedClientAuth(needClientAuth);
-        }
-        SSLSession session = engine.getSession();
-        readIncoming = ByteBuffer.allocate(session.getApplicationBufferSize());
-        writeOutgoing = ByteBuffer.allocate(session.getPacketBufferSize());
-        if(LOG.isTraceEnabled())
-            LOG.trace("Initialized engine: " + engine + ", session: " + session);
     }
 
     public int read(ByteBuffer dst) throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         int transferred = 0;
         
         // If data was left in readOutgoing, pre-transfer it.
         if(readOutgoing != null && readOutgoing.position() > 0) {
             transferred += BufferUtils.transfer(readOutgoing, dst);
-        }        
+        }
         
         while(true) {
             // If we're not handshaking and there's no space to read into, exit early.
-            if(!dst.hasRemaining() && engine.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING) {
-                LOG.debug("No space to read into, leaving");
+            // Must check separately for 'first read' and 'not handshaking', because
+            // the engine isn't put into handshaking mode until a single read is done.
+            if(firstReadDone.getAndSet(true) && !dst.hasRemaining() && engine.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING) {
+                LOG.debug("No room left to transfer data, exiting");
                 return transferred;
             }
-            
+
             int read = -1;
             while(readIncoming.hasRemaining() && (read = readSink.read(readIncoming)) > 0);
             // if we last read EOF & nothing was put in sourceBuffer, EOF
@@ -107,25 +169,36 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 LOG.debug("Read EOF, no data to transfer.  Connection finished");
                 return -1;
             }
-            
+
             // If we couldn't read anything, there's nothing to unwrap.
             if(readIncoming.position() == 0) {
                 LOG.debug("Unable to read anything, exiting read loop");
                 return 0;
             }
-            
+
             readIncoming.flip();
 
             // Try unwrapping directly into dst first.
             SSLEngineResult result = engine.unwrap(readIncoming, dst);
+            readProduced += result.bytesProduced();
+            readConsumed += result.bytesConsumed();
             transferred += result.bytesProduced();
             SSLEngineResult.Status status = result.getStatus();
             
             // If dst didn't have enough space, use an intermediate buffer.
             if(status == Status.BUFFER_OVERFLOW) {
-                if(readOutgoing == null)
-                    readOutgoing = ByteBuffer.allocate(engine.getSession().getPacketBufferSize());
+                // Initialize readOutgoing only if not shutdown,
+                // but grab the lock after we've checked to make sure
+                // it's non-null, to avoid lock every read.
+                if(readOutgoing == null) {
+                    synchronized(initLock) {
+                        if(!shutdown)
+                            readOutgoing = NIODispatcher.instance().getBufferCache().getHeap(engine.getSession().getPacketBufferSize());
+                    }
+                }
                 result = engine.unwrap(readIncoming, readOutgoing);
+                readProduced += result.bytesProduced();
+                readConsumed += result.bytesConsumed();
                 status = result.getStatus();
                 if(status == Status.BUFFER_OVERFLOW)
                     throw new IllegalStateException("not enough room in fallback TLS buffer!");
@@ -173,6 +246,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      */
     private boolean processHandshakeResult(boolean reading, boolean writing, HandshakeStatus hs) {
         needsHandshakeWrap = false;
+        needsHandshakeUnwrap = false;
         switch(hs) {
         case NEED_TASK:
             needTask();
@@ -180,14 +254,15 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         case NEED_WRAP:
             needsHandshakeWrap = true;
             writeSink.interestWrite(this, true);
-            readSink.interestRead(true);
+            readSink.interestRead(false);
             return writing;
         case NEED_UNWRAP:
+            needsHandshakeUnwrap = true;
             readSink.interestRead(true);
             writeSink.interestWrite(null, false);
             // If we had previously buffered read data, force a read.
             if(readDataLeft && !reading)
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         try {
                             read(BufferUtils.getEmptyBuffer());
@@ -198,8 +273,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 });
             return reading;
         case FINISHED:
-            // ensure we're ready for everything.
-            readSink.interestRead(true);
+            synchronized(readInterestLock) {
+                // set interest to what our observer wanted.
+                readSink.interestRead(readInterest);
+            }
             writeSink.interestWrite(this, true);
         case NOT_HANDSHAKING:
         default: 
@@ -232,12 +309,17 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
     }
 
-    public int write(ByteBuffer src) throws IOException {        
+    public int write(ByteBuffer src) throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         int consumed = 0;
         // do...while because we want to force one write even with empty buffers
         do {
             boolean wasEmpty = writeOutgoing.position() == 0;
             SSLEngineResult result = engine.wrap(src, writeOutgoing);
+            writeProduced += result.bytesProduced();
+            writeConsumed += result.bytesConsumed();
             if(LOG.isDebugEnabled())
                 LOG.debug("Wrap result: " + result);
             consumed += result.bytesConsumed();
@@ -258,6 +340,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
 
     public boolean handleWrite() throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         InterestWritableByteChannel source = writeSink;
         if(source == null)
             throw new IllegalStateException("writing with no source.");
@@ -305,7 +390,37 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
     }
 
+    /**
+     * Releases any resources that were acquired by the channel.
+     * If the underlying channels are still open, this method only propogates
+     * the shutdown call, instead of shutting down this channel, as it can
+     * still be used by other channels.
+     */
     public void shutdown() {
+        synchronized(initLock) {
+            if(shutdown)
+                return;
+            
+            if(!isOpen()) {
+                LOG.debug("Shutting down SSL channel");
+                shutdown = true;
+            }
+        }
+        
+        if(shutdown) {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+                public void run() {
+                    ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
+                    if(readIncoming != null)
+                        cache.release(readIncoming);
+                    if(readOutgoing != null)
+                        cache.release(readOutgoing);
+                    if(writeOutgoing != null)
+                        cache.release(writeOutgoing);
+                }
+            });
+        }
+        
         Shutdownable observer = writeWanter;
         if(observer != null)
             observer.shutdown();
@@ -334,7 +449,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
 
     public boolean isOpen() {
-        return readSink.isOpen() && writeSink.isOpen();
+        return readSink != null && readSink.isOpen() && writeSink != null && writeSink.isOpen();
     }
 
     public void handleIOException(IOException iox) {
@@ -342,7 +457,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
     
     public void interestRead(boolean status) {
-        readSink.interestRead(status);
+        synchronized(readInterestLock) {
+            readInterest = status;
+            readSink.interestRead(needsHandshakeUnwrap || status);
+        }
     }
 
     public synchronized void interestWrite(WriteObserver observer, boolean status) {
@@ -351,5 +469,35 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         if(source != null)
             source.interestWrite(this, true);
     }
-
+    
+    /** Returns the total number of bytes that this has produced from unwrapping reads. */
+    long getReadBytesProduced() {
+        return readProduced;
+    }
+    
+    /** Returns the total number of bytes that this has consumed while unwrapping reads. */
+    long getReadBytesConsumed() {
+        return readConsumed;
+    }
+    
+    /** Returns the total number of bytes that this has produced from wrapping writes. */
+    long getWrittenBytesProduced() {
+        return writeProduced;
+    }
+    
+    /** Returns the total number of bytes that this has consumed while wrapping writes. */
+    long getWrittenBytesConsumed() {
+        return writeConsumed;
+    }
+    
+    /** Returns the SSLSession this channel uses. */
+    SSLSession getSession() {
+        return engine != null ? engine.getSession() : null;
+    }
+    
+    /** Returns true if we're currently handshaking. */
+    boolean isHandshaking() {
+        return !firstReadDone.get() || engine.getHandshakeStatus() != HandshakeStatus.NOT_HANDSHAKING;
+        
+    }
 }

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -19,6 +18,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -37,6 +39,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -344,11 +347,11 @@ public class QueryReply extends Message implements SecureMessage {
     /** Creates a new query reply with data read from the network. */
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
 		throws BadPacketException {
-    	this(guid,ttl,hops,payload,Message.N_UNKNOWN);
+    	this(guid,ttl,hops,payload,Network.UNKNOWN);
                                        
     }
     
-    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,int network) 
+    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,Network network) 
     	throws BadPacketException{
     	super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length,network);
         this._payload=payload;
@@ -409,7 +412,7 @@ public class QueryReply extends Message implements SecureMessage {
              Set<? extends IpPort> proxies, SecurityToken securityToken) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
-              16);                             // 16-byte footer
+              Network.UNKNOWN);
 
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
@@ -433,6 +436,8 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
+        boolean supportsTLS = ConnectionSettings.TLS_INCOMING.getValue();
+        _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -465,7 +470,7 @@ public class QueryReply extends Message implements SecureMessage {
                 
                 // size of standard, no options, ggep block...
                 int ggepLen=
-                    _ggepUtil.getQRGGEP(false, false, false,
+                    _ggepUtil.getQRGGEP(false, false, false, false,
                                         IpPort.EMPTY_SET, null).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
@@ -483,8 +488,9 @@ public class QueryReply extends Message implements SecureMessage {
                            | (finishedUpload ? UPLOADED_MASK : 0)
                            | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
                            | (supportsBH || isMulticastReply || hasProxies ||
-                              (supportsFWTransfer || securityToken != null) ? 
-                              GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+                              supportsFWTransfer || securityToken != null ||
+                              supportsTLS ? 
+                                      GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
                 baos.write(flags);
                 baos.write(controls);
                 
@@ -503,6 +509,7 @@ public class QueryReply extends Message implements SecureMessage {
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
                                                        isMulticastReply,
                                                        supportsFWTransfer,
+                                                       supportsTLS,
                                                        proxies, securityToken);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
@@ -793,6 +800,12 @@ public class QueryReply extends Message implements SecureMessage {
     public synchronized void setSecureStatus(int secureStatus) {
         this._secureStatus = secureStatus;
     }    
+    
+    /** Returns true iff this client supports TLS. */
+    public boolean isTLSCapable() {
+        parseResults();
+        return _data.isTLSCapable();
+    }
 
     /** 
      * Returns true iff the client supports chat.
@@ -1011,8 +1024,9 @@ public class QueryReply extends Message implements SecureMessage {
             boolean supportsChatT=false;
             boolean supportsBrowseHostT=false;
             boolean replyToMulticastT=false;
-            Set<IpPort> proxies = IpPort.EMPTY_SET;
+            Set<? extends IpPort> proxies = IpPort.EMPTY_SET;
             byte[] securityToken = null;
+            boolean supportsTLST = false;
             
             //a) extract vendor code
             try {
@@ -1066,6 +1080,7 @@ public class QueryReply extends Message implements SecureMessage {
                                     throw new BadPacketException("Message had empty OOB security token");
                                 }
                             }
+                            supportsTLST = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
                         } catch (BadGGEPPropertyException bgpe) {
                         }
                     }
@@ -1126,7 +1141,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setProxies(proxies);
             _data.setSecurityToken(securityToken);
             _data.setHostData(new HostData(this));
-
+            _data.setTLSCapable(supportsTLST);
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -1147,11 +1162,6 @@ public class QueryReply extends Message implements SecureMessage {
             clientGUID = result;
         }
         return clientGUID;
-    }
-
-    /** Returns this, because it's always safe to send big replies. */
-    public Message stripExtendedPayload() {
-        return this;
     }
 
     public String toString() {
@@ -1273,60 +1283,52 @@ public class QueryReply extends Message implements SecureMessage {
          */
         private final byte[] _standardGGEP;
         
-        /** A GGEP block that has the 'Browse Host' extension.  Useful for Query
-         *  Replies.
-         */
+        /** A GGEP block that has the 'Browse Host' extension. */
         private final byte[] _bhGGEP;
+        
+        /** A GGEP Block with BH & TLS */
+        private final byte[] _bhTLSGGEP;
         
         /** A GGEP block that has the 'Multicast Source' extension.  
          *  Useful for Query Replies for a Query from a multicast source.
          */
         private final byte[] _mcGGEP;
         
-        /** A GGEP block that has everything a QR could possible need.
-         */
-        private final byte[] _comboGGEP;
+        /** A GGEP Block with MC + TLS. */
+        private final byte[] _mcTLSGGEP;
+        
+        /** A GGEP Block with BH & MC. */
+        private final byte[] _bhAndMC;
+        
+        /** A GGEP Block with BH, MC & TLS. */
+        private final byte[] _bhMCAndTLS;
+        
+        /** A TLS GGEP Block only. */
+        private final byte[] _tlsGGEP;
         
         public GGEPUtil() {
-            ByteArrayOutputStream oStream = new ByteArrayOutputStream();
-            
-            // the standard GGEP has nothing.
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            _standardGGEP = create(out);
+            _bhGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST);
+            _mcGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+            _mcTLSGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhAndMC = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+            _bhTLSGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhMCAndTLS = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _tlsGGEP = create(out, GGEP.GGEP_HEADER_TLS_CAPABLE);
+        }
+        
+        private byte[] create(ByteArrayOutputStream out, String... headers) {
+            out.reset();
+            GGEP combo = new GGEP(false);
+            for(String header : headers)
+                combo.put(header);
             try {
-                GGEP standard = new GGEP(false);
-                standard.write(oStream);
+                combo.write(out);
             } catch (IOException writeError) {}
-            _standardGGEP = oStream.toByteArray();
-            
-            // a GGEP block with JUST BHOST
-            oStream.reset();
-            try {
-                GGEP bhost = new GGEP(false);
-                bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
-                bhost.write(oStream);
-            } catch (IOException writeError) {}
-            _bhGGEP = oStream.toByteArray();
-            Assert.that(_bhGGEP != null);
-
-            // a GGEP block with JUST MCAST
-            oStream.reset();
-            try {
-                GGEP mcast = new GGEP(false);
-                mcast.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-                mcast.write(oStream);
-            } catch (IOException writeError) {}
-            _mcGGEP = oStream.toByteArray();
-            Assert.that(_mcGGEP != null);
-
-            // a GGEP block with everything....
-            oStream.reset();
-            try {
-                GGEP combo = new GGEP(false);
-                combo.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-                combo.put(GGEP.GGEP_HEADER_BROWSE_HOST);
-                combo.write(oStream);
-            } catch (IOException writeError) {}
-            _comboGGEP = oStream.toByteArray();
-            Assert.that(_comboGGEP != null);
+            byte[] data = out.toByteArray();
+            assert data != null;
+            return data;
         }
         
         /** @return The appropriate byte[] corresponding to the GGEP block you
@@ -1335,6 +1337,7 @@ public class QueryReply extends Message implements SecureMessage {
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
+                                boolean supportsTLS,
                                 Set<? extends IpPort> proxies,
                                 SecurityToken securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
@@ -1352,6 +1355,8 @@ public class QueryReply extends Message implements SecureMessage {
                     retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
                 if (isMulticastResponse)
                     retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                if (supportsTLS)
+                    retGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
                 if (supportsFWTransfer)
                     retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
                                 new byte[] {UDPConnection.VERSION});
@@ -1362,21 +1367,18 @@ public class QueryReply extends Message implements SecureMessage {
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
+                BitNumbers bn = new BitNumbers(Math.min(MAX_PROXIES, proxies.size()));
                 if (proxies != null && !proxies.isEmpty()) {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();
-                        String host = 
-                            ppi.getAddress();
-                        int port = ppi.getPort();
+                        IPPortCombo combo = new IPPortCombo(ppi.getInetSocketAddress());
                         try {
-                            IPPortCombo combo = new IPPortCombo(host, port);
                             baos.write(combo.toBytes());
+                            if(ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
+                                bn.set(numWritten);
                             numWritten++;
-                        }
-                        catch (UnknownHostException bad) {
-                        }
-                        catch (IOException terrible) {
+                        } catch (IOException terrible) {
                             ErrorService.error(terrible);
                         }
                     }
@@ -1384,15 +1386,17 @@ public class QueryReply extends Message implements SecureMessage {
 
                 try {
                     // add the PushProxies
-                    if (numWritten > 0)
-                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY,
-                                    baos.toByteArray());
+                    if (numWritten > 0) {
+                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
+                        // add the TLS push proxies info, if any.
+                        if(!bn.isEmpty())
+                            retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
+                    }
                     // set up return value
                     baos.reset();
                     retGGEP.write(baos);
                     retGGEPBlock = baos.toByteArray();
-                }
-                catch (IOException terrible) {
+                } catch (IOException terrible) {
                     ErrorService.error(terrible);
                 }
 
@@ -1400,12 +1404,22 @@ public class QueryReply extends Message implements SecureMessage {
             // else if (supportsBH && supportsFWTransfer &&
             // isMulticastResponse), since supportsFWTransfer is only helpful
             // if we have proxies
+            else if (supportsBH && isMulticastResponse && supportsTLS)
+                retGGEPBlock = _bhMCAndTLS;
             else if (supportsBH && isMulticastResponse)
-                retGGEPBlock = _comboGGEP;
+                retGGEPBlock = _bhAndMC;
+            else if (supportsBH && supportsTLS)
+                retGGEPBlock = _bhTLSGGEP;
             else if (supportsBH)
                 retGGEPBlock = _bhGGEP;
-            else if (isMulticastResponse)
+            else if(isMulticastResponse && supportsTLS)
+                retGGEPBlock = _mcTLSGGEP;
+            else if(isMulticastResponse)
                 retGGEPBlock = _mcGGEP;
+            else if(supportsTLS)
+                retGGEPBlock = _tlsGGEP;
+            else
+                retGGEPBlock = _standardGGEP;
             return retGGEPBlock;
         }
         
@@ -1416,22 +1430,36 @@ public class QueryReply extends Message implements SecureMessage {
          * @param ggeps the array of GGEP extensions that may or may not
          *  contain push proxy data
          */
-        public Set<IpPort> getPushProxies(GGEP ggep) {
+        public Set<? extends IpPort> getPushProxies(GGEP ggep) {
             Set<IpPort> proxies = null;
+            BitNumbers bn = null;
+            
+            // First try and get the bits for which PPs support TLS.
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS)) {
+                try {
+                    bn = new BitNumbers(ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+                } catch(BadGGEPPropertyException bad) {}
+            }
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
                 try {
                     byte[] proxyBytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
                     ByteArrayInputStream bais = new ByteArrayInputStream(proxyBytes);
+                    int i = 0;
                     while (bais.available() > 0) {
                         byte[] combo = new byte[6];
                         if (bais.read(combo, 0, combo.length) == combo.length) {
                             try {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
-                                proxies.add(IPPortCombo.getCombo(combo));
+                                IpPort ipp = IPPortCombo.getCombo(combo);
+                                // make it a connectable if the TLS bit is set.
+                                if(bn != null && bn.isSet(i))
+                                    ipp = new ConnectableImpl(ipp, true);
+                                proxies.add(ipp);
                             } catch (InvalidDataException malformedPair) {}
-                        }                        
+                        }
+                        i++;
                     }
                  } catch (BadGGEPPropertyException bad) {}
             }

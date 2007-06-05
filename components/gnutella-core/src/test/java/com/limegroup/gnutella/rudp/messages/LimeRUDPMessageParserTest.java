@@ -15,6 +15,7 @@ import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -54,7 +55,7 @@ public class LimeRUDPMessageParserTest extends LimeTestCase {
         byte[] payload = new byte[b.length - 23];
         System.arraycopy(b, 0, header, 0, header.length);
         System.arraycopy(b, 23, payload, 0, payload.length);
-        Message parsed = p.parse(header, payload, (byte)1, (byte)1);
+        Message parsed = p.parse(header, payload, (byte)1, Network.UNKNOWN);
         assertInstanceof(AbstractLimeRUDPMessage.class, parsed);
         assertEquals(clazz, parsed.getClass());
         assertNotSame(parsed, m);

@@ -1368,7 +1368,7 @@ public abstract class MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
-                    sock = Sockets.connect(addrToContact, portToContact, 12000);
+                    sock = Sockets.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();

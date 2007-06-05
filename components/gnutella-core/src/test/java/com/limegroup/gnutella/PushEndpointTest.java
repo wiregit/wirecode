@@ -5,133 +5,353 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.service.ErrorService;
+import org.limewire.io.IpPortSet;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
-/**
- * tests the PushEndpoint class.
- */
+
+/** tests the PushEndpoint class. */
 @SuppressWarnings("unchecked")
 public class PushEndpointTest extends LimeTestCase {
 
+    /* useful testing variables. */
+    private IpPort ppi1;
+    private IpPort ppi2;
+    private IpPort ppi3;
+    private IpPort ppi4;
+    private IpPort ppi5;
+    private IpPort ppi6;
+    
+    private IpPort tls1;
+    private IpPort tls2;
+    private IpPort tls3;
+    private IpPort tls4;
+    private IpPort tls5;
+    private IpPort tls6;
+    
+    private static Map m;
+    
 	public PushEndpointTest(String name) {
 		super(name);
 	}
-	static Map m;
-	public static void globalSetUp () {
-	    try {
-	        m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,
-	                "GUID_PROXY_MAP");
-	    }catch(Exception bad){
-	        ErrorService.error(bad);
-	    }
+    
+	public static void globalSetUp () throws Exception {
+	    m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
 	}
+    
     public static Test suite() {
         return buildTestSuite(PushEndpointTest.class);
+    }
+    
+    public void setUp() throws Exception {
+        ppi1 = new IpPortImpl("1.2.3.4", 1235);
+        ppi2 = new IpPortImpl("1.2.3.5", 1235);
+        ppi3 = new IpPortImpl("1.2.3.6", 1235);
+        ppi4 = new IpPortImpl("1.2.3.7", 1235);
+        ppi5 = new IpPortImpl("1.2.3.8", 1235);
+        ppi6 = new IpPortImpl("1.2.3.9", 1235);
+
+        tls1 = new ConnectableImpl("1.2.3.4", 1235, true);
+        tls2 = new ConnectableImpl("1.2.3.5", 1235, true);
+        tls3 = new ConnectableImpl("1.2.3.6", 1235, true);
+        tls4 = new ConnectableImpl("1.2.3.7", 1235, true);
+        tls5 = new ConnectableImpl("1.2.3.8", 1235, true);
+        tls6 = new ConnectableImpl("1.2.3.9", 1235, true);
     }
     
     public void testConstructors() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());
     	GUID guid2 = new GUID(GUID.makeGuid());
     	GUID guid3 = new GUID(GUID.makeGuid());
+        GUID guid4 = new GUID(GUID.makeGuid());
     	
     	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
     	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
+        IpPort ppi3 = new ConnectableImpl("1.2.3.6", 1236, true);
 		
     	Set set1 = new HashSet();
     	Set set2 = new HashSet();
+        Set set3 = new HashSet();
     	
     	set1.add(ppi1); 
     	set2.add(ppi1);
     	set2.add(ppi2);
+        set3.add(ppi1);
+        set3.add(ppi2);
+        set3.add(ppi3);
     	
     	PushEndpoint empty = new PushEndpoint(guid1.bytes());
     	assertEquals(guid1,new GUID(empty.getClientGUID()));
-    	assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies()));
+    	assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), true));
     	assertEquals(0,empty.getProxies().size());
     	
     	PushEndpoint one = new PushEndpoint(guid2.bytes(),set1);
-    	assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE,
-    			PushEndpoint.getSizeBytes(one.getProxies()));
+    	assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), true));
     	assertEquals(1,one.getProxies().size());
     	assertEquals(0,one.supportsFWTVersion());
     	
     	PushEndpoint two = new PushEndpoint(guid2.bytes(),set2);
-    	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE,
-    			PushEndpoint.getSizeBytes(two.getProxies()));
+    	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), true));
     	assertEquals(2,two.getProxies().size());
     	assertEquals(0,two.supportsFWTVersion());
+        
+        PushEndpoint tls = new PushEndpoint(guid4.bytes(),set3);
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(tls.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE+1, PushEndpoint.getSizeBytes(tls.getProxies(), true));
+        assertEquals(3,tls.getProxies().size());
+        assertEquals(0,tls.supportsFWTVersion());
+        Set proxies = tls.getProxies();
+        assertEquals(3, proxies.size());
+        int notTLS = 0;
+        int isTLS = 0;
+        Connectable tlsIPP = null;
+        for(Object ipp : proxies) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable()) {
+                isTLS++;
+                tlsIPP = (Connectable)ipp;
+            } else {
+                notTLS++;
+            }
+        }
+        assertEquals(2, notTLS);
+        assertEquals(1, isTLS);
+        assertEquals("1.2.3.6", tlsIPP.getAddress());
+        
     	
     	//test features
-    	PushEndpoint three = new PushEndpoint(guid3.bytes(),set2,0x0,1);
+    	PushEndpoint three = new PushEndpoint(guid3.bytes(),set2,(byte)0,1);
     	assertGreaterThan(0,three.supportsFWTVersion());
     	assertEquals("1.1.1.1",three.getAddress());
     	assertEquals(6346,three.getPort());
     	
     	//test IpPort constructor
     	IpPort ip = new IpPortImpl("1.2.3.4",5);
-    	PushEndpoint four = new PushEndpoint(guid3.bytes(),set2,0x0,1,ip);
+    	PushEndpoint four = new PushEndpoint(guid3.bytes(),set2,(byte)0,1,ip);
     	assertEquals("1.2.3.4",four.getAddress());
     	assertEquals(5,four.getPort());
     }
     
-    
-    public void testExternalization() throws Exception {
-    	GUID guid1 = new GUID(GUID.makeGuid());
-    	GUID guid2 = new GUID(GUID.makeGuid());
-    	
-    	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
-    	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
-    	IpPort ppi3 = new IpPortImpl("1.2.3.6",1235);
-    	IpPort ppi4 = new IpPortImpl("1.2.3.7",1235);
-    	IpPort ppi5 = new IpPortImpl("1.2.3.8",1235);
-    	IpPort ppi6 = new IpPortImpl("1.2.3.9",1235);
-		
-    	Set set1 = new TreeSet(IpPort.COMPARATOR);
-    	Set set6 = new TreeSet(IpPort.COMPARATOR);
-    	
-    	set1.add(ppi1); 
-    	set6.add(ppi1);set6.add(ppi2);set6.add(ppi3);set6.add(ppi4);
-    	set6.add(ppi5);set6.add(ppi6);
-    	
+    public void testBasicToAndFromBytes() throws Exception {
+    	GUID guid1 = new GUID(GUID.makeGuid());		
+    	Set set1 = ippset(ppi1);
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	
+        for (IpPort ipp : one.getProxies()) {
+            if (ipp instanceof Connectable
+                    && ((Connectable) ipp).isTLSCapable())
+                fail("TLS capable: " + ipp);
+        }
+        
     	assertEquals(0,one.supportsFWTVersion());
-    	byte [] network = one.toBytes();
-    	byte [] network2 = new byte [PushEndpoint.getSizeBytes(one.getProxies())+5];
-    	one.toBytes(network2,2);
+        
+        byte[] expected = new byte[23];
+        expected[ 0] = 0x1; // 1 proxy, no f2f, no features
+        for(int i = 0; i < 15; i++)
+            expected[i+1] = guid1.bytes()[i];
+        expected[17] = 1;
+        expected[18] = 2;
+        expected[19] = 3;
+        expected[20] = 4;
+        ByteOrder.short2leb((short)1235, expected, 21);
+        
+        // Test toBytes
+    	byte [] network = one.toBytes(false);
+        assertEquals(expected, network);
+        // toBytes(...)
+        byte [] network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, false);
+        assertEquals(expected, network2, 2, expected.length);
+        
+        // And make sure w/ TLS=true doesn't change things, since there's no TLS ipps!
+        network = one.toBytes(true);
+        assertEquals(expected, network);
+        // toBytes(...)
+        network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, true);
+        assertEquals(expected, network2, 2, expected.length);
     	
-    	assertEquals(PushEndpoint.getSizeBytes(one.getProxies()),network.length);
-    	PushEndpoint one_prim= PushEndpoint.fromBytes(
-                new DataInputStream(new ByteArrayInputStream(network)));
-    	assertEquals(one,one_prim);
-    	one_prim = PushEndpoint.fromBytes(
-                new DataInputStream(new ByteArrayInputStream(network2,2,network2.length-2)));
-    	assertEquals(one,one_prim);
-    	assertEquals(0,one_prim.supportsFWTVersion());
-    	
+        // Test fromBytes
+    	assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), false), expected.length);
+    	PushEndpoint one_prim = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
+    	assertEquals(one, one_prim);
+    	// And make sure none of the proxies are TLS capable.
+        for (IpPort ipp : one_prim.getProxies()) {
+            if (ipp instanceof Connectable
+                    && ((Connectable) ipp).isTLSCapable())
+                fail("TLS capable: " + ipp);
+        }
+        assertEquals(0, IpPort.COMPARATOR.compare(ppi1, one_prim.getProxies().iterator().next()));
+    }
+    
+    public void testToAndFromWithTLS() throws Exception {
+        GUID guid1 = new GUID(GUID.makeGuid());
+        Set tet1 = ippset(ppi1, ppi2, tls3, tls4);
+
+        byte[] expected = new byte[42];
+        expected[ 0] = 0x4 | (byte)0x80; // 1 proxy, no f2f, tls fields added
+        for(int i = 0; i < 15; i++)
+            expected[i+1] = guid1.bytes()[i];
+        expected[17] = (byte)0x30;
+        for(int i = 0; i < 4; i++) {
+            expected[18 + (i * 6)] = 1;
+            expected[19 + (i * 6)] = 2;
+            expected[20 + (i * 6)] = 3;
+            expected[21 + (i * 6)] = (byte)(i+4);
+            ByteOrder.short2leb((short)1235, expected, 22 + (i*6));
+        }
+        
+        PushEndpoint one = new PushEndpoint(guid1.bytes(), tet1);
+        assertEquals(0,one.supportsFWTVersion());        
+        // Make sure the proxies we read are TLS capable.
+        Set proxies = one.getProxies();
+        Set expectedProxies = new IpPortSet(tet1);
+        assertEquals(4, proxies.size());
+        int notTLS = 0;
+        int isTLS = 0;
+        for(Object ipp : proxies) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable()) {
+                isTLS++;
+                expectedProxies.remove(ipp);
+            } else {
+                notTLS++;
+                expectedProxies.remove(ipp);
+            }
+        }
+        assertEquals(2, notTLS);
+        assertEquals(2, isTLS);
+        assertEquals(0, expectedProxies.size());
+        
+        
+        // Test toBytes
+        byte[] network = one.toBytes(true);
+        assertEquals(expected, network);
+        // toBytes(...)
+        byte[] network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, true);
+        assertEquals(expected, network2, 2, expected.length);
+        
+        // And make sure w/ TLS=false does change things!
+        network = one.toBytes(false);
+        assertNotEquals(expected, network);
+        // iterate through the bytes -- the only one that should be different is the first & TLS byte
+        for(int i = 0; i < expected.length; i++) {
+            if(i == 0)
+                assertEquals("wrong initial byte!", 0x4, network[0]);
+            else if(i < 17)
+                assertEquals("wrong at i: " + i, expected[i], network[i]);
+            else if(i == 17)
+                continue;
+            else
+                assertEquals("wrong at i: " + i, expected[i], network[i-1]);
+        }
+        
+        // toBytes(...)
+        network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, false);
+        assertNotEquals(expected, network2, 2, expected.length);        
+        // network2 should be identital to network (which we verified above)...
+        assertEquals(network, network2, 2, network.length);
+        
+        // Test fromBytes
+        assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), true), expected.length);
+        PushEndpoint one_prim = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
+        assertEquals(one, one_prim);
+        
+        // Test deserialized PE for TLS understanding
+        proxies = one_prim.getProxies();
+        expectedProxies = new IpPortSet(tet1);
+        assertEquals(4, proxies.size());
+        notTLS = 0;
+        isTLS = 0;
+        for (Object ipp : proxies) {
+            if (ipp instanceof Connectable
+                    && ((Connectable) ipp).isTLSCapable()) {
+                isTLS++;
+                expectedProxies.remove(ipp);
+            } else {
+                notTLS++;
+                expectedProxies.remove(ipp);
+            }
+        }
+        assertEquals(2, notTLS);
+        assertEquals(2, isTLS);
+        assertEquals(0, expectedProxies.size());
+    }
+        
+    public void testToBytesMorePPIs() throws Exception {
+        // make sure we don't mark TLS if it isn't in the endpoints.
+        // makes sure we cut off adding PPIs at 4.
+        
+        GUID guid1 = new GUID(GUID.makeGuid());
+        Set set = ippset(ppi1, ppi2, ppi3, ppi4, tls5, tls6);
+        byte[] expected = new byte[41];
+        expected[ 0] = 0x4; // 1 proxy, no f2f, no tls
+        for(int i = 0; i < 15; i++)
+            expected[i+1] = guid1.bytes()[i];
+        for(int i = 0; i < 4; i++) {
+            expected[17 + (i * 6)] = 1;
+            expected[18 + (i * 6)] = 2;
+            expected[19 + (i * 6)] = 3;
+            expected[20 + (i * 6)] = (byte)(i+4);
+            ByteOrder.short2leb((short)1235, expected, 21 + (i*6));
+        }
+        
+        PushEndpoint one = new PushEndpoint(guid1.bytes(), set);
+        assertEquals(0,one.supportsFWTVersion());
+        
+        // Test toBytes
+        byte[] network = one.toBytes(true);
+        assertEquals(expected, network);
+        // toBytes(...)
+        byte[] network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, true);
+        assertEquals(expected, network2, 2, expected.length);
+        
+        // Make sure, just for kicks, that tls=false doesn't change.
+        network = one.toBytes(false);
+        assertEquals(expected, network);
+        // toBytes(...)
+        network2 = new byte[expected.length + 2];
+        one.toBytes(network2, 2, false);
+        assertEquals(expected, network2, 2, expected.length);
+
+        // Reconstruct it from the network & make sure none of them had proxies.
+        one = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(network)));
+        for(IpPort ipp : one.getProxies()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                fail("TLS capable: " + ipp);
+        }
+    }
+        
+    public void testToAndFromBytesWithFWT() throws Exception {
+        GUID guid2 = new GUID(GUID.makeGuid());
+        Set set6 = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
+        
     	m.clear();
         // test a PE that claims it supports FWT but doesn't have external address -
         // its FWT status gets cleared
-    	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,
-    			0,2);
+    	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,(byte)0,2);
     	assertEquals(2,six.supportsFWTVersion());
-    	network = six.toBytes();
-    	assertEquals(PushEndpoint.getSizeBytes(six.getProxies()),network.length);
+    	byte[] network = six.toBytes(false);
+    	assertEquals(PushEndpoint.getSizeBytes(six.getProxies(), false),network.length);
     	
     	m.clear();
-    	PushEndpoint four = PushEndpoint.fromBytes(
-                new DataInputStream(new ByteArrayInputStream(network)));
+    	PushEndpoint four = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(0,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
         
@@ -141,14 +361,12 @@ public class PushEndpointTest extends LimeTestCase {
     	
     	// test a PE that carries its external address
     	m.clear();
-    	PushEndpoint ext = new PushEndpoint(guid2.bytes(),set6,
-    			0,2, new IpPortImpl("1.2.3.4",5));
-    	network = ext.toBytes();
-    	assertEquals(PushEndpoint.getSizeBytes(set6)+6,network.length);
+    	PushEndpoint ext = new PushEndpoint(guid2.bytes(),set6,(byte)0,2, new IpPortImpl("1.2.3.4",5));
+    	network = ext.toBytes(false);
+    	assertEquals(PushEndpoint.getSizeBytes(set6, false)+6,network.length);
     	
     	m.clear();
-    	PushEndpoint ext2 = PushEndpoint.fromBytes(
-                new DataInputStream(new ByteArrayInputStream(network)));
+    	PushEndpoint ext2 = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(ext,ext2);
     	assertEquals("1.2.3.4",ext2.getAddress());
     	assertEquals(5,ext2.getPort());
@@ -158,83 +376,171 @@ public class PushEndpointTest extends LimeTestCase {
     	// does not use up the extra 6 bytes
     	
     	m.clear();
-    	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set6,
-    	        0,0, new IpPortImpl("1.2.3.4",5));
-    	network = noFWT.toBytes();
-    	assertEquals(PushEndpoint.getSizeBytes(set6),network.length);
+    	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set6,(byte)0,0, new IpPortImpl("1.2.3.4",5));
+    	network = noFWT.toBytes(false);
+    	assertEquals(PushEndpoint.getSizeBytes(set6, false),network.length);
     	
     	m.clear();
-    	PushEndpoint noFWT2 = PushEndpoint.fromBytes(
-                new DataInputStream(new ByteArrayInputStream(network)));
+    	PushEndpoint noFWT2 = PushEndpoint.fromBytes(new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(noFWT,noFWT2);
     	assertEquals(RemoteFileDesc.BOGUS_IP,noFWT2.getAddress());
     	assertEquals(4,noFWT2.getProxies().size());
     	m.clear();
-    	
+    }
+        
+    public void testSimpleHTTPStringValue() throws Exception {
+    	GUID guid1 = new GUID();
+        Set set = ippset(ppi1);
+    	PushEndpoint one = new PushEndpoint(guid1.bytes(), set);
+    	String httpString = one.httpStringValue();
+        assertEquals(guid1.toHexString() + ";1.2.3.4:1235", httpString);
+    	PushEndpoint one_prim = new PushEndpoint(httpString);
+    	assertEquals(1,one_prim.getProxies().size());
+    	set.retainAll(one_prim.getProxies());
+    	assertEquals(1, set.size());
     }
     
-    /**
-     * tests externalization to http header values.
-     * TODO: update this test after format is finalized.
-     */
-    public void testExternalizationHTTP() throws Exception {
-    	GUID guid1 = new GUID(GUID.makeGuid());
-    	GUID guid2 = new GUID(GUID.makeGuid());
-    	
-    	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
-    	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
-    	IpPort ppi3 = new IpPortImpl("1.2.3.6",1235);
-    	IpPort ppi4 = new IpPortImpl("1.2.3.7",1235);
-    	IpPort ppi5 = new IpPortImpl("1.2.3.8",1235);
-    	IpPort ppi6 = new IpPortImpl("1.2.3.9",1235);
-		
-    	Set set1 = new TreeSet(IpPort.COMPARATOR);
-    	Set set6 = new TreeSet(IpPort.COMPARATOR);
-    	
-    	set1.add(ppi1); 
-    	set6.add(ppi1);set6.add(ppi2);set6.add(ppi3);set6.add(ppi4);
-    	set6.add(ppi5);set6.add(ppi6);
-    	
-    	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	
-    	String httpString = one.httpStringValue();
-    	
-    	PushEndpoint one_prim = new PushEndpoint(httpString);
-    	
-    	
-    	assertEquals(1,one_prim.getProxies().size());
-    	set1.retainAll(one_prim.getProxies());
-    	assertEquals(1,set1.size());
-    	
+    public void testHttpStringValueWithMyIp() throws Exception {
+        GUID g1 = new GUID();
+        Set set = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
+        
     	//now test a bigger endpoint with an ip in it
     	IpPort ip = new IpPortImpl("1.2.3.4",5);
-       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2,ip);
-    	httpString = six.httpStringValue();
-    	
+       	PushEndpoint six = new PushEndpoint(g1.bytes(), set, (byte)0, 2, ip);
+    	String httpString = six.httpStringValue();
+        assertEquals(g1.toHexString() + ";fwt/2;5:1.2.3.4;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
     	PushEndpoint four = new PushEndpoint(httpString);
-    	    	
     	assertEquals(2,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
     	assertEquals("1.2.3.4",four.getAddress());
     	assertEquals(5,four.getPort());
     	
-    	Set sent = new TreeSet(IpPort.COMPARATOR);
-        sent.addAll(set6);
-    	sent.retainAll(four.getProxies());
-    	assertEquals(four.getProxies().size(),sent.size());
-    	
+        set.retainAll(four.getProxies());
+    	assertEquals(four.getProxies().size(), set.size());
+    }
+    
+    public void testHttpStringWithTLS() throws Exception {
+        GUID g1 = new GUID();
+        Set set = ippset(ppi1, tls2, ppi3, tls4);
+        PushEndpoint pe = new PushEndpoint(g1.bytes(), set);
+        String httpString = pe.httpStringValue();
+        assertEquals(g1.toHexString() + ";pptls=5;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
+        PushEndpoint read = new PushEndpoint(httpString);
+        Iterator<? extends IpPort> i = read.getProxies().iterator();
+        IpPort read1 = i.next();
+        IpPort read2 = i.next();
+        IpPort read3 = i.next();
+        IpPort read4 = i.next();
+        assertFalse(i.hasNext());
+        
+        assertEquals("1.2.3.4", read1.getAddress());
+        assertEquals("1.2.3.5", read2.getAddress());
+        assertEquals("1.2.3.6", read3.getAddress());
+        assertEquals("1.2.3.7", read4.getAddress());
+        
+        // these two MUST be Connectables.
+        assertInstanceof(Connectable.class, read2);
+        assertInstanceof(Connectable.class, read4);
+        assertTrue(((Connectable)read2).isTLSCapable());
+        assertTrue(((Connectable)read4).isTLSCapable());
+        
+        // 1 & 3 MAY be Connectables, but MUST NOT be tls capable
+        assertTrue( (!(read1 instanceof Connectable)) || (!((Connectable)read1).isTLSCapable()));
+        assertTrue( (!(read3 instanceof Connectable)) || (!((Connectable)read3).isTLSCapable()));
+    }
+    
+    public void testHttpStringWithTLSAndMyIP() throws Exception {
+        GUID g1 = new GUID();
+        Set set = ippset(tls1, ppi2, tls3, ppi4);
+        IpPort myIp = new IpPortImpl("1.3.2.5:7");
+        PushEndpoint pe = new PushEndpoint(g1.bytes(), set, (byte)0, 2, myIp);
+        String httpString = pe.httpStringValue();
+        assertEquals(g1.toHexString() + ";fwt/2;7:1.3.2.5;pptls=A;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
+        assertEquals(2, pe.supportsFWTVersion());
+        PushEndpoint read = new PushEndpoint(httpString);
+        assertEquals("1.3.2.5", read.getAddress());
+        Iterator<? extends IpPort> i = read.getProxies().iterator();
+        IpPort read1 = i.next();
+        IpPort read2 = i.next();
+        IpPort read3 = i.next();
+        IpPort read4 = i.next();
+        assertFalse(i.hasNext());
+        
+        assertEquals("1.2.3.4", read1.getAddress());
+        assertEquals("1.2.3.5", read2.getAddress());
+        assertEquals("1.2.3.6", read3.getAddress());
+        assertEquals("1.2.3.7", read4.getAddress());
+        
+        // these two MUST be Connectables.
+        assertInstanceof(Connectable.class, read1);
+        assertInstanceof(Connectable.class, read3);
+        assertTrue(((Connectable)read1).isTLSCapable());
+        assertTrue(((Connectable)read3).isTLSCapable());
+        
+        // 2 & 4 MAY be Connectables, but MUST NOT be tls capable
+        assertTrue( (!(read2 instanceof Connectable)) || (!((Connectable)read2).isTLSCapable()));
+        assertTrue( (!(read4 instanceof Connectable)) || (!((Connectable)read4).isTLSCapable()));
+    }
+    
+    public void testUpdateProxiesAndOverwriteProxies() throws Exception {
+        GUID g1 = new GUID();
+        Set set1 = ippset(ppi1, ppi2, ppi3, ppi4);
+        PushEndpoint pe = new PushEndpoint(g1.bytes(), set1);
+        pe.updateProxies(true);
+        
+        PushEndpoint pe2 = new PushEndpoint(g1.bytes());
+        assertEquals(0, pe2.getProxies().size());
+        pe2.updateProxies(false);
+        assertEquals(4, pe2.getProxies().size());
+        
+        // Basic overwrite.
+        Set set2 = ippset(ppi5, ppi6);
+        PushEndpoint.overwriteProxies(g1.bytes(), set2);
+        assertEquals(2, pe.getProxies().size());
+        assertEquals(2, pe2.getProxies().size());
+        
+        // Overwrite w/ HTTP string
+        PushEndpoint.overwriteProxies(g1.bytes(), "1.2.3.4:5,1.2.3.5:5,1.2.3.6:6");
+        assertEquals(3, pe.getProxies().size());
+        assertEquals(3, pe2.getProxies().size());
+        int tls = 0;
+        for(IpPort ipp : pe.getProxies()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                tls++;
+        }
+        assertEquals(0, tls);
+        
+        PushEndpoint.overwriteProxies(g1.bytes(), "pptls=2,2.3.4.5:5,2.3.4.6:6,2.3.4.7:7");
+        assertEquals(3, pe.getProxies().size());
+        assertEquals(3, pe2.getProxies().size());
+        tls = 0;
+        IpPort tlsIpp = null;
+        for(IpPort ipp : pe.getProxies()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable()) {
+                tls++;
+                tlsIpp = ipp;
+            }
+        }
+        assertEquals(1, tls);
+        assertEquals("2.3.4.7", tlsIpp.getAddress());
+    }
+    
+    public void testNoFWTInHTTPGetsNoEndpoint() throws Exception {
+        GUID g1 = new GUID();
+        Set set1 = ippset(ppi1);
+        IpPort me = new IpPortImpl("1.2.3.4:5");
+        
     	//now test an endpoint with an ip in it, but which does not support
     	//FWT.  We should not get the ip in the http representation
-    	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set1,0,0,ip);
-    	httpString = noFWT.httpStringValue();
+    	PushEndpoint noFWT = new PushEndpoint(g1.bytes(), set1, (byte)0, 0, me);
+    	String httpString = noFWT.httpStringValue();
+        assertEquals(g1.toHexString() +";1.2.3.4:1235", httpString);
     	
     	PushEndpoint parsed = new PushEndpoint(httpString);
     	assertEquals(RemoteFileDesc.BOGUS_IP,parsed.getAddress());
-    	
-    	//************* parsing tests *****************//
-    	
-    	//now an endpoint with a feature we do not understand
-    	
+    }
+    
+    public void testUnknownFeatures() throws Exception {
         PushEndpoint unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
@@ -261,9 +567,17 @@ public class PushEndpointTest extends LimeTestCase {
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	assertEquals("1.2.3.4",unknown.getAddress());
-    	assertEquals(5,unknown.getPort());    	
-    	
-    	
+    	assertEquals(5,unknown.getPort());
+    }
+    
+    
+
+    
+    private IpPortSet ippset(IpPort... ipps) {
+        IpPortSet set = new IpPortSet();
+        for(int i = 0; i < ipps.length; i++)
+            set.add(ipps[i]);
+        return set;
     }
     
 }

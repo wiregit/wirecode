@@ -9,13 +9,14 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-
-
+import org.limewire.util.Decorator;
 /**
  * Tests certain features of NetworkUtils
  */
@@ -632,5 +633,105 @@ public class NetworkUtilsTest extends BaseTestCase {
         InetAddress addr3 = InetAddress.getByName("192.168.1.1");
         assertInstanceof(Inet4Address.class, addr3);
         assertFalse(NetworkUtils.isDocumentationAddress(addr3));
+    }
+    
+    public void testUnpackIpPorts() throws Exception {
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 6, 0, 1, 2, 3, 4, 7, 0 };
+        List<IpPort> ipps = NetworkUtils.unpackIps(data);
+        Iterator<IpPort> it = ipps.iterator();
+        
+        IpPort ipp = it.next();
+        assertNotTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:5"), ipp));
+        
+        ipp = it.next();
+        assertNotTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:6"), ipp));
+        
+        ipp = it.next();
+        assertNotTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:7"), ipp));
+        
+        assertFalse(it.hasNext());
+    }
+    
+    public void testUnpackIpPortsWrongSize() throws Exception {
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 0, 1 };
+        try {
+            NetworkUtils.unpackIps(data);
+            fail("expected exception");
+        } catch(InvalidDataException ide) {
+            assertEquals("invalid size", ide.getMessage());
+        }
+    }
+    
+    public void testUnpackIpPortsWithDecorator() throws Exception {
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 6, 0, 1, 2, 3, 4, 7, 0, 1, 2, 3, 4, 8, 0 };
+        final AtomicInteger index = new AtomicInteger(0);
+        Decorator<IpPort, IpPort> tlsDecorator = new Decorator<IpPort, IpPort>() {
+            public IpPort decorate(IpPort input) {
+                try {
+                    switch(index.get()) {
+                    case 0: assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:5"), input)); break;
+                    case 1: assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:6"), input)); break;
+                    case 2: assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:7"), input)); break;
+                    case 3: assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:8"), input)); break;
+                    default:
+                        fail("invalid idx: " + index.get());
+                    }
+                    
+                    if(index.getAndIncrement() % 2 == 0)
+                        return new ConnectableImpl(input, true);
+                    else
+                        return input;
+                } catch(UnknownHostException uhe) {
+                    throw new RuntimeException(uhe);
+                }
+            }
+        };
+        
+        List<IpPort> ipps = NetworkUtils.unpackIps(data, tlsDecorator);
+        assertEquals(4, index.get());
+        assertEquals(4, ipps.size());
+        IpPort ipp = ipps.get(0);
+        assertTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:5"), ipp));
+        
+        ipp = ipps.get(1);
+        assertNotTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:6"), ipp));
+        
+        ipp = ipps.get(2);
+        assertTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:7"), ipp));
+        
+        ipp = ipps.get(3);
+        assertNotTLS(ipp);
+        assertEquals(0, IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:8"), ipp));
+    }
+    
+    public void testUnpackIpPortDecoratorReturnsNull() throws Exception {
+        byte[] data = new byte[] { 1, 2, 3, 4, 5, 0 };
+        try {
+            NetworkUtils.unpackIps(data, new Decorator<IpPort, IpPort>() {
+                public IpPort decorate(IpPort input) {
+                    return null;
+                }
+                
+            });
+            fail("expected exception");
+        } catch(InvalidDataException ide) {
+            assertEquals("decorator returned null", ide.getMessage());
+        }
+    }
+    
+    private static void assertNotTLS(IpPort ipp) {
+        if(ipp instanceof Connectable)
+            assertFalse(((Connectable)ipp).isTLSCapable());
+    }
+    
+    private static void assertTLS(IpPort ipp) {
+        assertInstanceof(Connectable.class, ipp);
+        assertTrue(((Connectable)ipp).isTLSCapable());
     }
 }
