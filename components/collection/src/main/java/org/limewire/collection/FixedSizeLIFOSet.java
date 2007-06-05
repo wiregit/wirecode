@@ -2,6 +2,70 @@ package org.limewire.collection;
 
 /**
  * A fixed size Last-In-First-Out (LIFO) Set.
+ * A fixed size <code>Set</code> where the last added element is the first 
+ * item in the list. Upon reaching the capacity of elements, 
+ * <code>FixedSizeLIFOSet</code> removes either the last item first (default)
+ * first item first (FIFO).
+ <pre>
+ 
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+ 
+    void sampleCodeFixedSizeLIFOSet(){
+        FixedSizeLIFOSet<MyObject> fslsLIFO = new FixedSizeLIFOSet<MyObject>(3, FixedSizeLIFOSet.EjectionPolicy.LIFO);
+        
+        if(!fslsLIFO.add(new MyObject("1", 1)))
+            System.out.println("Add failed 1");
+        System.out.println(fslsLIFO);
+        if(!fslsLIFO.add(new MyObject("2", 2)))
+            System.out.println("Add failed 2");
+        System.out.println(fslsLIFO);
+        if(!fslsLIFO.add(new MyObject("3", 3)))
+            System.out.println("Add failed 3");
+        System.out.println(fslsLIFO);
+        if(!fslsLIFO.add(new MyObject("4", 4)))
+            System.out.println("Add failed 4");
+        System.out.println(fslsLIFO);
+        
+        System.out.println("********************");
+
+        FixedSizeLIFOSet<MyObject> fslsFIFO = new FixedSizeLIFOSet<MyObject>(3, FixedSizeLIFOSet.EjectionPolicy.FIFO);
+        
+        if(!fslsFIFO.add(new MyObject("1", 1)))
+            System.out.println("Add failed 1");
+        System.out.println(fslsFIFO);
+        if(!fslsFIFO.add(new MyObject("2", 2)))
+            System.out.println("Add failed 2");
+        System.out.println(fslsFIFO);
+        if(!fslsFIFO.add(new MyObject("3", 3)))
+            System.out.println("Add failed 3");
+        System.out.println(fslsFIFO);
+        if(!fslsFIFO.add(new MyObject("4", 4)))
+            System.out.println("Add failed 4");
+        System.out.println(fslsFIFO);
+    }
+    Output:
+        [1=1]
+        [2=2, 1=1]
+        [3=3, 2=2, 1=1]
+        [4=4, 2=2, 1=1]
+        ********************
+        [1=1]
+        [2=2, 1=1]
+        [3=3, 2=2, 1=1]
+        [4=4, 3=3, 2=2]
+ </pre>
+
  */
 public class FixedSizeLIFOSet<E> extends LIFOSet<E> {
 

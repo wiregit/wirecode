@@ -2,7 +2,26 @@ package org.limewire.collection;
 
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
 
+/**
+ * Analyzes <code>CharSequence</code> keys with case sensitivity. With 
+ * <code>CharSequenceKeyAnalyzer</code> you can
+ * compare, check prefix, and determine the index of a bit.
+ * 
+<pre>
+    void sampleCodeCharSequenceKeyAnalyzer(){
+        CharSequenceKeyAnalyzer cska = new CharSequenceKeyAnalyzer();
+        
+        System.out.println("Is 'after' a prefix of 'Afternoon'? " + cska.isPrefix("after", 0, 16, "Afternoon"));
+        
+        System.out.println("Is 'after' a prefix of 'afternoon'? " + cska.isPrefix("after", 0, 16, "afternoon"));
+        
+    }
+    Output:
+        Is 'after' a prefix of 'Afternoon'? false
+        Is 'after' a prefix of 'afternoon'? true
 
+</pre>
+ */
 public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
     
     private static final long serialVersionUID = -7032449491269434877L;
@@ -15,8 +34,7 @@ public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
             bits[i] = 1 << (bitCount - i - 1);
         }
         return bits;
-    }
-    
+    } 
     public int length(CharSequence key) {
         return (key != null ? key.length() * 16 : 0);
     }

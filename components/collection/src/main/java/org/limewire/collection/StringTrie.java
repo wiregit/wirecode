@@ -7,33 +7,33 @@ import java.util.NoSuchElementException;
 
 
 /**
- * An information reTRIEval tree, a.k.a., a prefix tree.  A Trie is similar to
- * a dictionary, except that keys must be strings.  Furthermore, Trie provides
- * an efficient means (getPrefixedBy()) to find all values given just a PREFIX
- * of a key.<p>
- *
+ * An information reTRIEval tree, a.k.a., a prefix tree. A Trie is similar to
+ * a dictionary, except that keys must be strings. Furthermore, Trie provides
+ * an efficient means ({@link #getPrefixedBy(String)}) to find all values given 
+ * just a PREFIX of a key.
+ * <p>
  * All retrieval operations run in O(nm) time, where n is the size of the
- * key/prefix and m is the size of the alphabet.  Some implementations may
- * reduce this to O(n log m) or even O(n) time.  Insertion operations are
- * assumed to be infrequent and may be slower.  The space required is roughly
+ * key/prefix and m is the size of the alphabet. Some implementations may
+ * reduce this to O(n log m) or even O(n) time. Insertion operations are
+ * assumed to be infrequent and may be slower. The space required is roughly
  * linear with respect to the sum of the sizes of all keys in the tree, though
- * this may be reduced if many keys have common prefixes.<p>
- *
- * The Trie can be set to ignore case.  Doing so is the same as making all
- * keys and prefixes lower case.  That means the original keys cannot be
- * extracted from the Trie.<p>
- *
- * Restrictions (not necessarily limitations!)
+ * this may be reduced if many keys have common prefixes.
+ * <p>
+ * The Trie can be set to ignore case which is the same as making all
+ * keys and prefixes lower case. Therefore, ignoring case means the original 
+ * keys cannot be extracted from the Trie.
+ * <p>
+ * Restrictions (not necessarily limitations)
  * <ul>
- * <li><b>This class is not synchronized.</b> Do that externally if you desire.
+ * <li><b>This class is not synchronized.</b> Do that externally.
  * <li>Keys and values may not be null.
  * <li>The interface to this is not complete.
  * </ul>
  *
  * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie.html for a
  * discussion of Tries.
- *
- * @modified David Soh (yunharla00@hotmail.com)
+ *<p>
+ * Modified David Soh (yunharla00@hotmail.com)
  *      added getIterator() for enhanced AutoCompleteTextField use.
  *
  */
@@ -71,7 +71,7 @@ public class StringTrie<V> {
     private TrieNode<V> root;
 
     /**
-     * Indicates whever search keys are case-sensitive or not.
+     * Indicates whenever search keys are case-sensitive or not.
      * If true, keys will be canonicalized to lowercase.
      */
     private boolean ignoreCase;
@@ -86,7 +86,7 @@ public class StringTrie<V> {
 
     /**
      * Makes this empty.
-     * @modifies this
+     * Modifies this.
      */
     public void clear() {
         this.root = new TrieNode<V>();
@@ -99,7 +99,7 @@ public class StringTrie<V> {
      * modification. So this simply returns its parameter s.<p>
      *
      * Other overrides may also perform a conversion to the NFC form
-     * (interoperable across platforms) or to the NFKC form after removal of
+     * (inter-operable across platforms) or to the NFKC form after removal of
      * accents and diacritics from the NFKD form (ideal for searches using
      * strings in natural language).<p>
      *
@@ -134,7 +134,7 @@ public class StringTrie<V> {
      *      bcd
      *  </ol>
      *
-     * @requires 0 &lt;= startOffset &lt;= stopOffset &lt;= a.length()
+     * Requires 0 &lt;= startOffset &lt;= stopOffset &lt;= a.length()
      */
     private final int match(String a, int startOffset, int stopOffset,
                             String b) {
@@ -155,8 +155,8 @@ public class StringTrie<V> {
      * Maps the given key (which may be empty) to the given value.
      *
      * @return the old value associated with key, or <tt>null</tt> if none
-     * @requires value != null
-     * @modifies this
+     * Requires value != null
+     * Modifies this
      */
     public V add(String key, V value) {
         // early conversion of key, for best performance
@@ -188,7 +188,7 @@ public class StringTrie<V> {
                 //           child  newNode
                 //
                 // ...unless c = "", in which case you just do a "splice
-                // insert" by ommiting newNew and setting intermediate's value.
+                // insert" by omitting newNew and setting intermediate's value.
                 TrieNode<V> child = edge.getChild();
                 TrieNode<V> intermediate = new TrieNode<V>();
                 String a = label.substring(0, j);
@@ -268,7 +268,7 @@ public class StringTrie<V> {
      * Ensures no values are associated with the given key.
      *
      * @return <tt>true</tt> if any values were actually removed
-     * @modifies this
+     * Modifies this.
      */
     public boolean remove(String key) {
         // early conversion of search key
@@ -291,7 +291,7 @@ public class StringTrie<V> {
      * so that k.startsWith(prefix) and get(k) == v.  The remove() operation
      * on the iterator is unimplemented.
      *
-     * @requires this not modified while iterator in use
+     * Requires this not modified while iterator in use.
      */
     public Iterator<V> getPrefixedBy(String prefix) {
         // Early conversion of search key
@@ -309,7 +309,7 @@ public class StringTrie<V> {
      * But it can be performed early on the whole buffer using the public
      * method <tt>canonicalCase(String)</tt> of this.
      *
-     * @requires 0 &lt;= startOffset &lt;= stopOffset &lt;= prefix.length
+     * requires 0 &lt;= startOffset &lt;= stopOffset &lt;= prefix.length
      * @see #canonicalCase(String)
      */
     public Iterator<V> getPrefixedBy(String prefix,
@@ -495,7 +495,7 @@ public class StringTrie<V> {
     }
 
     /**
-     * Prints a description of the substree starting with start to buf.
+     * Prints a description of the sub tree starting with start to buf.
      * The printing starts with the given indent level. (internal)
      */
     private void toStringHelper(TrieNode start, StringBuilder buf, int indent) {
@@ -521,7 +521,7 @@ public class StringTrie<V> {
 }
 
 /**
- * A node of the Trie.  Each Trie has a list of children, labelled by strings.
+ * A node of the Trie.  Each Trie has a list of children, labeled by strings.
  * Each of these [String label, TrieNode child] pairs is considered an "edge".
  * The first character of each label must be distinct.  When managing
  * children, different implementations may trade space for time.  Each node
@@ -578,7 +578,7 @@ final class TrieNode<E> {
     /**
      * Get the nth child edge of this node.
      *
-     * @requires 0 &lt;= i &lt; children.size()
+     * Requires 0 &lt;= i &lt; children.size()
      */
     private final TrieEdge<E> get(int i) {
         return children.get(i);
@@ -657,10 +657,10 @@ final class TrieNode<E> {
      * Inserts an edge with the given label to the given child to this.
      * Keeps all edges binary sorted by their label start.
      *
-     * @requires label not empty.
-     * @requires for all edges E in this, label.getLabel[0] != E not already
+     * Requires label not empty.
+     * Requires for all edges E in this, label.getLabel[0] != E not already
      *  mapped to a node.
-     * @modifies this
+     * Modifies this
      */
     public void put(String label, TrieNode<E> child) {
         char labelStart;
@@ -694,7 +694,7 @@ final class TrieNode<E> {
      * Ensures that this's children take a minimal amount of storage.  This
      * should be called after numerous calls to add().
      *
-     * @modifies this
+     * Modifies this.
      */
     public void trim() {
         children.trimToSize();
@@ -816,15 +816,15 @@ final class TrieNode<E> {
 
 
 /**
- * A labelled edge, i.e., a String label and a TrieNode endpoint.
+ * A labeled edge, i.e., a String label and a TrieNode endpoint.
  */
 final class TrieEdge<E> {
     private String label;
     private TrieNode<E> child;
 
     /**
-     * @requires label.size() > 0
-     * @requires child != null
+     * Requires label.size() > 0
+     * Requires child != null
      */
     TrieEdge(String label, TrieNode<E> child) {
         this.label = label;

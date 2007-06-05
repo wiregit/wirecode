@@ -14,41 +14,42 @@ import java.util.Set;
 import java.util.SortedMap;
 
 /**
- * A PATRICIA Trie.
- * 
+ * A PATRICIA Trie. 
+ * <p>
  * PATRICIA = Practical Algorithm to Retrieve Information Coded in Alphanumeric
- * 
- * A PATRICIA Trie is a compressed Trie.  Instead of storing all data at the
+ * <p>
+ * A PATRICIA Trie is a compressed Trie. Instead of storing all data at the
  * edges of the Trie (and having empty internal nodes), PATRICIA stores data
- * in every node.  This allows for very efficient traversal, insert, delete,
- * predecessor, successor, prefix, range, and 'select' operations.  All operations
+ * in every node. This allows for very efficient traversal, insert, delete,
+ * predecessor, successor, prefix, range, and 'select' operations. All operations
  * are performed at worst in O(K) time, where K is the number of bits in the
- * largest item in the tree.  In practice, operations actually take O(A(K))
+ * largest item in the tree. In practice, operations actually take O(A(K))
  * time, where A(K) is the average number of bits of all items in the tree.
- * 
+ * <p>
  * Most importantly, PATRICIA requires very few comparisons to keys while
- * doing any operation.  While performing a lookup, each comparison
+ * doing any operation. While performing a lookup, each comparison
  * (at most K of them, described above) will perform a single bit comparison
  * against the given key, instead of comparing the entire key to another key.
- * 
- * The Trie can return operations in lexographical order using the 'traverse',
- * 'prefix', 'submap', or 'iterator' methods.  The Trie can also scan for items
- * that are 'bitwise' (using an XOR metric) by the 'select' method.  Bitwise
- * closeness is determined by the KeyAnalyzer returning true or false for
- * a bit being set or not in a given key.
- * 
+ * <p>
+ * The Trie can return operations in lexicographical order using the 'traverse',
+ * 'prefix', 'submap', or 'iterator' methods. The Trie can also scan for items
+ * that are 'bitwise' (using an XOR metric) by the 'select' method. Bitwise
+ * closeness is determined by the {@link KeyAnalyzer} returning true or 
+ * false for a bit being set or not in a given key.
+ * <p>
  * This PATRICIA Trie supports both variable length & fixed length keys.
- * Some methods, such as getPrefixedBy(...) are suited only to variable
- * length keys, whereas getPrefixedByBits(...) is suited to fixed-size keys.
+ * Some methods, such as <code>getPrefixedBy(...)</code> are suited only to 
+ * variable length keys, whereas <code>getPrefixedByBits(...)</code> is suited 
+ * to fixed-size keys.
+ * <p>
+ * Additionally see <a 
+ * href="http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/PATRICIA/">PATRICIA</a>
+ * for more information.
+ * <p>
+ * Any methods here that take an <code>Object</code> may throw a 
+ * <code>ClassCastException<code> if the method is expecting an instance of K 
+ * (and it isn't K).
  * 
- * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/PATRICIA/ for
- * more information.
- * 
- * Any methods here that take an Object may throw a ClassCastException if
- * the method is expecting an instance of K (and it isn't K).
- * 
- * @author Roger Kapsi
- * @author Sam Berlin
  */
 public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>, Serializable {
     
@@ -81,7 +82,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         return keyAnalyzer;
     }
     
-    /** Clears the Trie (i.e. removes all emelemnts). */
+    /** Clears the Trie (i.e. removes all elements). */
     public void clear() {
         root.key = null;
         root.bitIndex = -1;
@@ -315,7 +316,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * This is eqivalent to the other selectR() method but without
+     * This is equivalent to the other selectR() method but without
      * its overhead because we're selecting only one best matching
      * Entry from the Trie.
      */
@@ -325,7 +326,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (h.bitIndex <= bitIndex) {
             // If we hit the root Node and it is empty
             // we have to look for an alternative best
-            // mathcing node.
+            // matching node.
             if (!h.isEmpty()) {
                 result[0] = h;
                 return false;
@@ -374,7 +375,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                     removeEntry(h);
                     return false;
                 case CONTINUE:
-                    // fallthrough.
+                    // fall through.
                 }
             }
             return true; // continue
@@ -404,17 +405,16 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * a lookup of 'Lime' would return 'Lime', 'LimeRadio', and 'LimeWire'.
      * 
      * The view that this returns is optimized to have a very efficient
-     * Iterator.  The firstKey, lastKey & size methods must iterate
-     * over all possible values in order to determine the results.  This
-     * information is cached until the Patricia tree changes.  All other
+     * Iterator. The firstKey, lastKey & size methods must iterate
+     * over all possible values in order to determine the results. This
+     * information is cached until the Patricia tree changes. All other
      * methods (except Iterator) must compare the given key to the prefix
-     * to ensure that it is within the range of the view.  The Iterator's
+     * to ensure that it is within the range of the view. The Iterator's
      * remove method must also relocate the subtree that contains the
      * prefixes if the entry holding the subtree is removed or changes.
      * Changing the subtree takes O(K) time.
      * 
      * @param key
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key) {
         return getPrefixedByBits(key, 0, keyAnalyzer.length(key));
@@ -444,7 +444,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      *  
      * @param key
      * @param length
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key, int length) {
         return getPrefixedByBits(key, 0, length * keyAnalyzer.bitsPerElement());
@@ -475,7 +474,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * @param key
      * @param offset
      * @param length
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key, int offset, int length) {
         return getPrefixedByBits(key, offset * keyAnalyzer.bitsPerElement(), length * keyAnalyzer.bitsPerElement());
@@ -502,8 +500,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * Changing the subtree takes O(K) time.
      * 
      * @param key
-     * @param length
-     * @return
+     * @param bitLength
      */
     public SortedMap<K, V> getPrefixedByBits(K key, int bitLength) {
         return getPrefixedByBits(key, 0, bitLength);
@@ -527,7 +524,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * @param key
      * @param offset
      * @param length
-     * @return
      */
     private SortedMap<K, V> getPrefixedByBits(K key, int offset, int length) {
         int offsetLength = offset + length;
@@ -571,7 +567,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * 
      * This may throw ClassCastException if the object is not of type K.
      * 
-     * @param key the Key to delete
+     * @param k the Key to delete
      * @return Returns the deleted Value
      */
     public V remove(Object k) {
@@ -654,7 +650,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * 
      * If it's an internal Entry then "good luck" with understanding
      * this code. The Idea is essentially that Entry p takes Entry h's
-     * place in the trie which requires some re-wireing.
+     * place in the trie which requires some re-wiring.
      */
     private void removeInternalEntry(TrieEntry<K, V> h) {
         if (h == root) {
@@ -695,7 +691,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         
         // Fix H's parent and child Nodes
         {         
-            // If H is a parent of its left and right childs 
+            // If H is a parent of its left and right child 
             // then change them to P
             if (h.left.parent == h) {
                 h.left.parent = p;
@@ -729,7 +725,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns the node lexographically before the given node (or null if none).
+     * Returns the node lexicographically before the given node (or null if none).
      * 
      * This follows four simple branches:
      *  - If the uplink that returned us was a right uplink:
@@ -746,7 +742,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      *              - Follow right path for first right child from node.parent.left   
      * 
      * @param start
-     * @return
      */
     private TrieEntry<K, V> previousEntry(TrieEntry<K, V> start) {
         if(start.predecessor == null)
@@ -780,7 +775,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns the entry lexographically after the given entry.
+     * Returns the entry lexicographically after the given entry.
      * If the given entry is null, returns the first node.
      */
     private TrieEntry<K, V> nextEntry(TrieEntry<K, V> node) {
@@ -792,7 +787,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns the entry lexographically after the given entry.
+     * Returns the entry lexicographically after the given entry.
      * If the given entry is null, returns the first node.
      * 
      * This will traverse only within the subtree.  If the given node
@@ -1158,7 +1153,22 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
     }
     
-    /** Analyzes keys on a bit level. */
+    /** 
+     * Defines the interface to analyze {@link Trie} keys on a bit 
+     * level. <code>KeyAnalyzer</code>'s 
+     * methods return the length of the key in bits, whether or not a bit is 
+     * set, and bits per element in the key. 
+     * <p>
+     * Additionally, a method determines if a key is a prefix of another key and
+     * returns the bit index where one key is different from another key (if 
+     * the key and found key are equal than the return value is EQUAL_BIT_KEY).
+     * <p>
+     * <code>KeyAnalyzer</code> defines:<br>
+     * <table cellspace="5">
+     * <tr><td>NULL_BIT_KEY</td><td>When key's bits are all zero</td></tr>
+     * <tr><td> EQUAL_BIT_KEY </td><td>When key's are the same </td></tr>
+     * </table>
+     */
     public static interface KeyAnalyzer<K> extends Comparator<K>, Serializable {
         
         /** Returned by bitIndex if key's bits are all 0 */
@@ -1461,9 +1471,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns a collection view of the values contained in this map.  The
+     * Returns a collection view of the values contained in this map. The
      * collection is backed by the map, so changes to the map are reflected in
-     * the collection, and vice-versa.  The collection supports element
+     * the collection, and vice-versa. The collection supports element
      * removal, which removes the corresponding mapping from this map, via the
      * <tt>Iterator.remove</tt>, <tt>Collection.remove</tt>,
      * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt> operations.
@@ -1510,7 +1520,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * Returns the first entry the Trie is storing.
      * 
      * This is implemented by going always to the left until
-     * we encounter a valid uplink.  That uplink is the first key.
+     * we encounter a valid uplink. That uplink is the first key.
      */
     private TrieEntry<K, V> firstEntry() {
         // if Trie is empty, no first node.
@@ -1537,9 +1547,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     /**
      * Returns the last entry the Trie is storing.
-     * 
+     * <p>
      * This is implemented by going always to the right until
-     * we encounter a valid uplink.  That uplink is the last key.
+     * we encounter a valid uplink. That uplink is the last key.
      */
     private TrieEntry<K, V> lastEntry() {
         return followRight(root.left);

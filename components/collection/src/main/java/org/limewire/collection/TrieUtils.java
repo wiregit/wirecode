@@ -9,7 +9,8 @@ import org.limewire.collection.Trie.Cursor;
 
 
 /**
- * Miscellaneous utilities for Tries
+ * Miscellaneous utilities for Tries. See <a 
+ * href="http://en.wikipedia.org/wiki/Trie">Trie</a> for more information.
  */
 public final class TrieUtils {
     

@@ -21,7 +21,7 @@ public class Periodic {
 	 * Creates a periodic task 
 	 * @param r the <tt>Runnable</tt> to execute
 	 * @param scheduler the <tt>SchedulingThreadPool</tt> to schedule
-	 * executon on.
+	 * execution on.
 	 */
 	public Periodic(Runnable r,
 			SchedulingThreadPool scheduler) {
@@ -35,7 +35,7 @@ public class Periodic {
 	 * 
 	 * Note: some implementations of <tt>SchedulingThreadPool</tt> use nanoseconds
 	 * as their time unit, so do not schedule anything for more than 292 years in the
-	 * future.  More practically, this means you should not use Long.MAX_VALUE as parameter.
+	 * future. More practically, this means you should not use Long.MAX_VALUE as parameter.
 	 * 
 	 * @param newDelay the new delay from now when this should be executed
 	 * @return true if the execution time changed

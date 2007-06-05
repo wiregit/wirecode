@@ -1,36 +1,66 @@
 package org.limewire.collection;
 
 
-/**
- * An approximate string matcher.  Two strings are considered "approximately
- * equal" if one can be transformed into the other through some series of
- * inserts, deletes, and substitutions.<p>
- *
- * The approximate matcher has options to ignore case and whitespace.  It also
- * has switches to make it perform better by comparing strings backwards and
- * reusing a buffer.  However, these do <i>not</i> affect the match methods
- * directly; they only affect the results of the process(String) method. 
- * This method is used to preprocess strings before passing to match(..).
- * Typical use:
- *
- * <pre>
- *       String s1, s2;
- *       ApproximateMatcher matcher=new ApproximateMatcher();
- *       matcher.setIgnoreCase(true);
- *       matcher.setCompareBackwards(true);
- *       String s1p=matcher.process(s1);         //pre-process s1
- *       String s2p=matcher.process(s2);         //pre-process s2
- *       int matches=matcher.match(s1p, s2p);    //compare processed strings
- *       ...
- * </pre>
- *
- * The reason for this design is to reduce the pre-processing overhead when a
- * string is matched against many other strings.  Preprocessing really is
- * required to support the ignoreWhitespace option; it is simply not possible to
- * do the k-difference dynamic programming algorithm effienctly in one pass.
+/** 
+ * Determines if two strings are considered "approximately equal" if one 
+ * string can be transformed into the other string through some series of 
+ * inserts, deletes and substitutions.
+ * <p>
+ * The approximate matcher has options to ignore case and whitespace. Also, 
+ * <code>ApproximateMatcher</code> has switches to compare strings backwards 
+ * and reuse a buffer (which can make <code>ApproximateMatcher</code> perform 
+ * better). However, the switches do <i>not</i> affect the matching methods 
+ * directly; the switches only affect the results of the {@link #process(String)} method. 
+ * <code>process</code> method preprocesses strings before passing to {@link #match(String, String)}.
+ * A typical use:
+<pre>
+       String s1, s2;
+       ApproximateMatcher matcher=new ApproximateMatcher();
+       matcher.setIgnoreCase(true);
+       matcher.setCompareBackwards(true);
+       String s1p=matcher.process(s1);         //pre-process s1
+       String s2p=matcher.process(s2);         //pre-process s2
+       int matches=matcher.match(s1p, s2p);    //compare processed strings
+       ...
+</pre>
  * 
- * Note that this class is not thread-safe if the buffering constructor is
- * used.  
+ * <p>
+ * This design (calling <code>process</code> and then <code>match</code>) 
+ * reduces the pre-processing overhead when a string is matched 
+ * against many other strings. Preprocessing is required to support the 
+ * {@link #ignoreWhitespace} method option; it is not possible to do the 
+ * k-difference dynamic programming algorithm efficiently in one pass. 
+ * <p>
+ * Note this class is not thread-safe when you use the buffering constructor, 
+ * {@link #ApproximateMatcher(int)}.
+ * <p>
+ * <pre>
+    void sampleCodeApproximateMatcher(){
+        ApproximateMatcher am = new ApproximateMatcher();
+        am.setIgnoreCase(true);
+        String s1 = am.process("Ireland");
+        String s2 = am.process("Iceland");
+
+        String message = "insertions, deletions or replacements";
+        System.out.println("1) Number of " + message +" "+am.match(s1, s2));
+        System.out.println("2) Number of " + message +" "+am.match(s1, "land"));
+
+        if(am.matches(s1, s2, 0))
+            System.out.println("3) " + s1+ " and " + s2 + " match.");
+        else
+            System.out.println("3) " + s1+ " and " + s2 + " don't match.");
+        if(am.matches(s1, s2, 1))
+            System.out.println("4) " + s1+ " and " + s2 + " match.");
+        else
+            System.out.println("4) " + s1+ " and " + s2 + " don't match.");
+    }
+    Output:
+        1) Number of insertions, deletions or replacements 1
+        2) Number of insertions, deletions or replacements 3
+        3) ireland and iceland don't match.
+        4) ireland and iceland match.
+
+</pre>
  */
 final public class ApproximateMatcher
 {
@@ -72,24 +102,24 @@ final public class ApproximateMatcher
 
     ////////////////////////////// Processing Methods ///////////////////////
 
-    /*
-     * @param ignoreCase true iff case should be ignored when matching processed
+    /**
+     * @param ignoreCase true if case should be ignored when matching processed
      * strings.  Default value is false.
      */
     public void setIgnoreCase(boolean ignoreCase) {
         this.ignoreCase=ignoreCase;
     }
 
-    /*
-     * @param ignoreWhitespace true iff the characters ' ' and '_' should be
+    /**
+     * @param ignoreWhitespace true if the characters ' ' and '_' should be
      * ignored when matching processed strings.  Default value is false.
      */
     public void setIgnoreWhitespace(boolean ignoreWhitespace) {
         this.ignoreWhitespace=ignoreWhitespace;
     }
 
-    /*
-     * @param compareBackwards true iff the comparison should be done backwards
+    /**
+     * @param compareBackwards true if the comparison should be done backwards
      * when matching processed strings.  This is solely an optimization if you
      * expect more differences at the end of the word than the beginning.  
      * Default value is false.
@@ -137,7 +167,7 @@ final public class ApproximateMatcher
 
     ///////////////////////// Public Matching Methods //////////////////////////
 
-    /*
+    /**
      * Returns the edit distance between s1 and s2.  That is, returns the number
      * of insertions, deletions, or replacements necessary to transform s1 into
      * s2.  A value of 0 means the strings match exactly.<p>
@@ -176,7 +206,7 @@ final public class ApproximateMatcher
      * If you want to ignore case or whitespace, or compare backwards, s1 and s2
      * should be the return values of a call to process(..).
      * 
-     * @requires 0.<=match<=1.
+     * Requires 0.<=match<=1.
      */
     public final boolean matches(String s1, String s2, float precision) {
         int s1n=s1.length();

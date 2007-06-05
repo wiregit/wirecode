@@ -2,7 +2,9 @@ package org.limewire.collection;
 
 import java.util.Iterator;
 
-/** An convenience class to aid in writing iterators that cannot be modified. */
+/** 
+ * A convenience class to aid in developing iterators that cannot be modified.
+ */
 public abstract class UnmodifiableIterator<E> implements Iterator<E> {
     /** Throws UnsupportedOperationException */
     public final void remove() {

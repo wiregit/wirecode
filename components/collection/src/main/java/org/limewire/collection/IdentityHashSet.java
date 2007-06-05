@@ -7,6 +7,65 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Stores elements in a <code>Set</code> with keys that are compared with ==, not equals.
+ * Different key objects are considered distinct even if they have equal contents. 
+ * For example, if you attempt to add <code>mo</code> (MyObject mo = new 
+ * MyObject("b", 2);) twice, then the add fails. However, if you attempt to add
+ * new MyObject("b", 2) twice, both adds pass.
+<pre>
+    public class MyObjectHash{
+        public String s;
+        public int item;
+        public MyObjectHash(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item;
+        }
+        
+        public boolean equals(Object obj) {
+            MyObjectHash other = (MyObjectHash)obj;
+            return (this.s.equals(other.s) && this.item == other.item);         
+        }
+                
+        public int hashCode() {
+            return this.item * 31 + s.hashCode();
+        }
+    }   
+
+    void sampleCodeIdentityHashSet(){
+
+        IdentityHashSet&lt;MyObjectHash&gt; ihs = new IdentityHashSet&lt;MyObjectHash&gt;(4);
+
+        MyObjectHash mo = new MyObjectHash("a", 1);
+        if(ihs.add(mo))
+            System.out.println("1) Size is: " + ihs.size() + " contents: " + ihs);
+        if(!ihs.add(mo))
+            System.out.println("Unable to add the same object twice; contents: " + ihs);
+        
+        if(ihs.add(new MyObjectHash("b", 2)))
+            System.out.println("2) Size is: " + ihs.size() + " contents: " + ihs);
+        if(ihs.add(new MyObjectHash("b", 2)))
+            System.out.println("3) Size is: " + ihs.size() + " contents: " + ihs);
+        if(ihs.add(new MyObjectHash("c", 3)))
+            System.out.println("3) Size is: " + ihs.size() + " contents: " + ihs);
+        if(ihs.add(new MyObjectHash("d", 4)))
+            System.out.println("4) Size is: " + ihs.size() + " contents: " + ihs);  
+    }
+    Output:
+        1) Size is: 1 contents: [a=1]
+        Unable to add the same object twice; contents: [a=1]
+        2) Size is: 2 contents: [a=1, b=2]
+        3) Size is: 3 contents: [a=1, b=2, b=2]
+        3) Size is: 4 contents: [a=1, c=3, b=2, b=2]
+        4) Size is: 5 contents: [c=3, a=1, d=4, b=2, b=2]
+
+</pre>
+ * 
+ */
 public class IdentityHashSet<E>
 extends AbstractSet<E>
 implements Set<E>, Cloneable, java.io.Serializable
@@ -19,7 +78,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 	private static final Object PRESENT = new Object();
 
 	/**
-	 * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
+	 * Constructs a new, empty set; the backing <tt>IdentityHashMap</tt> instance has
 	 * default initial capacity (16) and load factor (0.75).
 	 */
 	public IdentityHashSet() {
@@ -28,7 +87,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 
 	/**
 	 * Constructs a new set containing the elements in the specified
-	 * collection.  The <tt>HashMap</tt> is created with default load factor
+	 * collection.  The <tt>IdentityHashMap</tt> is created with default load factor
 	 * (0.75) and an initial capacity sufficient to contain the elements in
 	 * the specified collection.
 	 *
@@ -43,7 +102,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 
 
 	/**
-	 * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
+	 * Constructs a new, empty set; the backing <tt>IdentityHashMap</tt> instance has
 	 * the specified initial capacity and default load factor, which is
 	 * <tt>0.75</tt>.
 	 *
@@ -126,7 +185,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 	}
 
 	/**
-	 * Returns a shallow copy of this <tt>HashSet</tt> instance: the elements
+	 * Returns a shallow copy of this <tt>IdentityHashSet</tt> instance: the elements
 	 * themselves are not cloned.
 	 *
 	 * @return a shallow copy of this set.
@@ -143,10 +202,10 @@ implements Set<E>, Cloneable, java.io.Serializable
 	}
 
 	/**
-	 * Save the state of this <tt>HashSet</tt> instance to a stream (that is,
+	 * Save the state of this <tt>IdentityHashSet</tt> instance to a stream (that is,
 	 * serialize this set).
 	 *
-	 * @serialData The capacity of the backing <tt>HashMap</tt> instance
+	 * @serialData The capacity of the backing <tt>IdentityHashMap</tt> instance
 	 *		   (int), and its load factor (float) are emitted, followed by
 	 *		   the size of the set (the number of elements it contains)
 	 *		   (int), followed by all of its elements (each an Object) in
@@ -166,7 +225,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 	}
 
 	/**
-	 * Reconstitute the <tt>HashSet</tt> instance from a stream (that is,
+	 * Reconstitute the <tt>IdentityHashSet</tt> instance from a stream (that is,
 	 * deserialize it).
 	 */
 	@SuppressWarnings("unchecked")

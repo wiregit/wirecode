@@ -5,48 +5,48 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * Utility class that uses the strategy pattern for <tt>Comparator</tt> 
- * instances.  This is possible because all comparators implement the 
- * <tt>Comparator</tt> interface.  This allows all classes using these 
- * comparators to use the same instances, reducing object creation.  Many of
- * these comparators are only necessary because the Java 1.1.8 versions of 
- * their classes did not implement the <tt>Comparable</tt> interface.
+ * Provides a way to compare various data types with static methods. 
+ * <p>
+ * <code>Comparators</code> is a utility class that uses the strategy 
+ * pattern for {@link java.lang.Comparable} instances. Many of these comparators 
+ * are only necessary because the Java 1.1.8 versions of their classes 
+ * did not implement the {@link Comparable} interface.
  */
 public final class Comparators { 
 
     /**
-     * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s.
+     * <code>Comparator</code> for comparing two <code>Integer</code>s.
      */
     private static final Comparator<Integer> INT_COMPARATOR = new IntComparator();
 
     /**
-     * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s the opposite way.
+     * <code>Comparator</code> for comparing two <code>Integer</code>s the opposite way.
      */
     private static final Comparator<Integer> INVERSE_INT_COMPARATOR = new InverseIntComparator();
     
     /**
-     * <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
+     * <code>Comparator</code> for comparing two <code>Long</code>s.
      */
     private static final Comparator<Long> LONG_COMPARATOR = new LongComparator();
 
     /**
-     * Inverse <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
+     * Inverse <code>Comparator</code> for comparing two <code>Long</code>s.
      */
     private static final Comparator<Long> INVERSE_LONG_COMPARATOR = 
         new InverseLongComparator();
     
     /**
-     * <tt>Comparator</tt> for comparing two <tt>String</tt>s.
+     * <code>Comparator</code> for comparing two <code>String</code>s.
      */
     private static final Comparator<String> STRING_COMPARATOR = new StringComparator();
     
     /**
-     * <tt>Comparator</tt> for comparing two <tt>File</tt>s.
+     * <code>Comparator</code> for comparing two <code>File</code>s.
      */
     private static final Comparator<File> FILE_COMPARATOR = new FileComparator();
     
     /**
-     * <tt>Comparator</tt> for comparing two <tt>String</tt>s regardless of
+     * <code>Comparator</code> for comparing two <code>String</code>s regardless of
      * case.
      */
     private static final Comparator<String> CASE_INSENSITIVE_STRING_COMPARATOR =
@@ -65,13 +65,13 @@ public final class Comparators {
     private Comparators() {}
     
     /**
-     * Instance accessor for the <tt>Comparator</tt> for <tt>Integer</tt>s.
-     * This is necessary because the <tt>Integer</tt> class did not implement 
-     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
-     * <tt>IntComparator</tt> has no state, allowing a single instance to be
-     * used whenever a <tt>Comparator</tt> is needed for <tt>Integer</tt>s.
+     * Instance assessor for the <code>Comparator</code> for <code>Integer</code>s.
+     * This is necessary because the <code>Integer</code> class did not implement 
+     * <code>Comparable</code> in Java 1.1.8.  This is an instance because the
+     * <code>IntComparator</code> has no state, allowing a single instance to be
+     * used whenever a <code>Comparator</code> is needed for <code>Integer</code>s.
      * 
-     * @return the <tt>IntComparator</tt> instance
+     * @return the <code>IntComparator</code> instance
      */
     public static Comparator<Integer> integerComparator() {
         return INT_COMPARATOR;
@@ -82,26 +82,26 @@ public final class Comparators {
     }
     
     /**
-     * Instance accessor for the <tt>Comparator</tt> for <tt>Long</tt>s.  This
-     * is necessary because the <tt>Long</tt> class did not implement 
-     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
-     * <tt>LongComparator</tt> has no state, allowing a single instance to be
-     * used whenever a <tt>Comparator</tt> is needed for <tt>Long</tt>s.
+     * Instance assessor for the <code>Comparator</code> for <code>Long</code>s.  This
+     * is necessary because the <code>Long</code> class did not implement 
+     * <code>Comparable</code> in Java 1.1.8.  This is an instance because the
+     * <code>LongComparator</code> has no state, allowing a single instance to be
+     * used whenever a <code>Comparator</code> is needed for <code>Long</code>s.
      * 
-     * @return the <tt>LongComparator</tt> instance
+     * @return the <code>LongComparator</code> instance
      */
     public static Comparator<Long> longComparator() {
         return LONG_COMPARATOR;
     }
 
     /**
-     * Instance accessor for the inverse <tt>Comparator</tt> for <tt>Long</tt>s.  
-     * This is necessary because the <tt>Long</tt> class did not implement 
-     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
-     * <tt>LongComparator</tt> has no state, allowing a single instance to be
-     * used whenever a <tt>Comparator</tt> is needed for <tt>Long</tt>s.
+     * Instance assessor for the inverse <code>Comparator</code> for <code>Long</code>s.  
+     * This is necessary because the <code>Long</code> class did not implement 
+     * <code>Comparable</code> in Java 1.1.8.  This is an instance because the
+     * <code>LongComparator</code> has no state, allowing a single instance to be
+     * used whenever a <code>Comparator</code> is needed for <code>Long</code>s.
      * 
-     * @return the <tt>LongComparator</tt> instance
+     * @return the <code>LongComparator</code> instance
      */
     public static Comparator<Long> inverseLongComparator() {
         return INVERSE_LONG_COMPARATOR;
@@ -112,26 +112,26 @@ public final class Comparators {
     }
     
     /**
-     * Instance accessor for the <tt>Comparator</tt> for <tt>String</tt>s.  This
-     * is necessary because the <tt>String</tt> class did not implement 
-     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
-     * <tt>StringComparator</tt> has no state, allowing a single instance to be
-     * used whenever a <tt>Comparator</tt> is needed for <tt>String</tt>s.
+     * Instance assessor for the <code>Comparator</code> for Strings.  This
+     * is necessary because the String class did not implement 
+     * <code>Comparable</code> in Java 1.1.8. This is an instance because the
+     * <code>StringComparator</code> has no state, allowing a single instance to be
+     * used whenever a <code>Comparator</code> is needed for Strings.
      * 
-     * @return the <tt>StringComparator</tt> instance
+     * @return the <code>StringComparator</code> instance
      */
     public static Comparator<String> stringComparator() {
         return STRING_COMPARATOR;
     }
 
     /**
-     * Instance accessor for the <tt>Comparator</tt> for <tt>File</tt>s.  This
-     * is necessary because the <tt>File</tt> class did not implement 
-     * <tt>Comparable</tt> in Java 1.1.8.  This is an instance because the
-     * <tt>FileComparator</tt> has no state, allowing a single instance to be
-     * used whenever a <tt>Comparator</tt> is needed for <tt>File</tt>s.
+     * Instance assessor for the <code>Comparator</code> for <code>File</code>s. This
+     * is necessary because the <code>File</code> class did not implement 
+     * <code>Comparable</code> in Java 1.1.8. This is an instance because the
+     * <code>FileComparator</code> has no state, allowing a single instance to be
+     * used whenever a <code>Comparator</code> is needed for <code>File</code>s.
      * 
-     * @return the <tt>FileComparator</tt> instance
+     * @return the <code>FileComparator</code> instance
      */
     public static Comparator<File> fileComparator() {
         return FILE_COMPARATOR;
@@ -150,12 +150,12 @@ public final class Comparators {
     }
     
     /**
-     * Instance accessor for the <tt>Comparator</tt> for case insensitive
-     * <tt>String</tt>s.  This is an instance because the
-     * <tt>CaseInsensitiveStringComparator</tt> has no state, allowing a single
-     * instance to be used whenever a <tt>Comparator</tt> is needed.
+     * Instance assessor for the <code>Comparator</code> for case insensitive
+     * <code>String</code>s.  This is an instance because the
+     * <code>CaseInsensitiveStringComparator</code> has no state, allowing a single
+     * instance to be used whenever a <code>Comparator</code> is needed.
      *
-     * @return the <tt>CaseInsensitiveStringComparator</tt> instance
+     * @return the <code>CaseInsensitiveStringComparator</code> instance
      */
     public static Comparator<String> caseInsensitiveStringComparator() {
         return CASE_INSENSITIVE_STRING_COMPARATOR;
@@ -184,10 +184,10 @@ public final class Comparators {
     }
 
     /**
-     * Compares two <tt>Long</tt>s.  Useful for storing Java
-     * 1.1.8 <tt>Long</tt>s in Java 1.2+ sorted collections classes.  This is 
-     * needed because <tt>Long</tt>s in 1.1.8 do not implement the 
-     * <tt>Comparable</tt> interface, unlike <tt>Long</tt>s in 1.2+. 
+     * Compares two <code>Long</code>s.  Useful for storing Java
+     * 1.1.8 <code>Long</code>s in Java 1.2+ sorted collections classes.  This is 
+     * needed because <code>Long</code>s in 1.1.8 do not implement the 
+     * <code>Comparable</code> interface, unlike <code>Long</code>s in 1.2+. 
      */
     private static final class LongComparator implements 
         Comparator<Long>, Serializable {
@@ -199,10 +199,10 @@ public final class Comparators {
     }
 
     /**
-     * Inverse comparison for two <tt>Long</tt>s.  Useful for storing Java
-     * 1.1.8 <tt>Long</tt>s in Java 1.2+ sorted collections classes.  This is 
-     * needed because <tt>Long</tt>s in 1.1.8 do not implement the 
-     * <tt>Comparable</tt> interface, unlike <tt>Long</tt>s in 1.2+. 
+     * Inverse comparison for two <code>Long</code>s.  Useful for storing Java
+     * 1.1.8 <code>Long</code>s in Java 1.2+ sorted collections classes.  This is 
+     * needed because <code>Long</code>s in 1.1.8 do not implement the 
+     * <code>Comparable</code> interface, unlike <code>Long</code>s in 1.2+. 
      */    
     private static final class InverseLongComparator implements 
         Comparator<Long>, Serializable {
@@ -215,8 +215,7 @@ public final class Comparators {
     }
     
     /**
-     * Compares to <tt>String</tt> objects.  The comparison is done
-     * without regard to case.
+     * Compares <code>String</code> objects without regard to case.
      */
     public static final class CaseInsensitiveStringComparator implements
         Comparator<String>, Serializable {

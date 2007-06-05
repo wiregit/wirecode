@@ -1,7 +1,7 @@
 package org.limewire.collection;
 
 /**
- * Interface for operations that can be cancelled.
+ * Defines an interface to determine if operations are cancellable.
  */
 public interface Cancellable {
     

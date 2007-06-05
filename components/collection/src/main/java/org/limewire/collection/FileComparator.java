@@ -5,8 +5,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * Compares two File's lexically by file name).  Useful for storing Java 1.1.8
- * Files in Java 1.2+ sorted collections classes.  This is needed because Files
+ * Compares two Files by file name. Useful for storing Java 1.1.8
+ * Files in Java 1.2+ sorted collections classes. This is needed because Files
  * in 1.1.8 do not implement the Comparable interface, unlike Files in 1.2+.
  */
 final class FileComparator implements Comparator<File>, Serializable {

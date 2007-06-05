@@ -12,16 +12,61 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
-* A stronger version of ForgetfulHashMap.  Like ForgetfulHashMap, this is a
+* Provides a better-defined replacement policy version of 
+* {@link ForgetfulHashMap}. Like <code>ForgetfulHashMap</code>, this is a
 * mapping that "forgets" keys and values using a FIFO replacement policy, much
-* like a cache.  Unlike ForgetfulHashMap, it has better-defined replacement
-* policy.  Specifically, it allows a key to be remapped to a different value and
-* then "renews" this key so it is the last key to be replaced.  All of this is
-* done in constant time.<p>
-*  
-* @author Anurag Singla -- initial version
-* @author Christopher Rohrs -- cleaned up and added unit tests
-* @author Sam Berlin -- extend LinkedHashMap (adds unimplemented methods, simplifies) 
+* like a cache. 
+* <p>
+* Specifically, <code>FixedsizeForgetfulHashMap</code> allows a 
+* key to be re-mapped to a different value and then "renews" this key so it 
+* is the last key to be replaced (done in constant time).
+<pre>
+
+    public class MyObjectHash{
+        public String s;
+        public int item;
+        public MyObjectHash(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item;
+        }
+        
+        public boolean equals(Object obj) {
+            MyObjectHash other = (MyObjectHash)obj;
+            return (this.s.equals(other.s) && this.item == other.item);         
+        }
+                
+        public int hashCode() {
+            return this.item * 31 + s.hashCode();
+        }
+    }   
+
+    void sampleCodeFixedsizeForgetfulHashMap(){
+        FixedsizeForgetfulHashMap&lt;String, MyObjectHash&gt; ffhm = new FixedsizeForgetfulHashMap&lt;String, MyObjectHash&gt;(3);
+
+        ffhm.put("Mykey1", new MyObjectHash("a", 1));
+        System.out.println("1) Size is: " + ffhm.size() + " contents: " + ffhm);
+        ffhm.put("Mykey2", new MyObjectHash("b", 2));
+        System.out.println("2) Size is: " + ffhm.size() + " contents: " + ffhm);
+        ffhm.put("Mykey3", new MyObjectHash("c", 3));
+        System.out.println("3) Size is: " + ffhm.size() + " contents: " + ffhm);
+
+        ffhm.put("Mykey4", new MyObjectHash("d", 4));
+        System.out.println("4) Size is: " + ffhm.size() + " contents: " + ffhm);
+        
+        ffhm.put("Mykey3", new MyObjectHash("replace", 3));
+        System.out.println("5) Size is: " + ffhm.size() + " contents: " + ffhm);    
+    }
+    Output:
+        1) Size is: 1 contents: {Mykey1=a=1}
+        2) Size is: 2 contents: {Mykey1=a=1, Mykey2=b=2}
+        3) Size is: 3 contents: {Mykey1=a=1, Mykey2=b=2, Mykey3=c=3}
+        4) Size is: 3 contents: {Mykey2=b=2, Mykey3=c=3, Mykey4=d=4}
+        5) Size is: 3 contents: {Mykey2=b=2, Mykey4=d=4, Mykey3=replace=3}
+</pre>
 */
 public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
 
@@ -81,7 +126,7 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
     /**
      * Removes the least recently used entry from the map
      * @return A Map.Entry object
-     * @modifies this
+     * Modifies this.
      */
     public Map.Entry<K, V> removeLRUEntry() {
         //if there are no elements, return null.
@@ -114,7 +159,7 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
     }
 
     /**
-     * Overriden to ensure that remapping a key renews the value in the
+     * Overridden to ensure that remapping a key renews the value in the
      * linked list.
      */
     @Override

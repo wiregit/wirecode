@@ -4,9 +4,20 @@ package org.limewire.collection;
 import java.util.Map;
 
 /**
-* This class stores a pair of a property key, and its corresponding value.
-* It implements Map.Entry interface, so that other classes can use it in the
-* same way, there's no backing Map though, unless stated otherwise.
+* Stores a property key and its corresponding value pair. <code>KeyValue</code>
+* implements <code>Map.Entry</code>, but there's no backing map.
+<pre>
+    void sampleCodeKeyValue(){
+        String key = new String("myKey");
+        String value = new String("myValue");
+        KeyValue&lt;String, String&gt; k = new KeyValue&lt;String, String&gt;(key, value);
+        System.out.println(k);  
+    }
+    Output:
+        myKey = myValue
+
+</pre>
+
 */
 public class KeyValue<K, V> implements Map.Entry<K, V>
 {

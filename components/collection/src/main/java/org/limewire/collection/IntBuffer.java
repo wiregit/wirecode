@@ -4,13 +4,36 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 /** 
- * A very simple fixed-size double-ended queue, i.e., a circular buffer.
- * The fixed size is intentional, not the result of laziness; use this 
- * data structure when you want to use a fix amount of resources.
- * This is not thread-safe.
+ * Provides a fixed-size double-ended queue, a circular buffer.
+ * Use <code>IntBuffer</code> when you want to use a fix amount of resources.
  * For a minimal amount of efficiency, the internal buffer is only
  * allocated on the first insertion or retrieval, allowing lots of
- * Buffers to be created that may not be used.
+ * int buffers to be created that may not be used.
+ * <p>
+ * <code>IntBuffer</code> is not thread-safe.
+<pre>
+    void sampleCodeIntBuffer(){
+        IntBuffer ib = new IntBuffer(10);
+
+        for(int i = 0; !ib.isFull(); i++){
+            ib.add(i);
+        }
+        for(int i = 0; i < ib.size() ; i++)
+            System.out.println(ib.get(i));      
+    }
+
+    Output:
+        9
+        8
+        7
+        6
+        5
+        4
+        3
+        2
+        1
+        0
+</pre>
  */
 public final class IntBuffer implements Cloneable, Iterable<Integer> {
     /**
@@ -39,8 +62,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     private int tail;
 
     /** 
-     * @requires size>=1
-     * @effects creates a new, empty buffer that can hold 
+     * Requires size>=1. 
+     * Has the effect that it creates a new, empty buffer that can hold 
      *  size elements.
      */
     public IntBuffer(int size) {
@@ -87,13 +110,17 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
 	}
 	*/
 
-    /** Returns true iff this is empty. */
+    /** Returns true if and only if this is empty. See <a href=
+     * "http://en.wikipedia.org/wiki/Iff">Iff</a> for more information.
+     * */
     public boolean isEmpty() {
         return head==tail;
     }
 
-    /** Returns true iff this is full, e.g., adding another element 
-     *  would force another out. */
+    /** Returns true if and only if this is full, e.g., adding another element 
+     *  would force another out. See <a href=
+     * "http://en.wikipedia.org/wiki/Iff">Iff</a> for more information.
+     *  */
     public boolean isFull() {
         return increment(tail)==head;
     }
@@ -134,7 +161,7 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
             return i+1;
     }
 
-    /** Returns the j s.t. buf[j]=this[i]. */
+    /** Returns the j such that buf[j]=this[i]. */
     private int index(int i) throws IndexOutOfBoundsException {        
         if (i<0 || i>=getSize())
             throw new IndexOutOfBoundsException("index: " + i + ", size: " + getSize());
@@ -149,8 +176,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /*
-     * @modifies this[i]
-     * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
+     * Modifies this[i].
+     * Has the effect that if i<0 or i>=getSize(), throws IndexOutOfBoundsException 
      *  and does not modify this.  Else this[i]=o.
      */
     public void set(int i, int value) throws IndexOutOfBoundsException {
@@ -166,10 +193,10 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /** 
-     * @modifies this
-     * @effects adds x to the head of this, removing the tail 
+     * Modifies this.
+     * Has the effect that it adds x to the head of this, removing the tail 
      *  if necessary so that the number of elements in this is less than
-     *  or equal to the maximum size.  Returns the element removed, or null
+     *  or equal to the maximum size. Returns the element removed, or null
      *  if none was removed.
      */
     public int addFirst(int x) {
@@ -183,8 +210,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /** 
-     * @modifies this
-     * @effects adds x to the tail of this, removing the head 
+     * Modifies this.
+     * Has the effect that it adds x to the tail of this, removing the head 
      *  if necessary so that the number of elements in this is less than
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
@@ -233,8 +260,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }    
 
     /**
-     * @modifies this
-     * @effects Removes and returns the head of this, or throws 
+     * Modifies this.
+     * Has the effect that it removes and returns the head of this, or throws 
      *   NoSuchElementException if this is empty.
      */
     public int removeFirst() throws NoSuchElementException {
@@ -247,8 +274,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /**
-     * @modifies this
-     * @effects Removes and returns the tail of this, or throws 
+     * Modifies this.
+     * Has the effect that it removes and returns the tail of this, or throws 
      *   NoSuchElementException if this is empty.
      */
     public int removeLast() throws NoSuchElementException {
@@ -261,10 +288,10 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /**
-     * @modifies this
-     * @effects Removes and returns the i'th element of this, or
+     * Modifies this.
+     * Has the effect that it removes and returns the i'th element of this, or
      *  throws IndexOutOfBoundsException if i is not a valid index
-     *  of this.  In the worst case, this runs in linear time with
+     *  of this. In the worst case, this runs in linear time with
      *  respect to size().
      */ 
     public int remove(int i) throws IndexOutOfBoundsException {
@@ -279,10 +306,10 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /**
-     * @modifies this
-     * @effects removes the first occurrence of x in this,
-     *  if any, as determined by .equals.  Returns true if any 
-     *  elements were removed.  In the worst case, this runs in linear 
+     * Modifies this.
+     * Has the effect that it removes the first occurrence of x in this,
+     *  if any, as determined by .equals. Returns true if any 
+     *  elements were removed. In the worst case, this runs in linear 
      *  time with respect to size().
      */
     public boolean removeValue(int x) {
@@ -296,10 +323,10 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /**
-     * @modifies this
-     * @effects removes all occurrences of x in this,
-     *  if any, as determined by .equals.  Returns true if any 
-     *  elements were removed.   In the worst case, this runs in linear 
+     * Modifies this.
+     * Has the effect that it removes all occurrences of x in this,
+     *  if any, as determined by .equals. Returns true if any 
+     *  elements were removed. In the worst case, this runs in linear 
      *  time with respect to size().
      */
     public boolean removeAll(int x) {
@@ -316,8 +343,8 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
 
 
     /**
-     * @modifies this
-     * @effects removes all elements of this.
+     * Modifies this.
+     * Has the effect that it removes all elements of this.
      */
     public void clear() {
         head=0;
@@ -325,9 +352,9 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /** 
-     * @effects returns an iterator that yields the elements of this, in 
+     * Has the effect that it returns an iterator that yields the elements of this, in 
      *  order, from head to tail.
-     * @requires this not modified will iterator in use.
+     * Requires this not modified will iterator in use.
      */
     public IntBufferIterator iterator() {
         return new IntBufferIterator();

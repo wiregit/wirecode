@@ -15,13 +15,36 @@ import org.limewire.util.ByteOrder;
 
 
 /**
- * A "range" version of IntSet. This is a first cut of the class and does
+ * Provides an interval of ranges (a "range" version of {@link IntSet}). 
+ * 
+ <pre>
+
+    void sampleCodeIntervalSet(){
+        IntervalSet is = new IntervalSet();
+        
+        is.add(new Interval(1,4)); 
+        is.add(new Interval(11,14)); 
+        is.add(new Interval(21,24)); 
+        System.out.println("1) Set is " + is + " intervals: " + 
+                is.getNumberOfIntervals());
+
+        is.add(new Interval(5,10)); 
+        System.out.println("2) Set is " + is + " intervals: " + 
+                is.getNumberOfIntervals());
+        IntervalSet is2 = is.invert(50);
+        System.out.println("3) Set is " + is2 + " intervals: " + 
+                is2.getNumberOfIntervals());
+    }
+    Output:
+        1) Set is [1-4, 11-14, 21-24] intervals: 3
+        2) Set is [1-14, 21-24] intervals: 2
+        3) Set is [0, 15-20, 25-49] intervals: 3
+</pre>
+ * 
+ */ 
+ /* This is a first cut of the class and does
  * not support all the operations IntSet does, just the ones we need for now.
- * <p>
- * Important Note: This class uses Interval from the download package. Ideally,
- * classes in the util package should be stand alone, but we need to have 
- * Interval stay in downloads for reasons of backward compatibility.
- */
+ */ 
 public class IntervalSet implements Iterable<Interval>, Serializable{
     
 	private static final long serialVersionUID = -7791242963023638684L;
@@ -98,7 +121,6 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     
     /**
      * Adds a whole IntervalSet into this IntervalSet.
-     * @param set
      */
     public void add(IntervalSet set) {
         for(Interval interval : set)
@@ -236,15 +258,15 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         if (low > high)
             return overlapBlocks;
         
-        //TODO2:For now we iterate over each of the inervals we have, 
-        //but there should be a faster way of finding which intrevals we 
+        //TODO2:For now we iterate over each of the intervals we have, 
+        //but there should be a faster way of finding which intervals we 
         //can overlap, Actually there is a max of  two intervals we can overlap
         //one on the top end and one on the bottom end. We need to make this 
         //more efficient
         for(Interval interval : intervals) {
             //case a:
             if(low <= interval.low && interval.high <= high) {
-                //Need to check the whole iterval, starting point=interval.low
+                //Need to check the whole interval, starting point=interval.low
                 overlapBlocks.add(interval);
                 continue;
             }
@@ -261,7 +283,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
             //Note: There is one condition under which case b and c are both
             //true. In this case the same interval will be added twice. The
             //effect of this is that we will check the same overlap interval 
-            //2 times. We are still doing it this way, beacuse this conditon
+            //2 times. We are still doing it this way, because this condition
             //will not happen in practice, and the code looks better this way, 
             //and finally, it cannot do any harm - the worst that can happen is
             //that we check the exact same interval twice.
@@ -448,7 +470,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     }
     
     /**
-     * Recomposes intervals to ensure that invariants are met.
+     * Recompose intervals to ensure that invariants are met.
      */
     private void fix() {
         String preIntervals = intervals.toString();

@@ -10,11 +10,54 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-
 /**
  * 
- * A Set ordered by Last-In-First-Out. 
+ * A <code>Set</code> ordered with the last added element is the first item in the list.
  * 
+<pre>
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+    void sampleCodeLIFOSet(){
+        LIFOSet<MyObject> s = new LIFOSet<MyObject>(1);
+        if(!s.add(new MyObject("1", 1)))
+            System.out.println("Add failed 1");
+        System.out.println(s);
+        if(!s.add(new MyObject("2", 2)))
+            System.out.println("Add failed 2");
+        System.out.println(s);
+        if(!s.add(new MyObject("3", 3)))
+            System.out.println("Add failed 3");
+        System.out.println(s);
+        if(!s.add(new MyObject("4", 4)))
+            System.out.println("Add failed 4");
+        System.out.println(s);
+        if(!s.add(new MyObject("5", 5)))
+            System.out.println("Add failed 5");
+        System.out.println(s);
+        
+        if(!s.add(new MyObject("6", 6)))
+            System.out.println("Add failed 6");
+        System.out.println(s);
+    }   
+    Output:
+        [1=1]
+        [2=2, 1=1]
+        [3=3, 2=2, 1=1]
+        [4=4, 3=3, 2=2, 1=1]
+        [5=5, 4=4, 3=3, 2=2, 1=1]
+        [6=6, 5=5, 4=4, 3=3, 2=2, 1=1]
+</pre>
  */
 public class LIFOSet<E> implements Set<E>{
     

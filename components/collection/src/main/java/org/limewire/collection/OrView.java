@@ -1,5 +1,62 @@
 package org.limewire.collection;
 
+/**
+ * Gives an Or view over one to many {@link BitField BitFileds}. 
+ * <code>OrView</code> returns the Or value and next clear (equal to 0) and 
+ * set (equal to 1) bit of the <code>BitField</code>s.
+ * <p>
+ * See <a href="http://en.wikipedia.org/wiki/OR">Or</a> for more information on
+ * the logical disjunction.
+ * <pre>
+    void printBitField(BitField bf, String bfName){
+        System.out.print(bfName + ": ");
+        for(int i = 0; i < bf.maxSize(); i++){
+            int j = 0;
+            if(bf.get(i)){
+                j = 1;          
+            }
+            System.out.print(j);
+        }
+        System.out.println(""); 
+    }
+
+    void sampleCodeOrView(){
+        BitSet bs1 = new BitSet();
+        bs1.set(0);
+        bs1.set(1);
+        
+        BitSet bs2 = new BitSet();
+        bs2.set(0);
+        bs2.set(2);
+        
+        BitSet bs3 = new BitSet();
+        bs3.set(0);
+        bs3.set(3);
+        
+        BitField bf1 = new BitFieldSet(bs1, 5);
+        BitField bf2 = new BitFieldSet(bs2, 5);
+               
+        printBitField(bf1, "bf1");
+        printBitField(bf2, "bf2");
+        
+        OrView ov = new OrView(bf1, bf2);
+
+        System.out.print(" ov: ");
+        for(int i = 0 ; i < ov.maxSize(); i++){
+            int j = 0;
+            if(ov.get(i))
+                j = 1;
+            System.out.print(j);
+        }
+        System.out.println();
+    }
+    Output:
+        bf1: 11000
+        bf2: 10100
+         ov: 11100
+ * </pre>
+ *
+ */
 public class OrView extends BooleanFunction {
 
 	public OrView(BitField first, BitField... more) {

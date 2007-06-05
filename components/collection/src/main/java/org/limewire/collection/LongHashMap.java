@@ -224,9 +224,9 @@ public class LongHashMap<V> {
      *             determined by the <tt>equals</tt> method;
      *             <code>false</code> otherwise.
      * @throws  NullPointerException  if the value is <code>null</code>.
-     * @see        #containsKey(int)
+     * @see        #containsKey(long)
      * @see        #containsValue(Object)
-     * @see        java.util.Map
+     * @see        Map
      */
     public boolean contains(Object value) {
         if (value == null) {
@@ -288,7 +288,7 @@ public class LongHashMap<V> {
      * @return  the value to which the key is mapped in this hashtable;
      *          <code>null</code> if the key is not mapped to any value in
      *          this hashtable.
-     * @see     #put(int, Object)
+     * @see     #put(long, Object)
      */
     public V get(long key) {
         Entry<V> tab[] = table;
@@ -347,7 +347,7 @@ public class LongHashMap<V> {
      * @return the previous value of the specified key in this hashtable,
      *         or <code>null</code> if it did not have one.
      * @throws  NullPointerException  if the key is <code>null</code>.
-     * @see     #get(int)
+     * @see     #get(long)
      */
     public V put(long key, V value) {
         // Makes sure the key is not already in the hashtable.

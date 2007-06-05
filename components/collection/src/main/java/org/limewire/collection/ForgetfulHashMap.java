@@ -3,21 +3,66 @@ package org.limewire.collection;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * A mapping that "forgets" keys and values using a FIFO replacement
- * policy, much like a cache.<p>
- *
- * More formally, a ForgetfulHashMap is a sequence of key-value pairs
- * [ (K1, V1), ... (KN, VN) ] ordered from youngest to oldest.  When
+ * policy, much like a cache.
+ * <p>
+ * More formally, a <code>ForgetfulHashMap</code> is a sequence of key-value pairs
+ * [ (K1, V1), ... (KN, VN) ] ordered from youngest to oldest. When
  * inserting a new pair, (KN, VN) is discarded if N is greater than
- * some threshold.  This threshold is fixed when the table is
- * constructed.  <b>However, this property may not hold if keys are
- * remapped to different values</b>; if you need this, use 
- * FixedsizeForgetfulHashmap.<p>
+ * a size (this threshold is fixed when the table is
+ * constructed). <b>However, this property may not hold if keys are
+ * re-mapped to different values</b>; if you need to re-map keys to different 
+ * values, use {@link FixedsizeForgetfulHashMap}.
+ * <p>
+ * Technically, this is not a valid subtype of <code>HashMap</code> (since items
+ * can be removed), but <code>HashMap</code> makes implementation easy. 
+ * Also, <code>ForgetfulHashMap</code> is <b>not synchronized</b>.
+<pre>
+    public class MyObjectHash{
+        public String s;
+        public int item;
+        public MyObjectHash(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item;
+        }
+        
+        public boolean equals(Object obj) {
+            MyObjectHash other = (MyObjectHash)obj;
+            return (this.s.equals(other.s) && this.item == other.item);         
+        }
+                
+        public int hashCode() {
+            return this.item * 31 + s.hashCode();
+        }
+    }   
+
+    void sampleCodeForgetfulHashMap(){
+        ForgetfulHashMap&lt;String, MyObjectHash&gt; fhm = new ForgetfulHashMap&lt;String, MyObjectHash&gt;(2);
+        fhm.put("Mykey1", new MyObjectHash("a", 1));
+        System.out.println("1) Size is: " + fhm.size() + " contents: " + fhm);
+        fhm.put("Mykey2", new MyObjectHash("b", 2));
+        System.out.println("2) Size is: " + fhm.size() + " contents: " + fhm);
+        fhm.put("Mykey3", new MyObjectHash("c", 3));
+        System.out.println("3) Size is: " + fhm.size() + " contents: " + fhm);
+
+        fhm.put("Mykey3", new MyObjectHash("replace", 3));
+        System.out.println("4) Size is: " + fhm.size() + " contents: " + fhm);
+        
+    }
+    Output:
+        1) Size is: 1 contents: {Mykey1=a=1}
+        2) Size is: 2 contents: {Mykey2=b=2, Mykey1=a=1}
+        3) Size is: 2 contents: {Mykey2=b=2, Mykey3=c=3}
+        4) Size is: 1 contents: {Mykey3=replace=3}
+   
+</pre>
  *
- * Technically, this not a valid subtype of HashMap, but it makes
- * implementation really easy. =) Also, ForgetfulHashMap is <b>not
- * synchronized</b>.
  */
 public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
     /* The current implementation is a hashtable for the mapping and
@@ -63,9 +108,9 @@ public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
     }
 
     /**
-     * @requires key is not in this
-     * @modifies this
-     * @effects adds the given key value pair to this, removing some
+     * Requires key is not in this.
+     * Modifies this.
+     * Has the effect that it adds the given key value pair to this, removing some
      *  older mapping if necessary.  The return value is undefined; it
      *  exists solely to conform with the superclass' signature.
      */

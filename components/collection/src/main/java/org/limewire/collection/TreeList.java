@@ -24,10 +24,10 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 /**
- * A <code>List</code> implementation that is optimised for fast insertions and
+ * A <code>List</code> implementation that is optimized for fast insertions and
  * removals at any index in the list.
  * <p>
- * This list implementation utilises a tree structure internally to ensure that
+ * This list implementation utilizes a tree structure internally to ensure that
  * all insertions and removals are O(log n). This provides much faster performance
  * than both an <code>ArrayList</code> and a <code>LinkedList</code> where elements
  * are inserted and removed repeatedly from anywhere in the list.
@@ -46,10 +46,28 @@ import java.util.NoSuchElementException;
  * <p>
  * <code>LinkedList</code> is rarely a good choice of implementation.
  * <code>TreeList</code> is almost always a good replacement for it, although it
- * does use sligtly more memory.
- * 
+ * does use slightly more memory.
+<pre>
+    void sampleCodeTreeList(){
+        TreeList&lt;Integer&gt; tl = new TreeList&lt;Integer&gt;();
+        tl.add(10);
+        tl.add(5);
+        tl.add(100);
+        tl.add(4);
+        tl.add(40);
+        Iterator&lt;Integer&gt; iter = tl.iterator();
+        while(iter.hasNext())
+            System.out.println(iter.next().toString());
+    }
+    Output:
+        10
+        5
+        100
+        4
+        40
+    
+</pre>
  * @since Commons Collections 3.1
- * @version $Revision: 1.2 $ $Date: 2007-05-23 20:30:11 $
  *
  * @author Joerg Schmuecker
  * @author Stephen Colebourne

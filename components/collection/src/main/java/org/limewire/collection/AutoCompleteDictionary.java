@@ -12,15 +12,16 @@ package org.limewire.collection;
 import java.util.Iterator;
 
 /**
- * This interface defines the API that dictionaries for autocomplete components
- * must implement. Note that implementations of this interface should perform
- * look ups as quickly as possible to avoid delays as the user types.
- *
+ * Defines the interface for an auto-complete dictionary. Implementations 
+ * should perform look ups quickly to avoid delays as the user types. The 
+ * interface includes adding, removing and clearing entries from the dictionary.
+ * Additionally, <code>AutoCompleteDictionary</code> provides a search and way 
+ * to iterate through the dictionary entries.
  * @author Matt Welsh (matt@matt-welsh.com)
- *
- * @modified David Soh (yunharla00@hotmail.com)
- *      added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
- *
+ * <br>
+ * Modified David Soh (yunharla00@hotmail.com)
+ *       added getIterator() & getIterator(String) for enhanced 
+ *       AutoCompleteTextField use.
  */
 public interface AutoCompleteDictionary extends Iterable<String> {
     /**

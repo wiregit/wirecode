@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.SortedMap;
 
 /**
- * An interface for Tries
- * 
- * @author Roger Kapsi
- * @author Sam Berlin
+ * Defines the interface for a prefix tree, an ordered tree data structure used
+ * to store an associated array where the keys are strings. For more 
+ * information, see <a href= "http://en.wikipedia.org/wiki/Trie">Tries</a>.
  */
 public interface Trie<K, V> extends SortedMap<K, V> {
     
@@ -23,8 +22,6 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'Lime' would return 'Lime', 'LimeRadio', and 'LimeWire'.
      * 
-     * @param key
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key);
     
@@ -40,9 +37,6 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * a lookup of 'LimePlastics' with a length of 4 would
      * return 'Lime', 'LimeRadio', and 'LimeWire'.
      *  
-     * @param key
-     * @param length
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key, int length);
     
@@ -58,10 +52,6 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * a lookup of 'The Lime Plastics' with an offset of 4 and a 
      * length of 4 would return 'Lime', 'LimeRadio', and 'LimeWire'.
      * 
-     * @param key
-     * @param offset
-     * @param length
-     * @return
      */
     public SortedMap<K, V> getPrefixedBy(K key, int offset, int length);
     
@@ -75,15 +65,12 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * '192.168' by providing the key '192.168.X.X' and a length of 16
      * would return all addresses that begin with '192.168'.
      * 
-     * @param key
-     * @param length
-     * @return
      */
     public SortedMap<K, V> getPrefixedByBits(K key, int bitLength);
     
     /**
      * Returns the value for the entry whose key is closest in a bitwise
-     * XOR metric to the given key.  This is NOT lexographic closeness.
+     * XOR metric to the given key.  This is NOT lexicographic closeness.
      * For example, given the keys:
      *  D = 1000100
      *  H = 1001000
@@ -91,8 +78,6 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * If the trie contained 'H' and 'L', a lookup of 'D' would return 'L',
      * because the XOR between D & L is closer than the XOR between D & H. 
      *  
-     * @param key
-     * @return
      */
     public V select(K key);
     
@@ -101,41 +86,48 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * value is closest in an XOR metric to the given key.  After the closest
      * entry is found, the trie will call select on that entry and continue
      * calling select for each entry (traversing in order of XOR closeness,
-     * NOT lexographically) until the cursor returns Cursor.SelectStatus.EXIT.
+     * NOT lexicographically) until the cursor returns Cursor.SelectStatus.EXIT.
      * The cursor can return Cursor.SelectStatus.CONTINUE to continue traversing.
      * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
      * and stop traversing.
      * 
      * The Cursor.SelectStatus.REMOVE operation is not supported.
      * 
-     * @param key
-     * @param cursor
      * @return The entry the cursor returned EXIT on, or null if it continued
      *         till the end.
      */
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);
     
     /**
-     * Traverses the trie in lexographic order.  Cursor.select will be called
-     * on each entry.  The traversal will stop when the cursor returns
-     * Cursor.SelectStatus.EXIT.  Cursor.SelectStatus.CONTINUE is used to 
-     * continue traversing.  Cursor.SelectStatus.REMOVE is used to remove
+     * Traverses the trie in lexicographical order. (See a href=
+     * "http://en.wikipedia.org/wiki/Lexicographical_order"> Lexicographical</a>
+     * for more information.) Cursor.select will be called
+     * on each entry. The traversal will stop when the cursor returns
+     * Cursor.SelectStatus.EXIT. Cursor.SelectStatus.CONTINUE is used to 
+     * continue traversing. Cursor.SelectStatus.REMOVE is used to remove
      * the element that was selected and continue traversing.
      * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
      * and stop traversing.
      *   
-     * @param cursor
      * @return The entry the cursor returned EXIT on, or null if it continued
      *         till the end.
      */
     public Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor);
     
     /**
-     * Allows operations to be performed given entries of the Trie as
-     * it is traversing through the entries.
+     * Defines the interface to return status of the current trie 
+     * entry during an iteration of entries. The <code>Trie</code> entry status 
+     * might be:
+     * <table cellspace="5">
+     * <tr><td><b>Return Value</b></td><td><b>Status</b></td></tr>
+     * <tr><td>EXIT</td><td>Finish the Trie operation</td></tr>
+     * <tr><td>CONTINUE</td><td>Look at the next Trie</td></tr>
+     * <tr><td>REMOVE</td><td>Remove the entry and continue iterating</td></tr>
+     * <tr><td>REMOVE_AND_EXIT</td><td>Remove the entry and stop iterating</td></tr>
+     * </table>
      *
-     * @param <K>
-     * @param <V>
+     * @param <K> Key Type
+     * @param <V> Key Value
      */
     public static interface Cursor<K, V> {
         
@@ -146,11 +138,10 @@ public interface Trie<K, V> extends SortedMap<K, V> {
          * REMOVE_AND_EXIT to remove the entry and stop iterating. 
          * Not all operations support REMOVE.
          * 
-         * @param entry
-         * @return
          */
         public SelectStatus select(Map.Entry<? extends K, ? extends V> entry);
      
+        /** The mode during selection.      */
         public static enum SelectStatus {
             EXIT, CONTINUE, REMOVE, REMOVE_AND_EXIT;
         }

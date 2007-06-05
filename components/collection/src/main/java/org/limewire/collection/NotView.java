@@ -1,5 +1,48 @@
 package org.limewire.collection;
 
+/**
+ * Provides a not view for a {@link BitField}.  
+ * See <a 
+ * href="http://en.wikipedia.org/wiki/Logical_NOR">not</a> for more 
+ * information.
+<pre>
+    void printBitField(BitField bf, String bfName){
+        System.out.print(bfName + ": ");
+        for(int i = 0; i < bf.maxSize(); i++){
+            int j = 0;
+            if(bf.get(i)){
+                j = 1;          
+            }
+            System.out.print(j);
+        }
+        System.out.println(""); 
+    }
+
+    void sampleCodeNotView(){
+        BitSet bs1 = new BitSet();
+        bs1.set(0);
+        bs1.set(1);
+                
+        BitField bf1 = new BitFieldSet(bs1, 5);
+               
+        printBitField(bf1, "bf1");
+        
+        NotView nv = new NotView(bf1);
+
+        System.out.print(" nv: ");
+        for(int i = 0 ; i < nv.maxSize(); i++){
+            int j = 0;
+            if(nv.get(i))
+                j = 1;
+            System.out.print(j);
+        }       
+        System.out.println();
+    }
+    Output:
+        bf1: 11000
+         nv: 00111
+    
+ */
 public class NotView implements BitField {
 
 	private final BitField bf; 

@@ -4,6 +4,78 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Contains a collection of {@link Collection Collections}.
+ <pre>
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+    void sampleCodeMultiCollection(){
+        LinkedList&lt;MyObject&gt; l1 = new LinkedList&lt;MyObject&gt;();
+        for(int i = 0; i < 5; i++)
+            if(!l1.add(new MyObject(String.valueOf(i), i)))
+                System.out.println("add failed " + i);  
+        
+        LinkedList&lt;MyObject&gt; l2 = new LinkedList&lt;MyObject&gt;();
+        for(int i = 80; i < 89; i++)
+            if(!l2.add(new MyObject(String.valueOf(i), i)))
+                System.out.println("add failed " + i);  
+                
+        MyObject itemToAdd = new MyObject(String.valueOf(800), 800);
+        if(!l2.add(itemToAdd))
+            System.out.println("itemToAdd failed.");    
+                
+        MultiCollection&lt;MyObject&gt; mc = new MultiCollection&lt;MyObject&gt;(l1, l2);
+        System.out.println("l1 size is: " + l1.size());
+        System.out.println("l2 size is: " + l2.size());
+        System.out.println("mc size is: " + mc.size());
+        
+        if(!mc.contains(itemToAdd))
+            System.out.println("contains failed."); 
+        else{
+            if(!mc.remove(itemToAdd))
+                System.out.println("remove failed.");   
+            else
+                System.out.println("mc size after remove: " + mc.size());
+        }
+        
+        if(!mc.isEmpty()) {
+            LinkedList&lt;MyObject&gt; copyOfList2 = (LinkedList&lt;MyObject&gt;)l2.clone();
+                        
+            if(!mc.containsAll(l2))
+                System.out.println("containsAll all failed.");
+            else{   
+                if(!mc.removeAll(copyOfList2))
+                    System.out.println("remove all failed.");
+                else{
+                    System.out.println("mc size after removing copyOfList2: " + mc.size());
+                }           
+            }
+        }
+        mc.clear();
+        System.out.println("mc size is: " + mc.size());
+    }
+    Output:
+        l1 size is: 5
+        l2 size is: 10
+        mc size is: 15
+        mc size after remove: 14
+        mc size after removing copyOfList2: 5
+        mc size is: 0
+    
+ </pre>
+ * 
+ */
 public class MultiCollection<T> extends MultiIterable<T> implements Collection<T> {
 	
 	private final Iterable<Collection<? extends T>> collections;
@@ -69,7 +141,6 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		}
 		return false;
 	}
-
 	public boolean removeAll(Collection<?> c) {
 		boolean ret = false;
 		for (Object o : c) {

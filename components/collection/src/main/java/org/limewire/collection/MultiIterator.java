@@ -4,6 +4,60 @@ package org.limewire.collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Implements the {@link Iterator} interface. You can use 
+ * <code>MultiIterator</code> for a single list, multiple lists and 
+ * {@link MultiCollection MultiCollections}.
+ <pre>
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+    void sampleCodeMultiIterator(){
+        LinkedList&lt;MyObject&gt; l1 = new LinkedList&lt;MyObject&gt;();
+        for(int i = 0; i < 2; i++)
+            if(!l1.add(new MyObject(String.valueOf(i), i)))
+                System.out.println("add failed " + i);  
+        
+        LinkedList&lt;MyObject&gt; l2 = new LinkedList&lt;MyObject&gt;();
+        for(int i = 80; i < 82; i++)
+            if(!l2.add(new MyObject(String.valueOf(i), i)))
+                System.out.println("add failed " + i);  
+                
+        MyObject itemToAdd = new MyObject(String.valueOf(800), 800);
+        if(!l2.add(itemToAdd))
+            System.out.println("itemToAdd failed.");    
+                
+        MultiCollection&lt;MyObject&gt; mc = new MultiCollection&lt;MyObject&gt;(l1, l2);
+        
+        if(!mc.isEmpty()) {
+            MultiIterator&lt;MyObject&gt; miterator = new MultiIterator&lt;MyObject&gt;(l1.iterator(), mc.iterator());
+            
+            while(miterator.hasNext()){
+                System.out.println(miterator.next());
+            }
+        }
+        mc.clear();
+    }
+    Output:
+        0=0
+        1=1
+        0=0
+        1=1
+        80=80
+        81=81
+        800=800    
+</pre>
+ */
 
 public class MultiIterator<T> implements Iterator<T> {
 

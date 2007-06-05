@@ -3,9 +3,99 @@ package org.limewire.collection;
 import java.util.Stack;
 
 /**
- * A cache of byte[].  Intended to allow a limited number of byte[]s to be created,
- * with methods for retrieving & returning them.  When the maximum number is created,
- * further attempts to retrieve will block until others have been returned.
+ * Sets a limit to the number of byte arrays that can be created. <code>ByteArrayCache</code>
+ * has methods to create and release the byte arrays, as well as check the size 
+ * (total size, remaining size, and byte array size).
+ * <p>  
+ * When the maximum number of byte arrays are created ({@link #getCreated()} ==
+ * {@link #getMaxSize()}), attempts to get a new byte array ({@link #get()}) 
+ * block until a byte array is freed ({@link #release(byte[])}).
+<pre>
+    void sampleCodeByteArrayCache(){
+        try{
+            ByteArrayCache bac = new ByteArrayCache(3, 2);
+            System.out.println("cache size: " + bac.getCacheSize());
+        
+            byte[] b1 = bac.getQuick();
+            System.out.println("1 number of bytes created: " + bac.getCreated());
+            
+            for(int i = 0; i < bac.getLength(); i++)
+                b1[i] = 0;
+            byte[] b2 = bac.getQuick();
+            if(b2 != null){
+                bac.release(b2);
+            }           System.out.println("2 number of bytes created: " + bac.getCreated());
+            
+            byte[] b3 = bac.getQuick();
+            if(b3 != null){
+                bac.release(b2);
+            }   
+            System.out.println("3 number of bytes created: " + bac.getCreated());
+            
+            byte[] b4 = bac.getQuick();
+            if(b4 != null){
+                bac.release(b2);
+            }   
+            System.out.println("4 number of bytes created: " + bac.getCreated());
+            
+            byte[] b5 = bac.getQuick();
+            if(b5 != null){
+                bac.release(b2);
+            }
+            System.out.println("5 number of bytes created: " + bac.getCreated());
+            
+            byte[] b6 = bac.getQuick();
+            if(b6 != null){
+                bac.release(b2);
+            }
+            System.out.println("6 number of bytes created: " + bac.getCreated());
+            
+            byte[] b7 = bac.getQuick();
+            if(b7 != null){
+                bac.release(b2);
+            }
+            System.out.println("7 number of bytes created: " + bac.getCreated());
+            
+            byte[] b8 = bac.getQuick();
+            if(b8 != null){
+                bac.release(b2);
+            }
+            System.out.println("8 number of bytes created: " + bac.getCreated());
+            
+            byte[] b9 = bac.getQuick();
+            if(b9 != null){
+                bac.release(b2);
+            }
+            System.out.println("9 number of bytes created: " + bac.getCreated());
+
+            System.out.println("cache size: " + bac.getCacheSize());
+            System.out.println("more buffer available: " + bac.isBufferAvailable());
+            System.out.println("number of bytes created: " + bac.getCreated());
+            System.out.println("max size: " + bac.getMaxSize());
+        }
+        catch(Exception e){
+            System.out.println("Exception is " + e);
+        }
+    }
+    Output:
+        cache size: 0
+        1 number of bytes created: 1
+        2 number of bytes created: 2
+        3 number of bytes created: 2
+        4 number of bytes created: 2
+        5 number of bytes created: 2
+        6 number of bytes created: 2
+        7 number of bytes created: 2
+        8 number of bytes created: 2
+        9 number of bytes created: 2
+        cache size: 2
+        more buffer available: true
+        number of bytes created: 2
+        max size: 3
+        
+</pre>
+
+ * 
  */
 public class ByteArrayCache {
     
@@ -49,8 +139,8 @@ public class ByteArrayCache {
     
     /**
      * Attempts to retrieve a new byte[].
-     * If the cache is empty and getCreated() is >= getMaxSize(), this will block until
-     * a byte[] is returned to the cache.
+     * If the cache is empty and getCreated() is >= getMaxSize(), this will 
+     * block until a byte[] is returned to the cache.
      */
     public synchronized byte[] get() throws InterruptedException {
         while(true) {
@@ -68,8 +158,8 @@ public class ByteArrayCache {
     }
     
     /**
-     * Attempts to retrieve a new byte[].
-     * If the cache is empty and getCreated() is >= getMaxSize(), this will return null.
+     * Attempts to retrieve a new byte[]. If the cache is empty and getCreated()
+     * is >= getMaxSize(), this will return null.
      */
     public synchronized byte[] getQuick() {
         if (!CACHE.isEmpty()) {

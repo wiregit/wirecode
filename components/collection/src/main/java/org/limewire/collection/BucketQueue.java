@@ -3,15 +3,85 @@ package org.limewire.collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
-
 /** 
- * A discrete-case priority queue.  Designed to be a replacement for BinaryHeap
- * for the special case when there are only a small number of positive
- * priorities, where larger numbers are higher priority.  Unless otherwise
- * noted, all methods have the same specifications as BinaryHeap.  This also has
- * a few additional methods not found in BinaryHeap.  <b>This class is not
- * synchronized.</b>
+ * Provides a discrete-case priority queue. <code>BucketQueue</code> is designed 
+ * to be a replacement for a binary heap for the special case when there 
+ * are only a small number of positive priorities. (Priorities are zero based 
+ * and therefore, when priority is set to 3, the values are [0, 1, 2]. Also, larger 
+ * numbers are higher priority.)
+ * <p>
+ * You determine how many element cases per priority are allowed in the queue. 
+ * When the queue attempts to add an element more than the maximum capacity for 
+ * the priority, the first element is removed upon {@link #insert(Object, int)}. 
+ * <p>
+ * Note: <code>BucketQueue</code> is not synchronized.
+ * 
+ <pre>
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+   void sampleCodeBucketQueue(){
+                                            //priorities, capacity
+        BucketQueue&lt;MyObject&gt; bq = new BucketQueue&lt;MyObject&gt;(3,2);
+        MyObject returnFromInsert ;
+        
+        bq.insert(new MyObject("a", 1), 1);
+        bq.insert(new MyObject("b", 2), 1);
+        System.out.println("List contents: ");
+
+        for(MyObject  i : bq)
+            System.out.println("\tElement is " + i);
+
+        returnFromInsert = bq.insert(new MyObject("c", 3), 1);
+        if(returnFromInsert != null)
+            System.out.println("Element " + returnFromInsert + " popped because there are already 2 elements of priority 1.");
+        
+        System.out.println("List contents: ");
+        for(MyObject  i : bq)
+            System.out.println("\tElement is " + i);
+        
+        bq.insert(new MyObject("d", 4), 2);
+        bq.insert(new MyObject("e", 5), 2);
+
+        bq.insert(new MyObject("f", 1), 0);
+        
+        
+        System.out.println("List contents: ");
+        for(MyObject  i : bq)
+            System.out.println("\tElement is " + i);
+        
+        System.out.println("Max: " + bq.getMax().toString() + " and bq is " + bq);
+        
+    }
+
+    Output:
+        List contents: 
+            Element is b=2
+            Element is a=1
+        Element a=1 popped because there are already 2 elements of priority 1.
+        List contents: 
+            Element is c=3
+            Element is b=2
+        List contents: 
+            Element is e=5
+            Element is d=4
+            Element is c=3
+            Element is b=2
+            Element is f=1
+        Max: e=5 and bq is [[e=5, d=4], [c=3, b=2], [f=1]]
+ </pre>
+ 
+ * 
  */
 public class BucketQueue<E> implements Cloneable, Iterable<E> {
     /** 
@@ -27,7 +97,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     private int size=0;
 
     /** 
-     * @effects a new queue with the given number of priorities, and
+     * Has the effect that a new queue with the given number of priorities, and
      *  the given number of entries PER PRIORITY.  Hence 0 through 
      *  priorities-1 are the legal priorities, and there are up to
      *  capacityPerPriority*priorities elements in the queue.
@@ -51,7 +121,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * @effects makes a new queue that will hold up to capacities[i]
+     * Has the effect to make a new queue that will hold up to capacities[i]
      *  elements of priority i.  Hence the legal priorities are 0
      *  through capacities.length-1
      * @exception IllegalArgumentException capacities.length<=0 or 
@@ -94,8 +164,8 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * @modifies this
-     * @effects adds o to this, removing and returning some older element of
+     * Modifies this.
+     * Has the effect to add o to this, removing and returning some older element of
      *  same or lesser priority as needed
      * @exception IllegalArgumentException priority is not a legal priority, 
      *  as determined by this' constructor
@@ -115,8 +185,8 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * @modifies this
-     * @effects removes all o' s.t. o'.equals(o).  Note that p's
+     * Modifies this.
+     * Has the effects to remove all o' such that o'.equals(o).  Note that p's
      *  priority is ignored.  Returns true if any elements were removed.
      */
     public boolean removeAll(Object o) {
@@ -170,7 +240,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /** 
-     * @effects returns the number of entries with the given priority. 
+     * Has the effect to return the number of entries with the given priority. 
      * @exception IllegalArgumentException priority is not a legal priority, 
      *  as determined by this' constructor
      */
@@ -187,9 +257,9 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /** 
-     * @requires this not modified while iterator in use
-     * @effects yields the elements of this exactly once, from highest priority
-     *  to lowest priority.  Within each priority level, newer elements are
+     * Requires this not modified while iterator in use
+     * Has the effect to yield the elements of this exactly once, from highest priority
+     *  to lowest priority. Within each priority level, newer elements are
      *  yielded before older ones.  
      */
     public Iterator<E> iterator() {
@@ -197,8 +267,8 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /** 
-     * @requires this not modified while iterator in use
-     * @effects yields the best n elements from startPriority down to to lowest
+     * Requires this not modified while iterator in use
+     * Has the effect to yield the best n elements from startPriority down to to lowest
      *  priority.  Within each priority level, newer elements are yielded before
      *  older ones, and each element is yielded exactly once.  May yield fewer
      *  than n elements.
@@ -219,8 +289,8 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
         private int left;
 
         /**
-         * @requires buckets.length>0
-         * @effects creates an iterator that yields the best
+         * Requires buckets.length>0
+         * Has the effect to creates an iterator that yields the best
          *  n elements.
          */
         public BucketQueueIterator(int startPriority, int n) {

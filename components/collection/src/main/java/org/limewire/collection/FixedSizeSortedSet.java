@@ -6,15 +6,97 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.limewire.service.ErrorService;
 
 /**
- * A simple fixed size sorted set.  Uses two structures internally, a SortedSet
+ * Gives a sorted {@link Set} of elements with a maximum size. Elements are sorted
+ * upon insertion to the list, but only a fixed number of unique items are kept. 
+ * Therefore, a newly inserted element can push out items depending on it's 
+ * insertion location. 
+ * <p>
+ * <code>FixedSizeSortedSet</code> does not accept duplicate elements. 
+ * Additionally, <code>FixedSizeSortedSet</code> is not synchronized and should
+ * be done externally.
+ *<p> 
+ * All elements inserted into a sorted set must implement the 
+ * {@link Comparable} interface. 
+ * 
+ <pre>
+    public class MyComparableObjectHash implements Comparable&lt;MyComparableObjectHash$gt;{
+        public String s;
+        public int item;
+        public MyComparableObjectHash(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item;
+        }
+                
+        public int compareTo(MyComparableObjectHash other) {
+            int c = this.s.compareTo(other.s);//compare by the string
+            if(c == 0){//if the string is equal, compare by item
+                c = this.item - other.item;
+            }
+                return c;
+            }   
+
+        public boolean equals(Object obj) {
+            MyComparableObjectHash other = (MyComparableObjectHash)obj;
+            return (this.s.equals(other.s) && this.item == other.item);         
+        }
+                
+        public int hashCode() {
+            return this.item * 31 + s.hashCode();
+        }
+        
+    }   
+
+    void sampleCodeFixedSizeSortedSet(){    
+        FixedSizeSortedSet&lt;MyComparableObjectHash&gt; fsss = new FixedSizeSortedSet&lt;MyComparableObjectHash&gt;(5);
+
+        fsss.add(new MyComparableObjectHash("e", 1));
+        fsss.add(new MyComparableObjectHash("e", 2));       
+        fsss.add(new MyComparableObjectHash("b", 3));
+        fsss.add(new MyComparableObjectHash("a", 4));
+
+        Iterator iter = fsss.iterator();
+        while(iter.hasNext())
+            System.out.println(iter.next());        
+
+        if(!fsss.add(new MyComparableObjectHash("a", 4)))
+            System.out.println("add('a', 4) failed - no duplicates");
+            
+        fsss.add(new MyComparableObjectHash("c", 5));
+        fsss.add(new MyComparableObjectHash("g", 0));       
+                    
+        iter = fsss.iterator();
+        while(iter.hasNext())
+            System.out.println(iter.next());        
+    }
+    Output:
+        a=4
+        b=3
+        e=1
+        e=2
+        add('a', 4) failed - no duplicates
+        a=4
+        b=3
+        c=5
+        e=1
+        g=0
+ </pre>
+
+ */ 
+ /* 
+  * A simple fixed size sorted set. Uses two structures internally, a SortedSet
  * and a Map, in order to efficiently look things up and keep them sorted.
- * This class is NOT SYNCHRONIZED.  Synchronization should be done externally.
+ * This class is NOT SYNCHRONIZED. Synchronization should be done externally.
  */
 public class FixedSizeSortedSet<E> implements Iterable<E> {
 

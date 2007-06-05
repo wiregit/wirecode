@@ -3,10 +3,34 @@ package org.limewire.collection;
 import java.util.Collection;
 import java.util.Iterator;
 
-
 /**
- * A variant of <tt>FixedSizeArrayHashSet</tt> that allows iterations over
+ * A variant of {@link FixedSizeArrayHashSet} that allows iterations over
  * its elements in random order. 
+ * 
+<pre>
+
+    void sampleCodeRandomOrderHashSet(){
+
+        LinkedList&lt;Integer&gt; linkedlist1 = new LinkedList&lt;Integer&gt;();
+        for(int i = 0; i < 5; i++)
+            if(!linkedlist1.add(i))
+                System.out.println("add failed " + i);  
+                            
+        RandomOrderHashSet&lt;Integer&gt; rohs = new RandomOrderHashSet&lt;Integer&gt;(linkedlist1);
+        
+        Iterator&lt;Integer&gt; iter = rohs.iterator();
+        
+        while(iter.hasNext()){
+            System.out.println(iter.next());
+        }
+    }
+    Random Output:
+        3
+        0
+        2
+        4
+        1
+</pre>
  */
 public class RandomOrderHashSet<T> extends FixedSizeArrayHashSet<T> {
 

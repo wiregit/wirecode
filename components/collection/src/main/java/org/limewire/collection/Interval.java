@@ -5,7 +5,9 @@ import java.io.Serializable;
 import org.limewire.util.ByteOrder;
 
 
-/** The open interval [low, high] inclusive on the both ends. */
+/** 
+ * Represents a closed interval [low, high] inclusive on both ends. 
+ */
 public class Interval implements Serializable{
     /** Ensure backwards compatibility. */
     static final long serialVersionUID = -2562093104400487554L;
@@ -14,8 +16,8 @@ public class Interval implements Serializable{
     public final int low;
     public final int high;
 
-    /** @requires low<=high
-     *  @requires low and high can be represented as ints
+    /** Requires low<=high.
+     *  Requires low and high can be represented as ints.
      */
     public Interval(long low, long high) {
         if(high < low)
@@ -35,7 +37,7 @@ public class Interval implements Serializable{
     }
     
     /**
-    *  @requires singleton can be represented as an int
+    *  Requires singleton can be represented as an int.
     */
     public Interval(long singleton) {
         if(singleton < Integer.MIN_VALUE)

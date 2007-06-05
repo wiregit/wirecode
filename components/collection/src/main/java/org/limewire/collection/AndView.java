@@ -1,5 +1,61 @@
 package org.limewire.collection;
 
+/**
+ * Provides a logical conjunction, 'And', operation on {@link BitField}s. 
+ * <code>AndView</code> gets and finds the next set (equal to 1) and clear (equal 
+ * to 0) bit starting at a specific location.
+ * <p>
+ * For more information, see <a href = 
+ * "http://en.wikipedia.org/wiki/Logical_conjunction">Logical conjunction</a>.
+<pre>
+    void printBitField(BitField bf, String bfName){
+        System.out.print(bfName + ": ");
+        for(int i = 0; i < bf.maxSize(); i++){
+            int j = 0;
+            if(bf.get(i)){
+                j = 1;          
+            }
+            System.out.print(j);
+        }
+        System.out.println(""); 
+    }
+
+    void sampleCodeAndView(){
+        BitSet bs1 = new BitSet();
+        bs1.set(0);
+        bs1.set(1);
+        
+        BitSet bs2 = new BitSet();
+        bs2.set(0);
+        bs2.set(2);
+        
+        BitSet bs3 = new BitSet();
+        bs3.set(0);
+        bs3.set(3);
+        
+        BitField bf1 = new BitFieldSet(bs1, 5);
+        BitField bf2 = new BitFieldSet(bs2, 5);
+               
+        printBitField(bf1, "bf1");
+        printBitField(bf2, "bf2");
+        
+        AndView av = new AndView(bf1, bf2);
+
+        System.out.print(" av: ");
+        for(int i = 0 ; i < av.maxSize(); i++){
+            int j = 0;
+            if(av.get(i))
+                j = 1;
+            System.out.print(j);
+        }   
+        System.out.println();
+    }
+    Output:
+        bf1: 11000
+        bf2: 10100
+         av: 10000
+</pre>
+ */
 public class AndView extends BooleanFunction {
 
 	public AndView(BitField first, BitField... more) {

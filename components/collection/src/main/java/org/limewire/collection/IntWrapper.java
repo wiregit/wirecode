@@ -1,10 +1,32 @@
 package org.limewire.collection;
 
+
 /**
- * Simple int wrapper class that lets you set the value at any time.
- * Useful for changing the value of objects stored in Maps or Lists,
- * without having to access the object every time.
- * Just keep the handle to this instance and set/get it.
+ * Provides a simple int wrapper class that lets you set the value at any time.
+ * <code>IntWrapper</code> is useful for changing the value of objects stored 
+ * in Maps or Lists, without having to access the object every time.
+ * Just keep the handle to this instance and set/get the object.
+ <pre>
+
+    void sampleCodeWrapper(){
+        
+        IntWrapper w1 = new IntWrapper(1);
+        
+        ArrayList&lt;IntWrapper&gt; l = new ArrayList&lt;IntWrapper&gt;();
+
+        l.add(0, w1);
+        l.add(0, new IntWrapper(2));
+        l.add(0, new IntWrapper(3));
+        l.add(0, new IntWrapper(4));
+        System.out.println("1) List is " + l);
+        w1.setInt(10);
+        System.out.println("2) List is " + l);
+    }
+    Output:
+        1) List is [4, 3, 2, 1]
+        2) List is [4, 3, 2, 10]
+ </pre>
+ * 
  */
 public final class IntWrapper {
     private int x;

@@ -5,12 +5,33 @@ import java.util.NoSuchElementException;
 
 
 /**
- * A class that generates all the integers from 0 to a certain limit in a 
+ * Generates all the integers from 0 to a certain limit in a 
  * random fashion where each number is generated only once per cycle.
- * 
- * It also implements the Iterable interface that iterates over a single cycle.
- * 
- * Logic: http://en.wikipedia.org/wiki/Linear_congruential_generator
+ * <p>
+ * <code>RandomSequence</code> also implements the <code>Iterable</code> 
+ * interface that iterates over a single cycle.
+ <pre>
+    void sampleCodeRandomSequence(){
+        RandomSequence rs = new RandomSequence(10);
+        Iterable&lt;Integer&gt; i = new MultiIterable&lt;Integer&gt;(rs);
+        for(Integer o : i)
+            System.out.println(o);
+    }
+    Random Output:
+        4
+        7
+        2
+        5
+        0
+        3
+        1
+        8
+        6
+        9
+ */
+
+/* For more information regarding the logic, see
+ * http://en.wikipedia.org/wiki/Linear_congruential_generator.
  * Thx to Cyclonus for the pow2 hint
  */
 public class RandomSequence implements Iterable<Integer> {

@@ -5,27 +5,68 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A priority queue with bounded size.  Similar to BinaryHeap, but implemented
- * with a balanced tree instead of a binary heap.  This results in some
+ * Provides a priority queue with bounded size. Similar to a binary heap, but 
+ * implemented with a balanced tree instead of a binary heap. This results in some
  * subtle differences:
  * 
  * <ol> 
- * <li>FixedsizePriorityQueue guarantees that the lowest priority element
- *     is ejected when exceeding capacity.  BinaryHeap provides no such 
+ * <li><code>FixedsizePriorityQueue</code> guarantees the lowest priority element
+ *     is ejected when exceeding capacity. A binary heap provides no such 
  *     guarantees.
  * <li>Fetching the max element takes O(lg N) time, where N is the number of
- *     elements.  Compare with O(1) for BinaryHeap.  Extracting and adding
+ *     elements. Compare with O(1) for a binary heap. Extracting and adding
  *     elements is still O(lg N) time.  
- * <li>FixedsizePriorityQueue can provide operations for extracting the minimum
- *     and the maximum element.  Note, however, that this is still considered
+ * <li><code>FixedsizePriorityQueue</code> can provide operations for extracting the minimum
+ *     and the maximum element. Note, however, that this is still considered
  *     a "max heap", for reasons in (1).
- * <li>FixedsizePriorityQueue REQUIRES an explicit Comparator; it won't
- *     use the natural ordering of values.
+ * <li><code>FixedsizePriorityQueue</code> requires an explicit {@link Comparator};
+ * <code>FixedsizePriorityQueue</code> won't use the natural ordering of values.
  * </ol>
  * 
- * <b>This class is not synchronized; that is up to the user.</b><p>
- * 
- * @see BinaryHeap 
+ * <b>This class is not synchronized.</b>
+ * <p>
+<pre>
+    public class MyComparatorObject implements Comparator&lt;MyObject&gt;{  
+        public int compare(MyObject a, MyObject b){
+            return a.item - b.item;
+        }
+    }   
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+    void sampleCodeFixedsizePriorityQueue(){
+        
+        FixedsizePriorityQueue&lt;MyObject&gt; fpq = 
+            new FixedsizePriorityQueue&lt;MyObject&gt;(new MyComparatorObject(), 3);
+        fpq.insert(new MyObject("a", 19));
+        fpq.insert(new MyObject("b", 2));
+        fpq.insert(new MyObject("c", 37));
+        System.out.println(fpq);
+        fpq.insert(new MyObject("d", 400));
+        System.out.println("Inserting another Integer pushes out an element since the max. size was reached.");
+        System.out.println(fpq);
+
+        System.out.println("Minimum element: " + fpq.getMin());
+        System.out.println("Maximum element: " + fpq.getMax());
+    }
+    Output:
+        [b=2, a=19, c=37]
+        Inserting another Integer pushes out an element since the max. size was reached.
+        [a=19, c=37, d=400]
+        Minimum element: a=19
+        Maximum element: d=400
+
+</pre>
  */
 public class FixedsizePriorityQueue<E> implements Iterable<E> {
     /** 
@@ -67,8 +108,6 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * added even if already in this (possibly with a different priority).
      *
      * @param x the entry to add
-     * @param priority the priority of x, with higher numbers corresponding
-     *  to higher priority
      * @return the element ejected, possibly x, or null if none 
      */
     public E insert(E x) {
@@ -78,7 +117,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
             assert added;
             return null;
         } else {
-            //Ensure size does not exceeed capacity.    
+            //Ensure size does not exceed capacity.    
             //Micro-optimizations are possible.
             E smallest = tree.first();
             if (tree.comparator().compare(x,smallest)>0) {
@@ -120,7 +159,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * Returns true if this contains o.  Runs in O(N) time, where N is
      * number of elements in this.
      *
-     * @param true this contains a x s.t. o.equals(x).  Note that
+     * @param o this contains a x s.t. o.equals(x).  Note that
      *  priority is ignored in this operation.
      */
     public boolean contains(Object o) {
@@ -128,9 +167,9 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
     }
 
     /** 
-     * Removes the first occurence of  o.
+     * Removes the first occurrence of  o.
      *
-     * @param true this contained an x s.t. o.equals(x).
+     * @return true this contained an x such that o.equals(x).
      */
     public boolean remove(Object o) {
         return tree.remove(o);

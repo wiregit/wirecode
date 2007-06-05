@@ -1,10 +1,12 @@
 package org.limewire.collection;
 
 /**
- * An exception that gets thrown when there's no more space left in the
- * underlying data structure to store the new element which is being
- * tried to be added
- * @author Anurag Singla
+ * Thrown when there isn't any more space left in the
+ * underlying data structure to store the new element which was attempted
+ * to be added. For example, if you create a {@link FixedsizeHashMap} with
+ * a size of 10 and attempt to add the 11th item, 
+ * {@link FixedsizeHashMap#put(Object, Object)} throws 
+ * <code>NoMoreStorageException</code>.
  */
 
 public class NoMoreStorageException extends RuntimeException

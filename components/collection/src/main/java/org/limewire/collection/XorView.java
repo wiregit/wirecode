@@ -1,21 +1,26 @@
 package org.limewire.collection;
 
 /**
- * Provides an XOR view.
+ * Provides an XOR view. <code>XorView</code> gets and finds the next set 
+ * (equal to 1) and clear (equal to 0) bit starting at a specific location.
+ * <p>
+ * See <a href="http://en.wikipedia.org/wiki/Exclusive_or">exclusive or</a> 
+ * for more information.
 <pre>
-    void PrintBitField(BitField bfs, String bfsName){
-        System.out.print(bfsName + ": ");
-        for(int i = 0; i < bfs.maxSize(); i++){
+    void printBitField(BitField bf, String bfName){
+        System.out.print(bfName + ": ");
+        for(int i = 0; i < bf.maxSize(); i++){
             int j = 0;
-            if(bfs.get(i)){
+            if(bf.get(i)){
                 j = 1;          
             }
             System.out.print(j);
         }
         System.out.println(""); 
-        
     }
-    void SampleCodeXorView(){
+
+    void sampleCodeXorView(){
+        
         BitSet bs1 = new BitSet();
         bs1.set(0);
         bs1.set(1);
@@ -31,8 +36,8 @@ package org.limewire.collection;
         BitField bf1 = new BitFieldSet(bs1, 5);
         BitField bf2 = new BitFieldSet(bs2, 5);
                
-        PrintBitField(bf1, "bf1");
-        PrintBitField(bf2, "bf2");
+        printBitField(bf1, "bf1");
+        printBitField(bf2, "bf2");
                        
         XorView xov = new XorView(bf1, bf2);
 
@@ -44,17 +49,14 @@ package org.limewire.collection;
                j = 1;
             System.out.print(j);
         }
+        System.out.println();
     }
-        
     Output:
         bf1: 11000
         bf2: 10100
         xov: 01100
-
 </pre>
- * <p>
- * See <a href="http://en.wikipedia.org/wiki/Exclusive_or">exclusive or</a> 
- * for more information.
+
  */
 public class XorView extends BooleanFunction {
 

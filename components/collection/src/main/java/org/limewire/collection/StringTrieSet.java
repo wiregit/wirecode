@@ -5,15 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A TrieSet.  A set-like interface designed specifically for Strings.
- * Uses a Trie as the backing Map, and provides an implementation specific to
- * Strings.  Has the same retrieval/insertion times as the backing Trie.
- * Stores the value as the string, for easier retrieval.
- * The goal is to efficiently find Strings that can branch off a prefix.
- *
- * Primarily designed as an AutoCompleteDictionary
- *
- * @modified David Soh (yunharla00@hotmail.com)
+ * Provides a set-like interface designed specifically for <code>String</code>s.
+ * Uses a Trie as the backing map and provides an implementation specific to
+ * <code>String</code>s. Has the same retrieval/insertion times as the backing 
+ * Trie. Stores the value as the string, for easier retrieval.
+ * The goal is to efficiently find Strings that can branch off a prefix. 
+ * <p>
+ * Primarily designed as an {@link AutoCompleteDictionary}.
+ * <p> 
+ * See <a href="http://en.wikipedia.org/wiki/Trie">Trie</a> for more information.
+ * <p>
+ * Modified David Soh (yunharla00@hotmail.com)
  *      1. added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
  *      2. disallowed adding duplicates
  *
@@ -25,7 +27,7 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
     private transient StringTrie<String> map;
 
     /**
-     * This constuctor sets up a dictionary where case IS significant
+     * This constructor sets up a dictionary where case IS significant
      * but whose sort order is binary based.
      * All Strings are stored with the case of the last entry added.
      */

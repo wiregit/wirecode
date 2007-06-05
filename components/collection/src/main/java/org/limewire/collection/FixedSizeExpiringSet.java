@@ -8,12 +8,56 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This is a Set forgetting entries after a certain amount of time and it never
+ * Maintains, at most, a fixed size of objects in a <code>Set</code> 
+ * for a specified time. <code>FixedSizeExpiringSet</code> never
  * holds more entries than specified in the constructor.
  * 
- * @author Gregorio Roper
+<pre>
+    public class MyObject{
+        public String s;
+        public int item;
+        public MyObject(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item ;
+        }
+    }   
+
+    void sampleCodeFixedSizeExpiringSet(){
+        try{
+            
+        FixedSizeExpiringSet&lt;MyObject&gt; fses = new FixedSizeExpiringSet&lt;MyObject&gt;(4, 2000);
+    
+        fses.add(new MyObject("a", 1));
+        fses.add(new MyObject("b", 2));
+        fses.add(new MyObject("c", 3));
+        fses.add(new MyObject("d", 4));
+        fses.add(new MyObject("e", 5)); 
+
+        System.out.println("1) Size: " + fses.size());
+        Thread.sleep(1000);
+        System.out.println("2) Size: " + fses.size());
+        Thread.sleep(2000);
+        System.out.println("3) Size (after expiration): " + fses.size());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    Output:
+        1) Size: 4
+        2) Size: 4
+        3) Size (after expiration): 0
+</pre>
  * 
- * Note: expiration times longer than Long.MAX_VALUE / 10^6 will be truncated.  
+ * @author Gregorio Roper
+ */
+
+ /*
+  * Note: expiration times longer than Long.MAX_VALUE / 10^6 will be truncated.  
  */
 public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     
@@ -25,7 +69,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     private static final int DEFAULT_SIZE = 50;
 
     /*
-     * Default time after which the entires expire 10 minutes
+     * Default time after which the entries expire 10 minutes
      */
     private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000 * 1000 * 1000;
 

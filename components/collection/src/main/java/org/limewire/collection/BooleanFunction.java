@@ -1,9 +1,12 @@
 package org.limewire.collection;
 
 /**
- * A view over two or more <tt>BitField</tt> instances that represents a boolean function.
- * This class itself is a BitField so several may be chained
- * to form complex functions.
+ * Provides a view over two or more <code>BitField</code> instances that 
+ * represents a boolean function. This class itself is a <code>BitField</code>
+ * so several <code>BitField</code>s may be chained to form complex functions. 
+ * See <a href=
+ * "http://en.wikipedia.org/wiki/Boolean_function">Boolean Function</a> for 
+ * more information.
  */
 abstract class BooleanFunction implements BitField {
 

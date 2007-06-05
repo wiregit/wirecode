@@ -7,21 +7,20 @@
 package org.limewire.collection;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 
 
 /**
-* A classic doubly-linked list.  Unlike the LinkedList class in the JDK, this
-* provides way a way to refer to elements of the list (each of type ListElement)
+* Provides a doubly-linked list. Unlike the {@link LinkedList} class in the 
+* JDK, <code>DoublyLinkedList</code> provides a way to refer to elements of 
+* the list (each of type <code>ListElement</code>)
 * directly, avoiding linear-time searches when you wish to remove an element.
-* This currently only has a minimal set of operations.<p>
+* <p>
+* Note: <code>DoublyLinkedList</code> is not thread-safe. You should externally
+* synchronize access to the list if required.
 *
-* <b>This class is not thread-safe.</b> All the access to the list should be
-* synchronized externally if required.
-*
-* @author Anurag Singla initial revision
-* @author Christopher Rohrs bug fix, specification cleanup, and unit tests
 */
 public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElement<E>> {    
     /*
@@ -169,7 +168,7 @@ public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElemen
     }
 
     /**
-     * An element of the linked list.  Immutable.
+     * Represents an immutable element of the linked list.
      */
     public static class ListElement<E> {
         /**
@@ -178,12 +177,12 @@ public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElemen
         E key;
     
         /**
-         * Refernce to the previous element in the list
+         * Reference to the previous element in the list
          */
         ListElement<E> prev;
     
         /**
-         * Refernce to the next element in the list
+         * Reference to the next element in the list
          */
         ListElement<E> next;
     

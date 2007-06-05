@@ -4,8 +4,33 @@ import java.util.LinkedList;
 
 
 /**
- * A utility that measures the average number of elements
- * in a queueing system.
+ * Measures the average number of elements in a queueing system.
+ * <p> See <a href="http://en.wikipedia.org/wiki/Little's_law">Little's Law</a>
+ * for more information.
+<pre>
+    void sampleCodeQueueCounter(){
+        try{
+            QueueCounter qc = new QueueCounter(10);
+            System.out.println("Average size: " + qc.getAverageSize());
+            for(int i = 0; i < 10; i++){
+                qc.recordArrival();
+                Thread.sleep( 1000 );
+            }
+            for(int i = 0; i < 10; i++){
+                qc.recordDeparture();
+            }
+            System.out.println("Average size: " + qc.getAverageSize());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }       
+        
+    }
+    Output:
+        Average size: -1.0
+        Average size: 5.496200684813807
+    
+</pre>
  */
 public class QueueCounter {
 	private LinkedList<Long> arrivals;

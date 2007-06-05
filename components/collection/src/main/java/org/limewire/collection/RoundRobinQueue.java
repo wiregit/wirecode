@@ -6,7 +6,59 @@ import java.util.LinkedList;
 
 
 /**
- * a round-robin queue.  basically two lists that flip back and forth.
+ * Creates a round-robin queue. {@link #next()} returns an item on the queue and then puts 
+ * that item to the end of the queue.
+ <pre>
+
+    void sampleCodeRoundRobinQueue(){
+        class myarray{
+            int [] ar;
+            int Index;
+            public String Get(){
+                if(Index == Size())                 
+                    Index = 0;      
+                return "[" + ar[Index++] + "]";
+            }
+            
+            public int Size(){
+                return ar.length;
+            }
+
+            public myarray(int a){
+                Index = 0;
+                ar = new int [2];
+                
+                switch(a){
+                case 0:
+                    ar[0] = 1;ar[1] = 2;
+                break;
+                case 1:
+                    ar[0] = 11;ar[1] = 12;
+                break;
+                }
+            }
+        }
+        RoundRobinQueue&lt;myarray&gt; rrq = new RoundRobinQueue&lt;myarray&gt;();
+        
+        LinkedList&lt;myarray&gt; ll = new LinkedList&lt;myarray&gt;();
+        ll.add(new myarray(0));
+        ll.add(new myarray(1));
+        
+        Iterator&lt;myarray&gt; iter = ll.iterator();
+        while(iter.hasNext())
+            rrq.enqueue(iter.next());
+        
+        for(int i = 0; i < rrq.size() * new myarray(0).Size() ; i++){
+            System.out.println(rrq.next().Get());
+        }   
+    }
+    Output:
+        [1]
+        [11]
+        [2]
+        [12]
+ </pre>
+ * 
  */
 public class RoundRobinQueue<T>  {
 
@@ -42,7 +94,7 @@ public class RoundRobinQueue<T>  {
 	}
 	
 	/**
-	 * removes the next occurence of the specified object
+	 * Removes the next occurrence of the specified object
 	 * @param o the object to remove from the queue. 
 	 */
 	public synchronized void remove (Object o) {
@@ -50,7 +102,7 @@ public class RoundRobinQueue<T>  {
 	}
 	
 	/**
-	 * removes all occurences of the given object in the list.
+	 * Removes all occurrences of the given object in the list.
 	 * @param o the object to remove.
 	 */
 	public synchronized void removeAllOccurences(Object o) {

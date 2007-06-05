@@ -9,9 +9,8 @@ package org.limewire.collection;
 import java.util.Map;
 
 /**
- * Holds a name value pair. The name is an instance of String, the value can
- * be any object. 
- * @author  asingla
+ * Holds a name value pair. The name is an instance of <code>String</code>, the
+ * value can be any object. 
  */
 public class NameValue <V> implements Map.Entry<String, V> {
 
@@ -52,7 +51,10 @@ public class NameValue <V> implements Map.Entry<String, V> {
     public String toString() {
         return "name = " + _name + " value = " + _value;
     }
-    
+    /**
+     * Gives a {@link #compareTo(org.limewire.collection.NameValue.ComparableByName)} 
+     * implementation for a {@link NameValue}.
+     */
     public static class ComparableByName<V> extends NameValue<V> implements Comparable<ComparableByName> {
         public ComparableByName(String name) {
             super(name);

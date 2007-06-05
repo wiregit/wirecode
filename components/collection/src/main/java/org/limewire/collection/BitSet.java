@@ -13,30 +13,47 @@ package org.limewire.collection;
 import java.io.IOException;
 
 /**
- * This class implements a vector of bits that grows as needed. Each 
- * component of the bit set has a <code>boolean</code> value. The 
- * bits of a <code>BitSet</code> are indexed by nonnegative integers. 
- * Individual indexed bits can be examined, set, or cleared. One 
- * <code>BitSet</code> may be used to modify the contents of another 
- * <code>BitSet</code> through logical AND, logical inclusive OR, and 
- * logical exclusive OR operations.
+ * Contains a vector of bits that grows as needed. Each component of the bit 
+ * set has a <code>boolean</code> value. The bits of a <code>BitSet</code> are 
+ * indexed by nonnegative integers. Individual indexed bits can be examined, 
+ * set, or cleared. One <code>BitSet</code> may be used to modify the contents 
+ * of another <code>BitSet</code> through logical {@link AndView AND}, {@link OrView logical inclusive OR}, 
+ * and {@link XorView logical exclusive OR} operations.
  * <p>
- * By default, all bits in the set initially have the value 
- * <code>false</code>. 
+ * By default, all bits in the set initially have the value false. 
  * <p>
- * Every bit set has a current size, which is the number of bits 
- * of space currently in use by the bit set. Note that the size is
- * related to the implementation of a bit set, so it may change with
- * implementation. The length of a bit set relates to logical length
- * of a bit set and is defined independently of implementation.
+ * Every bit set has a current size, which is the number of bits of space 
+ * currently in use by the bit set. Note that the size is related to the 
+ * implementation of a bit set, so it may change with implementation. The 
+ * length of a bit set relates to logical length of a bit set and is defined 
+ * independently of implementation.
  * <p>
- * Unless otherwise noted, passing a null parameter to any of the
- * methods in a <code>BitSet</code> will result in a
- * <code>NullPointerException</code>.
- *
- * A <code>BitSet</code> is not safe for multithreaded use without
- * external synchronization.
- *
+ * Unless otherwise noted, passing a null parameter to any of the methods in a 
+ * <code>BitSet</code> will result in a <code>NullPointerException</code>. 
+ * Additionally, <code>BitSet</code> is not safe for multi-threaded use 
+ * without external synchronization.
+ * 
+ * <pre>
+
+    void sampleCodeBitSet(){
+        BitSet bs = new BitSet();
+        bs.set(1);
+
+        System.out.print("bs: ");
+        for(int i = 0; i < bs.size(); i++){
+            int j = 0;
+            if(bs.get(i)){
+                j = 1;          
+            }
+            System.out.print(j);
+        }
+        System.out.println();
+    }
+    Output:
+        bs: 0100000000000000000000000000000000000000000000000000000000000000
+ </pre>
+ * 
+ * 
  * @author  Arthur van Hoff
  * @author  Michael McCloskey
  * @version 1.54, 12/03/01
@@ -619,7 +636,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
 
     /*
      * trailingZeroTable[i] is the number of trailing zero bits in the binary
-     * representaion of i.
+     * representation of i.
      */
     private final static byte trailingZeroTable[] = {
       -25, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,

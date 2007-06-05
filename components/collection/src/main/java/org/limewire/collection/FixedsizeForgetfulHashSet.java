@@ -1,15 +1,73 @@
 package org.limewire.collection;
 
 import java.util.AbstractSet;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 
 /**
-* A set version of FixedsizeForgetfulHashMap.  
-* This forgets values using a FIFO replacement policy, much
-* like a cache.  Unlike ForgetfulHashMap, it has better-defined replacement
-* policy.  Specifically, it allows values to be renewed when re-added.
-* All of this is done in constant time.<p> 
+ * Stores a fixed size of elements as a <code>Set</code> and removes elements 
+ * when that size is reached. <code>FixedsizeForgetfulHashSet</code> is a 
+ * <code>Set</code> version of {@link FixedsizeForgetfulHashMap}. Like 
+ * <code>ForgetfulHashMap</code>, values are "forgotten" using a FIFO replacement 
+ * policy.   
+ * <p>
+ * <code>FixedsizeForgetfulHashSet</code> works in constant time.
+ * 
+<pre>
+    public class MyObjectHash{
+        public String s;
+        public int item;
+        public MyObjectHash(String s, int item){
+            this.s = s;
+            this.item = item;
+        }       
+
+        public String toString(){
+            return s + "=" + item;
+        }
+        
+        public boolean equals(Object obj) {
+            MyObjectHash other = (MyObjectHash)obj;
+            return (this.s.equals(other.s) && this.item == other.item);         
+        }
+                
+        public int hashCode() {
+            return this.item * 31 + s.hashCode();
+        }
+    }   
+    
+    void sampleCodeFixedsizeForgetfulHashSet(){
+        FixedsizeForgetfulHashSet&lt;MyObjectHash&gt; ffhs = new FixedsizeForgetfulHashSet&lt;MyObjectHash&gt;(4);
+
+        MyObjectHash mo = new MyObjectHash("a", 1);
+        if(ffhs.add(mo))
+            System.out.println("1) Size is: " + ffhs.size() + " contents: " + ffhs);
+        if(!ffhs.add(mo))
+            System.out.println("Unable to add the same object twice; contents: " + ffhs);
+
+        if(ffhs.add(new MyObjectHash("b", 2)))
+            System.out.println("2) Size is: " + ffhs.size() + " contents: " + ffhs);
+        if(!ffhs.add(new MyObjectHash("b", 2)))
+            System.out.println("Unable to add the object; contents: " + ffhs);
+        if(ffhs.add(new MyObjectHash("c", 3)))
+            System.out.println("3) Size is: " + ffhs.size() + " contents: " + ffhs);
+        if(ffhs.add(new MyObjectHash("d", 4)))
+            System.out.println("4) Size is: " + ffhs.size() + " contents: " + ffhs);    
+        if(ffhs.add(new MyObjectHash("e", 5)))
+            System.out.println("5) Size is: " + ffhs.size() + " contents: " + ffhs);    
+    }   
+    Output:
+        1) Size is: 1 contents: [a=1]
+        Unable to add the same object twice; contents: [a=1]
+        2) Size is: 2 contents: [a=1, b=2]
+        Unable to add the object; contents: [a=1, b=2]
+        3) Size is: 3 contents: [a=1, b=2, c=3]
+        4) Size is: 4 contents: [a=1, b=2, c=3, d=4]
+        5) Size is: 4 contents: [b=2, c=3, d=4, e=5]
+    
+</pre>
+* 
 */
 public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<E>, Cloneable {
 
@@ -56,7 +114,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
     /**
      * Removes the least recently used entry from the set
      * @return The least recently used value from the set.
-     * @modifies this
+     * Modifies this.
      */
     public E removeLRUEntry() {
         if(isEmpty())

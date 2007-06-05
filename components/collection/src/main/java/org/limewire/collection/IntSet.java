@@ -3,23 +3,48 @@ package org.limewire.collection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
- * A set of integers.  Optimized to have an extremely compact representation
+ * Represents a set of distinct integers. 
+ * Like {@link Set}, <code>IntSet</code> is <b>not synchronized</b>.
+ * 
+ * The set {1, 3, 4, 5, 7}, {1, 2, 3, 4, 5, 7} and {1, 2, 4, 5, 7} is 
+ * represented by:
+ * <pre>
+    void sampleCodeIntSet(){
+        IntSet s = new IntSet(10);
+        s.add(1); s.add(1); 
+        s.add(3); s.add(4); s.add(5);
+        s.add(7);       
+        System.out.println("1) Set is " + s);
+        s.add(2);       
+        System.out.println("2) Set is " + s);
+        s.remove(3);        
+        System.out.println("3) Set is " + s);
+    }
+    Output:
+        1) Set is [1, 3-5, 7]
+        2) Set is [1-5, 7]
+        3) Set is [1-2, 4-5, 7]
+    
+ * </pre>
+ */
+
+/* Optimized to have an extremely compact representation
  * when the set is "dense", i.e., has many sequential elements.  For example {1,
  * 2} and {1, 2, ..., 1000} require the same amount of space.  All retrieval
  * operations run in O(log n) time, where n is the size of the set.  Insertion
- * operations may be slower.<p>
- *
+ * operations may be slower.
+ * <p>
  * All methods have the same specification as the Set class, except that
  * values are restricted to int' for the reason described  above.  For
- * this reason, methods are not specified below.  Like Set, this class
- * is <b>not synchronized</b>.  
+ * this reason, methods are not specified below.   
  */
 public class IntSet {
     /**
      * Our current implementation consists of a list of disjoint intervals,
-     * sorted by starting location.  As an example, the set {1, 3, 4, 5, 7} is
+     * sorted by starting location. As an example, the set {1, 3, 4, 5, 7} is
      * represented by
      *     [1, 3-5, 7]
      * Adding 2 turns the representation into
@@ -29,8 +54,8 @@ public class IntSet {
      *     [1-2, 4-5, 7]
      *
      * We use a sorted List instead of a TreeSet because it has a more compact
-     * memory footprint, amd memory is at a premium here.  It also makes
-     * implementation much easier.  Unfortunately it means that insertion 
+     * memory footprint, and memory is at a premium here. It also makes
+     * implementation much easier. Unfortunately it means that insertion 
      * and some set operations are more expensive because memory must be 
      * allocated and copied.
      *
@@ -51,7 +76,7 @@ public class IntSet {
         /** INVARIANT: low<=high */
         int low;
         int high;
-        /** @requires low<=high */
+        /** It is required that low<=high */
         Interval(int low, int high) {
             this.low=low;
             this.high=high;
@@ -297,8 +322,8 @@ public class IntSet {
     }
     
 
-    /** Ensures that this consumes the minimum amount of memory.  This method
-     *  should typically be called after the last call to add(..).  Insertions
+    /** Ensures that this consumes the minimum amount of memory. This method
+     *  should typically be called after the last call to add(..). Insertions
      *  can still be done after the call, but they might be slower.
      *
      *  Because this method only affects the performance of this, there
@@ -310,7 +335,7 @@ public class IntSet {
 
     /** 
      * Returns the values of this in order from lowest to highest, as int.
-     *     @requires this not modified while iterator in use
+     *     It is required that this not modified while iterator in use
      */
     public IntSetIterator iterator() {
         return new IntSetIterator();
