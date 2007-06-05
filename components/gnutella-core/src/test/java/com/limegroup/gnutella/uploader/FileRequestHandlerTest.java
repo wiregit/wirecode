@@ -2,7 +2,10 @@ package com.limegroup.gnutella.uploader;
 
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import junit.framework.Test;
 
@@ -16,19 +19,21 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpExecutionContext;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class FileRequestHandlerTest extends BaseTestCase {
+public class FileRequestHandlerTest extends LimeTestCase {
 
     private FileDesc fd = new FileDescStub("filename");
 
@@ -45,6 +50,14 @@ public class FileRequestHandlerTest extends BaseTestCase {
         }
     };
 
+    private URN urn1;
+
+    private MockHTTPUploadSessionManager sessionManager;
+
+    private FileManagerStub fileManager;
+
+    private FileRequestHandler requestHandler;
+
     public FileRequestHandlerTest(String name) {
         super(name);
     }
@@ -53,9 +66,22 @@ public class FileRequestHandlerTest extends BaseTestCase {
         return buildTestSuite(FileRequestHandlerTest.class);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
+        Vector<FileDesc> descs = new Vector<FileDesc>();
+        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+
+        FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
+        urns.put(urn1, fd1);
+        descs.add(fd1);
+
+        sessionManager = new MockHTTPUploadSessionManager();
+        fileManager = new FileManagerStub(urns, descs);        
+        requestHandler = new FileRequestHandler(sessionManager, fileManager);        
+    }
+    
     public void testHandleAccept() throws Exception {
-        FileRequestHandler requestHandler = new FileRequestHandler(
-                new MockHTTPUploadSessionManager());
         HttpRequest request = new BasicHttpRequest("GET", "filename");
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1,
                 HttpStatus.SC_OK, "");
@@ -95,6 +121,54 @@ public class FileRequestHandlerTest extends BaseTestCase {
             ConnectionSettings.LAST_FWT_STATE.setValue(lastFWTState);
         }
 
+    }
+
+    public void testFeatureHeaderInterceptor() throws Exception {
+        HTTPUploadSession session = new HTTPUploadSession(null, null, null);
+        HTTPUploader uploader = new HTTPUploader("filename", session); 
+        uploader.setFileDesc(fd);
+        sessionManager.uploader = uploader;
+        HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1,
+                HttpStatus.SC_OK, "");
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        request.addHeader("X-Features", "fwalt/0.1,browse/1.0,chat/0.1");
+        request.addHeader("X-Node", "127.0.0.1:1234");
+        request.addHeader("X-Downloaded", "123456");
+        request.addHeader("Range", "bytes 1-2");
+        request.addHeader("X-Gnutella-Content-URN", urn1.httpStringValue());
+        request.addHeader("X-Queue", "1.0");
+        
+        requestHandler.handle(request, response, new HttpExecutionContext(null));
+        assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        assertEquals(1234, uploader.getGnutellaPort());
+        assertEquals("127.0.0.1", uploader.getHost());
+        assertTrue(uploader.isChatEnabled());
+        assertTrue(uploader.isBrowseHostEnabled());
+        assertEquals(123456, uploader.getTotalAmountUploaded());
+        assertEquals(1, uploader.getUploadBegin());
+        assertEquals(3, uploader.getUploadEnd());
+        assertEquals(true, uploader.containedRangeRequest());
+        assertEquals(urn1, uploader.getRequestedURN());
+        assertTrue(uploader.supportsQueueing());
+    }
+        
+    public void testFeatureHeaderInterceptorChat() throws Exception {
+        HTTPUploadSession session = new HTTPUploadSession(null, null, null);
+        HTTPUploader uploader = new HTTPUploader("filename", session); 
+        uploader.setFileDesc(fd);
+        sessionManager.uploader = uploader;
+        HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1,
+                HttpStatus.SC_OK, "");
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        request.addHeader("Chat", "128.0.0.1:5678");       
+        requestHandler.handle(request, response, new HttpExecutionContext(null));
+        assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        assertEquals(5678, uploader.getGnutellaPort());
+        assertEquals("128.0.0.1", uploader.getHost());
+        assertTrue(uploader.isChatEnabled());
+        assertTrue(uploader.isBrowseHostEnabled());
     }
 
 }

@@ -12,16 +12,20 @@ import org.apache.http.protocol.HttpContext;
 
 public class MockHTTPUploadSessionManager implements HTTPUploadSessionManager {
 
+    public HTTPUploader uploader;
+
+    public QueueStatus queueStatus = QueueStatus.ACCEPTED;
+    
     public void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {            
     }
 
     public QueueStatus enqueue(HttpContext context, HttpRequest request) {
-        return null;
+        return queueStatus;
     }
 
     public HTTPUploader getOrCreateUploader(HttpRequest request,
             HttpContext context, UploadType type, String filename) {
-        return null;
+        return uploader;
     }
 
     public void handleFreeLoader(HttpRequest request,

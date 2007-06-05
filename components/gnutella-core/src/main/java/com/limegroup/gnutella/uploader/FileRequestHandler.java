@@ -18,7 +18,6 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
@@ -53,19 +52,12 @@ public class FileRequestHandler implements HttpRequestHandler {
      */
     private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
-    private HTTPUploadSessionManager sessionManager;
+    private final HTTPUploadSessionManager sessionManager;
 
-    private FileManager fileManager = RouterService.getFileManager();
+    private final FileManager fileManager;
     
-    public FileRequestHandler(HTTPUploadSessionManager sessionManager) {
+    public FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager) {
         this.sessionManager = sessionManager;
-    }
-
-    public FileManager getFileManager() {
-        return fileManager;
-    }
-    
-    public void setFileManager(FileManager fileManager) {
         this.fileManager = fileManager;
     }
     
