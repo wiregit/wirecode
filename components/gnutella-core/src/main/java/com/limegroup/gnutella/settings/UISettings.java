@@ -94,4 +94,18 @@ public final class UISettings extends LimeProps {
     /** Setting for if native icons should be preloaded. */
     public static final BooleanSetting PRELOAD_NATIVE_ICONS =
         FACTORY.createBooleanSetting("PRELOAD_NATIVE_ICONS", true);
+    
+    /**
+     * Setting to persist the width of the options dialog if the dialog
+     * was resized by the user.
+     */
+    public static final IntSetting UI_OPTIONS_DIALOG_WIDTH = 
+        FACTORY.createIntSetting("UI_OPTIONS_DIALOG_WIDTH", 600);
+    
+    /**
+     * Setting to persist the height of the options dialog if the dialog
+     * was resized by the user.
+     */
+    public static final IntSetting UI_OPTIONS_DIALOG_HEIGHT= 
+        FACTORY.createIntSetting("UI_OPTIONS_DIALOG_HEIGHT", 460);
 }
