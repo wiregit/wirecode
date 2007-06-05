@@ -113,6 +113,31 @@ public class ExecutorsHelperTest extends BaseTestCase {
     }
     
 
+    public void testNewFixedSizeThreadPoolStartsMoreThanOneThread() throws Exception {
+        ErrorCallback oldCallback = ErrorService.getErrorCallback();
+        try {
+            ErrorCallbackStub testCallback = new ErrorCallbackStub();
+            ErrorService.setErrorCallback(testCallback);
+            
+            ExecutorService service = ExecutorsHelper.newFixedSizeThreadPool(2, "fixedSizePool");
+            CountDownLatch runLatch = new CountDownLatch(1);
+            Runner blockedRunner = new Runner(runLatch, false);
+            Runner secondRunner = new Runner();
+            service.execute(blockedRunner);
+            service.execute(secondRunner);
+            Thread.yield();
+            assertTrue(blockedRunner.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+            assertFalse(blockedRunner.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+            assertTrue("Second runner not run", secondRunner.getRanLatch().await(500, TimeUnit.MILLISECONDS));
+            runLatch.countDown();
+            assertTrue(blockedRunner.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+            assertEquals(0, testCallback.getExceptionCount());
+        }
+        finally {
+            ErrorService.setErrorCallback(oldCallback);
+        }
+    }
+
     private static class Runner implements Runnable {
         private volatile Thread thread;
         private volatile String name;
