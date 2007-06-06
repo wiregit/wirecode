@@ -18,6 +18,8 @@ import java.util.Set;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
@@ -37,6 +39,8 @@ public class BTMetaInfo implements Serializable {
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
 
+    private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
+    
 	/** a marker for a hash that has been verified */
 	private static final byte [] VERIFIED_HASH = new byte[0];
 
@@ -224,10 +228,15 @@ public class BTMetaInfo implements Serializable {
 	 * @throws IOException if parsing or reading failed.
 	 */
 	public static BTMetaInfo readFromBytes(byte []torrent) throws IOException {
-		Object metaInfo = Token.parse(torrent);
-        if(!(metaInfo instanceof Map))
-            throw new ValueException("metaInfo not a Map!");
-        return new BTMetaInfo(new BTData((Map)metaInfo));
+	    try {
+	        Object metaInfo = Token.parse(torrent);
+	        if(!(metaInfo instanceof Map))
+	            throw new ValueException("metaInfo not a Map!");
+	        return new BTMetaInfo(new BTData((Map)metaInfo));
+	    } catch (IOException bad) {
+	        LOG.error("read failed", bad);
+	        throw bad;
+	    }
 	}
 
 	/**
