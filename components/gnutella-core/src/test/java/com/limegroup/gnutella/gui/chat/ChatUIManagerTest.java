@@ -76,6 +76,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         outgoing = new ChatFrame(chat);
         chat.start();
         chat.waitForConnect(4000);
+        assertTrue("Could not establish outgoing chat connection", chat.isConnected());
         LimeTestUtils.waitForNIO();
         GUITestUtils.waitForSwing();
         incoming = getIncomingChat();

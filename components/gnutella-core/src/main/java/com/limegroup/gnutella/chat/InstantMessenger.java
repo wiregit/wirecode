@@ -60,27 +60,44 @@ public class InstantMessenger implements Chatter {
     private static final String CHAT_OK = "CHAT/0.1 200 OK";
 
     private static final String CONNECT = "CONNECT/0.1";
-    
-    private static final String CHARSET = "UTF-8";
 
-    private volatile Socket socket;
+    private static final String CHARSET = "UTF-8";
 
     private final String host;
 
     private final int port;
 
-    private ActivityCallback callback;
+    private final boolean outgoing;
 
-    private ChatManager manager;
+    private final ActivityCallback callback;
 
-    private IOStateMachine shaker;
+    private final ChatManager manager;
 
+    private final Object connectionLock = new Object();
+
+    /**
+     * The socket used to send and receive data. Can be <code>null</code> if
+     * no connection has been established, yet.
+     * <p>
+     * Note: Acquire {@link #connectionLock} to access.
+     */
+    private Socket socket;
+
+    /**
+     * Note: Acquire {@link #connectionLock} to access.
+     */
     private MessageReceiver receiver;
 
+    /**
+     * Note: Acquire {@link #connectionLock} to access.
+     */
     private MessageSender sender;
 
-    private boolean outgoing;
-
+    /**
+     * If true, the user has closed the chat.
+     * <p>
+     * Note: Acquire {@link #connectionLock} to access.
+     */
     private boolean stopped;
 
     /**
@@ -91,12 +108,13 @@ public class InstantMessenger implements Chatter {
         if (socket == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
         }
-        
+
         this.manager = manager;
         this.socket = socket;
         this.port = socket.getPort();
         this.host = socket.getInetAddress().getHostAddress();
         this.callback = callback;
+        this.outgoing = false;
     }
 
     /**
@@ -107,7 +125,7 @@ public class InstantMessenger implements Chatter {
         if (host == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
         }
-        
+
         this.host = host;
         this.port = port;
         this.manager = manager;
@@ -122,8 +140,10 @@ public class InstantMessenger implements Chatter {
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)
                                     throws IOException {
-                                InstantMessenger.this.socket = socket;
-                                shake(createOutgoingShakeStates());
+                                synchronized (connectionLock) {
+                                    InstantMessenger.this.socket = socket;
+                                    shake(createOutgoingShakeStates());
+                                }
                             }
 
                             public void handleIOException(IOException e) {
@@ -133,7 +153,7 @@ public class InstantMessenger implements Chatter {
 
                             public void shutdown() {
                                 LOG.warn("Could not establish chat connection to "
-                                        + host + ":" + port);
+                                                + host + ":" + port);
                                 stop();
                             }
 
@@ -154,12 +174,12 @@ public class InstantMessenger implements Chatter {
      * user from calling it when a connection is not yet established.
      */
     public boolean send(String message) {
-        synchronized (this) {
+        synchronized (connectionLock) {
             if (stopped || sender == null) {
                 return false;
             }
         }
-        
+
         try {
             sender.sendMessage(message + "\n");
         } catch (IOException e) {
@@ -213,24 +233,24 @@ public class InstantMessenger implements Chatter {
      * Invoked when the handshake completes.
      */
     private void handshakeCompleted() {
-        try {
-            socket.setSoTimeout(0);
-        } catch (SocketException e) {
-            LOG.warn("Could not set socket timeout", e);
-        }
+        synchronized (connectionLock) {
+            try {
+                socket.setSoTimeout(0);
+            } catch (SocketException e) {
+                LOG.warn("Could not set socket timeout", e);
+            }
 
-        synchronized (this) {
             receiver = new MessageReceiver();
             sender = new MessageSender();
-        }
 
-        ((NIOMultiplexor) socket).setReadObserver(receiver);
-        ((NIOMultiplexor) socket).setWriteObserver(sender);
+            ((NIOMultiplexor) socket).setReadObserver(receiver);
+            ((NIOMultiplexor) socket).setWriteObserver(sender);
+        }
 
         callback.acceptChat(this);
         
-        synchronized (this) {
-            this.notifyAll();
+        synchronized (connectionLock) {
+            connectionLock.notifyAll();
         }
     }
 
@@ -240,7 +260,7 @@ public class InstantMessenger implements Chatter {
     }
 
     private void shake(List<IOState> states) {
-        this.shaker = new IOStateMachine(new IOStateObserver() {
+        IOStateMachine shaker = new IOStateMachine(new IOStateObserver() {
             public void handleStatesFinished() {
                 handshakeCompleted();
             }
@@ -254,22 +274,31 @@ public class InstantMessenger implements Chatter {
             }
         }, states);
 
-        try {
-            socket.setSoTimeout(Constants.TIMEOUT);
-        } catch (SocketException e) {
-            LOG.warn("Could not set socket timeout", e);
+        synchronized (connectionLock) {
+            if (stopped) {
+                return;
+            }
+
+            try {
+                socket.setSoTimeout(Constants.TIMEOUT);
+            } catch (SocketException e) {
+                LOG.warn("Could not set socket timeout", e);
+            }
+            ((NIOMultiplexor) socket).setReadObserver(shaker);
+            ((NIOMultiplexor) socket).setWriteObserver(shaker);
         }
-        ((NIOMultiplexor) socket).setReadObserver(shaker);
-        ((NIOMultiplexor) socket).setWriteObserver(shaker);
     }
 
     /* For testing. */
-    public synchronized void waitForConnect(long timeout) throws InterruptedException {
-        if (socket == null || !socket.isConnected()) {
-            this.wait(timeout);
+    public void waitForConnect(long timeout)
+            throws InterruptedException {
+        synchronized (connectionLock) {
+            if (!stopped && (socket == null || !socket.isConnected())) {
+                connectionLock.wait(timeout);
+            }
         }
     }
-    
+
     private class MessageReceiver extends AbstractChannelInterestReader {
 
         public MessageReceiver() {
@@ -285,9 +314,9 @@ public class InstantMessenger implements Chatter {
             int read = 0;
             while (buffer.hasRemaining() && (read = source.read(buffer)) > 0)
                 ;
-                
+
             flushBuffer();
-            
+
             if (read == -1) {
                 stop();
             }
@@ -306,9 +335,11 @@ public class InstantMessenger implements Chatter {
                 buffer.clear();
             }
         }
-        
+
         @Override
         public void shutdown() {
+            super.shutdown();
+
             stop();
         }
     }
@@ -330,9 +361,11 @@ public class InstantMessenger implements Chatter {
 
         @Override
         public void shutdown() {
+            super.shutdown();
+
             stop();
         }
-        
+
     }
 
     private class ReadChatConnectHeaderState extends SimpleReadHeaderState {
@@ -369,16 +402,17 @@ public class InstantMessenger implements Chatter {
      * Stop the chat, and close the connections this is always safe to call.
      */
     public void stop() {
-        synchronized (this) {
+        synchronized (connectionLock) {
             if (stopped) {
                 return;
             }
             stopped = true;
-        }
-        
-        if (socket != null && !socket.isClosed()) {
-            IOUtils.close(socket);
-            socket = null;
+
+            if (socket != null && !socket.isClosed()) {
+                IOUtils.close(socket);
+            }
+            
+            connectionLock.notifyAll();
         }
         callback.chatUnavailable(this);
     }
@@ -387,13 +421,16 @@ public class InstantMessenger implements Chatter {
         return outgoing;
     }
 
-    public synchronized boolean isConnected() {
-        return !stopped;
+    public boolean isConnected() {
+        synchronized (connectionLock) {
+            return !stopped;
+        }
     }
 
     @Override
     public String toString() {
-        return getClass().getName() + "[host=" + host + ":" + port + ",outgoing=" + outgoing + "]";
+        return getClass().getName() + "[host=" + host + ":" + port
+                + ",outgoing=" + outgoing + "]";
     }
-    
+
 }
