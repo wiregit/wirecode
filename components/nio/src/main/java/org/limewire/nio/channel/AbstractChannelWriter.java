@@ -16,7 +16,7 @@ public abstract class AbstractChannelWriter implements ChannelWriter {
     
     protected ByteBuffer buffer;
     
-    protected boolean shutdown;
+    protected volatile boolean shutdown;
     
     public AbstractChannelWriter(int bufferSize) {
         buffer = ByteBuffer.allocate(bufferSize);
