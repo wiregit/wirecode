@@ -3,21 +3,22 @@ package org.limewire.store.storeserver.api;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * This is what receives actual commands from an {@link Server}.
+ * This is what receives actual commands from an {@link Dispatcher}.
  */
 public abstract class AbstractDispatchee implements Dispatchee {
 
-    private final org.limewire.store.storeserver.api.Server server;
+    private final Dispatcher dispatcher;
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private boolean isConnected;
 
-    public AbstractDispatchee(final Server server) {
-        this.server = server;
+    public AbstractDispatchee(final Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
-    public final Server getServer() {
-        return this.server;
+    public final Dispatcher getDispatcher() {
+        return this.dispatcher;
     }
 
     public final void setConnected(boolean isConnected) {

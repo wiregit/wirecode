@@ -2,6 +2,8 @@ package org.limewire.store.storeserver.api;
 
 import java.util.Map;
 
+
+
 /**
  * Recieves messages from the local server.
  */
@@ -12,7 +14,7 @@ public interface Dispatchee extends ConnectionListener.HasSome {
      * 
      * @return the local server from which this receives commands
      */
-    Server getServer();
+    Dispatcher getDispatcher();
 
     /**
      * Responds to <tt>cmd</tt> with arguments <tt>args</tt>.

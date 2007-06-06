@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.limewire.service.ErrorService;
+import org.limewire.store.storeserver.api.Dispatcher;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.api.URLSocketOpenner;
 import org.limewire.store.storeserver.core.AbstractServer;
@@ -35,19 +36,19 @@ import org.limewire.store.storeserver.util.Util;
  */
 final class LocalServerDelegate {
 
-  private final AbstractServer server;
+  private final Dispatcher dispatcher;
   private final int port;
   private final Server.OpensSocket openner;
   private final String host;
 
-  public LocalServerDelegate(final AbstractServer server, String host, final int port, final Server.OpensSocket openner) {
-    this.server = server;
+  public LocalServerDelegate(final Dispatcher server, String host, final int port, final Server.OpensSocket openner) {
+    this.dispatcher = server;
     this.host = host;
     this.port = port;
     this.openner = openner;
   }
   
-  public LocalServerDelegate(final AbstractServer server, final String host, final int port) {
+  public LocalServerDelegate(final Dispatcher server, final String host, final int port) {
       this(server, host, port, new URLSocketOpenner());
   }
 
@@ -55,9 +56,9 @@ final class LocalServerDelegate {
   private static int numSendWindows = 0;
 
   void showSendWindow() {
-    JFrame f = new JFrame(server.toString());
+    JFrame f = new JFrame(dispatcher.toString());
     f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
-    f.getContentPane().add(new JLabel(server.toString()));
+    f.getContentPane().add(new JLabel(dispatcher.toString()));
     JPanel p = new JPanel();
     
     /** A simple panel. */
@@ -105,8 +106,8 @@ final class LocalServerDelegate {
           if (Util.isEmpty(val)) continue;
           args.put(key, val);
         }
-        String res = server.sendMsg(s, args);
-        server.note("have response:\n" + res);
+        String res = dispatcher.sendMsg(s, args);
+        dispatcher.note("have response:\n" + res);
         t.setText("");
         for (int i = 0; i < ps.length; i++) {
           ps[i].clear();
@@ -133,9 +134,9 @@ final class LocalServerDelegate {
 
   public String sendMsg(final String msg, final Map<String, String> args) {
     try {
-      server.note("sending " + msg + ":" + args);
+      dispatcher.note("sending {0} : {1}", msg, args);
       Socket sock = openner.open(host, port);
-      server.note("have socket: " + sock);
+      dispatcher.note("have socket: " + sock);
       BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
       String message = msg;
       String params = null;
@@ -149,7 +150,7 @@ final class LocalServerDelegate {
       }
       if (params != null)
         message += params;
-      server.note("message: " + message);
+      dispatcher.note("message: " + message);
       wr.write("GET /" + message + " HTTP/1.1\n\r\n\r");
       wr.flush();
       BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -165,7 +166,7 @@ final class LocalServerDelegate {
       sock.close();
       return res;
     } catch (IOException e) {
-        ErrorService.error(e);
+        ErrorService.error(e, host + ":" + port);
     }
     return null;
   }

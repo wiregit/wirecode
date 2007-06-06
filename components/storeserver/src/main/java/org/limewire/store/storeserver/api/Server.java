@@ -20,18 +20,11 @@ public interface Server {
     };
     
     /**
-     * Sets the new {@link Dispatchee} instance.
+     * Returns the instance {@link Dispatcher}.
      * 
-     * @param d the new {@link Dispatchee} instance
+     * @return the instance {@link Dispatcher}
      */
-    void setDispatchee(Dispatchee d);
-
-    /**
-     * Returns the {@link Dispatchee} instance.
-     * 
-     * @return the {@link Dispatchee} instance
-     */
-    Dispatchee getDispatchee();
+    Dispatcher getDispatcher();
 
     /**
      * Starts up the server.
@@ -160,6 +153,11 @@ public interface Server {
          * </ul>
          */
         String ECHO = "Echo";
+        
+        /**
+         * Sent from Code to Local with unknown parameters
+         */
+        String MSG = "Msg";
 
         public final static String ALERT = "Alert";
     }

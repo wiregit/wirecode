@@ -11,6 +11,8 @@ import org.limewire.store.storeserver.api.Dispatchee;
 import org.limewire.store.storeserver.api.Server;
 import org.limewire.store.storeserver.api.URLSocketOpenner;
 
+import com.limegroup.gnutella.util.LimeWireUtils;
+
 
 /**
  * Encapsulates a local server and dispatchee.
@@ -41,7 +43,11 @@ final class StoreManagerImpl implements StoreManager {
     
     private StoreManagerImpl(Server localServer, Dispatchee dispatchee) {
         this.localServer = localServer;
-        this.localServer.setDispatchee(dispatchee);
+        this.localServer.getDispatcher().setDispatchee(dispatchee);
+        //
+        // Register the default handlers
+        //
+        registerHandler(Commands.GET_VERSION, new GetVersion());
     }
     
     /* (non-Javadoc)
@@ -69,14 +75,14 @@ final class StoreManagerImpl implements StoreManager {
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#addConnectionListener(org.limewire.store.storeserver.api.IConnectionListener)
      */
     public final boolean addConnectionListener(ConnectionListener lis) {
-        return this.localServer.getDispatchee().addConnectionListener(lis);
+        return this.localServer.getDispatcher().getDispatchee().addConnectionListener(lis);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.store.storeserver.IStoreServer#removeConnectionListener(org.limewire.store.storeserver.api.IConnectionListener)
      */
     public final boolean removeConnectionListener(ConnectionListener lis) {
-        return this.localServer.getDispatchee().removeConnectionListener(lis);
+        return this.localServer.getDispatcher().getDispatchee().removeConnectionListener(lis);
     }
     
     /* (non-Javadoc)
@@ -110,6 +116,26 @@ final class StoreManagerImpl implements StoreManager {
     // ------------------------------------------------------------
     // Handlers
     // ------------------------------------------------------------
+    
+    /**
+     * Commands that are handled before sending out to the rest of the client.
+     */
+    private final static class Commands {
+
+        /**
+         * Command to return the version of limewire.
+         */
+        public static final String GET_VERSION = "GetVersion";
+        
+    }
+    
+    class GetVersion extends AbstractHandler {
+        GetVersion() { super(Commands.GET_VERSION); }
+        public String handle(Map<String, String> args) {
+            return LimeWireUtils.getLimeWireVersion();
+        }
+        
+    }
     
     /**
      * Dispatch the command <tt>cmd</tt> to a handler and all the listeners.
@@ -162,7 +188,7 @@ final class StoreManagerImpl implements StoreManager {
         private StoreManagerImpl server;
 
         public DispatcheeImpl(Server server) {
-            super(server);
+            super(server.getDispatcher());
         }
 
         public String dispatch(String cmd, Map<String, String> args) {

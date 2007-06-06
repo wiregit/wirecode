@@ -12,16 +12,14 @@ import java.net.Socket;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.service.ErrorService;
-import org.limewire.store.storeserver.api.Server;
+import org.limewire.store.storeserver.api.Dispatcher;
 import org.limewire.store.storeserver.util.Util;
 
 /**
@@ -39,7 +37,8 @@ public abstract class AbstractServer implements Runnable  {
 
     private final List<Thread> threads = new ArrayList<Thread>(NUM_WORKERS);
     private final List<Worker> workers = new ArrayList<Worker>(NUM_WORKERS);
-    private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
+    
+    private Dispatcher dispatcher;
 
     private boolean hasShutDown;
     private Thread runner;
@@ -61,24 +60,16 @@ public abstract class AbstractServer implements Runnable  {
         return t;
     }
 
-    public AbstractServer(final int port, final String name) {
+    public AbstractServer(final int port, final String name, final Dispatcher dispatcher) {
         this.port = port;
         this.name = name;
-        Handler[] hs = createHandlers();
-        note("creating {0} handler(s)...", hs.length);
-        for (Handler h : hs) {
-            this.names2handlers.put(h.name().toLowerCase(), h);
-            note(" - {0}", h.name());
-        }
-        note("connecting on port {0}", port);
+        this.dispatcher = dispatcher;
+        getDispatcher().note("connecting on port {0}", port);
     }
-
-    /**
-     * Send a message.
-     * 
-     * @param args
-     */
-    public abstract String sendMsg(String msg, Map<String, String> args);
+    
+    public AbstractServer(final int port, final String name) {
+        this(port, name, null);        
+    }
 
     /**
      * Main entry point.
@@ -88,6 +79,10 @@ public abstract class AbstractServer implements Runnable  {
         noteRun();
         createWorkers();
         go();
+    }
+    
+    public final Dispatcher getDispatcher() {
+        return this.dispatcher;
     }
 
     public final void setDone(final boolean done) {
@@ -105,19 +100,9 @@ public abstract class AbstractServer implements Runnable  {
     public final String getName() {
         return name;
     }
-
-    /**
-     * Wraps the message <tt>error</tt> in the call back
-     * {@link Constants.ERROR_CALLBACK}. <br>
-     * Example: If the error message is <tt>"You stink!"</tt> the wrapped
-     * message would be <tt>error("You stink!")</tt>.
-     * 
-     * @param error the error message
-     * @return the message <tt>error</tt> in the call back
-     */
-    public final String report(final String error) {
-        return wrapCallback(Server.Constants.ERROR_CALLBACK, Util
-                .wrapError(error));
+    
+    public final String report(String error) {
+        return Dispatcher.report(error);
     }
     
     /**
@@ -126,7 +111,7 @@ public abstract class AbstractServer implements Runnable  {
      * @param millis milliseconds to wait for a join
      */
     public final void shutDown(final long millis) {
-        note("shutting down");
+        getDispatcher().note("shutting down");
         if (hasShutDown)
             return;
         hasShutDown = true;
@@ -149,6 +134,17 @@ public abstract class AbstractServer implements Runnable  {
     protected final void handle(final Throwable t, final String msg) {
         ErrorService.error(t, msg);
     }
+    
+    /**
+     * If subclasses can't pass a dispatcher in to the super constructor
+     * because it needs to know about the server, you <b>must</b> call this
+     * in the constructor.
+     * 
+     * @param dispatcher new {@link Dispatcher}
+     */
+    protected final void setDispatcher(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 
     /**
      * Set by {@link #start(AbstractServer)}.
@@ -161,34 +157,6 @@ public abstract class AbstractServer implements Runnable  {
      * Override this to know when we're starting.
      */
     protected void noteRun() {
-    }
-
-    /**
-     * Override this to create the {@link Handler}s to use.
-     * 
-     * @return the list of handlers that will take your requests.
-     */
-    protected abstract Handler[] createHandlers();
-
-    /**
-     * Wraps the message <tt>msg</tt> using callback function
-     * <tt>callback</tt>. The msesage is surrounded by
-     * {@link Constants.CALLBACK_QUOTE}s and all quotes in the message,
-     * {@link Constants.CALLBACK_QUOTE}, are escaped.
-     * 
-     * @param callback the function in which <tt>msg</tt> is wrapped
-     * @param msg the message
-     * @return the message <tt>msg</tt> using callback function
-     *         <tt>callback</tt>
-     */
-    protected final String wrapCallback(final String callback, final String msg) {
-        if (Util.isEmpty(callback)) {
-            return msg;
-        } else {
-            char q = Server.Constants.CALLBACK_QUOTE;
-            String s = Server.Constants.CALLBACK_QUOTE_STRING;
-            return callback + "(" + q + msg.replace(s, "\\" + s) + q + ")";
-        }
     }
     
     /**
@@ -227,7 +195,7 @@ public abstract class AbstractServer implements Runnable  {
                 }
             }
         } catch (IOException e) {
-            handle(e);
+            handle(e, "on port " + port);
             if (e instanceof java.net.BindException)
                 setDone(true);
         }
@@ -362,7 +330,7 @@ public abstract class AbstractServer implements Runnable  {
                 }
                 final String ip = Util.getIPAddress(s.getInetAddress());
                 final Request incoming = new Request(ip);
-                String res = handle(request, ps, incoming);
+                String res = dispatcher.handle(request, ps, incoming);
                 ps.print("HTTP/1.1 ");
                 ps.print(HttpURLConnection.HTTP_OK);
                 ps.print(" OK");
@@ -390,61 +358,7 @@ public abstract class AbstractServer implements Runnable  {
         o.print(line);
         o.write(NEWLINE);
     }
-
-    /**
-     * Create an instance of Handler from the top level name as well as trying a
-     * static inner class and calls its {@link Handler#handle()} method.
-     */
-    private String handle(final String request, final PrintStream out,
-            Request incoming) {
-        final String req = makeFile(request);
-        final Handler h = names2handlers.get(req.toLowerCase());
-        if (h == null) {
-            LOG.error("Couldn't create a handler for " + req);
-            return report(Server.ErrorCodes.UNKNOWN_COMMAND);
-        }
-        note("have handler: {0}", h.name());
-        final String res = h.handle(getArgs(request), incoming);
-        note("response from {0}: {1}", h.name(), res);
-        return res;
-    }
-
-    /**
-     * Returns the arguments to the right of the <code>?</code>. <br>
-     * <code>static</code> for testing
-     * 
-     * @param request may be <code>null</code>
-     * @return the arguments to the right of the <code>?</code>
-     */
-    static Map<String, String> getArgs(final String request) {
-        if (request == null || request.length() == 0) {
-            return Util.EMPTY_MAP_OF_STRING_X_STRING;
-        }
-        final int ihuh = request.indexOf('?');
-        if (ihuh == -1) {
-            return Util.EMPTY_MAP_OF_STRING_X_STRING;
-        }
-        final String rest = request.substring(ihuh + 1);
-        return Util.parseArgs(rest);
-    }
-
-    /**
-     * Removes hash and other stuff.
-     */
-    private String makeFile(final String s) {
-        String res = s;
-        final char[] cs = { '#', '?' };
-        for (char c : cs) {
-            final int id = res.indexOf(c);
-            if (id != -1)
-                res = res.substring(0, id);
-        }
-        return res;
-    }
-
-
-
-
+    
     private void stop(final Thread t, final long millis) {
         synchronized (t) {
             try {
@@ -462,144 +376,4 @@ public abstract class AbstractServer implements Runnable  {
         shutDown(1000);
     }
 
-    public final void note(final String pattern, final Object... os) {
-        if (LOG.isDebugEnabled()) LOG.debug(MessageFormat.format(pattern, os));
-    }
-
-    // ------------------------------------------------------------
-    // Handlers
-    // ------------------------------------------------------------
-
-    /**
-     * Handles commands.
-     */
-    public interface Handler {
-
-        /**
-         * Perform some operation on the incoming message and return the result.
-         * 
-         * @param args CGI params
-         * @param req incoming {@link Request}
-         * @return the result of performing some operation on the incoming
-         *         message
-         */
-        String handle(Map<String, String> args, Request req);
-
-        /**
-         * Returns the unique name of this instance.
-         * 
-         * @return the unique name of this instance
-         */
-        String name();
-    }
-
-    /**
-     * Handles commands, but does NOT return a result.
-     */
-    public interface Listener {
-
-        /**
-         * Perform some operation on the incoming message.
-         * 
-         * @param args CGI params
-         * @param req incoming {@link Request}
-         */
-        void handle(Map<String, String> args, Request req);
-
-        /**
-         * Returns the unique name of this instance.
-         * 
-         * @return the unique name of this instance
-         */
-        String name();
-    }
-
-    /**
-     * Something with a name.
-     */
-    abstract class HasName {
-
-        private final String name;
-
-        public HasName(final String name) {
-            this.name = name;
-        }
-
-        public HasName() {
-            String n = getClass().getName();
-            int ilast;
-            ilast = n.lastIndexOf(".");
-            if (ilast != -1)
-                n = n.substring(ilast + 1);
-            ilast = n.lastIndexOf("$");
-            if (ilast != -1)
-                n = n.substring(ilast + 1);
-            this.name = n;
-        }
-
-        public final String name() {
-            return name;
-        }
-
-        protected final String getArg(final Map<String, String> args,
-                final String key) {
-            final String res = args.get(key);
-            return res == null ? "" : res;
-        }
-
-    }
-
-    /**
-     * Generic base class for {@link Listener}s.
-     */
-    public abstract class AbstractListener extends HasName implements Listener {
-        protected AbstractListener(String name) {
-            super(name);
-        }
-
-        protected AbstractListener() {
-            super();
-        }
-    }
-
-    /**
-     * Generic base class for {@link Handler}s.
-     */
-    public abstract class AbstractHandler extends HasName implements Handler {
-        protected AbstractHandler(String name) {
-            super(name);
-        }
-
-        protected AbstractHandler() {
-            super();
-        }
-    }
-
-    /**
-     * A {@link Handler} requiring a callback specified by the parameter
-     * {@link Parameters#CALLBACK}.
-     */
-    protected abstract class HandlerWithCallback extends AbstractHandler {
-
-        public final String handle(final Map<String, String> args, Request req) {
-            String callback = getArg(args, Server.Parameters.CALLBACK);
-            if (callback == null) {
-                return report(Server.ErrorCodes.MISSING_CALLBACK_PARAMETER);
-            }
-            return wrapCallback(callback, handleRest(args, req));
-        }
-
-        /**
-         * Returns the result <b>IN PLAIN TEXT</b>. Override this to provide
-         * functionality after the {@link Parameters#CALLBACK} argument has been
-         * extracted. This method should <b>NOT</b> wrap the result in the
-         * callback, nor should it be called from any other method except this
-         * abstract class.
-         * 
-         * @param args original, untouched arguments
-         * @param req originating {@link Request} object
-         * @return result <b>IN PLAIN TEXT</b>
-         */
-        abstract String handleRest(Map<String, String> args, Request req);
-    }
 }
