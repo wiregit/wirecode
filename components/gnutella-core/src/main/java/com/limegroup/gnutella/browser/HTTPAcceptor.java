@@ -141,6 +141,8 @@ public class HTTPAcceptor {
             if(NetworkUtils.isLocalHost(client)) {                
                 // Dispatch asynchronously.
                 ThreadExecutor.startThread(new ConnectionDispatchRunner(client), "ConnectionDispatchRunner");
+            } else {
+                IOUtils.close(client);
             }
         }
     }
