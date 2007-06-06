@@ -165,9 +165,14 @@ public class HTTPAcceptor {
     }
 
     /**
-     * Handles an incoming HTTP push request.
+     * Handles an incoming HTTP push request. This needs to be called from the NIO thread.
      */
     public void acceptConnection(Socket socket, HTTPConnectionData data) {
+        if (reactor == null) {
+            LOG.warn("Received upload request before reactor was initialized");
+            return;
+        }
+        
         DefaultNHttpServerConnection conn = reactor.acceptConnection(null,
                 socket);
         if (conn != null)

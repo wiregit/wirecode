@@ -151,6 +151,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
             prepareSocket(socket);
             return connectSocket((AbstractNBSocket) socket, null, word);
         } catch (IOException e) {
+            LOG.info("Closing socket due to unexpected exception", e);
             IOUtils.close(socket);
             return null;
         }
