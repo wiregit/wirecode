@@ -2,7 +2,6 @@
 package org.limewire.collection;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Provides a round robin iterator, visiting one item per collection before 
