@@ -61,7 +61,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private final Collection<? extends DHTValueEntity> entities;
     
     /**
-     * 
+     * A list of all StoreProcesses
      */
     private final List<StoreProcess> processes = new ArrayList<StoreProcess>();
     
@@ -172,6 +172,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 }
             } catch (IOException err) {
                 process.setIOException(err);
+                process.finish();
+                
                 LOG.error("IOException", err);
             }
         }
@@ -240,7 +242,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
     
     /**
-     * 
+     * A StoreProcess process manages storing of n values at
+     * a single Node
      */
     private abstract class StoreProcess {
         
@@ -288,59 +291,69 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         }
         
         /**
-         * 
+         * Returns true if there are more elements to sore
          */
         public boolean hasNext() {
             return iterator.hasNext();
         }
         
         /**
-         * 
+         * Returns the next element to store
          */
         public DHTValueEntity next() {
             return iterator.next();
         }
         
         /**
-         * 
+         * Adds the StoreStatusCode to an internal list of StoreStatusCodes
          */
         public void addStoreStatusCode(StoreStatusCode code) {
             codes.add(code);
         }
         
         /**
-         * 
+         * Returns all StoreStatusCodes
          */
         public Collection<StoreStatusCode> getStoreStatusCodes() {
             return codes;
         }
         
         /**
-         * 
+         * Sets an IOException that may occurred
          */
         public void setIOException(IOException exception) {
             this.exception = exception;
         }
         
         /**
-         * 
+         * Returns an IOException that may occurred
          */
         public IOException getIOException() {
             return exception;
         }
         
         /**
-         * 
+         * Sets a timeout that may occurred
          */
         public void setTimeout(long timeout) {
             this.timeout = timeout;
         }
         
         /**
-         * 
+         * Returns a timeout that may occurred (
          */
         public long getTimeout() {
             return timeout;
+        }
+        
+        /**
+         * Finishes the lookup process
+         */
+        public void finish() {
+            while(hasNext()) {
+                DHTValueEntity entity = next();
+                addStoreStatusCode(new StoreStatusCode(entity, StoreResponse.ERROR));
+            }
         }
         
         /**
@@ -361,11 +374,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /**
          * Handles a store timeout. Returns true if storing is done
          */
-        public abstract boolean timeout(RequestMessage msg, long time) throws IOException;
+        public abstract boolean timeout(RequestMessage msg, long timeout) throws IOException;
     }
     
     /**
-     * 
+     * Stores values at the local Node
      */
     private class LocalStoreProcess extends StoreProcess {
         
@@ -406,7 +419,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
     
     /**
-     * 
+     * Stores values at a remote Node
      */
     private class RemoteStoreProcess extends StoreProcess {
         
@@ -419,13 +432,15 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
 
         @Override
         public boolean store() throws IOException {
+            currentEntity = null;
+            
             // Nothing left? We're done!
             if (!hasNext()) {
                 return true;
             }
             
+            // Get the next value and try to store it
             currentEntity = next();
-            
             StoreRequest request = context.getMessageHelper()
                 .createStoreRequest(getContact().getContactAddress(), 
                         getSecurityToken(), Collections.singleton(currentEntity));
@@ -449,7 +464,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                     LOG.error(getContact() + " sent a wrong number of StoreStatusCodes: " + codes);
                 }
                 
-                // Exit!
+                // Exit
+                finish();
                 return true;
             }
             
@@ -462,7 +478,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                             + "\n" + CollectionUtils.toString(getEntities()));
                 }
                 
-                // Exit!
+                // Exit
+                finish();
                 return true;
             }
             
@@ -487,18 +504,29 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 }
                 
                 // Exit
+                finish();
                 return true;
             }
         }
         
         @Override
-        public boolean timeout(RequestMessage msg, long time) throws IOException {
+        public boolean timeout(RequestMessage msg, long timeout) throws IOException {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't store " + currentEntity + " at " + getContact());
             }
             
+            setTimeout(timeout);
             addStoreStatusCode(new StoreStatusCode(currentEntity, StoreResponse.ERROR));
             return store();
+        }
+
+        @Override
+        public void finish() {
+            if (currentEntity != null) {
+                addStoreStatusCode(new StoreStatusCode(currentEntity, StoreResponse.ERROR));
+                currentEntity = null;
+            }
+            super.finish();
         }
     }
 }
