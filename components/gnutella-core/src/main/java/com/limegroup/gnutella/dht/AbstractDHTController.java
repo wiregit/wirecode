@@ -201,6 +201,7 @@ public abstract class AbstractDHTController implements DHTController {
             });
         }
         
+        DHTSettings.DHT_NODE_ID.setValue(dht.getLocalNodeID().toHexString());
         DHTStatsManager.clear();
     }
 

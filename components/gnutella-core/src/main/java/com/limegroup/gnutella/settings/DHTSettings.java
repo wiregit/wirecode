@@ -287,6 +287,13 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.EnablePushProxyQueries");
     
     /**
+     * This setting is storing the most recent DHT Node ID for debugging purposes.
+     * The setting is actually never read!
+     */
+    public static final StringSetting DHT_NODE_ID
+        = FACTORY.createStringSetting("DHT_NODE_ID", "");
+    
+    /**
      * This setting is storing the most recent DHT mode for debugging purposes.
      * The setting is actually never read!
      */
