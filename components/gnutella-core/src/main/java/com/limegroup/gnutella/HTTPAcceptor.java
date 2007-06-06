@@ -170,7 +170,8 @@ public class HTTPAcceptor {
     public void acceptConnection(Socket socket, HTTPConnectionData data) {
         DefaultNHttpServerConnection conn = reactor.acceptConnection(null,
                 socket);
-        HttpContextParams.setConnectionData(conn.getContext(), data);
+        if (conn != null)
+            HttpContextParams.setConnectionData(conn.getContext(), data);
     }
 
     /**
