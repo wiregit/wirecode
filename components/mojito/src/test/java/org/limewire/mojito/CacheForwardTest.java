@@ -438,35 +438,43 @@ public class CacheForwardTest extends MojitoTestCase {
     }
     
     public void testStoreMultipleValues() throws Exception {
-        MojitoDHT dht1 = MojitoFactory.createDHT("DHT1");
-        dht1.bind(2000);
-        dht1.start();
+        MojitoDHT dht1 = null;
+        MojitoDHT dht2 = null;
         
-        MojitoDHT dht2 = MojitoFactory.createDHT("DHT2");
-        dht2.bind(2001);
-        dht2.start();
-        
-        dht1.bootstrap(new InetSocketAddress("localhost", 2001)).get();
-        dht2.bootstrap(new InetSocketAddress("localhost", 2000)).get();
-        
-        Context context1 = (Context)dht1;
-        
-        KUID primaryKey1 = KUID.createRandomID();
-        KUID primaryKey2 = KUID.createRandomID();
-        
-        DHTValue value1 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
-        DHTValue value2 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Foo Bar".getBytes());
-        
-        DHTValueEntity entity1 = DHTValueEntity.createFromValue(context1, primaryKey1, value1);
-        DHTValueEntity entity2 = DHTValueEntity.createFromValue(context1, primaryKey2, value2);
-        
-        Collection<DHTValueEntity> entities = Arrays.asList(entity1, entity2);
-        DHTFuture<StoreResult> future = context1.store(
-                dht2.getLocalNode(), null, entities);
-        StoreResult result = future.get();
-        
-        assertEquals(2, dht2.getDatabase().getKeyCount());
-        assertEquals(2, dht2.getDatabase().getValueCount());
+        try {
+            dht1 = MojitoFactory.createDHT("DHT1");
+            dht1.bind(2000);
+            dht1.start();
+            
+            dht2 = MojitoFactory.createDHT("DHT2");
+            dht2.bind(2001);
+            dht2.start();
+            
+            dht1.bootstrap(new InetSocketAddress("localhost", 2001)).get();
+            dht2.bootstrap(new InetSocketAddress("localhost", 2000)).get();
+            
+            Context context1 = (Context)dht1;
+            
+            KUID primaryKey1 = KUID.createRandomID();
+            KUID primaryKey2 = KUID.createRandomID();
+            
+            DHTValue value1 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
+            DHTValue value2 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Foo Bar".getBytes());
+            
+            DHTValueEntity entity1 = DHTValueEntity.createFromValue(context1, primaryKey1, value1);
+            DHTValueEntity entity2 = DHTValueEntity.createFromValue(context1, primaryKey2, value2);
+            
+            Collection<DHTValueEntity> entities = Arrays.asList(entity1, entity2);
+            DHTFuture<StoreResult> future = context1.store(
+                    dht2.getLocalNode(), null, entities);
+            StoreResult result = future.get();
+            
+            assertEquals(2, dht2.getDatabase().getKeyCount());
+            assertEquals(2, dht2.getDatabase().getValueCount());
+        } finally {
+            if (dht1 != null) { dht1.close(); }
+            if (dht2 != null) { dht2.close(); }
+        }
     }
     
     /**
