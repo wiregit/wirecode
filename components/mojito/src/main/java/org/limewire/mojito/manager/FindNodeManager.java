@@ -65,7 +65,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
             future = futureMap.get(lookupId);
             if (future == null) {
                 FindNodeResponseHandler handler 
-                    = new FindNodeResponseHandler(context, lookupId, count);
+                    = createFindNodeResponseHandler(context, lookupId, count);
                 future = new FindNodeFuture(lookupId, handler);
                 
                 futureMap.put(lookupId, future);
@@ -74,6 +74,14 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
         }
         
         return future;
+    }
+    
+    /**
+     * Creates and returns a FindNodeResponseHandler
+     */
+    protected FindNodeResponseHandler createFindNodeResponseHandler(
+            Context context, KUID lookupId, int count) {
+        return new FindNodeResponseHandler(context, lookupId, count);
     }
     
     /**
