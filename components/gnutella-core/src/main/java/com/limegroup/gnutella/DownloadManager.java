@@ -27,6 +27,8 @@ import org.limewire.service.MessageService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
+import org.limewire.util.GenericsUtils;
+import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -71,7 +73,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-@SuppressWarnings("unchecked")
 public class DownloadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
@@ -137,7 +138,7 @@ public class DownloadManager implements BandwidthTracker {
      *  that means that all MDs have been serviced at least once, so you can
      *  clear it and start anew....
      */
-    private List querySentMDs = new ArrayList();
+    private List<AbstractDownloader> querySentMDs = new ArrayList<AbstractDownloader>();
     
     /**
      * The number of times we've been bandwidth measures
@@ -274,9 +275,9 @@ public class DownloadManager implements BandwidthTracker {
         for(DownloadInformation ui : updates)
             urns.add(ui.getUpdateURN().httpStringValue());
         
-        for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
+        for (Iterator<AbstractDownloader> iter = new DualIterator<AbstractDownloader>(waiting.iterator(),active.iterator());
         iter.hasNext();) {
-            Downloader d = (Downloader)iter.next();
+            Downloader d = iter.next();
             if (d instanceof InNetworkDownloader  && 
                     !urns.contains(d.getSHA1Urn().httpStringValue())) 
                 d.stop();
@@ -466,9 +467,9 @@ public class DownloadManager implements BandwidthTracker {
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
     boolean writeSnapshot() {
-        List buf;
+        List<AbstractDownloader> buf;
         synchronized(this) {
-            buf = new ArrayList(active.size() + waiting.size());
+            buf = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
             buf.addAll(active);
             buf.addAll(waiting);
         }
@@ -511,7 +512,7 @@ public class DownloadManager implements BandwidthTracker {
      *  @param file the downloads.dat snapshot file */
     public synchronized boolean readSnapshot(File file) {
         //Read downloaders from disk.
-        List buf=null;
+        List<AbstractDownloader> buf=null;
         try {
             ObjectInputStream in = new ConverterObjectInputStream(
                                     new BufferedInputStream(
@@ -522,7 +523,7 @@ public class DownloadManager implements BandwidthTracker {
             //started some downloads before this method is called, the new and
             //old downloads will use different IncompleteFileManager instances.
             //This doesn't really cause an errors, however.
-            buf=(List)in.readObject();
+            buf = GenericsUtils.scanForList(in.readObject(), AbstractDownloader.class, ScanMode.REMOVE);
             incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch(Throwable t) {
             LOG.error("Unable to read download file", t);
@@ -532,7 +533,7 @@ public class DownloadManager implements BandwidthTracker {
         // Pump the downloaders through a set, to remove duplicate values.
         // This is necessary in case LimeWire got into a state where a
         // downloader was written to disk twice.
-        buf = new LinkedList(new LinkedHashSet(buf));
+        buf = new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
 
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
@@ -564,8 +565,8 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
      
-    private static Collection getActiveDownloadFiles(List downloaders) {
-        List ret = new ArrayList(downloaders.size());
+    private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
+        List<File> ret = new ArrayList<File>(downloaders.size());
         for (Iterator iter = downloaders.iterator(); iter.hasNext();) {
             Downloader d = (Downloader) iter.next();
 	    File f = d.getFile();
@@ -599,7 +600,9 @@ public class DownloadManager implements BandwidthTracker {
      * so the return value can usually be ignored.  The download begins
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
-     *
+     * 
+     * @param files a group of "similar" files to smart download
+     * @param alts a List of secondary RFDs to use for other sources
      * @param queryGUID the guid of the query that resulted in the RFDs being
      * downloaded.
      * @param saveDir can be null, then the default save directory is used
@@ -611,7 +614,7 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
-                                            List alts, GUID queryGUID, 
+                                            List<? extends RemoteFileDesc> alts, GUID queryGUID, 
                                             boolean overwrite, File saveDir,
 											String fileName) 
 		throws SaveLocationException {
@@ -962,7 +965,7 @@ public class DownloadManager implements BandwidthTracker {
             throw new NullPointerException("null hostdata");
 
         // need to synch because active and waiting are not thread safe
-        List downloaders = new ArrayList(active.size() + waiting.size());
+        List<AbstractDownloader> downloaders = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
         synchronized (this) { 
             // add to all downloaders, even if they are waiting....
             downloaders.addAll(active);
@@ -1156,15 +1159,14 @@ public class DownloadManager implements BandwidthTracker {
     
     /** Calls measureBandwidth on each uploader. */
     public void measureBandwidth() {
-        List activeCopy;
+        List<AbstractDownloader> activeCopy;
         synchronized(this) {
-            activeCopy = new ArrayList(active);
+            activeCopy = new ArrayList<AbstractDownloader>(active);
         }
         
         float currentTotal = 0f;
         boolean c = false;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-            BandwidthTracker bt = (BandwidthTracker)iter.next();
+        for (BandwidthTracker bt : activeCopy) {
             if (bt instanceof InNetworkDownloader)
                 continue;
             
@@ -1183,14 +1185,13 @@ public class DownloadManager implements BandwidthTracker {
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
     public float getMeasuredBandwidth() {
-        List activeCopy;
+        List<AbstractDownloader> activeCopy;
         synchronized(this) {
-            activeCopy = new ArrayList(active);
+            activeCopy = new ArrayList<AbstractDownloader>(active);
         }
         
         float sum=0;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-            BandwidthTracker bt = (BandwidthTracker)iter.next();
+        for (BandwidthTracker bt : activeCopy) {
             if (bt instanceof InNetworkDownloader)
                 continue;
             

@@ -1754,7 +1754,7 @@ public class RouterService {
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
-	                                  List<? extends IpPort> alts, GUID queryGUID,
+	                                  List<? extends RemoteFileDesc> alts, GUID queryGUID,
                                       boolean overwrite, File saveDir,
 									  String fileName)
 		throws SaveLocationException {
@@ -1763,7 +1763,7 @@ public class RouterService {
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files, 
-									  List<? extends IpPort> alts,
+									  List<? extends RemoteFileDesc> alts,
 									  GUID queryGUID,
 									  boolean overwrite)
 		throws SaveLocationException {
@@ -1778,7 +1778,7 @@ public class RouterService {
                                       GUID queryGUID, 
                                       boolean overwrite, File saveDir, String fileName)
 		throws SaveLocationException {
-		return download(files, IpPort.EMPTY_LIST, queryGUID,
+		return download(files, RemoteFileDesc.EMPTY_LIST, queryGUID,
 				overwrite, saveDir, fileName);
 	}
 	

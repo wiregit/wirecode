@@ -14,6 +14,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +57,9 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 
     /** bogus IP we assign to RFDs whose real ip is unknown */
     public static final String BOGUS_IP = "1.1.1.1";
+    
+    /** Typed reference to an empty list of RemoteFileDescs. */ 
+    public static final List<RemoteFileDesc> EMPTY_LIST = Collections.emptyList(); 
     
 	private final String _host;
 	private final int _port;
