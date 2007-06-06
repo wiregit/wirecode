@@ -60,15 +60,24 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     
     private final Collection<? extends DHTValueEntity> entities;
     
-    private final List<StoreProcess> processList = new ArrayList<StoreProcess>();
+    /**
+     * 
+     */
+    private final List<StoreProcess> processes = new ArrayList<StoreProcess>();
     
-    /** An Iterator of StoreProcesses (see processList) */
-    private Iterator<StoreProcess> processes = null;
+    /** 
+     * An Iterator of StoreProcesses (see processList) 
+     */
+    private Iterator<StoreProcess> toProcess = null;
     
-    /** Map of currently active StoreProcesses (see parallelism) */
+    /** 
+     * Map of currently active StoreProcesses (see parallelism) 
+     */
     private Map<KUID, StoreProcess> activeProcesses = new HashMap<KUID, StoreProcess>();
     
-    /** The number of parallel stores */
+    /** 
+     * The number of parallel stores 
+     */
     private final int parallelism = StoreSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, 
@@ -85,47 +94,35 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
         
-        // The order of the processes is as follows. The idea
-        // is to not issue parallel store requests at a single Node.
-        //
-        // In other words we want this:
-        // Value1(Node1), Value1(Node2), Value1(Node3)...
-        // Value2(Node1), Value2(Node2), Value2(Node3)...
-        // 
-        // And NOT this:
-        // Value1(Node1), Value2(Node1), Value3(Node1)...
-        // Value1(Node2), Value2(Node2), Value3(Node2)...
-        for (DHTValueEntity entity : entities) {
-            for (Entry<? extends Contact, ? extends SecurityToken> entry : path) {
-                Contact node = entry.getKey();
-                SecurityToken securityToken = entry.getValue();
-                
-                if (context.isLocalNode(node)) {
-                    processList.add(new LocalStoreProcess(node, entity));
-                } else {
-                    processList.add(new RemoteStoreProcess(node, securityToken, entity));
-                }
+        for (Entry<? extends Contact, ? extends SecurityToken> entry : path) {
+            Contact node = entry.getKey();
+            SecurityToken securityToken = entry.getValue();
+            
+            if (context.isLocalNode(node)) {
+                processes.add(new LocalStoreProcess(node, securityToken, entities));
+            } else {
+                processes.add(new RemoteStoreProcess(node, securityToken, entities));
             }
         }
     }
     
     @Override
     public void start() throws DHTException {
-        processes = processList.iterator();
+        toProcess = processes.iterator();
         sendNextAndExitIfDone();
     }
     
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
-        StoreResponse response = (StoreResponse)message;
-        Collection<StoreStatusCode> statusCodes = response.getStoreStatusCodes();
         
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
         
-        StoreProcess process = activeProcesses.remove(nodeId);
+        StoreProcess process = activeProcesses.get(nodeId);
         if (process != null) {
-            process.response(statusCodes);
+            if (process.response(message)) {
+                activeProcesses.remove(nodeId);
+            }
         }
         
         sendNextAndExitIfDone();
@@ -135,9 +132,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     protected void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         
-        StoreProcess process = activeProcesses.remove(nodeId);
+        StoreProcess process = activeProcesses.get(nodeId);
         if (process != null) {
-            process.setTimeout(time);
+            if (process.timeout(message, time)) {
+                activeProcesses.remove(nodeId);
+            }
         }
         
         sendNextAndExitIfDone();
@@ -147,9 +146,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     protected void error(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         
-        StoreProcess process = activeProcesses.remove(nodeId);
+        StoreProcess process = activeProcesses.get(nodeId);
         if (process != null) {
-            process.setException(e);
+            if (process.error(message, e)) {
+                activeProcesses.remove(nodeId);
+            }
         }
         
         sendNextAndExitIfDone();
@@ -160,16 +161,17 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
      * an event if storing is done
      */
     private void sendNextAndExitIfDone() {
-        while(activeProcesses.size() < parallelism && processes.hasNext()) {
-            StoreProcess process = processes.next();
+        while(activeProcesses.size() < parallelism && toProcess.hasNext()) {
+            StoreProcess process = toProcess.next();
             
             try {
-                if (process.store()) {
+                boolean done = process.store();
+                if (!done) {
                     Contact node = process.getContact();
                     activeProcesses.put(node.getNodeID(), process);
                 }
             } catch (IOException err) {
-                process.setException(err);
+                process.setIOException(err);
                 LOG.error("IOException", err);
             }
         }
@@ -191,10 +193,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         Map<KUID, Collection<Contact>> locations 
             = new HashMap<KUID, Collection<Contact>>();
         
-        for (StoreProcess process : processList) {
+        for (StoreProcess process : processes) {
             Contact node = process.getContact();
             Collection<StoreStatusCode> statusCodes 
                 = process.getStoreStatusCodes();
+            
             map.put(node, statusCodes);
             
             for (StoreStatusCode statusCode : statusCodes) {
@@ -213,239 +216,289 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
         
-        if (processList.size() == 1) {
-            StoreProcess process = processList.get(0);
-            if (process.getException() != null) {
-                setException(new DHTException(process.getException()));
+        if (processes.size() == 1) {
+            StoreProcess process = processes.get(0);
+            
+            IOException exception = process.getIOException();
+            long timeout = process.getTimeout();
+            
+            if (exception != null) {
+                setException(new DHTException(exception));
                 return;
-            } else if (process.getTimeout() != -1L) {
+                
+            } else if (timeout != -1L) {
                 Contact node = process.getContact();
                 KUID nodeId = node.getNodeID();
                 SocketAddress dst = node.getContactAddress();
-                fireTimeoutException(nodeId, dst, null, process.getTimeout());
+                fireTimeoutException(nodeId, dst, null, timeout);
                 return;
             }
         }
         
         StoreResult result = new StoreResult(map, entities);
-        /*for (DHTValueEntity entity : entities) {
-            entity.handleStoreResult(result);
-        }*/
-        
         setReturnValue(result);
     }
     
     /**
-     * A StoreProcess manages 
+     * 
      */
-    private static interface StoreProcess {
-        
-        /**
-         * Returns the Node where we are storing the values
-         */
-        public Contact getContact();
-        
-        /**
-         * Returns the value this process is storing
-         */
-        public DHTValueEntity getDHTValueEntity();
-        
-        /**
-         * Starts the process and returns true if the process
-         * was started
-         */
-        public boolean store() throws IOException;
-        
-        /**
-         * Called every time for every StoreResponse. Return
-         * true if this StoreProcess is done with storing.
-         */
-        public void response(Collection<StoreStatusCode> statusCodes) throws IOException;
-        
-        /**
-         * This returns essentially the result of the StoreProcess
-         */
-        public Collection<StoreStatusCode> getStoreStatusCodes();
-        
-        /**
-         * Setter for Exception
-         */
-        public void setException(Exception exception);
-        
-        /**
-         * Returns an Exception if one occured
-         */
-        public Exception getException();
-        
-        /**
-         * Setter for timeout
-         */
-        public void setTimeout(long time);
-        
-        /**
-         * Returns a non negative value if a timeout occured
-         */
-        public long getTimeout();
-    }
-    
-    /**
-     * LocalStoreProcess stores values in the local Node's Database
-     */
-    private class LocalStoreProcess implements StoreProcess {
+    private abstract class StoreProcess {
         
         private final Contact node;
         
-        private final DHTValueEntity entity;
-        
-        private final Collection<StoreStatusCode> statusCodes 
-            = new ArrayList<StoreStatusCode>();
-        
-        public LocalStoreProcess(Contact node, DHTValueEntity entity) {
-            assert (context.isLocalNode(node));
-            this.node = node;
-            this.entity = entity;
-        }
-        
-        public Contact getContact() {
-            return node;
-        }
-        
-        public DHTValueEntity getDHTValueEntity() {
-            return entity;
-        }
-        
-        public boolean store() throws IOException {
-            
-            // Store the values in the local Database
-            Database database = context.getDatabase();
-            if (database.store(entity)) {
-                statusCodes.add(new StoreStatusCode(entity, StoreResponse.OK));
-            } else {
-                statusCodes.add(new StoreStatusCode(entity, StoreResponse.ERROR));
-            }
-            
-            // And exit here (do as if we were not able
-            // to start this process)!
-            return false;
-        }
-        
-        public void response(Collection<StoreStatusCode> statusCodes) throws IOException {
-            throw new UnsupportedOperationException();
-        }
-        
-        public void setException(Exception exception) {
-            throw new UnsupportedOperationException();
-        }
-        
-        public Exception getException() {
-            return null;
-        }
-        
-        public void setTimeout(long time) {
-            throw new UnsupportedOperationException();
-        }
-        
-        public long getTimeout() {
-            return -1L;
-        }
-        
-        public Collection<StoreStatusCode> getStoreStatusCodes() {
-            return statusCodes;
-        }
-    }
-    
-    /**
-     * RemoteStoreProcess stores values at a remote Node
-     */
-    private class RemoteStoreProcess implements StoreProcess {
-        
-        /** The Node to where to store the values */
-        private final Contact node;
-        
-        /** The SecurityToken for the Node */
         private final SecurityToken securityToken;
         
-        /** The value that is currently beeing stored */
-        private final DHTValueEntity entity;
+        private final Collection<? extends DHTValueEntity> entities;
         
-        private Collection<StoreStatusCode> statusCodes = null;
+        private final Iterator<? extends DHTValueEntity> iterator;
+        
+        private final Collection<StoreStatusCode> codes = new ArrayList<StoreStatusCode>();
+        
+        private IOException exception;
         
         private long timeout = -1L;
         
-        /** A reference to an Exception that iterrupted this store process */
-        private Exception exception;
-        
-        private RemoteStoreProcess(Contact node, SecurityToken securityToken, 
-                DHTValueEntity entity) {
-            assert (!context.isLocalNode(node));
+        private StoreProcess(Contact node, SecurityToken securityToken, 
+                Collection<? extends DHTValueEntity> entities) {
             this.node = node;
             this.securityToken = securityToken;
-            this.entity = entity;
+            this.entities = entities;
+            this.iterator = entities.iterator();
         }
         
+        /**
+         * The Contact where we're storing the values
+         */
         public Contact getContact() {
             return node;
         }
-        
-        public DHTValueEntity getDHTValueEntity() {
-            return entity;
+
+        /**
+         * The SecurityToken we got from the Contact
+         */
+        public SecurityToken getSecurityToken() {
+            return securityToken;
         }
         
-        public boolean store() throws IOException {
-            StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), securityToken, Collections.singleton(entity));
-            context.getMessageDispatcher().send(node, request, StoreResponseHandler.this);
-            return true;
+        /**
+         * List of values we're storing at the Node
+         */
+        public Collection<? extends DHTValueEntity> getEntities() {
+            return entities;
         }
         
-        public void response(Collection<StoreStatusCode> statusCodes) throws IOException {
-            // We store one value per request! If the remote Node
-            // sends us a different number of StoreStatusCodes back
-            // then there is something wrong!
-            if (statusCodes.size() != 1) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " sent a wrong number of StoreStatusCodes: " + statusCodes);
-                }
-                return;
-            }
-            
-            // The returned StoreStatusCode must have the same primary and
-            // secondaryKeys as the value we requested to store.
-            StoreStatusCode statusCode = statusCodes.iterator().next();
-            if (!statusCode.isFor(entity)) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " sent a wrong [" + statusCode + "] for " + entity
-                            + "\n" + CollectionUtils.toString(entities));
-                }
-                return;
-            }
-            
-            this.statusCodes = statusCodes;
+        /**
+         * 
+         */
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
         
-        public void setTimeout(long time) {
-            this.timeout = time;
+        /**
+         * 
+         */
+        public DHTValueEntity next() {
+            return iterator.next();
         }
         
+        /**
+         * 
+         */
+        public void addStoreStatusCode(StoreStatusCode code) {
+            codes.add(code);
+        }
+        
+        /**
+         * 
+         */
+        public Collection<StoreStatusCode> getStoreStatusCodes() {
+            return codes;
+        }
+        
+        /**
+         * 
+         */
+        public void setIOException(IOException exception) {
+            this.exception = exception;
+        }
+        
+        /**
+         * 
+         */
+        public IOException getIOException() {
+            return exception;
+        }
+        
+        /**
+         * 
+         */
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
+        }
+        
+        /**
+         * 
+         */
         public long getTimeout() {
             return timeout;
         }
         
-        public void setException(Exception exception) {
-            this.exception = exception;
+        /**
+         * Starts the StoreProcess. Returns true if storing is done
+         */
+        public abstract boolean store() throws IOException;
+        
+        /**
+         * Handles a store response. Returns true if storing is done
+         */
+        public abstract boolean response(ResponseMessage msg) throws IOException;
+
+        /**
+         * Handles a store error. Returns true if storing is done
+         */
+        public abstract boolean error(RequestMessage msg, IOException err);
+        
+        /**
+         * Handles a store timeout. Returns true if storing is done
+         */
+        public abstract boolean timeout(RequestMessage msg, long time) throws IOException;
+    }
+    
+    /**
+     * 
+     */
+    private class LocalStoreProcess extends StoreProcess {
+        
+        private LocalStoreProcess(Contact node, SecurityToken securityToken, 
+                Collection<? extends DHTValueEntity> entities) {
+            super(node, securityToken, entities);
         }
         
-        public Exception getException() {
-            return exception;
+        @Override
+        public boolean store() throws IOException {
+            Database database = context.getDatabase();
+            while(hasNext()) {
+                DHTValueEntity entity = next();
+                boolean stored = database.store(entity);
+                if (stored) {
+                    addStoreStatusCode(new StoreStatusCode(entity, StoreResponse.OK));
+                } else {
+                    addStoreStatusCode(new StoreStatusCode(entity, StoreResponse.ERROR));
+                }
+            }
+            return true;
         }
         
-        public Collection<StoreStatusCode> getStoreStatusCodes() {
-            if (statusCodes == null || statusCodes.isEmpty()) {
-                statusCodes = Collections.singleton(
-                        new StoreStatusCode(entity, StoreResponse.ERROR));
+        @Override
+        public boolean response(ResponseMessage msg) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean error(RequestMessage msg, IOException err) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean timeout(RequestMessage msg, long time) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    /**
+     * 
+     */
+    private class RemoteStoreProcess extends StoreProcess {
+        
+        private DHTValueEntity currentEntity = null;
+        
+        private RemoteStoreProcess(Contact node, SecurityToken securityToken, 
+                Collection<? extends DHTValueEntity> entities) {
+            super(node, securityToken, entities);
+        }
+
+        @Override
+        public boolean store() throws IOException {
+            // Nothing left? We're done!
+            if (!hasNext()) {
+                return true;
             }
             
-            return statusCodes;
+            currentEntity = next();
+            
+            StoreRequest request = context.getMessageHelper()
+                .createStoreRequest(getContact().getContactAddress(), 
+                        getSecurityToken(), Collections.singleton(currentEntity));
+            
+            context.getMessageDispatcher().send(getContact(), 
+                    request, StoreResponseHandler.this);
+            
+            return false;
+        }
+        
+        @Override
+        public boolean response(ResponseMessage msg) throws IOException {
+            StoreResponse response = (StoreResponse)msg;
+            Collection<StoreStatusCode> codes = response.getStoreStatusCodes();
+            
+            // We store one value per request! If the remote Node
+            // sends us a different number of StoreStatusCodes back
+            // then there is something wrong!
+            if (codes.size() != 1) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(getContact() + " sent a wrong number of StoreStatusCodes: " + codes);
+                }
+                
+                // Exit!
+                return true;
+            }
+            
+            // The returned StoreStatusCode must have the same primary and
+            // secondaryKeys as the value we requested to store.
+            StoreStatusCode code = codes.iterator().next();
+            if (!code.isFor(currentEntity)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(getContact() + " sent a wrong [" + code + "] for " + currentEntity
+                            + "\n" + CollectionUtils.toString(getEntities()));
+                }
+                
+                // Exit!
+                return true;
+            }
+            
+            // Store next value
+            return store();
+        }
+
+        @Override
+        public boolean error(RequestMessage msg, IOException err) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Couldn't store " + currentEntity + " at " + getContact(), err);
+            }
+            
+            setIOException(err);
+            addStoreStatusCode(new StoreStatusCode(currentEntity, StoreResponse.ERROR));
+            
+            try {
+                return store();
+            } catch (IOException iox) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("IOException", iox);
+                }
+                
+                // Exit
+                return true;
+            }
+        }
+        
+        @Override
+        public boolean timeout(RequestMessage msg, long time) throws IOException {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Couldn't store " + currentEntity + " at " + getContact());
+            }
+            
+            addStoreStatusCode(new StoreStatusCode(currentEntity, StoreResponse.ERROR));
+            return store();
         }
     }
 }
