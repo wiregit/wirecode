@@ -111,7 +111,7 @@ public class ExecutorsHelper {
      * until an executing item is finished and then be processed.
      */
     public static ExecutorService newFixedSizeThreadPool(int size, String name) {
-        ThreadPoolExecutor tpe =  new ThreadPoolExecutor(1, size,
+        ThreadPoolExecutor tpe =  new ThreadPoolExecutor(size, size,
                 5L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 daemonThreadFactory(name));
