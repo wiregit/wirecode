@@ -19,6 +19,7 @@
 
 package org.limewire.mojito;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -48,7 +49,7 @@ import org.limewire.mojito.util.HostFilter;
 /**
  * The public interface of the Mojito DHT
  */
-public interface MojitoDHT {
+public interface MojitoDHT extends Closeable {
     
     /**
      * Returns the name of the DHT instance
