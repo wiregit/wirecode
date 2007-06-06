@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.Inspectable;
 import org.limewire.nio.observer.AcceptChannelObserver;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.IOErrorObserver;
@@ -124,6 +124,9 @@ public class NIODispatcher implements Runnable {
     /** Queue lock. */
     private final Object Q_LOCK = new Object();
     
+    /** Stats for the selector */
+    private final SelectStats stats = new SelectStats();
+    
     /**
      * A map of classes of SelectableChannels to the Selector that should
      * be used to register that channel with.
@@ -162,16 +165,6 @@ public class NIODispatcher implements Runnable {
     
     /** The last time the ByteBufferCache was cleared. */
     private long lastCacheClearTime;
-    
-    /** Number of select() calls this session */
-    @InspectablePrimitive
-    public volatile long numSelects;
-    /** Average time spent in select() call in nanoseconds */
-    @InspectablePrimitive
-    public volatile long avgSelectTime;
-    /** Number of selectNow() calls this session */
-    @InspectablePrimitive
-    public volatile long immediateSelects;
     
     /** Returns true if the NIODispatcher is merrily chugging along. */
     public boolean isRunning() {
@@ -653,13 +646,13 @@ public class NIODispatcher implements Runnable {
                         try {
                             primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
                         } finally {
-                            updateSelectTime(System.nanoTime() - nanoNow);
+                            stats.updateSelectTime(System.nanoTime() - nanoNow);
                         }
                     }
                 }
                 
                 if (immediate) {
-                    immediateSelects = Math.max(0, immediateSelects+1);
+                    stats.countSelectNow();
                     primarySelector.selectNow();
                 }
             } catch (NullPointerException err) {
@@ -755,18 +748,6 @@ public class NIODispatcher implements Runnable {
     	if (nextScheduled != null) 
     		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));
     	return Math.max(0, next);
-    }
-    
-    /** Updates the counters for the select times */
-    private void updateSelectTime(long thisSelect) {
-        // the Math.max calls are to account for overflow
-        long avg = avgSelectTime;
-        long num = numSelects;
-        avg = Math.max(0, avg * Math.max(1, num));
-        num = Math.max(1,++num);
-        avg = Math.max(0, avg+thisSelect) / num;
-        numSelects = num;
-        avgSelectTime = avg;
     }
     
     /**
@@ -1059,6 +1040,46 @@ public class NIODispatcher implements Runnable {
     	public void eventPending() {
     		wakeup();
     	}
+    }
+    
+    /**
+     * @return quick stats about the selector
+     */
+    public long [] getSelectStats() {
+        return stats.getStats();
+    }
+    
+    public static class SelectStats implements Inspectable {
+        private long numSelects, numImmediateSelects, avgSelectTime;
+        public synchronized long[] getStats() {
+            return new long[]{numSelects, numImmediateSelects, avgSelectTime};
+        }
+        
+        /** Updates the counters for the select times */
+        synchronized void updateSelectTime(long thisSelect) {
+            // the Math.max calls are to account for overflow
+            long avg = avgSelectTime;
+            long num = numSelects;
+            avg = Math.max(0, avg * Math.max(1, num));
+            num = Math.max(1,++num);
+            avg = Math.max(0, avg+thisSelect) / num;
+            numSelects = num;
+            avgSelectTime = avg;
+        }
+        
+        synchronized void countSelectNow() {
+            numImmediateSelects = Math.max(0, numImmediateSelects +1 );   
+        }
+        
+        public Object inspect() {
+            long [] data = getStats();
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("ver",1);
+            ret.put("num",data[0]);
+            ret.put("numIm",data[1]);
+            ret.put("avg",data[2]);
+            return ret;
+        }
     }
 }
 
