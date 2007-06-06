@@ -78,6 +78,13 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         FileUtils.copy(wma5, new File(_sharedDir, "wma5.wma"));
     }
 	
+	@Override
+	public void setUp() throws Exception {
+	    super.setUp();
+	    
+	    RouterService.getFileManager().loadSettingsAndWait(4000);
+	}
+	
 	public void testFileDescKnowsLicense() throws Exception {
 	    FileManager fm = RouterService.getFileManager();
 	    FileDesc[] fds = fm.getAllSharedFileDescriptors();

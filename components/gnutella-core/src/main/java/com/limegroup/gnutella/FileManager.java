@@ -454,8 +454,8 @@ public abstract class FileManager {
                 }
             }            
         };
-        addFileEventListener(listener);
         try {
+            addFileEventListener(listener);
             start();
             if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
                 throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
@@ -702,6 +702,26 @@ public abstract class FileManager {
         });
     }
     
+    public void loadSettingsAndWait(long timeout) throws InterruptedException, TimeoutException {
+        final CountDownLatch loadedLatch = new CountDownLatch(1);
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                    loadedLatch.countDown();
+                }
+            }            
+        };
+        try {
+            addFileEventListener(listener);
+            loadSettings();
+            if (!loadedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Loading of FileManager settings did not complete within " + timeout + " ms");
+            }
+        } finally {
+            removeFileEventListener(listener);
+        }
+    }
+
     /**
      * Loads the FileManager with a new list of directories.
      */
