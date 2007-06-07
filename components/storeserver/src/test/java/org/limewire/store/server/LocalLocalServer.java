@@ -9,16 +9,17 @@ import java.util.Map;
  */
 public class LocalLocalServer extends ServerImpl {
 
+  final LocalServerDelegate del;
   public final static int PORT = 8081;
 
   public LocalLocalServer(final String host, final int otherPort, final DispatcherSupport.OpensSocket openner) {
     super(PORT, "Local Server");
-    final LocalServerDelegate del = new LocalServerDelegate(getDispatcher(), host, otherPort, openner);
     setDispatcher(new StoreServerDispatcher(new SendsMessagesToServer() {
         public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
-            return del.sendMsg(msg, args);
+            return del.sendMsgToRemoteServer(msg, args);
         }
     }));
+    this.del = new LocalServerDelegate(host, otherPort, openner);
     
     
   }

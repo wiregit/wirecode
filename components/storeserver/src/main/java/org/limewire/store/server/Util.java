@@ -259,5 +259,10 @@ public final class Util {
         return newCmd;
 
     }
+    
+    static String getArg(final Map<String, String> args, final String key) {
+        final String res = args.get(key);
+        return res == null ? "" : res;
+    }    
 
 }

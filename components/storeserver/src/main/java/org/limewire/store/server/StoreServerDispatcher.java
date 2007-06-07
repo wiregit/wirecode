@@ -6,9 +6,6 @@ package org.limewire.store.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.store.server.DispatcherSupport.HandlerWithCallback;
-import org.limewire.store.server.DispatcherSupport.Parameters;
-
 final class StoreServerDispatcher extends DispatcherSupport implements SendsMessagesToServer {
     
     private final SendsMessagesToServer sender;
@@ -66,7 +63,7 @@ final class StoreServerDispatcher extends DispatcherSupport implements SendsMess
             if (getPrivateKey() == null) {
                 return report(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY);
             }
-            final String herPrivateKey = getArg(args, DispatcherSupport.Parameters.PRIVATE);
+            final String herPrivateKey = Util.getArg(args, DispatcherSupport.Parameters.PRIVATE);
             if (herPrivateKey == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
             }
@@ -137,7 +134,7 @@ final class StoreServerDispatcher extends DispatcherSupport implements SendsMess
     class Msg extends HandlerWithCallbackWithPrivateKey {
         protected String handleRest(final String privateKey,
                 final Map<String, String> args) {
-            String cmd = getArg(args, DispatcherSupport.Parameters.COMMAND);
+            String cmd = Util.getArg(args, DispatcherSupport.Parameters.COMMAND);
             if (cmd == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER);
             }
@@ -157,7 +154,7 @@ final class StoreServerDispatcher extends DispatcherSupport implements SendsMess
     class Echo extends HandlerWithCallbackWithPrivateKey {
         protected String handleRest(final String privateKey,
                 final Map<String, String> args) {
-            String msg = getArg(args, DispatcherSupport.Parameters.MSG);
+            String msg = Util.getArg(args, DispatcherSupport.Parameters.MSG);
             return msg;
         }
     }

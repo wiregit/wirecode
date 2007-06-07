@@ -219,12 +219,6 @@ abstract class DispatcherSupport implements Dispatcher {
             return name;
         }
 
-        protected final String getArg(final Map<String, String> args,
-                final String key) {
-            final String res = args.get(key);
-            return res == null ? "" : res;
-        }
-
     }
 
     // ------------------------------------------------------------
@@ -336,7 +330,7 @@ abstract class DispatcherSupport implements Dispatcher {
     protected abstract class HandlerWithCallback extends AbstractHandler {
 
         public final String handle(final Map<String, String> args) {
-            String callback = getArg(args, DispatcherSupport.Parameters.CALLBACK);
+            String callback = Util.getArg(args, DispatcherSupport.Parameters.CALLBACK);
             if (callback == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER);
             }

@@ -36,7 +36,7 @@ public abstract class AbstractServer implements Runnable  {
     private final List<Thread> threads = new ArrayList<Thread>(NUM_WORKERS);
     private final List<Worker> workers = new ArrayList<Worker>(NUM_WORKERS);
     
-    private DispatcherSupport dispatcher;
+    private Dispatcher dispatcher;
 
     private boolean hasShutDown;
     private Thread runner;
@@ -62,7 +62,7 @@ public abstract class AbstractServer implements Runnable  {
         this.port = port;
         this.name = name;
         this.dispatcher = dispatcher;
-        getDispatcher().note("connecting on port {0}", port);
+        LOG.debug(name + " on port " + port);
     }
     
     public AbstractServer(final int port, final String name) {
@@ -80,7 +80,7 @@ public abstract class AbstractServer implements Runnable  {
     }
     
     public final DispatcherSupport getDispatcher() {
-        return this.dispatcher;
+        return (DispatcherSupport)this.dispatcher;
     }
 
     public final void setDone(final boolean done) {
@@ -140,7 +140,7 @@ public abstract class AbstractServer implements Runnable  {
      * 
      * @param dispatcher new {@link DispatcherSupport}
      */
-    protected final void setDispatcher(DispatcherSupport dispatcher) {
+    protected final void setDispatcher(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 
@@ -327,7 +327,7 @@ public abstract class AbstractServer implements Runnable  {
                     request = request.substring(1);
                 }
                 final String ip = Util.getIPAddress(s.getInetAddress());
-                String res = dispatcher.handle(request, ps);
+                String res = getDispatcher().handle(request, ps);
                 ps.print("HTTP/1.1 ");
                 ps.print(HttpURLConnection.HTTP_OK);
                 ps.print(" OK");

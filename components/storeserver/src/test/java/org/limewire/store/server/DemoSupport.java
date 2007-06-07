@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.limewire.store.server.AbstractServer;
 import org.limewire.store.server.LocalLocalServer;
-import org.limewire.store.server.RemoteServer;
+import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.ServerImpl;
 import org.limewire.store.server.Util;
 import org.limewire.util.BaseTestCase;
@@ -29,7 +29,7 @@ public abstract class DemoSupport extends BaseTestCase {
     return this.localServer;
   }
 
-  protected final RemoteServer getRemoteServer() {
+  protected final AbstractRemoteServer getRemoteServer() {
     return this.remoteServer;
   }
 

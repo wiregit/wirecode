@@ -5,7 +5,7 @@ import java.util.Map;
 import org.limewire.store.server.AbstractDispatchee;
 import org.limewire.store.server.AbstractServer;
 import org.limewire.store.server.LocalLocalServer;
-import org.limewire.store.server.RemoteServer;
+import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.ServerImpl;
 
 
@@ -21,13 +21,13 @@ public class Demo {
     }
 
     private final ServerImpl localServer;
-    private final RemoteServer remoteServer;
+    private final AbstractRemoteServer remoteServer;
 
     public final ServerImpl getLocalServer() {
         return localServer;
     }
 
-    public final RemoteServer getRemoteServer() {
+    public final AbstractRemoteServer getRemoteServer() {
         return remoteServer;
     }
 
@@ -44,7 +44,7 @@ public class Demo {
     public void realMain(final String[] args) {
         start();
         getLocalServer().getDispatcher().setDispatchee(
-                new AbstractDispatchee(getLocalServer().getDispatcher()) {
+                new AbstractDispatchee() {
                     public String dispatch(final String cmd,
                             final Map<String, String> args) {
                         return "OK (" + cmd + ":" + args + ")";

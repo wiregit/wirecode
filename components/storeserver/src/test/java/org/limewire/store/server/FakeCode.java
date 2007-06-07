@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.limewire.store.server.LocalServerDelegate;
-import org.limewire.store.server.RemoteServer;
+import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.ServerImpl;
 
 
@@ -31,17 +31,17 @@ final class FakeCode {
 		void handle(String res);
 	}
 	
-	FakeCode(ServerImpl local, RemoteServer remote) {
-		this.toLocalServer = new LocalServerDelegate(remote.getDispatcher(), "localhost", local.getPort());
-		this.toRemoteServer = new LocalServerDelegate(local.getDispatcher(), "localhost", remote.getPort());
+	FakeCode(ServerImpl local, AbstractRemoteServer remote) {
+		this.toLocalServer = new LocalServerDelegate("localhost", local.getPort());
+		this.toRemoteServer = new LocalServerDelegate("localhost", remote.getPort());
 	}
 	
 	protected final void sendLocalMsg(String msg, Map<String, String> args, Handler h) {
-		h.handle(removeHeaders(this.toLocalServer.sendMsg(msg, args)));
+		h.handle(removeHeaders(toLocalServer.sendMsgToRemoteServer(msg, args)));
 	}
 
 	protected final void sendRemoteMsg(String msg, Map<String, String> args, Handler h) {
-		h.handle(removeHeaders(this.toRemoteServer.sendMsg(msg, args)));
+		h.handle(removeHeaders(toRemoteServer.sendMsgToRemoteServer(msg, args)));
 	}
 	
 	private String removeHeaders(String response) {

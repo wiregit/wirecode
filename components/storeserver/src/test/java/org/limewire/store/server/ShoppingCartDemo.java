@@ -46,10 +46,6 @@ class ShoppingCartDemo {
     
     private final List<String> queue = new ArrayList<String>();
 
-    public ShoppingCartDispatcher() {
-      super(main.getLocalServer().getDispatcher());
-    }
-
     public String dispatch(final String cmd, final Map<String, String> args) {
       if (cmd.equals("GetMsg")) {
         if (queue.isEmpty()) {
