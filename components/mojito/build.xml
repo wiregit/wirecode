@@ -11,23 +11,23 @@
 	<import file="../common/build.xml"/>
 	
 	<target name="initialize" depends="lw-collection.initialize, lw-io.initialize, lw-security.initialize,
-				lw-setting.initialize, lw-common.initialize, lw-statistic.initialize">
-	        <do.setup-properties component="mojito">
-				<src-classpath>
-					<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-					<path refid="build.limewire.components.collection.buildpath"/>
-					<path refid="build.limewire.components.io.buildpath"/>
-					<path refid="build.limewire.components.security.buildpath"/>
-					<path refid="build.limewire.components.statistic.buildpath"/>
-					<path refid="build.limewire.components.setting.buildpath"/>
-				    <path refid="build.limewire.components.common.buildpath"/>
-				</src-classpath>
-	        </do.setup-properties>
+				lw-setting.initialize, lw-common.initialize, lw-statistic.initialize" unless="initialized.mojito">
+        <do.setup-properties component="mojito">
+			<src-classpath>
+				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+				<path refid="build.limewire.components.collection.buildpath"/>
+				<path refid="build.limewire.components.io.buildpath"/>
+				<path refid="build.limewire.components.security.buildpath"/>
+				<path refid="build.limewire.components.statistic.buildpath"/>
+				<path refid="build.limewire.components.setting.buildpath"/>
+			    <path refid="build.limewire.components.common.buildpath"/>
+			</src-classpath>
+        </do.setup-properties>
 	</target>
 	
 	<target name="clean" depends="lw-collection.clean, lw-io.clean, lw-security.clean,
 				lw-setting.clean, lw-common.clean, lw-statistic.clean">
-		    <do.clean component="mojito"/>
+	    <do.clean component="mojito"/>
 	</target>
 	    
     <target name="compile" depends="lw-collection.compile, lw-io.compile, lw-security.compile,
@@ -45,13 +45,11 @@
 	    <do.clean-src component="mojito"/>
 	</target>
 	
-	<target name="compile-tests" depends="lw-collection.compile-tests, lw-io.compile-tests, lw-security.compile-tests,
-				lw-setting.compile-tests, lw-common.compile-tests, lw-statistic.compile-tests">
+	<target name="compile-tests">
 	    <do.compile-tests component="mojito"/>
 	</target>
 	
-	<target name="clean-tests" depends="lw-collection.clean-tests, lw-io.clean-tests, lw-security.clean-tests,
-				lw-setting.clean-tests, lw-common.clean-tests, lw-statistic.clean-tests">
+	<target name="clean-tests">
 	    <do.clean-tests component="mojito"/>
 	</target>
 	

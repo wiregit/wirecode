@@ -11,7 +11,7 @@
     <import file="../common/build.xml"/>
     <import file="../collection/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize, lw-collection.initialize">
+    <target name="initialize" depends="lw-common.initialize, lw-collection.initialize" unless="initialized.statistic">
         <do.setup-properties component="statistic">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>

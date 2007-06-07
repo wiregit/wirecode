@@ -7,7 +7,7 @@
 	<import file="../components/build.xml"/>
 	<import file="../components/common/build-macros.xml"/>
     
-    <target name="initialize" depends="lw-components.initialize">
+    <target name="initialize" depends="lw-components.initialize" unless="initialized.tests">
         <property name="limewire.components.tests.home"
         		  location="${limewire.home}/tests"/>
 		<property name="limewire.components.tests.tests"
@@ -106,6 +106,7 @@
          <do.clover-setup component="tests" defaultfileset="${limewire.components.all.home}">
  	        <locations>
  	            <fileset dir="${limewire.core.src}"/>
+ 	            <fileset dir="${limewire.gui.src}"/>
  			</locations>
  	    </do.clover-setup>
 	</target>

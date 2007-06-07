@@ -5,16 +5,16 @@
 	<import file="../mojito/build.xml"/>
 	<import file="../common/build-macros.xml" />
 	
-	<target name="initialize" depends="mojito.initialize">
-	        <do.setup-properties component="mojito-ui">
-				<src-classpath>
-					<path refid="build.limewire.components.mojito.buildpath"/>
-				</src-classpath>
-	        </do.setup-properties>
+	<target name="initialize" depends="mojito.initialize" unless="initialized.mojito-ui">
+        <do.setup-properties component="mojito-ui">
+			<src-classpath>
+				<path refid="build.limewire.components.mojito.buildpath"/>
+			</src-classpath>
+        </do.setup-properties>
 	</target>
 	
 	<target name="clean" depends="mojito.clean">
-		    <do.clean component="mojito-ui"/>
+	    <do.clean component="mojito-ui"/>
 	</target>
 	    
     <target name="compile" depends="mojito.compile">
@@ -32,13 +32,13 @@
 	    <do.clean-src component="mojito-ui"/>
 	</target>
 	
-	<target name="compile-tests" depends="mojito.compile-tests">
+	<target name="compile-tests">
 	   <!-- There are currently no mojito-ui tests. -->
 	   <!-- <do.compile-tests component="mojito-ui"/> -->
-        <mkdir dir="${build.limewire.components.mojito-ui.tests}"/>
+       <mkdir dir="${build.limewire.components.mojito-ui.tests}"/>
 	</target>
 	
-	<target name="clean-tests" depends="mojito.clean-tests">
+	<target name="clean-tests">
 	    <do.clean-tests component="mojito-ui"/>
 	</target>
 	

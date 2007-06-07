@@ -22,7 +22,7 @@
     <import file="resources/build.xml"/>
 	<import file="http/build.xml"/>
 	
-    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-rudp.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize, lw-http.initialize">
+    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-rudp.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize, lw-http.initialize" unless="initialized.all">
         <do.setup-properties component="all">
 			<tests-classpath>
             	<path refid="tests.limewire.components.common.classpath"/>
@@ -115,7 +115,7 @@
 	
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
-	        depends="compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-http.compile-tests">
+	        depends="compile-src, lw-test-util.compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-http.compile-tests">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     
@@ -157,13 +157,8 @@
 	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
+		<fail if="testsfailed" message="One or more tests failed!"/>
 	</target>
-    
-    <target name="clean-test-all"
-    		description="Cleans and then runs every test."
-            depends="initialize, clean, test-all">
-    	<fail if="testsfailed" message="One or more tests failed!"/>
-   	</target>
     
     <target name="prep-tests">
         <mkdir dir="${limewire.components.all.tests.resources}"/>

@@ -12,7 +12,7 @@
     <import file="../nio/build.xml"/>
     <import file="../io/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize, lw-nio.initialize, lw-io.initialize">
+    <target name="initialize" depends="lw-common.initialize, lw-nio.initialize, lw-io.initialize" unless="initialized.rudp">
         <do.setup-properties component="rudp">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>

@@ -12,7 +12,7 @@
     <import file="../common/build-macros.xml"/>
     <import file="../common/build.xml" />
     
-    <target name="initialize" depends="lw-common.initialize">
+    <target name="initialize" depends="lw-common.initialize" unless="initialized.security">
         <do.setup-properties component="security">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
@@ -37,10 +37,11 @@
 	    <do.clean-src component="security"/>
 	</target>
 	
-	<target name="compile-tests" depends="lw-common.compile-tests">
+	<target name="compile-tests">
 	    <do.compile-tests component="security"/>
 	</target>
-	<target name="clean-tests" depends="lw-common.clean-tests">
+	
+	<target name="clean-tests">
 	    <do.clean-tests component="security"/>
 	</target>
 	

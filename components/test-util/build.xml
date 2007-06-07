@@ -10,7 +10,7 @@
 	
     <import file="../common/build-macros.xml" />
     
-    <target name="initialize">
+    <target name="initialize" unless="initialized.test-util">
         <do.setup-properties component="test-util">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/tests/junit.jar"/>

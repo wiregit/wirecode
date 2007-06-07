@@ -34,6 +34,8 @@
         <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
         <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
         <sequential>
+            <property name="initialized.@{component}" value="true"/>
+            
         	<property name="limewire.components.@{component}.home"
         		      location="${limewire.components.home}/@{component}"/>
         	<property name="limewire.components.@{component}.src.home"
@@ -139,7 +141,7 @@
 		           source		="${compile.source}"
 	  	           target       ="${compile.target}"
 	 	           sourcepath   =""
-			       excludes     ="@{excludes}" 
+			       excludes     ="@{excludes}"
 	 	    >
 			    <compilerarg value="-Xlint:unchecked"/>
 				<src>
@@ -405,7 +407,7 @@
     </macrodef>
     
     <!-- Checks to see if clover is installed and sets a property if so -->
-    <target name="clover-check">
+    <target name="clover-check" unless="clover.installed">
         <available property="clover.installed" classname="com.cenqua.clover.CloverInstr" />
     </target>
     
@@ -436,10 +438,5 @@
     <target name="test-all"/> <!-- Must write a real target for this when importing -->
     <target name="test-some"/> <!-- Must write a real target for this when importing -->
     <target name="clover2html"/> <!-- Must write a real target for this when importing -->
-    
-    <target name="clover-all" depends="initialize, clean, with.clover">
-        <antcall target="test-all" inheritRefs="true" />
-		<antcall target="clover2html" inheritRefs="true" />
-    </target>
-	
+    	
 </project>

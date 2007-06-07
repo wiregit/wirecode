@@ -12,8 +12,7 @@
     <import file="../io/build.xml"/>
     <import file="../nio/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize,
-    lw-io.initialize, lw-nio.initialize">
+    <target name="initialize" depends="lw-common.initialize, lw-io.initialize, lw-nio.initialize" unless="initialized.http">
         <do.setup-properties component="http">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
@@ -29,24 +28,22 @@
 	    <do.clean component="http"/>
 	</target>
     
-    <target name="compile" depends="lw-common.compile, lw-io.compile,
-	lw-nio.compile">
+    <target name="compile" depends="lw-common.compile, lw-io.compile, lw-nio.compile">
     	<do.compile component="http"/>
     </target>
 	
-	<target name="compile-src" depends="lw-common.compile-src,
-    	lw-io.compile-src, lw-nio.compile-src">
+	<target name="compile-src" depends="lw-common.compile-src, lw-io.compile-src, lw-nio.compile-src">
 	    <do.compile-src component="http"/>
 	</target>
     
-	<target name="clean-src" depends="lw-common.clean-src,
-	    lw-io.clean-src, lw-nio.clean-src">
+	<target name="clean-src" depends="lw-common.clean-src, lw-io.clean-src, lw-nio.clean-src">
 	    <do.clean-src component="http"/>
 	</target>
 	
 	<target name="compile-tests">
 	    <do.compile-tests component="http"/>
 	</target>
+	
 	<target name="clean-tests">
 	    <do.clean-tests component="http"/>
 	</target>

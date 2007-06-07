@@ -9,7 +9,7 @@
 	
     <import file="../common/build-macros.xml" />
     
-    <target name="initialize">
+    <target name="initialize" unless="initialized.resources">
         <do.setup-properties component="resources"/>
     </target>
 	

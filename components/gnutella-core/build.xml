@@ -2,12 +2,10 @@
 
     <property name="limewire.home" location="${basedir}/.."/>
     
-    <echo message="Update: Building now requires the 'components' module."/>
-    <echo message="        If building fails because it cannot find ../components/build.xml,"/>
-    <echo message="        please checkout the components module as a sibling to core."/>
     <import file="../components/build.xml"/>
     
-    <target name="initialize" depends="lw-components.initialize">
+    <target name="initialize" depends="lw-components.initialize" unless="initialized.core">
+        <property name="initialized.core" 			  value="true"/>
         <property name="limewire.core.home"           location="${limewire.home}/core"/>
         <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
         <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>

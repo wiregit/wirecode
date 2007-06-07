@@ -8,11 +8,7 @@
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
     
-    <target name="clean-build" depends="initialize, clean, compile"/>
-    <target name="clean-build-test" depends="initialize, clean, compile, test-all"/>
-    
-    <target name="initialize"
-            depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
+    <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
 		<property name="limewire.components.tests.tests"
@@ -90,11 +86,36 @@
 	<!-- TODO: implement -->
     <target name="javadoc"/>
     
-    <!-- TODO: implement -->
-    <target name="clover2html"/>
+    <target name="clover2html"
+            description="Converts clover's generated data into HTML reports."
+            depends="initialize">
+		<do.clover2html component="limewire"/>
+    </target>
     
-    <!-- TODO: implement -->
-    <target name="with.clover"/>
+    <target name="with.clover"
+            description="Instructs the build to use clover's instrumenting."
+            depends="initialize">
+        <!-- point the defaultfileset to somewhere where no files are -->
+        <do.clover-setup component="limewire" defaultfileset="${limewire.components.limewire.home}">
+  	    	<locations>    
+				<fileset dir="${limewire.core.src}"/>
+     	        <fileset dir="${limewire.gui.src}"/>
+  	    	    <!-- TODO: find some way to not have to duplicate component names here -->
+  	            <fileset dir="${limewire.components.common.src}" />
+      	        <fileset dir="${limewire.components.collection.src}"/>
+      	        <fileset dir="${limewire.components.security.src}" />
+      	        <fileset dir="${limewire.components.io.src}" />
+      	        <fileset dir="${limewire.components.nio.src}" />
+      	        <fileset dir="${limewire.components.rudp.src}" />
+      	    	<fileset dir="${limewire.components.setting.src}" />	            
+      	    	<fileset dir="${limewire.components.statistic.src}" />	
+  				<fileset dir="${limewire.components.mojito.src}" />	 
+  				<fileset dir="${limewire.components.mojito-ui.src}" />	 
+  	        	<fileset dir="${limewire.components.http.src}" />
+  	            <!-- Add as components are added. -->
+  			</locations>
+  	    </do.clover-setup>
+  	</target>
    
     <!-- mask imported targets -->
     <target name="test"/>

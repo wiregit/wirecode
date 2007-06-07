@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="examples/mojito/" kind="src" output="core" path="core"/>
+	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
 	<classpathentry excluding="windows/|macosx/" kind="src" output="gui" path="gui"/>
 	<classpathentry kind="src" output="lib/messagebundles" path="lib/messagebundles"/>
-	<classpathentry excluding="build/" kind="src" output="tests/build/tests" path="tests"/>
+	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
 	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>

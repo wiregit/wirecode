@@ -11,7 +11,7 @@
     <import file="build-macros.xml" />
     <import file="../test-util/build.xml"/>
     
-    <target name="initialize" depends="lw-test-util.initialize">
+    <target name="initialize" depends="lw-test-util.initialize" unless="initialized.common">
         <do.setup-properties component="common">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
