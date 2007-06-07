@@ -71,6 +71,8 @@
 			          location="${clover.limewire.components.@{component}.home}/clover.db"/>
             <property name="clover.limewire.components.@{component}.html"
 			          location="${clover.limewire.components.@{component}.home}/html"/>
+            <property name="clover.limewire.components.@{component}.xml"
+			          location="${clover.limewire.components.@{component}.home}/coverage.xml"/>
             
             <property name="dist.limewire.components.@{component}.home"
                       location="${limewire.components.@{component}.home}/dist"/>
@@ -427,6 +429,10 @@
                 <current outfile="${clover.limewire.components.@{component}.html}"
                 		 title="LimeWire - ${clover.time}">
 	                <format type="html"/>
+                </current>
+                <current outfile="${clover.limewire.components.@{component}.xml}"
+                         title="LimeWire - ${clover.time}">
+					<format type="xml"/>
                 </current>
             </clover-report>
         </sequential>
