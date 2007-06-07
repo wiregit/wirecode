@@ -149,19 +149,19 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
             throw new UnsupportedOperationException();
         }
 
-        public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks) throws InterruptedException {
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> T invokeAny(Collection<Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> T invokeAny(Collection<Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             throw new UnsupportedOperationException();
         }
 
@@ -253,19 +253,19 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
             throw new UnsupportedOperationException();
         }
 
-        public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks) throws InterruptedException {
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> T invokeAny(Collection<Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
             throw new UnsupportedOperationException();
         }
 
-        public <T> T invokeAny(Collection<Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             throw new UnsupportedOperationException();
         }
 
