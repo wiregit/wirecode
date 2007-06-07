@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.limewire.setting.evt.SettingsHandlerEvent;
 import org.limewire.setting.evt.SettingsHandlerListener;
-import org.limewire.setting.evt.SettingsHandlerEvent.Type;
+import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
 
 
 /**
@@ -19,24 +19,38 @@ import org.limewire.setting.evt.SettingsHandlerEvent.Type;
  */
 public final class SettingsHandler {
     
+    /**
+     * The singleton instance of SettingsHandler
+     */
     private static final SettingsHandler INSTANCE = new SettingsHandler();
     
+    /**
+     * Returns the singleton instanceof the SettingsHandler
+     */
     public static SettingsHandler instance() {
         return INSTANCE;
     }
     
+    /**
+     * A list of Settings this SettingsHandler is managing
+     */
     private final Collection<Settings> PROPS = Collections.synchronizedList(new ArrayList<Settings>());
 
+    /**
+     * A list of {@link SettingsHandlerListener}s
+     */
     private volatile Collection<SettingsHandlerListener> listeners;
     
+    /**
+     * The Executor for the Events
+     */
     private volatile Executor executor = Executors.newSingleThreadExecutor();
     
     // never instantiate this class.
-    private SettingsHandler() {
-    }
+    private SettingsHandler() {}
     
     /**
-     * 
+     * Registers a SettingsHandlerListener
      */
     public void addSettingsHandlerListener(SettingsHandlerListener l) {
         if (l == null) {
@@ -53,7 +67,7 @@ public final class SettingsHandler {
     }
     
     /**
-     * 
+     * Removes a SettingsHandlerListener
      */
     public void removeSettingsHandlerListener(SettingsHandlerListener l) {
         if (l == null) {
@@ -71,7 +85,7 @@ public final class SettingsHandler {
      */
     public void addSettings(Settings settings) {
         PROPS.add(settings);
-        fireSettingsHandlerEvent(Type.SETTINGS_ADDED, settings);
+        fireSettingsHandlerEvent(EventType.SETTINGS_ADDED, settings);
     }
     
     /**
@@ -80,7 +94,7 @@ public final class SettingsHandler {
      */
     public void removeSettings(Settings settings) {
         if (PROPS.remove(settings)) {
-            fireSettingsHandlerEvent(Type.SETTINGS_REMOVED, settings);
+            fireSettingsHandlerEvent(EventType.SETTINGS_REMOVED, settings);
         }
     }
 
@@ -94,7 +108,7 @@ public final class SettingsHandler {
             }
         }
         
-        fireSettingsHandlerEvent(Type.RELOAD, null);
+        fireSettingsHandlerEvent(EventType.RELOAD, null);
     }
     
     /**
@@ -107,7 +121,7 @@ public final class SettingsHandler {
             }
         }
         
-        fireSettingsHandlerEvent(Type.SAVE, null);
+        fireSettingsHandlerEvent(EventType.SAVE, null);
     }
     
     /**
@@ -120,7 +134,7 @@ public final class SettingsHandler {
             }
         }
         
-        fireSettingsHandlerEvent(Type.REVERT_TO_DEFAULT, null);
+        fireSettingsHandlerEvent(EventType.REVERT_TO_DEFAULT, null);
     }
     
     /**
@@ -133,23 +147,29 @@ public final class SettingsHandler {
             }
         }
         
-        fireSettingsHandlerEvent(Type.SHOULD_SAVE, null);
+        fireSettingsHandlerEvent(EventType.SHOULD_SAVE, null);
     }
     
-    protected void fireSettingsHandlerEvent(Type type, Settings settings) {
+    /**
+     * Fires a SettingsHandlerEvent
+     */
+    protected void fireSettingsHandlerEvent(EventType type, Settings settings) {
         fireSettingsHandlerEvent(new SettingsHandlerEvent(type, this, settings));
     }
     
+    /**
+     * Fires a SettingsHandlerEvent
+     */
     protected void fireSettingsHandlerEvent(final SettingsHandlerEvent evt) {
         if (evt == null) {
             throw new NullPointerException("SettingsHandlerEvent is null");
         }
         
-        if (listeners != null && listeners.isEmpty()) {
+        if (listeners != null && !listeners.isEmpty()) {
             Runnable command = new Runnable() {
                 public void run() {
                     for (SettingsHandlerListener l : listeners) {
-                        l.handleSettingsHandlerEvent(evt);
+                        l.settingsHandlerEvent(evt);
                     }
                 }
             };
@@ -158,15 +178,21 @@ public final class SettingsHandler {
         }
     }
     
+    /**
+     * Fires a event on the Executor Thread
+     */
+    protected void fireEvent(Runnable evt) {
+        executor.execute(evt);
+    }
+    
+    /**
+     * Replaces the current Executor
+     */
     public void setExecutor(Executor executor) {
         if (executor == null) {
             throw new NullPointerException("Executor is null");
         }
         
         this.executor = executor;
-    }
-    
-    public void fireEvent(Runnable evt) {
-        executor.execute(evt);
     }
 }    

@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.setting.evt.SettingEvent.Type;
+import org.limewire.setting.evt.SettingEvent.EventType;
 
 
 /**
@@ -85,6 +85,9 @@ public abstract class Setting {
 	 */
 	private boolean isPrivate = false;
 
+	/**
+	 * List of SettingListener
+	 */
     private volatile Collection<SettingListener> listeners = null;
     
 	/**
@@ -110,7 +113,7 @@ public abstract class Setting {
 	}
     
 	/**
-	 * 
+	 * Registers a SettingListener
 	 */
 	public void addSettingListener(SettingListener l) {
         if (l == null) {
@@ -127,7 +130,7 @@ public abstract class Setting {
     }
     
 	/**
-	 * 
+	 * Removes a SettingListener
 	 */
     public void removeSettingListener(SettingListener l) {
         if (l == null) {
@@ -148,7 +151,7 @@ public abstract class Setting {
             value = DEFAULT_VALUE;
         }
         loadValue(value);
-        fireSettingEvent(Type.RELOAD);
+        fireSettingEvent(EventType.RELOAD);
     }
 
 	/**
@@ -160,7 +163,7 @@ public abstract class Setting {
 	 */
 	public void revertToDefault() {
         setValue(DEFAULT_VALUE);
-        fireSettingEvent(Type.REVERT_TO_DEFAULT);
+        fireSettingEvent(EventType.REVERT_TO_DEFAULT);
 	}
 	
 	/**
@@ -178,7 +181,7 @@ public abstract class Setting {
     public Setting setAlwaysSave(boolean alwaysSave) {
         if (this.alwaysSave != alwaysSave) {
             this.alwaysSave = alwaysSave;
-            fireSettingEvent(Type.ALWAYS_SAVE_CHANGED);
+            fireSettingEvent(EventType.ALWAYS_SAVE_CHANGED);
         }
         return this;
     }
@@ -189,7 +192,7 @@ public abstract class Setting {
     public Setting setPrivate(boolean isPrivate) {
         if (this.isPrivate != isPrivate) {
             this.isPrivate = isPrivate;
-            fireSettingEvent(Type.PRIVACY_CANGED);
+            fireSettingEvent(EventType.PRIVACY_CANGED);
         }
         return this;
     }
@@ -234,7 +237,7 @@ public abstract class Setting {
         if (old == null || !old.equals(value)) {
             PROPS.put(KEY, value);
             loadValue(value);
-            fireSettingEvent(Type.VALUE_CHANGED);
+            fireSettingEvent(EventType.VALUE_CHANGED);
         }
     }
 
@@ -248,10 +251,16 @@ public abstract class Setting {
         return KEY + "=" + getValueAsString();
     }
     
-    protected void fireSettingEvent(Type type) {
+    /**
+     * Fires a SettingEvent
+     */
+    protected void fireSettingEvent(EventType type) {
         fireSettingEvent(new SettingEvent(type, this));
     }
     
+    /**
+     * Fires a SettingEvent
+     */
     protected void fireSettingEvent(final SettingEvent evt) {
         if (evt == null) {
             throw new NullPointerException("SettingEvent is null");
@@ -261,7 +270,7 @@ public abstract class Setting {
             Runnable command = new Runnable() {
                 public void run() {
                     for (SettingListener l : listeners) {
-                        l.handleSettingEvent(evt);
+                        l.settingEvent(evt);
                     }
                 }
             };

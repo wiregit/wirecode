@@ -3,7 +3,7 @@ package org.limewire.setting;
 import java.io.File;
 import java.util.Properties;
 
-import org.limewire.setting.evt.SettingsEvent.Type;
+import org.limewire.setting.evt.SettingsEvent.EventType;
 
 
 /**
@@ -61,7 +61,7 @@ public class BasicSettings extends AbstractSettings implements Settings {
      */
     public void reload() {
         FACTORY.reload();
-        fireSettingsEvent(Type.RELOAD);
+        fireSettingsEvent(EventType.RELOAD);
     }
     
     /**
@@ -70,14 +70,14 @@ public class BasicSettings extends AbstractSettings implements Settings {
     public void save() {
         if (getShouldSave()) {
             FACTORY.save();
-            fireSettingsEvent(Type.SAVE);
+            fireSettingsEvent(EventType.SAVE);
         }
     }
     
     /** Revert all settings to their default value     */
     public void revertToDefault() {
         FACTORY.revertToDefault();
-        fireSettingsEvent(Type.REVERT_TO_DEFAULT);
+        fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
     }
     
     /** Used to find any setting based on the key in the appropriate props file     */

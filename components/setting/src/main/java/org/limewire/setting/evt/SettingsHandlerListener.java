@@ -1,6 +1,14 @@
 package org.limewire.setting.evt;
 
+import org.limewire.setting.SettingsHandler;
+
+/**
+ * A listener for {@link SettingsHandler}s
+ */
 public interface SettingsHandlerListener {
     
-    public void handleSettingsHandlerEvent(SettingsHandlerEvent evt);
+    /**
+     * Invoked when a {@link SettingsHandler} changed its state
+     */
+    public void settingsHandlerEvent(SettingsHandlerEvent evt);
 }

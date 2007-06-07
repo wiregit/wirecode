@@ -5,12 +5,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.setting.evt.SettingsEvent;
 import org.limewire.setting.evt.SettingsListener;
-import org.limewire.setting.evt.SettingsEvent.Type;
+import org.limewire.setting.evt.SettingsEvent.EventType;
 
 public abstract class AbstractSettings implements Settings {
     
     /**
-     * 
+     * List of SettingsListeners
      */
     private volatile Collection<SettingsListener> listeners;
     
@@ -19,6 +19,9 @@ public abstract class AbstractSettings implements Settings {
      */
     private volatile boolean shouldSave = true;
     
+    /**
+     * Registers a SettingsListener
+     */
     public void addSettingsListener(SettingsListener l) {
         if (l == null) {
             throw new NullPointerException("SettingsListener is null");
@@ -33,6 +36,9 @@ public abstract class AbstractSettings implements Settings {
         listeners.add(l);
     }
     
+    /**
+     * Removes a SettingsListener
+     */
     public void removeSettingsListener(SettingsListener l) {
         if (l == null) {
             throw new NullPointerException("SettingsListener is null");
@@ -47,7 +53,7 @@ public abstract class AbstractSettings implements Settings {
     public void setShouldSave(boolean shouldSave) {
         if (this.shouldSave != shouldSave) {
             this.shouldSave = shouldSave;
-            fireSettingsEvent(Type.SHOULD_SAVE);
+            fireSettingsEvent(EventType.SHOULD_SAVE);
         }
     }
     
@@ -56,20 +62,26 @@ public abstract class AbstractSettings implements Settings {
         return shouldSave;
     }
     
-    protected void fireSettingsEvent(Type type) {
+    /**
+     * Fires a SettingsEvent
+     */
+    protected void fireSettingsEvent(EventType type) {
         fireSettingsEvent(new SettingsEvent(type, this));
     }
     
+    /**
+     * Fires a SettingsEvent
+     */
     protected void fireSettingsEvent(final SettingsEvent evt) {
         if (evt == null) {
             throw new NullPointerException("SettingsEvent is null");
         }
         
-        if (listeners != null && listeners.isEmpty()) {
+        if (listeners != null && !listeners.isEmpty()) {
             Runnable command = new Runnable() {
                 public void run() {
                     for (SettingsListener l : listeners) {
-                        l.handleSettingsEvent(evt);
+                        l.settingsEvent(evt);
                     }
                 }
             };

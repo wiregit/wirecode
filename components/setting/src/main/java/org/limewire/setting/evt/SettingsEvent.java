@@ -2,28 +2,67 @@ package org.limewire.setting.evt;
 
 import org.limewire.setting.Settings;
 
+/**
+ * SettingsEvent are fired when a {@link Settings} instance changed 
+ */
 public class SettingsEvent {
     
-    public static enum Type {
+    /**
+     * Various SettingsEvent that may occur
+     */
+    public static enum EventType {
+        /**
+         * The Settings were saved
+         */
         SAVE,
+        
+        /**
+         * The Settings were reloaded
+         */
         RELOAD,
+        
+        /**
+         * The Settings were reverted back to default
+         */
         REVERT_TO_DEFAULT,
+        
+        /**
+         * The 'should save' state of the Settings changed
+         */
         SHOULD_SAVE;
     }
     
-    private final Type type;
+    /**
+     * The type of the event
+     */
+    private final EventType type;
     
+    /**
+     * The Settings instance that created this event
+     */
     private final Settings settings;
     
-    public SettingsEvent(Type type, Settings settings) {
+    /**
+     * Constructs a SettingsEvent
+     * 
+     * @param type The type of the event
+     * @param settings The Settings instance that triggered this event
+     */
+    public SettingsEvent(EventType type, Settings settings) {
         this.type = type;
         this.settings = settings;
     }
     
-    public Type getType() {
+    /**
+     * Returns the type of the event
+     */
+    public EventType getEventType() {
         return type;
     }
     
+    /**
+     * Returns the Settings instance that fired this event
+     */
     public Settings getSettings() {
         return settings;
     }

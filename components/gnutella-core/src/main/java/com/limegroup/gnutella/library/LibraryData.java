@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.limewire.setting.AbstractSettings;
 import org.limewire.setting.SettingsHandler;
-import org.limewire.setting.evt.SettingsEvent.Type;
+import org.limewire.setting.evt.SettingsEvent.EventType;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -60,7 +60,7 @@ public class LibraryData extends AbstractSettings {
     public void save() {
         if (getShouldSave()) {
             DATA.save();
-            fireSettingsEvent(Type.SAVE);
+            fireSettingsEvent(EventType.SAVE);
         }
     }
     
@@ -69,7 +69,7 @@ public class LibraryData extends AbstractSettings {
      */
     public void revertToDefault() {
         DATA.clear();
-        fireSettingsEvent(Type.REVERT_TO_DEFAULT);
+        fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
     }
     
     /**
@@ -77,7 +77,7 @@ public class LibraryData extends AbstractSettings {
      */
     public void reload() {
         DATA.load();
-        fireSettingsEvent(Type.RELOAD);
+        fireSettingsEvent(EventType.RELOAD);
     }
     
 	/**
