@@ -467,7 +467,7 @@ public class CacheForwardTest extends MojitoTestCase {
             Collection<DHTValueEntity> entities = Arrays.asList(entity1, entity2);
             DHTFuture<StoreResult> future = context1.store(
                     dht2.getLocalNode(), null, entities);
-            StoreResult result = future.get();
+          /*  StoreResult result = */ future.get(); // TODO: should result be tested?
             
             assertEquals(2, dht2.getDatabase().getKeyCount());
             assertEquals(2, dht2.getDatabase().getValueCount());
