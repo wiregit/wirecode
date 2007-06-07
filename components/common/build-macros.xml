@@ -334,6 +334,10 @@
 			</junit>
 		</sequential>
 	</macrodef>
+    
+    <target name="tests-failguard">
+		<fail if="testsfailed" message="One or more tests failed!"/>
+    </target>
 	
     <macrodef name="do.tests2html" description="Converts test XML output to HTML reports.">
         <attribute name="component"/>

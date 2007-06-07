@@ -157,7 +157,6 @@
 	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
-		<fail if="testsfailed" message="One or more tests failed!"/>
 	</target>
     
     <target name="prep-tests">

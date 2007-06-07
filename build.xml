@@ -54,7 +54,6 @@
                 <fileset dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
 			</more-xml-locations>
     	</do.tests2html>
-        <fail if="testsfailed" message="One or more tests failed!"/>
     </target>    
     
     <target name="test-components"
@@ -66,7 +65,6 @@
                  <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
  			</more-xml-locations>
      	</do.tests2html>
-        <fail if="testsfailed" message="One or more tests failed!"/>
     </target>    
     
     <target name="test-one-lw"
