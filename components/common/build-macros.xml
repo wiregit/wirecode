@@ -402,6 +402,8 @@
             <taskdef resource="clovertasks"/>
             <mkdir dir="${clover.limewire.components.@{component}.home}"/>
             <clover-setup initString="${clover.limewire.components.@{component}.db}">
+                <statementContext name="log" regexp="^LOG\..*"/>
+                <statementContext name="iflog" regexp="^if \(LOG\.is.*"/>
             	<fileset dir="@{defaultfileset}"/>
                 <locations/>
             </clover-setup>
@@ -428,11 +430,11 @@
             <clover-report>
                 <current outfile="${clover.limewire.components.@{component}.html}"
                 		 title="LimeWire - ${clover.time}">
-	                <format type="html"/>
+	                <format type="html" filter="log,iflog,assert"/>
                 </current>
                 <current outfile="${clover.limewire.components.@{component}.xml}"
                          title="LimeWire - ${clover.time}">
-					<format type="xml"/>
+					<format type="xml" filter="log,iflog,assert"/>
                 </current>
             </clover-report>
         </sequential>

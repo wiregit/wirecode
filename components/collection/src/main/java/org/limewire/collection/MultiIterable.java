@@ -93,6 +93,6 @@ public class MultiIterable<T> implements Iterable<T> {
         for (int i = 0; i < iterables.length; i++)
             iterators[i] = (Iterator<T>)iterables[i].iterator();
         return new MultiIterator<T>(iterators);
-    }
+    }    
 }
 
