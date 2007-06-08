@@ -99,10 +99,20 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         
         try {
             controller.start();
-            //bootstrap active node
+            assertTrue(controller.isRunning());
+            
+            // bootstrap active node
             controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));
-            Thread.sleep(2000);
-            //ask for active nodes -- should return itself and the bootstrap node
+            for (int i = 0; i < 10; i++) {
+                if (controller.isBootstrapped()) {
+                    break;
+                }
+                
+                Thread.sleep(500);
+            }
+            assertTrue(controller.isBootstrapped());
+            
+            // ask for active nodes -- should return itself and the bootstrap node
             List<IpPort> l = controller.getActiveDHTNodes(10);
             assertEquals(2, l.size());
             assertEquals(RouterService.getPort(), l.get(0).getPort());
