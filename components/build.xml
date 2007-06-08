@@ -21,8 +21,9 @@
     <import file="statistic/build.xml"/>
     <import file="resources/build.xml"/>
 	<import file="http/build.xml"/>
+	<import file="storeserver/build.xml"/>
 	
-    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-rudp.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize, lw-http.initialize" unless="initialized.all">
+    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-rudp.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize, lw-http.initialize, lw-storeserver.initialize" unless="initialized.all">
         <do.setup-properties component="all">
 			<tests-classpath>
             	<path refid="tests.limewire.components.common.classpath"/>
@@ -69,7 +70,7 @@
 	
 	<target name="clean"
 	        description="Cleans all generated data in every component."
-	        depends="lw-setting.clean, lw-statistic.clean, lw-rudp.clean, lw-nio.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean, lw-http.clean">
+	        depends="lw-setting.clean, lw-statistic.clean, lw-rudp.clean, lw-nio.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean, lw-http.clean, lw-storeserver.clean">
 	    <do.clean component="all"/>
     </target>
     
@@ -79,7 +80,7 @@
     
     <target name="compile-core"
             description="Compiles the source and tests of every non-UI component."
-            depends="lw-setting.compile, lw-statistic.compile, lw-rudp.compile, lw-nio.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile, lw-http.clean">
+            depends="lw-setting.compile, lw-statistic.compile, lw-rudp.compile, lw-nio.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile, lw-http.compile, lw-storeserver.compile">
         <mkdir dir="${build.limewire.components.all.classes}"/>
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
@@ -97,7 +98,7 @@
 	
 	<target name="compile-core-src"
 	        description="Compiles only the source code of every non-UI component."
-	        depends="lw-setting.compile-src, lw-statistic.compile-src, lw-rudp.compile-src, lw-nio.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src, lw-http.compile-src">
+	        depends="lw-setting.compile-src, lw-statistic.compile-src, lw-rudp.compile-src, lw-nio.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src, lw-http.compile-src, lw-storeserver.compile-src">
         <mkdir dir="${build.limewire.components.all.classes}"/>
 	</target>
 	
@@ -109,19 +110,19 @@
     
 	<target name="clean-src"
 	        description="Cleans files generated from compiling the source code of every component."
-	        depends="lw-setting.clean-src, lw-statistic.clean-src, lw-rudp.clean-src, lw-nio.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src, mojito.clean-src, mojito-ui.clean-src, lw-http.clean-src">
+	        depends="lw-setting.clean-src, lw-statistic.clean-src, lw-rudp.clean-src, lw-nio.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src, mojito.clean-src, mojito-ui.clean-src, lw-http.clean-src, lw-storeserver.clean-src">
 		<do.clean-src component="all"/>
 	</target>
 	
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
-	        depends="compile-src, lw-test-util.compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-http.compile-tests">
+	        depends="compile-src, lw-test-util.compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-http.compile-tests, lw-storeserver.compile-tests">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     
 	<target name="clean-tests"
 	        description="Cleans data generated from compiling and running the tests of every component."
-	        depends="initialize, lw-setting.clean-tests, lw-statistic.clean-tests, lw-rudp.clean-tests, lw-nio.clean-tests, lw-io.clean-tests, lw-security.clean-tests, lw-collection.clean-tests, lw-common.clean-tests, lw-test-util.clean-tests, mojito.clean-tests, mojito-ui.clean-tests, lw-http.clean-tests">
+	        depends="initialize, lw-setting.clean-tests, lw-statistic.clean-tests, lw-rudp.clean-tests, lw-nio.clean-tests, lw-io.clean-tests, lw-security.clean-tests, lw-collection.clean-tests, lw-common.clean-tests, lw-test-util.clean-tests, mojito.clean-tests, mojito-ui.clean-tests, lw-http.clean-tests, lw-storeserver.clean-tests">
 	    <do.clean-tests component="all"/>
 	</target>
 	

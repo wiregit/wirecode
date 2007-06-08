@@ -83,6 +83,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.store.server.StoreManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -612,6 +613,10 @@ public class RouterService {
             LOG.trace("START ChatManager");
             ChatManager.instance().initialize();
             LOG.trace("END ChatManager");
+            
+            LOG.trace("START StoreServer");
+            StoreManager.HOLDER.instance();
+            LOG.trace("END StoreServer");            
 
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
