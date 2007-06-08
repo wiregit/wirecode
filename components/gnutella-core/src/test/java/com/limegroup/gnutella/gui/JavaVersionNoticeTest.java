@@ -31,6 +31,9 @@ public class JavaVersionNoticeTest extends BaseTestCase {
         assertNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.5.0"));
         assertNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.6.0"));
         assertNotNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.6.0-beta"));
+        assertNotNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.6.0-rc"));
+        assertNotNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.6.0-beta1"));
+        assertNotNull(JavaVersionNotice.getUpgradeRecommendedDialog("1.6.0-rc2"));
     }
 
     public void testUpgradeRecommendedSetting() {
