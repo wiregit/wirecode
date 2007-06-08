@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.3 $
- * $Date: 2007-06-04 20:20:33 $
+ * $Revision: 1.4 $
+ * $Date: 2007-06-08 00:28:21 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -57,8 +57,10 @@ import org.apache.http.nio.NHttpServiceHandler;
 import org.apache.http.nio.entity.ContentBufferEntity;
 import org.apache.http.nio.entity.ContentOutputStream;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
+import org.apache.http.nio.util.ByteBufferAllocator;
 import org.apache.http.nio.util.ContentInputBuffer;
 import org.apache.http.nio.util.ContentOutputBuffer;
+import org.apache.http.nio.util.HeapByteBufferAllocator;
 import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.nio.util.SimpleOutputBuffer;
 import org.apache.http.params.HttpParams;
@@ -93,10 +95,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
     private static final String CONN_STATE = "http.nio.conn-state";
     
-    private HttpParams params;
-    private HttpProcessor httpProcessor;
-    private HttpResponseFactory responseFactory;
-    private ConnectionReuseStrategy connStrategy;
+    private final HttpProcessor httpProcessor;
+    private final HttpResponseFactory responseFactory;
+    private final ConnectionReuseStrategy connStrategy;
+    private final ByteBufferAllocator allocator;
+    private final HttpParams params;
+
     private HttpRequestHandlerResolver handlerResolver;
     private HttpExpectationVerifier expectationVerifier;
     private HttpServiceEventListener eventListener;
@@ -123,6 +127,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         this.connStrategy = connStrategy;
         this.responseFactory = responseFactory;
         this.params = params;
+        this.allocator = new HeapByteBufferAllocator();
     }
 
     public void setEventListener(final HttpServiceEventListener eventListener) {
@@ -144,7 +149,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     public void connected(final NHttpServerConnection conn) {
         HttpContext context = conn.getContext();
 
-        ServerConnState connState = new ServerConnState(); 
+        ServerConnState connState = new ServerConnState(allocator); 
         context.setAttribute(CONN_STATE, connState);
 
         if (this.eventListener != null) {
@@ -504,23 +509,25 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         private int outputState;
         
         private HttpRequest request;
+        private final ByteBufferAllocator allocator;
         
-        public ServerConnState() {
+        public ServerConnState(final ByteBufferAllocator allocator) {
             super();
             this.inputState = READY;
             this.outputState = READY;
+            this.allocator = allocator;
         }
 
         public ContentInputBuffer getInbuffer() {
             if (this.inbuffer == null) {
-                this.inbuffer = new SimpleInputBuffer(2048);
+                this.inbuffer = new SimpleInputBuffer(2048, allocator);
             }
             return this.inbuffer;
         }
 
         public ContentOutputBuffer getOutbuffer() {
             if (this.outbuffer == null) {
-                this.outbuffer = new SimpleOutputBuffer(2048);
+                this.outbuffer = new SimpleOutputBuffer(2048, allocator);
             }
             return this.outbuffer;
         }
