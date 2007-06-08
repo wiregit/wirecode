@@ -10,6 +10,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -61,9 +64,16 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private Painter painter;
     
+    private int painterIndex = 0;
+    
+    private final List<Painter> painters = new ArrayList<Painter>();
+    
     public ArcsVisualizer(final KUID nodeId) {
         
-        painter = new SnowMan(nodeId);
+        painters.add(new SnowMan(nodeId));
+        painters.add(new PlasmaLamp(nodeId));
+        
+        painter = painters.get(painterIndex);
         
         Runnable repaint = new Runnable() {
             public void run() {
@@ -104,14 +114,17 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 synchronized (lock) {
                     painter.clear();
                     
-                    if (painter instanceof SnowMan) {
-                        painter = new PlasmaLamp(nodeId);
-                    } else {
-                        painter = new SnowMan(nodeId);
-                    }
+                    painterIndex = (painterIndex + 1) % painters.size();
+                    painter = painters.get(painterIndex);
                 }
             }
         });
+    }
+    
+    public void addPainter(Painter painter) {
+        synchronized (lock) {
+            painters.add(painter);
+        }
     }
     
     public void paint(Graphics g) {
@@ -157,11 +170,14 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
         EventType type = evt.getEventType();
         KUID nodeId = null;
+        SocketAddress addr = null;
         
         if (type.equals(EventType.MESSAGE_RECEIVED)) {
             nodeId = evt.getMessage().getContact().getNodeID();
+            addr = evt.getMessage().getContact().getContactAddress();
         } else if (type.equals(EventType.MESSAGE_SENT)) {
             nodeId = evt.getNodeID();
+            addr = evt.getSocketAddress();
         } else {
             return;
         }
@@ -169,7 +185,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         OpCode opcode = evt.getMessage().getOpCode();
         boolean request = (evt.getMessage() instanceof RequestMessage);
         synchronized (lock) {
-            painter.handle(type, nodeId, opcode, request);
+            painter.handle(type, nodeId, addr, opcode, request);
         }
     }
     
@@ -201,7 +217,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             OpCode opcode = OpCode.valueOf(1 + generator.nextInt(OpCode.values().length-1));
             //OpCode opcode = OpCode.FIND_NODE_REQUEST;
             
-            arcs.painter.handle(type, nodeId, opcode, true);
+            arcs.painter.handle(type, nodeId, null, opcode, true);
             
             // Sleep a bit...
             //Thread.sleep(sleep);
@@ -210,9 +226,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             // Send every now an then a response
             if (generator.nextBoolean()) {
                 if (type.equals(EventType.MESSAGE_SENT)) {
-                    arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, opcode, false);
+                    arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, null, opcode, false);
                 } else {
-                    arcs.painter.handle(EventType.MESSAGE_SENT, nodeId, opcode, false);
+                    arcs.painter.handle(EventType.MESSAGE_SENT, nodeId, null, opcode, false);
                 }
             }
         }

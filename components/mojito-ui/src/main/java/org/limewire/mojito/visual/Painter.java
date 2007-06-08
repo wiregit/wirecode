@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.math.BigDecimal;
+import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
@@ -25,7 +26,7 @@ public abstract class Painter {
     
     public abstract void paint(Component c, Graphics2D g);
     
-    public abstract void handle(EventType type, KUID nodeId, OpCode opcode, boolean request);
+    public abstract void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request);
     
     public abstract void clear();
     

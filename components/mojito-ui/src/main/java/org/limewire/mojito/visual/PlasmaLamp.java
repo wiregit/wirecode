@@ -8,6 +8,7 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
+import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -87,7 +88,7 @@ class PlasmaLamp extends Painter {
         g2.fill(dot);
     }
     
-    public void handle(EventType type, KUID nodeId, OpCode opcode, boolean request) {
+    public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
         if (nodeId == null) {
             return;
         }

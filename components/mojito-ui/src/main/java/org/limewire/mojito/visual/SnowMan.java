@@ -10,6 +10,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,7 +74,7 @@ class SnowMan extends Painter {
         g2.fill(dot);
     }
     
-    public void handle(EventType type, KUID nodeId, OpCode opcode, boolean request) {
+    public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
         synchronized (nodes) {
             nodes.add(new Node(dot, type, nodeId, opcode, request));
         }
