@@ -282,8 +282,6 @@ public class BTMetaInfo implements Serializable {
         } catch (URIException bad) {}
         if (!hostOk)
             throw new ValueException("invalid host");
-        if (!NetworkUtils.isValidPort(check.getPort()))
-            throw new ValueException("invalid port");
     }
     
     // keys used between read/write object.
