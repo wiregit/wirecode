@@ -2,12 +2,15 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.net.Socket;
 
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Interval;
+import org.limewire.nio.Throttle;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
@@ -15,7 +18,7 @@ import com.limegroup.gnutella.http.AltLocTracker;
 /**
  * Maintains state for an HTTP upload.
      */
-public class HTTPUploader extends AbstractUploader implements Uploader {
+public class HTTPUploader extends AbstractUploader implements Uploader, FileTransfer {
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
@@ -40,6 +43,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 	
     private HttpResponse lastResponse;
 
+    private File file;
+
     public HTTPUploader(String fileName, HTTPUploadSession session) {
         super(fileName, session);
 	}
@@ -58,12 +63,13 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     @Override
     public void setFileDesc(FileDesc fd) {
         super.setFileDesc(fd);
-	
-        setUploadBegin(0);
-        setUploadEnd(getFileSize());
+        
+        setFile(fd.getFile());
     }
     
     public void setFile(File file) {
+        this.file = file;
+        
         setFileSize(file.length());
         setUploadBegin(0);
         setUploadEnd(getFileSize());
@@ -233,6 +239,16 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     @Override
     public boolean isBrowseHostEnabled() {
         return super.isBrowseHostEnabled() && getGnutellaPort() != -1;
+    }
+
+    public void activateThrottle() {
+        Socket socket = getSession().getIOSession().getSocket();
+        Throttle throttle = RouterService.getBandwidthManager().getWriteThrottle(socket);
+        getSession().getIOSession().setThrottle(throttle);
+    }
+
+    public File getFile() {
+        return file;
     }
     
 }

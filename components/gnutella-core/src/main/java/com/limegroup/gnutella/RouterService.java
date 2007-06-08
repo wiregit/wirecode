@@ -45,7 +45,8 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
-import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.browser.LocalAcceptor;
+import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
@@ -158,9 +159,14 @@ public class RouterService {
     private static final ConnectionDispatcher dispatcher = new ConnectionDispatcher();
 
     /**
-     * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
+     * Acceptor listening on port that is reachable from localhost only.
      */
-    private static HTTPAcceptor httpAcceptor;
+    private static LocalAcceptor localAcceptor;
+
+    /**
+     * Local web server for serving magnet links etc.
+     */
+    private static LocalHTTPAcceptor localHTTPAcceptor;
 
 	/**
 	 * Initialize the class that manages all TCP connections.
@@ -585,12 +591,17 @@ public class RouterService {
     		QueryUnicaster.instance().start();
     		LOG.trace("STOP QueryUnicaster");
     		
-    		LOG.trace("START HTTPAcceptor");
+    		LOG.trace("START LocalAcceptor");
             callback.componentLoading("HTTPACCEPTOR");
-            httpAcceptor = new HTTPAcceptor();  
-            httpAcceptor.start();
-            LOG.trace("STOP HTTPAcceptor");
-            
+            localAcceptor = new LocalAcceptor();  
+            localAcceptor.start();
+            LOG.trace("STOP LocalAcceptor");
+
+            LOG.trace("START LocalHTTPAcceptor");
+            localHTTPAcceptor = new LocalHTTPAcceptor();  
+            localHTTPAcceptor.start(localAcceptor.getDispatcher());
+            LOG.trace("STOP LocalHTTPAcceptor");
+
             LOG.trace("START Pinger");
             callback.componentLoading("PINGER");
             Pinger.instance().start();
@@ -880,12 +891,21 @@ public class RouterService {
     }
 
     /** 
-     * Accessor for the <tt>Acceptor</tt> instance.
+     * Accessor for the local <tt>Acceptor</tt> instance.
      *
      * @return the <tt>Acceptor</tt> in use
      */
-    public static HTTPAcceptor getHTTPAcceptor() {
-        return httpAcceptor;
+    public static LocalAcceptor getLocalAcceptor() {
+        return localAcceptor;
+    }
+
+    /** 
+     * Accessor for the local <tt>HTTPAcceptor</tt> instance.
+     *
+     * @return the <tt>Acceptor</tt> in use
+     */
+    public static LocalHTTPAcceptor getLocalHTTPAcceptor() {
+        return localHTTPAcceptor;
     }
 
     /** 

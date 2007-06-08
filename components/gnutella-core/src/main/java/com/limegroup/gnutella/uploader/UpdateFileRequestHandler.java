@@ -48,7 +48,7 @@ public class UpdateFileRequestHandler implements HttpRequestHandler {
             uploader.setFile(file);
             uploader.setState(Uploader.UPDATE_FILE);
 
-            response.setEntity(new FileResponseEntity(uploader, file));
+            response.setEntity(new FileResponseEntity(uploader));
         }
 
         sessionManager.sendResponse(uploader, response);

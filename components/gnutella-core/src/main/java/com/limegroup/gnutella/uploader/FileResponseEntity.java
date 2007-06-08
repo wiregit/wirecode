@@ -12,7 +12,6 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
@@ -22,7 +21,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
-    private final HTTPUploader uploader;
+    private final FileTransfer uploader;
 
     private final File file;
 
@@ -46,10 +45,10 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     /** Cancels the transfer if inactivity for too long. */  
     private StalledUploadWatchdog watchdog;
     
-    public FileResponseEntity(HTTPUploader uploader, File file) {
+    public FileResponseEntity(FileTransfer uploader) {
         this.uploader = uploader;
-        this.file = file;
-
+        this.file = uploader.getFile();
+        
         setContentType(Constants.FILE_MIME_TYPE);
 
         begin = uploader.getUploadBegin();
@@ -69,9 +68,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
 
         watchdog = new StalledUploadWatchdog();
-        
-        uploader.getSession().getIOSession().setThrottle(RouterService
-                .getBandwidthManager().getWriteThrottle(uploader.getSession().getIOSession().getSocket()));
+
+        uploader.activateThrottle();
 
         reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
         reader.start();

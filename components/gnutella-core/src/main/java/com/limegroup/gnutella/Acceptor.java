@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -9,7 +8,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -20,13 +18,10 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.SocketFactory;
-import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsHandler;
-import org.limewire.util.BufferUtils;
-
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -584,9 +579,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
             // Dispatch asynchronously if possible.
             if (client instanceof NIOMultiplexor) // supports non-blocking reads
-                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(client, allowedProtocol));
+                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(RouterService.getConnectionDispatcher(), client, allowedProtocol));
             else
-                ThreadExecutor.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");
+                ThreadExecutor.startThread(new BlockingConnectionDispatcher(RouterService.getConnectionDispatcher(), client, allowedProtocol), "ConnectionDispatchRunner");
         }
     }
     
@@ -679,99 +674,5 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             }
         }
     }
-    
-    /**
-     * A ConnectionDispatcher that reads asynchronously from the socket.
-     */
-    private static class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
-        private final Socket client;
-        private final String allowedWord;
-        
-        AsyncConnectionDispatcher(Socket client, String allowedWord) {
-            // + 1 for whitespace
-            super(RouterService.getConnectionDispatcher().getMaximumWordSize() + 1);
-            
-            this.client = client;
-            this.allowedWord = allowedWord;
-        }
-        
-        public void shutdown() {
-            super.shutdown();
-            HTTPStat.CLOSED_REQUESTS.incrementStat();
-        }
-
-        public void handleRead() throws IOException {
-            // Fill up our buffer as much we can.
-            int read = 0;
-            while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
-            
-            // See if we have a full word.
-            for(int i = 0; i < buffer.position(); i++) {
-                if(buffer.get(i) == ' ') {
-                    String word = new String(buffer.array(), 0, i);
-                    if(allowedWord != null && !allowedWord.equals(word))
-                        throw new IOException("wrong word!");
-                    
-                    buffer.limit(buffer.position()).position(i+1);
-                    source.interestRead(false);
-                    RouterService.getConnectionDispatcher().dispatch(word, client, true);
-                    return;
-                }
-            }
-            
-            // If there's no room to read more or there's nothing left to read,
-            // we aren't going to read our word.
-            if(!buffer.hasRemaining() || read == -1)
-                close();
-        }
-        
-        public int read(ByteBuffer dst) {
-            return BufferUtils.transfer(buffer, dst, false);
-        }
-
-        public long read(ByteBuffer [] dst) {
-        	return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
-        }
-    }
-
-
-    /**
-     * A ConnectionDispatcher that blocks while reading.
-     */
-    private static class BlockingConnectionDispatcher implements Runnable {
-        private final Socket client;
-        private final String allowedWord;
-        
-        public BlockingConnectionDispatcher(Socket socket, String allowedWord) {
-            this.client = socket;
-            this.allowedWord = allowedWord;
-        }
-
-        /** Reads a word and sends it off to the ConnectionDispatcher for dispatching. */
-        public void run() {
-            try {
-                //The try-catch below is a work-around for JDK bug 4091706.
-                InputStream in=null;
-                try {
-                    in=client.getInputStream(); 
-                } catch (IOException e) {
-                    HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    throw e;
-                } catch(NullPointerException e) {
-                    // This should only happen extremely rarely.
-                    // JDK bug 4091706
-                    throw new IOException(e.getMessage());
-                }
-                
-                ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
-                String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
-                if(allowedWord != null && !allowedWord.equals(word))
-                    throw new IOException("wrong word!");
-                dispatcher.dispatch(word, client, false);
-            } catch (IOException iox) {
-                HTTPStat.CLOSED_REQUESTS.incrementStat();
-                IOUtils.close(client);
-            }
-        }
-    }    
+  
 }
