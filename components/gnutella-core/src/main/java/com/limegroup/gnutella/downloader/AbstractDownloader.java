@@ -43,6 +43,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 
 	protected static final String FILE_SIZE = "fileSize";
 
+    /** LOCKING: this */
 	protected volatile Map<String, Serializable> propertiesMap;
 
 	/**

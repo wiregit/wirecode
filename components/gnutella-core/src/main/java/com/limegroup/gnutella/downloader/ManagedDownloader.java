@@ -529,7 +529,6 @@ public class ManagedDownloader extends AbstractDownloader
 		}
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
 		cachedRFDs.addAll(Arrays.asList(files));
-		this.propertiesMap = new HashMap<String, Serializable>();
 		if (files.length > 0) 
 			initPropertiesMap(files[0]);
 
@@ -559,10 +558,10 @@ public class ManagedDownloader extends AbstractDownloader
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
         IncompleteFileManager ifm;
         
-        if ( !propertiesMap.containsKey(ATTRIBUTES) )
-            propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
         
         synchronized(this) {
+            if ( !propertiesMap.containsKey(ATTRIBUTES) )
+                propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
             cached.addAll(cachedRFDs);
             properties.putAll(propertiesMap);
             ifm = incompleteFileManager;
@@ -668,21 +667,22 @@ public class ManagedDownloader extends AbstractDownloader
         ranker.setMeshHandler(this);
         
         // get the SHA1 if we can.
-        if (downloadSHA1 == null)
-        	downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
         
         synchronized(this) {
+            if (downloadSHA1 == null)
+                downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
             for(RemoteFileDesc rfd : cachedRFDs) {
                 if(downloadSHA1 != null)
                     break;
                 downloadSHA1 = rfd.getSHA1Urn();
             }
+            if (downloadSHA1 != null)
+                propertiesMap.put(SHA1_URN,downloadSHA1);
         }
         
-		if (downloadSHA1 != null) {
+		if (downloadSHA1 != null) 
 		    RouterService.getAltlocManager().addListener(downloadSHA1,this);
-			propertiesMap.put(SHA1_URN,downloadSHA1);
-        }
+        
 		
 		// make sure all rfds have the same sha1
         verifyAllFiles();

@@ -90,7 +90,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         //location when the download control thread calls tryAllDownloads.
         super(new RemoteFileDesc[0], ifm, null, saveDir, 
 			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
-		propertiesMap.put(MAGNET, magnet);
+        synchronized(this) {
+            propertiesMap.put(MAGNET, magnet);
+        }
     }
     
     public void initialize(DownloadManager manager, FileManager fileManager, 
@@ -100,7 +102,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         super.initialize(manager, fileManager, callback);
     }
 
-	private MagnetOptions getMagnet() {
+	private synchronized MagnetOptions getMagnet() {
 		return (MagnetOptions)propertiesMap.get(MAGNET);
 	}
     
