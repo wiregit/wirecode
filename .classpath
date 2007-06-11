@@ -44,16 +44,11 @@
 	<classpathentry kind="lib" path="lib/jars/id3v2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl011.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/looks.jar"/>
-	<classpathentry kind="lib" path="lib/jars/mp3sp14.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
-	<classpathentry kind="lib" path="lib/jars/other/themes.jar"/>
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
-	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
-	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
@@ -67,5 +62,12 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jakarta-httpcore.jar"/>
 	<classpathentry kind="lib" path="lib/jars/basicplayer3.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/other/themes.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jl1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mp3spi1.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jogg-0.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jorbis-0.0.15.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="lib/jars/vorbisspi1.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
