@@ -869,8 +869,15 @@ public class ManagedConnection extends Connection
      * Notification that messaging has closed.
      */
     public void messagingClosed() {
-        if( _manager != null )
-            _manager.remove(this);   
+        // we must run this in another thread, as manager.remove
+        // obtains locks, but this can be called from the NIO thread
+        if( _manager != null ) {
+            RouterService.getMessageDispatcher().dispatch(new Runnable() {
+                public void run() {
+                    _manager.remove(ManagedConnection.this);
+                }
+            });
+        }
     }
     
     /**

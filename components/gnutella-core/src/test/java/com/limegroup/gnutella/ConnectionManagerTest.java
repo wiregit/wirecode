@@ -439,9 +439,12 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
         
+        Thread.sleep(1000); // let capVM send
+        
         assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
         ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
-        assertFalse(mc.isTLSCapable());
+        assertTrue(mc.isTLSCapable());
+        assertFalse(mc.isTLSEncoded());
     }
     
     public void testGoodTLSHost() throws Exception {
@@ -452,9 +455,12 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
+        Thread.sleep(1000); // let capVM send
+        
         assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
         ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
+        assertTrue(mc.isTLSEncoded());
     }
     
     public void testGoodTLSHostNotUsedIfNoSetting() throws Exception {
@@ -465,9 +471,12 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
+        Thread.sleep(1000); // let capVM send
+        
         assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
         ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
-        assertFalse(mc.isTLSCapable());
+        assertTrue(mc.isTLSCapable());
+        assertFalse(mc.isTLSEncoded());
     }
 
 
@@ -684,6 +693,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         
         TestHostCatcher() {
             super();
+            resetLatches();
         }
         
         void resetLatches() {
@@ -744,10 +754,13 @@ public class ConnectionManagerTest extends LimeTestCase {
             new ArrayBlockingQueue<EndpointObserver>(100);
         final BlockingQueue<Endpoint> endpoints = 
             new ArrayBlockingQueue<Endpoint>(100);
+        
+        @Override
         public void getAnEndpoint(EndpointObserver observer) {
             assertTrue(observers.offer(observer));
         }
         
+        @Override
         public boolean add(Endpoint e, boolean asdf) {
             assertTrue(endpoints.offer(e));
             return false;

@@ -65,7 +65,7 @@ public class GGEP {
     /** The extension header (key) for packed IP/Ports */
     public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
     /** The extension header (key) for which packed IP/Ports support TLS. */
-    public static final String GGEP_HEADER_PACKED_IPPORTS_TLS="TLSIPP";
+    public static final String GGEP_HEADER_PACKED_IPPORTS_TLS="IPP_TLS";
     /** The extension header (key) for understanding TLS. */
     public static final String GGEP_HEADER_TLS_CAPABLE="TLS";
     /** The extension header (key) for packed UDP Host Caches */

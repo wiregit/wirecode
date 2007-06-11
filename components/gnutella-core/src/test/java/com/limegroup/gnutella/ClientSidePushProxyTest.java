@@ -67,6 +67,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        RouterService.getDownloadManager().clearAllDownloads();        
         
         //      Turn off by default, explicitly test elsewhere.
         ConnectionSettings.TLS_INCOMING.setValue(false);
@@ -78,7 +80,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // send a MessagesSupportedMessage
         testUP[0].send(MessagesSupportedVendorMessage.instance());
         testUP[0].flush();
-
+        
         // we expect to get a PushProxy request
         Message m = null;
         do {
@@ -252,7 +254,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
             // tell the leaf to download the file, should result in push proxy
             // request
-            RouterService.download((new RemoteFileDesc[] 
+            Downloader download = RouterService.download((new RemoteFileDesc[] 
                 { ((MyActivityCallback)getCallback()).getRFD() }), true, 
                     new GUID(m.getGUID()));
     
@@ -339,7 +341,10 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                assertEquals("GET /get/10/boalt.org HTTP/1.1", currLine); 
            } finally { 
                push.close(); 
-           } 
+           }
+           
+           download.stop();
+           
        } finally { 
            ss.close(); 
        } 

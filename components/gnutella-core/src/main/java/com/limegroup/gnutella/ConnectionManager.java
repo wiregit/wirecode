@@ -1502,8 +1502,10 @@ public class ConnectionManager implements ConnectionAcceptor,
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
                 //add to catcher with the locale info.
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                                          c.getPort()), true, c.getLocalePref());
+                ExtendedEndpoint ee = new ExtendedEndpoint(c.getInetAddress().getHostAddress(),
+                                                           c.getPort(), c.getLocalePref());
+                ee.setTLSCapable(c.isTLSCapable());
+                _catcher.add(ee, true);
             }
         }
         
