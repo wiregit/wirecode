@@ -15,7 +15,7 @@ import java.util.List;
  * <p> 
  * See <a href="http://en.wikipedia.org/wiki/Trie">Trie</a> for more information.
  * <p>
- * Modified David Soh (yunharla00@hotmail.com)
+ * @modified David Soh (yunharla00@hotmail.com)
  *      1. added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
  *      2. disallowed adding duplicates
  *
@@ -107,4 +107,3 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
             removeEntry(string);
     }
 }
-

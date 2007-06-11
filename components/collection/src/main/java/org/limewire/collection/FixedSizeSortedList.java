@@ -10,53 +10,23 @@ import java.util.Comparator;
  * is removed and then the new element is inserted in the proper location.
  * 
  <pre>
-    public class MyComparableObject implements Comparable&lt;MyComparableObject&gt;{
-        public String s;
-        public int item;
-        public MyComparableObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    FixedSizeSortedList&lt;String&gt; fssl = new FixedSizeSortedList&lt;String&gt;(5);
+    
+    fssl.add("Abby");
+    fssl.add("Abby");
+    fssl.add("Bob");
+    fssl.add("Chris");
+    fssl.add("Dan");
+    System.out.println(fssl);
+    fssl.add("Eric");
+    System.out.println(fssl);
+    fssl.add("Abby");
+    System.out.println(fssl);
 
-        public String toString(){
-            return s + "=" + item;
-        }
-                
-        public int compareTo(MyComparableObject other) {
-            int c = this.s.compareTo(other.s);//compare by the string
-            if(c == 0){//if the string is equal, compare by item
-                c = this.item - other.item;
-            }
-            return c;
-        }       
-    }   
-
-    void sampleCodeFixedSizeSortedList(){
-        FixedSizeSortedList&lt;MyComparableObject&gt; fssl = new FixedSizeSortedList&lt;MyComparableObject&gt;(5);
-        
-        if( fssl.add(new MyComparableObject("a", 1)))
-            System.out.println("1: " + fssl);
-        if( fssl.add(new MyComparableObject("a", 2)))
-                System.out.println("2: " + fssl);
-        if( fssl.add(new MyComparableObject("b", 1)))
-            System.out.println("3: " + fssl);
-        if( fssl.add(new MyComparableObject("c", 1)))
-            System.out.println("4: " + fssl);
-        if( fssl.add(new MyComparableObject("d", 1)))
-            System.out.println("5: " + fssl);
-        if( fssl.add(new MyComparableObject("e", 1)))
-            System.out.println("6: " + fssl);
-        if( fssl.add(new MyComparableObject("a", 1)))
-            System.out.println("7: " + fssl);
-    }
     Output:
-        1: [a=1]
-        2: [a=1, a=2]
-        3: [a=1, a=2, b=1]
-        4: [a=1, a=2, b=1, c=1]
-        5: [a=1, a=2, b=1, c=1, d=1]
-        6: [a=1, a=2, b=1, c=1, e=1]
-        7: [a=1, a=1, a=2, b=1, c=1]    
+        [Abby, Abby, Bob, Chris, Dan]
+        [Abby, Abby, Bob, Chris, Eric]
+        [Abby, Abby, Abby, Bob, Chris]
 </pre>
 */ 
 public class FixedSizeSortedList<E> extends SortedList<E> {

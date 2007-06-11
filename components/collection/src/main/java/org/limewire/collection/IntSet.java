@@ -8,39 +8,37 @@ import java.util.Set;
 /**
  * Represents a set of distinct integers. 
  * Like {@link Set}, <code>IntSet</code> is <b>not synchronized</b>.
- * 
- * The set {1, 3, 4, 5, 7}, {1, 2, 3, 4, 5, 7} and {1, 2, 4, 5, 7} is 
- * represented by:
+ * <p>
+ * Optimized to have an extremely compact representation
+ * when the set is "dense", i.e., has many sequential elements. For example {1,
+ * 2} and {1, 2, ..., 1000} require the same amount of space. All retrieval
+ * operations run in O(log n) time, where n is the size of the set. Insertion
+ * operations may be slower.
+ * <p>
+ * All methods have the same specification as the <code>Set</code> class, except 
+ * that values are restricted to int' for the reason described  above. For
+ * this reason, methods are not specified below.   
+ * <p>
+ * This class is not thread-safe.
  * <pre>
-    void sampleCodeIntSet(){
-        IntSet s = new IntSet(10);
-        s.add(1); s.add(1); 
-        s.add(3); s.add(4); s.add(5);
-        s.add(7);       
-        System.out.println("1) Set is " + s);
-        s.add(2);       
-        System.out.println("2) Set is " + s);
-        s.remove(3);        
-        System.out.println("3) Set is " + s);
-    }
+    IntSet s = new IntSet(10);
+    s.add(1); s.add(1); 
+    s.add(3); s.add(4); s.add(5);
+    s.add(7);       
+    System.out.println("Set is " + s);
+    s.add(2);       
+    System.out.println("Set is " + s);
+    s.remove(3);        
+    System.out.println("Set is " + s);
+
     Output:
-        1) Set is [1, 3-5, 7]
-        2) Set is [1-5, 7]
-        3) Set is [1-2, 4-5, 7]
-    
+        Set is [1, 3-5, 7]
+        Set is [1-5, 7]
+        Set is [1-2, 4-5, 7]
+
  * </pre>
  */
 
-/* Optimized to have an extremely compact representation
- * when the set is "dense", i.e., has many sequential elements.  For example {1,
- * 2} and {1, 2, ..., 1000} require the same amount of space.  All retrieval
- * operations run in O(log n) time, where n is the size of the set.  Insertion
- * operations may be slower.
- * <p>
- * All methods have the same specification as the Set class, except that
- * values are restricted to int' for the reason described  above.  For
- * this reason, methods are not specified below.   
- */
 public class IntSet {
     /**
      * Our current implementation consists of a list of disjoint intervals,
@@ -76,7 +74,7 @@ public class IntSet {
         /** INVARIANT: low<=high */
         int low;
         int high;
-        /** It is required that low<=high */
+        /** @requires that low<=high */
         Interval(int low, int high) {
             this.low=low;
             this.high=high;
@@ -335,7 +333,7 @@ public class IntSet {
 
     /** 
      * Returns the values of this in order from lowest to highest, as int.
-     *     It is required that this not modified while iterator in use
+     *     @requires this not modified while iterator in use
      */
     public IntSetIterator iterator() {
         return new IntSetIterator();

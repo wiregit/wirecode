@@ -9,51 +9,23 @@ import java.util.NoSuchElementException;
  * list are included with the last sublist. For example, list = {1,2,3,4,5} and 2
  * partitions makes subList1 = {1,2} and subList2 = {3,4,5}.
 <pre>
-    public class MyObject{
-        public String s;
-        public int item;
-        public MyObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    LinkedList&lt;String&gt; list = new LinkedList&lt;String&gt;();
+    for(int i = 1; i < 6; i++)
+        list.add(String.valueOf(i));
+    System.out.println(list);
+    
+    ListPartitioner&lt;String&gt; lp = new ListPartitioner&lt;String&gt;(list, 2);
+    List&lt;String&gt; p1 = lp.getPartition(0);
+    List&lt;String&gt; p2 = lp.getPartition(1);
+    
+    System.out.println("partition 1: " + p1);
+    System.out.println("partition 2: " + p2);
+    
+    Output:
+        [1, 2, 3, 4, 5]
+        partition 1: [1, 2]
+        partition 2: [3, 4, 5]
 
-        public String toString(){
-            return s + "=" + item ;
-        }
-    }   
-
-    void sampleCodeListPartitioner(){
-        LinkedList&lt;MyObject&gt; l = new LinkedList&lt;MyObject&gt;();
-        for(int i = 1; i < 6; i++)
-            if(!l.add(new MyObject(String.valueOf(i), i)))
-                System.out.println("add failed " + i);  
-        for(MyObject o : l)
-            System.out.println(o);
-        
-        ListPartitioner&lt;MyObject&gt; lp = new ListPartitioner&lt;MyObject&gt;(l, 2);
-        List&lt;MyObject&gt; p1 = lp.getPartition(0);
-        List&lt;MyObject&gt; p2 = lp.getPartition(1);
-        
-        System.out.println("***partition 1***");
-        for(MyObject o : p1)
-            System.out.println(o);
-        System.out.println("***partition 2***");
-        for(MyObject o : p2)
-            System.out.println(o);
-    }
-    Output:    
-        1=1
-        2=2
-        3=3
-        4=4
-        5=5
-        ***partition 1***
-        1=1
-        2=2
-        ***partition 2***
-        3=3
-        4=4
-        5=5
 </pre>
  */ 
 

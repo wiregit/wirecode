@@ -18,49 +18,22 @@ import java.util.Map;
  * <p>
  * Technically, this is not a valid subtype of <code>HashMap</code> (since items
  * can be removed), but <code>HashMap</code> makes implementation easy. 
- * Also, <code>ForgetfulHashMap</code> is <b>not synchronized</b>.
+ * <p>
+ * This class is not thread-safe.
 <pre>
-    public class MyObjectHash{
-        public String s;
-        public int item;
-        public MyObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    ForgetfulHashMap&lt;String, String&gt; fhm = new ForgetfulHashMap&lt;String, String&gt;(2);
+    fhm.put("myKey1", "Abby");
+    fhm.put("myKey2", "Bob");
+    System.out.println(fhm);
+    fhm.put("myKey3", "Chris");
+    System.out.println(fhm);
+    fhm.put("myKey3", "replace");
+    System.out.println(fhm);
 
-        public String toString(){
-            return s + "=" + item;
-        }
-        
-        public boolean equals(Object obj) {
-            MyObjectHash other = (MyObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
-        }
-    }   
-
-    void sampleCodeForgetfulHashMap(){
-        ForgetfulHashMap&lt;String, MyObjectHash&gt; fhm = new ForgetfulHashMap&lt;String, MyObjectHash&gt;(2);
-        fhm.put("Mykey1", new MyObjectHash("a", 1));
-        System.out.println("1) Size is: " + fhm.size() + " contents: " + fhm);
-        fhm.put("Mykey2", new MyObjectHash("b", 2));
-        System.out.println("2) Size is: " + fhm.size() + " contents: " + fhm);
-        fhm.put("Mykey3", new MyObjectHash("c", 3));
-        System.out.println("3) Size is: " + fhm.size() + " contents: " + fhm);
-
-        fhm.put("Mykey3", new MyObjectHash("replace", 3));
-        System.out.println("4) Size is: " + fhm.size() + " contents: " + fhm);
-        
-    }
-    Output:
-        1) Size is: 1 contents: {Mykey1=a=1}
-        2) Size is: 2 contents: {Mykey2=b=2, Mykey1=a=1}
-        3) Size is: 2 contents: {Mykey2=b=2, Mykey3=c=3}
-        4) Size is: 1 contents: {Mykey3=replace=3}
-   
+    Output:  
+        {myKey2=Bob, myKey1=Abby}
+        {myKey2=Bob, myKey3=Chris}
+        {myKey3=replace}
 </pre>
  *
  */
@@ -108,9 +81,9 @@ public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
     }
 
     /**
-     * Requires key is not in this.
-     * Modifies this.
-     * Has the effect that it adds the given key value pair to this, removing some
+     * @requires key is not in this.
+     * @modifies this.
+     * @effects adds the given key value pair to this, removing some
      *  older mapping if necessary.  The return value is undefined; it
      *  exists solely to conform with the superclass' signature.
      */

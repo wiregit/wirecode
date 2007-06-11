@@ -9,76 +9,31 @@ import java.util.Map;
  * entry first. An attempt to add new entry throws a {@link NoMoreStorageException}.
  * 
 <pre>
-    public class MyObjectHash{
-        public String s;
-        public int item;
-        public MyObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
-
-        public String toString(){
-            return s + "=" + item;
-        }
+    try{
         
-        public boolean equals(Object obj) {
-            MyObjectHash other = (MyObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
-        }
+        FixedsizeHashMap&lt;String, String&gt; fhm = new FixedsizeHashMap&lt;String, String&gt;(3);
+        fhm.put("myKey1", "Abby");
+        fhm.put("myKey2", "Bob");
+        fhm.put("myKey3", "Chris");
+        System.out.println(fhm);    
+
+        String ret;
+        ret = fhm.put("myKey3", "replace");
+        if(ret != null)
+            System.out.println("put returned: " + ret);
+        System.out.println(fhm);    
+
+        fhm.put("myKey4", "Dan");
+    } catch (Exception e) {
+        System.out.println("Exception because of maximum size upon put myKey4 ... " + e.toString() );
     }   
-
-    void sampleCodeFixedsizeHashMap(){
-        try{
-            FixedsizeHashMap&lt;String, MyObjectHash&gt; fhm = new FixedsizeHashMap&lt;String, MyObjectHash&gt;(3);
-            
-            MyObjectHash mohReturn;
-            mohReturn = fhm.put("Mykey1", new MyObjectHash("a", 1));
-            if(mohReturn != null)
-                System.out.println("error with put1");
-            else
-                System.out.println("1) " + fhm);    
-
-            mohReturn = fhm.put("Mykey2", new MyObjectHash("b", 2));
-            if(mohReturn != null)
-                System.out.println("error with put2");
-            else
-                System.out.println("2) " + fhm);    
-
-            mohReturn = fhm.put("Mykey3", new MyObjectHash("c", 3));
-            if(mohReturn != null)
-                System.out.println("error with put3");
-            else
-                System.out.println("3) " + fhm);    
     
-            mohReturn = fhm.put("Mykey3", new MyObjectHash("replace", 3));
-            if(mohReturn != null)
-                System.out.println("put returned: " + mohReturn);
-            System.out.println("4) " + fhm);    
-
-            mohReturn = fhm.put("Mykey4", new MyObjectHash("d", 4));
-            if(mohReturn != null)
-                System.out.println("Error with put, because of maximum size." + mohReturn);
-            else
-                System.out.println("5) " + fhm);    
-        }
-        catch(Exception e){
-            System.out.println("Exception because of maximum size upon put Mykey4 ... 
-            " + e.toString() );
-        }   
-    }
     Output:
-        1) {Mykey1=a=1}
-        2) {Mykey2=b=2, Mykey1=a=1}
-        3) {Mykey2=b=2, Mykey3=c=3, Mykey1=a=1}
-        put returned: c=3
-        4) {Mykey2=b=2, Mykey3=replace=3, Mykey1=a=1}
-        Exception because of maximum size upon put Mykey4 ... 
-                        org.limewire.collection.NoMoreStorageException
-
+        {myKey2=Bob, myKey3=Chris, myKey1=Abby}
+        put returned: Chris
+        {myKey2=Bob, myKey3=replace, myKey1=Abby}
+        Exception because of maximum size upon put myKey4 ... org.limewire.collection.NoMoreStorageException
+    
 </pre>
  * 
  */

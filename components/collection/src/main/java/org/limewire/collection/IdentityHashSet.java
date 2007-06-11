@@ -8,61 +8,30 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Stores elements in a <code>Set</code> with keys that are compared with ==, not equals.
- * Different key objects are considered distinct even if they have equal contents. 
- * For example, if you attempt to add <code>mo</code> (MyObject mo = new 
- * MyObject("b", 2);) twice, then the add fails. However, if you attempt to add
- * new MyObject("b", 2) twice, both adds pass.
 <pre>
-    public class MyObjectHash{
-        public String s;
-        public int item;
-        public MyObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    IdentityHashSet&lt;String&gt; ihs = new IdentityHashSet&lt;String&gt;(4);
 
-        public String toString(){
-            return s + "=" + item;
-        }
+    String s = new String("Abby");
+    ihs.add(s);
+
+    if(!ihs.add(s))
+        System.out.println("Unable to add ("+ s + ") the same object twice; contents: " + ihs);
+    
+    if(ihs.add("Abby"))
+        System.out.println("Was able to add a new String(\"Abby\") since it's a separate object.");
+
+    System.out.println("Contents: " + ihs);
         
-        public boolean equals(Object obj) {
-            MyObjectHash other = (MyObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
-        }
-    }   
+    ihs.add("Bob");
+    ihs.add("Chris");
+    ihs.add("Dan");
+    System.out.println("Size is: " + ihs.size() + " contents: " + ihs); 
 
-    void sampleCodeIdentityHashSet(){
-
-        IdentityHashSet&lt;MyObjectHash&gt; ihs = new IdentityHashSet&lt;MyObjectHash&gt;(4);
-
-        MyObjectHash mo = new MyObjectHash("a", 1);
-        if(ihs.add(mo))
-            System.out.println("1) Size is: " + ihs.size() + " contents: " + ihs);
-        if(!ihs.add(mo))
-            System.out.println("Unable to add the same object twice; contents: " + ihs);
-        
-        if(ihs.add(new MyObjectHash("b", 2)))
-            System.out.println("2) Size is: " + ihs.size() + " contents: " + ihs);
-        if(ihs.add(new MyObjectHash("b", 2)))
-            System.out.println("3) Size is: " + ihs.size() + " contents: " + ihs);
-        if(ihs.add(new MyObjectHash("c", 3)))
-            System.out.println("3) Size is: " + ihs.size() + " contents: " + ihs);
-        if(ihs.add(new MyObjectHash("d", 4)))
-            System.out.println("4) Size is: " + ihs.size() + " contents: " + ihs);  
-    }
     Output:
-        1) Size is: 1 contents: [a=1]
-        Unable to add the same object twice; contents: [a=1]
-        2) Size is: 2 contents: [a=1, b=2]
-        3) Size is: 3 contents: [a=1, b=2, b=2]
-        3) Size is: 4 contents: [a=1, c=3, b=2, b=2]
-        4) Size is: 5 contents: [c=3, a=1, d=4, b=2, b=2]
-
+        Unable to add (Abby) the same object twice; contents: [Abby]
+        Was able to add a new String("Abby") since it's a separate object.
+        Contents: [Abby, Abby]
+        Size is: 5 contents: [Dan, Bob, Abby, Abby, Chris]
 </pre>
  * 
  */

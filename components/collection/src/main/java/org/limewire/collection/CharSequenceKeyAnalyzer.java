@@ -6,21 +6,30 @@ import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
  * Analyzes <code>CharSequence</code> keys with case sensitivity. With 
  * <code>CharSequenceKeyAnalyzer</code> you can
  * compare, check prefix, and determine the index of a bit.
- * 
-<pre>
-    void sampleCodeCharSequenceKeyAnalyzer(){
-        CharSequenceKeyAnalyzer cska = new CharSequenceKeyAnalyzer();
-        
-        System.out.println("Is 'after' a prefix of 'Afternoon'? " + cska.isPrefix("after", 0, 16, "Afternoon"));
-        
-        System.out.println("Is 'after' a prefix of 'afternoon'? " + cska.isPrefix("after", 0, 16, "afternoon"));
-        
-    }
-    Output:
-        Is 'after' a prefix of 'Afternoon'? false
-        Is 'after' a prefix of 'afternoon'? true
+ * <p>
+ * A typical use case for a <code>CharSequenceKeyAnalyzer</code> is with a 
+ * {@link PatriciaTrie}.
+ * <pre>
+    PatriciaTrie&lt;String, String&gt; trie = new PatriciaTrie&lt;String, String&gt;(new CharSequenceKeyAnalyzer());
+    
+    trie.put("Lime", "Lime");
+    trie.put("LimeWire", "LimeWire");
+    trie.put("LimeRadio", "LimeRadio");
+    trie.put("Lax", "Lax");
+    trie.put("Lake", "Lake");
+    trie.put("Lovely", "Lovely");
 
-</pre>
+    System.out.println(trie.select("Lo"));
+    System.out.println(trie.select("Lime"));
+
+    System.out.println(trie.getPrefixedBy("La").toString());            
+
+    Output:
+        Lovely
+        Lime
+        {Lake=Lake, Lax=Lax}
+
+ * </pre>
  */
 public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
     

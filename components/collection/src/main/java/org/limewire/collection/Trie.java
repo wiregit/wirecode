@@ -9,6 +9,9 @@ import java.util.SortedMap;
  * Defines the interface for a prefix tree, an ordered tree data structure used
  * to store an associated array where the keys are strings. For more 
  * information, see <a href= "http://en.wikipedia.org/wiki/Trie">Tries</a>.
+ * 
+ * @author Roger Kapsi
+ * @author Sam Berlin
  */
 public interface Trie<K, V> extends SortedMap<K, V> {
     
@@ -99,9 +102,8 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);
     
     /**
-     * Traverses the trie in lexicographical order. (See a href=
-     * "http://en.wikipedia.org/wiki/Lexicographical_order"> Lexicographical</a>
-     * for more information.) Cursor.select will be called
+     * Traverses the trie in lexicographical order. 
+     * Cursor.select will be called
      * on each entry. The traversal will stop when the cursor returns
      * Cursor.SelectStatus.EXIT. Cursor.SelectStatus.CONTINUE is used to 
      * continue traversing. Cursor.SelectStatus.REMOVE is used to remove
@@ -115,13 +117,17 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor);
     
     /**
-     * Defines the interface to return status of the current trie 
+     * An interface that allows operations to be performed given entries of the 
+     * Trie as it traverses through the entries. The <code>Cursor</code> used 
+     * may perform an operation while traversing.
+     * <p>
+     * <code>Cursor</code> returns status of the current trie 
      * entry during an iteration of entries. The <code>Trie</code> entry status 
      * might be:
      * <table cellspace="5">
      * <tr><td><b>Return Value</b></td><td><b>Status</b></td></tr>
      * <tr><td>EXIT</td><td>Finish the Trie operation</td></tr>
-     * <tr><td>CONTINUE</td><td>Look at the next Trie</td></tr>
+     * <tr><td>CONTINUE</td><td>Looks at the next element in the traversal</td></tr>
      * <tr><td>REMOVE</td><td>Remove the entry and continue iterating</td></tr>
      * <tr><td>REMOVE_AND_EXIT</td><td>Remove the entry and stop iterating</td></tr>
      * </table>

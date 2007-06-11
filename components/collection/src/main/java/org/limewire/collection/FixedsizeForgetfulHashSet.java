@@ -15,57 +15,28 @@ import java.util.Set;
  * <code>FixedsizeForgetfulHashSet</code> works in constant time.
  * 
 <pre>
-    public class MyObjectHash{
-        public String s;
-        public int item;
-        public MyObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    FixedsizeForgetfulHashSet&lt;String&gt; ffhs = new FixedsizeForgetfulHashSet&lt;String&gt;(4);
 
-        public String toString(){
-            return s + "=" + item;
-        }
-        
-        public boolean equals(Object obj) {
-            MyObjectHash other = (MyObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
-        }
-    }   
-    
-    void sampleCodeFixedsizeForgetfulHashSet(){
-        FixedsizeForgetfulHashSet&lt;MyObjectHash&gt; ffhs = new FixedsizeForgetfulHashSet&lt;MyObjectHash&gt;(4);
+    ffhs.add("Abby");
+    System.out.println(ffhs);
+    if(!ffhs.add("Abby"))
+        System.out.println("Unable to add the same object twice: " + ffhs);
 
-        MyObjectHash mo = new MyObjectHash("a", 1);
-        if(ffhs.add(mo))
-            System.out.println("1) Size is: " + ffhs.size() + " contents: " + ffhs);
-        if(!ffhs.add(mo))
-            System.out.println("Unable to add the same object twice; contents: " + ffhs);
+    ffhs.add("Bob");
+    ffhs.add("Bob");
+    ffhs.add("Chris");
 
-        if(ffhs.add(new MyObjectHash("b", 2)))
-            System.out.println("2) Size is: " + ffhs.size() + " contents: " + ffhs);
-        if(!ffhs.add(new MyObjectHash("b", 2)))
-            System.out.println("Unable to add the object; contents: " + ffhs);
-        if(ffhs.add(new MyObjectHash("c", 3)))
-            System.out.println("3) Size is: " + ffhs.size() + " contents: " + ffhs);
-        if(ffhs.add(new MyObjectHash("d", 4)))
-            System.out.println("4) Size is: " + ffhs.size() + " contents: " + ffhs);    
-        if(ffhs.add(new MyObjectHash("e", 5)))
-            System.out.println("5) Size is: " + ffhs.size() + " contents: " + ffhs);    
-    }   
+    ffhs.add("Dan");
+    System.out.println(ffhs);   
+    ffhs.add("Eric");
+    System.out.println(ffhs);   
+
     Output:
-        1) Size is: 1 contents: [a=1]
-        Unable to add the same object twice; contents: [a=1]
-        2) Size is: 2 contents: [a=1, b=2]
-        Unable to add the object; contents: [a=1, b=2]
-        3) Size is: 3 contents: [a=1, b=2, c=3]
-        4) Size is: 4 contents: [a=1, b=2, c=3, d=4]
-        5) Size is: 4 contents: [b=2, c=3, d=4, e=5]
-    
+        [Abby]
+        Unable to add the same object twice: [Abby]
+        [Abby, Bob, Chris, Dan]
+        [Bob, Chris, Dan, Eric]
+
 </pre>
 * 
 */
@@ -114,7 +85,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
     /**
      * Removes the least recently used entry from the set
      * @return The least recently used value from the set.
-     * Modifies this.
+     * @modifies this.
      */
     public E removeLRUEntry() {
         if(isEmpty())

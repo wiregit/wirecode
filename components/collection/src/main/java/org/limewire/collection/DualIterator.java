@@ -6,49 +6,30 @@ import java.util.Iterator;
  * Provides an iterator that iterates over two other iterators, in order.
  * 
 <pre>
-    public class MyObject{
-        public String s;
-        public int item;
-        public MyObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
-
-        public String toString(){
-            return s + "=" + item ;
-        }
-    }   
-
-    public void sampleCodeDualIterator(){
-        LinkedList&lt;MyObject&gt; l1 = new LinkedList&lt;MyObject&gt;();
-        LinkedList&lt;MyObject&gt; l2 = new LinkedList&lt;MyObject&gt;();
-        for(int i = 0; i < 5; i++)
-            if(!l1.add(new MyObject(String.valueOf(i), i)))
-                System.out.println("add failed " + i);  
-        for(int i = 10; i < 15; i++)
-            if(!l2.add(new MyObject(String.valueOf(i), i)))
-                System.out.println("add failed " + i);  
-        DualIterator&lt;MyObject&gt; di = new DualIterator&lt;MyObject&gt;(l1.iterator(), l2.iterator());
-        
-        while(di.hasNext())
-            System.out.println(di.next());      
+    LinkedList&lt;String&gt; l1 = new LinkedList&lt;String&gt;();
+    LinkedList&lt;String&gt; l2 = new LinkedList&lt;String&gt;();
+    for(int i = 0; i < 5; i++){
+        l1.add(String.valueOf(i));
+        l2.add(String.valueOf(i + 10));
     }
 
+    for(DualIterator&lt;String&gt; di = 
+            new DualIterator&lt;String&gt;(l1.iterator(), l2.iterator()); di.hasNext();)    
+        System.out.println(di.next());      
+
     Output:
-        0=0
-        1=1
-        2=2
-        3=3
-        4=4
-        10=10
-        11=11
-        12=12
-        13=13
-        14=14
+        0
+        1
+        2
+        3
+        4
+        10
+        11
+        12
+        13
+        14
 
 </pre>
- * 
- * 
  */
 public class DualIterator<T> implements Iterator<T> {
     

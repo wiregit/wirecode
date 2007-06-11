@@ -47,30 +47,11 @@ import java.util.NoSuchElementException;
  * <code>LinkedList</code> is rarely a good choice of implementation.
  * <code>TreeList</code> is almost always a good replacement for it, although it
  * does use slightly more memory.
-<pre>
-    void sampleCodeTreeList(){
-        TreeList&lt;Integer&gt; tl = new TreeList&lt;Integer&gt;();
-        tl.add(10);
-        tl.add(5);
-        tl.add(100);
-        tl.add(4);
-        tl.add(40);
-        Iterator&lt;Integer&gt; iter = tl.iterator();
-        while(iter.hasNext())
-            System.out.println(iter.next().toString());
-    }
-    Output:
-        10
-        5
-        100
-        4
-        40
-    
-</pre>
- * @since Commons Collections 3.1
- *
+ * 
  * @author Joerg Schmuecker
  * @author Stephen Colebourne
+ * @since Commons Collections 3.1
+ *
  */
 public class TreeList<E> extends AbstractList<E> {
 //    add; toArray; iterator; insert; get; indexOf; remove

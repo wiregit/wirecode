@@ -19,7 +19,7 @@ import java.util.Iterator;
  * to iterate through the dictionary entries.
  * @author Matt Welsh (matt@matt-welsh.com)
  * <br>
- * Modified David Soh (yunharla00@hotmail.com)
+ * @modified David Soh (yunharla00@hotmail.com)
  *       added getIterator() & getIterator(String) for enhanced 
  *       AutoCompleteTextField use.
  */

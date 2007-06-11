@@ -7,15 +7,10 @@ import java.util.Map;
 * Stores a property key and its corresponding value pair. <code>KeyValue</code>
 * implements <code>Map.Entry</code>, but there's no backing map.
 <pre>
-    void sampleCodeKeyValue(){
-        String key = new String("myKey");
-        String value = new String("myValue");
-        KeyValue&lt;String, String&gt; k = new KeyValue&lt;String, String&gt;(key, value);
-        System.out.println(k);  
-    }
+    System.out.println(new KeyValue&lt;String, String&gt;("myKey", "myValue")); 
+    
     Output:
         myKey = myValue
-
 </pre>
 
 */

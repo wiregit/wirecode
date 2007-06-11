@@ -18,9 +18,33 @@ import java.util.NoSuchElementException;
 * the list (each of type <code>ListElement</code>)
 * directly, avoiding linear-time searches when you wish to remove an element.
 * <p>
-* Note: <code>DoublyLinkedList</code> is not thread-safe. You should externally
-* synchronize access to the list if required.
-*
+* This class is not thread-safe.
+* <pre>
+    DoublyLinkedList<String> dll = new DoublyLinkedList<String>();
+    dll.addLast("Abby");
+    dll.addLast("Bob");
+    dll.addLast("Chris");
+    ListElement&lt;String&gt; dan = dll.addLast("Dan");
+        
+    for(DoublyLinkedList.ListElement&lt;String&gt; e : dll)
+        System.out.println(e.getKey());
+    dll.remove(dan);
+    System.out.println("");
+    for(DoublyLinkedList.ListElement&lt;String&gt; e : dll)
+        System.out.println(e.getKey());     
+    
+    Output:
+        Abby
+        Bob
+        Chris
+        Dan
+        
+        Abby
+        Bob
+        Chris
+* </pre>
+* @author Anurag Singla initial revision 
+* @author Christopher Rohrs bug fix, specification cleanup, and unit tests
 */
 public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElement<E>> {    
     /*
@@ -169,6 +193,31 @@ public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElemen
 
     /**
      * Represents an immutable element of the linked list.
+<pre>
+    DoublyLinkedList<String> dll = new DoublyLinkedList<String>();
+    dll.addLast("Abby");
+    dll.addLast("Bob");
+    dll.addLast("Chris");
+    ListElement&lt;String&gt; dan = dll.addLast("Dan");
+        
+    for(DoublyLinkedList.ListElement&lt;String&gt; e : dll)
+        System.out.println(e.getKey());
+    dll.remove(dan);
+    System.out.println("");
+    for(DoublyLinkedList.ListElement&lt;String&gt; e : dll)
+        System.out.println(e.getKey());     
+    
+    Output:
+        Abby
+        Bob
+        Chris
+        Dan
+        
+        Abby
+        Bob
+        Chris
+</pre>
+ 
      */
     public static class ListElement<E> {
         /**

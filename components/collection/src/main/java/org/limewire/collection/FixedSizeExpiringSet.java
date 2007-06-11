@@ -10,55 +10,39 @@ import java.util.Set;
 /**
  * Maintains, at most, a fixed size of objects in a <code>Set</code> 
  * for a specified time. <code>FixedSizeExpiringSet</code> never
- * holds more entries than specified in the constructor.
- * 
+ * holds more entries than specified in the constructor. This class
+ * is a hash-based <code>Set</code> and therefore, objects must correctly
+ * contain a {@link #hashCode()} and {@link #equals(Object)}.
+ * <p>
+ * Note: expiration times longer than Long.MAX_VALUE / 10^6 will be truncated.  
 <pre>
-    public class MyObject{
-        public String s;
-        public int item;
-        public MyObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    try{        
+        FixedSizeExpiringSet&lt;String&gt; fses = new FixedSizeExpiringSet&lt;String&gt;(4, 2000);
 
-        public String toString(){
-            return s + "=" + item ;
-        }
-    }   
+        fses.add("Abby");
+        fses.add("Bob");
+        fses.add("Chris");
+        fses.add("Dan");
+        fses.add("Eric");   
 
-    void sampleCodeFixedSizeExpiringSet(){
-        try{
-            
-        FixedSizeExpiringSet&lt;MyObject&gt; fses = new FixedSizeExpiringSet&lt;MyObject&gt;(4, 2000);
-    
-        fses.add(new MyObject("a", 1));
-        fses.add(new MyObject("b", 2));
-        fses.add(new MyObject("c", 3));
-        fses.add(new MyObject("d", 4));
-        fses.add(new MyObject("e", 5)); 
-
-        System.out.println("1) Size: " + fses.size());
+        System.out.println("Size: " + fses.size());
         Thread.sleep(1000);
-        System.out.println("2) Size: " + fses.size());
+        System.out.println("Size: " + fses.size());
         Thread.sleep(2000);
-        System.out.println("3) Size (after expiration): " + fses.size());
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+        System.out.println("Size (after expiration): " + fses.size());
+    } catch(Exception e) {
+        e.printStackTrace();
     }
+
     Output:
-        1) Size: 4
-        2) Size: 4
-        3) Size (after expiration): 0
+        Size: 4
+        Size: 4
+        Size (after expiration): 0
 </pre>
- * 
  * @author Gregorio Roper
+
  */
 
- /*
-  * Note: expiration times longer than Long.MAX_VALUE / 10^6 will be truncated.  
- */
 public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     
     private static final long MAX_EXPIRE_TIME = Long.MAX_VALUE / 1000000;

@@ -35,30 +35,18 @@ package org.limewire.collection;
  * {@link #ApproximateMatcher(int)}.
  * <p>
  * <pre>
-    void sampleCodeApproximateMatcher(){
-        ApproximateMatcher am = new ApproximateMatcher();
-        am.setIgnoreCase(true);
-        String s1 = am.process("Ireland");
-        String s2 = am.process("Iceland");
+    ApproximateMatcher am = new ApproximateMatcher();
+    am.setIgnoreCase(true);
+    String s1 = am.process("Ireland");
+    String s2 = am.process("Iceland");
 
-        String message = "insertions, deletions or replacements";
-        System.out.println("1) Number of " + message +" "+am.match(s1, s2));
-        System.out.println("2) Number of " + message +" "+am.match(s1, "land"));
+    System.out.println("Number of insertions, deletions or replacements " +am.match(s1, "land"));
 
-        if(am.matches(s1, s2, 0))
-            System.out.println("3) " + s1+ " and " + s2 + " match.");
-        else
-            System.out.println("3) " + s1+ " and " + s2 + " don't match.");
-        if(am.matches(s1, s2, 1))
-            System.out.println("4) " + s1+ " and " + s2 + " match.");
-        else
-            System.out.println("4) " + s1+ " and " + s2 + " don't match.");
-    }
+    if(am.matches(s1, s2, 1))
+        System.out.println(s1+ " and " + s2 + " match.");
     Output:
-        1) Number of insertions, deletions or replacements 1
-        2) Number of insertions, deletions or replacements 3
-        3) ireland and iceland don't match.
-        4) ireland and iceland match.
+        Number of insertions, deletions or replacements 3
+        ireland and iceland match.
 
 </pre>
  */
@@ -103,7 +91,7 @@ final public class ApproximateMatcher
     ////////////////////////////// Processing Methods ///////////////////////
 
     /**
-     * @param ignoreCase true if case should be ignored when matching processed
+     * @param ignoreCase true if and only if case should be ignored when matching processed
      * strings.  Default value is false.
      */
     public void setIgnoreCase(boolean ignoreCase) {
@@ -111,7 +99,7 @@ final public class ApproximateMatcher
     }
 
     /**
-     * @param ignoreWhitespace true if the characters ' ' and '_' should be
+     * @param ignoreWhitespace true if and only if the characters ' ' and '_' should be
      * ignored when matching processed strings.  Default value is false.
      */
     public void setIgnoreWhitespace(boolean ignoreWhitespace) {
@@ -119,7 +107,7 @@ final public class ApproximateMatcher
     }
 
     /**
-     * @param compareBackwards true if the comparison should be done backwards
+     * @param compareBackwards true if and only if the comparison should be done backwards
      * when matching processed strings.  This is solely an optimization if you
      * expect more differences at the end of the word than the beginning.  
      * Default value is false.
@@ -206,7 +194,7 @@ final public class ApproximateMatcher
      * If you want to ignore case or whitespace, or compare backwards, s1 and s2
      * should be the return values of a call to process(..).
      * 
-     * Requires 0.<=match<=1.
+     * @requires 0.<=match<=1.
      */
     public final boolean matches(String s1, String s2, float precision) {
         int s1n=s1.length();

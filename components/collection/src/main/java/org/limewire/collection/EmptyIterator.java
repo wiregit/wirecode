@@ -5,29 +5,21 @@ import java.util.NoSuchElementException;
 
 
 /**
- * Provides an unmodified empty iterator. <code>EmptyIterator</code> always
+ * Provides an unmodifiable empty iterator. <code>EmptyIterator</code> always
  * returns that there aren't any more items and throws a 
  * {@link NoSuchElementException} when attempting to move to the next item.
  * 
  <pre>
-    public void sampleCodeEmptyIterator(){
-        try{
-            
-            EmptyIterator ei = new EmptyIterator();
-        
-            while(ei.hasNext())
-                System.out.println(ei.next());      
-            ei.next();      
-        }
-        catch(Exception e){
-            System.out.println("Expected to get NoSuchElementException exception: " + e.toString());
-        }
+    try{
+        EmptyIterator ei = new EmptyIterator();     
+        ei.next();      
+    } catch (Exception e) {
+        System.out.println("Expected to get NoSuchElementException exception: " + e.toString());
     }
+
     Output:
         Expected to get NoSuchElementException exception: java.util.NoSuchElementException
-
  </pre>
- * 
  */
 public class EmptyIterator extends UnmodifiableIterator {
     /** A constant EmptyIterator. */

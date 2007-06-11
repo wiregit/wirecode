@@ -17,8 +17,8 @@ import java.io.IOException;
  * set has a <code>boolean</code> value. The bits of a <code>BitSet</code> are 
  * indexed by nonnegative integers. Individual indexed bits can be examined, 
  * set, or cleared. One <code>BitSet</code> may be used to modify the contents 
- * of another <code>BitSet</code> through logical {@link AndView AND}, {@link OrView logical inclusive OR}, 
- * and {@link XorView logical exclusive OR} operations.
+ * of another BitSet through logical AND, logical inclusive OR, and logical 
+ * exclusive OR operations.
  * <p>
  * By default, all bits in the set initially have the value false. 
  * <p>
@@ -30,25 +30,22 @@ import java.io.IOException;
  * <p>
  * Unless otherwise noted, passing a null parameter to any of the methods in a 
  * <code>BitSet</code> will result in a <code>NullPointerException</code>. 
- * Additionally, <code>BitSet</code> is not safe for multi-threaded use 
- * without external synchronization.
- * 
+ * <p>
+ * This class is not thread-safe.
  * <pre>
+    BitSet bs = new BitSet();
+    bs.set(1);
 
-    void sampleCodeBitSet(){
-        BitSet bs = new BitSet();
-        bs.set(1);
-
-        System.out.print("bs: ");
-        for(int i = 0; i < bs.size(); i++){
-            int j = 0;
-            if(bs.get(i)){
-                j = 1;          
-            }
-            System.out.print(j);
+    System.out.print("bs: ");
+    for(int i = 0; i < bs.size(); i++){
+        int j = 0;
+        if(bs.get(i)){
+            j = 1;          
         }
-        System.out.println();
+        System.out.print(j);
     }
+    System.out.println();
+
     Output:
         bs: 0100000000000000000000000000000000000000000000000000000000000000
  </pre>

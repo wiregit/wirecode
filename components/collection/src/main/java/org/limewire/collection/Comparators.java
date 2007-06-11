@@ -11,6 +11,33 @@ import java.util.Comparator;
  * pattern for {@link java.lang.Comparable} instances. Many of these comparators 
  * are only necessary because the Java 1.1.8 versions of their classes 
  * did not implement the {@link Comparable} interface.
+ * <p>
+ * <code>Comparators</code> are helpful when using a {@link FixedsizePriorityQueue}.
+ * <pre>   
+    FixedsizePriorityQueue&lt;String&gt; fpq = 
+        new FixedsizePriorityQueue&lt;String&gt;(Comparators.stringComparator(), 3);
+    fpq.insert("Abby");
+    fpq.insert("Bob");
+    fpq.insert("Chris");
+    System.out.println(fpq);
+    String s = fpq.insert("Dan");
+    System.out.println("Inserting another String pushes out an element (" + s + ") since the max. size was reached.");
+    System.out.println(fpq);
+
+    System.out.println("Minimum element: " + fpq.getMin());
+    System.out.println("Maximum element: " + fpq.getMax());
+    fpq.extractMax();
+    System.out.println(fpq);
+
+    Output:
+        [Abby, Bob, Chris]
+        Inserting another String pushes out an element (Abby) since the max. size was reached.
+        [Bob, Chris, Dan]
+        Minimum element: Bob
+        Maximum element: Dan
+        [Bob, Chris]
+
+ * </pre>
  */
 public final class Comparators { 
 

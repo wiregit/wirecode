@@ -9,35 +9,29 @@ package org.limewire.collection;
  * (If you attempt to create a byte array less than a size zero (base 2^-2), 
  * the size is set to 1.)
  * <p>
- * Additionally, <code>PowerOf2ByteArrayCache</code> stores the total cache size.
+ * Additionally, <code>PowerOf2ByteArrayCache</code> stores the total size of 
+ * cached byte[]s.
  * <pre>
-    void sampleCodePowerOf2ByteArrayCache(){
-        PowerOf2ByteArrayCache p2 = new PowerOf2ByteArrayCache();
-        for(int i = 0; i < 17; i++){
-            byte[] ba = p2.get(i);
-            int n = p2.getCacheSize();
-            System.out.println("i= " +i + " ba size: " + ba.length + " cache size is " + n);
-        }
-    }
-    Output:
-        i= 0 ba size: 1 cache size is 1
-        i= 1 ba size: 1 cache size is 1
-        i= 2 ba size: 2 cache size is 3
-        i= 3 ba size: 4 cache size is 7
-        i= 4 ba size: 4 cache size is 7
-        i= 5 ba size: 8 cache size is 15
-        i= 6 ba size: 8 cache size is 15
-        i= 7 ba size: 8 cache size is 15
-        i= 8 ba size: 8 cache size is 15
-        i= 9 ba size: 16 cache size is 31
-        i= 10 ba size: 16 cache size is 31
-        i= 11 ba size: 16 cache size is 31
-        i= 12 ba size: 16 cache size is 31
-        i= 13 ba size: 16 cache size is 31
-        i= 14 ba size: 16 cache size is 31
-        i= 15 ba size: 16 cache size is 31
-        i= 16 ba size: 16 cache size is 31
+    PowerOf2ByteArrayCache p2 = new PowerOf2ByteArrayCache();
+
+    byte[] ba4 = p2.get(4);
+    System.out.println("ba4 size: " + ba4.length + " cache size is " + p2.getCacheSize());
+
+    byte[] ba5 = p2.get(5);
+    System.out.println("ba5 size: " + ba5.length + " cache size is " + p2.getCacheSize());
+
+    byte[] ba8 = p2.get(8);
+    System.out.println("ba8 size: " + ba8.length + " cache size is " + p2.getCacheSize());
+
+    byte[] ba9 = p2.get(9);
+    System.out.println("ba9 size: " + ba9.length + " cache size is " + p2.getCacheSize());  
     
+    Output:
+        ba4 size: 4 cache size is 4
+        ba5 size: 8 cache size is 12
+        ba8 size: 8 cache size is 12
+        ba9 size: 16 cache size is 28
+
   </pre>
  */
 

@@ -5,66 +5,42 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Provides a priority queue with bounded size. Similar to a binary heap, but 
- * implemented with a balanced tree instead of a binary heap. This results in some
- * subtle differences:
- * 
- * <ol> 
- * <li><code>FixedsizePriorityQueue</code> guarantees the lowest priority element
- *     is ejected when exceeding capacity. A binary heap provides no such 
- *     guarantees.
- * <li>Fetching the max element takes O(lg N) time, where N is the number of
- *     elements. Compare with O(1) for a binary heap. Extracting and adding
- *     elements is still O(lg N) time.  
- * <li><code>FixedsizePriorityQueue</code> can provide operations for extracting the minimum
- *     and the maximum element. Note, however, that this is still considered
- *     a "max heap", for reasons in (1).
- * <li><code>FixedsizePriorityQueue</code> requires an explicit {@link Comparator};
- * <code>FixedsizePriorityQueue</code> won't use the natural ordering of values.
- * </ol>
- * 
- * <b>This class is not synchronized.</b>
+ * Provides a priority queue with bounded size in an 
+ * <a href="http://en.wikipedia.org/wiki/AVL_tree">AVL tree</a>.
+ * <code>FixedsizePriorityQueue</code> guarantees the lowest priority element
+ * is ejected when exceeding capacity. 
  * <p>
+ * <code>FixedsizePriorityQueue</code> provides {@link #extractMax()} to extract 
+ * the maximum element. <code>FixedsizePriorityQueue</code> requires an explicit 
+ * {@link Comparator}; <code>FixedsizePriorityQueue</code> won't use the natural
+ * ordering of values.
+ * <p>
+ * Fetching the max element takes O(lg N) time, where N is the number of
+ * elements. Also, extracting and adding elements is O(lg N) time.  
+ * <p>
+ * This class is not thread-safe.
 <pre>
-    public class MyComparatorObject implements Comparator&lt;MyObject&gt;{  
-        public int compare(MyObject a, MyObject b){
-            return a.item - b.item;
-        }
-    }   
-    public class MyObject{
-        public String s;
-        public int item;
-        public MyObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    FixedsizePriorityQueue&lt;String&gt; fpq = 
+        new FixedsizePriorityQueue&lt;String&gt;(Comparators.stringComparator(), 3);
+    fpq.insert("Abby");
+    fpq.insert("Bob");
+    fpq.insert("Chris");
+    System.out.println(fpq);
+    System.out.println("Inserting another String pushes out an element (" + fpq.insert("Dan") + ") since the max. size was reached.");
+    System.out.println(fpq);
 
-        public String toString(){
-            return s + "=" + item ;
-        }
-    }   
-
-    void sampleCodeFixedsizePriorityQueue(){
-        
-        FixedsizePriorityQueue&lt;MyObject&gt; fpq = 
-            new FixedsizePriorityQueue&lt;MyObject&gt;(new MyComparatorObject(), 3);
-        fpq.insert(new MyObject("a", 19));
-        fpq.insert(new MyObject("b", 2));
-        fpq.insert(new MyObject("c", 37));
-        System.out.println(fpq);
-        fpq.insert(new MyObject("d", 400));
-        System.out.println("Inserting another Integer pushes out an element since the max. size was reached.");
-        System.out.println(fpq);
-
-        System.out.println("Minimum element: " + fpq.getMin());
-        System.out.println("Maximum element: " + fpq.getMax());
-    }
+    System.out.println("Minimum element: " + fpq.getMin());
+    System.out.println("Maximum element: " + fpq.getMax());
+    fpq.extractMax();
+    System.out.println(fpq);
+    
     Output:
-        [b=2, a=19, c=37]
-        Inserting another Integer pushes out an element since the max. size was reached.
-        [a=19, c=37, d=400]
-        Minimum element: a=19
-        Maximum element: d=400
+        [Abby, Bob, Chris]
+        Inserting another String pushes out an element (Abby) since the max. size was reached.
+        [Bob, Chris, Dan]
+        Minimum element: Bob
+        Maximum element: Dan
+        [Bob, Chris]
 
 </pre>
  */

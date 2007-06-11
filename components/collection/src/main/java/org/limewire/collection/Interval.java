@@ -7,6 +7,12 @@ import org.limewire.util.ByteOrder;
 
 /** 
  * Represents a closed interval [low, high] inclusive on both ends. 
+<pre>
+    System.out.println("Interval is " + new Interval(1,4));
+    
+    Output:
+        Interval is 1-4
+</pre>
  */
 public class Interval implements Serializable{
     /** Ensure backwards compatibility. */
@@ -16,8 +22,8 @@ public class Interval implements Serializable{
     public final int low;
     public final int high;
 
-    /** Requires low<=high.
-     *  Requires low and high can be represented as ints.
+    /** @requires low<=high.
+     *  @requires low and high can be represented as ints.
      */
     public Interval(long low, long high) {
         if(high < low)
@@ -37,7 +43,7 @@ public class Interval implements Serializable{
     }
     
     /**
-    *  Requires singleton can be represented as an int.
+    *  @requires singleton can be represented as an int.
     */
     public Interval(long singleton) {
         if(singleton < Integer.MIN_VALUE)

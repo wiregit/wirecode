@@ -18,27 +18,25 @@ import org.limewire.util.ByteOrder;
  * Provides an interval of ranges (a "range" version of {@link IntSet}). 
  * 
  <pre>
+    IntervalSet is = new IntervalSet();
+    
+    is.add(new Interval(1,4)); 
+    is.add(new Interval(11,14)); 
+    is.add(new Interval(21,24)); 
+    System.out.println("Set is " + is + " intervals: " + 
+            is.getNumberOfIntervals());
 
-    void sampleCodeIntervalSet(){
-        IntervalSet is = new IntervalSet();
-        
-        is.add(new Interval(1,4)); 
-        is.add(new Interval(11,14)); 
-        is.add(new Interval(21,24)); 
-        System.out.println("1) Set is " + is + " intervals: " + 
-                is.getNumberOfIntervals());
+    is.add(new Interval(5,10)); 
+    System.out.println("Set is " + is + " intervals: " + 
+            is.getNumberOfIntervals());
+    IntervalSet is2 = is.invert(50);
+    System.out.println("Set is " + is2 + " intervals: " + 
+            is2.getNumberOfIntervals());
 
-        is.add(new Interval(5,10)); 
-        System.out.println("2) Set is " + is + " intervals: " + 
-                is.getNumberOfIntervals());
-        IntervalSet is2 = is.invert(50);
-        System.out.println("3) Set is " + is2 + " intervals: " + 
-                is2.getNumberOfIntervals());
-    }
     Output:
-        1) Set is [1-4, 11-14, 21-24] intervals: 3
-        2) Set is [1-14, 21-24] intervals: 2
-        3) Set is [0, 15-20, 25-49] intervals: 3
+        Set is [1-4, 11-14, 21-24] intervals: 3
+        Set is [1-14, 21-24] intervals: 2
+        Set is [0, 15-20, 25-49] intervals: 3
 </pre>
  * 
  */ 

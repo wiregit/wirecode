@@ -10,13 +10,17 @@ import java.util.NoSuchElementException;
  * <p>
  * <code>RandomSequence</code> also implements the <code>Iterable</code> 
  * interface that iterates over a single cycle.
+ * <p>
+ * For more information regarding the logic, see <a href=
+ * "http://en.wikipedia.org/wiki/Linear_congruential_generator">Linear 
+ * congruential generator</a>.
+ * <p>
+ * Thanks to Cyclonus for the pow2 hint.
+
  <pre>
-    void sampleCodeRandomSequence(){
-        RandomSequence rs = new RandomSequence(10);
-        Iterable&lt;Integer&gt; i = new MultiIterable&lt;Integer&gt;(rs);
-        for(Integer o : i)
-            System.out.println(o);
-    }
+    for(Integer o : new RandomSequence(10))
+        System.out.println(o);
+
     Random Output:
         4
         7
@@ -28,12 +32,9 @@ import java.util.NoSuchElementException;
         8
         6
         9
+</pre>
  */
 
-/* For more information regarding the logic, see
- * http://en.wikipedia.org/wiki/Linear_congruential_generator.
- * Thx to Cyclonus for the pow2 hint
- */
 public class RandomSequence implements Iterable<Integer> {
     private final int end;
     private final long pow2, a;

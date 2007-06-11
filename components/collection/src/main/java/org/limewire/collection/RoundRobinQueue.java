@@ -6,57 +6,21 @@ import java.util.LinkedList;
 
 
 /**
- * Creates a round-robin queue. {@link #next()} returns an item on the queue and then puts 
+ * A round-robin queue. {@link #next()} returns an item on the queue and then puts 
  * that item to the end of the queue.
- <pre>
-
-    void sampleCodeRoundRobinQueue(){
-        class myarray{
-            int [] ar;
-            int Index;
-            public String Get(){
-                if(Index == Size())                 
-                    Index = 0;      
-                return "[" + ar[Index++] + "]";
-            }
-            
-            public int Size(){
-                return ar.length;
-            }
-
-            public myarray(int a){
-                Index = 0;
-                ar = new int [2];
-                
-                switch(a){
-                case 0:
-                    ar[0] = 1;ar[1] = 2;
-                break;
-                case 1:
-                    ar[0] = 11;ar[1] = 12;
-                break;
-                }
-            }
-        }
-        RoundRobinQueue&lt;myarray&gt; rrq = new RoundRobinQueue&lt;myarray&gt;();
-        
-        LinkedList&lt;myarray&gt; ll = new LinkedList&lt;myarray&gt;();
-        ll.add(new myarray(0));
-        ll.add(new myarray(1));
-        
-        Iterator&lt;myarray&gt; iter = ll.iterator();
-        while(iter.hasNext())
-            rrq.enqueue(iter.next());
-        
-        for(int i = 0; i < rrq.size() * new myarray(0).Size() ; i++){
-            System.out.println(rrq.next().Get());
-        }   
-    }
-    Output:
-        [1]
-        [11]
-        [2]
-        [12]
+ <pre>    
+    RoundRobinQueue&lt;Integer&gt; rrq = new RoundRobinQueue&lt;Integer&gt;();  
+    rrq.enqueue(1); 
+    rrq.enqueue(2);  
+    
+    for(Integer i = rrq.size() + 1; i > 0; i--)
+        System.out.println(rrq.next());
+    
+    Output:    
+        1
+        2
+        1
+    
  </pre>
  * 
  */

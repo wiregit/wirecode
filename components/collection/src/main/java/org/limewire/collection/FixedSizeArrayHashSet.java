@@ -15,72 +15,31 @@ import java.util.RandomAccess;
  * <p>
  * <code>FixedSizeArrayHashSet</code> does not support the null element.
  * <pre> 
-    public class MyObjectHash{
-        public String s;
-        public int item;
-        public MyObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    FixedSizeArrayHashSet&lt;String&gt; fsah = new FixedSizeArrayHashSet&lt;String&gt;(4);
 
-        public String toString(){
-            return s + "=" + item;
-        }
-        
-        public boolean equals(Object obj) {
-            MyObjectHash other = (MyObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
-        }
-    }   
-
-    void sampleCodeFixedSizeArrayHashSet(){
-
-        FixedSizeArrayHashSet&lt;MyObjectHash&gt; fsah = new FixedSizeArrayHashSet&lt;MyObjectHash&gt;(4);
+    fsah.add("Abby");
+    fsah.add("Bob");
+    fsah.add("Chris");
+    fsah.add("Dan");
+    fsah.add("Eric");
+    fsah.add("Fred");
+    System.out.println(fsah);
     
-        fsah.add(new MyObjectHash("a", 1));
-        fsah.add(new MyObjectHash("b", 2));
-        fsah.add(new MyObjectHash("c", 3));
-        fsah.add(new MyObjectHash("d", 4));
-        fsah.add(new MyObjectHash("e", 5));
-        fsah.add(new MyObjectHash("f", 6));
+    if(!fsah.add("Chris"))
+        System.out.println("Tried to add Chris again, but it failed (though Chris was put to the first item).");
+    System.out.println(fsah);
 
-        for (MyObjectHash iO : fsah)
-            System.out.println(iO);
-        
-        if(!fsah.add(new MyObjectHash("c", 3)))
-            System.out.println("Tried to add 3=c again, but it failed (though 3=c was put to the first item).");
+    System.out.println("Index access: " + fsah.get(0));
 
-        System.out.println("Index access: " + fsah.get(0));
-
-        for (MyObjectHash iO : fsah)
-            System.out.println(iO);
-
-        System.out.println("Remove 3=c.");
-        if(!fsah.remove(new MyObjectHash("c", 3)))
-            System.out.println("Remove failed.");
-
-        for (MyObjectHash iO : fsah)
-            System.out.println(iO);
-    }
+    fsah.remove("Chris");
+    System.out.println(fsah);
     Output:
-        f=6
-        e=5
-        d=4
-        c=3
-        Tried to add 3=c again, but it failed (though 3=c was put to the first item).
-        Index access: c=3
-        c=3
-        f=6
-        e=5
-        d=4
-        Remove 3=c.
-        f=6
-        e=5
-        d=4
+        [Fred, Eric, Dan, Chris]
+        Tried to add Chris again, but it failed (though Chris was put to the first item).
+        [Chris, Fred, Eric, Dan]
+        Index access: Chris
+        [Fred, Eric, Dan]
+
    </pre>    
  */
 public class FixedSizeArrayHashSet<T> extends HashSet<T> implements RandomAccess {

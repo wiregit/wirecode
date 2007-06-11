@@ -4,24 +4,20 @@ package org.limewire.collection;
  * Provides a circular buffer for {@link Number Numbers}. Includes a summation
  * and average (arithmetic mean) of the elements in the buffer.
 <pre>
+    NumericBuffer&lt;Float&gt; nb = new NumericBuffer&lt;Float&gt;(10);
+    
+    nb.add(1f);
+    nb.add(2f);
+    nb.add(3f);
+    nb.add(4f);
+    System.out.println(nb);
+    System.out.println("Arithmetic mean (average) is: " + nb.average());
+    System.out.println("Sum is: " + nb.sum());  
 
-    void sampleCodeNumericBuffer(){
-        NumericBuffer&lt;Float&gt; nb = new NumericBuffer&lt;Float&gt;(10);
-        
-        for(float i = 1; i <= 4; i++)
-            nb.add(i);
-        for(float i : nb)
-            System.out.println("Value is " + i);
-        System.out.println("Arithmetic mean (average) is: " + nb.average());
-        System.out.println("Sum is: " + nb.sum());  
-    }
     Output:
-    Value is 4.0
-    Value is 3.0
-    Value is 2.0
-    Value is 1.0
-    Arithmetic mean (average) is: 2.5
-    Sum is: 10.0
+        [4.0, 3.0, 2.0, 1.0]
+        Arithmetic mean (average) is: 2.5
+        Sum is: 10.0
 </pre>
  * 
  */

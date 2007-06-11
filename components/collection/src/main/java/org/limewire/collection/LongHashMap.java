@@ -60,7 +60,14 @@ package org.limewire.collection;
 
 /**
  * <p>A hash map that uses primitive longs for the key rather than objects.</p>
- *
+<pre>
+    LongHashMap&lt;String&gt; lhm = new LongHashMap<String>(3);
+    lhm.put(1, "Abby");     
+    System.out.println(lhm.get(1)); 
+
+    Output:
+        Abby
+</pre>
  * @author Justin Couch
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne

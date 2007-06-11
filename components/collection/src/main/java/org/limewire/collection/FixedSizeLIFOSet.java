@@ -1,69 +1,48 @@
 package org.limewire.collection;
 
 /**
- * A fixed size Last-In-First-Out (LIFO) Set.
  * A fixed size <code>Set</code> where the last added element is the first 
  * item in the list. Upon reaching the capacity of elements, 
- * <code>FixedSizeLIFOSet</code> removes either the last item first (default)
- * first item first (FIFO).
+ * <code>FixedSizeLIFOSet</code> removes either the last item inserted, first 
+ * out (LIFO, default) or removes the first item inserted, first out (FIFO). 
+ * <p>
+ * This class is a hash-based <code>Set</code> and therefore, objects must correctly
+ * contain a {@link #hashCode()} and {@link #equals(Object)}.
  <pre>
- 
-    public class MyObject{
-        public String s;
-        public int item;
-        public MyObject(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
+    System.out.println("EjectionPolicy: LIFO");
+    FixedSizeLIFOSet&lt;String&gt; lifo = new FixedSizeLIFOSet&lt;String&gt;(3, FixedSizeLIFOSet.EjectionPolicy.LIFO);
 
-        public String toString(){
-            return s + "=" + item ;
-        }
-    }   
- 
-    void sampleCodeFixedSizeLIFOSet(){
-        FixedSizeLIFOSet<MyObject> fslsLIFO = new FixedSizeLIFOSet<MyObject>(3, FixedSizeLIFOSet.EjectionPolicy.LIFO);
-        
-        if(!fslsLIFO.add(new MyObject("1", 1)))
-            System.out.println("Add failed 1");
-        System.out.println(fslsLIFO);
-        if(!fslsLIFO.add(new MyObject("2", 2)))
-            System.out.println("Add failed 2");
-        System.out.println(fslsLIFO);
-        if(!fslsLIFO.add(new MyObject("3", 3)))
-            System.out.println("Add failed 3");
-        System.out.println(fslsLIFO);
-        if(!fslsLIFO.add(new MyObject("4", 4)))
-            System.out.println("Add failed 4");
-        System.out.println(fslsLIFO);
-        
-        System.out.println("********************");
+    lifo.add("Abby");
+    lifo.add("Bob");
+    lifo.add("Chris");
+    System.out.println(lifo);
+    System.out.println("Last in: Chris, First in Abby");
+    lifo.add("Dan");
+    System.out.println(lifo);
 
-        FixedSizeLIFOSet<MyObject> fslsFIFO = new FixedSizeLIFOSet<MyObject>(3, FixedSizeLIFOSet.EjectionPolicy.FIFO);
-        
-        if(!fslsFIFO.add(new MyObject("1", 1)))
-            System.out.println("Add failed 1");
-        System.out.println(fslsFIFO);
-        if(!fslsFIFO.add(new MyObject("2", 2)))
-            System.out.println("Add failed 2");
-        System.out.println(fslsFIFO);
-        if(!fslsFIFO.add(new MyObject("3", 3)))
-            System.out.println("Add failed 3");
-        System.out.println(fslsFIFO);
-        if(!fslsFIFO.add(new MyObject("4", 4)))
-            System.out.println("Add failed 4");
-        System.out.println(fslsFIFO);
-    }
+    System.out.println("\nEjectionPolicy: FIFO");
+
+    FixedSizeLIFOSet&lt;String&gt; fifo = new FixedSizeLIFOSet&lt;String&gt;(3, FixedSizeLIFOSet.EjectionPolicy.FIFO);
+
+    fifo.add("Abby");
+    fifo.add("Bob");
+    fifo.add("Chris");
+    System.out.println(fifo);
+    System.out.println("Last in: Chris, First in Abby");
+    fifo.add("Dan");
+    System.out.println(fifo);
+
     Output:
-        [1=1]
-        [2=2, 1=1]
-        [3=3, 2=2, 1=1]
-        [4=4, 2=2, 1=1]
-        ********************
-        [1=1]
-        [2=2, 1=1]
-        [3=3, 2=2, 1=1]
-        [4=4, 3=3, 2=2]
+        EjectionPolicy: LIFO
+        [Chris, Bob, Abby]
+        Last in: Chris, First in Abby
+        [Dan, Bob, Abby]
+        
+        EjectionPolicy: FIFO
+        [Chris, Bob, Abby]
+        Last in: Chris, First in Abby
+        [Dan, Chris, Bob]
+
  </pre>
 
  */

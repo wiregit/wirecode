@@ -3,19 +3,7 @@ package org.limewire.collection;
 /**
  * Provides a <code>BitField</code> implementation for a {@link BitSet} object.
  * 
- <pre>
-    void printBitField(BitField bf, String bfName){
-        System.out.print(bfName + ": ");
-        for(int i = 0; i < bf.maxSize(); i++){
-            int j = 0;
-            if(bf.get(i)){
-                j = 1;          
-            }
-            System.out.print(j);
-        }
-        System.out.println(""); 
-    }
-
+ <pre>   
     void sampleCodeBitFieldSet(){
         BitSet bs1 = new BitSet();
         bs1.set(1);
@@ -31,38 +19,45 @@ package org.limewire.collection;
         BitField bf2 = new BitFieldSet(bs2, 16);
         BitField bf3 = new BitFieldSet(bs3, 16);
 
-        printBitField(bf1, "bf1");
-        printBitField(bf2, "bf2");
-        printBitField(bf3, "bf3");
-
-        System.out.println("\nbf1) cardinality: " + bf1.cardinality());
-        System.out.println("bf1) Next clear bit is: " + bf1.nextClearBit(2));
-        System.out.println("bf1) Next set bit is: " + bf1.nextSetBit(0));
-
-        System.out.println("\nbf2) cardinality: " + bf2.cardinality());
-        System.out.println("bf2) Next clear bit is: " + bf2.nextClearBit(2));
-        System.out.println("bf2) Next set bit is: " + bf2.nextSetBit(0));
-
-        System.out.println("\nbf3) cardinality: " + bf3.cardinality());
-        System.out.println("bf3) Next clear bit is: " + bf3.nextClearBit(2));
-        System.out.println("bf3) Next set bit is: " + bf3.nextSetBit(0));        
+        PrintBFInfo(bf1, "bf1");
+        PrintBFInfo(bf2, "bf2");
+        PrintBFInfo(bf3, "bf3");      
     }
+
+    void PrintBFInfo(BitField bf, String bfn){
+        System.out.println(bfn);
+        for(int i = 0; i < bf.maxSize(); i++){
+            int j = 0;
+            if(bf.get(i))
+                j = 1;          
+            System.out.print(j);
+        }
+        System.out.println(); 
+
+        System.out.println("cardinality: " + bf.cardinality());
+        System.out.println("Next clear bit is: " + bf.nextClearBit(2));
+        System.out.println("Next set bit is: " + bf.nextSetBit(0));
+        System.out.println();         
+    }
+
     Output:
-        bf1: 0101000000000000
-        bf2: 0010000000000000
-        bf3: 0001000000000000
+        bf1
+        0101000000000000
+        cardinality: 2
+        Next clear bit is: 2
+        Next set bit is: 1
         
-        bf1) cardinality: 2
-        bf1) Next clear bit is: 2
-        bf1) Next set bit is: 1
+        bf2
+        0010000000000000
+        cardinality: 1
+        Next clear bit is: 3
+        Next set bit is: 2
         
-        bf2) cardinality: 1
-        bf2) Next clear bit is: 3
-        bf2) Next set bit is: 2
-        
-        bf3) cardinality: 1
-        bf3) Next clear bit is: 2
-        bf3) Next set bit is: 3
+        bf3
+        0001000000000000
+        cardinality: 1
+        Next clear bit is: 2
+        Next set bit is: 3
  </pre>
  * 
  */

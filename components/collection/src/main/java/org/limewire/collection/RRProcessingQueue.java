@@ -14,40 +14,40 @@ import org.limewire.concurrent.ExecutorsHelper;
  * Executes {@link Runnable Runnables} in a round-robin order per queue ID. 
  * 
  <pre>
-    public void sampleCodeRRProcessingQueue(){
-        class Runner implements Runnable {
-            final int item;
-            Runner(int item) {
-                this.item = item;
-            }
-            public void run() {
-                try {
+    class Runner implements Runnable {
+        final int item;
+        
+        Runner(int item) {
+            this.item = item;
+        }
+        
+        public void run() {
+            try {
                 Thread.sleep(150);
                 System.out.println("Item: " + item);
-                } catch (InterruptedException iex){
-                    System.out.println(iex.toString());
-                }
+            } catch (InterruptedException iex) {
+                System.out.println(iex.toString());
             }
-        }       
-        RRProcessingQueue rrpq = new RRProcessingQueue("sampleCodeRRProcessingQueue");
-        
-        rrpq.execute(new Runner(1), "1");
-        rrpq.execute(new Runner(2), "2");
-        rrpq.execute(new Runner(3), "1");
-        rrpq.execute(new Runner(4), "2");
-        rrpq.execute(new Runner(5), "3");
-                
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {}                
-    }
+        }
+    }       
+    RRProcessingQueue rrpq = new RRProcessingQueue("sampleCodeRRProcessingQueue");
+    
+    rrpq.execute(new Runner(1), "Abby");
+    rrpq.execute(new Runner(2), "Bob");
+    rrpq.execute(new Runner(3), "Abby");
+    rrpq.execute(new Runner(4), "Bob");
+    rrpq.execute(new Runner(5), "Chris");
+            
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException ignored) {}                
+
     Output:
         Item: 1
         Item: 2
         Item: 5
         Item: 3
         Item: 4
-
  </pre>
  */
 /* TODO: Convert to using java.util.concurrent. */

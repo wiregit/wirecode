@@ -10,7 +10,18 @@ import java.util.Map;
 
 /**
  * Holds a name value pair. The name is an instance of <code>String</code>, the
- * value can be any object. 
+ * value can be any object.
+ *  
+ * <pre>
+    NameValue.ComparableByName&lt;String&gt; cbnDriver = new NameValue.ComparableByName&lt;String&gt;("Driver's License", "Alaska");
+    NameValue.ComparableByName&lt;String&gt; cbnBoating = new NameValue.ComparableByName&lt;String&gt;("Boating License", "Pennyslvania");
+    
+    System.out.println("Compare Driver's License with Boating License: " + cbnDriver.compareTo(cbnBoating));    
+
+    Output:
+        Compare Driver's License with Boating License: 2
+ * </pre>
+ * @author Anurag Singla 
  */
 public class NameValue <V> implements Map.Entry<String, V> {
 
@@ -53,7 +64,10 @@ public class NameValue <V> implements Map.Entry<String, V> {
     }
     /**
      * Gives a {@link #compareTo(org.limewire.collection.NameValue.ComparableByName)} 
-     * implementation for a {@link NameValue}.
+     * implementation for a {@link NameValue}. This class compares according to
+     * the name.  
+     * <pre>
+     * </pre> 
      */
     public static class ComparableByName<V> extends NameValue<V> implements Comparable<ComparableByName> {
         public ComparableByName(String name) {

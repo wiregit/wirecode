@@ -8,6 +8,24 @@ import org.limewire.concurrent.SchedulingThreadPool;
 /**
  * A utility to schedule, reschedule and cancel the execution of 
  * a task.
+<pre>
+    Calendar cal = new GregorianCalendar();
+    System.out.println("1) " + cal.get(Calendar.SECOND));
+    
+    Periodic p = new Periodic(new Runnable() {
+        public void run() {
+            Calendar cal = new GregorianCalendar();
+            System.out.println("3) " + cal.get(Calendar.SECOND));
+            }}, new SimpleTimer(false));
+
+    p.rescheduleIfLater(5000);
+    System.out.println("2) " + cal.get(Calendar.SECOND));
+    
+    Time run-dependant Output:
+        1) 23
+        2) 23
+        3) 28
+</pre>
  */
 public class Periodic {
 

@@ -7,6 +7,8 @@ package org.limewire.collection;
  * a size of 10 and attempt to add the 11th item, 
  * {@link FixedsizeHashMap#put(Object, Object)} throws 
  * <code>NoMoreStorageException</code>.
+ * 
+ * @author Anurag Singla 
  */
 
 public class NoMoreStorageException extends RuntimeException

@@ -7,19 +7,7 @@ package org.limewire.collection;
  * <p>
  * For more information, see <a href = 
  * "http://en.wikipedia.org/wiki/Logical_conjunction">Logical conjunction</a>.
-<pre>
-    void printBitField(BitField bf, String bfName){
-        System.out.print(bfName + ": ");
-        for(int i = 0; i < bf.maxSize(); i++){
-            int j = 0;
-            if(bf.get(i)){
-                j = 1;          
-            }
-            System.out.print(j);
-        }
-        System.out.println(""); 
-    }
-
+<pre>   
     void sampleCodeAndView(){
         BitSet bs1 = new BitSet();
         bs1.set(0);
@@ -28,11 +16,7 @@ package org.limewire.collection;
         BitSet bs2 = new BitSet();
         bs2.set(0);
         bs2.set(2);
-        
-        BitSet bs3 = new BitSet();
-        bs3.set(0);
-        bs3.set(3);
-        
+                
         BitField bf1 = new BitFieldSet(bs1, 5);
         BitField bf2 = new BitFieldSet(bs2, 5);
                
@@ -40,16 +24,20 @@ package org.limewire.collection;
         printBitField(bf2, "bf2");
         
         AndView av = new AndView(bf1, bf2);
-
-        System.out.print(" av: ");
-        for(int i = 0 ; i < av.maxSize(); i++){
-            int j = 0;
-            if(av.get(i))
-                j = 1;
-            System.out.print(j);
-        }   
-        System.out.println();
+        printBitField(av, " av");
     }
+
+    void printBitField(BitField bf, String bfName){
+        System.out.print(bfName + ": ");
+        for(int i = 0; i < bf.maxSize(); i++){
+            int j = 0;
+            if(bf.get(i))
+                j = 1;          
+            System.out.print(j);
+        }
+        System.out.println(""); 
+    }
+
     Output:
         bf1: 11000
         bf2: 10100

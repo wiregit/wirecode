@@ -50,6 +50,31 @@ import java.util.SortedMap;
  * <code>ClassCastException<code> if the method is expecting an instance of K 
  * (and it isn't K).
  * 
+ * <pre>
+    PatriciaTrie&lt;String, String&gt; trie = new PatriciaTrie&lt;String, String&gt;
+    (new CharSequenceKeyAnalyzer());
+    
+    trie.put("Lime", "Lime");
+    trie.put("LimeWire", "LimeWire");
+    trie.put("LimeRadio", "LimeRadio");
+    trie.put("Lax", "Lax");
+    trie.put("Lake", "Lake");
+    trie.put("Lovely", "Lovely");
+
+    System.out.println(trie.select("Lo"));
+    System.out.println(trie.select("Lime"));
+
+    System.out.println(trie.getPrefixedBy("La").toString());            
+    
+    Output:
+        Lovely
+        Lime
+        {Lake=Lake, Lax=Lax}
+
+ * </pre>
+ * @author Roger Kapsi
+ * @author Sam Berlin
+
  */
 public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>, Serializable {
     

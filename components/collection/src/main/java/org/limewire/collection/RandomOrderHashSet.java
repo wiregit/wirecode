@@ -8,28 +8,16 @@ import java.util.Iterator;
  * its elements in random order. 
  * 
 <pre>
+    LinkedList&lt;Integer&gt; linkedlist1 = new LinkedList&lt;Integer&gt;();
+    for(int i = 0; i < 5; i++)
+        linkedlist1.add(i);
+                        
+    RandomOrderHashSet&lt;Integer&gt; rohs = new RandomOrderHashSet&lt;Integer&gt;(linkedlist1);                
+    System.out.println(rohs);
 
-    void sampleCodeRandomOrderHashSet(){
-
-        LinkedList&lt;Integer&gt; linkedlist1 = new LinkedList&lt;Integer&gt;();
-        for(int i = 0; i < 5; i++)
-            if(!linkedlist1.add(i))
-                System.out.println("add failed " + i);  
-                            
-        RandomOrderHashSet&lt;Integer&gt; rohs = new RandomOrderHashSet&lt;Integer&gt;(linkedlist1);
-        
-        Iterator&lt;Integer&gt; iter = rohs.iterator();
-        
-        while(iter.hasNext()){
-            System.out.println(iter.next());
-        }
-    }
     Random Output:
-        3
-        0
-        2
-        4
-        1
+        [1, 3, 0, 2, 4]
+
 </pre>
  */
 public class RandomOrderHashSet<T> extends FixedSizeArrayHashSet<T> {

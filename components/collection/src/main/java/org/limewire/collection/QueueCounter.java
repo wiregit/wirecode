@@ -8,27 +8,23 @@ import java.util.LinkedList;
  * <p> See <a href="http://en.wikipedia.org/wiki/Little's_law">Little's Law</a>
  * for more information.
 <pre>
-    void sampleCodeQueueCounter(){
-        try{
-            QueueCounter qc = new QueueCounter(10);
-            System.out.println("Average size: " + qc.getAverageSize());
-            for(int i = 0; i < 10; i++){
-                qc.recordArrival();
-                Thread.sleep( 1000 );
-            }
-            for(int i = 0; i < 10; i++){
-                qc.recordDeparture();
-            }
-            System.out.println("Average size: " + qc.getAverageSize());
+    try{
+        QueueCounter qc = new QueueCounter(10);
+        System.out.println("Average size: " + qc.getAverageSize());
+        for(int i = 0; i < 10; i++){
+            qc.recordArrival();
+            Thread.sleep( 1000 );
         }
-        catch(Exception e){
-            e.printStackTrace();
-        }       
-        
-    }
+        for(int i = 0; i < 10; i++)
+            qc.recordDeparture();
+        System.out.println("Average size: " + qc.getAverageSize());
+    } catch(Exception e) {
+        e.printStackTrace();
+    }               
+
     Output:
         Average size: -1.0
-        Average size: 5.496200684813807
+        Average size: 5.500395106845166
     
 </pre>
  */

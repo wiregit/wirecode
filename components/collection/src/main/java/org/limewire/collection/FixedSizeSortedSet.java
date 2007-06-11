@@ -15,81 +15,151 @@ import org.limewire.service.ErrorService;
 /**
  * Gives a sorted {@link Set} of elements with a maximum size. Elements are sorted
  * upon insertion to the list, but only a fixed number of unique items are kept. 
- * Therefore, a newly inserted element can push out items depending on it's 
- * insertion location. 
+ * Therefore, a newly inserted element can push out items depending on its 
+ * insertion location. All inserted elements must implement the 
+ * {@link Comparable} interface. Additionally, <code>FixedSizeSortedSet</code> 
+ * does not accept duplicate elements. 
  * <p>
- * <code>FixedSizeSortedSet</code> does not accept duplicate elements. 
- * Additionally, <code>FixedSizeSortedSet</code> is not synchronized and should
- * be done externally.
- *<p> 
- * All elements inserted into a sorted set must implement the 
- * {@link Comparable} interface. 
- * 
+ * {@link #hashCode()} and {@link #equals(Object)} are used to determine if an
+ * existing item needs to be replaced, but <code>compareTo</code> is 
+ * used to determine which items are ejected. <code>compareTo</code> CAN be 
+ * different from <code>hashCode</code> and <code>equals</code> (which is 
+ * explicitly against the strong suggestion of <code>compareTo</code> and 
+ * <code>equals</code>, but is necessary for <code>FixedSizeSortedSet</code> to
+ * function). In other words,
+ * <p>
+ * Note: <code>FixedSizeSortedSet</code> can use a class that has a natural
+ * ordering that is inconsistent with equals.
+ * <p>
+ * This class is not thread-safe.
  <pre>
-    public class MyComparableObjectHash implements Comparable&lt;MyComparableObjectHash$gt;{
-        public String s;
-        public int item;
-        public MyComparableObjectHash(String s, int item){
-            this.s = s;
-            this.item = item;
-        }       
-
-        public String toString(){
-            return s + "=" + item;
-        }
-                
-        public int compareTo(MyComparableObjectHash other) {
-            int c = this.s.compareTo(other.s);//compare by the string
-            if(c == 0){//if the string is equal, compare by item
-                c = this.item - other.item;
-            }
-                return c;
-            }   
-
-        public boolean equals(Object obj) {
-            MyComparableObjectHash other = (MyComparableObjectHash)obj;
-            return (this.s.equals(other.s) && this.item == other.item);         
-        }
-                
-        public int hashCode() {
-            return this.item * 31 + s.hashCode();
+    //Consistent with equals
+    public class MyPersonName implements Comparable {
+        private int age ;
+        private String name;
+        
+        MyPersonName(String name, int age){
+            this.name = name;
+            this.age = age;
         }
         
-    }   
+        public int age(){
+            return age;
+        }
+        
+        public String name(){
+            return name;
+        }
+        
+        public int compareTo(Object o){
+            MyPersonName p = (MyPersonName) o;
+            return this.name.compareTo(p.name());
+        }
+        
+        public boolean equals(Object o){
+            MyPersonName p = (MyPersonName) o;
+            return name.equals(p.name());
+        }
+        
+        public int hashCode(){
+            return 37*name.hashCode();
+        }
 
-    void sampleCodeFixedSizeSortedSet(){    
-        FixedSizeSortedSet&lt;MyComparableObjectHash&gt; fsss = new FixedSizeSortedSet&lt;MyComparableObjectHash&gt;(5);
+        public String toString(){
+            return name + "'s age: " + age;
+        }
+    }
+    
+    //Note: This class has a natural ordering that is inconsistent with equals
+    public class MyPersonAge implements Comparable {
+        private int age ;
+        private String name;
+        
+        MyPersonAge(String name, int age){
+            this.name = name;
+            this.age = age;
+        }
+        public int age(){
+            return age;
+        }
+        public String name(){
+            return name;
+        }
+        
+        public int compareTo(Object o){
+            MyPersonAge p = (MyPersonAge) o;
+            return this.age - p.age() ;
+        }
+        
+        public boolean equals(Object o){
+            MyPersonAge p = (MyPersonAge) o;
+            return name.equals(p.name());
+        }
+        
+        public int hashCode(){
+            return 37*name.hashCode();
+        }
+        
+        public String toString(){
+            return name + "'s age: " + age;
+        }
+    }
+    
+    void sampleCodeFixedSizeSortedSet(){
+        
+        //compareTo by Age
+        System.out.println("When max. size met, evict people by oldest person.");
+        FixedSizeSortedSet&lt;MyPersonAge&gt; age = new FixedSizeSortedSet&lt;MyPersonAge&gt;(5);
+        age.add(new MyPersonAge("Abby", 23));
+        
+        if(!age.add(new MyPersonAge("Abby", 27)))
+            System.out.println("Add failed; 23 is replaced with 27");
+        age.add(new MyPersonAge("Chris", 20));
+        age.add(new MyPersonAge("Bob", 28));
+        age.add(new MyPersonAge("Dan", 25));
+        age.add(new MyPersonAge("Eric", 24));
+        //max reached
+        age.add(new MyPersonAge("Fred", 22));
+        
+        for(MyPersonAge o : age)
+            System.out.println(o.toString());   
 
-        fsss.add(new MyComparableObjectHash("e", 1));
-        fsss.add(new MyComparableObjectHash("e", 2));       
-        fsss.add(new MyComparableObjectHash("b", 3));
-        fsss.add(new MyComparableObjectHash("a", 4));
+        System.out.println("****************************");
 
-        Iterator iter = fsss.iterator();
-        while(iter.hasNext())
-            System.out.println(iter.next());        
-
-        if(!fsss.add(new MyComparableObjectHash("a", 4)))
-            System.out.println("add('a', 4) failed - no duplicates");
-            
-        fsss.add(new MyComparableObjectHash("c", 5));
-        fsss.add(new MyComparableObjectHash("g", 0));       
-                    
-        iter = fsss.iterator();
-        while(iter.hasNext())
-            System.out.println(iter.next());        
+        //compareTo by Name
+        System.out.println("When max. size met, evict people by alphabetical name.");
+        FixedSizeSortedSet&lt;MyPersonName&gt; name = new FixedSizeSortedSet&lt;MyPersonName&gt;(5);
+        name.add(new MyPersonName("Abby", 23));
+        
+        if(!name.add(new MyPersonName("Abby", 27)))
+            System.out.println("Add failed; 23 is replaced with 27");
+        name.add(new MyPersonName("Chris", 20));
+        name.add(new MyPersonName("Bob", 28));
+        name.add(new MyPersonName("Dan", 25));
+        name.add(new MyPersonName("Eric", 24));
+        //max reached
+        name.add(new MyPersonName("Fred", 22));
+        
+        for(MyPersonName o : name)
+            System.out.println(o.toString());       
     }
     Output:
-        a=4
-        b=3
-        e=1
-        e=2
-        add('a', 4) failed - no duplicates
-        a=4
-        b=3
-        c=5
-        e=1
-        g=0
+        When max. size met, evict people by oldest person.
+        Add failed; 23 is replaced with 27
+        Chris's age: 20
+        Fred's age: 22
+        Eric's age: 24
+        Dan's age: 25
+        Abby's age: 27
+        ****************************
+        When max. size met, evict people by alphabetical name.
+        Add failed; 23 is replaced with 27
+        Abby's age: 27
+        Bob's age: 28
+        Chris's age: 20
+        Dan's age: 25
+        Fred's age: 22
+
  </pre>
 
  */ 

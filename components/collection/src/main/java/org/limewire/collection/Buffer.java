@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
  * allocated on the first insertion or retrieval, allowing lots of
  * <code>Buffer</code>s to be created that may not be used.
  * <p>
- * <code>Buffer</code> is not thread-safe; you should externally synchronize.
+ * This class is not thread-safe.
  */
 public class Buffer<E> implements Cloneable, Iterable<E> {
     /**
@@ -42,8 +42,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     private int tail;
 
     /** 
-     * Requires size>=1.
-     * Has the effect that it creates a new, empty buffer that can hold 
+     * @requires size>=1.
+     * @effects that it creates a new, empty buffer that can hold 
      *  size elements.
      */
     public Buffer(int size) {
@@ -81,17 +81,13 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
             buf = createArray(size+1);
     }
 
-    /** Returns true if and only if this is empty. 
-     * See <a href=
-     * "http://en.wikipedia.org/wiki/Iff">Iff</a> for more information.
-     */
+    /** Returns true if and only if this is empty.      */
     public boolean isEmpty() {
         return head==tail;
     }
 
     /** Returns true if and only if this is full, e.g., adding another element 
-     *  would force another out. See <a href=
-     * "http://en.wikipedia.org/wiki/Iff">Iff</a> for more information.
+     *  would force another out. 
      */
     public boolean isFull() {
         return increment(tail)==head;
@@ -148,8 +144,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /*
-     * Modifies this[i].
-     * Has the effect that If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
+     * @modifies this[i].
+     * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
      *  and does not modify this.  Else this[i]=o.
      */
     public void set(int i, E o) throws IndexOutOfBoundsException {
@@ -163,8 +159,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /** 
-     * Modifies this.
-     * Has the effect that it adds x to the head of this, removing the tail 
+     * @modifies this.
+     * @effects adds x to the head of this, removing the tail 
      *  if necessary so that the number of elements in this is less than
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
@@ -180,8 +176,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /** 
-     * Modifies this.
-     * Has the effect that it adds x to the tail of this, removing the head 
+     * @modifies this.
+     * @effects adds x to the tail of this, removing the head 
      *  if necessary so that the number of elements in this is less than
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
@@ -230,8 +226,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }    
 
     /**
-     * Modifies this.
-     * Has the effect that it removes and returns the head of this, or throws 
+     * @modifies this.
+     * @effects removes and returns the head of this, or throws 
      *   NoSuchElementException if this is empty.
      */
     public E removeFirst() throws NoSuchElementException {
@@ -244,8 +240,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * Modifies this.
-     * Has the effect that it Removes and returns the tail of this, or throws 
+     * @modifies this.
+     * @effects Removes and returns the tail of this, or throws 
      *   NoSuchElementException if this is empty.
      */
     public E removeLast() throws NoSuchElementException {
@@ -258,8 +254,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * Modifies this.
-     * Has the effect that it removes and returns the i'th element of this, or
+     * @modifies this.
+     * @effects Removes and returns the i'th element of this, or
      *  throws IndexOutOfBoundsException if i is not a valid index
      *  of this. In the worst case, this runs in linear time with
      *  respect to size().
@@ -277,8 +273,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * Modifies this.
-     * Has the effect that it removes the first occurrence of x in this,
+     * @modifies this.
+     * @effects removes the first occurrence of x in this,
      *  if any, as determined by .equals.  Returns true if any 
      *  elements were removed.  In the worst case, this runs in linear 
      *  time with respect to size().
@@ -294,8 +290,8 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /**
-     * Modifies this.
-     * Has the effect that it removes all occurrences of x in this,
+     * @modifies this.
+     * @effects removes all occurrences of x in this,
      *  if any, as determined by .equals. Returns true if any 
      *  elements were removed. In the worst case, this runs in linear 
      *  time with respect to size().
@@ -314,17 +310,17 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
 
 
     /**
-     * Modifies this.
-     * Has the effect that it removes all elements of this.
+     * @modifies this.
+     * @effects removes all elements of this.
      */
     public void clear() {
         while (!isEmpty()) removeFirst();
     }
 
     /** 
-     * Has the effect that it returns an iterator that yields the elements of this, in 
+     * @effects returns an iterator that yields the elements of this, in 
      *  order, from head to tail.
-     * Requires this not modified will iterator in use.
+     * @requires this not modified will iterator in use.
      */
     public Iterator<E> iterator() {
         // will either throw NoSuchElementException

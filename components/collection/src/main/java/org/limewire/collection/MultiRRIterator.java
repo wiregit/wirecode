@@ -4,29 +4,20 @@ package org.limewire.collection;
 import java.util.Iterator;
 
 /**
- * Provides a round robin iterator, visiting one item per collection before 
- * moving to the next item in the collection.
+ * Is a round robin {@link Iterator} for multiple interators.
+ * 
 <pre>
-    void sampleCodeMultiRRIterator(){
-        LinkedList&lt;Integer&gt; l1 = new LinkedList&lt;Integer&gt;();
-        for(int i = 0; i < 5; i++)
-            if(!l1.add(i))
-                System.out.println("add failed " + i);  
-        LinkedList&lt;Integer&gt; l2 = new LinkedList&lt;Integer&gt;();
-        for(int i = 80; i < 85; i++)
-            if(!l2.add(i))
-                System.out.println("add failed " + i);  
-                                
-        MultiCollection&lt;Integer&gt; mc = new MultiCollection&lt;Integer&gt;(l1, l2);
-        if(!mc.isEmpty()) {
-            MultiRRIterator&lt;Integer&gt; mRRiterator = new MultiRRIterator&lt;Integer&gt;(l1.iterator(), l2.iterator());
-            
-            while(mRRiterator.hasNext()){
-                System.out.println(mRRiterator.next());
-            }
-        }
-        mc.clear();     
+    LinkedList&lt;Integer&gt; l1 = new LinkedList&lt;Integer&gt;();
+    LinkedList&lt;Integer&gt; l2 = new LinkedList&lt;Integer&gt;();
+    for(int i = 0; i < 5; i++){
+        l1.add(i);
+        l2.add(i + 80);
     }
+                            
+    for(MultiRRIterator&lt;Integer&gt; mRRiterator = new MultiRRIterator&lt;Integer&gt;(l1.iterator(), l2.iterator());
+            mRRiterator.hasNext();)
+        System.out.println(mRRiterator.next());
+    
     Output:
         0
         80
@@ -37,8 +28,7 @@ import java.util.Iterator;
         3
         83
         4
-        84
-    
+        84    
 </pre>
  */
 
