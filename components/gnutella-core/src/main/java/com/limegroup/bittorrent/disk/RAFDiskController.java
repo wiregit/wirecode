@@ -82,7 +82,9 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 		List<F> filesToVerify = null;
 		for (int i = 0; i < _files.size(); i++) {
 			F file = _files.get(i);
-
+            // close in case this is a restart loop
+			IOUtils.close(fos[i]);
+            
 			// if the file is complete, just open it for reading and be done
 			// with it
 			if (complete) {
