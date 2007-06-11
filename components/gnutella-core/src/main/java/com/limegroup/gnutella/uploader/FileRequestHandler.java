@@ -12,6 +12,8 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
+import org.limewire.http.RangeHeaderInterceptor;
+import org.limewire.http.RangeHeaderInterceptor.Range;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -137,6 +139,8 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
+        RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
+        processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
@@ -161,6 +165,18 @@ public class FileRequestHandler implements HttpRequestHandler {
             return uploader;
         }
 
+        if (rangeHeaderInterceptor.hasRequestedRanges()) {
+            Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
+            if (ranges.length > 1) {
+                handleInvalidRange(response, uploader, fd);
+                return uploader;
+            }
+            
+            uploader.setUploadBegin(ranges[0].getStartOffset(uploader.getFileSize()));
+            uploader.setUploadEnd(ranges[0].getEndOffset(uploader.getFileSize()) + 1);
+            uploader.setContainedRangeRequest(true);
+        }
+        
         if (!uploader.validateRange()) {
             handleInvalidRange(response, uploader, fd);
             return uploader;

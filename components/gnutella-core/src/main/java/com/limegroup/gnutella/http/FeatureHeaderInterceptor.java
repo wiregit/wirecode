@@ -35,8 +35,6 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             throws HttpException, IOException {
         if (readChatHeader(header))
             ;
-        else if (readRangeHeader(header))
-            ;
         else if (readContentURNHeader(header))
             ;
         else if (readQueueVersion(header))
@@ -83,97 +81,6 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
         try {
             uploader.setTotalAmountUploadedBefore(Integer.parseInt(header.getValue()));
         } catch (NumberFormatException e) {
-        }
-
-        return true;
-    }
-
-    /**
-     * Look for range header of form, "Range: bytes=", "Range:bytes=", "Range:
-     * bytes ", etc. Note that the "=" is required by HTTP, but old versions of
-     * BearShare do not send it. The value following the bytes unit will be in
-     * the form '-n', 'm-n', or 'm-'.
-     * 
-     * @return true if it had a Range header
-     */
-    private boolean readRangeHeader(Header header) throws IOException {
-        if (!HTTPHeaderName.RANGE.matches(header)) { 
-            return false;
-        }
-
-        uploader.setContainedRangeRequest(true);
-
-        // Set 'sub' to the value after the "bytes=" or "bytes ". Note
-        // that we don't validate the data between "Range:" and the
-        // bytes.
-        String sub;
-        String second;
-        try {
-            int i = header.getValue().indexOf("bytes");
-            if (i < 0)
-                throw new ProblemReadingHeaderException(
-                        "bytes not present in range");
-            sub = header.getValue().substring(i + 6);
-        } catch (IndexOutOfBoundsException e) {
-            throw new ProblemReadingHeaderException();
-        }
-        // remove the white space
-        sub = sub.trim();
-        char c;
-        // get the first character
-        try {
-            c = sub.charAt(0);
-        } catch (IndexOutOfBoundsException e) {
-            throw new ProblemReadingHeaderException();
-        }
-        // - n
-        if (c == '-') {
-            // String second;
-            try {
-                second = sub.substring(1);
-            } catch (IndexOutOfBoundsException e) {
-                throw new ProblemReadingHeaderException();
-            }
-            second = second.trim();
-            try {
-                // A range request for "-3" means return the last 3 bytes
-                // of the file. (LW used to incorrectly return bytes
-                // 0-3.)
-                uploader.setUploadBegin(Math
-                        .max(0, uploader.getFileSize() - Integer.parseInt(second)));
-                uploader.setUploadEnd(uploader.getFileSize());
-            } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
-            }
-        } else {
-            // m - n or 0 -
-            int dash = sub.indexOf("-");
-
-            // If the "-" does not exist, the head is incorrectly formatted.
-            if (dash == -1) {
-                throw new ProblemReadingHeaderException();
-            }
-            String first = sub.substring(0, dash).trim();
-            try {
-                uploader.setUploadBegin(Long.parseLong(first));
-            } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
-            }
-            try {
-                second = sub.substring(dash + 1);
-            } catch (IndexOutOfBoundsException e) {
-                throw new ProblemReadingHeaderException();
-            }
-            second = second.trim();
-            if (!second.equals(""))
-                try {
-                    // HTTP range requests are inclusive. So "1-3" means
-                    // bytes 1, 2, and 3. But _uploadEnd is an EXCLUSIVE
-                    // index, so increment by 1.
-                    uploader.setUploadEnd(Long.parseLong(second) + 1);
-                } catch (NumberFormatException e) {
-                    throw new ProblemReadingHeaderException();
-                }
         }
 
         return true;
