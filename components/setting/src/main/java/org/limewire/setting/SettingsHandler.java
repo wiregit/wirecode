@@ -74,9 +74,13 @@ public final class SettingsHandler {
             throw new NullPointerException("SettingsHandlerListener is null");
         }
         
-        if (listeners != null) {
-            listeners.remove(l);
+        synchronized (this) {
+            if (listeners == null) {
+                return;
+            }
         }
+        
+        listeners.remove(l);
     }
     
     /**
@@ -165,17 +169,21 @@ public final class SettingsHandler {
             throw new NullPointerException("SettingsHandlerEvent is null");
         }
         
-        if (listeners != null && !listeners.isEmpty()) {
-            Runnable command = new Runnable() {
-                public void run() {
-                    for (SettingsHandlerListener l : listeners) {
-                        l.settingsHandlerEvent(evt);
-                    }
-                }
-            };
-            
-            fireEvent(command);
+        synchronized (this) {
+            if (listeners == null || listeners.isEmpty()) {
+                return;
+            }
         }
+        
+        Runnable command = new Runnable() {
+            public void run() {
+                for (SettingsHandlerListener l : listeners) {
+                    l.settingsHandlerChanged(evt);
+                }
+            }
+        };
+        
+        fireEvent(command);
     }
     
     /**

@@ -59,6 +59,14 @@ public class SettingsHandlerEvent {
      * @param settings The Settings instance that was added or removed (null in other cases)
      */
     public SettingsHandlerEvent(EventType type, SettingsHandler handler, Settings settings) {
+        if (type == null) {
+            throw new NullPointerException("EventType is null");
+        }
+        
+        if (handler == null) {
+            throw new NullPointerException("SettingsHandler is null");
+        }
+        
         this.type = type;
         this.handler = handler;
         this.settings = settings;

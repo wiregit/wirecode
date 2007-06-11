@@ -10,5 +10,5 @@ public interface SettingsListener {
     /**
      * Invoked when a {@link Settings} instance changed its state
      */
-    public void settingsEvent(SettingsEvent evt);
+    public void settingsChanged(SettingsEvent evt);
 }

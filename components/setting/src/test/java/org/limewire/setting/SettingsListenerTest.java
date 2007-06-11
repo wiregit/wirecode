@@ -30,7 +30,7 @@ public class SettingsListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsEvent(SettingsEvent evt) {
+            public void settingsChanged(SettingsEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -51,7 +51,7 @@ public class SettingsListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsEvent(SettingsEvent evt) {
+            public void settingsChanged(SettingsEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -72,7 +72,7 @@ public class SettingsListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsEvent(SettingsEvent evt) {
+            public void settingsChanged(SettingsEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -93,7 +93,7 @@ public class SettingsListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsEvent(SettingsEvent evt) {
+            public void settingsChanged(SettingsEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();

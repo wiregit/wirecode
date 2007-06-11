@@ -30,7 +30,7 @@ public class SettingListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.addSettingListener(new SettingListener() {
-            public void settingEvent(SettingEvent evt) {
+            public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -45,6 +45,8 @@ public class SettingListenerTest extends BaseTestCase {
         
         assertEquals(EventType.VALUE_CHANGED, type[0]);
         
+        // Changing the value to the current value shouldn't
+        // trigger an Event!
         type[0] = null;
         synchronized (lock) {
             TestSettings.TEST.setValue(1);
@@ -58,7 +60,7 @@ public class SettingListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.addSettingListener(new SettingListener() {
-            public void settingEvent(SettingEvent evt) {
+            public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -79,7 +81,7 @@ public class SettingListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.addSettingListener(new SettingListener() {
-            public void settingEvent(SettingEvent evt) {
+            public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
                     if (evt.getEventType() == EventType.REVERT_TO_DEFAULT) {
                         type[0] = evt.getEventType();
@@ -102,7 +104,7 @@ public class SettingListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.addSettingListener(new SettingListener() {
-            public void settingEvent(SettingEvent evt) {
+            public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -129,7 +131,7 @@ public class SettingListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.addSettingListener(new SettingListener() {
-            public void settingEvent(SettingEvent evt) {
+            public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();

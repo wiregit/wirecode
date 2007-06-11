@@ -44,9 +44,13 @@ public abstract class AbstractSettings implements Settings {
             throw new NullPointerException("SettingsListener is null");
         }
         
-        if (listeners != null) {
-            listeners.remove(l);
+        synchronized (this) {
+            if (listeners == null) {
+                return;
+            }
         }
+        
+        listeners.remove(l);
     }
     
     /** Mutator for shouldSave     */
@@ -77,16 +81,20 @@ public abstract class AbstractSettings implements Settings {
             throw new NullPointerException("SettingsEvent is null");
         }
         
-        if (listeners != null && !listeners.isEmpty()) {
-            Runnable command = new Runnable() {
-                public void run() {
-                    for (SettingsListener l : listeners) {
-                        l.settingsEvent(evt);
-                    }
-                }
-            };
-            
-            SettingsHandler.instance().fireEvent(command);
+        synchronized (this) {
+            if (listeners == null || listeners.isEmpty()) {
+                return;
+            }
         }
+        
+        Runnable command = new Runnable() {
+            public void run() {
+                for (SettingsListener l : listeners) {
+                    l.settingsChanged(evt);
+                }
+            }
+        };
+        
+        SettingsHandler.instance().fireEvent(command);
     }
 }

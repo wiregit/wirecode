@@ -30,7 +30,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -52,7 +52,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         
         TestSettings.TEST.reload();
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -74,7 +74,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         
         TestSettings.TEST.reload();
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -96,7 +96,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         
         TestSettings.TEST.reload();
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -118,7 +118,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         
         TestSettings.TEST.reload();
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -140,7 +140,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         
         TestSettings.TEST.reload();
         SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerEvent(SettingsHandlerEvent evt) {
+            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();

@@ -49,6 +49,14 @@ public class SettingsEvent {
      * @param settings The Settings instance that triggered this event
      */
     public SettingsEvent(EventType type, Settings settings) {
+        if (type == null) {
+            throw new NullPointerException("EventType is null");
+        }
+        
+        if (settings == null) {
+            throw new NullPointerException("Settings is null");
+        }
+        
         this.type = type;
         this.settings = settings;
     }

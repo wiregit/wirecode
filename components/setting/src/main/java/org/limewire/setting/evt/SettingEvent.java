@@ -48,8 +48,14 @@ public class SettingEvent {
      * @param setting The Setting that triggered the event
      */
     public SettingEvent(EventType type, Setting setting) {
-        assert (type != null);
-        assert (setting != null);
+        if (type == null) {
+            throw new NullPointerException("EventType is null");
+        }
+        
+        if (setting == null) {
+            throw new NullPointerException("Setting is null");
+        }
+        
         this.type = type;
         this.setting = setting;
     }

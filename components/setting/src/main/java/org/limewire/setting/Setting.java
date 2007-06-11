@@ -137,9 +137,13 @@ public abstract class Setting {
             throw new NullPointerException("SettingListener is null");
         }
         
-        if (listeners != null) {
-            listeners.remove(l);
+        synchronized (this) {
+            if (listeners == null) {
+                return;
+            }
         }
+        
+        listeners.remove(l);
     }
     
     /**
@@ -266,16 +270,20 @@ public abstract class Setting {
             throw new NullPointerException("SettingEvent is null");
         }
         
-        if (listeners != null && !listeners.isEmpty()) {
-            Runnable command = new Runnable() {
-                public void run() {
-                    for (SettingListener l : listeners) {
-                        l.settingEvent(evt);
-                    }
-                }
-            };
-            
-            SettingsHandler.instance().fireEvent(command);
+        synchronized (this) {
+            if (listeners == null || listeners.isEmpty()) {
+                return;
+            }
         }
+        
+        Runnable command = new Runnable() {
+            public void run() {
+                for (SettingListener l : listeners) {
+                    l.settingChanged(evt);
+                }
+            }
+        };
+        
+        SettingsHandler.instance().fireEvent(command);
     }
 }
