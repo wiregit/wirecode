@@ -5,8 +5,6 @@ import junit.framework.TestCase;
 import org.apache.http.message.BasicHeader;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-
 public class RangeHeaderInterceptorTest extends TestCase {
 
     public void testProcessSingleRange() throws Exception {
@@ -105,23 +103,23 @@ public class RangeHeaderInterceptorTest extends TestCase {
         RangeHeaderInterceptor interceptor = new RangeHeaderInterceptor();
         try {
             interceptor.process(new BasicHeader("Range", "bytes=--1"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }       
         try {
             interceptor.process(new BasicHeader("Range", "bytes=1--1"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes=-1-1"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes=1-1-"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
     }
     
@@ -129,33 +127,33 @@ public class RangeHeaderInterceptorTest extends TestCase {
         RangeHeaderInterceptor interceptor = new RangeHeaderInterceptor();
         try {
             interceptor.process(new BasicHeader("Range", "bytes=1-abc"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes=abc"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes=2-1"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes="), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "bytes "), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
         try {
             interceptor.process(new BasicHeader("Range", "abc"), null);
-            fail("Expected ProblemReadingHeaderException");
-        } catch (ProblemReadingHeaderException expected) {
+            fail("Expected MalformedHeaderException");
+        } catch (MalformedHeaderException expected) {
         }
     }
 

@@ -12,6 +12,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
+import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
@@ -149,6 +150,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         try {
             processor.process(request, context);
         } catch (ProblemReadingHeaderException e) {
+            handleMalformedRequest(response, uploader);
+            return uploader;
+        } catch (MalformedHeaderException e) {
             handleMalformedRequest(response, uploader);
             return uploader;
         }

@@ -9,15 +9,14 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.protocol.HttpContext;
 
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-
 /**
  * Parses ranges found in Range headers formatted as specified in RFC 2616,
  * 14.35.1.
  */
 public class RangeHeaderInterceptor implements HeaderInterceptor {
 
+    public static String RANGE_HEADER = "Range";
+    
     private List<Range> ranges;
 
     /**
@@ -30,17 +29,17 @@ public class RangeHeaderInterceptor implements HeaderInterceptor {
      */
     public void process(Header header, HttpContext context)
             throws HttpException, IOException {
-        if (!HTTPHeaderName.RANGE.matches(header)) {
+        if (!RANGE_HEADER.equals(header.getName())) {
             return;
         }
 
         String value = header.getValue().trim();
         if (!value.startsWith("bytes")) {
-            throw new ProblemReadingHeaderException(
+            throw new MalformedHeaderException(
                     "bytes not present in range header");
         }
         if (value.length() <= 6) {
-            throw new ProblemReadingHeaderException(
+            throw new MalformedHeaderException(
                     "range not present in range header");
         }
 
@@ -57,9 +56,9 @@ public class RangeHeaderInterceptor implements HeaderInterceptor {
         }
     }
 
-    private Range parseRange(String value) throws ProblemReadingHeaderException {
+    private Range parseRange(String value) throws MalformedHeaderException {
         if (value.length() < 2) {
-            throw new ProblemReadingHeaderException("invalid range: " + value);
+            throw new MalformedHeaderException("invalid range: " + value);
         }
 
         final Range range = new Range();
@@ -67,13 +66,13 @@ public class RangeHeaderInterceptor implements HeaderInterceptor {
         int i = value.indexOf("-");
         if (i == -1 || value.indexOf("-", i + 1) != -1) {
             // there must be exactly one dash
-            throw new ProblemReadingHeaderException("invalid range: " + value);
+            throw new MalformedHeaderException("invalid range: " + value);
         } else if (i == 0) {
             // - n
             try {
                 range.endOffset = Long.parseLong(value.substring(1).trim());
             } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
+                throw new MalformedHeaderException();
             }
         } else if (i == value.length() - 1) {
             // n -
@@ -81,7 +80,7 @@ public class RangeHeaderInterceptor implements HeaderInterceptor {
                 range.startOffset = Long.parseLong(value.substring(0,
                         value.length() - 1).trim());
             } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
+                throw new MalformedHeaderException();
             }
         } else {
             // n-m
@@ -89,17 +88,17 @@ public class RangeHeaderInterceptor implements HeaderInterceptor {
                 range.startOffset = Long
                 .parseLong(value.substring(0, i).trim());
             } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
+                throw new MalformedHeaderException();
             }
             try {
                 range.endOffset = Long.parseLong(value.substring(i + 1).trim());
             } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
+                throw new MalformedHeaderException();
             }
         }
         
         if (range.endOffset != -1 && range.startOffset > range.endOffset) {
-            throw new ProblemReadingHeaderException(
+            throw new MalformedHeaderException(
                     "start offset is greater than end offset ("
                             + range.startOffset + ">" + range.endOffset + ")");
         }
