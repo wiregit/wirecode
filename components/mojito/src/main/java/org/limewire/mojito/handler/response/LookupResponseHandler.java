@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -79,7 +78,7 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     private final KUID furthestId;
     
     /** Set of queried KUIDs */
-    private final Set<KUID> queried = new HashSet<KUID>();
+    protected final Set<KUID> queried = new LinkedHashSet<KUID>();
     
     /** Trie of Contacts we're going to query */
     protected final Trie<KUID, Contact> toQuery 
@@ -773,6 +772,13 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         });
         
         return nearest;
+    }
+    
+    /**
+     * Returns all queried KUIDs
+     */
+    protected Set<KUID> getQueried() {
+        return queried;
     }
     
     /**

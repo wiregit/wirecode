@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -105,9 +106,10 @@ public class FindNodeResponseHandler
         
         Map<Contact, SecurityToken> path = getPath();
         Collection<Contact> collisions = getCollisions();
+        Set<KUID> queried = getQueried();
         
         FindNodeResult result = new FindNodeResult(getLookupID(), path, 
-                collisions, time, currentHop, routeTableFailureCount);
+                collisions, queried, time, currentHop, routeTableFailureCount);
         
         // We can use the result from a Node lookup to estimate the DHT size
         context.updateEstimatedSize(path.keySet());

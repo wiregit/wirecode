@@ -21,6 +21,7 @@ package org.limewire.mojito.result;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
@@ -38,6 +39,8 @@ public class FindNodeResult extends LookupResult {
     
     private final Collection<? extends Contact> collisions;
     
+    private final Set<KUID> queried;
+    
     private final long time;
     
     private final int hop;
@@ -47,10 +50,12 @@ public class FindNodeResult extends LookupResult {
     public FindNodeResult(KUID lookupId, 
             Map<? extends Contact, ? extends SecurityToken> path, 
             Collection<? extends Contact> collisions,
+            Set<KUID> queried,
             long time, int hop, int routeTableFailureCount) {
     	super(lookupId);
         this.path = path;
         this.collisions = collisions;
+        this.queried = queried;
         this.time = time;
         this.hop = hop;
         this.routeTableFailureCount = routeTableFailureCount;
@@ -93,6 +98,13 @@ public class FindNodeResult extends LookupResult {
      */
     public Collection<? extends Contact> getCollisions() {
         return collisions;
+    }
+    
+    /**
+     * Returns all KUIDs that were queried during the lookup
+     */
+    public Set<KUID> getQueried() {
+        return queried;
     }
     
     /**
