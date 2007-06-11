@@ -361,7 +361,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Both 'remove' sets have the location removed while the lock is held on removeWithLock,
      * and addTo is added if it isn't within contains (while the lock is held on addTo.
      */
-    private <T extends AlternateLocation> void storeLocation(T loc, Set<T> removeWithLock, Set<T> removeAlso, Set<T> addTo, Set<T> contains) {
+    private static <T extends AlternateLocation> void storeLocation(T loc, Set<T> removeWithLock, Set<T> removeAlso, Set<T> addTo, Set<T> contains) {
         synchronized(removeWithLock) {
             removeAlso.remove(loc);
             removeWithLock.remove(loc);

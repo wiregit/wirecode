@@ -124,7 +124,7 @@ public class HeadPong extends VendorMessage {
 	private static FileManager _fileManager = RouterService.getFileManager();
 	
 	/** try to make packets less than this size */
-	private static final int PACKET_SIZE = 580;
+	private static final int PACKET_SIZE = 1380;
 	
 	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 

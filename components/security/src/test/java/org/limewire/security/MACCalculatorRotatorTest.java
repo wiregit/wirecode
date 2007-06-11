@@ -1,15 +1,13 @@
 package org.limewire.security;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -112,7 +110,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
        
     }
 
-    private static class WrappingSchedulingTestThreadPool implements ScheduledExecutorService {
+    private static class WrappingSchedulingTestThreadPool extends AbstractExecutorService implements ScheduledExecutorService {
         
         private ScheduledExecutorService pool = SimpleTimer.sharedTimer();
         
@@ -146,22 +144,6 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
         }
 
         public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             throw new UnsupportedOperationException();
         }
 
@@ -221,7 +203,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
         
     }
     
-    private static class SchedulingTestThreadPool implements ScheduledExecutorService {
+    private static class SchedulingTestThreadPool extends AbstractExecutorService implements ScheduledExecutorService {
 
         Runnable r;
         Runnable r2;
@@ -250,22 +232,6 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
         }
 
         public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-            throw new UnsupportedOperationException();
-        }
-
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             throw new UnsupportedOperationException();
         }
 

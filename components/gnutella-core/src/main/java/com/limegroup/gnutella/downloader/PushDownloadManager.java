@@ -362,7 +362,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         final String request = "/gnutella/push-proxy?ServerID=" + 
                                Base32.encode(data.getFile().getClientGUID()) +
           (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
-          (ConnectionSettings.TLS_INCOMING.getValue() ? "(&tls=true" : "");
+          (ConnectionSettings.TLS_INCOMING.getValue() ? "&tls=true" : "");
             
         final String nodeString = "X-Node";
         final String nodeValue =
