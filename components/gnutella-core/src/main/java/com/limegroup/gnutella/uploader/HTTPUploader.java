@@ -108,10 +108,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public boolean validateRange() {
         long first = getUploadBegin();
         long last = getUploadEnd();
-    
+
         if (first >= last) {
             return false;
-    }
+        }
         if (getFileDesc() instanceof IncompleteFileDesc) {
             // If we are allowing, see if we have the range.
             IncompleteFileDesc ifd = (IncompleteFileDesc) getFileDesc();
@@ -121,22 +121,22 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
                 Interval request = ifd.getAvailableSubRange((int) first,
                         (int) last - 1);
                 if (request == null) {
-            return false;
-			}
+                    return false;
+                }
                 setUploadBegin(request.low);
                 setUploadEnd(request.high + 1);
             } else {
                 if (!ifd.isRangeSatisfiable((int) first, (int) last - 1)) {
                     return false;
-		} 
-    }
+                } 
+            }
         } else if (first < 0 || last > getFileSize()) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Returns the content URN that the client asked for.
      */
