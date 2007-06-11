@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.setting.evt.SettingsHandlerEvent;
 import org.limewire.setting.evt.SettingsHandlerListener;
 import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
@@ -25,7 +25,7 @@ public final class SettingsHandler {
     private static final SettingsHandler INSTANCE = new SettingsHandler();
     
     /**
-     * Returns the singleton instanceof the SettingsHandler
+     * Returns the singleton instance of the SettingsHandler
      */
     public static SettingsHandler instance() {
         return INSTANCE;
@@ -44,7 +44,7 @@ public final class SettingsHandler {
     /**
      * The Executor for the Events
      */
-    private volatile Executor executor = Executors.newSingleThreadExecutor();
+    private volatile Executor executor = ExecutorsHelper.newFixedSizeThreadPool(1, "SettingsHandlerEventDispatcher");
     
     // never instantiate this class.
     private SettingsHandler() {}
