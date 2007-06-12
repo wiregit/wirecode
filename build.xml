@@ -11,7 +11,7 @@
     <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
-		<property name="limewire.components.tests.tests"
+		<property name="limewire.components.limewire.tests"
         	      location="${limewire.components.tests.home}"/>
         <do.setup-properties component="limewire"/>
     </target>
@@ -32,6 +32,7 @@
             description="Cleans everything."
             depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean">
         <do.clean component="limewire"/>
+    	<delete dir="${limewire.components.limewire.home}/unused"/>
     </target>
 	
 	<target name="clean-src"
@@ -81,36 +82,33 @@
     <!-- TODO: implement -->
     <target name="clean-dist"/>
         
-	<!-- TODO: implement -->
-    <target name="javadoc"/>
+    <target name="javadoc">
+    	<fail message="Use maven to generate javadocs."/>
+    </target>
     
     <target name="clover2html"
             description="Converts clover's generated data into HTML reports."
             depends="initialize">
-		<do.clover2html component="limewire"/>
+		<do.clover2html component="limewire">
+		    <moretestinfo>
+				<testsources refid="limewire.components.sources.tests"/>
+    			<testsources dir="${limewire.components.tests.home}"/>
+    			<testresults dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
+                <testresults dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
+ 			</moretestinfo>
+        </do.clover2html>
     </target>
     
     <target name="with.clover"
             description="Instructs the build to use clover's instrumenting."
             depends="initialize">
-        <!-- point the defaultfileset to somewhere where no files are -->
-        <do.clover-setup component="limewire" defaultfileset="${limewire.components.limewire.home}">
+    	<mkdir dir="${limewire.components.limewire.home}/unused"/>
+        <do.clover-setup component="limewire" defaultfileset="${limewire.components.limewire.home}/unused">
   	    	<locations>    
 				<fileset dir="${limewire.core.src}"/>
      	        <fileset dir="${limewire.gui.src}"/>
-  	    	    <!-- TODO: find some way to not have to duplicate component names here -->
-  	            <fileset dir="${limewire.components.common.src}" />
-      	        <fileset dir="${limewire.components.collection.src}"/>
-      	        <fileset dir="${limewire.components.security.src}" />
-      	        <fileset dir="${limewire.components.io.src}" />
-      	        <fileset dir="${limewire.components.nio.src}" />
-      	        <fileset dir="${limewire.components.rudp.src}" />
-      	    	<fileset dir="${limewire.components.setting.src}" />	            
-      	    	<fileset dir="${limewire.components.statistic.src}" />	
-  				<fileset dir="${limewire.components.mojito.src}" />	 
-  				<fileset dir="${limewire.components.mojito-ui.src}" />	 
-  	        	<fileset dir="${limewire.components.http.src}" />
-  	            <!-- Add as components are added. -->
+    			<fileset dir="${limewire.components.tests.home}"/>
+    			<fileset refid="limewire.components.sources.all"/>
   			</locations>
   	    </do.clover-setup>
   	</target>

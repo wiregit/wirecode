@@ -82,7 +82,7 @@
 	<target name="test-all" 
             description="Runs every test in this module."
             depends="compile">
-	    <do.test-all component="tests"
+		<do.test-all component="tests"
 	    			 forkmode="perTest"/>
 	</target>
     
@@ -102,8 +102,7 @@
     <target name="with.clover"
              description="Instructs the build to use clover's instrumenting."
              depends="initialize">
-         <!-- point the defaultfileset to somewhere where no files are -->
-         <do.clover-setup component="tests" defaultfileset="${limewire.components.all.home}">
+         <do.clover-setup component="tests">
  	        <locations>
  	            <fileset dir="${limewire.core.src}"/>
  	            <fileset dir="${limewire.gui.src}"/>

@@ -60,9 +60,9 @@
         <do.jar component="common"/>
     </target>
     
-	<target name="javadoc" depends="initialize, compile-src">
+    <target name="javadoc" depends="initialize, compile-src">
     	<do.javadoc component="common"/>
-	</target>
+	</target>    
     
     <target name="clean-dist" depends="initialize">
         <do.clean-dist component="common"/>

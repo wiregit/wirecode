@@ -65,6 +65,37 @@
 			<path refid="build.limewire.components.classes.core"/>
 		    <!-- Add as UI components are added. -->
         </path>
+    
+    	<fileset id="limewire.components.sources.all" dir="${limewire.components.home}">
+    		<include name="${limewire.components.common.relative.antglob.allsources}"/>
+			<include name="${limewire.components.collection.relative.antglob.allsources}"/>
+			<include name="${limewire.components.security.relative.antglob.allsources}"/>
+			<include name="${limewire.components.io.relative.antglob.allsources}"/>
+			<include name="${limewire.components.nio.relative.antglob.allsources}"/>
+			<include name="${limewire.components.rudp.relative.antglob.allsources}"/>
+			<include name="${limewire.components.setting.relative.antglob.allsources}"/>
+			<include name="${limewire.components.statistic.relative.antglob.allsources}"/>
+			<include name="${limewire.components.mojito.relative.antglob.allsources}"/>
+			<include name="${limewire.components.mojito-ui.relative.antglob.allsources}"/>
+	     	<include name="${limewire.components.http.relative.antglob.allsources}"/>    
+   			<!-- Add as components are added! -->
+		</fileset>
+    
+		<fileset id="limewire.components.sources.tests" dir="${limewire.components.home}">
+			<include name="${limewire.components.common.relative.antglob.tests}"/>
+			<include name="${limewire.components.collection.relative.antglob.tests}"/>
+			<include name="${limewire.components.security.relative.antglob.tests}"/>
+			<include name="${limewire.components.io.relative.antglob.tests}"/>
+			<include name="${limewire.components.nio.relative.antglob.tests}"/>
+			<include name="${limewire.components.rudp.relative.antglob.tests}"/>
+			<include name="${limewire.components.setting.relative.antglob.tests}"/>
+			<include name="${limewire.components.statistic.relative.antglob.tests}"/>
+			<include name="${limewire.components.mojito.relative.antglob.tests}"/>
+			<include name="${limewire.components.mojito-ui.relative.antglob.tests}"/>
+	     	<include name="${limewire.components.http.relative.antglob.tests}"/>    
+    		<!-- Add as components are added! -->
+		</fileset>
+    
     </target>
 	
 	<target name="clean"
@@ -79,7 +110,7 @@
     
     <target name="compile-core"
             description="Compiles the source and tests of every non-UI component."
-            depends="lw-setting.compile, lw-statistic.compile, lw-rudp.compile, lw-nio.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile, lw-http.clean">
+            depends="lw-setting.compile, lw-statistic.compile, lw-rudp.compile, lw-nio.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile, lw-http.compile">
         <mkdir dir="${build.limewire.components.all.classes}"/>
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
@@ -187,28 +218,9 @@
         </do.jar>
     </target>
     
-	<target name="javadoc"
-            description="Generates a javadoc of every component's source."
-            depends="initialize">
-	    <do.javadoc component="all"
-	    			classpathrefid="tests.limewire.components.all.classpath"
-				    windowtitle="LimeWire Components"
-	        		sourcepath="">
-	        <more-javadoc-elements>
-	            <fileset dir="${limewire.components.common.src}" />
-    	        <fileset dir="${limewire.components.collection.src}"/>
-    	        <fileset dir="${limewire.components.security.src}" />
-    	        <fileset dir="${limewire.components.io.src}" />
-    	        <fileset dir="${limewire.components.nio.src}" />
-    	        <fileset dir="${limewire.components.rudp.src}" />
-    	    	<fileset dir="${limewire.components.setting.src}" />
-    	    	<fileset dir="${limewire.components.statistic.src}" />
-				<fileset dir="${limewire.components.mojito.src}" />
-				<fileset dir="${limewire.components.mojito-ui.src}" />
-     		    <!-- Add as components are added -->
-	        </more-javadoc-elements>
-	    </do.javadoc>
-	</target>
+	<target name="javadoc" description="Doesn't work.">
+    	<fail message="Use maven to generate javadocs."/>
+    </target>
 	    
     <target name="clean-dist"
             description="Cleans all generated distribution files."
@@ -219,21 +231,9 @@
     <target name="with.clover"
             description="Instructs the build to use clover's instrumenting."
             depends="initialize">
-        <!-- point the defaultfileset to somewhere where no files are -->
-        <do.clover-setup component="all" defaultfileset="${limewire.components.all.home}">
+        <do.clover-setup component="all">
 	        <locations>
-	            <fileset dir="${limewire.components.common.src}" />
-    	        <fileset dir="${limewire.components.collection.src}"/>
-    	        <fileset dir="${limewire.components.security.src}" />
-    	        <fileset dir="${limewire.components.io.src}" />
-    	        <fileset dir="${limewire.components.nio.src}" />
-    	        <fileset dir="${limewire.components.rudp.src}" />
-    	    	<fileset dir="${limewire.components.setting.src}" />	            
-    	    	<fileset dir="${limewire.components.statistic.src}" />	
-				<fileset dir="${limewire.components.mojito.src}" />	 
-				<fileset dir="${limewire.components.mojito-ui.src}" />	 
-	        	<fileset dir="${limewire.components.http.src}" />
-	            <!-- Add as components are added. -->
+	            <fileset refid="limewire.components.sources.all"/>
 			</locations>
 	    </do.clover-setup>
 	</target>
@@ -241,6 +241,11 @@
     <target name="clover2html"
             description="Converts clover's generated data into HTML reports."
             depends="initialize">
-        <do.clover2html component="all"/>
+    	<mkdir dir="${limewire.components.all.tests}"/>
+        <do.clover2html component="all">
+			<moretestinfo>
+    			<testsources refid="limewire.components.sources.tests"/>
+			</moretestinfo>
+	    </do.clover2html>
     </target>
 </project>
