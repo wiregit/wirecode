@@ -295,7 +295,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
             public void run() {
                 FileDesc fd = fileManager.stopSharingFile(f);          
                 if(fd != null && fdelete){
-                    FileUtils.delete(fd.getFile());
+                    FileUtils.delete(fd.getFile(), false);
                 } else
                 	f.setLastModified(System.currentTimeMillis());
             }

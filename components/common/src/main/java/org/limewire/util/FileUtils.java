@@ -459,16 +459,22 @@ public class FileUtils {
      * @param file The file or directory to trash or delete
      * @return     true on success
      */
-    public static boolean delete(File file) {
+    public static boolean delete(File file, boolean moveToRecylebin) {
     	if (!file.exists()) {
     		return false;
     	}
-    	if (OSUtils.isMacOSX()) {
-    		return moveToTrashOSX(file);
-    	} else if (OSUtils.isWindows()) {
-    		return SystemUtils.recycle(file);
-    	} else {
-    		return deleteRecursive(file);
+    	if (moveToRecylebin) {
+    	    if (OSUtils.isMacOSX()) {
+    	        return moveToTrashOSX(file);
+    	    } else if (OSUtils.isWindows()) {
+    	        return SystemUtils.recycle(file);
+    	    }
+    	    else {
+    	        throw new IllegalArgumentException("OS does not support recycle bin");
+    	    }
+    	} 
+    	else {
+    	    return deleteRecursive(file);
     	}
     }
 
