@@ -196,7 +196,7 @@ public abstract class Setting {
     public Setting setPrivate(boolean isPrivate) {
         if (this.isPrivate != isPrivate) {
             this.isPrivate = isPrivate;
-            fireSettingEvent(EventType.PRIVACY_CANGED);
+            fireSettingEvent(EventType.PRIVACY_CHANGED);
         }
         return this;
     }

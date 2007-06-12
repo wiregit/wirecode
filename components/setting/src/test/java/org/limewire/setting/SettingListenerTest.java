@@ -116,7 +116,7 @@ public class SettingListenerTest extends BaseTestCase {
             TestSettings.TEST.setPrivate(!TestSettings.TEST.isPrivate());
             lock.wait(100L);
         }
-        assertEquals(EventType.PRIVACY_CANGED, type[0]);
+        assertEquals(EventType.PRIVACY_CHANGED, type[0]);
         
         type[0] = null;
         synchronized (lock) {
