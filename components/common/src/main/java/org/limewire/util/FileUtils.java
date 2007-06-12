@@ -454,23 +454,30 @@ public class FileUtils {
     }
 
     /**
-     * Deletes the given file or directory, moving it to the trash can or recycle bin if the platform has one.
+     * Deletes the given file or directory, moving it to the trash can or 
+     * recycle bin if the platform has one and <code>moveToTrash</code> is
+     * true.
      * 
      * @param file The file or directory to trash or delete
+     * @param moveToTrash whether the file should be moved to the trash bin 
+     * or permanently deleted
      * @return     true on success
+     * 
+     * @throws IllegalArgumentException if the OS does not support moving files
+     * to a trash bin, check with {@link OSUtils#supportsTrash()}.
      */
-    public static boolean delete(File file, boolean moveToRecylebin) {
+    public static boolean delete(File file, boolean moveToTrash) {
     	if (!file.exists()) {
     		return false;
     	}
-    	if (moveToRecylebin) {
+    	if (moveToTrash) {
     	    if (OSUtils.isMacOSX()) {
     	        return moveToTrashOSX(file);
     	    } else if (OSUtils.isWindows()) {
     	        return SystemUtils.recycle(file);
     	    }
     	    else {
-    	        throw new IllegalArgumentException("OS does not support recycle bin");
+    	        throw new IllegalArgumentException("OS does not support trash");
     	    }
     	} 
     	else {

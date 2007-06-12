@@ -326,7 +326,7 @@ public class OSUtils {
 
     /**
      * Return whether the current operating system supports moving files
-     * to the recycle bin. 
+     * to the trash. 
      */
     public static boolean supportsTrash() {
         return isWindows() || isMacOSX();
