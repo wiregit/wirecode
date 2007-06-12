@@ -11,6 +11,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.AsyncHttpRequestHandler;
 
 import com.limegroup.gnutella.HTTPAcceptor;
 
@@ -37,32 +38,32 @@ public class LocalHTTPAcceptor extends HTTPAcceptor {
     private long MIN_REQUEST_INTERVAL = 1500;
 
     public LocalHTTPAcceptor() {
-        registerHandler("/magnet:", new MagnetCommandRequestHandler());
+        registerHandler("magnet:", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/default.js", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/pause", new MagnetPauseRequestHandler());
         registerHandler("/magcmd/detail", new MagnetDetailRequestHandler());
         registerHandler("*", new FileRequestHandler());
     }
 
-    private class MagnetCommandRequestHandler implements HttpRequestHandler {
+    private class MagnetCommandRequestHandler implements AsyncHttpRequestHandler {
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             triggerMagnetHandling(request.getRequestLine().getUri());
         }
     }
 
-    private class MagnetPauseRequestHandler implements HttpRequestHandler {
+    private class MagnetPauseRequestHandler implements AsyncHttpRequestHandler {
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             try {
-                Thread.sleep(250);
+                Thread.sleep(2500);
             } catch (InterruptedException e) {
             }
             response.setStatusCode(HttpStatus.SC_NO_CONTENT);
         }
     }
 
-    private class MagnetDetailRequestHandler implements HttpRequestHandler {
+    private class MagnetDetailRequestHandler implements AsyncHttpRequestHandler {
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             String uri = request.getRequestLine().getUri();

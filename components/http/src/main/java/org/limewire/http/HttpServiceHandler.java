@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.4 $
- * $Date: 2007-06-08 00:28:21 $
+ * $Revision: 1.4.2.1 $
+ * $Date: 2007-06-12 18:59:17 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -33,6 +33,7 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpEntity;
@@ -72,6 +73,8 @@ import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
 import org.apache.http.util.EncodingUtils;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.nio.NIODispatcher;
 
 /**
  * A HTTP service handler implementation that processes requests and responses
@@ -104,6 +107,8 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     private HttpRequestHandlerResolver handlerResolver;
     private HttpExpectationVerifier expectationVerifier;
     private HttpServiceEventListener eventListener;
+    
+    private ExecutorService executor = ExecutorsHelper.newProcessingQueue("HttpServiceHandler");
     
     public HttpServiceHandler(
             final HttpProcessor httpProcessor, 
@@ -391,8 +396,8 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
     
     private void processRequest(
-            final NHttpServerConnection conn,
-            final HttpRequest request) throws IOException, HttpException {
+            NHttpServerConnection conn,
+            HttpRequest request) throws IOException, HttpException {
         
         HttpContext context = conn.getContext();
         HttpVersion ver = request.getRequestLine().getHttpVersion();
@@ -424,7 +429,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 handler = this.handlerResolver.lookup(requestURI);
             }
             if (handler != null) {
-                handler.handle(request, response, context);
+                if (handler instanceof AsyncHttpRequestHandler) {
+                    processAsyncRequest(conn, handler, request, response, context);
+                    return;
+                } else {
+                    handler.handle(request, response, context);
+                }
             } else {
                 response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
             }
@@ -438,6 +448,57 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         sendResponse(conn, response);
     }
 
+    private void processAsyncRequest(final NHttpServerConnection conn, final HttpRequestHandler handler,
+            final HttpRequest request, final HttpResponse response, final HttpContext context) {
+        executor.submit(new Runnable() {
+            public void run() {
+                try {
+                    handler.handle(request, response, context);
+                    NIODispatcher.instance().invokeLater(new Runnable() {
+                        public void run() {
+                            sendAsyncResponse(conn, response);
+                        }
+                    });
+                } catch (final HttpException ex) {
+                    NIODispatcher.instance().invokeLater(new Runnable() {
+                        public void run() {
+                            HttpResponse errorResponse = HttpServiceHandler.this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 
+                                    HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
+                            HttpParamsLinker.link(response, HttpServiceHandler.this.params);
+                            handleException(ex, response);
+                            sendAsyncResponse(conn, errorResponse);
+                        }                        
+                    });
+                } catch (final IOException ex) {
+                    NIODispatcher.instance().invokeLater(new Runnable() {
+                        public void run() {
+                            shutdownConnection(conn);
+                            if (eventListener != null) {
+                                eventListener.fatalIOException(ex, conn);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void sendAsyncResponse(NHttpServerConnection conn, HttpResponse response) {
+        try {
+            sendResponse(conn, response);                        
+        } catch (IOException ex) {
+            shutdownConnection(conn);
+            if (this.eventListener != null) {
+                this.eventListener.fatalIOException(ex, conn);
+            }
+        } catch (HttpException ex) {
+            shutdownConnection(conn);
+            if (this.eventListener != null) {
+                this.eventListener.fatalProtocolException(ex, conn);
+            }
+        }
+    }
+    
     private void sendResponse(
             final NHttpServerConnection conn,
             final HttpResponse response) throws IOException, HttpException {
