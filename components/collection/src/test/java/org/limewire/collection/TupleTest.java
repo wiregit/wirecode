@@ -1,9 +1,19 @@
 package org.limewire.collection;
 
+import junit.framework.Test;
+
 import org.limewire.util.BaseTestCase;
 
 public class TupleTest extends BaseTestCase {
 
+    public TupleTest(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(TupleTest.class);
+    }
+        
     public void testGetFirst() {
         Tuple<String, Integer> t = new Tuple<String, Integer>("hello", 0);
         assertEquals("hello", t.getFirst());
