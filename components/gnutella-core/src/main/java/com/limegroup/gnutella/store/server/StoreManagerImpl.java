@@ -95,6 +95,10 @@ final class StoreManagerImpl implements StoreManager,
     
     // todo
     public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
+        //
+        // XXX: This will have to change, and I'll do it tomorrow (2007/06/13)
+        // XXX: Currently this is done locally so it works
+        //
         final StringBuffer res = new StringBuffer();
         try {
             String url = "http://localhost:8091/" + msg;
