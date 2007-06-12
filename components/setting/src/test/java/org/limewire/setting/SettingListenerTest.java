@@ -153,7 +153,7 @@ public class SettingListenerTest extends BaseTestCase {
         assertNull(type[0]);
     }
     
-    private static class TestSettings extends BasicSettings {
+    private static class TestSettings extends BasicSettingsGroup {
         
         private static final TestSettings INSTANCE = new TestSettings();
         

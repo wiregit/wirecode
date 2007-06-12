@@ -146,6 +146,9 @@ public abstract class Setting {
         }
     }
     
+    /**
+     * Returns all SettingListeners or null of there are none
+     */
     public SettingListener[] getSettingListeners() {
         synchronized (this) {
             if (listeners == null) {

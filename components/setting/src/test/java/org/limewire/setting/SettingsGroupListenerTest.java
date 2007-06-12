@@ -5,19 +5,19 @@ import java.io.File;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.limewire.setting.evt.SettingsEvent;
-import org.limewire.setting.evt.SettingsListener;
-import org.limewire.setting.evt.SettingsEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupEvent;
+import org.limewire.setting.evt.SettingsGroupListener;
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 import org.limewire.util.BaseTestCase;
 
-public class SettingsListenerTest extends BaseTestCase {
+public class SettingsGroupListenerTest extends BaseTestCase {
     
-    public SettingsListenerTest(String testName) {
+    public SettingsGroupListenerTest(String testName) {
         super(testName);
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(SettingsListenerTest.class);
+        TestSuite suite = new TestSuite(SettingsGroupListenerTest.class);
         return suite;
     }
     
@@ -29,8 +29,8 @@ public class SettingsListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
-        TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsChanged(SettingsEvent evt) {
+        TestSettings.INSTANCE.addSettingsGroupListener(new SettingsGroupListener() {
+            public void settingsGroupChanged(SettingsGroupEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -50,8 +50,8 @@ public class SettingsListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
-        TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsChanged(SettingsEvent evt) {
+        TestSettings.INSTANCE.addSettingsGroupListener(new SettingsGroupListener() {
+            public void settingsGroupChanged(SettingsGroupEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -71,8 +71,8 @@ public class SettingsListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
-        TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsChanged(SettingsEvent evt) {
+        TestSettings.INSTANCE.addSettingsGroupListener(new SettingsGroupListener() {
+            public void settingsGroupChanged(SettingsGroupEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -92,8 +92,8 @@ public class SettingsListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
-        TestSettings.INSTANCE.addSettingsListener(new SettingsListener() {
-            public void settingsChanged(SettingsEvent evt) {
+        TestSettings.INSTANCE.addSettingsGroupListener(new SettingsGroupListener() {
+            public void settingsGroupChanged(SettingsGroupEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -116,7 +116,7 @@ public class SettingsListenerTest extends BaseTestCase {
         assertNull(type[0]);
     }
     
-    private static class TestSettings extends BasicSettings {
+    private static class TestSettings extends BasicSettingsGroup {
         
         private static final TestSettings INSTANCE = new TestSettings();
         

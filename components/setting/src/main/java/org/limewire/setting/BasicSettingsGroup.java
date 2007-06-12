@@ -3,14 +3,14 @@ package org.limewire.setting;
 import java.io.File;
 import java.util.Properties;
 
-import org.limewire.setting.evt.SettingsEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 
 /**
  * Gives basic features including get, reload and save for a
  * {@link SettingsFactory}.
  */
-public class BasicSettings extends AbstractSettings {
+public class BasicSettingsGroup extends SettingsGroup {
     
     /**
      * properties file
@@ -26,7 +26,7 @@ public class BasicSettings extends AbstractSettings {
     /**
      * Basic constructor that creates the FACTORY and PROPS_FILE.
      */
-    protected BasicSettings(File settingsFile, String header) {
+    protected BasicSettingsGroup(File settingsFile, String header) {
         PROPS_FILE = settingsFile;
         FACTORY = new SettingsFactory(PROPS_FILE, header);
         
@@ -59,6 +59,7 @@ public class BasicSettings extends AbstractSettings {
     /**
      * reload settings from both the property and configuration files
      */
+    @Override
     public void reload() {
         FACTORY.reload();
         fireSettingsEvent(EventType.RELOAD);
@@ -67,6 +68,7 @@ public class BasicSettings extends AbstractSettings {
     /**
      * Save property settings to the property file
      */
+    @Override
     public void save() {
         if (getShouldSave()) {
             FACTORY.save();
@@ -75,6 +77,7 @@ public class BasicSettings extends AbstractSettings {
     }
     
     /** Revert all settings to their default value     */
+    @Override
     public void revertToDefault() {
         FACTORY.revertToDefault();
         fireSettingsEvent(EventType.REVERT_TO_DEFAULT);

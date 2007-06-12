@@ -156,7 +156,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         assertEquals(EventType.SHOULD_SAVE, type[0]);
     }
     
-    private static class TestSettings extends BasicSettings {
+    private static class TestSettings extends BasicSettingsGroup {
         
         private static final TestSettings INSTANCE = new TestSettings();
         

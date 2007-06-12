@@ -3,44 +3,65 @@ package org.limewire.setting;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.limewire.setting.evt.SettingsEvent;
-import org.limewire.setting.evt.SettingsListener;
-import org.limewire.setting.evt.SettingsEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupEvent;
+import org.limewire.setting.evt.SettingsGroupListener;
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
-public abstract class AbstractSettings implements Settings {
+/**
+ * Defines an abstract class to reload and save a value, revert to a 
+ * default value and mark a value as always saving. 
+ * <p>
+ * If saving is turned off, then underlying settings will not be saved. If 
+ * saving is turned on, then underlying settings still have the option not
+ * to save settings to disk.
+ */
+public abstract class SettingsGroup {
     
     /**
      * List of SettingsListeners
      */
-    private Collection<SettingsListener> listeners;
+    private Collection<SettingsGroupListener> listeners;
     
     /**
      * Value for whether or not settings should be saved to file.
      */
     private volatile boolean shouldSave = true;
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.setting.Settings#addSettingsListener(org.limewire.setting.evt.SettingsListener)
+    /**
+     * Loads Settings from disk
      */
-    public void addSettingsListener(SettingsListener l) {
+    public abstract void reload();
+    
+    /**
+     * Saves the current Settings to disk
+     */
+    public abstract void save();
+    
+    /**
+     * Reverts all Settings to their default values
+     */
+    public abstract void revertToDefault();
+    
+    /**
+     * Adds the given SettingsListener
+     */
+    public void addSettingsGroupListener(SettingsGroupListener l) {
         if (l == null) {
             throw new NullPointerException("SettingsListener is null");
         }
         
         synchronized (this) {
             if (listeners == null) {
-                listeners = new ArrayList<SettingsListener>();
+                listeners = new ArrayList<SettingsGroupListener>();
             }
             listeners.add(l);
         }        
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.setting.Settings#removeSettingsListener(org.limewire.setting.evt.SettingsListener)
+    /**
+     * Removes the given SettingsListener
      */
-    public void removeSettingsListener(SettingsListener l) {
+    public void removeSettingsGroupListener(SettingsGroupListener l) {
         if (l == null) {
             throw new NullPointerException("SettingsListener is null");
         }
@@ -55,17 +76,22 @@ public abstract class AbstractSettings implements Settings {
         }
     }
 
-    public SettingsListener[] getSettingsListeners() {
+    /**
+     * Returns all SettingsGroupListeners or null if there are none
+     */
+    public SettingsGroupListener[] getSettingsGroupListeners() {
         synchronized (this) {
             if (listeners == null) {
                 return null;
             }
             
-            return listeners.toArray(new SettingsListener[0]);
+            return listeners.toArray(new SettingsGroupListener[0]);
         }
     }
     
-    /** Mutator for shouldSave     */
+    /**
+     * Sets whether or not all Settings should be saved
+     */
     public void setShouldSave(boolean shouldSave) {
         if (this.shouldSave != shouldSave) {
             this.shouldSave = shouldSave;
@@ -73,7 +99,9 @@ public abstract class AbstractSettings implements Settings {
         }
     }
     
-    /** Access for shouldSave     */
+    /** 
+     * Access for shouldSave
+     */
     public boolean getShouldSave() {
         return shouldSave;
     }
@@ -82,23 +110,23 @@ public abstract class AbstractSettings implements Settings {
      * Fires a SettingsEvent
      */
     protected void fireSettingsEvent(EventType type) {
-        fireSettingsEvent(new SettingsEvent(type, this));
+        fireSettingsEvent(new SettingsGroupEvent(type, this));
     }
     
     /**
      * Fires a SettingsEvent
      */
-    protected void fireSettingsEvent(final SettingsEvent evt) {
+    protected void fireSettingsEvent(final SettingsGroupEvent evt) {
         if (evt == null) {
             throw new NullPointerException("SettingsEvent is null");
         }
         
-        final SettingsListener[] listeners = getSettingsListeners();
+        final SettingsGroupListener[] listeners = getSettingsGroupListeners();
         if (listeners != null) {
             Runnable command = new Runnable() {
                 public void run() {
-                    for (SettingsListener l : listeners) {
-                        l.settingsChanged(evt);
+                    for (SettingsGroupListener l : listeners) {
+                        l.settingsGroupChanged(evt);
                     }
                 }
             };

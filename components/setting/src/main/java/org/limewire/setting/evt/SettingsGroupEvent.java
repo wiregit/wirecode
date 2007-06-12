@@ -1,11 +1,11 @@
 package org.limewire.setting.evt;
 
-import org.limewire.setting.Settings;
+import org.limewire.setting.SettingsGroup;
 
 /**
- * SettingsEvent are fired when a {@link Settings} instance changed 
+ * SettingsEvent are fired when a {@link SettingsGroup} instance changed 
  */
-public class SettingsEvent {
+public class SettingsGroupEvent {
     
     /**
      * Various SettingsEvent that may occur
@@ -40,7 +40,7 @@ public class SettingsEvent {
     /**
      * The Settings instance that created this event
      */
-    private final Settings settings;
+    private final SettingsGroup settings;
     
     /**
      * Constructs a SettingsEvent
@@ -48,7 +48,7 @@ public class SettingsEvent {
      * @param type The type of the event
      * @param settings The Settings instance that triggered this event
      */
-    public SettingsEvent(EventType type, Settings settings) {
+    public SettingsGroupEvent(EventType type, SettingsGroup settings) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
@@ -71,7 +71,7 @@ public class SettingsEvent {
     /**
      * Returns the Settings instance that fired this event
      */
-    public Settings getSettings() {
+    public SettingsGroup getSettings() {
         return settings;
     }
     

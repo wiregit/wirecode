@@ -1,6 +1,6 @@
 package org.limewire.setting.evt;
 
-import org.limewire.setting.Settings;
+import org.limewire.setting.SettingsGroup;
 import org.limewire.setting.SettingsHandler;
 
 /**
@@ -49,7 +49,7 @@ public class SettingsHandlerEvent {
     
     private final SettingsHandler handler;
     
-    private final Settings settings;
+    private final SettingsGroup settings;
     
     /**
      * Constructs a SettingsHandlerEvent
@@ -58,7 +58,7 @@ public class SettingsHandlerEvent {
      * @param handler The handler that triggered this event
      * @param settings The Settings instance that was added or removed (null in other cases)
      */
-    public SettingsHandlerEvent(EventType type, SettingsHandler handler, Settings settings) {
+    public SettingsHandlerEvent(EventType type, SettingsHandler handler, SettingsGroup settings) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
@@ -90,7 +90,7 @@ public class SettingsHandlerEvent {
      * The Settings instance that was added or removed. It's null in
      * all other cases
      */
-    public Settings getSettings() {
+    public SettingsGroup getSettings() {
         return settings;
     }
     

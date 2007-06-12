@@ -12,7 +12,7 @@ import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
 
 
 /**
- * Groups all {@link Settings} objects in one location to reload, revert to
+ * Groups all {@link SettingsGroup} objects in one location to reload, revert to
  * a default value, save, or mark as save-able all <code>Settings</code> 
  * objects at once.
  */
@@ -33,7 +33,7 @@ public final class SettingsHandler {
     /**
      * A list of Settings this SettingsHandler is managing
      */
-    private final Collection<Settings> PROPS = Collections.synchronizedList(new ArrayList<Settings>());
+    private final Collection<SettingsGroup> PROPS = Collections.synchronizedList(new ArrayList<SettingsGroup>());
 
     /**
      * A list of {@link SettingsHandlerListener}s
@@ -97,7 +97,7 @@ public final class SettingsHandler {
      * Adds a settings class to the list of factories that 
      * this handler will act upon.
      */
-    public void addSettings(Settings settings) {
+    public void addSettings(SettingsGroup settings) {
         PROPS.add(settings);
         fireSettingsHandlerEvent(EventType.SETTINGS_ADDED, settings);
     }
@@ -106,7 +106,7 @@ public final class SettingsHandler {
      * Removes a settings class from the list of factories that
      * this handler will act upon.
      */
-    public void removeSettings(Settings settings) {
+    public void removeSettings(SettingsGroup settings) {
         if (PROPS.remove(settings)) {
             fireSettingsHandlerEvent(EventType.SETTINGS_REMOVED, settings);
         }
@@ -117,7 +117,7 @@ public final class SettingsHandler {
      */
     public void reload() {
         synchronized (PROPS) {
-            for (Settings settings : PROPS) {
+            for (SettingsGroup settings : PROPS) {
                 settings.reload();
             }
         }
@@ -130,7 +130,7 @@ public final class SettingsHandler {
      */
     public void save() {
         synchronized (PROPS) {
-            for (Settings settings : PROPS) {
+            for (SettingsGroup settings : PROPS) {
                 settings.save();
             }
         }
@@ -143,7 +143,7 @@ public final class SettingsHandler {
      */
     public void revertToDefault() {
         synchronized (PROPS) {
-            for (Settings settings : PROPS) {
+            for (SettingsGroup settings : PROPS) {
                 settings.revertToDefault();
             }
         }
@@ -156,7 +156,7 @@ public final class SettingsHandler {
      */
     public void setShouldSave(boolean shouldSave) {
         synchronized (PROPS) {
-            for (Settings settings : PROPS) {
+            for (SettingsGroup settings : PROPS) {
                 settings.setShouldSave(shouldSave);
             }
         }
@@ -167,7 +167,7 @@ public final class SettingsHandler {
     /**
      * Fires a SettingsHandlerEvent
      */
-    protected void fireSettingsHandlerEvent(EventType type, Settings settings) {
+    protected void fireSettingsHandlerEvent(EventType type, SettingsGroup settings) {
         fireSettingsHandlerEvent(new SettingsHandlerEvent(type, this, settings));
     }
     

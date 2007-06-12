@@ -4,16 +4,16 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.setting.AbstractSettings;
+import org.limewire.setting.SettingsGroup;
 import org.limewire.setting.SettingsHandler;
-import org.limewire.setting.evt.SettingsEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A container of LibraryData.
  */
-public class LibraryData extends AbstractSettings {
+public class LibraryData extends SettingsGroup {
     
     /**
      * The Container data, storing all the information.
