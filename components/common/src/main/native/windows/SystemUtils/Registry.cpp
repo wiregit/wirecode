@@ -33,7 +33,7 @@ int RegistryReadNumber(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 	if (result != ERROR_SUCCESS) {
 
 		// Throw an exception back to Java
-		ThrowIOException(e, "couldn't read integer");
+		ThrowIOException(e, _T("couldn't read integer"));
 		return 0;
 	}
 
@@ -51,7 +51,7 @@ CString RegistryReadText(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 
 	// Open the key
 	CRegistry registry;
-	if (!registry.Open(root, path, false)) return "";
+	if (!registry.Open(root, path, false)) return _T("");
 
 	// Get the size required
 	DWORD size;
@@ -61,12 +61,12 @@ CString RegistryReadText(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 		0,
 		NULL,
 		NULL,         // No data buffer, we're requesting the size
-		&size);       // The function will write the required size here
-	if (result != ERROR_SUCCESS) return "";
+		&size);       // Required size in bytes including the null terminator
+	if (result != ERROR_SUCCESS) return _T("");
 
 	// Open a string
 	CString s;
-	LPTSTR buffer = s.GetBuffer(size);
+	LPTSTR buffer = s.GetBuffer(size / sizeof(TCHAR)); // How many characters we'll write, including the null terminator
 
 	// Read the binary data
 	result = RegQueryValueEx(
@@ -74,10 +74,10 @@ CString RegistryReadText(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 		name,           // Name of the value to read
 		0,
 		NULL,
-		(LPBYTE)buffer, // Data buffer
-		&size);         // Size of data buffer
+		(LPBYTE)buffer, // Data buffer, writes the null terminator
+		&size);         // Size of data buffer in bytes
 	s.ReleaseBuffer();
-	if (result != ERROR_SUCCESS) ThrowIOException(e, "couldn't read text"); // Throw an exception back to Java
+	if (result != ERROR_SUCCESS) ThrowIOException(e, _T("couldn't read text")); // Throw an exception back to Java
 
 	// Return the string
 	return s;
@@ -121,12 +121,12 @@ bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value) {
 
 	// Set or make and set the text value
 	int result = RegSetValueEx(
-		registry.Key,        // Handle to an open key
-		name,                // Name of the value to set or make and set
+		registry.Key,                          // Handle to an open key
+		name,                                  // Name of the value to set or make and set
 		0,
-		REG_SZ,              // Variable type is a null-terminated string
-		(const BYTE *)value, // Address of the value data to load
-		lstrlen(value) + 1); // Size of the value data, add 1 to write the null terminator
+		REG_SZ,                                // Variable type is a null-terminated string
+		(const BYTE *)value,                   // Address of the value data to load
+		(lstrlen(value) + 1) * sizeof(TCHAR)); // Size of the value data in bytes, add 1 to write the null terminator
 	if (result != ERROR_SUCCESS) return false;
 	return true;
 }
@@ -172,7 +172,7 @@ bool RegistryDelete(HKEY base, LPCTSTR path) {
 bool CRegistry::Open(HKEY root, LPCTSTR path, bool write) {
 
 	// Make sure we were given a key and path
-	if (!root || path == CString("")) return false;
+	if (!root || path == CString(_T(""))) return false;
 
 	// Variables for opening the key
 	HKEY key;
@@ -187,7 +187,7 @@ bool CRegistry::Open(HKEY root, LPCTSTR path, bool write) {
 			root,                    // Handle to open root key
 			path,                    // Subkey name
 			0,
-			"",
+			_T(""),
 			REG_OPTION_NON_VOLATILE, // Save information in the registry file
 			KEY_ALL_ACCESS,          // Get access to read and write values in the key we're making and opening
 			NULL,
@@ -220,10 +220,10 @@ HKEY RegistryName(LPCTSTR name) {
 
 	// Look at the text name to return the matching registry root key handle value
 	CString s = name;
-	if      (s == "HKEY_CLASSES_ROOT")   return HKEY_CLASSES_ROOT;
-	else if (s == "HKEY_CURRENT_CONFIG") return HKEY_CURRENT_CONFIG;
-	else if (s == "HKEY_CURRENT_USER")   return HKEY_CURRENT_USER;
-	else if (s == "HKEY_LOCAL_MACHINE")  return HKEY_LOCAL_MACHINE;
-	else if (s == "HKEY_USERS")          return HKEY_USERS;
+	if      (s == _T("HKEY_CLASSES_ROOT"))   return HKEY_CLASSES_ROOT;
+	else if (s == _T("HKEY_CURRENT_CONFIG")) return HKEY_CURRENT_CONFIG;
+	else if (s == _T("HKEY_CURRENT_USER"))   return HKEY_CURRENT_USER;
+	else if (s == _T("HKEY_LOCAL_MACHINE"))  return HKEY_LOCAL_MACHINE;
+	else if (s == _T("HKEY_USERS"))          return HKEY_USERS;
 	else return NULL;
 }

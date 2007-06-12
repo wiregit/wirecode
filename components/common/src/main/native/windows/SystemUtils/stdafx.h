@@ -6,6 +6,7 @@
 #define _WIN32_WINNT 0x0500
 
 // Include Java and Windows headers
+
 #include <jni.h>      // Java types for native code like jstring and JNIEnv
 #include <jawt_md.h>  // Access Java's Active Widget Toolkit
 #include <windows.h>  // Win32 types, like DWORD
