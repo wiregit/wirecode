@@ -1,8 +1,8 @@
 package org.limewire.setting;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -88,7 +88,7 @@ public abstract class Setting {
 	/**
 	 * List of SettingListener
 	 */
-    private volatile Collection<SettingListener> listeners = null;
+    private Collection<SettingListener> listeners = null;
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -122,11 +122,10 @@ public abstract class Setting {
         
         synchronized (this) {
             if (listeners == null) {
-                listeners = new CopyOnWriteArrayList<SettingListener>();
+                listeners = new ArrayList<SettingListener>();
             }
-        }
-        
-        listeners.add(l);
+            listeners.add(l);
+        }        
     }
     
 	/**
@@ -138,12 +137,23 @@ public abstract class Setting {
         }
         
         synchronized (this) {
-            if (listeners == null) {
-                return;
+            if (listeners != null) {
+                listeners.remove(l);
+                if (listeners.isEmpty()) {
+                    listeners = null;
+                }
             }
         }
-        
-        listeners.remove(l);
+    }
+    
+    public SettingListener[] getSettingListeners() {
+        synchronized (this) {
+            if (listeners == null) {
+                return null;
+            }
+            
+            return listeners.toArray(new SettingListener[0]);
+        }
     }
     
     /**
@@ -270,20 +280,17 @@ public abstract class Setting {
             throw new NullPointerException("SettingEvent is null");
         }
         
-        synchronized (this) {
-            if (listeners == null || listeners.isEmpty()) {
-                return;
-            }
-        }
-        
-        Runnable command = new Runnable() {
-            public void run() {
-                for (SettingListener l : listeners) {
-                    l.settingChanged(evt);
+        final SettingListener[] listeners = getSettingListeners();
+        if (listeners != null) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    for (SettingListener l : listeners) {
+                        l.settingChanged(evt);
+                    }
                 }
-            }
-        };
-        
-        SettingsHandler.instance().execute(command);
+            };
+            
+            SettingsHandler.instance().execute(command);
+        }
     }
 }

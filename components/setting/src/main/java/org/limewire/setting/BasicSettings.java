@@ -10,7 +10,7 @@ import org.limewire.setting.evt.SettingsEvent.EventType;
  * Gives basic features including get, reload and save for a
  * {@link SettingsFactory}.
  */
-public class BasicSettings extends AbstractSettings implements Settings {
+public class BasicSettings extends AbstractSettings {
     
     /**
      * properties file

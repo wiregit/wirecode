@@ -1,7 +1,7 @@
 package org.limewire.setting;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.setting.evt.SettingsEvent;
 import org.limewire.setting.evt.SettingsListener;
@@ -12,7 +12,7 @@ public abstract class AbstractSettings implements Settings {
     /**
      * List of SettingsListeners
      */
-    private volatile Collection<SettingsListener> listeners;
+    private Collection<SettingsListener> listeners;
     
     /**
      * Value for whether or not settings should be saved to file.
@@ -30,11 +30,10 @@ public abstract class AbstractSettings implements Settings {
         
         synchronized (this) {
             if (listeners == null) {
-                listeners = new CopyOnWriteArrayList<SettingsListener>();
+                listeners = new ArrayList<SettingsListener>();
             }
-        }
-        
-        listeners.add(l);
+            listeners.add(l);
+        }        
     }
     
     /*
@@ -47,12 +46,23 @@ public abstract class AbstractSettings implements Settings {
         }
         
         synchronized (this) {
-            if (listeners == null) {
-                return;
+            if (listeners != null) {
+                listeners.remove(l);
+                if (listeners.isEmpty()) {
+                    listeners = null;
+                }
             }
         }
-        
-        listeners.remove(l);
+    }
+
+    public SettingsListener[] getSettingsListeners() {
+        synchronized (this) {
+            if (listeners == null) {
+                return null;
+            }
+            
+            return listeners.toArray(new SettingsListener[0]);
+        }
     }
     
     /** Mutator for shouldSave     */
@@ -83,20 +93,17 @@ public abstract class AbstractSettings implements Settings {
             throw new NullPointerException("SettingsEvent is null");
         }
         
-        synchronized (this) {
-            if (listeners == null || listeners.isEmpty()) {
-                return;
-            }
-        }
-        
-        Runnable command = new Runnable() {
-            public void run() {
-                for (SettingsListener l : listeners) {
-                    l.settingsChanged(evt);
+        final SettingsListener[] listeners = getSettingsListeners();
+        if (listeners != null) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    for (SettingsListener l : listeners) {
+                        l.settingsChanged(evt);
+                    }
                 }
-            }
-        };
-        
-        SettingsHandler.instance().execute(command);
+            };
+            
+            SettingsHandler.instance().execute(command);
+        }
     }
 }
