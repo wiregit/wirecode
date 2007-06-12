@@ -29,7 +29,7 @@ public class SettingEvent {
         /**
          * The privacy flag was changed
          */
-        PRIVACY_CANGED,
+        PRIVACY_CHANGED,
         
         /**
          * The value changed
