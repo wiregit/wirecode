@@ -52,6 +52,7 @@ public abstract class AbstractRemoteServer extends AbstractServer {
                 if (Util.isEmpty(publicKey)) {
                     return DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY;
                 }
+                note("StoreKey: " + publicKey + " -> " + ip + "," + privateKey);
                 storeKey(publicKey, privateKey, ip);
                 return DispatcherSupport.Responses.OK;
             }
@@ -72,8 +73,10 @@ public abstract class AbstractRemoteServer extends AbstractServer {
                 String ip = Util.getArg(args, DispatcherSupport.Parameters.IP);
                 if (ip == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER);
-                }
-                return lookUpPrivateKey(publicKey, ip);
+                }                
+                String privateKey = lookUpPrivateKey(publicKey, ip);
+                note("GiveKey: " + publicKey + " -> " + ip + "," + privateKey);
+                return privateKey;
             }
         }
     }

@@ -16,12 +16,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+
+import sun.beans.editors.StringEditor;
 
 /**
  * Instances of this class will receive HTTP requests and are responsible to
  * doling them out to listeners.
- * 
  */
 abstract class DispatcherSupport implements Dispatcher {
     
@@ -42,25 +44,20 @@ abstract class DispatcherSupport implements Dispatcher {
     // Interface
     // ------------------------------------------------------
     
-    public void handle(HttpRequest httpReq, HttpResponse httpRes, HttpContext c) throws HttpException, IOException {
+    public void handle(HttpRequest httpReq, HttpResponse res, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
         final String req = makeFile(request);
         final Handler h = names2handlers.get(req.toLowerCase());
-        final String res;
+        final String str;
         if (h == null) {
             LOG.error("Couldn't create a handler for " + req);
-            res = report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            str = report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
         } else {
             LOG.debug("have handler: " + h.name());
             final Map<String, String> args = DispatcherSupport.getArgs(request);
-            res = h.handle(args);
+            str = h.handle(args);
         }
-        if (res == null) {
-            //DispatcherSupport.report(Dispatcher.ErrorCodes.UNKNOWN_COMMAND);
-        } else {
-            //todo
-        }
-        
+        res.setEntity(new StringEntity(str));        
     }
     public final boolean addConnectionListener(ConnectionListener lis) {
         return getDispatchee().addConnectionListener(lis);
@@ -178,7 +175,8 @@ abstract class DispatcherSupport implements Dispatcher {
      * Removes hash and other stuff.
      */
     private String makeFile(final String s) {
-        String res = s;
+        int iprefix = s.indexOf(PREFIX);
+        String res = iprefix == -1 ? s : s.substring(iprefix + PREFIX.length());
         final char[] cs = { '#', '?' };
         for (char c : cs) {
             final int id = res.indexOf(c);

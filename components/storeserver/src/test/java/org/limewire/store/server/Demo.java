@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.limewire.store.server.AbstractDispatchee;
 import org.limewire.store.server.AbstractServer;
-import org.limewire.store.server.LocalLocalServer;
+import org.limewire.store.server.DemoLocalServer;
 import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.ServerImpl;
 
@@ -32,8 +32,8 @@ public class Demo {
     }
 
     Demo() {
-        localServer = new LocalLocalServer("localhost", DemoRemoteServer.PORT);
-        remoteServer = new DemoRemoteServer(LocalLocalServer.PORT);
+        localServer = new DemoLocalServer("localhost", DemoRemoteServer.PORT);
+        remoteServer = new DemoRemoteServer(DemoLocalServer.PORT);
     }
 
     public void start() {

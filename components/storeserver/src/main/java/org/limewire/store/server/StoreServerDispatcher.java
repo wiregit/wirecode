@@ -3,8 +3,12 @@
  */
 package org.limewire.store.server;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.limewire.service.ErrorService;
 
 final class StoreServerDispatcher extends DispatcherSupport implements SendsMessagesToServer {
     
@@ -112,6 +116,7 @@ final class StoreServerDispatcher extends DispatcherSupport implements SendsMess
         protected String handleRest(final String privateKey,
                 final Map<String, String> args) {
             newState(State.COMMUNICATING);
+            getDispatchee().setConnected(true);
             return DispatcherSupport.Responses.OK;
         }
     }
@@ -124,6 +129,7 @@ final class StoreServerDispatcher extends DispatcherSupport implements SendsMess
             newState(State.IDLE);
             privateKey = null;
             publicKey = null;
+            getDispatchee().setConnected(false);
             return DispatcherSupport.Responses.OK;
         }
     }

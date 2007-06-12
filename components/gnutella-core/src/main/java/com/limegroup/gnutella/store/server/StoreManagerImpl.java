@@ -1,14 +1,19 @@
 package com.limegroup.gnutella.store.server;
 
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.store.server.AbstractDispatchee;
 import org.limewire.store.server.ConnectionListener;
-import org.limewire.store.server.Dispatchee;
 import org.limewire.store.server.Dispatcher;
 import org.limewire.store.server.SendsMessagesToServer;
 import org.limewire.store.server.StoreServerFactory;
@@ -28,18 +33,14 @@ final class StoreManagerImpl implements StoreManager,
   
     static StoreManagerImpl newDemoInstance() {
         final StoreManagerImpl s = new StoreManagerImpl();
-        s.dispatcher = StoreServerFactory.createDispatcher(s, new Dispatchee() {
+        s.dispatcher = StoreServerFactory.createDispatcher(s, new  AbstractDispatchee() {
 
             public String dispatch(String cmd, Map<String, String> args) {
                 return s.dispatch(cmd, args);
             }
 
-            public boolean addConnectionListener(ConnectionListener lis) {
-                return s.addConnectionListener(lis);
-            }
-
-            public boolean removeConnectionListener(ConnectionListener lis) {
-                return s.removeConnectionListener(lis);
+            @Override
+            protected void connectionChanged(boolean isConnected) {
             }
             
         });
@@ -94,7 +95,22 @@ final class StoreManagerImpl implements StoreManager,
     
     // todo
     public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
-        return null;
+        final StringBuffer res = new StringBuffer();
+        try {
+            String url = "http://localhost:8091/" + msg;
+            boolean firstTime = true;
+            for (Map.Entry<String, String> e : args.entrySet()) {
+                url += firstTime ? "?" : "&";
+                firstTime = false;
+                url += e.getKey() + "=" + URLEncoder.encode(e.getValue());
+            }
+            InputStream is = new URL(url).openStream();
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
+            String line;
+            while ((line = in.readLine()) != null) res.append(line).append("\n");
+            in.close();
+        } catch (Exception e) { e.printStackTrace(); }
+        return res.toString();
     }    
 
     

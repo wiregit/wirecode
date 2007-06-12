@@ -2,8 +2,8 @@ package org.limewire.store.server;
 
 /*
  * $HeadURL$
- * $Revision: 1.1.4.1 $
- * $Date: 2007-06-08 15:04:31 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-06-12 20:54:47 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -36,7 +36,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 
 public class LocalHttpCoreServer extends AbstractHttpCoreServer {
 
-    public static final int PORT = 5550;
+    public static final int PORT = 45100;
 
     public static void main(String[] args) throws Exception {
         new LocalHttpCoreServer().start();

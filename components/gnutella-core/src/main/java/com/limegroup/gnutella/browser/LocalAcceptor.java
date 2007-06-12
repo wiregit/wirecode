@@ -34,7 +34,7 @@ public class LocalAcceptor {
 
     private int listeningPort = 45100;
 
-    private ConnectionDispatcher dispatcher = new ConnectionDispatcher();
+private ConnectionDispatcher dispatcher = new ConnectionDispatcher();
 
     /**
      * Starts listening to incoming connections.
@@ -45,7 +45,7 @@ public class LocalAcceptor {
                 ExternalControl.fireControlThread(socket, true);
             }
         }, new String[] { "MAGNET" }, true, true);
-        
+
         dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
             public void acceptConnection(String word, Socket socket) {
                 ExternalControl.fireControlThread(socket, false);

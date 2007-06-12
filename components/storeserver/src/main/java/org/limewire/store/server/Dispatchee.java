@@ -15,5 +15,12 @@ public interface Dispatchee extends ConnectionListener.HasSome {
      * @return to <tt>cmd</tt> with arguments <tt>args</tt>
      */
     String dispatch(String cmd, Map<String, String> args);
+    
+    /**
+     * Called when we're connected from the server.
+     * 
+     * @param isConnected whether we're connected when a connection changes
+     */
+    void setConnected(boolean isConnected);
 
 }

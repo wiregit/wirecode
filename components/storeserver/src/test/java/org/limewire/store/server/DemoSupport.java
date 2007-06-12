@@ -3,7 +3,7 @@ package org.limewire.store.server;
 import java.util.Map;
 
 import org.limewire.store.server.AbstractServer;
-import org.limewire.store.server.LocalLocalServer;
+import org.limewire.store.server.DemoLocalServer;
 import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.ServerImpl;
 import org.limewire.store.server.Util;
@@ -21,7 +21,7 @@ public abstract class DemoSupport extends BaseTestCase {
   public final static int LOCAL_PORT  = 8080;
   public final static int REMOTE_PORT = 8090;
 
-  private LocalLocalServer localServer;
+  private DemoLocalServer localServer;
   private DemoRemoteServer remoteServer;
   private FakeCode code;
 
@@ -81,7 +81,7 @@ public abstract class DemoSupport extends BaseTestCase {
 
     beforeSetup();
 
-    localServer = new LocalLocalServer("localhost", REMOTE_PORT);
+    localServer = new DemoLocalServer("localhost", REMOTE_PORT);
     remoteServer = new DemoRemoteServer(LOCAL_PORT);
     AbstractServer.start(localServer);
     AbstractServer.start(remoteServer);

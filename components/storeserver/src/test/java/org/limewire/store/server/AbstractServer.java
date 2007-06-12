@@ -24,6 +24,7 @@ import org.limewire.service.ErrorService;
 public abstract class AbstractServer implements Runnable  {
 
     private static final Log LOG = LogFactory.getLog(AbstractServer.class);
+    
     private final static int NUM_WORKERS = 5;
     private static final byte[] NEWLINE = { (byte) '\r', (byte) '\n' };
     private final int port;
@@ -191,7 +192,7 @@ public abstract class AbstractServer implements Runnable  {
                 }
             }
         } catch (IOException e) {
-            handle(e, "on port " + port);
+            handle(e, getClass() + " on port " + port);
             if (e instanceof java.net.BindException)
                 setDone(true);
         }
@@ -325,6 +326,15 @@ public abstract class AbstractServer implements Runnable  {
                     request = request.substring(1);
                 }
                 final String ip = Util.getIPAddress(s.getInetAddress());
+                //
+                // add the ip address
+                //
+                if (request.indexOf("?") == -1) {
+                    request += "?";
+                } else {
+                    request += "&";
+                }
+                request += "ip=" + ip;
                 String res = getDispatcher().handle(request, ps);
                 ps.print("HTTP/1.1 ");
                 ps.print(HttpURLConnection.HTTP_OK);

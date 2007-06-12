@@ -7,12 +7,12 @@ import java.util.Map;
 /**
  * Sample local server that connects to a {@link RemoteServer} running on <tt>localhost:8090</tt>.
  */
-public class LocalLocalServer extends ServerImpl {
+public class DemoLocalServer extends ServerImpl {
 
   final LocalServerDelegate del;
-  public final static int PORT = 8081;
+  public final static int PORT = 45100;
 
-  public LocalLocalServer(final String host, final int otherPort, final DispatcherSupport.OpensSocket openner) {
+  public DemoLocalServer(final String host, final int otherPort, final DispatcherSupport.OpensSocket openner) {
     super(PORT, "Local Server");
     setDispatcher(new StoreServerDispatcher(new SendsMessagesToServer() {
         public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
@@ -24,7 +24,7 @@ public class LocalLocalServer extends ServerImpl {
     
   }
   
-  public LocalLocalServer(final String host, final int otherPort) {
+  public DemoLocalServer(final String host, final int otherPort) {
       this(host, otherPort, new URLSocketOpenner());
   }
 

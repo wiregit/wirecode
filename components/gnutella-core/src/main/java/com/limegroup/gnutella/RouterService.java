@@ -626,7 +626,7 @@ public class RouterService {
             LOG.trace("END ChatManager");
             
             LOG.trace("START StoreServer");
-            StoreManager.HOLDER.instance();
+            getLocalHTTPAcceptor().registerHandler("/" + StoreManager.PREFIX + "*",  StoreManager.HOLDER.instance().getHandler());
             LOG.trace("END StoreServer");            
 
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -940,6 +940,16 @@ public class RouterService {
     public static UDPSelectorProvider getUDPSelectorProvider() {
     	return UDP_SELECTOR_PROVIDER;
     }
+    
+    /**
+     * Returns the {@link StoreServer} instance.
+     * 
+     * @return the {@link StoreServer} instance
+     */
+    public static StoreManager getStoreManager() {
+        return StoreManager.HOLDER.instance();
+    }
+
     
     public static HttpExecutor getHttpExecutor() {
     	return HTTP_EXECUTOR;

@@ -2,6 +2,9 @@ package org.limewire.store.server;
 
 import java.util.Map;
 
+/**
+ * Something that communicates with a remote server.
+ */
 public interface SendsMessagesToServer {
 
     /**

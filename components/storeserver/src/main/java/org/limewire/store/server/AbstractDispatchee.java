@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * This is what receives actual commands from an {@link DispatcherSupport}.
  */
-abstract class AbstractDispatchee implements Dispatchee {
+public abstract class AbstractDispatchee implements Dispatchee {
 
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private boolean isConnected;

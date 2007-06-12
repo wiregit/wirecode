@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.store.server.ConnectionListener;
+import org.limewire.store.server.Dispatcher;
 
 
 
@@ -30,14 +31,24 @@ import org.limewire.store.server.ConnectionListener;
  * at least one handler or listener will be registered for every command.
  */
 public interface StoreManager extends ConnectionListener.HasSome {
-    
-    public final static Holder HOLDER = new Holder() {
+
+    /**
+     * Holds the default instance and lazily creates it. 
+     */
+    Holder HOLDER = new Holder() {
         private StoreManagerImpl instance;       
         public StoreManagerImpl instance() {
             if (instance == null) instance = StoreManagerImpl.newDemoInstance();
             return instance;
         }        
     };
+    
+    
+    /**
+     * The prefix to all requests. This will be stripped off when sending to our
+     * handlers.
+     */
+    String PREFIX = Dispatcher.PREFIX;
     
     /**
      * Returns the instance of {@link HttpRequestHandler} responsible for passing along messages.

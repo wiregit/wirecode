@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.limewire.store.server.AbstractServer;
 import org.limewire.store.server.DispatcherSupport;
-import org.limewire.store.server.LocalLocalServer;
+import org.limewire.store.server.DemoLocalServer;
 import org.limewire.store.server.LocalServerDelegate;
 import org.limewire.store.server.AbstractRemoteServer;
 import org.limewire.store.server.URLSocketOpenner;
@@ -17,7 +17,7 @@ import org.limewire.store.server.URLSocketOpenner;
 public class DemoRemoteServer extends AbstractRemoteServer implements
         RemoteServer {
 
-    public final static int PORT = 8090;
+    public final static int PORT = 8091;
 
     private final LocalServerDelegate del;
 
@@ -58,9 +58,14 @@ public class DemoRemoteServer extends AbstractRemoteServer implements
     public final boolean storeKey(String publicKey, String privateKey, String ip) {
         return remoteServer.storeKey(publicKey, privateKey, ip);
     }
+        
+    // ---------------------------------------------------------------
+    // Testing
+    // ---------------------------------------------------------------
     
     public static void main(String[] args) {
-        AbstractServer.start(new DemoRemoteServer(LocalLocalServer.PORT));
+        AbstractServer.start(new DemoRemoteServer(DemoLocalServer.PORT));
     }
+
 
 }

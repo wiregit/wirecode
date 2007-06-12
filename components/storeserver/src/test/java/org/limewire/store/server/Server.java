@@ -12,7 +12,7 @@ public interface Server {
      */
     public final static Factory FACTORY = new Factory() {
         public Server newInstance(int port, DispatcherSupport.OpensSocket openner) {
-            return new LocalLocalServer("localhost", 8090, openner);
+            return new DemoLocalServer("localhost", 8090, openner);
         }
     };
     

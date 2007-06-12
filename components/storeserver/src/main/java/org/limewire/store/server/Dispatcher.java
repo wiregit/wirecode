@@ -1,6 +1,6 @@
 package org.limewire.store.server;
 
-import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.AsyncHttpRequestHandler;
 
 /**
  * This is the main part of this component and allows us to attach our
@@ -27,9 +27,12 @@ import org.apache.http.protocol.HttpRequestHandler;
  * at least one handler or listener will be registered for every command.
  * 
  */
-public interface Dispatcher extends HttpRequestHandler, ConnectionListener.HasSome, SendsMessagesToServer {
+public interface Dispatcher extends AsyncHttpRequestHandler, ConnectionListener.HasSome, SendsMessagesToServer {
     
-    public final static Creator CREATOR = new Creator() {
+    /**
+     * The {@link #Creator} creator that will create a new instance.
+     */
+    Creator CREATOR = new Creator() {
         public Dispatcher newInstance(SendsMessagesToServer sender, Dispatchee dispatchee) {
             final StoreServerDispatcher s = new StoreServerDispatcher(sender);
             s.setDispatchee(dispatchee);
@@ -37,6 +40,11 @@ public interface Dispatcher extends HttpRequestHandler, ConnectionListener.HasSo
         }
         
     };
+    /**
+     * The prefix to all requests. This will be stripped off when sending to our
+     * handlers.
+     */
+    String PREFIX = "store:";
     
     /**
      * Intances of this interface (there is one) will create a new dispatcher
