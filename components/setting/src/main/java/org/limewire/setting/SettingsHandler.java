@@ -97,18 +97,18 @@ public final class SettingsHandler {
      * Adds a settings class to the list of factories that 
      * this handler will act upon.
      */
-    public void addSettings(SettingsGroup settings) {
-        PROPS.add(settings);
-        fireSettingsHandlerEvent(EventType.SETTINGS_ADDED, settings);
+    public void addSettingsGroup(SettingsGroup group) {
+        PROPS.add(group);
+        fireSettingsHandlerEvent(EventType.SETTINGS_GROUP_ADDED, group);
     }
     
     /**
      * Removes a settings class from the list of factories that
      * this handler will act upon.
      */
-    public void removeSettings(SettingsGroup settings) {
-        if (PROPS.remove(settings)) {
-            fireSettingsHandlerEvent(EventType.SETTINGS_REMOVED, settings);
+    public void removeSettingsGroup(SettingsGroup group) {
+        if (PROPS.remove(group)) {
+            fireSettingsHandlerEvent(EventType.SETTINGS_GROUP_REMOVED, group);
         }
     }
 
@@ -117,8 +117,8 @@ public final class SettingsHandler {
      */
     public void reload() {
         synchronized (PROPS) {
-            for (SettingsGroup settings : PROPS) {
-                settings.reload();
+            for (SettingsGroup group : PROPS) {
+                group.reload();
             }
         }
         
@@ -130,8 +130,8 @@ public final class SettingsHandler {
      */
     public void save() {
         synchronized (PROPS) {
-            for (SettingsGroup settings : PROPS) {
-                settings.save();
+            for (SettingsGroup group : PROPS) {
+                group.save();
             }
         }
         
@@ -143,8 +143,8 @@ public final class SettingsHandler {
      */
     public void revertToDefault() {
         synchronized (PROPS) {
-            for (SettingsGroup settings : PROPS) {
-                settings.revertToDefault();
+            for (SettingsGroup group : PROPS) {
+                group.revertToDefault();
             }
         }
         
@@ -156,8 +156,8 @@ public final class SettingsHandler {
      */
     public void setShouldSave(boolean shouldSave) {
         synchronized (PROPS) {
-            for (SettingsGroup settings : PROPS) {
-                settings.setShouldSave(shouldSave);
+            for (SettingsGroup group : PROPS) {
+                group.setShouldSave(shouldSave);
             }
         }
         
@@ -167,8 +167,8 @@ public final class SettingsHandler {
     /**
      * Fires a SettingsHandlerEvent
      */
-    protected void fireSettingsHandlerEvent(EventType type, SettingsGroup settings) {
-        fireSettingsHandlerEvent(new SettingsHandlerEvent(type, this, settings));
+    protected void fireSettingsHandlerEvent(EventType type, SettingsGroup group) {
+        fireSettingsHandlerEvent(new SettingsHandlerEvent(type, this, group));
     }
     
     /**

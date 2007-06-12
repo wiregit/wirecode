@@ -43,7 +43,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
             lock.wait(100L);
         }
         
-        assertEquals(EventType.SETTINGS_ADDED, type[0]);
+        assertEquals(EventType.SETTINGS_GROUP_ADDED, type[0]);
     }
     
     public void testSettingsRemoved() throws Exception {
@@ -61,11 +61,11 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().removeSettings(TestSettings.INSTANCE);
+            SettingsHandler.instance().removeSettingsGroup(TestSettings.INSTANCE);
             lock.wait(100L);
         }
         
-        assertEquals(EventType.SETTINGS_REMOVED, type[0]);
+        assertEquals(EventType.SETTINGS_GROUP_REMOVED, type[0]);
     }
     
     public void testSave() throws Exception {

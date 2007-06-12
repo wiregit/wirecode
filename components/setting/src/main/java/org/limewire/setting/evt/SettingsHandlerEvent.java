@@ -16,12 +16,12 @@ public class SettingsHandlerEvent {
         /**
          * Fired when Settings were added to the handler
          */
-        SETTINGS_ADDED,
+        SETTINGS_GROUP_ADDED,
         
         /**
          * Fired when Settings were removed from the handler
          */
-        SETTINGS_REMOVED,
+        SETTINGS_GROUP_REMOVED,
         
         /**
          * Fired when all Settings were reloaded
@@ -49,16 +49,16 @@ public class SettingsHandlerEvent {
     
     private final SettingsHandler handler;
     
-    private final SettingsGroup settings;
+    private final SettingsGroup group;
     
     /**
      * Constructs a SettingsHandlerEvent
      * 
      * @param type The type of the event
      * @param handler The handler that triggered this event
-     * @param settings The Settings instance that was added or removed (null in other cases)
+     * @param group The SettingsGroup instance that was added or removed (null in other cases)
      */
-    public SettingsHandlerEvent(EventType type, SettingsHandler handler, SettingsGroup settings) {
+    public SettingsHandlerEvent(EventType type, SettingsHandler handler, SettingsGroup group) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
@@ -69,7 +69,7 @@ public class SettingsHandlerEvent {
         
         this.type = type;
         this.handler = handler;
-        this.settings = settings;
+        this.group = group;
     }
     
     /**
@@ -87,11 +87,11 @@ public class SettingsHandlerEvent {
     }
     
     /**
-     * The Settings instance that was added or removed. It's null in
+     * The SettingsGroup instance that was added or removed. It's null in
      * all other cases
      */
-    public SettingsGroup getSettings() {
-        return settings;
+    public SettingsGroup getSettingsGroup() {
+        return group;
     }
     
     public String toString() {

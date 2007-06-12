@@ -51,7 +51,7 @@ public class LibraryData extends SettingsGroup {
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
-        SettingsHandler.instance().addSettings(this);
+        SettingsHandler.instance().addSettingsGroup(this);
     }
     
     /**

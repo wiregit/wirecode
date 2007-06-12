@@ -40,25 +40,25 @@ public class SettingsGroupEvent {
     /**
      * The Settings instance that created this event
      */
-    private final SettingsGroup settings;
+    private final SettingsGroup group;
     
     /**
      * Constructs a SettingsEvent
      * 
      * @param type The type of the event
-     * @param settings The Settings instance that triggered this event
+     * @param group The SettingsGroup instance that triggered this event
      */
-    public SettingsGroupEvent(EventType type, SettingsGroup settings) {
+    public SettingsGroupEvent(EventType type, SettingsGroup group) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
         
-        if (settings == null) {
-            throw new NullPointerException("Settings is null");
+        if (group == null) {
+            throw new NullPointerException("SettingsGroup is null");
         }
         
         this.type = type;
-        this.settings = settings;
+        this.group = group;
     }
     
     /**
@@ -69,13 +69,13 @@ public class SettingsGroupEvent {
     }
     
     /**
-     * Returns the Settings instance that fired this event
+     * Returns the SettingsGroup instance that fired this event
      */
-    public SettingsGroup getSettings() {
-        return settings;
+    public SettingsGroup getSettingsGroup() {
+        return group;
     }
     
     public String toString() {
-        return type + ": " + settings;
+        return type + ": " + group;
     }
 }

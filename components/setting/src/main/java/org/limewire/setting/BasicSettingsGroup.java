@@ -30,7 +30,7 @@ public class BasicSettingsGroup extends SettingsGroup {
         PROPS_FILE = settingsFile;
         FACTORY = new SettingsFactory(PROPS_FILE, header);
         
-        SettingsHandler.instance().addSettings(this);
+        SettingsHandler.instance().addSettingsGroup(this);
     }
     
     /**
