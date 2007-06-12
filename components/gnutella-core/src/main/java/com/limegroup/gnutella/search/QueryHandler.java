@@ -811,6 +811,10 @@ public final class QueryHandler implements Inspectable {
         ret.put("ct", _curTime);
         ret.put("pqs", _probeQuerySent);
         ret.put("ftw", _forwardedToLeaves);
+        ret.put("the", _theoreticalHostsQueried);
+        if (RESULT_COUNTER != null)
+            ret.put("rc",RESULT_COUNTER.getNumResults());
+        ret.put("rh",REPLY_HANDLER.getAddress());
         return ret;
     }
 
