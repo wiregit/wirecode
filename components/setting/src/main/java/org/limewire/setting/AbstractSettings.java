@@ -19,8 +19,9 @@ public abstract class AbstractSettings implements Settings {
      */
     private volatile boolean shouldSave = true;
     
-    /**
-     * Registers a SettingsListener
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.setting.Settings#addSettingsListener(org.limewire.setting.evt.SettingsListener)
      */
     public void addSettingsListener(SettingsListener l) {
         if (l == null) {
@@ -36,8 +37,9 @@ public abstract class AbstractSettings implements Settings {
         listeners.add(l);
     }
     
-    /**
-     * Removes a SettingsListener
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.setting.Settings#removeSettingsListener(org.limewire.setting.evt.SettingsListener)
      */
     public void removeSettingsListener(SettingsListener l) {
         if (l == null) {
@@ -95,6 +97,6 @@ public abstract class AbstractSettings implements Settings {
             }
         };
         
-        SettingsHandler.instance().fireEvent(command);
+        SettingsHandler.instance().execute(command);
     }
 }

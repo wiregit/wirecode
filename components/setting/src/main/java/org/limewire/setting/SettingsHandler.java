@@ -183,13 +183,13 @@ public final class SettingsHandler {
             }
         };
         
-        fireEvent(command);
+        execute(command);
     }
     
     /**
      * Fires a event on the Executor Thread
      */
-    protected void fireEvent(Runnable evt) {
+    protected void execute(Runnable evt) {
         executor.execute(evt);
     }
     

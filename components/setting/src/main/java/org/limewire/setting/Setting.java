@@ -284,6 +284,6 @@ public abstract class Setting {
             }
         };
         
-        SettingsHandler.instance().fireEvent(command);
+        SettingsHandler.instance().execute(command);
     }
 }
