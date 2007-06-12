@@ -178,11 +178,13 @@ public abstract class Setting {
 	 * is called, as invalid values call revertToDefault.
 	 * Because default values are hard-coded into the program, this is okay.
 	 */
-	public void revertToDefault() {
+	public boolean revertToDefault() {
 	    if (!isDefault()) {
 	        setValue(DEFAULT_VALUE);
 	        fireSettingEvent(EventType.REVERT_TO_DEFAULT);
+	        return true;
 	    }
+	    return false;
 	}
 	
 	/**

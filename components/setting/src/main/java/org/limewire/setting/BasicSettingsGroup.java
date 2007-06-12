@@ -69,18 +69,23 @@ public class BasicSettingsGroup extends SettingsGroup {
      * Save property settings to the property file
      */
     @Override
-    public void save() {
+    public boolean save() {
         if (getShouldSave()) {
             FACTORY.save();
             fireSettingsEvent(EventType.SAVE);
+            return true;
         }
+        return false;
     }
     
     /** Revert all settings to their default value     */
     @Override
-    public void revertToDefault() {
-        FACTORY.revertToDefault();
-        fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
+    public boolean revertToDefault() {
+        if (FACTORY.revertToDefault()) {
+            fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
+            return true;
+        }
+        return false;
     }
     
     /** Used to find any setting based on the key in the appropriate props file     */

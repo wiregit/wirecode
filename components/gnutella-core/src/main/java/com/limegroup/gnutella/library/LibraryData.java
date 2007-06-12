@@ -57,24 +57,30 @@ public class LibraryData extends SettingsGroup {
     /**
      * Saves all the settings to disk.
      */
-    public void save() {
+    @Override
+    public boolean save() {
         if (getShouldSave()) {
             DATA.save();
             fireSettingsEvent(EventType.SAVE);
+            return true;
         }
+        return false;
     }
     
     /**
      * Reverts all settings to their defaults -- this clears all the settings.
      */
-    public void revertToDefault() {
+    @Override
+    public boolean revertToDefault() {
         DATA.clear();
         fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
+        return true;
     }
     
     /**
      * Reloads all settings to match what's on disk.
      */
+    @Override
     public void reload() {
         DATA.load();
         fireSettingsEvent(EventType.RELOAD);

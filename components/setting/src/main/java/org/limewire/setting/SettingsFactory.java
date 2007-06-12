@@ -236,9 +236,12 @@ public final class SettingsFactory implements Iterable<Setting> {
     /**
      * Reverts all settings to their factory defaults.
      */
-    public synchronized void revertToDefault() {
-        for(Setting set : settings)
-            set.revertToDefault();
+    public synchronized boolean revertToDefault() {
+        boolean any = false;
+        for(Setting setting : settings) {
+            any |= setting.revertToDefault();
+        }
+        return any;
     }
     
     /**

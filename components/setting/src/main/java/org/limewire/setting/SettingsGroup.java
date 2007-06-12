@@ -35,12 +35,12 @@ public abstract class SettingsGroup {
     /**
      * Saves the current Settings to disk
      */
-    public abstract void save();
+    public abstract boolean save();
     
     /**
      * Reverts all Settings to their default values
      */
-    public abstract void revertToDefault();
+    public abstract boolean revertToDefault();
     
     /**
      * Adds the given {@link SettingsGroupListener}

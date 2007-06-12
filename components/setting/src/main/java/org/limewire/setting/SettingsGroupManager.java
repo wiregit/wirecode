@@ -131,27 +131,37 @@ public final class SettingsGroupManager {
     /**
      * Save property settings to the property file.
      */
-    public void save() {
+    public boolean save() {
+        boolean any = false;
         synchronized (PROPS) {
             for (SettingsGroup group : PROPS) {
-                group.save();
+                any |= group.save();
             }
         }
         
-        fireSettingsHandlerEvent(EventType.SAVE, null);
+        if (any) {
+            fireSettingsHandlerEvent(EventType.SAVE, null);
+        }
+        
+        return any;
     }
     
     /**
      * Revert all settings to their default value.
      */
-    public void revertToDefault() {
+    public boolean revertToDefault() {
+        boolean any = false;
         synchronized (PROPS) {
             for (SettingsGroup group : PROPS) {
-                group.revertToDefault();
+                any |= group.revertToDefault();
             }
         }
         
-        fireSettingsHandlerEvent(EventType.REVERT_TO_DEFAULT, null);
+        if (any) {
+            fireSettingsHandlerEvent(EventType.REVERT_TO_DEFAULT, null);
+        }
+        
+        return any;
     }
     
     /**
