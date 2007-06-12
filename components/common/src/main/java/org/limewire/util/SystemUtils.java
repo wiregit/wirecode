@@ -28,9 +28,11 @@ public class SystemUtils {
         boolean canLoad;
         try {
             // Only load the library on systems where we've made it.
-            if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+            if (OSUtils.isWindows() && !OSUtils.isGoodWindows())
+                System.loadLibrary("SystemUtilitiesA");
+            else if(OSUtils.isMacOSX() || OSUtils.isWindows()) 
                 System.loadLibrary("SystemUtilities");
-            }
+            
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
             canLoad = false;
