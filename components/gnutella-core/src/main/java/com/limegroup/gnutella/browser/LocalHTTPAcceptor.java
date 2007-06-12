@@ -38,6 +38,8 @@ public class LocalHTTPAcceptor extends HTTPAcceptor {
     private long MIN_REQUEST_INTERVAL = 1500;
 
     public LocalHTTPAcceptor() {
+        super(true);
+        
         registerHandler("magnet:", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/default.js", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/pause", new MagnetPauseRequestHandler());

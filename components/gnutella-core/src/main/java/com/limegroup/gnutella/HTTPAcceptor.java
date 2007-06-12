@@ -73,6 +73,8 @@ public class HTTPAcceptor {
 
     private final List<HTTPAcceptorListener> acceptorListeners = new CopyOnWriteArrayList<HTTPAcceptorListener>();
 
+    private final boolean localOnly; 
+    
     private HttpIOReactor reactor;
 
     private HttpParams params;
@@ -85,7 +87,8 @@ public class HTTPAcceptor {
 
     private AtomicBoolean started = new AtomicBoolean();
 
-    public HTTPAcceptor() {
+    public HTTPAcceptor(boolean localOnly) {
+        this.localOnly = localOnly;
         this.registry = new SynchronizedHttpRequestHandlerRegistry();
         this.notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
@@ -100,6 +103,10 @@ public class HTTPAcceptor {
         inititalizeDefaultHandlers();
     }
 
+    public HTTPAcceptor() {
+        this(false);
+    }
+    
     /**
      * Note: Needs to be called from the NIODispatcher thread.
      */
@@ -284,7 +291,7 @@ public class HTTPAcceptor {
             public void acceptConnection(String word, Socket socket) {
                 reactor.acceptConnection(word + " ", socket);
             }
-        }, SUPPORTED_METHODS, false, false);
+        }, SUPPORTED_METHODS, localOnly, false);
     }
 
     /**
