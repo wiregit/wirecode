@@ -86,7 +86,7 @@ public abstract class Setting {
 	private boolean isPrivate = false;
 
 	/**
-	 * List of SettingListener
+	 * List of {@link SettingListener}
 	 */
     private Collection<SettingListener> listeners = null;
     
@@ -113,7 +113,7 @@ public abstract class Setting {
 	}
     
 	/**
-	 * Registers a SettingListener
+	 * Registers a {@link SettingListener}
 	 */
 	public void addSettingListener(SettingListener l) {
         if (l == null) {
@@ -129,7 +129,7 @@ public abstract class Setting {
     }
     
 	/**
-	 * Removes a SettingListener
+	 * Removes a {@link SettingListener}
 	 */
     public void removeSettingListener(SettingListener l) {
         if (l == null) {
@@ -147,7 +147,7 @@ public abstract class Setting {
     }
     
     /**
-     * Returns all SettingListeners or null of there are none
+     * Returns all {@link SettingListener}s or null of there are none
      */
     public SettingListener[] getSettingListeners() {
         synchronized (this) {
@@ -179,8 +179,10 @@ public abstract class Setting {
 	 * Because default values are hard-coded into the program, this is okay.
 	 */
 	public void revertToDefault() {
-        setValue(DEFAULT_VALUE);
-        fireSettingEvent(EventType.REVERT_TO_DEFAULT);
+	    if (!isDefault()) {
+	        setValue(DEFAULT_VALUE);
+	        fireSettingEvent(EventType.REVERT_TO_DEFAULT);
+	    }
 	}
 	
 	/**
@@ -293,7 +295,7 @@ public abstract class Setting {
                 }
             };
             
-            SettingsHandler.instance().execute(command);
+            SettingsGroupManager.instance().execute(command);
         }
     }
 }

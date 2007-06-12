@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.setting.evt.SettingsHandlerEvent;
-import org.limewire.setting.evt.SettingsHandlerListener;
-import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupManagerEvent;
+import org.limewire.setting.evt.SettingsGroupManagerListener;
+import org.limewire.setting.evt.SettingsGroupManagerEvent.EventType;
 
 
 /**
@@ -16,17 +16,17 @@ import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
  * a default value, save, or mark as save-able all <code>Settings</code> 
  * objects at once.
  */
-public final class SettingsHandler {
+public final class SettingsGroupManager {
     
     /**
      * The singleton instance of SettingsHandler
      */
-    private static final SettingsHandler INSTANCE = new SettingsHandler();
+    private static final SettingsGroupManager INSTANCE = new SettingsGroupManager();
     
     /**
      * Returns the singleton instance of the SettingsHandler
      */
-    public static SettingsHandler instance() {
+    public static SettingsGroupManager instance() {
         return INSTANCE;
     }
     
@@ -36,9 +36,9 @@ public final class SettingsHandler {
     private final Collection<SettingsGroup> PROPS = Collections.synchronizedList(new ArrayList<SettingsGroup>());
 
     /**
-     * A list of {@link SettingsHandlerListener}s
+     * A list of {@link SettingsGroupManagerListener}s
      */
-    private Collection<SettingsHandlerListener> listeners;
+    private Collection<SettingsGroupManagerListener> listeners;
     
     /**
      * The Executor for the Events
@@ -46,30 +46,30 @@ public final class SettingsHandler {
     private volatile Executor executor = ExecutorsHelper.newFixedSizeThreadPool(1, "SettingsHandlerEventDispatcher");
     
     // never instantiate this class.
-    private SettingsHandler() {}
+    private SettingsGroupManager() {}
     
     /**
-     * Registers a SettingsHandlerListener
+     * Registers a {@link SettingsGroupManagerListener}
      */
-    public void addSettingsHandlerListener(SettingsHandlerListener l) {
+    public void addSettingsHandlerListener(SettingsGroupManagerListener l) {
         if (l == null) {
-            throw new NullPointerException("SettingsHandlerListener is null");
+            throw new NullPointerException("SettingsGroupManagerListener is null");
         }
         
         synchronized (this) {
             if (listeners == null) {
-                listeners = new ArrayList<SettingsHandlerListener>();
+                listeners = new ArrayList<SettingsGroupManagerListener>();
             }
             listeners.add(l);
         }        
     }
     
     /**
-     * Removes a SettingsHandlerListener
+     * Removes a {@link SettingsGroupManagerListener}
      */
-    public void removeSettingsHandlerListener(SettingsHandlerListener l) {
+    public void removeSettingsHandlerListener(SettingsGroupManagerListener l) {
         if (l == null) {
-            throw new NullPointerException("SettingsHandlerListener is null");
+            throw new NullPointerException("SettingsGroupManagerListener is null");
         }
         
         synchronized (this) {
@@ -83,13 +83,16 @@ public final class SettingsHandler {
         }
     }
     
-    public SettingsHandlerListener[] getSettingsHandlerListeners() {
+    /**
+     * Returns all {@link SettingsGroupManagerListener}s or null if there are none
+     */
+    public SettingsGroupManagerListener[] getSettingsHandlerListeners() {
         synchronized (this) {
             if (listeners == null) {
                 return null;
             }
             
-            return listeners.toArray(new SettingsHandlerListener[0]);
+            return listeners.toArray(new SettingsGroupManagerListener[0]);
         }
     }
     
@@ -168,23 +171,23 @@ public final class SettingsHandler {
      * Fires a SettingsHandlerEvent
      */
     protected void fireSettingsHandlerEvent(EventType type, SettingsGroup group) {
-        fireSettingsHandlerEvent(new SettingsHandlerEvent(type, this, group));
+        fireSettingsHandlerEvent(new SettingsGroupManagerEvent(type, this, group));
     }
     
     /**
      * Fires a SettingsHandlerEvent
      */
-    protected void fireSettingsHandlerEvent(final SettingsHandlerEvent evt) {
+    protected void fireSettingsHandlerEvent(final SettingsGroupManagerEvent evt) {
         if (evt == null) {
             throw new NullPointerException("SettingsHandlerEvent is null");
         }
         
-        final SettingsHandlerListener[] listeners = getSettingsHandlerListeners();
+        final SettingsGroupManagerListener[] listeners = getSettingsHandlerListeners();
         if (listeners != null) {
             Runnable command = new Runnable() {
                 public void run() {
-                    for (SettingsHandlerListener l : listeners) {
-                        l.settingsHandlerChanged(evt);
+                    for (SettingsGroupManagerListener l : listeners) {
+                        l.handleGroupManagerEvent(evt);
                     }
                 }
             };

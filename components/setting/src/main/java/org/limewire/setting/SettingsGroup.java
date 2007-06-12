@@ -18,7 +18,7 @@ import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 public abstract class SettingsGroup {
     
     /**
-     * List of SettingsListeners
+     * List of {@link SettingsGroupListener}s
      */
     private Collection<SettingsGroupListener> listeners;
     
@@ -43,11 +43,11 @@ public abstract class SettingsGroup {
     public abstract void revertToDefault();
     
     /**
-     * Adds the given SettingsListener
+     * Adds the given {@link SettingsGroupListener}
      */
     public void addSettingsGroupListener(SettingsGroupListener l) {
         if (l == null) {
-            throw new NullPointerException("SettingsListener is null");
+            throw new NullPointerException("SettingsGroupListener is null");
         }
         
         synchronized (this) {
@@ -59,11 +59,11 @@ public abstract class SettingsGroup {
     }
     
     /**
-     * Removes the given SettingsListener
+     * Removes the given {@link SettingsGroupListener}
      */
     public void removeSettingsGroupListener(SettingsGroupListener l) {
         if (l == null) {
-            throw new NullPointerException("SettingsListener is null");
+            throw new NullPointerException("SettingsGroupListener is null");
         }
         
         synchronized (this) {
@@ -77,7 +77,7 @@ public abstract class SettingsGroup {
     }
 
     /**
-     * Returns all SettingsGroupListeners or null if there are none
+     * Returns all {@link SettingsGroupListener}s or null if there are none
      */
     public SettingsGroupListener[] getSettingsGroupListeners() {
         synchronized (this) {
@@ -131,7 +131,7 @@ public abstract class SettingsGroup {
                 }
             };
             
-            SettingsHandler.instance().execute(command);
+            SettingsGroupManager.instance().execute(command);
         }
     }
 }

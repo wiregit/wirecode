@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.limewire.setting.SettingsGroup;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.SettingsGroupManager;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -51,7 +51,7 @@ public class LibraryData extends SettingsGroup {
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
-        SettingsHandler.instance().addSettingsGroup(this);
+        SettingsGroupManager.instance().addSettingsGroup(this);
     }
     
     /**

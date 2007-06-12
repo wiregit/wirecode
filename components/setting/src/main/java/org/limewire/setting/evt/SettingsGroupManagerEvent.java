@@ -1,12 +1,12 @@
 package org.limewire.setting.evt;
 
 import org.limewire.setting.SettingsGroup;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.SettingsGroupManager;
 
 /**
- * SettingsHandlerEvent are fired when a {@link SettingsHandler} instance changed 
+ * SettingsHandlerEvent are fired when a {@link SettingsGroupManager} instance changed 
  */
-public class SettingsHandlerEvent {
+public class SettingsGroupManagerEvent {
     
     /**
      * Various types of events that may occur
@@ -47,7 +47,7 @@ public class SettingsHandlerEvent {
     
     private final EventType type;
     
-    private final SettingsHandler handler;
+    private final SettingsGroupManager manager;
     
     private final SettingsGroup group;
     
@@ -55,20 +55,20 @@ public class SettingsHandlerEvent {
      * Constructs a SettingsHandlerEvent
      * 
      * @param type The type of the event
-     * @param handler The handler that triggered this event
+     * @param manager The handler that triggered this event
      * @param group The SettingsGroup instance that was added or removed (null in other cases)
      */
-    public SettingsHandlerEvent(EventType type, SettingsHandler handler, SettingsGroup group) {
+    public SettingsGroupManagerEvent(EventType type, SettingsGroupManager manager, SettingsGroup group) {
         if (type == null) {
             throw new NullPointerException("EventType is null");
         }
         
-        if (handler == null) {
-            throw new NullPointerException("SettingsHandler is null");
+        if (manager == null) {
+            throw new NullPointerException("SettingsGroupManager is null");
         }
         
         this.type = type;
-        this.handler = handler;
+        this.manager = manager;
         this.group = group;
     }
     
@@ -82,8 +82,8 @@ public class SettingsHandlerEvent {
     /**
      * Returns the SettingsHandler instance that triggered this event
      */
-    public SettingsHandler getSettingsHandler() {
-        return handler;
+    public SettingsGroupManager getSettingsManager() {
+        return manager;
     }
     
     /**

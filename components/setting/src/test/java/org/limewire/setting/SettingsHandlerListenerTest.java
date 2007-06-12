@@ -5,9 +5,9 @@ import java.io.File;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.limewire.setting.evt.SettingsHandlerEvent;
-import org.limewire.setting.evt.SettingsHandlerListener;
-import org.limewire.setting.evt.SettingsHandlerEvent.EventType;
+import org.limewire.setting.evt.SettingsGroupManagerEvent;
+import org.limewire.setting.evt.SettingsGroupManagerListener;
+import org.limewire.setting.evt.SettingsGroupManagerEvent.EventType;
 import org.limewire.util.BaseTestCase;
 
 public class SettingsHandlerListenerTest extends BaseTestCase {
@@ -29,8 +29,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -51,8 +51,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.reload();
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -61,7 +61,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().removeSettingsGroup(TestSettings.INSTANCE);
+            SettingsGroupManager.instance().removeSettingsGroup(TestSettings.INSTANCE);
             lock.wait(100L);
         }
         
@@ -73,8 +73,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.reload();
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -83,7 +83,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().save();
+            SettingsGroupManager.instance().save();
             lock.wait(100L);
         }
         
@@ -95,8 +95,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.reload();
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -105,7 +105,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().reload();
+            SettingsGroupManager.instance().reload();
             lock.wait(100L);
         }
         
@@ -117,8 +117,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.reload();
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -127,7 +127,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().revertToDefault();
+            SettingsGroupManager.instance().revertToDefault();
             lock.wait(100L);
         }
         
@@ -139,8 +139,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         final EventType[] type = new EventType[1];
         
         TestSettings.TEST.reload();
-        SettingsHandler.instance().addSettingsHandlerListener(new SettingsHandlerListener() {
-            public void settingsHandlerChanged(SettingsHandlerEvent evt) {
+        SettingsGroupManager.instance().addSettingsHandlerListener(new SettingsGroupManagerListener() {
+            public void handleGroupManagerEvent(SettingsGroupManagerEvent evt) {
                 synchronized (lock) {
                     type[0] = evt.getEventType();
                     lock.notifyAll();
@@ -149,7 +149,7 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            SettingsHandler.instance().setShouldSave(!TestSettings.TEST.shouldAlwaysSave());
+            SettingsGroupManager.instance().setShouldSave(!TestSettings.TEST.shouldAlwaysSave());
             lock.wait(100L);
         }
         
