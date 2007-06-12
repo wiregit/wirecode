@@ -69,7 +69,7 @@ public class ContextSettings extends MojitoProps {
      * DHT size
      */
     public static final BooleanSetting ESTIMATE_WITH_LIVE_NODES_ONLY
-        = FACTORY.createRemoteBooleanSetting("ESTIMATE_WITH_LIVE_NODES_ONLY", false, 
+        = FACTORY.createRemoteBooleanSetting("ESTIMATE_WITH_LIVE_NODES_ONLY", true, 
                 "Mojito.EstimateWithLiveNodesOnly");
     
     /**
