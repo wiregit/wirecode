@@ -631,7 +631,9 @@ public class UploadTest extends LimeTestCase {
         String url = new String(new char[] {
             0x47, 0x72, 0xFC, 0x65, 0x7A, 0x69, 0x5F, 0x7A, 0xE4, 0x6D, 0xE4
         });
-            
+
+        // use home grown test client since HttpClient will not send theses
+        // characters in the first place
         HttpUploadClient client = new HttpUploadClient();
         try {
             client.connect("localhost", PORT);
@@ -641,6 +643,21 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Expected remote end to close socket", -1, in.read());
         } finally {
             client.close();
+        }
+    }
+
+    public void testFreeloader() throws Exception {
+        GetMethod method = new GetMethod(fileNameUrl);
+        method.setRequestHeader("User-Agent", "Mozilla");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+            String body = method.getResponseBodyAsString();
+            if (!body.startsWith("<html>")) {
+                fail("Expected free loader page, got: " + body);
+            }
+        } finally {
+            method.releaseConnection();
         }
     }
 
