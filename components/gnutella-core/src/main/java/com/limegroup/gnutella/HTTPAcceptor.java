@@ -114,9 +114,11 @@ public class HTTPAcceptor {
         this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
                 8 * 1024);
         this.params.setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true);
+        this.params.setIntParameter(HttpConnectionParams.MAX_LINE_LENGTH, 512);
+        this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 30);
         this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
                 LimeWireUtils.getHttpServer());
-
+        
         this.connectionListener = new ConnectionEventListener();
 
         // intercepts HTTP requests and responses
@@ -418,7 +420,7 @@ public class HTTPAcceptor {
          */
         public void process(HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
-            for (Iterator it = response.headerIterator(); it.hasNext();) {
+            for (Iterator<?> it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();
                 BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header
                         .getName().length()
