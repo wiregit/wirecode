@@ -601,6 +601,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertEquals(2,cm.getNumConnections());
         
         s.close();
+        Thread.sleep(10);
         cm.removeEventListener(observer);
     }
 
