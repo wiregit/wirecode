@@ -10,7 +10,7 @@ import org.limewire.setting.evt.SettingsGroupEvent.EventType;
  * Gives basic features including get, reload and save for a
  * {@link SettingsFactory}.
  */
-public class BasicSettingsGroup extends SettingsGroup {
+public class BasicSettingsGroup extends AbstractSettingsGroup {
     
     /**
      * properties file
@@ -59,7 +59,6 @@ public class BasicSettingsGroup extends SettingsGroup {
     /**
      * reload settings from both the property and configuration files
      */
-    @Override
     public void reload() {
         FACTORY.reload();
         fireSettingsEvent(EventType.RELOAD);
@@ -68,7 +67,6 @@ public class BasicSettingsGroup extends SettingsGroup {
     /**
      * Save property settings to the property file
      */
-    @Override
     public boolean save() {
         if (getShouldSave()) {
             FACTORY.save();
@@ -79,7 +77,6 @@ public class BasicSettingsGroup extends SettingsGroup {
     }
     
     /** Revert all settings to their default value     */
-    @Override
     public boolean revertToDefault() {
         if (FACTORY.revertToDefault()) {
             fireSettingsEvent(EventType.REVERT_TO_DEFAULT);

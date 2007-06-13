@@ -1,9 +1,10 @@
 package org.limewire.setting.evt;
 
+import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroup;
 
 /**
- * SettingsEvent are fired when a {@link SettingsGroup} instance changed 
+ * SettingsEvent are fired when a {@link AbstractSettingsGroup} instance changed 
  */
 public class SettingsGroupEvent {
     

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.setting.SettingsGroup;
+import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
@@ -13,7 +13,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 /**
  * A container of LibraryData.
  */
-public class LibraryData extends SettingsGroup {
+public class LibraryData extends AbstractSettingsGroup {
     
     /**
      * The Container data, storing all the information.
@@ -57,7 +57,6 @@ public class LibraryData extends SettingsGroup {
     /**
      * Saves all the settings to disk.
      */
-    @Override
     public boolean save() {
         if (getShouldSave()) {
             DATA.save();
@@ -70,7 +69,6 @@ public class LibraryData extends SettingsGroup {
     /**
      * Reverts all settings to their defaults -- this clears all the settings.
      */
-    @Override
     public boolean revertToDefault() {
         DATA.clear();
         fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
@@ -80,7 +78,6 @@ public class LibraryData extends SettingsGroup {
     /**
      * Reloads all settings to match what's on disk.
      */
-    @Override
     public void reload() {
         DATA.load();
         fireSettingsEvent(EventType.RELOAD);

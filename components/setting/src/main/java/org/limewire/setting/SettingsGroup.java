@@ -1,11 +1,6 @@
 package org.limewire.setting;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.limewire.setting.evt.SettingsGroupEvent;
 import org.limewire.setting.evt.SettingsGroupListener;
-import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 /**
  * Defines an abstract class to reload and save a value, revert to a 
@@ -15,123 +10,41 @@ import org.limewire.setting.evt.SettingsGroupEvent.EventType;
  * saving is turned on, then underlying settings still have the option not
  * to save settings to disk.
  */
-public abstract class SettingsGroup {
-    
-    /**
-     * List of {@link SettingsGroupListener}s
-     */
-    private Collection<SettingsGroupListener> listeners;
-    
-    /**
-     * Value for whether or not settings should be saved to file.
-     */
-    private volatile boolean shouldSave = true;
-    
+public interface SettingsGroup {
+
     /**
      * Loads Settings from disk
      */
     public abstract void reload();
-    
+
     /**
      * Saves the current Settings to disk
      */
     public abstract boolean save();
-    
+
     /**
      * Reverts all Settings to their default values
      */
     public abstract boolean revertToDefault();
-    
+
     /**
      * Adds the given {@link SettingsGroupListener}
      */
-    public void addSettingsGroupListener(SettingsGroupListener l) {
-        if (l == null) {
-            throw new NullPointerException("SettingsGroupListener is null");
-        }
-        
-        synchronized (this) {
-            if (listeners == null) {
-                listeners = new ArrayList<SettingsGroupListener>();
-            }
-            listeners.add(l);
-        }        
-    }
-    
+    public abstract void addSettingsGroupListener(SettingsGroupListener l);
+
     /**
      * Removes the given {@link SettingsGroupListener}
      */
-    public void removeSettingsGroupListener(SettingsGroupListener l) {
-        if (l == null) {
-            throw new NullPointerException("SettingsGroupListener is null");
-        }
-        
-        synchronized (this) {
-            if (listeners != null) {
-                listeners.remove(l);
-                if (listeners.isEmpty()) {
-                    listeners = null;
-                }
-            }
-        }
-    }
+    public abstract void removeSettingsGroupListener(SettingsGroupListener l);
 
-    /**
-     * Returns all {@link SettingsGroupListener}s or null if there are none
-     */
-    public SettingsGroupListener[] getSettingsGroupListeners() {
-        synchronized (this) {
-            if (listeners == null) {
-                return null;
-            }
-            
-            return listeners.toArray(new SettingsGroupListener[0]);
-        }
-    }
-    
     /**
      * Sets whether or not all Settings should be saved
      */
-    public void setShouldSave(boolean shouldSave) {
-        if (this.shouldSave != shouldSave) {
-            this.shouldSave = shouldSave;
-            fireSettingsEvent(EventType.SHOULD_SAVE);
-        }
-    }
-    
+    public abstract void setShouldSave(boolean shouldSave);
+
     /** 
      * Access for shouldSave
      */
-    public boolean getShouldSave() {
-        return shouldSave;
-    }
-    
-    /**
-     * Fires a SettingsEvent
-     */
-    protected void fireSettingsEvent(EventType type) {
-        fireSettingsEvent(new SettingsGroupEvent(type, this));
-    }
-    
-    /**
-     * Fires a SettingsEvent
-     */
-    protected void fireSettingsEvent(final SettingsGroupEvent evt) {
-        if (evt == null) {
-            throw new NullPointerException("SettingsEvent is null");
-        }
-        
-        final SettingsGroupListener[] listeners = getSettingsGroupListeners();
-        if (listeners != null) {
-            Runnable command = new Runnable() {
-                public void run() {
-                    for (SettingsGroupListener l : listeners) {
-                        l.settingsGroupChanged(evt);
-                    }
-                }
-            };
-            
-            SettingsGroupManager.instance().execute(command);
-        }
-    }
+    public abstract boolean getShouldSave();
+
 }
