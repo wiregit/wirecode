@@ -949,6 +949,10 @@ LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=LimeWire seï¿½eneklerinden paylaï¿½tï¿½ï¿
 LIBRARY_SHARED_FILES_CONFIGURE=Dï¿½zenle...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Paylaï¿½ma Seï¿½eneklerini Dï¿½zenle
+#### LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=Move to Trash
+#? LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=
+#### LIBRARY_MOVE_TO_TRASH_LABEL_WIN=Move to Recycle Bin
+#? LIBRARY_MOVE_TO_TRASH_LABEL_WIN=
 
 ################################################################################
 # Key/value pairs for the Library Search.

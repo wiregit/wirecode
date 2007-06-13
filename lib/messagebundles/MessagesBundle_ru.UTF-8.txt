@@ -949,6 +949,10 @@ LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=В настройках LimeWire вы м�
 LIBRARY_SHARED_FILES_CONFIGURE=Настроить...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Настройка параметров общего доступа
+#### LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=Move to Trash
+#? LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=
+#### LIBRARY_MOVE_TO_TRASH_LABEL_WIN=Move to Recycle Bin
+#? LIBRARY_MOVE_TO_TRASH_LABEL_WIN=
 
 ################################################################################
 # Key/value pairs for the Library Search.
