@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -562,6 +564,83 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
+        }
+    }
+
+    public void testLongHeader() throws Exception {
+        StringBuilder sb = new StringBuilder(2000);
+        for (int i = 0; i < 200; i++) {
+            sb.append("123456890");
+        }
+        
+        GetMethod method = new GetMethod(fileNameUrl);
+        method.addRequestHeader("Header", sb.toString());
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+        } finally {
+            method.releaseConnection();
+        }
+        
+        // request a very long filename
+        method = new GetMethod("/" + sb.toString());
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testLongFoldedHeader() throws Exception {
+        StringBuilder sb = new StringBuilder(2000);
+        sb.append("123456890");
+        for (int i = 0; i < 200; i++) {
+            sb.append("\n 123456890");
+        }
+        
+        GetMethod method = new GetMethod(fileNameUrl);
+        method.addRequestHeader("Header", sb.toString());
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testManyHeaders() throws Exception {
+        GetMethod method = new GetMethod(fileNameUrl);
+        for (int i = 0; i < 50; i++) {
+            method.addRequestHeader("Header", "abc");
+        }
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testInvalidCharactersInRequest() throws Exception {
+        // build request with non US-ASCII characters
+        String url = new String(new char[] {
+            0x47, 0x72, 0xFC, 0x65, 0x7A, 0x69, 0x5F, 0x7A, 0xE4, 0x6D, 0xE4
+        });
+            
+        HttpUploadClient client = new HttpUploadClient();
+        try {
+            client.connect("localhost", PORT);
+            HttpRequest request = new BasicHttpRequest("GET", "/" + url);
+            client.writeRequest(request);
+            InputStream in = client.getSocket().getInputStream();
+            try {
+                in.read();
+                fail("Expected remote end to close socket");
+            } catch (EOFException expected) {
+            }
+        } finally {
+            client.close();
         }
     }
 

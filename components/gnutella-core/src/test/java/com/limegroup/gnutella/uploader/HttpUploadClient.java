@@ -109,4 +109,12 @@ public class HttpUploadClient {
         return body.toString();
     }
 
+    public boolean isConnected() {
+        return (socket != null) ? socket.isConnected() : false;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+    
 }
