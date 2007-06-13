@@ -1,16 +1,22 @@
 package com.limegroup.gnutella.search;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedsizeForgetfulHashMap;
+import org.limewire.inspection.Inspectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
@@ -18,6 +24,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -25,6 +32,7 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -32,7 +40,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * results from <tt>QueryReply</tt> instances and performs the logic 
  * necessary to pass those results up to the UI.
  */
-public final class SearchResultHandler {
+public final class SearchResultHandler implements Inspectable {
     
     private static final Log LOG =
         LogFactory.getLog(SearchResultHandler.class);
@@ -59,6 +67,13 @@ public final class SearchResultHandler {
      *  I need synchronization for every call I make, so a Vector is fine.
      */
     private final List<GuidCount> GUID_COUNTS = new Vector<GuidCount>();
+    
+    /**
+     * counter for class C networks per query per urn
+     * remember the last 10 queries.
+     */
+    private final Map<GUID, Map<URN,ClassCNetworks[]>> cncCounter = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URN,ClassCNetworks[]>>(10));
 
     /*---------------------------------------------------    
       PUBLIC INTERFACE METHODS
@@ -87,6 +102,7 @@ public final class SearchResultHandler {
      */ 
     public void removeQuery(GUID guid) {
         LOG.trace("entered SearchResultHandler.removeQuery(GUID)");
+        cncCounter.remove(guid);
         GuidCount gc = removeQueryInternal(guid);
         if ((gc != null) && (!gc.isFinished())) {
             // shut off the query at the UPs - it wasn't finished so it hasn't
@@ -240,7 +256,9 @@ public final class SearchResultHandler {
                doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
                 continue;
             }
-                
+            
+            // we'll be showing the result to the user, count it
+            countClassC(qr,response);
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             rfd.setSecureStatus(secureStatus);
             Set<Endpoint> alts = response.getLocations();
@@ -256,6 +274,25 @@ public final class SearchResultHandler {
         accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
     }
 
+    private void countClassC(QueryReply qr, Response r) {
+        synchronized(cncCounter) {
+            GUID searchGuid = new GUID(qr.getGUID());
+            Map<URN, ClassCNetworks[]> m = cncCounter.get(searchGuid);
+            if (m == null) {
+                m = new HashMap<URN,ClassCNetworks[]>();
+                cncCounter.put(searchGuid,m);
+            }
+            for (URN u : r.getUrns()) {
+                ClassCNetworks [] cnc = m.get(u);
+                if (cnc == null) {
+                    cnc = new ClassCNetworks[]{new ClassCNetworks(), new ClassCNetworks()};
+                    m.put(u, cnc);
+                }
+                cnc[0].add(ByteOrder.beb2int(qr.getIPBytes(), 0), 1);
+                cnc[1].addAll(r.getLocations());
+            }
+        }
+    }
 
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
                                                  final int numGoodSentToFrontEnd) {
@@ -388,6 +425,25 @@ public final class SearchResultHandler {
         public String toString() {
             return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }
+    }
+    
+    public Object inspect() {
+        Map<String, Object> ret = new HashMap<String, Object>();
+        ret.put("ver",1);
+        synchronized(cncCounter) {
+            for (GUID g : cncCounter.keySet()) {
+                Map<URN, ClassCNetworks[]> m = cncCounter.get(g);
+                List<Map<String,byte[]>> toPut = new ArrayList<Map<String,byte[]>>(2);
+                for (ClassCNetworks[] c : m.values()) {
+                    Map<String,byte[]> cStats = new HashMap<String,byte[]>();
+                    cStats.put("ip",c[0].getTopInspectable(10));
+                    cStats.put("alt",c[1].getTopInspectable(10));
+                    toPut.add(cStats);
+                }
+                ret.put(g.toHexString(), toPut);
+            }
+        }
+        return ret;
     }
 
 }
