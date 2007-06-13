@@ -44,7 +44,15 @@ final class LocalServerDelegate implements SendsMessagesToServer {
 
     public String sendMsgToRemoteServer(final String msg, final Map<String, String> args) {
         try {
-            Socket sock = openner.open(host, port);
+            int tmpPort = port;
+            Socket tmpSock = null;
+            for (; tmpPort < port+10; tmpPort++) {
+                tmpSock = openner.open(host, tmpPort);
+                if (tmpSock != null) break;
+            }
+            final Socket sock = tmpSock;
+            System.out.println("sending on " + tmpPort + ":" + sock);
+            System.out.println(" --- " + msg + ":" + args + " ---");
             BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock
                     .getOutputStream()));
             String message = msg;

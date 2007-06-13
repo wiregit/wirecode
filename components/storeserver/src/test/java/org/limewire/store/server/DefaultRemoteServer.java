@@ -6,7 +6,12 @@ package org.limewire.store.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 class DefaultRemoteServer implements RemoteServer {
+
+    private final static Log LOG = LogFactory.getLog(RemoteServer.class);
 
     /** A pair. */
     private static class Pair {
@@ -29,7 +34,8 @@ class DefaultRemoteServer implements RemoteServer {
         }
 
         public boolean equals(final Object o) {
-            if (!(o instanceof DefaultRemoteServer.Pair)) return false;
+            if (!(o instanceof DefaultRemoteServer.Pair))
+                return false;
             final DefaultRemoteServer.Pair that = (DefaultRemoteServer.Pair) o;
             return this.key.equals(that.getKey())
                     && this.ip.equals(that.getIP());
@@ -48,13 +54,20 @@ class DefaultRemoteServer implements RemoteServer {
 
     public final boolean storeKey(String publicKey, String privateKey, String ip) {
         final DefaultRemoteServer.Pair p = new Pair(publicKey, ip);
+        note("storeKey: " + publicKey + " -> " + p);
         return pairs2privateKeys.put(p, privateKey) != null;
     }
 
     public final String lookUpPrivateKey(String publicKey, String ip) {
         final DefaultRemoteServer.Pair p = new Pair(publicKey, ip);
         final String privateKey = pairs2privateKeys.get(p);
-        return privateKey == null ? DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP
+        final String res = privateKey == null ? DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP
                 : privateKey;
+        note("lookUpKey: " + p + " -> " + privateKey);
+        return res;
+    }
+    
+    private void note(String s) {
+        LOG.debug(s);
     }
 }

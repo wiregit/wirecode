@@ -2,8 +2,8 @@ package org.limewire.store.server;
 
 /*
  * $HeadURL$
- * $Revision: 1.1.4.2 $
- * $Date: 2007-06-12 20:54:47 $
+ * $Revision: 1.1.4.3 $
+ * $Date: 2007-06-13 16:15:49 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +32,7 @@ package org.limewire.store.server;
  */
 import java.util.Map;
 
-import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.AsyncHttpRequestHandler;
 
 public class LocalHttpCoreServer extends AbstractHttpCoreServer {
 
@@ -46,7 +46,7 @@ public class LocalHttpCoreServer extends AbstractHttpCoreServer {
         return PORT;
     }
     
-    protected HttpRequestHandler createDispatcher() {
+    protected AsyncHttpRequestHandler createDispatcher() {
         SendsMessagesToServer sender = new LocalServerDelegate("localhost", RemoteHttpCoreServer.PORT);
         return new StoreServerDispatcher(sender);
     }

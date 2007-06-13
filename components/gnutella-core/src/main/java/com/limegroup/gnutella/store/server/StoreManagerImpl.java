@@ -2,6 +2,7 @@ package com.limegroup.gnutella.store.server;
 
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -11,12 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.store.server.AbstractDispatchee;
 import org.limewire.store.server.ConnectionListener;
 import org.limewire.store.server.Dispatcher;
 import org.limewire.store.server.SendsMessagesToServer;
 import org.limewire.store.server.StoreServerFactory;
+
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.util.EncodingUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -26,6 +35,8 @@ final class StoreManagerImpl implements StoreManager,
                                         StoreManager.Handler.CanRegister, 
                                         StoreManager.Listener.CanRegister,
                                         SendsMessagesToServer {
+    
+    private final static Log LOG = LogFactory.getLog(StoreManagerImpl.class);
     
     // -----------------------------------------------------------------
     // Factory
@@ -93,31 +104,35 @@ final class StoreManagerImpl implements StoreManager,
         return lst.contains(lis) ? false : lst.add(lis);
     }    
     
-    // todo
     public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
-        //
-        // XXX: This will have to change, and I'll do it tomorrow (2007/06/13)
-        // XXX: Currently this is done locally so it works
-        //
-        final StringBuffer res = new StringBuffer();
+        final String url = constructURL(msg, args);
+        HttpClient client = HttpClientManager.getNewClient();
+        final GetMethod get = new GetMethod(url);
+        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         try {
-            String url = "http://localhost:8091/" + msg;
-            boolean firstTime = true;
-            for (Map.Entry<String, String> e : args.entrySet()) {
-                url += firstTime ? "?" : "&";
-                firstTime = false;
-                url += e.getKey() + "=" + URLEncoder.encode(e.getValue());
-            }
-            InputStream is = new URL(url).openStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(is));
-            String line;
-            while ((line = in.readLine()) != null) res.append(line).append("\n");
-            in.close();
-        } catch (Exception e) { e.printStackTrace(); }
-        return res.toString();
-    }    
-
+            HttpClientManager.executeMethodRedirecting(client, get);
+            final String res = get.getResponseBodyAsString();
+            return res;
+        } catch(IOException ioe) {
+            LOG.warn("Can't contact store server: " + url, ioe);
+            return null;
+        } finally {
+            get.releaseConnection();
+        }
+    }
     
+    private String constructURL(final String msg, final Map<String, String> args) {
+        final StringBuffer url = new StringBuffer("http://localhost:8091/");
+        url.append(msg);
+        boolean firstTime = true;
+        for (Map.Entry<String, String> e : args.entrySet()) {
+            url.append(firstTime ? "?" : "&");
+            firstTime = false;
+            url.append(e.getKey()).append("=").append(EncodingUtils.encode(e.getValue()));
+        }
+        return url.toString();
+    }
+ 
     private String hash(String cmd) {
         return cmd.toLowerCase();
     }    

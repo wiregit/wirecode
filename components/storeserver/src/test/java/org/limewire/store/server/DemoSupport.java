@@ -18,12 +18,15 @@ public abstract class DemoSupport extends BaseTestCase {
     
   public DemoSupport(String s) { super(s); }
 
-  public final static int LOCAL_PORT  = 8080;
-  public final static int REMOTE_PORT = 8090;
+  public final static int LOCAL_PORT  = DemoLocalServer.PORT;
+  public final static int REMOTE_PORT = DemoRemoteServer.PORT;
 
   private DemoLocalServer localServer;
   private DemoRemoteServer remoteServer;
   private FakeCode code;
+  
+  private Thread localThread;
+  private Thread remoteThread;
 
   protected final ServerImpl getLocalServer() {
     return this.localServer;
@@ -75,6 +78,14 @@ public abstract class DemoSupport extends BaseTestCase {
       }
     };
   }
+  
+  protected final Thread getLocalThread() {
+      return localThread;
+  }
+  
+  protected final Thread getRemoteThread() {
+      return remoteThread;
+  }
 
   @Override
   protected final void setUp() throws Exception {
@@ -83,8 +94,8 @@ public abstract class DemoSupport extends BaseTestCase {
 
     localServer = new DemoLocalServer("localhost", REMOTE_PORT);
     remoteServer = new DemoRemoteServer(LOCAL_PORT);
-    AbstractServer.start(localServer);
-    AbstractServer.start(remoteServer);
+    localThread = AbstractServer.start(localServer);
+    remoteThread = AbstractServer.start(remoteServer);
     code = new FakeCode(localServer, remoteServer);
 
     afterSetup();
@@ -97,17 +108,15 @@ public abstract class DemoSupport extends BaseTestCase {
 
     stop(localServer);
     stop(remoteServer);
-
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    
+    localThread = null;
+    remoteThread = null;
 
     afterTearDown();
   }
 
   private void stop(final AbstractServer t) {
+      System.out.println("stopping " + t);
     if (t != null) {
       t.shutDown();
     }

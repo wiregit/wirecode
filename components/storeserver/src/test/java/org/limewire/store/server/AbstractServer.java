@@ -176,7 +176,21 @@ public abstract class AbstractServer implements Runnable  {
 
     private void go() {
         try {
-            final ServerSocket ss = new ServerSocket(port);
+            ServerSocket tmpSocket = null;
+            int tmpPort = port;
+            for (; tmpPort < port+10; tmpPort++) {
+                try {
+                    tmpSocket = new ServerSocket(tmpPort);
+                } catch (IOException ignored) { }
+                if (tmpSocket != null) break;
+            }
+            final ServerSocket ss = tmpSocket;
+            System.out.println("connected on " + tmpPort + ":" + ss);
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                public void run() {
+                    shutDown();
+                }
+            }));
             while (!isDone()) {
                 Socket s = ss.accept();
                 synchronized (workers) {
@@ -378,7 +392,7 @@ public abstract class AbstractServer implements Runnable  {
      * Calls {@link #shutDown(long)} with <tt>1000</tt>.
      */
     public final void shutDown() {
-        shutDown(1000);
+        shutDown(100);
     }
 
 }

@@ -14,11 +14,26 @@ public class DemoLocalServer extends ServerImpl {
 
   public DemoLocalServer(final String host, final int otherPort, final DispatcherSupport.OpensSocket openner) {
     super(PORT, "Local Server");
-    setDispatcher(new StoreServerDispatcher(new SendsMessagesToServer() {
+    StoreServerDispatcher ssd = new StoreServerDispatcher(new SendsMessagesToServer() {
         public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
             return del.sendMsgToRemoteServer(msg, args);
         }
-    }));
+    });
+    setDispatcher(ssd);
+    
+    ssd.setDispatchee(new AbstractDispatchee() {
+
+        @Override
+        protected void connectionChanged(boolean isConnected) {
+            System.out.println("connectionChanged(" + isConnected + ")");
+        }
+
+        public String dispatch(String cmd, Map<String, String> args) {
+            System.out.println(cmd + ":" + args);
+            return null;
+        }
+        
+    });
     this.del = new LocalServerDelegate(host, otherPort, openner);
     
     
