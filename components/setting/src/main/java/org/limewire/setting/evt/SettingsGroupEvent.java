@@ -1,10 +1,9 @@
 package org.limewire.setting.evt;
 
-import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroup;
 
 /**
- * SettingsEvent are fired when a {@link AbstractSettingsGroup} instance changed 
+ * SettingsEvent are fired when a {@link SettingsGroup} instance changed 
  */
 public class SettingsGroupEvent {
     
@@ -39,7 +38,7 @@ public class SettingsGroupEvent {
     private final EventType type;
     
     /**
-     * The Settings instance that created this event
+     * The {@link SettingsGroup} instance that created this event
      */
     private final SettingsGroup group;
     
@@ -47,7 +46,7 @@ public class SettingsGroupEvent {
      * Constructs a SettingsEvent
      * 
      * @param type The type of the event
-     * @param group The SettingsGroup instance that triggered this event
+     * @param group The {@link SettingsGroup} instance that triggered this event
      */
     public SettingsGroupEvent(EventType type, SettingsGroup group) {
         if (type == null) {
@@ -70,7 +69,7 @@ public class SettingsGroupEvent {
     }
     
     /**
-     * Returns the SettingsGroup instance that fired this event
+     * Returns the {@link SettingsGroup} instance that fired this event
      */
     public SettingsGroup getSettingsGroup() {
         return group;

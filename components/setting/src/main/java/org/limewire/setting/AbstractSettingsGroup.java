@@ -8,7 +8,7 @@ import org.limewire.setting.evt.SettingsGroupListener;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 /**
- * 
+ * An abstract implementation of SettingsGroup
  */
 public abstract class AbstractSettingsGroup implements SettingsGroup {
     
