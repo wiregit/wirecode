@@ -110,15 +110,15 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /** Number of force-shared active uploads. */
     private int forcedUploads;
 
-    private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
+    final private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
 
-    private ResponseListener responseListener = new ResponseListener();
+    private final ResponseListener responseListener = new ResponseListener();
 
     /**
      * Number of active uploads that are not accounted in the slot manager but
      * whose bandwidth is counted. (i.e. Multicast)
      */
-    private Set<HTTPUploader> localUploads = new CopyOnWriteArraySet<HTTPUploader>();
+    private final Set<HTTPUploader> localUploads = new CopyOnWriteArraySet<HTTPUploader>();
 
     /**
      * LOCKING: obtain this' monitor before modifying any of the data structures
@@ -176,11 +176,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
-    private ActivityCallback activityCallback;
+    private volatile ActivityCallback activityCallback;
 
-    private FileManager fileManager;
+    private volatile FileManager fileManager;
 
-    private boolean started;
+    private volatile boolean started;
     
     public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
