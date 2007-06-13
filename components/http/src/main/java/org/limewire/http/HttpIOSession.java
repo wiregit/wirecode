@@ -193,4 +193,8 @@ public class HttpIOSession implements IOSession {
         return socket;
     }
 
+    public void shutdown() {
+        close();
+    }
+
 }
