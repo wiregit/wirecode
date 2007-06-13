@@ -77,7 +77,7 @@ public class UploadTest extends LimeTestCase {
     private static final String incompleteHash = "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
 
     private static final String incompleteHashUrl = "/uri-res/N2R?"
-            + incompleteHash;
+        + incompleteHash;
 
     /** The verifying file for the shared incomplete file */
     private VerifyingFile vf;
@@ -89,39 +89,39 @@ public class UploadTest extends LimeTestCase {
     private String ROOT32;
 
     private HttpClient client;
-    
+
     private HostConfiguration hostConfig;
 
     private static RouterService ROUTER_SERVICE;
-    
+
     private static final Object loaded = new Object();
 
-	public UploadTest(String name) {
-		super(name);
-	}
+    public UploadTest(String name) {
+        super(name);
+    }
 
-	public static Test suite() {
-		return buildTestSuite(UploadTest.class);
-	}
+    public static Test suite() {
+        return buildTestSuite(UploadTest.class);
+    }
 
-	public static void main(String args[]) {
-		junit.textui.TestRunner.run(suite());
-	}
-	
+    public static void main(String args[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+
     public static void globalSetUp() {
         ROUTER_SERVICE = new RouterService(new FManCallback());
     }
-    
+
     @Override
-	protected void setUp() throws Exception {
+    protected void setUp() throws Exception {
         // allows to run single tests from Eclipse
         if (ROUTER_SERVICE == null) {
             globalSetUp();
         }
 
-	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
+        SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
-                .setValue(new String[] { "*.*.*.*" });
+        .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         RouterService.getIpFilter().refreshHosts();
@@ -129,35 +129,35 @@ public class UploadTest extends LimeTestCase {
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
-		UploadSettings.UPLOADS_PER_PERSON.setValue(10);
-		UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(10);
+        UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
 
         FilterSettings.FILTER_DUPLICATES.setValue(false);
 
-		ConnectionSettings.NUM_CONNECTIONS.setValue(8);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.NUM_CONNECTIONS.setValue(8);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-        
-		File testDir = CommonUtils.getResourceFile(testDirName);
+
+        File testDir = CommonUtils.getResourceFile(testDirName);
         // we must use a separate copy method
-		// because the filename has a # in it which can't be a resource.
+        // because the filename has a # in it which can't be a resource.
         LimeTestUtils.copyFile(new File(testDir, fileName), new File(
                 _sharedDir, fileName));
         LimeTestUtils.copyFile(new File(testDir, otherFileName), new File(
                 _sharedDir, otherFileName));
         assertTrue("Copying resources failed", new File(_sharedDir, fileName)
-                .exists());
+        .exists());
         assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
-                .length());
+        .length());
 
         if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
             // Thread.sleep(2000);
         }
-	    
+
         FileManager fm = RouterService.getFileManager();
         File incFile = new File(_incompleteDir, incName);
         fm.removeFileIfShared(incFile);
@@ -184,11 +184,11 @@ public class UploadTest extends LimeTestCase {
     @Override
     public void tearDown() {
         ((HTTPUploadManager) RouterService.getUploadManager()).cleanup();
-        
+
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
     }
-     
+
     private void initThexTree() throws Exception {
         FD = RouterService.getFileManager().getFileDescForFile(new File(_sharedDir, fileName));
         while (FD.getHashTree() == null) {
@@ -196,7 +196,7 @@ public class UploadTest extends LimeTestCase {
         }
         ROOT32 = FD.getHashTree().getRootHash();
     }
-    
+
     public void testHTTP10Download() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.setHttp11(false);
@@ -207,9 +207,9 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
+        }
     }
-    }
-    
+
     public void testHTTP10DownloadRange() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.addRequestHeader("Range", "bytes=2-");
@@ -247,7 +247,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertNotNull(method.getResponseHeader("Content-range"));
             assertEquals("bytes 2-5/26", method.getResponseHeader(
-                    "Content-range").getValue());
+            "Content-range").getValue());
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
@@ -312,7 +312,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
@@ -373,11 +373,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertNotNull(method.getResponseHeader("Content-range"));
             assertEquals("bytes 2-5/26", method.getResponseHeader(
-                    "Content-range").getValue());
+            "Content-range").getValue());
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testHTTP11DownloadRangeNoSpace() throws Exception {
@@ -387,7 +387,7 @@ public class UploadTest extends LimeTestCase {
             public String toExternalForm() {
                 return "Range:bytes 2-";
             };
-        
+
             public String toString() {
                 return "Range:bytes 2-";
             };
@@ -428,9 +428,9 @@ public class UploadTest extends LimeTestCase {
     public void testHTTP11IncompleteRange() throws Exception {
         Interval iv = new Interval(2, 6);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-                "verifiedBlocks");
+        "verifiedBlocks");
         vb.add(iv);
-        
+
         GetMethod method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 2-5");
         try {
@@ -439,8 +439,8 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 1-3");
         try {
@@ -449,7 +449,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cd", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 3-10");
@@ -459,8 +459,8 @@ public class UploadTest extends LimeTestCase {
             assertEquals("defg", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
-            
+        }
+
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 0-20");
         try {
@@ -469,7 +469,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdefg", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testHTTP11PipeliningDownload() throws Exception {
@@ -497,9 +497,9 @@ public class UploadTest extends LimeTestCase {
                     .readBody(response));
         } finally {
             client.close();
-    }
+        }
     }        
-    
+
     /**
      * Makes sure that a HEAD request followed by a GET request does the right
      * thing.
@@ -507,7 +507,7 @@ public class UploadTest extends LimeTestCase {
     public void testHTTP11HeadFollowedByGetDownload() throws Exception {
         http11DownloadPersistentHeadFollowedByGet(fileNameUrl);
     }
-    
+
     /**
      * Tests persistent connections with URI requests. (Raphael Manfredi claimed
      * this was broken.)
@@ -515,17 +515,17 @@ public class UploadTest extends LimeTestCase {
     public void testHTTP11DownloadPersistentURI() throws Exception {
         http11DownloadPersistentHeadFollowedByGet("/uri-res/N2R?" + hash);
     }      
-    
+
     private void http11DownloadPersistentHeadFollowedByGet(String url)
-            throws IOException {
+    throws IOException {
         HttpMethodBase method = new HeadMethod(url);
         try {
             int response = client.executeMethod(method);
             assertEquals(HttpStatus.SC_OK, response);
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -534,8 +534,8 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -544,7 +544,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }        
+        }        
 
         method = new HeadMethod(url);
         try {
@@ -552,8 +552,8 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -562,9 +562,9 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
+        }
     }
-    }
-    
+
     /**
      * Tests the case of requests for different file over the same HTTP session.
      */
@@ -577,10 +577,10 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         assertConnectionIsOpen(true);
-    
+
         method = new GetMethod(otherFileNameUrl);
         try {
             int response = client.executeMethod(method);
@@ -589,9 +589,9 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
+        }
     }
-    }
-    
+
     public void testIncompleteFileUpload() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -600,10 +600,10 @@ public class UploadTest extends LimeTestCase {
                     response);
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(true);
-                   
+
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
             int response = client.executeMethod(method);
@@ -611,16 +611,16 @@ public class UploadTest extends LimeTestCase {
                     response);
         } finally {
             method.releaseConnection();
+        }
     }
-    }
-    
+
     public void testIncompleteFileWithRanges() throws Exception {
         // add a range to the incomplete file.
         Interval iv = new Interval(50, 102500);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-                "verifiedBlocks");
+        "verifiedBlocks");
         vb.add(iv);
-        
+
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
             int response = client.executeMethod(method);
@@ -628,13 +628,13 @@ public class UploadTest extends LimeTestCase {
                     response);
             assertNotNull(method.getResponseHeader("X-Available-Ranges"));
             assertEquals("bytes 50-102499", method.getResponseHeader(
-                    "X-Available-Ranges").getValue());
+            "X-Available-Ranges").getValue());
         } finally {
             method.releaseConnection();
-            }
-        
+        }
+
         assertConnectionIsOpen(true);
-		
+
         // add another range and make sure we display it.
         iv = new Interval(150050, 252450);
         vb.add(iv);
@@ -649,9 +649,9 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-		
+
         assertConnectionIsOpen(true);
-        
+
         // add an interval too small to report and make sure we don't report
         iv = new Interval(102505, 150000);
         vb.add(iv);
@@ -666,9 +666,9 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-        
+
         assertConnectionIsOpen(true);
-                
+
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
         iv = new Interval(102500, 102505);
@@ -682,12 +682,12 @@ public class UploadTest extends LimeTestCase {
                     response);
             assertNotNull(method.getResponseHeader("X-Available-Ranges"));
             assertEquals("bytes 50-252449", method.getResponseHeader(
-                    "X-Available-Ranges").getValue());
+            "X-Available-Ranges").getValue());
         } finally {
             method.releaseConnection();
+        }
     }
-    }
-    
+
     public void testIncompleteFileWithRangeRequest() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         method.addRequestHeader("Range", "bytes 20-40");
@@ -698,11 +698,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Requested Range Unavailable", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         assertConnectionIsOpen(true);
     }
-    
+
     public void testHTTP11WrongURI() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + badHash);
         try {
@@ -711,11 +711,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Not Found", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
-                       
+        }
+
         assertConnectionIsOpen(true);
     }
-    
+
     public void testHTTP10WrongURI() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + badHash);
         method.setHttp11(false);
@@ -725,11 +725,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Not Found", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         assertConnectionIsOpen(false);
     }
-    
+
     public void testHTTP11MalformedURI() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + "no%20more%20school");
         try {
@@ -738,11 +738,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
-    
+
     public void testHTTP10MalformedURI() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + "%20more%20school");
         method.setHttp11(false);
@@ -752,11 +752,11 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
-    
+
     public void testHTTP11MalformedGet() throws Exception {
         GetMethod method = new GetMethod("/get/some/dr/pepper");
         try {
@@ -769,7 +769,7 @@ public class UploadTest extends LimeTestCase {
 
         assertConnectionIsOpen(false);
     }
-    
+
     public void testHTTP11MalformedHeader() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + hash);
         method.addRequestHeader("Range", "2-5");
@@ -779,7 +779,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("Malformed Request", method.getStatusText());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         assertConnectionIsOpen(false);
     }
@@ -800,37 +800,37 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-Create-Time"));
             assertEquals(creationTime + "", method.getResponseHeader(
-                    "X-Create-Time").getValue());
+            "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
-    }
+        }
     }
 
     public void testCreationTimeHeaderReturnedForIncompleteFile()
-            throws Exception {
+    throws Exception {
         Interval iv = new Interval(2, 5);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-                "verifiedBlocks");
+        "verifiedBlocks");
         vb.add(iv);
-    
+
         URN urn = URN.createSHA1Urn(incompleteHash);
         Long creationTime = new Long("10776");
         CreationTimeCache.instance().addTime(urn, creationTime.longValue());
 
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         method.addRequestHeader("Range", "bytes 2-5");
-                try {
+        try {
             int response = client.executeMethod(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertEquals("cdef", method.getResponseBodyAsString());
             assertNotNull(method.getResponseHeader("X-Create-Time"));
             assertEquals(creationTime + "", method.getResponseHeader(
-                    "X-Create-Time").getValue());
+            "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
-                }
-            }
-                            
+        }
+    }
+
     public void testChatFeatureHeader() throws Exception {
         ChatSettings.CHAT_ENABLED.setValue(true);
         GetMethod method = new GetMethod(fileNameUrl);
@@ -847,7 +847,7 @@ public class UploadTest extends LimeTestCase {
         }
 
         assertConnectionIsOpen(true);
-        
+
         // feature headers are only sent with the first response
         ChatSettings.CHAT_ENABLED.setValue(false);
         method = new GetMethod(fileNameUrl);
@@ -858,8 +858,8 @@ public class UploadTest extends LimeTestCase {
             assertNull(method.getResponseHeader("X-Features"));
         } finally {
             method.releaseConnection();
-    }
-    
+        }
+
         assertConnectionIsOpen(false);
 
         // try a new connection
@@ -874,12 +874,12 @@ public class UploadTest extends LimeTestCase {
             assertFalse(header.contains("chat/0.1"));
         } finally {
             method.releaseConnection();
-            }
         }
+    }
 
     public void testThexHeader() throws Exception {
         initThexTree();
-        
+
         GetMethod method = new GetMethod(fileNameUrl);
         try {
             int response = client.executeMethod(method);
@@ -891,10 +891,10 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-                
+
     public void testDownloadFromBitprintUrl() throws Exception {
         initThexTree();
-        
+
         GetMethod method = new GetMethod("/uri-res/N2R?urn:bitprint:"
                 + baseHash + "." + ROOT32);
         try {
@@ -904,8 +904,8 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-	}
-    
+        }
+
         // the request is checked for a valid bitprint length
         method = new GetMethod("/uri-res/N2R?urn:bitprint:" + baseHash + "."
                 + "asdoihffd");
@@ -914,7 +914,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response);
         } finally {
             method.releaseConnection();
-	}
+        }
 
         // but not for the valid base32 root -- in the future we may
         // and this test will break
@@ -927,7 +927,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-    }
+        }
 
         // make sure "bitprint:" is required for bitprint uploading.
         method = new GetMethod("/uri-res/N2R?urn:sha1:" + baseHash + "."
@@ -947,8 +947,8 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_NOT_FOUND, response);
         } finally {
             method.releaseConnection();
-            }
-            
+        }
+
         method = new GetMethod("/uri-res/N2X?" + "no hash");
         try {
             int response = client.executeMethod(method);
@@ -960,7 +960,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testGetTree() throws Exception {
         initThexTree();
-        
+
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
             int response = client.executeMethod(method);
@@ -1000,7 +1000,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-    
+
     private static class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized (loaded) {
@@ -1016,15 +1016,15 @@ public class UploadTest extends LimeTestCase {
                 loaded.wait();
             } catch (InterruptedException e) {
                 // good.
-    } 
-    }
+            } 
         }
-        
+    }
+
     private void assertConnectionIsOpen(boolean open) {
         HttpConnection connection = client.getHttpConnectionManager()
-                .getConnection(hostConfig);
+        .getConnection(hostConfig);
         assertEquals(open, connection.isOpen());
         client.getHttpConnectionManager().releaseConnection(connection);
-        }
-        
+    }
+
 }
