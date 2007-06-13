@@ -43,6 +43,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -169,11 +170,6 @@ public class UploadTest extends LimeTestCase {
         assertEquals(1, fm.getNumIncompleteFiles());
         assertEquals(2, fm.getNumFiles());
 
-        FD = fm.getFileDescForFile(new File(_sharedDir, fileName));
-        while (FD.getHashTree() == null)
-            Thread.sleep(300);
-        ROOT32 = FD.getHashTree().getRootHash();
-        
         assertEquals("Unexpected uploads in progress", 0, RouterService
                 .getUploadManager().uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, RouterService
@@ -191,8 +187,16 @@ public class UploadTest extends LimeTestCase {
         
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+    }
+     
+    private void initThexTree() throws Exception {
+        FD = RouterService.getFileManager().getFileDescForFile(new File(_sharedDir, fileName));
+        while (FD.getHashTree() == null) {
+            Thread.sleep(300);
         }
-        
+        ROOT32 = FD.getHashTree().getRootHash();
+    }
+    
     public void testHTTP10Download() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.setHttp11(false);
@@ -874,6 +878,8 @@ public class UploadTest extends LimeTestCase {
         }
 
     public void testThexHeader() throws Exception {
+        initThexTree();
+        
         GetMethod method = new GetMethod(fileNameUrl);
         try {
             int response = client.executeMethod(method);
@@ -887,6 +893,8 @@ public class UploadTest extends LimeTestCase {
     }
                 
     public void testDownloadFromBitprintUrl() throws Exception {
+        initThexTree();
+        
         GetMethod method = new GetMethod("/uri-res/N2R?urn:bitprint:"
                 + baseHash + "." + ROOT32);
         try {
@@ -951,6 +959,8 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testGetTree() throws Exception {
+        initThexTree();
+        
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
             int response = client.executeMethod(method);
@@ -959,22 +969,33 @@ public class UploadTest extends LimeTestCase {
             parser.nextRecord(); // xml
             DIMERecord tree = parser.nextRecord();
             assertFalse(parser.hasNext());
-            List allNodes = FD.getHashTree().getAllNodes();
+            List<List<byte[]>> allNodes = FD.getHashTree().getAllNodes();
             byte[] data = tree.getData();
             int offset = 0;
-            for (Iterator genIter = allNodes.iterator(); genIter.hasNext();) {
-                for (Iterator i = ((List) genIter.next()).iterator(); i
-                        .hasNext();) {
-                    byte[] current = (byte[]) i.next();
+            for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter.hasNext();) {
+                for (Iterator<byte[]> it = genIter.next().iterator(); it.hasNext();) {
+                    byte[] current = it.next();
                     for (int j = 0; j < current.length; j++) {
                         assertEquals("offset: " + offset + ", idx: " + j,
                                 current[j], data[offset++]);
-	}
-        }
+                    }
+                }
             }
             assertEquals(data.length, offset);
             // more extensive validity checks are in HashTreeTest
             // this is just checking to make sure we sent the right tree.
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testGetNonExistingTree() throws Exception {
+        URN urn = URN.createSHA1Urn(hash);
+        TigerTreeCache.instance().purgeTree(urn);
+        GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_FOUND, response);
         } finally {
             method.releaseConnection();
         }

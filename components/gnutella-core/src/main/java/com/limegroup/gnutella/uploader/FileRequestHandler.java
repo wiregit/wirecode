@@ -129,15 +129,6 @@ public class FileRequestHandler implements HttpRequestHandler {
                 context, type, fd.getFileName());
         uploader.setFileDesc(fd);
 
-        if (fileRequest.isThexRequest()) {
-            // XXX reset range to size of THEX tree
-            int outputLength = fd.getHashTree().getOutputLength();
-            // XXX the setFileSize() is confusing when uploading THEX trees
-            uploader.setFileSize(outputLength);
-            uploader.setUploadBegin(0);
-            uploader.setUploadEnd(outputLength);
-        }
-
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
         RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
@@ -169,23 +160,25 @@ public class FileRequestHandler implements HttpRequestHandler {
             return uploader;
         }
 
-        if (rangeHeaderInterceptor.hasRequestedRanges()) {
-            Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
-            if (ranges.length > 1) {
+        if (!fileRequest.isThexRequest()) {
+            if (rangeHeaderInterceptor.hasRequestedRanges()) {
+                Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
+                if (ranges.length > 1) {
+                    handleInvalidRange(response, uploader, fd);
+                    return uploader;
+                }
+
+                uploader.setUploadBegin(ranges[0].getStartOffset(uploader.getFileSize()));
+                uploader.setUploadEnd(ranges[0].getEndOffset(uploader.getFileSize()) + 1);
+                uploader.setContainedRangeRequest(true);
+            }
+
+            if (!uploader.validateRange()) {
                 handleInvalidRange(response, uploader, fd);
                 return uploader;
             }
-            
-            uploader.setUploadBegin(ranges[0].getStartOffset(uploader.getFileSize()));
-            uploader.setUploadEnd(ranges[0].getEndOffset(uploader.getFileSize()) + 1);
-            uploader.setContainedRangeRequest(true);
         }
         
-        if (!uploader.validateRange()) {
-            handleInvalidRange(response, uploader, fd);
-            return uploader;
-        }
-
         // start upload
         if (fileRequest.isThexRequest()) {
             handleTHEXRequest(request, response, context, uploader, fd);
@@ -314,12 +307,23 @@ public class FileRequestHandler implements HttpRequestHandler {
             throws HttpException, IOException {
         // reset the poll interval to allow subsequent requests right away
         uploader.getSession().updatePollTime(QueueStatus.BYPASS);
-        
-        // do not count THEX transfers towards the 
+
+        // do not count THEX transfers towards the total amount 
         uploader.setIgnoreTotalAmountUploaded(true);
         
         HashTree tree = fd.getHashTree();
-        assert tree != null;
+        if (tree == null) {
+            // tree was requested before hashing completed
+            uploader.setState(Uploader.FILE_NOT_FOUND);
+            response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+            return;
+        }
+
+        // XXX reset range to size of THEX tree
+        int outputLength = tree.getOutputLength();
+        uploader.setFileSize(outputLength);
+        uploader.setUploadBegin(0);
+        uploader.setUploadEnd(outputLength);
 
         // see CORE-174
         // response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
