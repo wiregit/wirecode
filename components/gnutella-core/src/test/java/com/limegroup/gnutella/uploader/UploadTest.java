@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +15,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpRecoverableException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpRequest;
@@ -577,7 +577,8 @@ public class UploadTest extends LimeTestCase {
         method.addRequestHeader("Header", sb.toString());
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            fail("Expected remote end to close connection, got: " + response);
+        } catch (HttpRecoverableException expected) {                
         } finally {
             method.releaseConnection();
         }
@@ -586,7 +587,8 @@ public class UploadTest extends LimeTestCase {
         method = new GetMethod("/" + sb.toString());
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            fail("Expected remote end to close connection, got: " + response);
+        } catch (HttpRecoverableException expected) {                
         } finally {
             method.releaseConnection();
         }
@@ -603,7 +605,8 @@ public class UploadTest extends LimeTestCase {
         method.addRequestHeader("Header", sb.toString());
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            fail("Expected remote end to close connection, got: " + response);
+        } catch (HttpRecoverableException expected) {                
         } finally {
             method.releaseConnection();
         }
@@ -616,7 +619,8 @@ public class UploadTest extends LimeTestCase {
         }
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            fail("Expected remote end to close connection, got: " + response);
+        } catch (HttpRecoverableException expected) {                
         } finally {
             method.releaseConnection();
         }
@@ -634,11 +638,7 @@ public class UploadTest extends LimeTestCase {
             HttpRequest request = new BasicHttpRequest("GET", "/" + url);
             client.writeRequest(request);
             InputStream in = client.getSocket().getInputStream();
-            try {
-                in.read();
-                fail("Expected remote end to close socket");
-            } catch (EOFException expected) {
-            }
+            assertEquals("Expected remote end to close socket", -1, in.read());
         } finally {
             client.close();
         }
