@@ -568,8 +568,8 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testLongHeader() throws Exception {
-        StringBuilder sb = new StringBuilder(2000);
-        for (int i = 0; i < 200; i++) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
             sb.append("123456890");
         }
         
@@ -595,9 +595,9 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testLongFoldedHeader() throws Exception {
-        StringBuilder sb = new StringBuilder(2000);
+        StringBuilder sb = new StringBuilder();
         sb.append("123456890");
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 1000; i++) {
             sb.append("\n 123456890");
         }
         
@@ -614,13 +614,28 @@ public class UploadTest extends LimeTestCase {
 
     public void testManyHeaders() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             method.addRequestHeader("Header", "abc");
         }
         try {
             int response = client.executeMethod(method);
             fail("Expected remote end to close connection, got: " + response);
         } catch (HttpRecoverableException expected) {                
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testHeaderLengthThatMatchesCharacterBufferLength() throws Exception {
+        GetMethod method = new GetMethod(fileNameUrl);
+        StringBuilder sb = new StringBuilder(512);
+        for (int i = 0; i < 512 - 3; i++) {
+            sb.append("a");
+        }
+        method.addRequestHeader("A", sb.toString());
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);               
         } finally {
             method.releaseConnection();
         }

@@ -114,8 +114,8 @@ public class HTTPAcceptor {
         this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
                 8 * 1024);
         this.params.setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true);
-        this.params.setIntParameter(HttpConnectionParams.MAX_LINE_LENGTH, 512);
-        this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 30);
+        this.params.setIntParameter(HttpConnectionParams.MAX_LINE_LENGTH, 4096);
+        this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 50);
         this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
                 LimeWireUtils.getHttpServer());
         
