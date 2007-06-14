@@ -136,7 +136,7 @@ public class CommonUtilsTest extends BaseTestCase {
         assertEquals("long.extension", CommonUtils.convertFileName("long.extension"));
     }
     
-    public void testConverFileNameWithParentDir() throws IOException {
+    public void testConvertFileNameWithParentDir() throws IOException {
         File dir = new File("/short/dir/");
         assertEquals("test", CommonUtils.convertFileName(dir, "test"));
         assertEquals("test.me", CommonUtils.convertFileName(dir, "test.me"));
@@ -149,7 +149,14 @@ public class CommonUtilsTest extends BaseTestCase {
             dirName[i] = '/';
         }
         dir = new File(new String(dirName));
-        assertEquals(2, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes().length);
+        try {
+            CommonUtils.convertFileName(dir, "lbkajdf ;alksdf");
+            fail("IOException expected for too long parent dir");
+        }
+        catch (IOException iee) {
+        }
+        dir = new File(new String(dirName, 0, dirName.length - 2));
+        assertEquals(1, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes().length);
         dir = new File(new String(dirName, 0, dirName.length - 5));
         assertEquals("1234", CommonUtils.convertFileName(dir, "12345"));
     }
