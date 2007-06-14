@@ -28,7 +28,7 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
     
     private final int historySize;
     
-    private T[] history;
+    private Object[] history;
     
     private int index = 0;
     
@@ -50,14 +50,13 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         this.historySize = historySize;
     }
     
-    @SuppressWarnings("unchecked")
     public synchronized void add(T sample) {
         if (sample == null) {
             throw new NullPointerException("Sample is null");
         }
         
         if (history == null) {
-            history = (T[])new Object[historySize];
+            history = new Object[historySize];
         }
         
         history[index] = sample;
@@ -88,9 +87,9 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
             if (i >= size()) {
                 throw new ArrayIndexOutOfBoundsException();
             }
-            return history[i];
+            return innerGet(i);
         } else {
-            return history[(index + i) % history.length];
+            return innerGet((index + i) % history.length);
         }
     }
     
@@ -111,7 +110,12 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         if (i < 0) {
             i = history.length;
         }
-        return history[i];
+        return innerGet(i);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private synchronized T innerGet(int index) {
+        return (T)history[index];
     }
     
     public synchronized long getTotalCount() {
