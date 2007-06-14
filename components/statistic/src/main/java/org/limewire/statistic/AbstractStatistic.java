@@ -231,7 +231,7 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
     public Object inspect() {
         List<Double> r = new ArrayList<Double>(_buffer.size());
         for (Double d : _buffer) {
-            if (d == Double.NaN)
+            if (d.equals(Double.NaN))
                 continue;
             r.add(d);
         }
