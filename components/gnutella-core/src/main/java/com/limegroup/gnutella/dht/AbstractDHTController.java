@@ -29,7 +29,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito.routing.RouteTable.RouteTableListener;
-import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.HostFilter;
@@ -202,7 +201,6 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         DHTSettings.DHT_NODE_ID.setValue(dht.getLocalNodeID().toHexString());
-        DHTStatsManager.clear();
     }
 
     /**

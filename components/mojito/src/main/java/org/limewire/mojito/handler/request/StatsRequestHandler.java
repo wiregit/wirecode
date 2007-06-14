@@ -28,7 +28,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StatsRequest;
 import org.limewire.mojito.messages.StatsResponse;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 
 
 /**
@@ -38,11 +37,8 @@ public class StatsRequestHandler extends AbstractRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(StatsRequestHandler.class);
     
-    private final NetworkStatisticContainer networkStats;
-    
     public StatsRequestHandler(Context context) {
         super(context);
-        networkStats = context.getNetworkStats();
     }
 
     @Override
@@ -50,25 +46,28 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         
         StatsRequest request = (StatsRequest) message;
         
+        context.getStatisticsContext().getStatsGroup().getRequestsReceived().incrementByOne();
+        
         if (!request.isSecure()) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(message.getContact() + " sent us an invalid Stats Request");
             }
+            
+            context.getStatisticsContext().getStatsGroup().getBadSignature().incrementByOne();
             return;
         }
         
-        networkStats.STATS_REQUEST.incrementStat();
-        StringWriter writer = new StringWriter();
+        StringWriter out = new StringWriter();
         
         switch(request.getType()) {
             case STATISTICS:
-                context.getDHTStats().dump(writer, false);
+                context.getStatisticsContext().write(out);
                 break;
             case DATABASE:
-                writer.write(context.getDatabase().toString());
+                out.write(context.getDatabase().toString());
                 break;
             case ROUTETABLE:
-                writer.write(context.getRouteTable().toString());
+                out.write(context.getRouteTable().toString());
                 break;
             default:
                 if (LOG.isErrorEnabled()) {
@@ -79,8 +78,10 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         }
         
         StatsResponse response = context.getMessageHelper()
-            .createStatsResponse(message, writer.toString().getBytes("ISO-8859-1"));
+            .createStatsResponse(message, out.toString().getBytes("ISO-8859-1"));
         
         context.getMessageDispatcher().send(message.getContact(), response);
+        
+        context.getStatisticsContext().getStatsGroup().getResponsesSent().incrementByOne();
     }
 }

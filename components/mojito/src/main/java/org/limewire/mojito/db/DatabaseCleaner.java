@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
 
 /**
@@ -39,14 +38,10 @@ public class DatabaseCleaner implements Runnable {
     
     private final Context context;
     
-    private final DatabaseStatisticContainer databaseStats;
-    
     private ScheduledFuture future;
     
     public DatabaseCleaner(Context context) {
         this.context = context;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     /**
@@ -86,7 +81,8 @@ public class DatabaseCleaner implements Runnable {
                     }
                     
                     database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
-                    databaseStats.EXPIRED_VALUES.incrementStat();
+                    
+                    context.getStatisticsContext().getStoreGroup().getExpiredValues().incrementByOne();
                 }
             }
         }

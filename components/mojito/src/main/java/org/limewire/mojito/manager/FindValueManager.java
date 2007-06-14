@@ -30,6 +30,7 @@ import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.statistics.FindValueGroup;
 
 
 /**
@@ -70,7 +71,9 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
                 
                 future = new FindValueFuture(entityKey, handler);
                 futureMap.put(entityKey, future);
+                
                 context.getDHTExecutorService().execute(future);
+                context.getStatisticsContext().getFindValueGroup().getRequestsSent().incrementByOne();
             }
         }
         
@@ -99,6 +102,18 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
 
         public String toString() {
             return "FindValueFuture: " + entityKey + ", " + handler;
+        }
+
+        @Override
+        protected void fireFutureResult(FindValueResult value) {
+            FindValueGroup group = context.getStatisticsContext().getFindValueGroup();
+            group.getResponsesReceived().add(value.getTime());
+            group.getHops().add(value.getHop());
+            if (value.getEntities().isEmpty() && value.getEntityKeys().isEmpty()) {
+                group.getNotFound().incrementByOne();
+            }
+            
+            super.fireFutureResult(value);
         }
     }
 }

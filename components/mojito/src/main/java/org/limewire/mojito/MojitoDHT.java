@@ -42,7 +42,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 
 
@@ -75,11 +74,6 @@ public interface MojitoDHT extends Closeable {
      * Returns the KeyPair that is used to verify signed messages
      */
     public KeyPair getKeyPair();
-    
-    /**
-     * Returns the DHT stats
-     */
-    public DHTStats getDHTStats();
     
     /**
      * Returns the local Node ID

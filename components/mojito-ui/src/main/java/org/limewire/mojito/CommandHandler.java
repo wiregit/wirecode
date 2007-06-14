@@ -51,7 +51,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.statistics.DHTStats;
+import org.limewire.mojito.statistics.StatisticsContext;
 import org.limewire.mojito.util.CollectionUtils;
 
 
@@ -393,8 +393,8 @@ public class CommandHandler {
     }
     
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        DHTStats stats = ((Context)dht).getDHTStats();
-        stats.dump(out, true);
+        StatisticsContext statisticsContext = ((Context)dht).getStatisticsContext();
+        statisticsContext.write(out);
     }
     
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {

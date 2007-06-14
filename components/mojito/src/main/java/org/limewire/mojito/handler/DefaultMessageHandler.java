@@ -42,7 +42,6 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
@@ -69,14 +68,10 @@ public class DefaultMessageHandler {
         DELETE;
     }
     
-    private DatabaseStatisticContainer databaseStats;
-    
     protected final Context context;
     
     public DefaultMessageHandler(Context context) {
         this.context = context;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     public void handleResponse(ResponseMessage message, long time) {
@@ -211,7 +206,8 @@ public class DefaultMessageHandler {
                 if (op.equals(Operation.FORWARD)) {
                     Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     valuesToForward.addAll(bag.values());
-                    databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                    
+                    context.getStatisticsContext().getStoreGroup().getForwardToNearest().incrementByOne();
                     
                 } else if (op.equals(Operation.DELETE)
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
@@ -220,7 +216,8 @@ public class DefaultMessageHandler {
                         //System.out.println("REMOVING: " + entity + "\n");
                         database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     }
-                    databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
+                    
+                    context.getStatisticsContext().getStoreGroup().getRemoveFromFurthest().incrementByOne();
                 }
             }
         }

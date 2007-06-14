@@ -108,7 +108,6 @@ public class StoreManager extends AbstractManager<StoreResult> {
         }
     }
     
-    
     /**
      * 
      */

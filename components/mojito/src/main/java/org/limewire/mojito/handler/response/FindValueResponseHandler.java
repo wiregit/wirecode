@@ -20,7 +20,6 @@
 package org.limewire.mojito.handler.response;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,12 +34,10 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.LookupRequest;
-import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
 
@@ -54,8 +51,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
 
     /** Whether or not this is an exhaustive lookup. */
     private boolean exchaustive = false;
-    
-    private final FindValueLookupStatisticContainer lookupStat;
     
     /** The key we're looking for */
     private final EntityKey lookupKey;
@@ -73,28 +68,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         this.lookupKey = lookupKey;
         
         setExhaustive(LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
-        lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
-    }
-    
-    @Override
-    protected void response(ResponseMessage message, long time) throws IOException {
-        super.response(message, time);
-        lookupStat.addReply();
-    }
-
-    @Override
-    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        super.timeout(nodeId, dst, message, time);
-        lookupStat.addTimeout();
-    }
-    
-    @Override
-    protected boolean lookup(Contact node) throws IOException {
-        if (super.lookup(node)) {
-            lookupStat.addRequest();
-            return true;
-        }
-        return false;
     }
     
     /**
@@ -113,15 +86,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         Map<Contact, SecurityToken> path = getPath();
         Collection<DHTValueEntity> entities = getDHTValueEntities();
         Collection<EntityKey> entityKeys = getEntityKeys();
-        
-        if (entities.isEmpty() && entityKeys.isEmpty()) {
-            lookupStat.FIND_VALUE_FAILURE.incrementStat();
-        } else {
-            lookupStat.FIND_VALUE_OK.incrementStat();
-        }
-        
-        lookupStat.setHops(currentHop, true);
-        lookupStat.setTime((int)time, true);
         
         setReturnValue(new FindValueResult(
                 lookupKey, path, entities, entityKeys, time, currentHop));

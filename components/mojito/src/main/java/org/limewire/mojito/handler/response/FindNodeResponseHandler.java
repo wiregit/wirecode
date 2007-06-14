@@ -20,7 +20,6 @@
 package org.limewire.mojito.handler.response;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -29,12 +28,10 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.LookupRequest;
-import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.statistics.FindNodeLookupStatisticContainer;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -43,23 +40,18 @@ import org.limewire.security.SecurityToken;
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeResult> {
     
-    private FindNodeLookupStatisticContainer lookupStat;
-    
     public FindNodeResponseHandler(Context context, KUID lookupId) {
         super(context, lookupId);
-        init();
     }
     
     public FindNodeResponseHandler(Context context, Contact forcedContact, KUID lookupId) {
         super(context, lookupId);
         addForcedContact(forcedContact);
-        init();
     }
     
     public FindNodeResponseHandler(Context context, KUID lookupId, int resultSetSize) {
         super(context, lookupId);
         setResultSetSize(resultSetSize);
-        init();
     }
     
     public FindNodeResponseHandler(Context context, Contact forcedContact, 
@@ -67,42 +59,13 @@ public class FindNodeResponseHandler
         super(context, lookupId);
         addForcedContact(forcedContact);
         setResultSetSize(resultSetSize);
-        init();
-    }
-    
-    private void init() {
-        lookupStat = new FindNodeLookupStatisticContainer(context, getLookupID());
     }
 
-    @Override
-    protected void response(ResponseMessage message, long time) throws IOException {
-        super.response(message, time);
-        lookupStat.addReply();
-    }
-
-    @Override
-    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        super.timeout(nodeId, dst, message, time);
-        lookupStat.addTimeout();
-    }
-
-    @Override
-    protected boolean lookup(Contact node) throws IOException {
-        if (super.lookup(node)) {
-            lookupStat.addRequest();
-            return true;
-        }
-        return false;
-    }
-    
     @Override
     protected void finishLookup() {
         long time = getElapsedTime();
         int routeTableFailureCount = getRouteTableFailureCount();
         int currentHop = getCurrentHop();
-        
-        lookupStat.setHops(currentHop, false);
-        lookupStat.setTime((int)time, false);
         
         Map<Contact, SecurityToken> path = getPath();
         Collection<Contact> collisions = getCollisions();

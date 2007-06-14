@@ -86,12 +86,7 @@ import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.statistics.DHTStats;
-import org.limewire.mojito.statistics.DHTStatsManager;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.statistics.GlobalLookupStatisticContainer;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
-import org.limewire.mojito.statistics.RoutingStatisticContainer;
+import org.limewire.mojito.statistics.StatisticsContext;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
@@ -125,11 +120,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private final BootstrapManager bootstrapManager;
     private final GetValueManager getValueManager;
     
-    private final DHTStats stats;
-    private final NetworkStatisticContainer networkStats;
-    private final GlobalLookupStatisticContainer globalLookupStats;
-    private final DatabaseStatisticContainer databaseStats;
-    
     private volatile KeyPair keyPair;
     
     private volatile Database database;
@@ -150,6 +140,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private final StorableModelManager publisherManager = new StorableModelManager();
     
     private volatile HostFilter hostFilter = null;
+    
+    private final StatisticsContext statisticsContext = new StatisticsContext();
     
     /**
      * Constructor to create a new Context
@@ -178,12 +170,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         setRouteTable(null);
         setDatabase(null, false);
         
-        // Init the Stats
-        stats = DHTStatsManager.getInstance(getLocalNodeID());
-        networkStats = new NetworkStatisticContainer(getLocalNodeID());
-        globalLookupStats = new GlobalLookupStatisticContainer(getLocalNodeID());
-        databaseStats = new DatabaseStatisticContainer(getLocalNodeID());
-        
         setMessageDispatcher(null);
         
         messageHelper = new MessageHelper(this);
@@ -210,14 +196,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public String getName() {
         return name;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#getDHTStats()
-     */
-    public DHTStats getDHTStats() {
-        return stats;
     }
     
     /*
@@ -373,7 +351,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             messageDispatcher = c.newInstance(this);
             
             messageDispatcher.addMessageDispatcherListener(
-                    new NetworkStatisticContainer.Listener(networkStats));
+                    getStatisticsContext().getNetworkGroup());
             
             return messageDispatcher;
         } catch (NoSuchMethodException e) {
@@ -418,7 +396,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         routeTable.setContactPinger(this);
-        routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
+        
+        routeTable.addRouteTableListener(
+                getStatisticsContext().getRouteTableGroup());
         
         this.routeTable = routeTable;
         
@@ -1138,31 +1118,17 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
-     * Updates the approxmiate DHT size based on the given Contacts
+     * Updates the approximate DHT size based on the given Contacts
      */
     public void updateEstimatedSize(Collection<? extends Contact> nodes) {
         estimator.updateSize(nodes);
     }
     
     /**
-     * Returns the StatisticsContainer for Network statistics
+     * 
      */
-    public NetworkStatisticContainer getNetworkStats() {
-        return networkStats;
-    }
-    
-    /**
-     * Returns the StatisticsContainer for lookup statistics
-     */
-    public GlobalLookupStatisticContainer getGlobalLookupStats() {
-        return globalLookupStats;
-    }
-    
-    /**
-     * Returns the StatisticsContainer for Database statistics
-     */
-    public DatabaseStatisticContainer getDatabaseStats() {
-        return databaseStats;
+    public StatisticsContext getStatisticsContext() {
+        return statisticsContext;
     }
     
     public String toString() {

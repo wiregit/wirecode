@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -35,7 +34,6 @@ import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 
 
@@ -48,11 +46,8 @@ public class PingManager extends AbstractManager<PingResult> {
     private final Map<SocketAddress, PingFuture> futureMap 
         = Collections.synchronizedMap(new HashMap<SocketAddress, PingFuture>());
     
-    private NetworkStatisticContainer networkStats;
-    
     public PingManager(Context context) {
         super(context);
-        networkStats = context.getNetworkStats();
     }
     
     public void init() {
@@ -141,8 +136,8 @@ public class PingManager extends AbstractManager<PingResult> {
                     futureMap.put(key, future);
                 }
                 
-                networkStats.PINGS_SENT.incrementStat();
                 context.getDHTExecutorService().execute(future);
+                context.getStatisticsContext().getPingGroup().getRequestsSent().incrementByOne();
             }
         }
         
@@ -170,14 +165,8 @@ public class PingManager extends AbstractManager<PingResult> {
 
         @Override
         protected void fireFutureResult(PingResult value) {
-            networkStats.PINGS_OK.incrementStat();
+            context.getStatisticsContext().getPingGroup().getResponsesReceived().add(value.getTime());
             super.fireFutureResult(value);
-        }
-        
-        @Override
-        protected void fireExecutionException(ExecutionException e) {
-            networkStats.PINGS_FAILED.incrementStat();
-            super.fireExecutionException(e);
         }
     }
 }

@@ -20,9 +20,9 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -33,7 +33,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -124,11 +123,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public SocketAddress getContactAddress() {
             return null;
         }
-
-        public DHTStats getDHTStats() {
-            return null;
-        }
-
+        
         public int getExternalPort() {
             return 0;
         }

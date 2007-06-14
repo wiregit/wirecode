@@ -33,14 +33,13 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 
 /**
  * The StoreRequestHandler handles incoming store requests as
- * sent by other Nodes. It performs some probabilty tests to
+ * sent by other Nodes. It performs some probability tests to
  * make sure the request makes sense (i.e. if the Key is close
  * to us and so on).
  */
@@ -48,18 +47,16 @@ public class StoreRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
     
-    private NetworkStatisticContainer networkStats;
-    
     public StoreRequestHandler(Context context) {
         super(context);
-        this.networkStats = context.getNetworkStats();
     }
     
     @Override
     public void request(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
-        networkStats.STORE_REQUESTS.incrementStat();
+        
+        context.getStatisticsContext().getStoreGroup().getRequestsReceived().incrementByOne();
         
         SecurityToken securityToken = request.getSecurityToken();
         
@@ -68,7 +65,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 LOG.error(request.getContact() 
                         + " does not provide a SecurityToken");
             }
-            networkStats.STORE_REQUESTS_NO_QK.incrementStat();
+            
+            context.getStatisticsContext().getStoreGroup().getNoSecurityToken().incrementByOne();
             return;
         }
         
@@ -77,7 +75,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);
             }
-            networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
+            
+            context.getStatisticsContext().getStoreGroup().getBadSecurityToken().incrementByOne();
             return;
         }
         
@@ -91,10 +90,9 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         for (DHTValueEntity entity : values) {
             
             if (database.store(entity)) {
-                networkStats.STORE_REQUESTS_OK.incrementStat();
                 status.add(new StoreStatusCode(entity, StoreResponse.OK));
             } else {
-                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+                context.getStatisticsContext().getStoreGroup().getRequestRejected().incrementByOne();
                 status.add(new StoreStatusCode(entity, StoreResponse.ERROR));
             }
         }
@@ -102,5 +100,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         StoreResponse response 
             = context.getMessageHelper().createStoreResponse(request, status);
         context.getMessageDispatcher().send(request.getContact(), response);
+        
+        context.getStatisticsContext().getStoreGroup().getResponsesSent().incrementByOne();
     }
 }

@@ -62,6 +62,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
     protected void request(RequestMessage message) throws IOException {
         FindValueRequest request = (FindValueRequest)message;
         
+        context.getStatisticsContext().getFindValueGroup().getRequestsReceived().incrementByOne();
+        
         KUID lookupId = request.getLookupID();
         DHTValueType valueType = request.getDHTValueType();
         
@@ -127,12 +129,12 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                         + lookupId + " to " + request.getContact());
             }
             
-            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
-
             FindValueResponse response = context.getMessageHelper()
                 .createFindValueResponse(request, requestLoad, 
                         valuesToReturn, availableKeys);
             context.getMessageDispatcher().send(request.getContact(), response);
+            
+            context.getStatisticsContext().getFindValueGroup().getResponsesSent().incrementByOne();
         }
     }
 }

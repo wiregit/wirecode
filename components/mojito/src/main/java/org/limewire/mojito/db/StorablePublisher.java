@@ -17,7 +17,6 @@ import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.service.ErrorService;
 
 /**
@@ -29,16 +28,12 @@ public class StorablePublisher implements Runnable {
     
     private final Context context;
     
-    private final DatabaseStatisticContainer databaseStats;
-    
     private ScheduledFuture future;
     
     private final PublishTask publishTask = new PublishTask();
     
     public StorablePublisher(Context context) {
         this.context = context;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     /**
@@ -173,7 +168,7 @@ public class StorablePublisher implements Runnable {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
-            databaseStats.REPUBLISHED_VALUES.incrementStat();
+            context.getStatisticsContext().getStoreGroup().getPublishedValues().incrementByOne();
             
             future = context.store(DHTValueEntity.createFromStorable(context, storable));
             future.addDHTFutureListener(new StoreResultHandler(storable));

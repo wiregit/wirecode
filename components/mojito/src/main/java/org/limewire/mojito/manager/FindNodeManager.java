@@ -30,6 +30,7 @@ import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
+import org.limewire.mojito.statistics.LookupGroup;
 
 
 /**
@@ -69,7 +70,9 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
                 future = new FindNodeFuture(lookupId, handler);
                 
                 futureMap.put(lookupId, future);
+                
                 context.getDHTExecutorService().execute(future);
+                context.getStatisticsContext().getFindNodeGroup().getRequestsSent().incrementByOne();
             }
         }
         
@@ -106,6 +109,15 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
 
         public String toString() {
             return "FindNodeFuture: " + lookupId + ", " + handler;
+        }
+
+        @Override
+        protected void fireFutureResult(FindNodeResult value) {
+            LookupGroup group = context.getStatisticsContext().getFindNodeGroup();
+            group.getResponsesReceived().add(value.getTime());
+            group.getHops().add(value.getHop());
+            
+            super.fireFutureResult(value);
         }
     }
 }

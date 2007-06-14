@@ -65,6 +65,8 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         // is delegating requests to this class!
         LookupRequest request = (LookupRequest)message;
 
+        context.getStatisticsContext().getFindNodeGroup().getRequestsReceived().incrementByOne();
+        
         KUID lookupId = request.getLookupID();
         Contact node = request.getContact();
         
@@ -95,11 +97,10 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
-        
         FindNodeResponse response = context.getMessageHelper()
                     .createFindNodeResponse(request, nodes);
-        
         context.getMessageDispatcher().send(node, response);
+        
+        context.getStatisticsContext().getFindNodeGroup().getResponsesSent().incrementByOne();
     }
 }

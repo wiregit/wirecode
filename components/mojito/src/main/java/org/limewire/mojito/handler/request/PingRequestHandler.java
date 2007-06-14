@@ -28,7 +28,6 @@ import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.util.MessageUtils;
 
 
@@ -39,17 +38,14 @@ public class PingRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
     
-    private final NetworkStatisticContainer networkStats;
-    
     public PingRequestHandler(Context context) {
         super(context);
-        networkStats = context.getNetworkStats();
     }
     
     @Override
     public void request(RequestMessage message) throws IOException {
         
-        networkStats.PING_REQUESTS.incrementStat();
+        context.getStatisticsContext().getPingGroup().getRequestsReceived().incrementByOne();
         
         PingRequest request = (PingRequest)message;
         Contact node = request.getContact();
@@ -73,6 +69,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
                 .createPingResponse(request, node.getContactAddress());
 
         context.getMessageDispatcher().send(node, response);
-        networkStats.PONGS_SENT.incrementStat();
+        
+        context.getStatisticsContext().getPingGroup().getResponsesSent().incrementByOne();
     }
 }
