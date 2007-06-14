@@ -89,9 +89,17 @@ public class StatsUtilsTest extends BaseTestCase {
         assertEquals(74.75, s.q3);
         assertEquals(841.6666666, s.m2, 0.00001);
         assertEquals(0.0, s.mode); // all elements occur once
-        l.add((double)55);
+        
+        l.clear();
+        l.add(2.0);
+        l.add(2.0);
+        l.add(1.0);
+        l.add(1.0);
+        l.add(0.5);
+        l.add(0.5);
+        l.add(0.5);
         s = StatsUtils.quickStatsDouble(l);
-        assertEquals(55.0, s.mode);
+        assertEquals(0.5, s.mode);
     }
     
     public void testSkewedness() throws Exception {

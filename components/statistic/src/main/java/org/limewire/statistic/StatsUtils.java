@@ -93,7 +93,10 @@ public class StatsUtils {
         for (int i = 1; i < l.size(); i++) {
             if (l.get(i) == current) 
                 currentOccurences++;
-            current = l.get(i);
+            else {
+                current = l.get(i);
+                currentOccurences = 0;
+            }
             if (currentOccurences > occurences) {
                 occurences = currentOccurences;
                 mode = current;
