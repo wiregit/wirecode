@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.limewire.collection.IntBuffer;
+import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.service.ErrorService;
 
@@ -32,8 +32,8 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
      * an empty buffer until stats are actually recorded.
 	 */
-	protected final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
-
+	protected final Buffer<Double> _buffer = new Buffer<Double>(HISTORY_LENGTH);
+    
 	/**
 	 * Int for the statistic currently being added to.
 	 */
@@ -112,7 +112,7 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	}
 		
 	// inherit doc comment
-	public IntBuffer getStatHistory() {
+	public Buffer<Double> getStatHistory() {
 		synchronized(_buffer) {
 			initializeBuffer();
 			return _buffer;
@@ -134,7 +134,7 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	public void storeCurrentStat() {
  		synchronized(_buffer) {
 			initializeBuffer();
- 			_buffer.addLast(_current);
+ 			_buffer.addLast((double)_current);
  		}
 		if(_current > _max) {
 			_max = _current;
@@ -223,15 +223,18 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	protected final void initializeBuffer() {
 		if(_buffer.isEmpty()) {
 			for(int i=0; i<HISTORY_LENGTH; i++) {
-				_buffer.addLast(0);
+				_buffer.addLast(Double.NaN);
 			}
 		}
 	}
     
     public Object inspect() {
         List<Double> r = new ArrayList<Double>(_buffer.size());
-        for (int i : _buffer)
-            r.add((double)i);
+        for (Double d : _buffer) {
+            if (d == Double.NaN)
+                continue;
+            r.add(d);
+        }
         
         return StatsUtils.quickStatsDouble(r).getMap();
     }

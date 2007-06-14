@@ -3,7 +3,7 @@ package org.limewire.statistic;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.limewire.collection.IntBuffer;
+import org.limewire.collection.Buffer;
 
 /**
  * Interface for generalized access to a <tt>Statistic</tt>.
@@ -78,7 +78,7 @@ public interface Statistic {
 	 * @return the <tt>Integer</tt> array for all statistics recorded for
 	 *  this statistic
 	 */
-	IntBuffer getStatHistory();	
+	Buffer<Double> getStatHistory();	
 	
 	/**
 	 * Clears the current data stored in this statistic.

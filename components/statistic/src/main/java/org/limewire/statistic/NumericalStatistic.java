@@ -22,7 +22,7 @@ public abstract class NumericalStatistic extends AbstractStatistic {
         super.addData(data);
         synchronized(_buffer) {
             initializeBuffer();
-            _buffer.addLast(data);
+            _buffer.addLast((double)data);
         }
         _totalStatsRecorded++;
         if(data > _max) {
