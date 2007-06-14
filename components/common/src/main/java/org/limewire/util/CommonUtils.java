@@ -10,6 +10,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -349,33 +353,77 @@ public class CommonUtils {
         return time.toString();
     }
 
+    /**
+     * Returns a normalized and shortened valid file name taking the length
+     * of the path of the parent directory into account.
+     * 
+     * The name is cleared from illegal filesystem characters and it is ensured
+     * that the maximum path system on the system is not exceeded unless the 
+     * parent directory path has already the maximum path length.
+
+     * @param parentDir
+     * @param name
+     * @throws IOException if the parent directory's path takes up 
+     * {@link OSUtils#getMaxPathLength()}.
+     * @return
+     */
+    public static String convertFileName(File parentDir, String name) throws IOException {
+        int parentLength = parentDir.getAbsolutePath().length();
+        if (parentLength >= OSUtils.getMaxPathLength() - 1 /* for the separator char*/) {
+            throw new IOException("Path too long");
+        }
+        return convertFileName(name, Math.min(OSUtils.getMaxPathLength() - parentLength - 1, 180));
+    }
+    
+    /**
+     * Cleans up the filename and truncates it to length of 180 bytes by calling
+     * {@link #convertFileName(String, int) convertFileName(String, 180)}. 
+     */
+    public static String convertFileName(String name) {
+        return convertFileName(name, 180);
+    }
+
     /** 
      * Replaces OS specific illegal characters from any filename with '_', 
      * including ( / \n \r \t ) on all operating systems, ( ? * \  < > | " ) 
      * on Windows, ( ` ) on unix.
      *
      * @param name the filename to check for illegal characters
+     * @param maxBytes the maximum number of bytes for the resulting file name,
+     * must be > 0
      * @return String containing the cleaned filename
+     * 
+     * @throws IllegalArgumentException if maxBytes <= 0
      */
-    public static String convertFileName(String name) {
+    public static String convertFileName(String name, int maxBytes) {
     	
+        if (maxBytes <= 0) {
+            throw new IllegalArgumentException("maxBytes must be > 0");
+        }
+        
     	// ensure that block-characters aren't in the filename.
         name = I18NConvert.instance().compose(name);
     
     	// if the name is too long, reduce it.  We don't go all the way
-    	// up to 256 because we don't know how long the directory name is
+    	// up to 255 because we don't know how long the directory name is
     	// We want to keep the extension, though.
-    	if(name.length() > 180) {
+    	if(name.length() > maxBytes || name.getBytes().length > maxBytes) {
     	    int extStart = name.lastIndexOf('.');
-    	    if ( extStart == -1) { // no extension, wierd, but possible
-    	        name = name.substring(0, 180);
+    	    if ( extStart == -1) { // no extension, weird, but possible
+    	        name = getPrefixWithMaxBytes(name, maxBytes);
     	    } else {
-    	        // if extension is greater than 11, we concat it.
-    	        // ( 11 = '.' + 10 extension characters )
+    	        // if extension is greater than 11, we truncate it.
+    	        // ( 11 = '.' + 10 extension bytes )
     	        int extLength = name.length() - extStart;		        
     	        int extEnd = extLength > 11 ? extStart + 11 : name.length();
-    		    name = name.substring(0, 180 - extLength) +
-    		           name.substring(extStart, extEnd);
+    	        byte[] extension = getMaxBytes(name.substring(extStart, extEnd), 16);
+    	        try {
+    	            name = getPrefixWithMaxBytes(name, maxBytes - extension.length) 
+    	            + new String(extension, Charset.defaultCharset().name());
+    	        }
+    	        catch (UnsupportedEncodingException uee) {
+    	            assert false; // should never happen
+    	        }
             }          
     	}
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
@@ -393,6 +441,34 @@ public class CommonUtils {
         }
         
         return name;
+    }
+    
+    /**
+     * Returns the prefix of <code>string</code> which takes up a maximum
+     * of <code>maxBytes</code>.
+     */
+    static String getPrefixWithMaxBytes(String string, int maxBytes) {
+        try {
+            return new String(getMaxBytes(string, maxBytes), Charset.defaultCharset().name());
+        }
+        catch (UnsupportedEncodingException uee) {
+            assert false; // should never happen
+        }
+        return string;
+    }
+    
+    static byte[] getMaxBytes(String string, int maxBytes) {
+        // use default encoding which is also used for files judging from the
+        // property name "file.encoding"
+        byte[] bytes = new byte[maxBytes];
+        ByteBuffer out = ByteBuffer.wrap(bytes);
+        CharBuffer in = CharBuffer.wrap(string.toCharArray());
+        CharsetEncoder encoder = Charset.defaultCharset().newEncoder();
+        encoder.encode(in, out, true);
+        encoder.flush(out);
+        byte[] result = new byte[out.position()];
+        System.arraycopy(bytes, 0, result, 0, result.length);
+        return result;
     }
 
     /**

@@ -179,13 +179,22 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
 	 */
 	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
-	    if (fileName == null)
+	    if (fileName == null) {
 	        fileName = getDefaultFileName();
-        else
-            fileName = CommonUtils.convertFileName(fileName);
-        
-	    if (saveDirectory == null)
+	    }
+	    
+	    if (saveDirectory == null) {
 	        saveDirectory = SharingSettings.getSaveDirectory(fileName);
+	    }
+	    
+	    try {
+	        fileName = CommonUtils.convertFileName(saveDirectory, fileName);
+	    }
+	    catch (IOException ie) {
+	        if (saveDirectory.isDirectory()) {
+	            throw new SaveLocationException(SaveLocationException.PATH_NAME_TOO_LONG, saveDirectory);
+	        }
+	    }
 	    
 	    if (!saveDirectory.isDirectory()) {
 	        if (saveDirectory.exists())

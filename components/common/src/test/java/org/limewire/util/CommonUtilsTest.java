@@ -1,7 +1,9 @@
 package org.limewire.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -90,11 +92,86 @@ public class CommonUtilsTest extends BaseTestCase {
         String testOne = CommonUtils.convertFileName(withExt);
         String testTwo = CommonUtils.convertFileName(withBigExt);
         String expectedOne = twoHundred.substring(0, 176) + ".zip";
-        String expectedTwo = twoHundred.substring(0, 163) + ".ziiiiiiiii";
+        String expectedTwo = twoHundred.substring(0, 169) + ".ziiiiiiiii";
         assertEquals("unexpected length1", expectedOne.length(), testOne.length());
         assertEquals("unexpected conversion1", expectedOne, testOne);
         assertEquals("unexpected length2", expectedTwo.length(), testTwo.length());     
         assertEquals("unexpected conversion2", expectedTwo, testTwo);
+    }
+    
+    public void testConvertFileNameWithUnicodeInput() {
+        String fileSystem = "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステム";
+        String converted = CommonUtils.convertFileName(fileSystem);
+        assertTrue(converted.length() <= 255);
+        assertEquals(180, converted.getBytes().length);
+    }
+    
+    public void testConvertFileNameWithExtensionAndUnicodeInput() {
+        String[] fileSystems =  { 
+                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシ.ステム",
+                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステム.txt",
+                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイ.ルシステムファイルシステム",
+        };
+        for (String fileSystem : fileSystems) { 
+            String converted = CommonUtils.convertFileName(fileSystem);
+            assertTrue(fileSystem + " not 180 bytes long", converted.getBytes().length <= 180);
+            // still has extension
+            assertTrue(converted.contains("."));
+            // extension is substring of original extension
+            assertTrue(fileSystem.substring(fileSystem.indexOf('.')).contains(converted.substring(converted.indexOf('.'))));
+        }
+
+        // test identity for small end substrings
+        for (String fileSystem : fileSystems) {
+            String halfed = fileSystem.substring(fileSystem.length() - 40);
+            String converted = CommonUtils.convertFileName(halfed);
+            assertEquals(halfed, converted);
+        }
+    }
+    
+    public void testConvertFileNameIdentity() {
+        assertEquals("test", CommonUtils.convertFileName("test"));
+        assertEquals("test.me", CommonUtils.convertFileName("test.me"));
+        assertEquals("Test me with Spaces!.meee", CommonUtils.convertFileName("Test me with Spaces!.meee"));
+        assertEquals("long.extension", CommonUtils.convertFileName("long.extension"));
+    }
+    
+    public void testConverFileNameWithParentDir() throws IOException {
+        File dir = new File("/short/dir/");
+        assertEquals("test", CommonUtils.convertFileName(dir, "test"));
+        assertEquals("test.me", CommonUtils.convertFileName(dir, "test.me"));
+        assertEquals("Test me with Spaces!.meee", CommonUtils.convertFileName(dir, "Test me with Spaces!.meee"));
+        assertEquals("long.extension", CommonUtils.convertFileName(dir, "long.extension"));
+        
+        char[] dirName = new char[OSUtils.getMaxPathLength()];
+        Arrays.fill(dirName, 'a');
+        for (int i = 0; i < dirName.length; i += 254) {
+            dirName[i] = '/';
+        }
+        dir = new File(new String(dirName));
+        assertEquals(2, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes().length);
+        dir = new File(new String(dirName, 0, dirName.length - 5));
+        assertEquals("1234", CommonUtils.convertFileName(dir, "12345"));
+    }
+    
+    public void testMaxBytesParameter() {
+        assertEquals("1", CommonUtils.convertFileName("12345", 1));
+        assertEquals("12", CommonUtils.convertFileName("12345", 2));
+        
+        try {
+            CommonUtils.convertFileName("1345", 0);
+            fail("No IAE thrown");
+        }
+        catch (IllegalArgumentException iae) {
+        }
+    }
+    
+    public void testNoTrailingSeparator() throws IOException {
+        File tmpFile = File.createTempFile("tmpfile", "file");
+        File tmpDir = tmpFile.getParentFile();
+        tmpFile.delete();
+        
+        assertFalse(tmpDir.getAbsolutePath().endsWith(File.separator));
     }
 
     /**

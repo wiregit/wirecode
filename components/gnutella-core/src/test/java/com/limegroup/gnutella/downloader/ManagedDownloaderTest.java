@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,10 +25,12 @@ import org.limewire.collection.Interval;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -62,6 +65,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     private FileManager fileman;
     private ActivityCallback callback;
     private MessageRouter router;
+    private static ConnectionManager connectionManager;
 
     public ManagedDownloaderTest(String name) {
         super(name);
@@ -76,18 +80,21 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     }
     
     public static void globalSetUp() throws Exception{
-        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+        connectionManager = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
         
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        PrivilegedAccessor.setValue(RouterService.class,"manager", connectionManager);
         
         assertTrue(RouterService.isConnected());
     }
     
     public void setUp() throws Exception {
+        if (connectionManager == null) {
+            globalSetUp();
+        }
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
@@ -359,6 +366,30 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         }
     }
 
+    public void testSetSaveFileExceptionPathNameTooLong() throws Exception {
+        RemoteFileDesc[] rfds = new RemoteFileDesc[] { newRFD("download") };
+        File saveDir = createMaximumPathLengthDirectory();
+        
+        try {
+            new ManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+                    saveDir, "does not matter", false);
+            fail("No exception thrown for dir " + saveDir);
+        }
+        catch (SaveLocationException sle) {
+            assertEquals("Parent dir should exceed max path length",
+                    SaveLocationException.PATH_NAME_TOO_LONG,
+                    sle.getErrorCode());
+        }
+        finally {
+            File parent = saveDir;
+            while (parent.getName().startsWith("zzzzzzz")) {
+                saveDir = parent;
+                parent = parent.getParentFile();
+            }
+            FileUtils.deleteRecursive(saveDir);
+        }
+    }
 
 	public void testSetSaveFileExceptions() throws Exception {
 		
@@ -568,6 +599,24 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	return new RemoteFileDesc(newRFD(name,hash),pe);
 	}
     
+    private File createMaximumPathLengthDirectory() throws IOException {
+        File tmpFile = File.createTempFile("temp", "file");
+        File tmpDir = tmpFile.getParentFile();
+        tmpFile.delete();
+        
+        char[] dirName = new char[OSUtils.getMaxPathLength() - tmpDir.getAbsolutePath().length()];
+        Arrays.fill(dirName, 'z');
+        for (int i = 0; i < dirName.length; i += 254) {
+            dirName[i] = File.separatorChar;
+        }
+        File longestDir = new File(tmpDir.getAbsolutePath() + new String(dirName));
+        System.out.println(longestDir.getAbsolutePath());
+        // currently fails due to JRE bug
+        assertTrue(longestDir.mkdirs());
+        return longestDir;
+    }
+    
+
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {

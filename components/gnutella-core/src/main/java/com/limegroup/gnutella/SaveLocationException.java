@@ -31,6 +31,12 @@ public class SaveLocationException extends IOException {
 	 * already being downloaded.
 	 */
 	public static final int FILE_ALREADY_DOWNLOADING = 10;
+	
+	/** 
+	 * Thrown when the directory to save in already exceeds the maximum path name
+	 * on the OS.
+	 */
+	public static final int PATH_NAME_TOO_LONG = 11;
     
 	/**
 	 * The error code of this exception.

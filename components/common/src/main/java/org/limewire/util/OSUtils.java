@@ -331,4 +331,20 @@ public class OSUtils {
     public static boolean supportsTrash() {
         return isWindows() || isMacOSX();
     }
+    
+    /**
+     * Returns the maximum path system of file system of the current OS
+     * or a conservative approximation.
+     */
+    public static int getMaxPathLength() { 
+        if (isWindows()) {
+            return Short.MAX_VALUE;
+        }
+        else if (isLinux()) {
+            return 4096 - 1;
+        }
+        else {
+            return 1024 - 1;
+        }
+    }
 }
