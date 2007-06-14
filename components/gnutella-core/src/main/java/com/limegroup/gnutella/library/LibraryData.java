@@ -4,15 +4,16 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.setting.Settings;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.AbstractSettingsGroup;
+import org.limewire.setting.SettingsGroupManager;
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A container of LibraryData.
  */
-public class LibraryData implements Settings {
+public class LibraryData extends AbstractSettingsGroup {
     
     /**
      * The Container data, storing all the information.
@@ -47,37 +48,31 @@ public class LibraryData implements Settings {
     public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
-     * Whether or not a 'save' operation is actually going to save to disk.
-     */
-    private boolean shouldSave = true;
-    
-    /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
-        SettingsHandler.addSettings(this);
+        SettingsGroupManager.instance().addSettingsGroup(this);
     }
     
     /**
      * Saves all the settings to disk.
      */
-    public void save() {
-        if(shouldSave)
+    public boolean save() {
+        if (getShouldSave()) {
             DATA.save();
+            fireSettingsEvent(EventType.SAVE);
+            return true;
+        }
+        return false;
     }
     
     /**
      * Reverts all settings to their defaults -- this clears all the settings.
      */
-    public void revertToDefault() {
+    public boolean revertToDefault() {
         DATA.clear();
-    }
-    
-    /**
-     * Sets whether or not these settings should be saved to disk.
-     */
-    public void setShouldSave(boolean save) {
-        shouldSave = save;
+        fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
+        return true;
     }
     
     /**
@@ -85,6 +80,7 @@ public class LibraryData implements Settings {
      */
     public void reload() {
         DATA.load();
+        fireSettingsEvent(EventType.RELOAD);
     }
     
 	/**

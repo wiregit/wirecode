@@ -24,7 +24,7 @@ import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BufferUtils;
 
 
@@ -239,7 +239,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         
         if (_port != oldPort || tryingRandom) {
             ConnectionSettings.PORT.setValue(_port);
-            SettingsHandler.save();
+            SettingsGroupManager.instance().save();
             RouterService.addressChanged();
         }
 

@@ -15,7 +15,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -203,8 +203,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Ensures that no settings are saved.
      */
     public static void setupSettings() throws Exception{
-        SettingsHandler.setShouldSave(false);
-        SettingsHandler.revertToDefault();
+        SettingsGroupManager.instance().setShouldSave(false);
+        SettingsGroupManager.instance().revertToDefault();
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
@@ -309,7 +309,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sets standard settings for a pristine test environment.
      */
     public static void setStandardSettings() {
-        SettingsHandler.revertToDefault();
+        SettingsGroupManager.instance().revertToDefault();
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 		ConnectionSettings.NUM_CONNECTIONS.setValue(4);
 		SearchSettings.GUESS_ENABLED.setValue(true);

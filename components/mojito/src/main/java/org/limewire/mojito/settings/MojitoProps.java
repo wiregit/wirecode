@@ -21,7 +21,7 @@ package org.limewire.mojito.settings;
 
 import java.io.File;
 
-import org.limewire.setting.BasicSettings;
+import org.limewire.setting.BasicSettingsGroup;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.util.CommonUtils;
 
@@ -29,7 +29,7 @@ import org.limewire.util.CommonUtils;
 /**
  * Handler for all Mojito Settings.
  */
-public class MojitoProps extends BasicSettings {
+public class MojitoProps extends BasicSettingsGroup {
     
     private static final MojitoProps INSTANCE = new MojitoProps();
     

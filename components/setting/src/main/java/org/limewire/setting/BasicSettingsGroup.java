@@ -3,13 +3,15 @@ package org.limewire.setting;
 import java.io.File;
 import java.util.Properties;
 
+import org.limewire.setting.evt.SettingsGroupEvent.EventType;
+
 
 /**
  * Gives basic features including get, reload and save for a
  * {@link SettingsFactory}.
  */
-public class BasicSettings implements Settings {
-        
+public class BasicSettingsGroup extends AbstractSettingsGroup {
+    
     /**
      * properties file
      */
@@ -22,19 +24,15 @@ public class BasicSettings implements Settings {
 	private final SettingsFactory FACTORY;
     
     /**
-     * Value for whether or not settings should be saved to file.
-     */
-    private boolean _shouldSave = true;
-    
-    /**
      * Basic constructor that creates the FACTORY and PROPS_FILE.
      */
-    protected BasicSettings(File settingsFile, String header) {
+    protected BasicSettingsGroup(File settingsFile, String header) {
         PROPS_FILE = settingsFile;
         FACTORY = new SettingsFactory(PROPS_FILE, header);
-        SettingsHandler.addSettings(this);
+        
+        SettingsGroupManager.instance().addSettingsGroup(this);
     }
-
+    
     /**
      * Returns the <tt>Properties</tt> instance that stores all settings.
      *
@@ -63,33 +61,30 @@ public class BasicSettings implements Settings {
      */
     public void reload() {
         FACTORY.reload();
+        fireSettingsEvent(EventType.RELOAD);
     }
     
     /**
      * Save property settings to the property file
      */
-    public void save() {
-        if ( _shouldSave) {
+    public boolean save() {
+        if (getShouldSave()) {
             FACTORY.save();
+            fireSettingsEvent(EventType.SAVE);
+            return true;
         }
+        return false;
     }
     
     /** Revert all settings to their default value     */
-    public void revertToDefault() {
-        FACTORY.revertToDefault();
+    public boolean revertToDefault() {
+        if (FACTORY.revertToDefault()) {
+            fireSettingsEvent(EventType.REVERT_TO_DEFAULT);
+            return true;
+        }
+        return false;
     }
     
-    /** Mutator for shouldSave     */
-    public void setShouldSave(boolean shouldSave) {
-        _shouldSave = shouldSave;
-    }
-    
-    /** Access for shouldSave     */
-    public boolean getShouldSave() {
-        return _shouldSave;
-    }
-
-
     /** Used to find any setting based on the key in the appropriate props file     */
     public Setting getSetting(String key) {
         synchronized(FACTORY) {
@@ -99,5 +94,9 @@ public class BasicSettings implements Settings {
             }
         }
         return null; //unable the find the setting we are looking for
+    }
+    
+    public String toString() {
+        return FACTORY.toString();
     }
 }

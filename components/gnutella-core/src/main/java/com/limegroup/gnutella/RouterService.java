@@ -36,7 +36,7 @@ import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.rudp.UDPSelectorProviderFactory;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
-import org.limewire.setting.SettingsHandler;
+import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -1187,7 +1187,7 @@ public class RouterService {
             } catch (IOException e) {}
             
             // save limewire.props & other settings
-            SettingsHandler.save();
+            SettingsGroupManager.instance().save();
 			
 			RatingTable.instance().ageAndSave();
             
