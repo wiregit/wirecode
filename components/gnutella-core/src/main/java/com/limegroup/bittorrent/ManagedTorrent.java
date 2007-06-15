@@ -102,6 +102,9 @@ BTLinkListener {
 	 */
 	private Choker choker;
 	
+    /**
+     * Locking this->state.getLock() ok.
+     */
 	private final SyncWrapper<TorrentState> state = 
 		new SyncWrapper<TorrentState>(TorrentState.QUEUED);
 	
@@ -223,13 +226,15 @@ BTLinkListener {
                 		 urn.equals(context.getMetaInfo().getURN())) {
                 	 
                      boolean wasActive;
-                	 synchronized(state.getLock()) {
-                		 wasActive = isActive();
-                		 state.set(TorrentState.INVALID);
-                	 }
-                	 
-                	 if (wasActive)
-                		 stopImpl();
+                     synchronized(ManagedTorrent.this) {
+                         synchronized(state.getLock()) {
+                             wasActive = isActive();
+                             state.set(TorrentState.INVALID);
+                         }
+
+                         if (wasActive)
+                             stopImpl();
+                     }
                  }
              }
 		};
@@ -268,7 +273,7 @@ BTLinkListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#stop()
 	 */
-	public void stop() {
+	public synchronized void stop() {
 				
 		if (!isActive()) {
 			throw new IllegalStateException("torrent cannot be stopped in state "+
@@ -283,7 +288,7 @@ BTLinkListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskManagerListener#diskExceptionHappened()
 	 */
-	public void diskExceptionHappened(DiskException e) {
+	public synchronized void diskExceptionHappened(DiskException e) {
 		synchronized(state.getLock()) {
 			if (state.get() == TorrentState.DISK_PROBLEM)
 				return;
@@ -366,7 +371,7 @@ BTLinkListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#pause()
 	 */
-	public void pause() {
+	public synchronized void pause() {
 		boolean wasActive = false;
 		synchronized(state.getLock()) {
 			if (!isActive() && state.get() != TorrentState.QUEUED)
@@ -541,7 +546,7 @@ BTLinkListener {
 	/**
 	 * Stops the torrent because of tracker failure.
 	 */
-	public void stopVoluntarily() {
+	public synchronized void stopVoluntarily() {
 		synchronized(state.getLock()) {
 			if (!isActive())
 				return;
