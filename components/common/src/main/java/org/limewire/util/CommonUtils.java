@@ -12,8 +12,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -378,9 +380,27 @@ public class CommonUtils {
     /**
      * Cleans up the filename and truncates it to length of 180 bytes by calling
      * {@link #convertFileName(String, int) convertFileName(String, 180)}. 
+     * @throws CharacterCodingException 
      */
     public static String convertFileName(String name) {
         return convertFileName(name, 180);
+    }
+        
+    public static String convertFileName(String name, int maxBytes) {
+        try {
+            return convertFileName(name, maxBytes, Charset.defaultCharset());
+        }
+        catch (CharacterCodingException cce) {
+            try {
+                return convertFileName(name, maxBytes, Charset.forName("UTF-8"));
+            }
+            catch (CharacterCodingException e) {
+                // should not happen, UTF-8 can encode unicode and gives us a
+                // good length estimate
+                assert false;
+                return name;
+            }
+        }
     }
 
     /** 
@@ -393,9 +413,11 @@ public class CommonUtils {
      * must be > 0
      * @return String containing the cleaned filename
      * 
+     * @throws CharacterCodingException if the charset could not encode the
+     * characters in <code>name</code> 
      * @throws IllegalArgumentException if maxBytes <= 0
      */
-    public static String convertFileName(String name, int maxBytes) {
+    public static String convertFileName(String name, int maxBytes, Charset charSet) throws CharacterCodingException {
     	
         if (maxBytes <= 0) {
             throw new IllegalArgumentException("maxBytes must be > 0");
@@ -410,16 +432,23 @@ public class CommonUtils {
     	if(name.length() > maxBytes || name.getBytes().length > maxBytes) {
     	    int extStart = name.lastIndexOf('.');
     	    if ( extStart == -1) { // no extension, weird, but possible
-    	        name = getPrefixWithMaxBytes(name, maxBytes);
+    	        name = getPrefixWithMaxBytes(name, maxBytes, charSet);
     	    } else {
     	        // if extension is greater than 11, we truncate it.
     	        // ( 11 = '.' + 10 extension bytes )
     	        int extLength = name.length() - extStart;		        
     	        int extEnd = extLength > 11 ? extStart + 11 : name.length();
-    	        byte[] extension = getMaxBytes(name.substring(extStart, extEnd), 16);
+    	        byte[] extension = getMaxBytes(name.substring(extStart, extEnd), 16, charSet);
     	        try {
-    	            name = getPrefixWithMaxBytes(name, maxBytes - extension.length) 
-    	            + new String(extension, Charset.defaultCharset().name());
+    	            // disregard extension if we lose too much of the name
+    	            // since the name is also used for searching
+    	            if (extension.length >= maxBytes - 10) {
+    	                name = getPrefixWithMaxBytes(name, maxBytes, charSet);
+    	            }
+    	            else {
+    	                name = getPrefixWithMaxBytes(name, maxBytes - extension.length, charSet) 
+    	                + new String(extension, charSet.name());
+    	            }
     	        }
     	        catch (UnsupportedEncodingException uee) {
     	            assert false; // should never happen
@@ -446,26 +475,30 @@ public class CommonUtils {
     /**
      * Returns the prefix of <code>string</code> which takes up a maximum
      * of <code>maxBytes</code>.
+     * @throws CharacterCodingException 
      */
-    static String getPrefixWithMaxBytes(String string, int maxBytes) {
+    static String getPrefixWithMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {
         try {
-            return new String(getMaxBytes(string, maxBytes), Charset.defaultCharset().name());
+            return new String(getMaxBytes(string, maxBytes, charSet), charSet.name());
         }
         catch (UnsupportedEncodingException uee) {
             assert false; // should never happen
         }
         return string;
     }
-    
-    static byte[] getMaxBytes(String string, int maxBytes) {
+
+    static byte[] getMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {
         // use default encoding which is also used for files judging from the
         // property name "file.encoding"
         byte[] bytes = new byte[maxBytes];
         ByteBuffer out = ByteBuffer.wrap(bytes);
         CharBuffer in = CharBuffer.wrap(string.toCharArray());
-        CharsetEncoder encoder = Charset.defaultCharset().newEncoder();
-        encoder.encode(in, out, true);
+        CharsetEncoder encoder = charSet.newEncoder();
+        CoderResult cr = encoder.encode(in, out, true);
         encoder.flush(out);
+        if (cr.isError()) {
+            cr.throwException();
+        }
         byte[] result = new byte[out.position()];
         System.arraycopy(bytes, 0, result, 0, result.length);
         return result;

@@ -194,6 +194,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	        if (saveDirectory.isDirectory()) {
 	            throw new SaveLocationException(SaveLocationException.PATH_NAME_TOO_LONG, saveDirectory);
 	        }
+	        // if not a directory, give precedence to error messages below
 	    }
 	    
 	    if (!saveDirectory.isDirectory()) {

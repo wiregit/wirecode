@@ -3,6 +3,8 @@ package org.limewire.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -99,20 +101,20 @@ public class CommonUtilsTest extends BaseTestCase {
         assertEquals("unexpected conversion2", expectedTwo, testTwo);
     }
     
-    public void testConvertFileNameWithUnicodeInput() {
-        String fileSystem = "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステム";
+    public void testConvertFileNameWithUnicodeInput() throws Exception {
+        String fileSystem = "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0";
         String converted = CommonUtils.convertFileName(fileSystem);
         assertTrue(converted.length() <= 255);
         assertEquals(180, converted.getBytes().length);
     }
     
-    public void testConvertFileNameWithExtensionAndUnicodeInput() {
+    public void testConvertFileNameWithExtensionAndUnicodeInput() throws Exception {
         String[] fileSystems =  { 
-                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシ.ステム",
-                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステム.txt",
-                "ファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイルシステムファイ.ルシステムファイルシステム",
+                "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7.\u30b9\u30c6\u30e0",
+                "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0.txt",
+                "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4.\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0",
         };
-        for (String fileSystem : fileSystems) { 
+        for (String fileSystem : fileSystems) {
             String converted = CommonUtils.convertFileName(fileSystem);
             assertTrue(fileSystem + " not 180 bytes long", converted.getBytes().length <= 180);
             // still has extension
@@ -129,7 +131,7 @@ public class CommonUtilsTest extends BaseTestCase {
         }
     }
     
-    public void testConvertFileNameIdentity() {
+    public void testConvertFileNameIdentity() throws CharacterCodingException {
         assertEquals("test", CommonUtils.convertFileName("test"));
         assertEquals("test.me", CommonUtils.convertFileName("test.me"));
         assertEquals("Test me with Spaces!.meee", CommonUtils.convertFileName("Test me with Spaces!.meee"));
@@ -161,7 +163,7 @@ public class CommonUtilsTest extends BaseTestCase {
         assertEquals("1234", CommonUtils.convertFileName(dir, "12345"));
     }
     
-    public void testMaxBytesParameter() {
+    public void testMaxBytesParameter() throws Exception {
         assertEquals("1", CommonUtils.convertFileName("12345", 1));
         assertEquals("12", CommonUtils.convertFileName("12345", 2));
         
@@ -173,6 +175,21 @@ public class CommonUtilsTest extends BaseTestCase {
         }
     }
     
+    public void testMaxBytesEncoderBailsOut() throws Exception {
+        String fileSystem = "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0";
+        try {
+            CommonUtils.getMaxBytes(fileSystem, 16, Charset.forName("ascii"));
+            fail("coding exception expected");
+        }
+        catch (CharacterCodingException cce) {
+        }
+    }
+    
+    public void testConvertFileNameReturnsTooLongFileNameWhenExtensionIsLongerThanMaxBytes() {
+        String converted = CommonUtils.convertFileName("hello.world", 4);
+        assertLessThanOrEquals(4, converted.getBytes().length);
+    }
+    
     public void testNoTrailingSeparator() throws IOException {
         File tmpFile = File.createTempFile("tmpfile", "file");
         File tmpDir = tmpFile.getParentFile();
@@ -180,11 +197,11 @@ public class CommonUtilsTest extends BaseTestCase {
         
         assertFalse(tmpDir.getAbsolutePath().endsWith(File.separator));
     }
-
+    
     /**
      * Helper method for testing illegal character conversion method.
      */
-    private void runCharTest(char[] illegalChars) {
+    private void runCharTest(char[] illegalChars) throws Exception {
         String test = "test";
         String correctResult = "test_";
         for(int i=0; i<illegalChars.length; i++) {
