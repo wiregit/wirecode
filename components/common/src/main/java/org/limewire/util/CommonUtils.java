@@ -380,12 +380,19 @@ public class CommonUtils {
     /**
      * Cleans up the filename and truncates it to length of 180 bytes by calling
      * {@link #convertFileName(String, int) convertFileName(String, 180)}. 
-     * @throws CharacterCodingException 
      */
     public static String convertFileName(String name) {
         return convertFileName(name, 180);
     }
         
+    /**
+     * Cleans up the filename from illegal characters and truncates it to the
+     * length of bytes specified.
+     * @param name the filename to clean up
+     * @param maxBytes the maximumm number of bytes the cleaned up file name
+     * can take up
+     * @return the cleaned up file name
+     */
     public static String convertFileName(String name, int maxBytes) {
         try {
             return convertFileName(name, maxBytes, Charset.defaultCharset());
@@ -480,6 +487,16 @@ public class CommonUtils {
         }
     }
 
+    /**
+     * Returns the first <code>maxBytes</code> of <code>string</code> encoded 
+     * using the encoder of <code>charSet</code>
+     * @param string whose prefix bytes to return
+     * @param maxBytes the maximum number of bytes to return
+     * @param charSet the char set used for encoding the characters into bytes
+     * @return the array of bytes of length <= maxBytes
+     * @throws CharacterCodingException if the char set's encoder could not
+     * handle the characters in the string
+     */
     static byte[] getMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {
         // use default encoding which is also used for files judging from the
         // property name "file.encoding"

@@ -104,8 +104,7 @@ public class CommonUtilsTest extends BaseTestCase {
     public void testConvertFileNameWithUnicodeInput() throws Exception {
         String fileSystem = "\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0\u30d5\u30a1\u30a4\u30eb\u30b7\u30b9\u30c6\u30e0";
         String converted = CommonUtils.convertFileName(fileSystem);
-        assertTrue(converted.length() <= 255);
-        assertEquals(180, converted.getBytes().length);
+        assertEquals(180, converted.getBytes(Charset.defaultCharset().name()).length);
     }
     
     public void testConvertFileNameWithExtensionAndUnicodeInput() throws Exception {
@@ -116,7 +115,8 @@ public class CommonUtilsTest extends BaseTestCase {
         };
         for (String fileSystem : fileSystems) {
             String converted = CommonUtils.convertFileName(fileSystem);
-            assertTrue(fileSystem + " not 180 bytes long", converted.getBytes().length <= 180);
+            assertLessThanOrEquals(fileSystem + " not 180 bytes long", 
+                    180, converted.getBytes(Charset.defaultCharset().name()).length);
             // still has extension
             assertTrue(converted.contains("."));
             // extension is substring of original extension
@@ -128,6 +128,26 @@ public class CommonUtilsTest extends BaseTestCase {
             String halfed = fileSystem.substring(fileSystem.length() - 40);
             String converted = CommonUtils.convertFileName(halfed);
             assertEquals(halfed, converted);
+        }
+        
+        // add illegal characters at various places and ensure 
+        // maximum length is respected
+        for (char[] illegalChars : new char[][] {
+                (char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+                "ILLEGAL_CHARS_ANY_OS"),
+                (char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+                "ILLEGAL_CHARS_UNIX"),
+                (char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+                "ILLEGAL_CHARS_WINDOWS")
+        }) {
+            for (String fileSystem: fileSystems) {
+                char[] fileNameChars = fileSystem.toCharArray();
+                for (char illegalChar : illegalChars) {
+                    fileNameChars[(int)(Math.random() * (fileNameChars.length - 1))] = illegalChar;
+                    String converted = CommonUtils.convertFileName(new String(fileNameChars));
+                    assertLessThanOrEquals(180, converted.getBytes(Charset.defaultCharset().name()).length);
+                }
+            }
         }
     }
     
@@ -157,7 +177,7 @@ public class CommonUtilsTest extends BaseTestCase {
         } catch (IOException iee) {
         }
         dir = new File(new String(dirName, 0, dirName.length - 2));
-        assertEquals(1, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes().length);
+        assertEquals(1, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes(Charset.defaultCharset().name()).length);
         dir = new File(new String(dirName, 0, dirName.length - 5));
         assertEquals("1234", CommonUtils.convertFileName(dir, "12345"));
     }
@@ -181,9 +201,9 @@ public class CommonUtilsTest extends BaseTestCase {
         }
     }
     
-    public void testConvertFileNameReturnsTooLongFileNameWhenExtensionIsLongerThanMaxBytes() {
+    public void testConvertFileNameReturnsTooLongFileNameWhenExtensionIsLongerThanMaxBytes() throws Exception {
         String converted = CommonUtils.convertFileName("hello.world", 4);
-        assertLessThanOrEquals(4, converted.getBytes().length);
+        assertLessThanOrEquals(4, converted.getBytes(Charset.defaultCharset().name()).length);
     }
     
     public void testNoTrailingSeparator() throws IOException {
