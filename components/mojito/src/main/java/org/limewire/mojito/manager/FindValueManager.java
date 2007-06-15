@@ -73,7 +73,6 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
                 futureMap.put(entityKey, future);
                 
                 context.getDHTExecutorService().execute(future);
-                context.getStatisticsContext().getFindValueGroup().getRequestsSent().incrementByOne();
             }
         }
         
@@ -107,7 +106,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
         @Override
         protected void fireFutureResult(FindValueResult value) {
             FindValueGroup group = context.getStatisticsContext().getFindValueGroup();
-            group.getResponsesReceived().add(value.getTime());
+            group.getTime().add(value.getTime());
             group.getHops().add(value.getHop());
             if (value.getEntities().isEmpty() && value.getEntityKeys().isEmpty()) {
                 group.getNotFound().incrementByOne();

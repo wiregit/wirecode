@@ -27,17 +27,15 @@ import java.lang.reflect.Modifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class StatisticsContext {
+public final class StatisticsContext {
     
     private final Log log = LogFactory.getLog(getClass());
     
-    private final DatabaseGroup database = new DatabaseGroup();
-    
-    private final LookupGroup FIND_NODE = new LookupGroup();
+    private final FindNodeGroup FIND_NODE = new FindNodeGroup();
     
     private final FindValueGroup FIND_VALUE = new FindValueGroup();
     
-    private final BasicGroup PING = new BasicGroup();
+    private final PingGroup PING = new PingGroup();
     
     private final StoreGroup STORE = new StoreGroup();
     
@@ -46,10 +44,6 @@ public class StatisticsContext {
     private final NetworkGroup network = new NetworkGroup();
     
     private final RouteTableGroup routeTable = new RouteTableGroup();
-    
-    public DatabaseGroup getDatabaseGroup() {
-        return database;
-    }
     
     public LookupGroup getFindNodeGroup() {
         return FIND_NODE;
@@ -80,18 +74,20 @@ public class StatisticsContext {
     }
     
     public void write(Writer out) throws IOException {
-        for (Field field : getClass().getFields()) {
+        Class<?> clazz = getClass();
+        for (Field field : clazz.getDeclaredFields()) {
             try {
                 if (Modifier.isTransient(field.getModifiers())) {
                     continue;
                 }
                 
+                field.setAccessible(true);
                 Object value = field.get(this);
-                if (!(value instanceof StatsGroup)) {
+                if (!(value instanceof StatisticsGroup)) {
                     continue;
                 }
                 
-                StatsGroup group = (StatsGroup) value;
+                StatisticsGroup group = (StatisticsGroup) value;
                 group.write(out);
                 
             } catch (IllegalAccessException err) {

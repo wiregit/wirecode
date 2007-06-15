@@ -79,6 +79,21 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     }
 
     @Override
+    protected void response(ResponseMessage message, long time) throws IOException {
+        super.response(message, time);
+        context.getStatisticsContext().getFindValueGroup().getResponsesReceived().add(time);
+    }
+    
+    @Override
+    protected boolean lookup(Contact node) throws IOException {
+        if (super.lookup(node)) {
+            context.getStatisticsContext().getFindValueGroup().getRequestsSent().incrementByOne();
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     protected void finishLookup() {
         long time = getElapsedTime();
         int currentHop = getCurrentHop();

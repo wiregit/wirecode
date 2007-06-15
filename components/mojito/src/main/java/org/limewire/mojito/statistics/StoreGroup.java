@@ -1,3 +1,22 @@
+/*
+ * Mojito Distributed Hash Table (Mojito DHT)
+ * Copyright (C) 2006-2007 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package org.limewire.mojito.statistics;
 
 public class StoreGroup extends BasicGroup {
@@ -6,7 +25,7 @@ public class StoreGroup extends BasicGroup {
     
     private final Statistic<Long> badSecurityToken = new Statistic<Long>();
     
-    private final Statistic<Long> requestRejected = new Statistic<Long>();
+    private final Statistic<Long> storeRequestRejected = new Statistic<Long>();
     
     private final Statistic<Long> forwardToNearest = new Statistic<Long>();
     
@@ -25,7 +44,7 @@ public class StoreGroup extends BasicGroup {
     }
     
     public Statistic<Long> getRequestRejected() {
-        return requestRejected;
+        return storeRequestRejected;
     }
     
     public Statistic<Long> getForwardToNearest() {

@@ -62,6 +62,21 @@ public class FindNodeResponseHandler
     }
 
     @Override
+    protected void response(ResponseMessage message, long time) throws IOException {
+        super.response(message, time);
+        context.getStatisticsContext().getFindNodeGroup().getResponsesReceived().add(time);
+    }
+    
+    @Override
+    protected boolean lookup(Contact node) throws IOException {
+        if (super.lookup(node)) {
+            context.getStatisticsContext().getFindNodeGroup().getRequestsSent().incrementByOne();
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     protected void finishLookup() {
         long time = getElapsedTime();
         int routeTableFailureCount = getRouteTableFailureCount();

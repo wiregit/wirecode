@@ -72,7 +72,6 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
                 futureMap.put(lookupId, future);
                 
                 context.getDHTExecutorService().execute(future);
-                context.getStatisticsContext().getFindNodeGroup().getRequestsSent().incrementByOne();
             }
         }
         
@@ -114,7 +113,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
         @Override
         protected void fireFutureResult(FindNodeResult value) {
             LookupGroup group = context.getStatisticsContext().getFindNodeGroup();
-            group.getResponsesReceived().add(value.getTime());
+            group.getTime().add(value.getTime());
             group.getHops().add(value.getHop());
             
             super.fireFutureResult(value);

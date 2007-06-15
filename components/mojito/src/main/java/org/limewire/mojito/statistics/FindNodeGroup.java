@@ -19,17 +19,6 @@
 
 package org.limewire.mojito.statistics;
 
-public abstract class LookupGroup extends BasicGroup {
-    
-    private final Statistic<Long> time = new Statistic<Long>();
+public class FindNodeGroup extends LookupGroup {
 
-    private final Statistic<Integer> hops = new Statistic<Integer>();
-    
-    public Statistic<Long> getTime() {
-        return time;
-    }
-    
-    public Statistic<Integer> getHops() {
-        return hops;
-    }
 }
