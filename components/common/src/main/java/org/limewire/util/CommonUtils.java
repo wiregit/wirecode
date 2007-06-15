@@ -389,16 +389,13 @@ public class CommonUtils {
     public static String convertFileName(String name, int maxBytes) {
         try {
             return convertFileName(name, maxBytes, Charset.defaultCharset());
-        }
-        catch (CharacterCodingException cce) {
+        } catch (CharacterCodingException cce) {
             try {
                 return convertFileName(name, maxBytes, Charset.forName("UTF-8"));
-            }
-            catch (CharacterCodingException e) {
+            } catch (CharacterCodingException e) {
                 // should not happen, UTF-8 can encode unicode and gives us a
                 // good length estimate
-                assert false;
-                return name;
+                throw new RuntimeException("UTF-8 should have encoded: " + name, e);
             }
         }
     }
@@ -444,14 +441,12 @@ public class CommonUtils {
     	            // since the name is also used for searching
     	            if (extension.length >= maxBytes - 10) {
     	                name = getPrefixWithMaxBytes(name, maxBytes, charSet);
-    	            }
-    	            else {
+    	            } else {
     	                name = getPrefixWithMaxBytes(name, maxBytes - extension.length, charSet) 
     	                + new String(extension, charSet.name());
     	            }
-    	        }
-    	        catch (UnsupportedEncodingException uee) {
-    	            assert false; // should never happen
+    	        } catch (UnsupportedEncodingException uee) {
+    	            throw new RuntimeException("Could not handle string", uee);
     	        }
             }          
     	}
@@ -480,11 +475,9 @@ public class CommonUtils {
     static String getPrefixWithMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {
         try {
             return new String(getMaxBytes(string, maxBytes, charSet), charSet.name());
+        } catch (UnsupportedEncodingException uee) {
+            throw new RuntimeException("Could not recreate string", uee);
         }
-        catch (UnsupportedEncodingException uee) {
-            assert false; // should never happen
-        }
-        return string;
     }
 
     static byte[] getMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {

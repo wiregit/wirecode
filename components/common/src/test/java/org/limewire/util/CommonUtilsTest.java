@@ -154,8 +154,7 @@ public class CommonUtilsTest extends BaseTestCase {
         try {
             CommonUtils.convertFileName(dir, "lbkajdf ;alksdf");
             fail("IOException expected for too long parent dir");
-        }
-        catch (IOException iee) {
+        } catch (IOException iee) {
         }
         dir = new File(new String(dirName, 0, dirName.length - 2));
         assertEquals(1, CommonUtils.convertFileName(dir, "blah, blhalksd").getBytes().length);
@@ -166,12 +165,10 @@ public class CommonUtilsTest extends BaseTestCase {
     public void testMaxBytesParameter() throws Exception {
         assertEquals("1", CommonUtils.convertFileName("12345", 1));
         assertEquals("12", CommonUtils.convertFileName("12345", 2));
-        
         try {
             CommonUtils.convertFileName("1345", 0);
             fail("No IAE thrown");
-        }
-        catch (IllegalArgumentException iae) {
+        } catch (IllegalArgumentException iae) {
         }
     }
     
@@ -180,8 +177,7 @@ public class CommonUtilsTest extends BaseTestCase {
         try {
             CommonUtils.getMaxBytes(fileSystem, 16, Charset.forName("ascii"));
             fail("coding exception expected");
-        }
-        catch (CharacterCodingException cce) {
+        } catch (CharacterCodingException cce) {
         }
     }
     
