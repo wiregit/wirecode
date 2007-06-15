@@ -466,7 +466,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         
         public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
-                LOG.debug("Bootstrap Cancelled", e);
+                LOG.debug("Bootstrap Canceled", e);
                 stop();
             }
         }
