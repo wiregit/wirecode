@@ -425,6 +425,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     private class BootstrapListener implements DHTFutureListener<BootstrapResult> {
         public void handleFutureSuccess(BootstrapResult result) {
+            boolean finish = false;
             synchronized (lock) {
                 bootstrapFuture = null;
 
@@ -433,7 +434,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                 LOG.debug("Future success type: "+ type);
                 switch(type) {
                     case BOOTSTRAP_SUCCEEDED:
-                        finish();
+                        finish = true;
                         break;
                     case BOOTSTRAP_FAILED:
                         // Try again!
@@ -443,6 +444,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                         //ignore other results
                         break;
                 }
+            }
+            
+            // Do not hold 'lock' when calling finish.
+            if (finish) {
+                finish();
             }
         }
         
