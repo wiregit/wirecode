@@ -80,9 +80,11 @@ public class SettingListenerTest extends BaseTestCase {
         final Object lock = new Object();
         final EventType[] type = new EventType[1];
         
+        TestSettings.TEST.setValue(123);
         TestSettings.TEST.addSettingListener(new SettingListener() {
             public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
+                    System.out.println(evt);
                     if (evt.getEventType() == EventType.REVERT_TO_DEFAULT) {
                         type[0] = evt.getEventType();
                         lock.notifyAll();

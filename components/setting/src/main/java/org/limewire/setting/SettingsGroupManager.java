@@ -116,6 +116,13 @@ public final class SettingsGroupManager {
     }
 
     /**
+     * 
+     */
+    public SettingsGroup[] getSettingsGroups() {
+        return PROPS.toArray(new SettingsGroup[0]);
+    }
+    
+    /**
      * Reload settings from both the property and configuration files.
      */
     public void reload() {

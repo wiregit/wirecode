@@ -39,7 +39,8 @@ public class SettingsHandlerListenerTest extends BaseTestCase {
         });
         
         synchronized (lock) {
-            TestSettings.TEST.reload();
+            SettingsGroup group = new BasicSettingsGroup(new File("LimeWire"), "LimeWire");
+            SettingsGroupManager.instance().addSettingsGroup(group);
             lock.wait(100L);
         }
         
