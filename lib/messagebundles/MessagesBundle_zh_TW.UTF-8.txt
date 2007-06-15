@@ -1289,6 +1289,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=無法下載至資料夾 {0}，因為那不
 SAVE_LOCATION_FILESYSTEM_ERROR=由於系統錯誤，無法定位檔案。
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=同樣的檔案已在下載中。
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2880,6 +2882,8 @@ ERROR_PORT=無法找到一個連接埠為進來的連線使用。\n請從設定�
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ###$ ERROR_THREE_CHARACTER_SEARCH=你 必须键入至少 3 个字符, 从 而避免阻塞 网络.
 ERROR_THREE_CHARACTER_SEARCH=您必須輸入至少 3 個字元，以避免阻塞網路。
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ###$ ERROR_INVALID_SAVE_DIRECTORY=错误的 保存 文件的 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置.

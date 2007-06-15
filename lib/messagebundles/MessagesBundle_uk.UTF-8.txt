@@ -1090,6 +1090,8 @@ SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Не можу встановити {0} я
 SAVE_LOCATION_FILESYSTEM_ERROR=Не можу встановити як місцезнаходження файлу через помилку у файловій системі
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Такий самий файл вже завантажується
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2453,6 +2455,8 @@ ERROR_PORT_UNAVAILABLE=Немає доступу до порту. Оберіть
 ERROR_PORT=Не можу знайти порт для вхідних підключень. \nБудь ласка, вкажіть порт у вікні налаштувань.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Ваш запит має бути довшим за 3 символи, щоб не перенавантажувати мережу.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Недійсна тека для збереження файлів. Будь ласка, використовуйте іншу теку або теку за замовчуванням.

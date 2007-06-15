@@ -1090,6 +1090,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=لايمكن وضع موقع الملف إ�
 SAVE_LOCATION_FILESYSTEM_ERROR=لايمكن وضع موقع الملف بسبب خطأ في نظام الملفات.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=ملف مشابه تم تنزيله مسبقاً
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2453,6 +2455,8 @@ ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر من
 ERROR_PORT=لم يتم إيجاد منفذ لاستخدامه في الاتصالات الواردة.\n من فضلك اختر منفذاً آخر من نافذة الإجراء.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=لا بد أن تحتوي جملة البحث على ثلاث أحرف على الأقل لتجنب حدوث اختناقات في الشبكة.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=المجلد غير صالح لحفظ الملفات. من فضلك اختر مجلداً آخر أو استخدم المجلد الافتراضي.

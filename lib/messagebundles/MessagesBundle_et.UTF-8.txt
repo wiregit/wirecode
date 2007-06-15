@@ -1090,6 +1090,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Ei suutnud määrata allalaadimise salvesta
 SAVE_LOCATION_FILESYSTEM_ERROR=Ei suutnud määrata failile asukohta tänu veale failisüsteemis.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Sama faili juba laaditakse alla.
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2453,6 +2455,8 @@ ERROR_PORT_UNAVAILABLE=Port pole kättesaadaval. Palun vali mingi muu port.
 ERROR_PORT=Ei suutnud leida porti sissetulevate ühenduste jaoks.\nPalun täpsusta porti konfigureerimis aknast.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Sinu otsing peab olema vähemalt kolme tähemärgi pikkune. Sellega väldiakse võrgu ummistumist.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Sellesse kausta ei ole luba salvestada. Palun kasutada teist kataloogi või taandada vaikolekuga määratud kausta.

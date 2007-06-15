@@ -1090,6 +1090,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Nu s-a setat locatia fisierului la {0}, deo
 SAVE_LOCATION_FILESYSTEM_ERROR=Nu s-a setat locatia fisierului din cauza unei erori in sistemul de fisiere.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Acelasi fisier este deja in descarcare.
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2453,6 +2455,8 @@ ERROR_PORT_UNAVAILABLE=Portul nu este disponibil. Selectati alt port.
 ERROR_PORT=Nu s-a gasit un port pentru conexiunile primite.\nSpecificati un port din fereastra de configurare.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Cautarea trebuie sa contina cel putin 3 caractere pentru a se evita congestionarea retelei.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Folder invalid pentru salvarea fisierelor. Va rugam folositi alt folder sau reveniti la cel implicit.

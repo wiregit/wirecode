@@ -1092,6 +1092,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=레귤러 파일은 아니기 때문에, �
 SAVE_LOCATION_FILESYSTEM_ERROR=파일 시스템의 에러에 의해 파일 위치를 설정할 수 없습니다
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=같은 파일이 이미 다운로드 되었습니다.
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2455,6 +2457,8 @@ ERROR_PORT_UNAVAILABLE=포트는 이용할 수 없기 때문에, 다른 포트�
 ERROR_PORT=내향의 접속에 사용하는 포트가 눈에 띄지 않기 때문에, \n설정 윈도우로부터 포트를 지정하는 것.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=파일저장 폴더에 문제가 있습니다. 다른 폴더를 사용거나 초기설정으로 되돌리세요.

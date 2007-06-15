@@ -1093,6 +1093,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=レギュラー・ファイルではない�
 SAVE_LOCATION_FILESYSTEM_ERROR=ファイルシステムのエラーにより、ファイル位置を設定できない
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=同じエラーが既にダウンロードされている
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2456,6 +2458,8 @@ ERROR_PORT_UNAVAILABLE=ポートは利用できないので、別のポートを
 ERROR_PORT=内向きの接続に使用するポートが見当たらないので、\n設定ウィンドウからポートを指定すること。
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=ネットワークの混雑を避けるために、検索は最低三文字以上で行うこと。
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=ファイル保存先のフォルダは無効。別のフォルダを使用するか初期設定に戻すこと。

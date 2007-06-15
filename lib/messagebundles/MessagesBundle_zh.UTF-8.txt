@@ -1090,6 +1090,8 @@ MEDIA_REWIND_BUTTON_TIP=后退
 #? SAVE_LOCATION_FILESYSTEM_ERROR=
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 #? SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2453,6 +2455,8 @@ ERROR_PORT_UNAVAILABLE=端口 不可提供. 请 选择 一个 不同的 端口.
 ERROR_PORT=不能 找到 一个 端口 为进来的 连接 使用.\n请 从 结构 窗口 指定 一个 端口.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=你 必须键入至少 3 个字符, 从 而避免阻塞 网络.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=错误的 保存 文件的 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置.

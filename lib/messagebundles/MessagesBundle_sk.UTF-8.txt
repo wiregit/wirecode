@@ -1092,6 +1092,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Nedá sa zmeniť umiestnenie súboru na {0}
 SAVE_LOCATION_FILESYSTEM_ERROR=Nedá sa zmeniť umiestnenie súboru kvôli chybe v súborovom systéme.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Tento súbor sa už sťahuje.
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -2455,6 +2457,8 @@ ERROR_PORT_UNAVAILABLE=Port je nedostupný. Vyberte prosím iný port.
 ERROR_PORT=Nemôžem nájsť port používaný pre prichádzajúce pripojenia.\nŠpecifikujte prosím port v okne nastavení.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Vaše vyhľadávanie musí mať aspoň tri znaky, aby sa zbytočne prehľadávaním nezahltila sieť.
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Neplatný priečinok pre ukladanie súborov. Použite prosím iný priečinok alebo sa vráťte k pôvodnému.
