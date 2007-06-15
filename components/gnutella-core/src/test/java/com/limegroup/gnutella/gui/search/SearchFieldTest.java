@@ -79,4 +79,11 @@ public class SearchFieldTest extends GUIBaseTestCase {
             assertEquals("String a of" + s + " was not inserted, " + illegalChars[i], 1, doc.getLength());    
         }
     }
+    
+    public void testInsertTooLongStringWithCharactersThatAreRemovedInNormalization() throws Exception {
+        SearchFieldDocument doc = new SearchFieldDocument();
+        // + and = are removed in normalization and thus a too long query string could slip in
+        doc.insertString(0, "hello === ==++ world that is way too +==++", null);
+        assertEquals(0, doc.getLength());
+    }
 }
