@@ -116,7 +116,7 @@ public final class SettingsGroupManager {
     }
 
     /**
-     * 
+     * Returns all {@link SettingsGroup}s that are currently registered
      */
     public SettingsGroup[] getSettingsGroups() {
         return PROPS.toArray(new SettingsGroup[0]);

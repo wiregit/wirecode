@@ -84,7 +84,6 @@ public class SettingListenerTest extends BaseTestCase {
         TestSettings.TEST.addSettingListener(new SettingListener() {
             public void settingChanged(SettingEvent evt) {
                 synchronized (lock) {
-                    System.out.println(evt);
                     if (evt.getEventType() == EventType.REVERT_TO_DEFAULT) {
                         type[0] = evt.getEventType();
                         lock.notifyAll();
