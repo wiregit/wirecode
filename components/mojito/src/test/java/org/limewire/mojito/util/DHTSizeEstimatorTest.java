@@ -235,6 +235,6 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
             estimator.addEstimatedRemoteSize(BigInteger.valueOf(size));
     	}
     	
-    	assertEquals(BigInteger.valueOf(490), estimator.getEstimatedSize(routeTable));
+    	assertEquals(BigInteger.valueOf(486), estimator.getEstimatedSize(routeTable));
     }
 }
