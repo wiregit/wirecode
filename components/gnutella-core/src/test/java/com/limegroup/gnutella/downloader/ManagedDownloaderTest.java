@@ -610,9 +610,20 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             dirName[i] = File.separatorChar;
         }
         File longestDir = new File(tmpDir.getAbsolutePath() + new String(dirName));
-        System.out.println(longestDir.getAbsolutePath());
         // currently fails due to JRE bug
-        assertTrue(longestDir.mkdirs());
+        if (!longestDir.mkdirs()) {
+            // go through path and create them one by one till JRE bug is fixed
+            LinkedList<File> dirs = new LinkedList<File>();
+            File current = longestDir;
+            while (!current.equals(tmpDir)) {
+                dirs.add(current);
+                current = current.getParentFile();
+            }
+            while (!dirs.isEmpty()) {
+                current = dirs.removeLast();
+                assertTrue("Could not create " + current, current.mkdir());
+            }
+        }
         return longestDir;
     }
     
