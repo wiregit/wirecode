@@ -377,7 +377,7 @@ public class SettingTest extends BaseTestCase {
         
         yes = 0; no = 0;
         for (int i = 0; i < 1000; i++) {
-            s.setValue(0.8f);
+            s.setValue(i % 2 == 0 ? 0.8f : 0.7f);
             if (s.getBoolean()) yes++; 
             else  no++;
         }
