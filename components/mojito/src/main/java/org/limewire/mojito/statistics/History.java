@@ -48,6 +48,9 @@ class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializ
     
     private transient int modCount = 0;
     
+    /**
+     * Creates a History with the given max size
+     */
     public History(int historySize) {
         if (historySize < 0) {
             throw new IllegalArgumentException("historySize: " + historySize);
@@ -98,17 +101,14 @@ class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializ
     }
     
     /**
-     * 
+     * Returns the element at the given index
      */
     public synchronized T get(int i) {
-        if (size() < history.length) {
-            if (i >= size()) {
-                throw new ArrayIndexOutOfBoundsException();
-            }
-            return innerGet(i);
-        } else {
-            return innerGet((index + i) % history.length);
+        if (i >= size()) {
+            throw new ArrayIndexOutOfBoundsException("index: " + i);
         }
+        
+        return innerGet((index + i) % history.length);
     }
     
     /**
@@ -136,7 +136,7 @@ class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializ
         
         int i = index - 1;
         if (i < 0) {
-            i = history.length;
+            i = history.length-1;
         }
         return innerGet(i);
     }
@@ -188,6 +188,18 @@ class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializ
         return new HistoryIterator();
     }
     
+    public synchronized String toString() {
+        StringBuilder buffer = new StringBuilder("[");
+        for (T num : this) {
+            buffer.append(num).append(",");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
+    
+    /**
+     * A simple Iterator for the History
+     */
     private class HistoryIterator implements Iterator<T> {
 
         private final int expectedModCount = modCount;
