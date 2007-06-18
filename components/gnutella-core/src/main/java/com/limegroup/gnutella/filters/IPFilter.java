@@ -25,6 +25,8 @@ public final class IPFilter extends HostileFilter {
     private volatile IPList goodHosts;
     /** List contained in hostiles.txt if any.  Loaded on startup only */ 
     private final IPList hostilesTXTHosts = new IPList();
+    /** Marker for whether or not hostiles have been loaded. */
+    private volatile boolean loadedHostiles = false;
     
     /** Constructs an IPFilter that automatically loads the content. */
     public IPFilter() {
@@ -34,21 +36,6 @@ public final class IPFilter extends HostileFilter {
     /** Constructs an IPFilter that can optionally load the content. */
     public IPFilter(boolean load) {
         if(load) {
-            
-            // Load data from hostiles.txt...
-            File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(hostiles));
-                String read = null;
-                while( (read = reader.readLine()) != null) {
-                    hostilesTXTHosts.add(read);
-                }
-            } catch(IOException ignored) {
-            } finally {
-                IOUtils.close(reader);
-            }
-            
             refreshHosts();
         } else {
             badHosts = new IPList();
@@ -83,6 +70,23 @@ public final class IPFilter extends HostileFilter {
         allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++) {
             newGood.add(allHosts[i]);
+        }
+
+        // Load data from hostiles.txt (if it wasn't already loaded!)...
+        if(!loadedHostiles) {
+            loadedHostiles = true;
+            File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(hostiles));
+                String read = null;
+                while( (read = reader.readLine()) != null) {
+                    hostilesTXTHosts.add(read);
+                }
+            } catch(IOException ignored) {
+            } finally {
+                IOUtils.close(reader);
+            }
         }
         
         badHosts = new MultiIPList(newBad, hostilesTXTHosts);
