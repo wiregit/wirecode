@@ -67,8 +67,6 @@ public final class StatisticsContext implements Inspectable {
      */
     private final NetworkGroup network = new NetworkGroup();
     
-    private final RouteTableGroup routeTable = new RouteTableGroup();
-    
     public LookupGroup getFindNodeGroup() {
         return FIND_NODE;
     }
@@ -91,10 +89,6 @@ public final class StatisticsContext implements Inspectable {
     
     public NetworkGroup getNetworkGroup() {
         return network;
-    }
-    
-    public RouteTableGroup getRouteTableGroup() {
-        return routeTable;
     }
     
     /**

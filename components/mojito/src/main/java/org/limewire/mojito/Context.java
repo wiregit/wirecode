@@ -397,9 +397,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         routeTable.setContactPinger(this);
         
-        routeTable.addRouteTableListener(
-                getStatisticsContext().getRouteTableGroup());
-        
         this.routeTable = routeTable;
         
         if (database != null) {
