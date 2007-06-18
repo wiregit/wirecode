@@ -41,9 +41,6 @@ public class ServerSideWhatIsNewTest
     private static File susheel = null;
     private static File tempFile1 = null;
     private static File tempFile2 = null;
-    private static File winInstaller = null;
-    private static File linInstaller = null;
-    private static File osxInstaller = null;
 
     public ServerSideWhatIsNewTest(String name) {
         super(name);
@@ -100,10 +97,6 @@ public class ServerSideWhatIsNewTest
         
         berkeley = new File(_sharedDir, "berkeley.txt");
         susheel = new File(_sharedDir, "susheel.txt");
-        
-        winInstaller = new File(_sharedDir, "LimeWireWin3.69.0010.exe");
-        linInstaller = new File(_sharedDir, "LimeWireLinux.bin");
-        osxInstaller = new File(_sharedDir, "LimeWireOSX.dmg");
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -724,13 +717,10 @@ public class ServerSideWhatIsNewTest
         
         FileManager fm = RouterService.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
-        
-        winInstaller =
-            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        linInstaller =
-            CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
-        osxInstaller =
-            CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
+
+        File winInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        File linInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
+        File osxInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
 
         //  Gotta make use of the force-share folder for this test
         if( FileManager.PROGRAM_SHARE.exists() ) {
@@ -742,72 +732,80 @@ public class ServerSideWhatIsNewTest
             FileManager.PROGRAM_SHARE.mkdir();
         }
 
-        FileUtils.copy(winInstaller, 
-                         new File(FileManager.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe"));
-        FileUtils.copy(linInstaller, 
-                         new File(FileManager.PROGRAM_SHARE, "LimeWireLinux.bin"));
-        FileUtils.copy(osxInstaller, 
-                         new File(FileManager.PROGRAM_SHARE, "LimeWireOSX.dmg"));
-
-        RouterService.getFileManager().loadSettings();
-        int i = 0;
-        for (; (i < 15) && (RouterService.getNumSharedFiles()+RouterService.getFileManager().getNumForcedFiles() < 5); i++)
-            Thread.sleep(1000);
-        if (i == 15)
-            fail("num shared files? " + RouterService.getNumSharedFiles());
-
-        // we should be sharing two files - two text files and three installers
-        // but the creation time cache should only have the two text files
-        // as entries....
-        //
-        //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
-        //      files don't count), and 3 forced shared files
-        assertEquals(2, RouterService.getNumSharedFiles());
-        assertEquals(3, RouterService.getFileManager().getNumForcedFiles());
-
-        {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
-            assertEquals(""+urnToLong, 2, urnToLong.size());
-        }
-        {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            assertEquals(""+longToUrns, 2, longToUrns.size());
-        }
-
-        // make sure the installer urns are not in the cache
-        {
-            assertTrue(winInstaller.exists());
-            URN installerURN = fm.getURNForFile(winInstaller);
-            assertNull(ctCache.getCreationTime(installerURN));
-        }
-        {
-            assertTrue(winInstaller.exists());
-            URN installerURN = fm.getURNForFile(linInstaller);
-            assertNull(ctCache.getCreationTime(installerURN));
-        }
-        {
-            assertTrue(winInstaller.exists());
-            URN installerURN = fm.getURNForFile(osxInstaller);
-            assertNull(ctCache.getCreationTime(installerURN));
-        }
-        // make sure berkeley and susheel are in the cache.
-        {
-            assertTrue(berkeley.exists());
-            assertNotNull(ctCache.getCreationTime(fm.getURNForFile(berkeley)));
-        }
-        {
-            assertTrue(susheel.exists());
-            assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
-        }
+        File winDst = new File(FileManager.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe");
+        File linDst = new File(FileManager.PROGRAM_SHARE, "LimeWireLinux.bin");
+        File osxDst = new File(FileManager.PROGRAM_SHARE, "LimeWireOSX.dmg");
         
-        File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
-        for (int j = 0; j < toDelete.length; j++) {
-            toDelete[j].delete();
-        }
-        FileManager.PROGRAM_SHARE.delete();
+        FileUtils.copy(winInstaller, winDst);
+        FileUtils.copy(linInstaller, linDst);
+        FileUtils.copy(osxInstaller, osxDst);
+        
+        winDst.deleteOnExit();
+        linDst.deleteOnExit();
+        osxDst.deleteOnExit();
+        
+        try {
+            RouterService.getFileManager().loadSettings();
+            int i = 0;
+            for (; (i < 15) && (RouterService.getNumSharedFiles()+RouterService.getFileManager().getNumForcedFiles() < 5); i++)
+                Thread.sleep(1000);
+            if (i == 15)
+                fail("num shared files? " + RouterService.getNumSharedFiles());
+    
+            // we should be sharing two files - two text files and three installers
+            // but the creation time cache should only have the two text files
+            // as entries....
+            //
+            //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
+            //      files don't count), and 3 forced shared files
+            assertEquals(2, RouterService.getNumSharedFiles());
+            assertEquals(3, RouterService.getFileManager().getNumForcedFiles());
+    
+            {
+                Map urnToLong = 
+                    (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+                assertEquals(2, urnToLong.size());
+            }
+            {
+                Map longToUrns =
+                    (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+                assertEquals(2, longToUrns.size());
+            }
+    
+            // make sure the installer urns are not in the cache
+            {
+                assertTrue(winInstaller.exists());
+                URN installerURN = fm.getURNForFile(winInstaller);
+                assertNull(ctCache.getCreationTime(installerURN));
+            }
+            {
+                assertTrue(winInstaller.exists());
+                URN installerURN = fm.getURNForFile(linInstaller);
+                assertNull(ctCache.getCreationTime(installerURN));
+            }
+            {
+                assertTrue(winInstaller.exists());
+                URN installerURN = fm.getURNForFile(osxInstaller);
+                assertNull(ctCache.getCreationTime(installerURN));
+            }
+            // make sure berkeley and susheel are in the cache.
+            {
+                assertTrue(berkeley.exists());
+                assertNotNull(ctCache.getCreationTime(fm.getURNForFile(berkeley)));
+            }
+            {
+                assertTrue(susheel.exists());
+                assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
+            }
+        
+        } finally {        
+            File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
+            for (int j = 0; j < toDelete.length; j++) {
+                toDelete[j].delete();
+            }
+            FileManager.PROGRAM_SHARE.delete();
 
+        }
     }
 
 }
