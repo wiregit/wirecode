@@ -20,6 +20,7 @@
 package org.limewire.mojito.statistics;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -30,8 +31,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 
-public abstract class StatisticsGroup {
+public abstract class StatisticsGroup implements Inspectable {
     
     private final Log log = LogFactory.getLog(getClass());
     
@@ -80,9 +82,12 @@ public abstract class StatisticsGroup {
         try {
             write(out);
         } catch (IOException err) {
-            // Not possible!
-            throw new RuntimeException(err);
+            err.printStackTrace(new PrintWriter(out));
         }
         return out.toString();
+    }
+
+    public Object inspect() {
+        return toString();
     }
 }

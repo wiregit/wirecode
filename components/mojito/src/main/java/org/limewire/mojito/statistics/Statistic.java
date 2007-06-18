@@ -20,9 +20,14 @@
 package org.limewire.mojito.statistics;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 
-public class Statistic<T extends Number & Comparable<T>> extends History<T> {
+import org.limewire.inspection.Inspectable;
+
+public class Statistic<T extends Number & Comparable<T>> 
+        extends History<T> implements Inspectable {
     
     public static final int HISTORY_SIZE = 200;
 
@@ -55,10 +60,25 @@ public class Statistic<T extends Number & Comparable<T>> extends History<T> {
         buffer.append(getAverage()).append("\t");
         buffer.append(getTotalCount()).append("\t");
         
+        // Remove the last tab
         if (buffer.length() > 0) {
             buffer.setLength(buffer.length()-1);
         }
         
         out.write(buffer.toString());
+    }
+    
+    public String toString() {
+        StringWriter out = new StringWriter();
+        try {
+            write(out);
+        } catch (IOException err) {
+            err.printStackTrace(new PrintWriter(out));
+        }
+        return out.toString();
+    }
+
+    public Object inspect() {
+        return toString();
     }
 }
