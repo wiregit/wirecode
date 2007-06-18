@@ -23,6 +23,8 @@ public final class IPFilter extends HostileFilter {
     
     private volatile IPList badHosts;
     private volatile IPList goodHosts;
+    /** List contained in hostiles.txt if any.  Loaded on startup only */ 
+    private final IPList hostilesTXTHosts = new IPList();
     
     /** Constructs an IPFilter that automatically loads the content. */
     public IPFilter() {
@@ -32,6 +34,21 @@ public final class IPFilter extends HostileFilter {
     /** Constructs an IPFilter that can optionally load the content. */
     public IPFilter(boolean load) {
         if(load) {
+            
+            // Load data from hostiles.txt...
+            File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(hostiles));
+                String read = null;
+                while( (read = reader.readLine()) != null) {
+                    hostilesTXTHosts.add(read);
+                }
+            } catch(IOException ignored) {
+            } finally {
+                IOUtils.close(reader);
+            }
+            
             refreshHosts();
         } else {
             badHosts = new IPList();
@@ -61,20 +78,6 @@ public final class IPFilter extends HostileFilter {
             newBad.add(allHosts[i]);
         }
         
-        // Load data from hostiles.txt...
-        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(hostiles));
-            String read = null;
-            while( (read = reader.readLine()) != null) {
-                newBad.add(read);
-            }
-        } catch(IOException ignored) {
-        } finally {
-            IOUtils.close(reader);
-        }
-        
         // Load basic good...
         IPList newGood = new IPList();
         allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
@@ -82,7 +85,7 @@ public final class IPFilter extends HostileFilter {
             newGood.add(allHosts[i]);
         }
         
-        badHosts = newBad;
+        badHosts = new MultiIPList(newBad, hostilesTXTHosts);
         goodHosts = newGood;
     }
     
