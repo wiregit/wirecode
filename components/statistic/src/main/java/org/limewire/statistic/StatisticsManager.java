@@ -1,6 +1,6 @@
 package org.limewire.statistic;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.concurrent.SimpleTimer;
@@ -13,17 +13,17 @@ public final class StatisticsManager implements Runnable {
 	/**
 	 * <tt>List</tt> of all statistics classes.
 	 */
-	private volatile List<Statistic> BASIC_STATS = new LinkedList<Statistic>();
+	private final List<Statistic> BASIC_STATS = new ArrayList<Statistic>();
 
 	/**
 	 * <tt>List</tt> of all advanced statistics classes.
 	 */
-	private volatile List<Statistic> ADVANCED_STATS = new LinkedList<Statistic>();
+	private final List<Statistic> ADVANCED_STATS = new ArrayList<Statistic>();
 
 	/**
 	 * <tt>List</tt> of all advanced numberical statistics classes.
 	 */
-	private volatile List<Statistic> NUMERICAL_STATS = new LinkedList<Statistic>();
+	private final List<Statistic> NUMERICAL_STATS = new ArrayList<Statistic>();
 
 	/**
 	 * Boolean for whether or not advanced statistics should be 
