@@ -20,27 +20,51 @@
 package org.limewire.mojito.statistics;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 
-public final class StatisticsContext {
+/**
+ * Provides accessors for various {@link StatisticsGroup}s.
+ */
+public final class StatisticsContext implements Inspectable {
     
     private final Log log = LogFactory.getLog(getClass());
     
+    /**
+     * Statistics for FIND_NODE operations
+     */
     private final FindNodeGroup FIND_NODE = new FindNodeGroup();
     
+    /**
+     * Statistics for FIND_VALUE operations
+     */
     private final FindValueGroup FIND_VALUE = new FindValueGroup();
     
+    /**
+     * Statistics for PING operations
+     */
     private final PingGroup PING = new PingGroup();
     
+    /**
+     * Statistics for STORE operations
+     */
     private final StoreGroup STORE = new StoreGroup();
     
+    /**
+     * Statistics for STATS operations
+     */
     private final StatsGroup STATS = new StatsGroup();
     
+    /**
+     * Statistics for MessageDispatcher
+     */
     private final NetworkGroup network = new NetworkGroup();
     
     private final RouteTableGroup routeTable = new RouteTableGroup();
@@ -73,6 +97,9 @@ public final class StatisticsContext {
         return routeTable;
     }
     
+    /**
+     * Writes all Statistics to the given Writer
+     */
     public void write(Writer out) throws IOException {
         Class<?> clazz = getClass();
         for (Field field : clazz.getDeclaredFields()) {
@@ -95,5 +122,19 @@ public final class StatisticsContext {
                 continue;
             }
         }
+    }
+
+    public String toString() {
+        StringWriter out = new StringWriter();
+        try {
+            write(out);
+        } catch (IOException err) {
+            err.printStackTrace(new PrintWriter(out));
+        }
+        return out.toString();
+    }
+    
+    public Object inspect() {
+        return toString();
     }
 }

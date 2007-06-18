@@ -19,6 +19,11 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * Provides various statistics for FIND_NODE operations
+ */
 public class FindNodeGroup extends LookupGroup {
-
+    // This class has no fields but we need the 
+    // class name to produce some output (that is
+    // done through reflection).
 }

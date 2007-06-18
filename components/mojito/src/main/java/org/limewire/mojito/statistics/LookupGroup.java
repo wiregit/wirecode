@@ -19,17 +19,36 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * An abstract class that provides common statistics for
+ * lookups.
+ */
 public abstract class LookupGroup extends BasicGroup {
     
-    private final Statistic<Long> time = new Statistic<Long>();
+    /**
+     * Provides information how long lookups take
+     */
+    private final Statistic<Long> lookupTime = new Statistic<Long>();
 
-    private final Statistic<Integer> hops = new Statistic<Integer>();
+    /**
+     * Provides information how many hops lookups take
+     */
+    private final Statistic<Integer> hopCount = new Statistic<Integer>();
     
-    public Statistic<Long> getTime() {
-        return time;
+    /**
+     * Provides information how many lookups a Node has made
+     */
+    private final Statistic<Integer> lookupCount = new Statistic<Integer>();
+    
+    public Statistic<Long> getLookupTime() {
+        return lookupTime;
     }
     
-    public Statistic<Integer> getHops() {
-        return hops;
+    public Statistic<Integer> getHopCount() {
+        return hopCount;
+    }
+    
+    public Statistic<Integer> getLookupCount() {
+        return lookupCount;
     }
 }

@@ -33,6 +33,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 
+/**
+ * An abstract class to implement groups of {@link Statistic}s.
+ */
 public abstract class StatisticsGroup implements Inspectable {
     
     private final Log log = LogFactory.getLog(getClass());

@@ -19,11 +19,17 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * Provides various statistics for STATS operations
+ */
 public class StatsGroup extends BasicGroup {
     
-    private final Statistic<Long> badSignature = new Statistic<Long>();
+    /**
+     * Counts the number of requests with a bad signature
+     */
+    private final Statistic<Integer> badSignature = new Statistic<Integer>();
     
-    public Statistic<Long> getBadSignature() {
+    public Statistic<Integer> getBadSignature() {
         return badSignature;
     }
 }

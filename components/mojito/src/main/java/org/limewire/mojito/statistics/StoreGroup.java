@@ -19,20 +19,44 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * Provides various statistics for STORE operations
+ */
 public class StoreGroup extends BasicGroup {
     
+    /**
+     * Counts the number of STORE requests that have no security token
+     */
     private final Statistic<Long> noSecurityToken = new Statistic<Long>();
     
+    /**
+     * Counts the number of STORE requests that have a bad security token
+     */
     private final Statistic<Long> badSecurityToken = new Statistic<Long>();
     
+    /**
+     * Counts the number of STORE requests that were rejected
+     */
     private final Statistic<Long> storeRequestRejected = new Statistic<Long>();
     
+    /**
+     * Counts the number of store-forwards
+     */
     private final Statistic<Long> forwardToNearest = new Statistic<Long>();
     
+    /**
+     * Counts the number of times the furthest Node deleted a value
+     */
     private final Statistic<Long> removeFromFurthest = new Statistic<Long>();
     
+    /**
+     * Counts how many values or how many times this Node has published values
+     */
     private final Statistic<Long> publishedValues = new Statistic<Long>();
     
+    /**
+     * Counts how many values have expired on this Node
+     */
     private final Statistic<Long> expiredValues = new Statistic<Long>();
     
     public Statistic<Long> getNoSecurityToken() {

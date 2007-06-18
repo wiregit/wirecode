@@ -19,11 +19,17 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * Provides various statistics for FIND_VALUE operations
+ */
 public class FindValueGroup extends LookupGroup {
     
-    private final Statistic<Long> notFound = new Statistic<Long>();
+    /**
+     * Counts the number of times a value was not found
+     */
+    private final Statistic<Long> valueNotFound = new Statistic<Long>();
     
-    public Statistic<Long> getNotFound() {
-        return notFound;
+    public Statistic<Long> getValueNotFound() {
+        return valueNotFound;
     }
 }

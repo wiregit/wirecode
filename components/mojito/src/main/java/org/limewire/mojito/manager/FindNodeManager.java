@@ -99,6 +99,8 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
             super(context, handler);
             this.lookupId = lookupId;
             this.handler = handler;
+            
+            context.getStatisticsContext().getFindNodeGroup().getLookupCount().incrementByOne();
         }
 
         @Override
@@ -113,8 +115,8 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
         @Override
         protected void fireFutureResult(FindNodeResult value) {
             LookupGroup group = context.getStatisticsContext().getFindNodeGroup();
-            group.getTime().add(value.getTime());
-            group.getHops().add(value.getHop());
+            group.getLookupTime().add(value.getTime());
+            group.getHopCount().add(value.getHop());
             
             super.fireFutureResult(value);
         }

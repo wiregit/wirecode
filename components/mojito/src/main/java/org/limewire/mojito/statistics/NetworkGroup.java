@@ -25,16 +25,35 @@ import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.RequestMessage;
 
+/**
+ * Provides statistics for the MessageDispatcher
+ */
 public class NetworkGroup extends BasicGroup implements MessageDispatcherListener {
 
+    /**
+     * Counts the number of late responses
+     */
     private final Statistic<Long> lateResponse = new Statistic<Long>();
     
+    /**
+     * Counts the number of messages that were filtered
+     */
     private final Statistic<Long> filtered = new Statistic<Long>();
     
+    /**
+     * Counts the number of Receipts that timed out
+     */
     private final Statistic<Long> receiptTimeout = new Statistic<Long>();
     
+    /**
+     * Counts the number of Receipts that got evicted due to 
+     * space (memory) limitations.
+     */
     private final Statistic<Long> receiptEvicted = new Statistic<Long>();
     
+    /**
+     * 
+     */
     public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
         EventType type = evt.getEventType();
         if (type.equals(EventType.MESSAGE_SENT)) {

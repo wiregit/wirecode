@@ -19,6 +19,11 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * Provides various statistics for PING operations
+ */
 public class PingGroup extends BasicGroup {
-
+    // This class has no fields but we need the 
+    // class name to produce some output (that is
+    // done through reflection).
 }

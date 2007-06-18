@@ -19,14 +19,30 @@
 
 package org.limewire.mojito.statistics;
 
+/**
+ * An abstract class that provides common statistics for 
+ * all DHT operations.
+ */
 public abstract class BasicGroup extends StatisticsGroup {
     
+    /**
+     * Counts the number of sent requests (we sent a request to somebody)
+     */
     private final Statistic<Long> requestsSent = new Statistic<Long>();
     
+    /**
+     * Counts the number of received responses (we received a response from somebody)
+     */
     private final Statistic<Long> responsesReceived = new Statistic<Long>();
     
+    /**
+     * Counts the number of requests received (we received a request from somebody)
+     */
     private final Statistic<Long> requestsReceived = new Statistic<Long>();
     
+    /**
+     * Counts the number of responses sent (we sent a response to somebody)
+     */
     private final Statistic<Long> responsesSent = new Statistic<Long>();
     
     public Statistic<Long> getRequestsSent() {

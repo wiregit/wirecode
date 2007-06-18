@@ -52,6 +52,9 @@ public class Statistic<T extends Number & Comparable<T>>
         return sum/size();
     }
     
+    /**
+     * Writes the Statistics to the given Writer
+     */
     public synchronized void write(Writer out) throws IOException {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getCurrent()).append("\t");

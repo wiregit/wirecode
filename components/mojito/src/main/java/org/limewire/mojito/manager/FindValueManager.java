@@ -92,6 +92,8 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
             super(context, handler);
             this.entityKey = entityKey;
             this.handler = handler;
+            
+            context.getStatisticsContext().getFindValueGroup().getLookupCount().incrementByOne();
         }
 
         @Override
@@ -106,10 +108,10 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
         @Override
         protected void fireFutureResult(FindValueResult value) {
             FindValueGroup group = context.getStatisticsContext().getFindValueGroup();
-            group.getTime().add(value.getTime());
-            group.getHops().add(value.getHop());
+            group.getLookupTime().add(value.getTime());
+            group.getHopCount().add(value.getHop());
             if (value.getEntities().isEmpty() && value.getEntityKeys().isEmpty()) {
-                group.getNotFound().incrementByOne();
+                group.getValueNotFound().incrementByOne();
             }
             
             super.fireFutureResult(value);
