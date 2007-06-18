@@ -24,7 +24,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializable {
+/**
+ * A simple ring buffer that keeps track of the most recently added
+ * element, the min and max value as well as the number of times 
+ * {@link #add(Number)} and {@link #incrementByOne()} was invoked 
+ * respectively.
+ */
+class History<T extends Number & Comparable<T>> implements Iterable<T>, Serializable {
     
     private final int historySize;
     
@@ -50,6 +56,9 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         this.historySize = historySize;
     }
     
+    /**
+     * Adds the given sample to the History
+     */
     public synchronized void add(T sample) {
         if (sample == null) {
             throw new NullPointerException("Sample is null");
@@ -77,11 +86,20 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         incrementByOne();
     }
     
+    /**
+     * Increments the inner counter by one.
+     * 
+     * Note: You cannot mix individual {@link #add(Number)}
+     * and {@link #incrementByOne()} calls!
+     */
     public synchronized void incrementByOne() {
         totalCount++;
         modCount++;
     }
     
+    /**
+     * 
+     */
     public synchronized T get(int i) {
         if (size() < history.length) {
             if (i >= size()) {
@@ -93,14 +111,24 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         }
     }
     
+    /**
+     * Returns the min element or null if the History is empty
+     */
     public synchronized T getMin() {
         return min;
     }
     
+    /**
+     * Returns the max element of null if the History is empty
+     */
     public synchronized T getMax() {
         return max;
     }
     
+    /**
+     * Returns the most recently added element or null if the
+     * History is empty
+     */
     public synchronized T getCurrent() {
         if (isEmpty()) {
             return null;
@@ -118,18 +146,31 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         return (T)history[index];
     }
     
+    /**
+     * Returns the total number of times {@link #add(Number)} or 
+     * {@link #incrementByOne()} was called
+     */
     public synchronized long getTotalCount() {
         return totalCount;
     }
     
+    /**
+     * Returns true if the History is empty
+     */
     public synchronized boolean isEmpty() {
         return size() == 0;
     }
     
+    /**
+     * Returns the current size of the History
+     */
     public synchronized int size() {
         return size;
     }
     
+    /**
+     * Clears the history
+     */
     public synchronized void clear() {
         index = 0;
         totalCount = 0;
@@ -139,22 +180,26 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
         modCount++;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Iterable#iterator()
+     */
     public synchronized Iterator<T> iterator() {
         return new HistoryIterator();
     }
     
     private class HistoryIterator implements Iterator<T> {
 
-        private int expectedModCount = modCount;
+        private final int expectedModCount = modCount;
         
-        private int pos = 0;
+        private int position = 0;
         
         public boolean hasNext() {
-            return (pos < totalCount);
+            return (position < size());
         }
 
         public T next() {
-            if (pos >= totalCount) {
+            if (position >= size()) {
                 throw new NoSuchElementException();
             }
             
@@ -162,7 +207,7 @@ public class History<T extends Number & Comparable<T>> implements Iterable<T>, S
                 throw new ConcurrentModificationException();
             }
             
-            return get(pos++);
+            return get(position++);
         }
 
         public void remove() {
