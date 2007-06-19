@@ -505,20 +505,20 @@ public class RouterService {
             callback.componentLoading("MESSAGE_ROUTER");
     		messageRouter.initialize();
     		LOG.trace("STOPMessageRouter");
-    		
+
+            LOG.trace("START HTTPUploadManager");
+            uploadManager.start(httpUploadAcceptor, fileManager, callback); 
+            LOG.trace("STOP HTTPUploadManager");
+
+            LOG.trace("START HTTPUploadAcceptor");
+            httpUploadAcceptor.start(getConnectionDispatcher()); 
+            LOG.trace("STOP HTTPUploadAcceptor");
+
             LOG.trace("START Acceptor");
             callback.componentLoading("ACCEPTOR");
     		acceptor.start();
     		LOG.trace("STOP Acceptor");
     		
-    		LOG.trace("START HTTPUploadAcceptor");
-    		httpUploadAcceptor.start(getConnectionDispatcher()); 
-    		LOG.trace("STOP HTTPUploadAcceptor");
-
-    		LOG.trace("START HTTPUploadManager");
-    		uploadManager.start(httpUploadAcceptor, fileManager, callback); 
-    		LOG.trace("STOP HTTPUploadManager");
-
             LOG.trace("START loading StaticMessages");
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
