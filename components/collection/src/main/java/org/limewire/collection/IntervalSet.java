@@ -213,9 +213,12 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
 	 * @return whether this interval set contains fully the given interval
 	 */
 	public boolean contains(Interval i) {
-        for(Interval ours : this) {
+        for(int j = 0; j < intervals.size(); j++) {
+            Interval ours = intervals.get(j);
             if (ours.low <= i.low && ours.high >= i.high)
                 return true;
+            if (ours.low > i.high)
+                break;
         }
         return false;        
     }
