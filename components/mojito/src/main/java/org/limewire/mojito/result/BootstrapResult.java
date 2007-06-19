@@ -48,63 +48,41 @@ public class BootstrapResult implements Result {
     
     private final Contact node;
     
-    private final long phaseOneTime;
-    private final long phaseTwoTime;
+    private final long time;
     
     private final ResultType resultType;
     
-    public BootstrapResult(Contact node, 
-            long phaseOneTime, long phaseTwoTime, ResultType resultType) {
+    public BootstrapResult(Contact node, long time, ResultType resultType) {
         this.node = node;
-        this.phaseOneTime = phaseOneTime;
-        this.phaseTwoTime = phaseTwoTime;
+        this.time = time;
         this.resultType = resultType;
     }
     
+    /**
+     * Returns the initial bootstrap Node
+     */
     public Contact getContact() {
         return node;
     }
     
     /**
-     * Returns the EventType
+     * Returns the ResultType
      */
     public ResultType getResultType() {
         return resultType;
     }
     
     /**
-     * Returns the time how long phase one (find nearest Nodes) took
-     */
-    public long getPhaseOneTime() {
-        return phaseOneTime;
-    }
-
-    /**
-     * Returns the time how long phase two (find random Nodes) took
-     */
-    public long getPhaseTwoTime() {
-        return phaseTwoTime;
-    }
-
-    /**
      * Returns the total bootstrapping time
      */
-    public long getTotalTime() {
-        if (phaseOneTime >= 0L) {
-            if (phaseTwoTime >= 0L) {
-                return phaseOneTime + phaseTwoTime;
-            }
-            return phaseOneTime;
-        }
-        return -1L;
+    public long getTime() {
+        return time;
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ResultType: ").append(resultType).append("\n");
-        buffer.append("Phase #1: ").append(getPhaseOneTime()).append("ms\n");
-        buffer.append("Phase #2: ").append(getPhaseTwoTime()).append("ms\n");
-        buffer.append("Total: ").append(getTotalTime()).append("ms\n");
+        buffer.append("Time: ").append(getTime()).append("ms\n");
         buffer.append("Contact: ").append(getContact()).append("\n");
         
         return buffer.toString();

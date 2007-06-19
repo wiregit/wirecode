@@ -200,9 +200,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private Set<? extends SocketAddress> dst;
         
-        private long startPhaseOne;
-        
-        private long startPhaseTwo;
+        private long startTime = -1L;
         
         private final long waitOnLock;
         
@@ -232,6 +230,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
 
             this.exchanger = exchanger;
 
+            startTime = System.currentTimeMillis();
             if (node == null) {
                 findInitialContact();
             } else {
@@ -292,7 +291,6 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 }
             };
     
-            startPhaseOne = System.currentTimeMillis();
             FindNodeResponseHandler handler = new FindNodeResponseHandler(
                     context, node, context.getLocalNodeID());
             start(handler, c);
@@ -382,7 +380,6 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
          * i.e. routing tables that have more than k nodes.
          */
         private void refreshAllBuckets() {
-            startPhaseTwo = System.currentTimeMillis();
             routeTableFailureCount = 0;
             foundNewContacts = false;
             
@@ -535,11 +532,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 type = ResultType.BOOTSTRAP_SUCCEEDED;
             }
             
-            long now = System.currentTimeMillis();
-            long phaseOne = (startPhaseTwo - startPhaseOne);
-            long phaseTwo = (now - startPhaseTwo);
+            long time = System.currentTimeMillis() - startTime;
             
-            exchanger.setValue(new BootstrapResult(node, phaseOne, phaseTwo, type));
+            exchanger.setValue(new BootstrapResult(node, time, type));
         }
         
         private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {

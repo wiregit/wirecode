@@ -160,11 +160,11 @@ public class Main {
                 //BootstrapResult result = MojitoUtils.bootstrap(dht, bootstrapHost).get();
                 BootstrapResult result = dht.bootstrap(bootstrapHost).get();
                 
-                time += result.getTotalTime();
+                time += result.getTime();
                 
                 if (result.getResultType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                     System.out.println("Node #" + i + " finished bootstrapping from " 
-                            + bootstrapHost + " in " + result.getTotalTime() + "ms");
+                            + bootstrapHost + " in " + result.getTime() + "ms");
                 } else {
                     System.out.println("Node #" + i + " failed to bootstrap from " 
                             + bootstrapHost + "\n" + result);
@@ -178,11 +178,11 @@ public class Main {
         if (dhts.size() > 1) {
             BootstrapResult result = MojitoUtils.bootstrap(
                     dhts.get(0), dhts.get(1).getContactAddress()).get();
-            time += result.getTotalTime();
+            time += result.getTime();
             
             if (result.getResultType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                 System.out.println("Node #0 finished bootstrapping from " 
-                        + dhts.get(1).getContactAddress() + " in " + result.getTotalTime() + "ms");
+                        + dhts.get(1).getContactAddress() + " in " + result.getTime() + "ms");
             } else {
                 System.out.println("Node #0 failed to bootstrap from " 
                         + dhts.get(1).getContactAddress() + "\n" + result);
