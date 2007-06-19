@@ -39,6 +39,8 @@ public class AltLocModel implements StorableModel {
     
     public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
+            // Clear the mappings as they're no longer needed
+            values.clear();
             return Collections.emptySet();
         }
         
