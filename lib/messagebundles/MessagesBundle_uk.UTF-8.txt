@@ -909,6 +909,11 @@ DOWNLOAD_POPUP_MENU_CLEAR=Прибрати Усі Неактивні Заван�
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
 DOWNLOAD_EXPLORE_BUTTON_TIP=Відкрити Теку з цим Файлом
 
+#### DOWNLOAD_SHOW_BUTTON_LABEL=Show in Library
+#? DOWNLOAD_SHOW_BUTTON_LABEL=
+#### DOWNLOAD_SHOW_BUTTON_TIP=Show Download in Library
+#? DOWNLOAD_SHOW_BUTTON_TIP=
+
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Відкрити
 #### LIBRARY_LAUNCH_BUTTON_TIP=Launch Selected Files
