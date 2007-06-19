@@ -137,7 +137,7 @@ public class BrowseHostHandler {
         //   a. if so, just send a Push out.
         //   b. if not, try direct connect.  If it doesn't work, send a push.
         
-        if (!needsPush(host, port)) {
+        if (canConnectDirectly(host, port) || isLocalBrowse(host)) {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
@@ -374,13 +374,22 @@ public class BrowseHostHandler {
 	 * because it is a private address or was unreachable in the past. Returns
 	 * false, otherwise or if <tt>host</tt> is the local address. 
 	 */
-    private static boolean needsPush(String host, int port) {
-        return (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() 
-        		&& NetworkUtils.isPrivateAddress(host)
-        		&& !NetworkUtils.isMe(host, port));
+    private boolean canConnectDirectly(String host, int port) {
+        return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() 
+        		|| !NetworkUtils.isPrivateAddress(host)
+        		|| NetworkUtils.isMe(host, port);
     }
 
-
+    /**
+     * Returns true, if the user attempts to browse in the local network by
+     * entering a host and port but not providing a <code>_serventID</code>.
+     * This will make a push impossible so a direct connect is attempted
+     * instead.
+     */
+    private boolean isLocalBrowse(String host) {
+        return _serventID == null && NetworkUtils.isPrivateAddress(host);
+    }
+    
 	/**
 	 * a helper method to compare two strings 
 	 * ignoring their case.
