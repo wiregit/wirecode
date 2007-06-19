@@ -54,7 +54,9 @@ public class LimeCoreGlueTest extends BaseTestCase {
         
         removeClasses(nextLoaded, expected);
         
-        assertEquals("loaded more classes than expected" +
+        ArrayList<Class> extraClasses = new ArrayList<Class>(nextLoaded);
+        extraClasses.removeAll(loaded);
+        assertEquals("loaded more classes than expected " + extraClasses +   
                      " -- make sure nothing is using CommonUtils.getUserSettingsDir too early!",
                      loaded, nextLoaded);
     }
@@ -79,17 +81,23 @@ public class LimeCoreGlueTest extends BaseTestCase {
     }
     
     private void removeClasses(List<Class> classes, List<String> expected) {
-        for(Iterator<Class> i = classes.iterator(); i.hasNext(); ) {
-            Class next = i.next();
-            if(expected.contains(next.getName())) {
-                i.remove();
-                expected.remove(next.getName());
+        List<String> found = new ArrayList<String>();
+        for(Iterator<Class> it = classes.iterator(); it.hasNext(); ) {
+            Class next = it.next();
+            String name = next.getName();
+            // remove artificial class name postfix added by Clover 
+            int i = name.indexOf("$__CLOVER_");
+            if (i != -1) {
+                name = name.substring(0, i);
             }
-            
-            if(expected.isEmpty())
-                break;
+            if (expected.contains(name)) {
+                it.remove();
+                found.add(name);
+            }
         }
-        if(!expected.isEmpty())
-            fail("didn't find all expected classes: " + expected);
+        
+        expected.removeAll(found);
+        
+        assertTrue("didn't find all expected classes: " + expected, expected.isEmpty());
     }
 }
