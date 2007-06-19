@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.SortedMap;
 
 /**
- * Defines the interface for a prefix tree, an ordered tree data structure used
- * to store an associated array where the keys are strings. For more 
- * information, see <a href= "http://en.wikipedia.org/wiki/Trie">Tries</a>.
+ * Defines the interface for a prefix tree, an ordered tree data structure. For 
+ * more information, see <a href= "http://en.wikipedia.org/wiki/Trie">Tries</a>.
  * 
  * @author Roger Kapsi
  * @author Sam Berlin
@@ -18,9 +17,9 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     /**
      * Returns a view of this Trie of all elements that are
      * prefixed by the given key.
-     * 
+     * <p>
      * In a fixed-keysize Trie, this is essentially a 'get' operation.
-     * 
+     * <p>
      * For example, if the trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'Lime' would return 'Lime', 'LimeRadio', and 'LimeWire'.
@@ -31,10 +30,10 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     /**
      * Returns a view of this Trie of all elements that are
      * prefixed by the length of the key.
-     * 
+     * <p>
      * Fixed-keysize Tries will not support this operation
      * (because all keys will be the same length).
-     * 
+     * <p>
      * For example, if the trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'LimePlastics' with a length of 4 would
@@ -46,10 +45,10 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     /**
      * Returns a view of this Trie of all elements that are prefixed
      * by the key, starting at the given offset and for the given length.
-     * 
+     * <p>
      * Fixed-keysize Tries will not support this operation
      * (because all keys are the same length).
-     *
+     * <p>
      * For example, if the trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'The Lime Plastics' with an offset of 4 and a 
@@ -61,7 +60,7 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     /**
      * Returns a view of this Trie of all elements that are prefixed
      * by the number of bits in the given Key.
-     * 
+     * <p>
      * Fixed-keysize Tries can support this operation as a way to do
      * lookups of partial keys.  That is, if the Trie is storing IP
      * addresses, you can lookup all addresses that begin with
@@ -74,10 +73,11 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     /**
      * Returns the value for the entry whose key is closest in a bitwise
      * XOR metric to the given key.  This is NOT lexicographic closeness.
-     * For example, given the keys:
-     *  D = 1000100
-     *  H = 1001000
-     *  L = 1001100
+     * For example, given the keys:<br>
+     *  D = 1000100 <br>
+     *  H = 1001000 <br> 
+     *  L = 1001100 <br>
+     * <p>
      * If the trie contained 'H' and 'L', a lookup of 'D' would return 'L',
      * because the XOR between D & L is closer than the XOR between D & H. 
      *  
@@ -89,12 +89,14 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * value is closest in an XOR metric to the given key.  After the closest
      * entry is found, the trie will call select on that entry and continue
      * calling select for each entry (traversing in order of XOR closeness,
-     * NOT lexicographically) until the cursor returns Cursor.SelectStatus.EXIT.
-     * The cursor can return Cursor.SelectStatus.CONTINUE to continue traversing.
-     * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
+     * NOT lexicographically) until the cursor returns 
+     * <code>Cursor.SelectStatus.EXIT</code>.<br>
+     * The cursor can return <code>Cursor.SelectStatus.CONTINUE</code> to 
+     * continue traversing.<br>
+     * <code>Cursor.SelectStatus.REMOVE_AND_EXIT</code> is used to remove the current element
      * and stop traversing.
-     * 
-     * The Cursor.SelectStatus.REMOVE operation is not supported.
+     * <p>
+     * Note: The {@link Cursor.SelectStatus#REMOVE} operation is not supported.
      * 
      * @return The entry the cursor returned EXIT on, or null if it continued
      *         till the end.
@@ -102,13 +104,13 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);
     
     /**
-     * Traverses the trie in lexicographical order. 
-     * Cursor.select will be called
-     * on each entry. The traversal will stop when the cursor returns
-     * Cursor.SelectStatus.EXIT. Cursor.SelectStatus.CONTINUE is used to 
-     * continue traversing. Cursor.SelectStatus.REMOVE is used to remove
-     * the element that was selected and continue traversing.
-     * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
+     * Traverses the trie in lexicographical order. <code>Cursor.select</code> 
+     * will be called on each entry.<p>
+     * The traversal will stop when the cursor returns <code>Cursor.SelectStatus.EXIT</code>.<br>
+     * <code>Cursor.SelectStatus.CONTINUE</code> is used to continue traversing.<br>
+     * <code>Cursor.SelectStatus.REMOVE</code> is used to remove the element that was 
+     * selected and continue traversing.<br>
+     * <code>Cursor.SelectStatus.REMOVE_AND_EXIT</code> is used to remove the current element
      * and stop traversing.
      *   
      * @return The entry the cursor returned EXIT on, or null if it continued
@@ -117,20 +119,23 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor);
     
     /**
-     * An interface that allows operations to be performed given entries of the 
-     * Trie as it traverses through the entries. The <code>Cursor</code> used 
-     * may perform an operation while traversing.
+     * An interface used by a {@link Trie}. A {@link Trie} selects items by 
+     * closeness and passes the items to the <code>Cursor</code>. You can then 
+     * decide what to do with the key-value pair and the return value 
+     * from {@link #select(java.util.Map.Entry)} tells the <code>Trie</code> 
+     * what to do next.
      * <p>
-     * <code>Cursor</code> returns status of the current trie 
-     * entry during an iteration of entries. The <code>Trie</code> entry status 
-     * might be:
+     * <code>Cursor</code> returns status/selection status might be:
      * <table cellspace="5">
      * <tr><td><b>Return Value</b></td><td><b>Status</b></td></tr>
      * <tr><td>EXIT</td><td>Finish the Trie operation</td></tr>
-     * <tr><td>CONTINUE</td><td>Looks at the next element in the traversal</td></tr>
-     * <tr><td>REMOVE</td><td>Remove the entry and continue iterating</td></tr>
+     * <tr><td>CONTINUE</td><td>Look at the next element in the traversal</td></tr>
      * <tr><td>REMOVE_AND_EXIT</td><td>Remove the entry and stop iterating</td></tr>
+     * <tr><td>REMOVE</td><td>Remove the entry and continue iterating</td></tr>
      * </table>
+
+     * Note: {@link Trie#select(Object, org.limewire.collection.Trie.Cursor)} does
+     * not support <code>REMOVE</code>.
      *
      * @param <K> Key Type
      * @param <V> Key Value
@@ -139,10 +144,11 @@ public interface Trie<K, V> extends SortedMap<K, V> {
         
         /**
          * Notification that the trie is currently looking at the given entry.
-         * Return EXIT to finish the trie operation, CONTINUE to look at the
-         * next entry, REMOVE to remove the entry and continue iterating, or
-         * REMOVE_AND_EXIT to remove the entry and stop iterating. 
-         * Not all operations support REMOVE.
+         * Return <code>EXIT</code> to finish the trie operation, 
+         * <code>CONTINUE</code> to look at the next entry, <code>REMOVE</code>
+         * to remove the entry and continue iterating, or
+         * <code>REMOVE_AND_EXIT</code> to remove the entry and stop iterating. 
+         * Not all operations support <code>REMOVE</code>.
          * 
          */
         public SelectStatus select(Map.Entry<? extends K, ? extends V> entry);

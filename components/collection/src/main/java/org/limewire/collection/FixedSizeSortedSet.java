@@ -26,12 +26,12 @@ import org.limewire.service.ErrorService;
  * different from <code>hashCode</code> and <code>equals</code> (which is 
  * explicitly against the strong suggestion of <code>compareTo</code> and 
  * <code>equals</code>, but is necessary for <code>FixedSizeSortedSet</code> to
- * function). In other words,
+ * function).
  * <p>
  * Note: <code>FixedSizeSortedSet</code> can use a class that has a natural
  * ordering that is inconsistent with equals.
  * <p>
- * This class is not thread-safe.
+ * <code>FixedSizeSortedSet<code> is not thread-safe.
  <pre>
     //Consistent with equals
     public class MyPersonName implements Comparable {
@@ -113,7 +113,7 @@ import org.limewire.service.ErrorService;
         age.add(new MyPersonAge("Abby", 23));
         
         if(!age.add(new MyPersonAge("Abby", 27)))
-            System.out.println("Add failed; 23 is replaced with 27");
+            System.out.println("Abby already contained in the collection; 23 is replaced with 27");
         age.add(new MyPersonAge("Chris", 20));
         age.add(new MyPersonAge("Bob", 28));
         age.add(new MyPersonAge("Dan", 25));
@@ -124,7 +124,7 @@ import org.limewire.service.ErrorService;
         for(MyPersonAge o : age)
             System.out.println(o.toString());   
 
-        System.out.println("****************************");
+        System.out.println("");
 
         //compareTo by Name
         System.out.println("When max. size met, evict people by alphabetical name.");
@@ -132,7 +132,7 @@ import org.limewire.service.ErrorService;
         name.add(new MyPersonName("Abby", 23));
         
         if(!name.add(new MyPersonName("Abby", 27)))
-            System.out.println("Add failed; 23 is replaced with 27");
+            System.out.println("Abby already contained in the collection; 23 is replaced with 27");
         name.add(new MyPersonName("Chris", 20));
         name.add(new MyPersonName("Bob", 28));
         name.add(new MyPersonName("Dan", 25));
@@ -145,21 +145,20 @@ import org.limewire.service.ErrorService;
     }
     Output:
         When max. size met, evict people by oldest person.
-        Add failed; 23 is replaced with 27
+        Abby already contained in the collection; 23 is replaced with 27
         Chris's age: 20
         Fred's age: 22
         Eric's age: 24
         Dan's age: 25
         Abby's age: 27
-        ****************************
+        
         When max. size met, evict people by alphabetical name.
-        Add failed; 23 is replaced with 27
+        Abby already contained in the collection; 23 is replaced with 27
         Abby's age: 27
         Bob's age: 28
         Chris's age: 20
         Dan's age: 25
         Fred's age: 22
-
  </pre>
 
  */ 

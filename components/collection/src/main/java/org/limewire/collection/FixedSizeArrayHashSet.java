@@ -26,7 +26,7 @@ import java.util.RandomAccess;
     System.out.println(fsah);
     
     if(!fsah.add("Chris"))
-        System.out.println("Tried to add Chris again, but it failed (though Chris was put to the first item).");
+        System.out.println("Tried to add Chris again, but it already exists in the collection (though Chris was put to the first item).");
     System.out.println(fsah);
 
     System.out.println("Index access: " + fsah.get(0));
@@ -35,7 +35,7 @@ import java.util.RandomAccess;
     System.out.println(fsah);
     Output:
         [Fred, Eric, Dan, Chris]
-        Tried to add Chris again, but it failed (though Chris was put to the first item).
+        Tried to add Chris again, but it already exists in the collection (though Chris was put to the first item).
         [Chris, Fred, Eric, Dan]
         Index access: Chris
         [Fred, Eric, Dan]

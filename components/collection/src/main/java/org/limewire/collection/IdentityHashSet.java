@@ -15,7 +15,7 @@ import java.util.Set;
     ihs.add(s);
 
     if(!ihs.add(s))
-        System.out.println("Unable to add ("+ s + ") the same object twice; contents: " + ihs);
+        System.out.println("Already contained ("+ s + "); contents: " + ihs);
     
     if(ihs.add("Abby"))
         System.out.println("Was able to add a new String(\"Abby\") since it's a separate object.");
@@ -28,10 +28,10 @@ import java.util.Set;
     System.out.println("Size is: " + ihs.size() + " contents: " + ihs); 
 
     Output:
-        Unable to add (Abby) the same object twice; contents: [Abby]
+        Already contained (Abby); contents: [Abby]
         Was able to add a new String("Abby") since it's a separate object.
         Contents: [Abby, Abby]
-        Size is: 5 contents: [Dan, Bob, Abby, Abby, Chris]
+        Size is: 5 contents: [Dan, Chris, Abby, Abby, Bob]
 </pre>
  * 
  */

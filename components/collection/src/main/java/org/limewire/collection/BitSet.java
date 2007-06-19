@@ -14,13 +14,14 @@ import java.io.IOException;
 
 /**
  * Contains a vector of bits that grows as needed. Each component of the bit 
- * set has a <code>boolean</code> value. The bits of a <code>BitSet</code> are 
- * indexed by nonnegative integers. Individual indexed bits can be examined, 
- * set, or cleared. One <code>BitSet</code> may be used to modify the contents 
- * of another BitSet through logical AND, logical inclusive OR, and logical 
- * exclusive OR operations.
+ * set has a <code>boolean</code> value; by default, all bits in the set 
+ * initially have the value false. The bits of a <code>BitSet</code> are 
+ * indexed by nonnegative integers. 
  * <p>
- * By default, all bits in the set initially have the value false. 
+ * Individual indexed bits can be examined, set or cleared. Also, one 
+ * <code>BitSet</code> may be used to modify the contents 
+ * of another <code>BitSet</code> through logical AND, logical inclusive OR, 
+ * and logical exclusive OR operations.
  * <p>
  * Every bit set has a current size, which is the number of bits of space 
  * currently in use by the bit set. Note that the size is related to the 

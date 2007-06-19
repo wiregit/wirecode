@@ -20,7 +20,7 @@ import java.util.Set;
     ffhs.add("Abby");
     System.out.println(ffhs);
     if(!ffhs.add("Abby"))
-        System.out.println("Unable to add the same object twice: " + ffhs);
+        System.out.println("The set already contained that item; Set contents: " + ffhs);
 
     ffhs.add("Bob");
     ffhs.add("Bob");
@@ -33,7 +33,7 @@ import java.util.Set;
 
     Output:
         [Abby]
-        Unable to add the same object twice: [Abby]
+        The set already contained that item; Set contents: [Abby]
         [Abby, Bob, Chris, Dan]
         [Bob, Chris, Dan, Eric]
 

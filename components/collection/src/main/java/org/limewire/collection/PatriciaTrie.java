@@ -1191,7 +1191,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * <code>KeyAnalyzer</code> defines:<br>
      * <table cellspace="5">
      * <tr><td>NULL_BIT_KEY</td><td>When key's bits are all zero</td></tr>
-     * <tr><td> EQUAL_BIT_KEY </td><td>When key's are the same </td></tr>
+     * <tr><td> EQUAL_BIT_KEY </td><td>When keys are the same </td></tr>
      * </table>
      */
     public static interface KeyAnalyzer<K> extends Comparator<K>, Serializable {

@@ -10,8 +10,8 @@ package org.limewire.collection;
  * Also, <code>BitField</code> has a <a href="http://en.wikipedia.org/wiki/Cardinality">
  * cardinality</a> method for working with sets.
  * <p>
- * <code>BitField</code> is subclassed by {@link BitFieldSet}, {@link AndView}, 
- * {@link OrView}, {@link XorView} and {@link NotView}. The subclasses perform 
+ * {@link BitFieldSet}, {@link AndView}, {@link OrView}, {@link XorView} and 
+ * {@link NotView} implement <code>BitField</code>. The subclasses perform 
  * various operations on the bits. 
  * <p>
 <pre>
