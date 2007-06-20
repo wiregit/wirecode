@@ -1,10 +1,11 @@
 package com.limegroup.gnutella;
 
+import org.limewire.http.entity.FilePieceReaderTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.uploader.AltLocUploadTest;
-import com.limegroup.gnutella.uploader.FilePieceReaderTest;
 import com.limegroup.gnutella.uploader.FileRequestHandlerTest;
 import com.limegroup.gnutella.uploader.HTTPUploaderTest;
 import com.limegroup.gnutella.uploader.PushUploadTest;

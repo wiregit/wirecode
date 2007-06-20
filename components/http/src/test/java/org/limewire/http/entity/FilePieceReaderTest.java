@@ -1,16 +1,16 @@
-package com.limegroup.gnutella.uploader;
+package org.limewire.http.entity;
 
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Random;
 
 import junit.framework.Test;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.LimeTestUtils;
 
 public class FilePieceReaderTest extends BaseTestCase {
 
@@ -184,9 +184,10 @@ public class FilePieceReaderTest extends BaseTestCase {
 
             }
 
-            public Runner(MockByteBufferCache cache, IOException exception) throws IOException {
+            public Runner(MockByteBufferCache cache, IOException exception)
+                    throws IOException {
                 this(cache);
-                
+
                 this.exception = exception;
             }
 
@@ -243,7 +244,7 @@ public class FilePieceReaderTest extends BaseTestCase {
         t3.join(5000);
         t4.join(5000);
         t5.join(5000);
-        
+
         assertFalse(t1.isAlive());
         assertFalse(t2.isAlive());
         assertFalse(t3.isAlive());
@@ -291,7 +292,21 @@ public class FilePieceReaderTest extends BaseTestCase {
     private void createFile(int size) throws IOException {
         file = File.createTempFile("limewire", "");
         file.deleteOnExit();
-        data = LimeTestUtils.writeRandomData(file, size);
+        data = writeRandomData(file, size);
+    }
+
+    public static byte[] writeRandomData(File file, int size)
+            throws IOException {
+        byte[] data = new byte[size];
+        Random r = new Random();
+        r.nextBytes(data);
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        try {
+            raf.write(data);
+        } finally {
+            raf.close();
+        }
+        return data;
     }
 
     private class MyPieceListener implements PieceListener {
