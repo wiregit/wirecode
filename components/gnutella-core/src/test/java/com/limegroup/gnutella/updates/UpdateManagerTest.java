@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.updates;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 
 import junit.framework.Test;
@@ -140,20 +139,6 @@ public class UpdateManagerTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
-        /*
-        // Sleep for 3.0 seconds, regardless of exceptions
-        long stopTime = 3*1000 + System.currentTimeMillis();
-        long sleepLength = 3*1000;
-        while (sleepLength > 0) {
-            try {
-                Thread.sleep(sleepLength);
-            } catch (Exception ignoreMe){
-                //Minimize busy waiting in the face of exceptions. 
-                Thread.yield();
-            }
-            sleepLength = stopTime - System.currentTimeMillis();
-        }
-        */
         // Sleep for 3.0 seconds, unless interrupted
         Thread.sleep(3*1000);
         setSettings();
@@ -209,21 +194,11 @@ public class UpdateManagerTest extends LimeTestCase {
     public void testOldVersionNotAcceptedFromNetwork() throws Exception {
         updateVersion = MIDDLE;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6666,"3.6.3",OLD); 
-        } catch(IOException iox) {
-            fail("could not set up test");
-        }
+        TestConnection conn = new TestConnection(6666,"3.6.3",OLD);
         conn.start();
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                                                    "3.2.2",man.getVersion());
+        assertEquals("Update manager accepted lower version", "3.2.2",man.getVersion());
         conn.killThread();
     }
 
@@ -231,22 +206,12 @@ public class UpdateManagerTest extends LimeTestCase {
     public void testIOXLeavesVersionIntact() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6667,"3.6.3",NEW); 
-        } catch(IOException iox) {
-            fail("could not set up test");
-        }
+        TestConnection conn = new TestConnection(6667,"3.6.3",NEW);
         conn.setSendUpdateData(false);
         conn.start();
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                                                    "2.9.3",man.getVersion());
+        assertEquals("Update manager accepted lower version", "2.9.3",man.getVersion());
         conn.killThread();
     }
 
@@ -254,109 +219,59 @@ public class UpdateManagerTest extends LimeTestCase {
     public void testBadSignatureFailsOnNetwork() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6668,"3.6.3", DEF_SIGNATURE);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6668,"3.6.3", DEF_SIGNATURE);
         conn.start();
-       try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                                                    "2.9.3", man.getVersion());
+        assertEquals("Update manager accepted lower version", "2.9.3", man.getVersion());
         conn.killThread();
     }
 
     public void testEqualVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6669, "2.9.3", NEW);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6669, "2.9.3", NEW);
         conn.setTestUpdateNotRequested(true);
         conn.start();
-       try {
-            Thread.sleep(3000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(3000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                             "2.9.3", man.getVersion());
-        //conn.killThread();
+        assertEquals("Update manager accepted lower version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
     public void testLowerMajorVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6670, "2.3.3", NEW);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6670, "2.3.3", NEW);
         conn.setTestUpdateNotRequested(true);
         conn.start();
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                             "2.9.3", man.getVersion());
-        //conn.killThread();
+        assertEquals("Update manager accepted lower version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
     public void testDifferentMinorVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6671, "2.9.5", NEW);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6671, "2.9.5", NEW);
         conn.setTestUpdateNotRequested(true);
         conn.start();
-       try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update manager accepted lower version",
-                             "2.9.3", man.getVersion());
-        //conn.killThread();
+        assertEquals("Update manager accepted lower version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
    public void testNewerVersionAcceptedOnNetwork() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try { //header says same as me, but my version file is older, 
-            conn = new TestConnection(6672, "3.6.3", NEW);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
-        conn.setTestUpdateNotRequested(false);
+        TestConnection conn = new TestConnection(6672, "3.6.3", NEW);
         conn.start();
-        try {
-            Thread.sleep(2000);
-        } catch(InterruptedException ix) {
-            fail("unable to set up test");
-        }
+        Thread.sleep(2000);
         UpdateManager man = UpdateManager.instance();
-       assertEquals("Update should have got new version",
-                                                    "3.6.3", man.getVersion());
+        assertEquals("Update should have got new version", "3.6.3", man.getVersion());
+        conn.killThread();
     }
 
 
@@ -368,19 +283,12 @@ public class UpdateManagerTest extends LimeTestCase {
     public void testNewerVersionFileWithSameVersionRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try { //header says same as me, but my version file is older, 
-            conn = new TestConnection(6673, "3.2.2", NEW);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6673, "3.2.2", NEW);
         conn.start();
-        try {
-            Thread.sleep(300);
-        } catch(Exception e) {}
+        Thread.sleep(300);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update should have got new version",
-                                                    "3.6.3", man.getVersion());
+        assertEquals("Update should have got new version", "3.6.3", man.getVersion());
+        conn.killThread();
     }
 
 
@@ -389,77 +297,49 @@ public class UpdateManagerTest extends LimeTestCase {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try { //header says same as me, but my version file is older, 
-            conn = new TestConnection(6674, "3.6.3", DEF_MESSAGE);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6674, "3.6.3", DEF_MESSAGE);
         conn.start();
-        try {
-            Thread.sleep(300);
-        } catch(Exception e) {}
+        Thread.sleep(300);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update should have got new version",
-                                                    "2.9.3", man.getVersion());
+        assertEquals("Update should have got new version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
     public void testBadXMLFailsOnNetwork() throws Exception {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try { //header says same as me, but my version file is older, 
-            conn = new TestConnection(6675, "3.6.3", BAD_XML);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6675, "3.6.3", BAD_XML);
         conn.start();
-        try {
-            Thread.sleep(300);
-        } catch(Exception e) {}
+        Thread.sleep(300);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update should have got new version",
-                                                    "2.9.3", man.getVersion());
+        assertEquals("Update should have got new version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
     public void testGarbageDataFailsOnNetwork() throws Exception {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
-        TestConnection conn = null;
-        try { //header says same as me, but my version file is older, 
-            conn = new TestConnection(6676, "3.6.3", RANDOM_BYTES);
-        } catch(IOException iox) {
-            fail("could not set test up");
-        }
+        TestConnection conn = new TestConnection(6676, "3.6.3", RANDOM_BYTES);
         conn.start();
-        try {
-            Thread.sleep(300);
-        } catch(Exception e) {}
+        Thread.sleep(300);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Update should have got new version",
-                                                    "2.9.3", man.getVersion());
+        assertEquals("Update should have got new version", "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
    public void testUpdateNotRequesteFromSpecial() throws Exception {
    		removeConnections();
        updateVersion = OLD;
        changeUpdateFile();
-       TestConnection conn = null;
-       try {
-           conn = new TestConnection(6681, "@version@", NEW);
-       } catch (IOException e) {
-           fail("could not setup test");
-       }
+       TestConnection conn = new TestConnection(6681, "@version@", NEW);
        conn.setTestUpdateNotRequested(true);
        conn.start();
-       try {
-           Thread.sleep(300);
-       } catch (InterruptedException ix) { }
+       Thread.sleep(300);
        UpdateManager man = UpdateManager.instance();
-       assertEquals("should not have requested new file",
-                                              "2.9.3", man.getVersion());
+       assertEquals("should not have requested new file", "2.9.3", man.getVersion());
+       conn.killThread();
    }
     
     /**

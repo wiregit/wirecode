@@ -10,7 +10,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.limewire.service.ErrorService;
+import junit.framework.AssertionFailedError;
+
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -27,7 +30,7 @@ public class TestConnection {
     private Socket _socket;
     private int _port;
     
-    private byte[] _updateData; 
+    private byte[] _updateData;
     
     
     // used to determine if the file should actually be sent.
@@ -45,50 +48,33 @@ public class TestConnection {
         _sendUpdateData = true;//we want to send in the default case
     }
     
-    public void start() {
+    public void start() throws IOException, InterruptedException {
         //1. set up an incoming socket
-        try {
-            _server = new ServerSocket();
-            //_server.setReuseAddress(true);
-            _server.bind(new InetSocketAddress(_port));
-        } catch (IOException iox) {
-            ErrorService.error(iox);
-        }
+        _server = new ServerSocket();
+        _server.setReuseAddress(true);
+        _server.bind(new InetSocketAddress(_port));
         
-        Thread t = new Thread() {
+        Thread t = new ManagedThread() {
             public void run() {
                 try {
                     loop();
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                } catch(IOException iox) {
+                    throw new RuntimeException(iox);
                 }
             }
         };
         t.setDaemon(true);
         t.start();
 
-        try {
-            Thread.sleep(500);//give the server socket a little time to start
-        } catch(InterruptedException e) {
-            ErrorService.error(e);
-        }
+        Thread.sleep(500);//give the server socket a little time to start
         //2. Make an out going connection to the machine
-        try {
-            _socket = new Socket("localhost", UpdateManagerTest.PORT);
-            doHandshake();
-        } catch (IOException iox) {
-            ErrorService.error(iox);
-        }
-        
+        _socket = new Socket("localhost", UpdateManagerTest.PORT);
+        doHandshake();
     }
     
     void killThread() {
-        try {
-            if(_server != null)
-                _server.close();
-            if(_socket != null)
-                _socket.close();
-        } catch(IOException iox) {}
+        IOUtils.close(_server);
+        IOUtils.close(_socket);
     }
     
     private void doHandshake() { //throws IOException {
@@ -101,8 +87,7 @@ public class TestConnection {
         //Phase 1 of the handshake
         os.write("GNUTELLA CONNECT/0.6\r\n".getBytes());
         os.write("User-Agent: LimeWire/3.4.4\r\n".getBytes());
-        os.write(
-            ("Listen-IP:127.0.0.1:"+_port+"\r\n").getBytes());
+        os.write(("Listen-IP:127.0.0.1:"+_port+"\r\n").getBytes());
         os.write("X-Query-Routing: 0.1\r\n".getBytes());
         os.write("X-Max-TTL: 3\r\n".getBytes());
         os.write("X-Dynamic-Querying: 0.1\r\n".getBytes());
@@ -138,7 +123,15 @@ public class TestConnection {
     //processes only one request
     private void loop() throws IOException {
         Socket incoming = null;
-        incoming = _server.accept();
+        try {
+            incoming = _server.accept();
+        } catch(IOException iox) {
+            // swallow if we weren't expecting a request.
+            if(!_testUpdateNotRequested)
+                throw iox;
+            else
+                return;
+        }
         try {
             handleRequest(incoming);
         } catch (IOException iox) {
@@ -149,7 +142,7 @@ public class TestConnection {
 
     private void handleRequest(Socket socket) throws IOException {
         if(_testUpdateNotRequested)
-            Assert.that(false, "Unexpected behaviour -- update requested");
+            throw new AssertionFailedError("Unexpected behaviour -- update requested");
         InputStream is = socket.getInputStream();
         OutputStream os = socket.getOutputStream();
         ByteReader reader = new ByteReader(is);
