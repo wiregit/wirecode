@@ -11,8 +11,9 @@
     <import file="../common/build.xml"/>
     <import file="../io/build.xml"/>
     <import file="../nio/build.xml"/>
+    <import file="../net/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize, lw-io.initialize, lw-nio.initialize" unless="initialized.http">
+    <target name="initialize" depends="lw-common.initialize, lw-io.initialize, lw-nio.initialize, lw-net.initialize" unless="initialized.http">
         <do.setup-properties component="http">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
@@ -20,23 +21,24 @@
 			    <path refid="build.limewire.components.common.buildpath"/>
 			    <path refid="build.limewire.components.io.buildpath"/>
 			    <path refid="build.limewire.components.nio.buildpath"/>
+			    <path refid="build.limewire.components.net.buildpath"/>
 			</src-classpath>
         </do.setup-properties>
     </target>
 	
-	<target name="clean" depends="lw-common.clean, lw-io.clean, lw-nio.clean">
+	<target name="clean" depends="lw-common.clean, lw-io.clean, lw-nio.clean, lw-net.clean">
 	    <do.clean component="http"/>
 	</target>
     
-    <target name="compile" depends="lw-common.compile, lw-io.compile, lw-nio.compile">
+    <target name="compile" depends="lw-common.compile, lw-io.compile, lw-nio.compile, lw-net.compile">
     	<do.compile component="http"/>
     </target>
 	
-	<target name="compile-src" depends="lw-common.compile-src, lw-io.compile-src, lw-nio.compile-src">
+	<target name="compile-src" depends="lw-common.compile-src, lw-io.compile-src, lw-nio.compile-src, lw-net.compile-src">
 	    <do.compile-src component="http"/>
 	</target>
     
-	<target name="clean-src" depends="lw-common.clean-src, lw-io.clean-src, lw-nio.clean-src">
+	<target name="clean-src" depends="lw-common.clean-src, lw-io.clean-src, lw-nio.clean-src, lw-net.clean-src">
 	    <do.clean-src component="http"/>
 	</target>
 	

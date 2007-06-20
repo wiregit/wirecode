@@ -26,6 +26,11 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-net</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-nio</artifactId>
       <version>${limewire.version}</version>
     </dependency>

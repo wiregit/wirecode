@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.4.6.1 $
- * $Date: 2007-06-20 19:11:05 $
+ * $Revision: 1.4.6.2 $
+ * $Date: 2007-06-20 20:00:35 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -450,17 +450,17 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
     private void processAsyncRequest(final NHttpServerConnection conn, final HttpRequestHandler handler,
             final HttpRequest request, final HttpResponse response, final HttpContext context) {
-        executor.submit(new Runnable() {
+        executor.execute(new Runnable() {
             public void run() {
                 try {
                     handler.handle(request, response, context);
-                    NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                         public void run() {
                             sendAsyncResponse(conn, response);
                         }
                     });
                 } catch (final HttpException ex) {
-                    NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                         public void run() {
                             HttpResponse errorResponse = HttpServiceHandler.this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 
                                     HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
@@ -470,7 +470,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                         }                        
                     });
                 } catch (final IOException ex) {
-                    NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                         public void run() {
                             shutdownConnection(conn);
                             if (eventListener != null) {
