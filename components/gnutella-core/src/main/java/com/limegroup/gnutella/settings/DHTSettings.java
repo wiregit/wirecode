@@ -17,7 +17,7 @@ public class DHTSettings extends LimeProps {
     private DHTSettings() {}
     
     /**
-     * Setting for wether or not the DHT should be active at all.
+     * Setting for whether or not the DHT should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     // Was DHTSettings.DisableDHT // 4.13.1 & 4.13.2
@@ -26,7 +26,7 @@ public class DHTSettings extends LimeProps {
                 true, "DHT.DisableNetwork");
     
     /**
-     * Setting for wether or not the DHT should be active at all.
+     * Setting for whether or not the DHT should be active at all.
      */
     public static final BooleanSetting DISABLE_DHT_USER 
         = FACTORY.createBooleanSetting("DISABLE_DHT_USER", false); 
@@ -104,7 +104,7 @@ public class DHTSettings extends LimeProps {
                 "DHT.MinPassiveLeafInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
-     * Setting for whether or not an ultrapeer can join the DHT in active mode.
+     * Setting for whether or not an Ultrapeer can join the DHT in active mode.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting EXCLUDE_ULTRAPEERS 
@@ -202,7 +202,7 @@ public class DHTSettings extends LimeProps {
                 3L*60L*60L*1000L, "DHT.RareFileTime", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
     
     /**
-     * The minumum number of upload attempts before a file is considered
+     * The minimum number of upload attempts before a file is considered
      * rate. This make sure we don't upload every file.
      */
     public static final IntSetting RARE_FILE_ATTEMPTED_UPLOADS
