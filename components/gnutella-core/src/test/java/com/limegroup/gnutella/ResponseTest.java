@@ -8,6 +8,10 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -404,11 +408,66 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    assertEquals("wrong number of locations", 2, r.getLocations().size());
-	    Set endpoints = new HashSet();
-	    endpoints.add( new Endpoint("1.2.3.4", 1) );
-	    endpoints.add( new Endpoint("4.3.2.1", 2) );
+	    Set endpoints = new IpPortSet();
+	    endpoints.add( new IpPortImpl("1.2.3.4", 1) );
+	    endpoints.add( new IpPortImpl("4.3.2.1", 2) );
 	    assertEquals("wrong alts", endpoints, r.getLocations());
 	    assertEquals("should have no time", -1, r.getCreateTime());
+    }
+    
+    /** Tests TLS is read in addition. */
+    public void testReadGGEPAltWithTLSExtension() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
+        ByteOrder.int2leb(257, baos);
+        ByteOrder.int2leb(1029, baos);
+        byte[] name = new byte[] { 's', 'a', 'm', 0 };
+        baos.write(name);
+        
+        GGEP info = new GGEP();
+        // locations: 1.2.3.4:1, 4.3.2.1:2, 2.3.4.5:6, 5.4.3.2:7, 2.3.3.2:8
+        byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0, 2, 3, 4, 5, 6, 0, 5, 4, 3, 2, 7, 0, 2, 3, 3, 2, 8, 0 };
+        info.put(GGEP.GGEP_HEADER_ALTS, alts);
+        byte[] tlsIdx = { (byte)0xC8 }; // 11001
+        info.put(GGEP.GGEP_HEADER_ALTS_TLS, tlsIdx );        
+        info.write(baos);
+        
+        // write out closing null.
+        baos.write((byte)0);
+        
+        byte[] output = baos.toByteArray();
+        ByteArrayInputStream in = new ByteArrayInputStream(output);
+        Response r = Response.createFromStream(in);
+        assertEquals("wrong index", 257, r.getIndex());
+        assertEquals("wrong size", 1029, r.getSize());
+        assertEquals("wrong name", "sam", r.getName());
+        // too annoying to check extension was correct.
+        assertEquals("leftover input", -1, in.read());
+        
+        assertEquals("wrong number of locations", 5, r.getLocations().size());
+        Set tls = new IpPortSet();
+        Set nonTLS = new IpPortSet();
+        for(IpPort ipp : r.getLocations()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                tls.add(ipp);
+            else
+                nonTLS.add(ipp);
+        }
+        // TLS should be 3, nonTLS == 2
+        assertEquals(3, tls.size());
+        assertEquals(2, nonTLS.size());
+        Set endpoints = new IpPortSet();
+        endpoints.add( new IpPortImpl("1.2.3.4", 1) );
+        endpoints.add( new IpPortImpl("4.3.2.1", 2) );
+        endpoints.add( new IpPortImpl("2.3.3.2", 8) );
+        assertEquals(endpoints, tls);
+        
+        endpoints.clear();
+        endpoints.add( new IpPortImpl("2.3.4.5", 6) );
+        endpoints.add( new IpPortImpl("5.4.3.2", 7) );
+        assertEquals(endpoints, nonTLS);
+        
+        assertEquals("should have no time", -1, r.getCreateTime());
     }
     
     /**
@@ -480,9 +539,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong time", time, r.getCreateTime());
 	    
 	    assertEquals("wrong number of locations", 2, r.getLocations().size());
-	    Set endpoints = new HashSet();
-	    endpoints.add( new Endpoint("1.2.3.4", 1) );
-	    endpoints.add( new Endpoint("4.3.2.1", 2) );
+	    Set endpoints = new IpPortSet();
+	    endpoints.add( new IpPortImpl("1.2.3.4", 1) );
+	    endpoints.add( new IpPortImpl("4.3.2.1", 2) );
 	    assertEquals("wrong alts", endpoints, r.getLocations());
     }        
         
@@ -525,9 +584,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    assertEquals("wrong number of locations", 2, r.getLocations().size());
-	    Set endpoints = new HashSet();
-	    endpoints.add( new Endpoint("1.2.3.4", 1) );
-	    endpoints.add( new Endpoint("4.3.2.1", 2) );
+	    Set endpoints = new IpPortSet();
+	    endpoints.add( new IpPortImpl("1.2.3.4", 1) );
+	    endpoints.add( new IpPortImpl("4.3.2.1", 2) );
 	    assertEquals("wrong alts", endpoints, r.getLocations());
 	    
 	    Set urns = new HashSet();
@@ -558,13 +617,12 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         AlternateLocationCollection alc =
             AlternateLocationCollection.create(urn);
         for(int i = 0; i < 20; i++) {
-            AlternateLocation al = AlternateLocation.create(
-                "http://1.2.3." + i + ":1/uri-res/N2R?" + sha1);
+            AlternateLocation al = AlternateLocation.create("1.2.3." + i + ":1", urn);
             alc.add(al);
         }
         
         // Then get them as endpoints (should remove the extra alts).
-        Set endpoints = getAsEndpoints(alc);
+        Set endpoints = getAsIpPorts(alc);
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
@@ -591,6 +649,49 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
             assertEquals(1, data[i+4]);
             assertEquals(0, data[i+5]);
         }
+    }
+    
+    public void testAltsAndTLSAreWritten() throws Exception {
+        final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+        
+        // First create a bunch of alts.
+        AlternateLocationCollection alc = AlternateLocationCollection.create(urn);
+        for(int i = 0; i < 10; i++) {
+            AlternateLocation al = AlternateLocation.create("1.2.3." + i + ":1", urn, i % 3 == 0);
+            alc.add(al);
+        }
+        
+        // Then get them as endpoints (should remove the extra alts).
+        Set endpoints = getAsIpPorts(alc);
+        assertEquals("didn't filter out extras", 10, endpoints.size());
+        
+        // Add them to the output stream as a GGEP block.
+        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1);
+        addGGEP(baos, gc);
+        
+        // See if we can correctly read the GGEP block.
+        baos.flush();
+        byte[] output = baos.toByteArray();
+        GGEP alt = new GGEP(output, 0, null);
+        Set headers = alt.getHeaders();
+        assertEquals("wrong size", 2, headers.size());
+        assertTrue("no alt!", headers.contains("ALT"));
+        assertTrue("no tls!", headers.contains("ALT_TLS"));
+        byte[] data = alt.getBytes("ALT");
+        assertEquals("wrong data length", 60, data.length);
+        for(int i = 0; i < data.length; i+=6) {
+            assertEquals(1, data[i]);
+            assertEquals(2, data[i+1]);
+            assertEquals(3, data[i+2]);
+            assertEquals((int)Math.floor(i / 6), data[i+3]);
+            assertEquals(1, data[i+4]);
+            assertEquals(0, data[i+5]);
+        }
+        data = alt.getBytes("ALT_TLS");
+        assertEquals("wrong tls length", 2, data.length);
+        assertEquals(new byte[] { (byte)0x92, (byte)0x40 }, data );
     }
     
     /**
@@ -621,8 +722,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 1, locs.size());
-        assertEquals("wrong endpoint",
-            new Endpoint("1.2.3.4:1"), locs.iterator().next());
+        assertEquals("wrong endpoint", 0,
+           IpPort.COMPARATOR.compare(new IpPortImpl("1.2.3.4:1"), (IpPort)locs.iterator().next()));
 
         // multiple of 6, diff            
         byte[] d2 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 2, 0};
@@ -630,9 +731,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         locs = getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 2, locs.size());
-        Set eps = new HashSet();
-        eps.add( new Endpoint("1.2.3.4:1") );
-        eps.add( new Endpoint("1.2.3.4:2") );
+        Set eps = new IpPortSet();
+        eps.add( new IpPortImpl("1.2.3.4:1") );
+        eps.add( new IpPortImpl("1.2.3.4:2") );
         assertEquals("wrong endpoints", eps, locs);
         
         // ctime.
@@ -705,10 +806,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         }
     }
     
-    private Set getAsEndpoints(AlternateLocationCollection col)
+    private Set getAsIpPorts(AlternateLocationCollection col)
       throws Exception {
         return (Set)PrivilegedAccessor.invokeMethod(Response.class,
-            "getAsEndpoints", new Object[] { col } );
+            "getAsIpPorts", new Object[] { col } );
     }
     
     private void addGGEP(OutputStream os, Response.GGEPContainer gc) throws Exception {

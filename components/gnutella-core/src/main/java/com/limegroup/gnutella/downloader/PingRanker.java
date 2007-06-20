@@ -295,7 +295,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (RouterService.acceptedIncomingConnection() ||
                 RouterService.getUdpService().canDoFWT())
             flags |= HeadPing.PUSH_ALTLOCS;
-        
         return flags;
     }
     
@@ -334,7 +333,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             
             // older push proxies do not route but respond directly, we want to get responses
             // from other push proxies
-            if (!pong.hasFile() && !pong.isGGEPPong() && rfd.needsPush())
+            if (!pong.hasFile() && pong.isRoutingBroken() && rfd.needsPush())
                 return;
             
             // if the pong is firewalled, remove the other proxies from the 

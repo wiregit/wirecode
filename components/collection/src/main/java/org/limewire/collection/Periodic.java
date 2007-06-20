@@ -1,8 +1,8 @@
 package org.limewire.collection;
 
 import java.util.concurrent.Future;
-
-import org.limewire.concurrent.SchedulingThreadPool;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -29,7 +29,7 @@ import org.limewire.concurrent.SchedulingThreadPool;
  */
 public class Periodic {
 
-	private final SchedulingThreadPool scheduler;
+	private final ScheduledExecutorService scheduler;
 	private final Delegate d;
 	
 	private long nextExecuteTime;
@@ -42,7 +42,7 @@ public class Periodic {
 	 * execution on.
 	 */
 	public Periodic(Runnable r,
-			SchedulingThreadPool scheduler) {
+            ScheduledExecutorService scheduler) {
 		this.d = new Delegate(r);
 		this.scheduler = scheduler;
 	}
@@ -51,7 +51,7 @@ public class Periodic {
 	 * changes the execution time of this Periodic task if it is
 	 * later than the current execution time.
 	 * 
-	 * Note: some implementations of <tt>SchedulingThreadPool</tt> use nanoseconds
+	 * Note: some implementations of <tt>ScheduledExecutorService</tt> use nanoseconds
 	 * as their time unit, so do not schedule anything for more than 292 years in the
 	 * future. More practically, this means you should not use Long.MAX_VALUE as parameter.
 	 * 
@@ -63,9 +63,9 @@ public class Periodic {
 		if (future == null) { 
 			nextExecuteTime = newTime;
 			if (newDelay > 0) 
-				future = scheduler.invokeLater(d,newDelay);
+				future = scheduler.schedule(d, newDelay, TimeUnit.MILLISECONDS);
 			else
-				scheduler.invokeLater(d);
+				scheduler.execute(d);
 			return true;
 		} else if (newTime > nextExecuteTime) {
 			nextExecuteTime = newTime;
@@ -90,10 +90,10 @@ public class Periodic {
 			future.cancel(false);
 			nextExecuteTime = newTime;
 			if (newDelay > 0)
-				future = scheduler.invokeLater(d, newDelay);
+				future = scheduler.schedule(d, newDelay, TimeUnit.MILLISECONDS);
 			else { 
 				future = null;
-				scheduler.invokeLater(d);
+				scheduler.execute(d);
 			}
 			return true;
 		}
@@ -123,7 +123,7 @@ public class Periodic {
 				
 				long now = System.currentTimeMillis();
 				if (now < nextExecuteTime) {
-					future = scheduler.invokeLater(this, nextExecuteTime - now);
+					future = scheduler.schedule(this, nextExecuteTime - now, TimeUnit.MILLISECONDS);
 					return;
 				}
 			}

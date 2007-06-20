@@ -8,19 +8,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import junit.framework.Test;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.StubHandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -161,32 +159,6 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 		assertTrue("connection should be high degree",  conn.isHighDegreeConnection());
         conn.close();
 	}
-
-	public void testStripsGGEP() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
-        assertEquals(0, cm.getNumConnections());
-
-	    Connection conn = createConnection(new NoGGEPProperties());
-        drain(conn);
-        assertEquals(1, cm.getNumConnections());
-        
-        Connection out = (Connection)cm.getConnections().get(0);
-        assertFalse("connection should supportn't GGEP", out.supportsGGEP());
-
-        out.send(PingReply.create(GUID.makeGuid(), (byte)1));
-		Message m = getFirstInstanceOfMessageType(conn, PingReply.class);
-		assertNotNull(m);
-		assertInstanceof("should be a pong", PingReply.class, m);
-		
-		PingReply pr = (PingReply)m;
-
-        assertTrue("pong should not have GGEP", !pr.hasGGEPExtension());
-		assertTrue("should not have ggep block", !pr.supportsUnicast());
-		assertEquals("incorrect daily uptime!", -1, pr.getDailyUptime());
-		out.close();
-		conn.close();
-    }
-
 
 	// Tests to make sure that connections are closed correctly from the
     //	  client side.
@@ -344,16 +316,6 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         
         public void setLocalePreferencing(boolean b) {}
     }
-
-    /**
-     * Handshake properties indicating no support for GGEP.
-     */
-	private static class NoGGEPProperties extends UltrapeerHeaders {
-		public NoGGEPProperties() {
-			super("localhost");
-			remove(HeaderNames.GGEP);
-		}
-	}
     
     private static class ConnectionAcceptor {
         private ServerSocket socket;

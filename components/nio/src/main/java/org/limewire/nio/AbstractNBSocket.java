@@ -138,7 +138,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * in reading is turned on.
      */
     public final void setReadObserver(final ChannelReadObserver newReader) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 ReadObserver oldReader = reader;
                 try {
@@ -163,13 +163,21 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     if(oldReader instanceof InterestReadableByteChannel && oldReader != newReader) {
                         lastChannel.setReadChannel((InterestReadableByteChannel)oldReader);
-                        reader.handleRead(); // read up any buffered data.
+                        reader.handleRead(); // read up any buffered data from the old reader chain.
                         oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
-                    NIODispatcher.instance().interestRead(getChannel(), true);
+                    
+                    // If the socket is still connected, read up any buffered data from the current chain.
+                    // This is only done if we know the dispatcher is not going to immediately call
+                    // handleRead on the socket.  If this were not done, buffered data within the chain
+                    // would not be read until future incoming data triggered another handleRead.
+                    if(isConnected() && !NIODispatcher.instance().isReadReadyThisIteration(getChannel()));
+                        reader.handleRead();
+                        
+                    source.interestRead(true);
                 } catch(IOException iox) {
                     shutdown();
                     oldReader.shutdown(); // in case we lost it.
@@ -192,7 +200,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * write, then an IllegalStateException is thrown.
      */
     public final void setWriteObserver(final ChannelWriter newWriter) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 try {
                     if(writer.handleWrite())
@@ -342,12 +350,12 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             
             if(getChannel().connect(addr)) {
                 // Make sure connecting callbacks are always on the NIO thread.
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         try {
                             observer.handleConnect(AbstractNBSocket.this);
                         } catch(IOException iox) {
-                            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+                            NIODispatcher.instance().executeLaterAlways(new Runnable() {
                                 public void run() {
                                     shutdown();
                                 }
@@ -361,7 +369,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 return false;
             }
         } catch(IOException failed) {
-            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+            NIODispatcher.instance().executeLaterAlways(new Runnable() {
                 public void run() {
                     shutdown();
                 }
@@ -390,9 +398,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         }
         
         if(localReader instanceof NIOInputStream) {
+            NIOInputStream nis = (NIOInputStream)localReader;
             // Ensure the stream is initialized before we interest it.
-            InputStream stream = ((NIOInputStream)localReader).getInputStream();
-            NIODispatcher.instance().interestRead(getChannel(), true);
+            InputStream stream = nis.getInputStream();
+            nis.interestRead(true);
             return stream;
         } else {
             Callable<InputStream> callable = new Callable<InputStream>() {
@@ -403,7 +412,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             };
             
-            Future<InputStream> future = NIODispatcher.instance().submit(callable);
+            Future<InputStream> future = NIODispatcher.instance().getScheduledExecutorService().submit(callable);
             try {
                 return future.get();
             } catch(ExecutionException ee) {
@@ -434,7 +443,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /** Gets the read timeout for this socket. */
-    public final long getReadTimeout() {
+    public long getReadTimeout() {
         if(reader instanceof NIOInputStream) {
             return 0; // NIOInputStream handles its own timeouts.
         } else {
@@ -476,13 +485,17 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(VersionUtils.isJavaVersionOrAbove("1.5.0_10") || NIODispatcher.instance().isDispatchThread()) {
             shutdownSocketAndChannels();
         } else {
+            Future future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+                public void run() {
+                    shutdownSocketAndChannels();
+                }
+            });
+            
             try {
-                NIODispatcher.instance().invokeAndWait(new Runnable() {
-                    public void run() {
-                        shutdownSocketAndChannels();
-                    }
-                });
+                future.get(); // Wait for the future to complete.
             } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            } catch (ExecutionException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -494,7 +507,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(shutdownObserver != null)
             shutdownObserver.shutdown();
         
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(nioOutputStream != null)
                     nioOutputStream.shutdown();

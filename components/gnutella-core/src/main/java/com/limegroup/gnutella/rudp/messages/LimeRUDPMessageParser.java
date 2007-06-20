@@ -8,6 +8,7 @@ import org.limewire.rudp.messages.MessageFormatException;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 
 public class LimeRUDPMessageParser implements MessageParser {
@@ -20,7 +21,7 @@ public class LimeRUDPMessageParser implements MessageParser {
     }
     
     public Message parse(byte[] header, byte[] payload, 
-            byte softMax, int network) throws BadPacketException, IOException {
+            byte softMax, Network network) throws BadPacketException, IOException {
         
         try {
             return (Message)factory.createMessage(ByteBuffer.wrap(header), ByteBuffer.wrap(payload));

@@ -102,8 +102,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // tell the leaf to browse host the file, should result in direct HTTP
         // request
-        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
-                                callback.getRFD().getPort(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 null, false);
 
@@ -201,8 +200,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // tell the leaf to browse host the file, should result in PushProxy
         // request
-        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
-                                callback.getRFD().getPort(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies, false);
 
@@ -334,8 +332,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file,
-        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
-                                callback.getRFD().getPort(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies, false);
 

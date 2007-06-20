@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -40,7 +42,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      * @param data the data for the host returning the result
      * @param locs the <tt>Set</tt> of alternate locations for the file
      */
-	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set<Endpoint> locs);
+	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set<? extends IpPort> locs);
 
     /**
      * Add a query string to the monitor screen

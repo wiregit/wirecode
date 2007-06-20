@@ -3,9 +3,7 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,17 +11,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -52,7 +52,6 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testHasFreeSlots() throws Exception {
-        
         byte[] guid = GUID.makeGuid();
         byte[] ip = {1,1,1,1};
         PingReply pr = PingReply.create(guid, (byte)3, 6346, ip, 
@@ -60,11 +59,11 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         //All values are determined based on connection status, and because
         // we haven't set up connections yet, we don't have free anything.
-        assertTrue("slots unexpectedly empty", !pr.hasFreeSlots());
+        assertTrue("slots not empty", !pr.hasFreeSlots());
         assertEquals("unexpected number leaf slots", 0, pr.getNumLeafSlots());
-        assertTrue("slots unexpectedly not empty", !pr.hasFreeLeafSlots());
-        assertTrue("slots unexpectedly empty", !pr.hasFreeUltrapeerSlots());
-        assertEquals("slots unexpectedly empty", 0, pr.getNumUltrapeerSlots());
+        assertTrue("slots not empty", !pr.hasFreeLeafSlots());
+        assertTrue("slots not empty", !pr.hasFreeUltrapeerSlots());
+        assertEquals("slots not empty", 0, pr.getNumUltrapeerSlots());
         
         // Switch ConnectionManager to report different values for free leaf
         // and ultrapeer slots.
@@ -74,11 +73,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pr = PingReply.create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
             
-        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
-
-        assertTrue("slots unexpectedly full", pr.hasFreeLeafSlots());
-        
-        assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
+        assertTrue("no slots", pr.hasFreeSlots());
+        assertTrue("no slots", pr.hasFreeLeafSlots());
+        assertTrue("no slots", pr.hasFreeUltrapeerSlots());
         
         // Should now have leaf slots
         assertEquals("unexpected number leaf slots", 
@@ -326,6 +323,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
     public void testBasicGGEP() throws Exception {
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        
         // create a pong
         PingReply pr = 
             PingReply.createExternal(new byte[16], (byte)3, 6349, IP, false);
@@ -338,14 +337,29 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
+        assertEquals(6349, pong.getPort());
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.supportsUnicast()==false);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
+        assertFalse(pong.supportsUnicast());
+        assertEquals("LIME", pong.getVendor());
+        assertEquals(2, pong.getVendorMajorVersion());
+        assertEquals(7, pong.getVendorMinorVersion());
+        assertTrue(pong.isTLSCapable());
+        // make sure it's still capable if we turn our settings off.
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        assertTrue(pong.isTLSCapable());
+        
+        // And try creating a new pong w/o TLS.
+        // create a pong
+        pr = PingReply.createExternal(new byte[16], (byte)3, 6349, IP, false);
+        baos.reset();
+        pr.write(baos);
+        bytes=baos.toByteArray();
+        m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        pong=(PingReply)m;
+        assertFalse(pong.isTLSCapable());
+        // make sure it's still off if we turn our settings on.
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        assertFalse(pong.isTLSCapable());
     }
 
 
@@ -353,34 +367,25 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecode() throws Exception {
-        //Create pong
-
         PingReply pr = PingReply.create(new byte[16], (byte)3, 6349, IP,
                                    0l, 0l, true, 523, true);        
 
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        try {
-            pr.write(baos);
-        } catch (IOException e) {
-            assertTrue("Couldn't write stream.", false);
-        }
-
-        //Encode and check raw bytes.
-        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
-        //this into account....
+        pr.write(baos);
         byte[] bytes=baos.toByteArray(); 
-        int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
-        int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
+        int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int gueLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
         int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
+        int tlsLength = GGEP.GGEP_HEADER_TLS_CAPABLE.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
-                      +idLength //ID
+                      +duLength //ID
                       +1   //data length
                       +2   //data bytes
-                      +1   //"UDP" extension flags
-                      +udpLength // ID
+                      +1   //"GUE" extension flags
+                      +gueLength // ID
                       +1   //data length
                       +1   //data bytes
                       +1   //"UP" extension flags
@@ -394,47 +399,50 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
                       +1  //"DHT" extension flags
                       +dhtLength
                       +1   // data length
-                      +3;  // data bytes 
-        assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
-        int offset=23+14;                              //GGEP offset
-        assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
-        assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x00 | dhtLength)); //extension flags
-        assertTrue(bytes[offset+2]==(byte)'D');
-        assertTrue(bytes[offset+3]==(byte)'H');
-        assertTrue(bytes[offset+4]==(byte)'T');
-        assertTrue(bytes[offset+2+dhtLength+5]==(byte)'D');
-        assertTrue(bytes[offset+2+dhtLength+6]==(byte)'U');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4]==(byte)'G');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+5]==(byte)'U');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+6]==(byte)'E');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3]==(byte)'U');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+4]==(byte)'P');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+5]==(byte)'V');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+6]==(byte)'C');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+8]==(byte)'L');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+9]==(byte)'I');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+10]==(byte)'M');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+11]==(byte)'E');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+12]==39);
-        //...etc.
-        assertTrue(bytes[bytes.length-2-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
+                      +3   // data bytes 
+                      +1   // "TLS" extension flags
+                      +tlsLength // ID
+                      +1;  // EOGGEP.
+        assertEquals(23+14+ggepLength, bytes.length);
+        int offset=23+14;                                  //GGEP offset
+        assertEquals((byte)0xc3,        bytes[offset]);    //GGEP magic number
+        assertEquals((byte)(dhtLength), bytes[offset+1]);  //extension flags
+        assertEquals((byte)'D',  bytes[offset+2]);
+        assertEquals((byte)'H',  bytes[offset+3]);
+        assertEquals((byte)'T',  bytes[offset+4]);
+        assertEquals((byte)'D',  bytes[offset+2+dhtLength+5]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+6]);
+        assertEquals((byte)0x0B, bytes[offset+2+dhtLength+8]); // little byte of 523
+        assertEquals((byte)0x02, bytes[offset+2+dhtLength+9]); // big byte of 523
+        assertEquals((byte)'G',  bytes[offset+2+dhtLength+5+duLength+4]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+5]);
+        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+6]);
+        assertEquals((byte)'T',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+4]);
+        assertEquals((byte)'S',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+5]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2]);
+        assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+3]);
+        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+5]);
+        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+6]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+8]);
+        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+9]);
+        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+10]);
+        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+11]);
+        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+12]);
 
 
         //Decode and check contents.
         Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
+        assertEquals(6349, pong.getPort());
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.getDailyUptime()==523);
-        assertTrue(pong.supportsUnicast()==true);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
+        assertEquals(523, pong.getDailyUptime());
+        assertTrue(pong.supportsUnicast());
+        assertEquals("LIME", pong.getVendor());
+        assertEquals(2, pong.getVendorMajorVersion());
+        assertEquals(7, pong.getVendorMinorVersion());
+        assertTrue(pong.isTLSCapable());
 
     }
 
@@ -442,28 +450,19 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoGUESS() throws Exception {
-        //Create pong
-
         PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
                                       0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        try {
-            pr.write(baos);
-        } catch (IOException e) {
-            assertTrue("Couldn't write stream.", false);
-        }
-
-        //Encode and check raw bytes.
-        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
-        //this into account....
+        pr.write(baos);
         byte[] bytes=baos.toByteArray(); 
-        int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
         int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
+        int tlsLength = GGEP.GGEP_HEADER_TLS_CAPABLE.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
-                      +idLength //ID
+                      +duLength //ID
                       +1   //data length
                       +2   //data bytes
                       +1   //"UP" extension flags
@@ -474,77 +473,119 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
                       +vcLength // ID
                       +1   // data length
                       +5   // data bytes
-                      +1   //"DHT" extension flags
+                      +1  //"DHT" extension flags
                       +dhtLength
                       +1   // data length
-                      +3;  // data bytes 
-        assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
-        int offset=23+14;                              //GGEP offset
-        assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
-        assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                bytes[offset+1]==(byte)(0x00 | dhtLength)); //extension flags
-        assertTrue(bytes[offset+2]==(byte)'D');
-        assertTrue(bytes[offset+3]==(byte)'H');
-        assertTrue(bytes[offset+4]==(byte)'T');
-        assertTrue(bytes[offset+2+dhtLength+5]==(byte)'D');
-        assertTrue(bytes[offset+2+dhtLength+6]==(byte)'U');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4]==(byte)'U');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+5]==(byte)'P');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+5]==(byte)'V');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+6]==(byte)'C');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+8]==(byte)'L');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+9]==(byte)'I');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+10]==(byte)'M');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+11]==(byte)'E');
-        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+12]==39);
-        //...etc.
-        assertTrue(bytes[bytes.length-2-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
+                      +3   // data bytes 
+                      +1   // "TLS" extension flags
+                      +tlsLength // ID
+                      +1;  // EOGGEP.
+        assertEquals(23+14+ggepLength, bytes.length);
+        int offset=23+14;                                  //GGEP offset
+        assertEquals((byte)0xc3,        bytes[offset]);    //GGEP magic number
+        assertEquals((byte)(dhtLength), bytes[offset+1]);  //extension flags
+        assertEquals((byte)'D',  bytes[offset+2]);
+        assertEquals((byte)'H',  bytes[offset+3]);
+        assertEquals((byte)'T',  bytes[offset+4]);
+        assertEquals((byte)'D',  bytes[offset+2+dhtLength+5]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+6]);
+        assertEquals((byte)0x0B, bytes[offset+2+dhtLength+8]); // little byte of 523
+        assertEquals((byte)0x02, bytes[offset+2+dhtLength+9]); // big byte of 523
+        assertEquals((byte)'T',  bytes[offset+2+dhtLength+5+duLength+4]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+5]);
+        assertEquals((byte)'S',  bytes[offset+2+dhtLength+5+duLength+6]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2]);
+        assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+3]);
+        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+5]);
+        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+6]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+8]);
+        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+9]);
+        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+10]);
+        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+11]);
+        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+12]);
 
 
         //Decode and check contents.
         Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
+        assertEquals(6349, pong.getPort());
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.getDailyUptime()==523);
-        assertTrue(pong.supportsUnicast()==false);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
+        assertEquals(523, pong.getDailyUptime());
+        assertFalse(pong.supportsUnicast());
+        assertEquals("LIME", pong.getVendor());
+        assertEquals(2, pong.getVendorMajorVersion());
+        assertEquals(7, pong.getVendorMinorVersion());
+        assertTrue(pong.isTLSCapable());
     }
+    
+    /** Test the raw bytes of an encoded GGEP'ed pong.  Then checks that
+     *  these can be decoded.  Note that this will need to be changed if
+     *  more extensions are added. */
+    public void testGGEPEncodeDecodeNoTLS() throws Exception {
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
+                                      0l, 0l, true, 523, false);        
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        pr.write(baos);
+        byte[] bytes=baos.toByteArray(); 
+        int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
+        int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
+        int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
+        int ggepLength=1   //magic number
+                      +1   //"DUPTIME" extension flags
+                      +duLength //ID
+                      +1   //data length
+                      +2   //data bytes
+                      +1   //"UP" extension flags
+                      +upLength // ID
+                      +1   // data length
+                      +3  // data bytes
+                      +1   //"VC" extension flags
+                      +vcLength // ID
+                      +1   // data length
+                      +5   // data bytes
+                      +1  //"DHT" extension flags
+                      +dhtLength
+                      +1   // data length
+                      +3;  // data bytes
+        assertEquals(23+14+ggepLength, bytes.length);
+        int offset=23+14;                                  //GGEP offset
+        assertEquals((byte)0xc3,        bytes[offset]);    //GGEP magic number
+        assertEquals((byte)(dhtLength), bytes[offset+1]);  //extension flags
+        assertEquals((byte)'D',  bytes[offset+2]);
+        assertEquals((byte)'H',  bytes[offset+3]);
+        assertEquals((byte)'T',  bytes[offset+4]);
+        assertEquals((byte)'D',  bytes[offset+2+dhtLength+5]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+6]);
+        assertEquals((byte)0x0B, bytes[offset+2+dhtLength+8]); // little byte of 523
+        assertEquals((byte)0x02, bytes[offset+2+dhtLength+9]); // big byte of 523
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4]);
+        assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+5]);
+        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+upLength+5]);
+        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+upLength+6]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+upLength+8]);
+        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+upLength+9]);
+        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+upLength+10]);
+        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+upLength+11]);
+        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+upLength+12]);
 
-    public void testStripGGEP2() throws Exception {
-        byte[] guid=GUID.makeGuid();
-        byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        PingReply pr1 = PingReply.create(guid, (byte)3, 6349, ip,
-                                    13l, 14l, false, 4321, false); 
-        PingReply pr2=(PingReply)pr1.stripExtendedPayload();
-        assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
-        assertEquals(pr1.getHops(), pr2.getHops());
-        assertEquals(pr1.getTTL(), pr2.getTTL());
-        assertEquals(pr1.getFiles(), pr2.getFiles());
-        assertEquals(pr1.getKbytes(), pr2.getKbytes());
-        assertEquals(pr1.getPort(), pr2.getPort());
-        assertEquals(pr1.getInetAddress(), pr2.getInetAddress());
 
-        assertTrue(! pr2.hasGGEPExtension());
-        assertEquals("pong should not have a daily uptime", -1,
-                     pr2.getDailyUptime());
-
-        ByteArrayOutputStream out=new ByteArrayOutputStream();
-        pr2.write(out);
-        assertTrue(out.toByteArray().length==(23+14));
-
-        //Check no aliasing
-        pr1.hop();
-        assertTrue(pr1.getHops()!=pr2.getHops());
-        assertTrue(pr1.getTTL()!=pr2.getTTL());
+        //Decode and check contents.
+        Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        PingReply pong=(PingReply)m;
+        assertTrue(m instanceof PingReply);
+        assertEquals(6349, pong.getPort());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
+        assertEquals(523, pong.getDailyUptime());
+        assertFalse(pong.supportsUnicast());
+        assertEquals("LIME", pong.getVendor());
+        assertEquals(2, pong.getVendorMajorVersion());
+        assertEquals(7, pong.getVendorMinorVersion());
+        assertFalse(pong.isTLSCapable());
     }
-
+    
     public void testPongTooSmall() throws Exception {
         byte[] bytes=new byte[23+25];  //one byte too small
         bytes[16]=Message.F_PING_REPLY;
@@ -807,6 +848,114 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         ipp = (IpPort)l.get(4);
         assertEquals("1.5.3.5", ipp.getAddress());
         assertEquals(5, ipp.getPort());
+        
+        // Assert none of them supported TLS
+        for(Object o : l ) {
+            // right now only TLS-capable hosts become ExtendedEndpoints.
+            assertNotInstanceof(ExtendedEndpoint.class, o);
+        }
+    }
+    
+    public void testTLSPackedIPPorts() throws Exception {
+        List l = new LinkedList();
+        
+        // every % 6 add an endpoint that directly implements HostInfo,
+        // every % 3 add an endpoint that doesn't, but give HostCatcher a capable
+        for(int i = 1; i < 11; i++) {
+            if(i % 6 == 0) {
+                ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
+                ep.setTLSCapable(true);
+                l.add(ep);
+                assertTrue(RouterService.getHostCatcher().isHostTLSCapable(ep));
+            } else {
+                l.add(new IpPortImpl("1.2.3." + i, i+1));
+                if(i % 3 == 0) {
+                    ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
+                    ep.setTLSCapable(true);
+                    RouterService.getHostCatcher().add(ep, true);
+                }
+                
+                assertEquals(i%3==0, RouterService.getHostCatcher().isHostTLSCapable(new IpPortImpl("1.2.3." + i, i+1)));
+            }
+        }
+        
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, l, null);
+        l = pr.getPackedIPPorts();
+        assertEquals(10, l.size());
+        for(int i = 1; i < 11; i++) {
+            IpPort ipp = (IpPort)l.get(i-1);
+            assertEquals("1.2.3." + i, ipp.getAddress());
+            assertEquals(i+1, ipp.getPort());            
+            // These are the TLS hosts
+            if(i%3==0) {
+                assertInstanceof(ExtendedEndpoint.class, ipp);
+                assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+            } else {
+                assertNotInstanceof(ExtendedEndpoint.class, ipp);
+            }
+        }
+    }
+    
+    public void testNetworkTLSPackedIpPorts() throws Exception {
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        // mark the second & third items as TLS (and the fifth, just to see if it will ignore it)
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20 | 0x8));
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+
+        List l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        IpPort ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
+        
+        //  and make sure we can read from network data.
+        out = new ByteArrayOutputStream();
+        pr.write(out);
+        pr = (PingReply)MessageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        assertInstanceof(ExtendedEndpoint.class, ipp);
+        assertTrue(((ExtendedEndpoint)ipp).isTLSCapable());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());
+        assertNotInstanceof(ExtendedEndpoint.class, ipp);
+        
     }
     
     public void testPackedHostCachesInPong() throws Exception {

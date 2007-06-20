@@ -7,6 +7,7 @@ import org.limewire.mojito.messages.MessageFactory;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 
 /**
@@ -25,7 +26,7 @@ class MessageParserDelegate implements MessageParser {
     }
     
     public Message parse(byte[] header, byte[] payload, 
-            byte softMax, int network) throws BadPacketException, IOException {
+            byte softMax, Network network) throws BadPacketException, IOException {
         
         return (Message)factory.createMessage(null, 
                 ByteBuffer.wrap(header), 

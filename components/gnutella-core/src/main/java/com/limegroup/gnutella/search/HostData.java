@@ -100,6 +100,9 @@ public final class HostData {
      */
     private final int FWT_VERSION;
 
+    /** If the host supports TLS connections. */
+    private final boolean TLS_CAPABLE; 
+    
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
@@ -161,6 +164,7 @@ public final class HostData {
         PROXIES = reply.getPushProxies();
         CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
         FWT_VERSION = reply.getFWTransferVersion();
+        TLS_CAPABLE = reply.isTLSCapable();
 
         if ( multicast )
             SPEED = Integer.MAX_VALUE;
@@ -317,6 +321,11 @@ public final class HostData {
      */
     public int getFWTVersionSupported() {
     	return FWT_VERSION;
+    }
+    
+    /** Returns true if the host supports TLS connections. */
+    public boolean isTLSCapable() {
+        return TLS_CAPABLE;
     }
 
 }

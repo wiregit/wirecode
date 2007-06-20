@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -62,7 +62,7 @@ public class DHTNodeFetcher {
     /**
      * The Runnable that requests DHT hosts.
      */
-    private TimerTask fetcherTask = null;
+    private ScheduledFuture<?>  fetcherTask = null;
     
     /**
      * A lock for the TimerTask
@@ -119,11 +119,11 @@ public class DHTNodeFetcher {
             }
             
             if(LOG.isDebugEnabled()){
-                LOG.debug("Adding active host from HostCatcher: "+ ep.getSocketAddress());
+                LOG.debug("Adding active host from HostCatcher: "+ ep.getInetSocketAddress());
             }
             
             haveActive = true;
-            bootstrapper.addBootstrapHost(ep.getSocketAddress());
+            bootstrapper.addBootstrapHost(ep.getInetSocketAddress());
         }
         
         if(haveActive) { //we have added active hosts already - no need to request
@@ -226,7 +226,7 @@ public class DHTNodeFetcher {
     public void stop() {
         synchronized (fetcherTaskLock) {
             if (fetcherTask != null) {
-                fetcherTask.cancel();
+                fetcherTask.cancel(true);
                 fetcherTask = null;
             }
         }

@@ -109,11 +109,6 @@ public abstract class RouteTableMessage extends Message {
     public byte getVariant() {
         return variant;
     }
-
-    /** Returns this. */
-    public Message stripExtendedPayload() {
-        return this;
-    }
 }
 
 

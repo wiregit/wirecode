@@ -18,6 +18,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 
@@ -559,7 +560,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Message.N_TCP);
+        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Network.TCP);
         assertNotNull(m2);
     }
     

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -51,70 +52,70 @@ public class GreedyQueryFilterTest extends LimeTestCase {
         assertTrue(filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.mpg".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.mpg".getBytes(), Network.UNKNOWN);
         assertTrue(!filter.allow(msg));
 
         msg=QueryRequest.createQuery("1.mpg", (byte)5);
         assertTrue(filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.mp3".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.mp3".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.*".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.*".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.MP3".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.MP3".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.MPG".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.MPG".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "mp3".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "mp3".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "mpg".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "mpg".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "MP3".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "MP3".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "MPG".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "MPG".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "a.b".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "a.b".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.*-".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*.*-".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)3, 
-            (byte)2, "--**.*-".getBytes(), Message.N_UNKNOWN);
+            (byte)2, "--**.*-".getBytes(), Network.UNKNOWN);
         assertTrue(filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*****".getBytes(), Message.N_UNKNOWN);
+            (byte)4, "*****".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)2,
-            (byte)3, "britney*.*".getBytes(), Message.N_UNKNOWN);
+            (byte)3, "britney*.*".getBytes(), Network.UNKNOWN);
         assertTrue(filter.allow(msg)); 
     
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)2,
-            (byte)3, "*.*.".getBytes(), Message.N_UNKNOWN);
+            (byte)3, "*.*.".getBytes(), Network.UNKNOWN);
         assertTrue(! filter.allow(msg));
 
         msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1,
-            (byte)6, "new order*".getBytes(), Message.N_UNKNOWN);
+            (byte)6, "new order*".getBytes(), Network.UNKNOWN);
         assertTrue(filter.allow(msg)); 
     
     }

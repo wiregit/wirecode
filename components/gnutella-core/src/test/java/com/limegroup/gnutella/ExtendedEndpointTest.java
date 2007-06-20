@@ -111,7 +111,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,3492,1,100,86400113;113,"
                      + ApplicationSettings.DEFAULT_LOCALE.getValue() 
-                     + ",,0,INACTIVE,\n",
+                     + ",,0,INACTIVE,,\n",
                      out.toString());
     }
 
@@ -144,7 +144,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,,"+timeString+",,"
                      + "," + ApplicationSettings.DEFAULT_LOCALE.getValue()
-                     + ",,,\n",
+                     + ",,,,,\n",
                      out.toString());
     }
 
@@ -195,13 +195,13 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0, e.getUDPHostCacheFailures());
         StringWriter writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,0,,\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,0,,,,\n", writer.toString());
         e.recordUDPHostCacheFailure();
         e.recordUDPHostCacheFailure();
         e.recordUDPHostCacheFailure();
         writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,3,,\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,3,,,,\n", writer.toString());
         e.setUDPHostCache(false);
         assertFalse(e.isUDPHostCache());
         try {
@@ -214,11 +214,29 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         } catch(AssertFailure expected) {}
         writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,,,\n", writer.toString());
         
         e = ExtendedEndpoint.read("www.limewire.org:6346,,,,,en,0,");
         assertTrue(e.isUDPHostCache());
         assertEquals(0, e.getUDPHostCacheFailures());
+    }
+    
+    public void testTLSEndpoints() throws Exception {
+        ExtendedEndpoint e= ExtendedEndpoint.read("1.3.4.5:6348,,1097611864117,,,en,,,,1,");
+        assertTrue(e.isTLSCapable());
+        StringWriter writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,,1,\n", writer.toString());
+        e.setTLSCapable(false);
+        writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,,,\n", writer.toString());        
+        e = ExtendedEndpoint.read("1.3.4.5:6348,,1097611864117,,,en,,,,,");
+        assertFalse(e.isTLSCapable());
+        e.setTLSCapable(true);
+        writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,,1,\n", writer.toString());
     }
     
     public void testReadingStuff() throws Exception {

@@ -24,6 +24,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Allows a testcase to easily interact with a fully running LimeWire.
@@ -100,7 +101,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          ServerSocket ss=new ServerSocket();
          ss.setReuseAddress(true);
          ss.bind(new InetSocketAddress(0));
-         RouterService.connectToHostAsynchronously("127.0.0.1", ss.getLocalPort());
+         RouterService.connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          

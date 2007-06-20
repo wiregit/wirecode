@@ -1,17 +1,23 @@
 package com.limegroup.gnutella.uploader;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.http.HttpResponse;
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
@@ -45,19 +51,29 @@ public class HTTPHeaderUtils {
         if (RouterService.acceptedIncomingConnection())
             return;
 
-        Set<IpPort> proxies = RouterService.getConnectionManager()
+        Set<? extends Connectable> proxies = RouterService.getConnectionManager()
                 .getPushProxies();
 
         StringBuilder buf = new StringBuilder();
         int proxiesWritten = 0;
-        for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext()
-                && proxiesWritten < 4;) {
-            IpPort current = iter.next();
-            buf.append(current.getAddress()).append(":").append(
-                    current.getPort()).append(",");
+        BitNumbers bn = new BitNumbers(proxies.size());
+        for(Connectable current : proxies) {
+            if(proxiesWritten >= 4)
+                break;
+            
+            if(current.isTLSCapable())
+                bn.set(proxiesWritten);
+
+            buf.append(current.getAddress())
+               .append(":")
+               .append(current.getPort())
+               .append(",");
 
             proxiesWritten++;
         }
+        
+        if(!bn.isEmpty())
+            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + ",");
 
         if (proxiesWritten > 0)
             buf.deleteCharAt(buf.length() - 1);
@@ -84,18 +100,34 @@ public class HTTPHeaderUtils {
         if (sha1 != null) {
             response
                     .addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(sha1));
-            Set<? extends AlternateLocation> alts = uploader.getAltLocTracker()
-                    .getNextSetOfAltsToSend();
-            if (alts.size() > 0) {
+            Collection<DirectAltLoc> direct = uploader.getAltLocTracker().getNextSetOfAltsToSend();
+            if (direct.size() > 0) {
+                List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
+                final BitNumbers bn = new BitNumbers(direct.size());
+                for(DirectAltLoc al : direct) {
+                    IpPort ipp = al.getHost();
+                    if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                        bn.set(ordered.size());
+                    ordered.add(al);
+                }
+                
+                if(!bn.isEmpty()) {
+                    ordered.add(0, new HTTPHeaderValue() {
+                        public String httpStringValue() {
+                            return DirectAltLoc.TLS_IDX + bn.toHexString();
+                        }
+                    });
+                }
+                
                 response.addHeader(HTTPHeaderName.ALT_LOCATION
-                        .create(new HTTPHeaderValueCollection(alts)));
+                        .create(new HTTPHeaderValueCollection(ordered)));
             }
 
             if (uploader.getAltLocTracker().wantsFAlts()) {
-                alts = uploader.getAltLocTracker().getNextSetOfPushAltsToSend();
-                if (alts.size() > 0) {
+                Collection<PushAltLoc> pushes = uploader.getAltLocTracker().getNextSetOfPushAltsToSend();
+                if (pushes.size() > 0) {
                     response.addHeader(HTTPHeaderName.FALT_LOCATION
-                            .create(new HTTPHeaderValueCollection(alts)));
+                            .create(new HTTPHeaderValueCollection(pushes)));
                 }
             }
         }

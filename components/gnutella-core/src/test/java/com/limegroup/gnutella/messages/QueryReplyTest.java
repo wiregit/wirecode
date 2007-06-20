@@ -26,9 +26,13 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
@@ -45,6 +49,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -61,6 +66,21 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
     private static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
+    
+    private final byte[] guid = { 0x1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte)0xFF };
+    private final byte[] ip= {(byte)0xFE, 0, 0, 0x1};
+    private final long u4 = 0x00000000FFFFFFFFl;
+
+    private QueryReply qr;
+    private Iterator iter;
+    private byte[] payload;
+    private String vendor;
+    private Response[] responses;
+    private Response r1;
+    private Response r2;
+    private ByteArrayOutputStream out;
+    private byte[] bytes;
+    private int ggepLen;
 
     private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
     private FileManager fman = null;
@@ -114,11 +134,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
 	public void testLegacy() throws Exception {		
-		byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)0x1};
-		long u4=0x00000000FFFFFFFFl;
-		byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
-		Response[] responses=new Response[0];
-		QueryReply qr=new QueryReply(guid, (byte)5,
+		responses=new Response[0];
+		qr=new QueryReply(guid, (byte)5,
 									 0xF3F1, ip, 1, responses,
 									 guid, false);
 		assertEquals(1, qr.getSpeed());
@@ -137,18 +154,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		assertEquals(u4, qr.getSpeed());
 		assertTrue(Arrays.equals(qr.getClientGUID(),guid));
 
-		Iterator iter=qr.getResults();
-		Response r1=(Response)iter.next();
+		iter=qr.getResults();
+		r1=(Response)iter.next();
 		assertEquals(r1, responses[0]);
-		Response r2=(Response)iter.next();
+		r2=(Response)iter.next();
 		assertEquals(r2, responses[1]);
 		assertFalse(iter.hasNext());
-
-		
-		////////////////////  Contruct from Raw Bytes /////////////
-		
+    }
+    
+    public void testNetworkSimple() throws Exception {
  		//Normal case: double null-terminated result
-		byte[] payload=new byte[11+11+16];
+		payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
 		payload[3]=1;            //non-blank ip
@@ -171,8 +187,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 			qr.getNeedsPush(); //undefined => exception
 			fail("qr should have been invalid");
 		} catch (BadPacketException e) { }
-		
-		
+    }
+    
+    public void testNetworkNoClientGUID() throws Exception {
         //Bad case: not enough space for client GUID.  We can get
         //the client GUID, but not the results.
         payload=new byte[11+11+15];
@@ -192,7 +209,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.getVendor();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
-
+    }
+    
+    public void testNetworkCheckMetadata() throws Exception {
         //Test case added by Sumeet Thadani to check the metadata part
         //Test case modified by Susheel Daswani to check the metadata part
         payload=new byte[11+11+(4+1+4+5)+16];
@@ -215,15 +234,13 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        try {
-            iter=qr.getResults();
-            Response r = (Response)iter.next();
-            assertEquals("Sumeet test1", "A",  r.getName());
-            assertNull("bad xml", r.getDocument());
-        }catch(BadPacketException e){
-            fail("metaResponse not created well!", e);
-        }
+        iter=qr.getResults();
+        Response r = (Response)iter.next();
+        assertEquals("Sumeet test1", "A",  r.getName());
+        assertNull("bad xml", r.getDocument());
+    }
+    
+    public void testNetworkMetadataNoVendor() throws Exception {
 
         //Normal case: basic metainfo with no vendor data
         payload=new byte[11+11+(4+1+4+4)+16];
@@ -243,12 +260,14 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
 
-        String vendor=qr.getVendor();
+        vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
         assertTrue(qr.getNeedsPush());
-        
+    }
+    
+    public void testNetworkMetadataExtraVendorData() throws Exception {
         //Normal case: basic metainfo with extra vendor data
         payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
@@ -276,7 +295,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertFalse(qr.getNeedsPush());
 
         assertFalse(qr.getSupportsChat());
-
+    }
+    
+    public void testNetworkNoCommonData() throws Exception {
         //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
@@ -295,7 +316,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.getVendor();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
-
+    }
+    
+    public void testNetworkInvalidCommonPayloadLength() throws Exception {
         //Bad case.  Common payload length lies.
         payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
@@ -316,11 +339,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.getVendor();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }  
-
-
+    }
+    
+    public void testNetworkBearShareQHD() throws Exception {
         ///////////// BearShare 2.2.0 QHD (busy bits and friends) ///////////
-
-
         //Normal case: busy bit undefined and push bits unset.
         //(We don't bother testing undefined and set.  Who cares?)
         payload=new byte[11+11+(4+1+4+1)+16];
@@ -358,10 +380,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.getIsMeasuredSpeed();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
-       
-
+    }
+    
+    public void testNetworkQHDBusyPushBits() throws Exception {
         //Normal case: busy and push bits defined and set
-
         payload=new byte[11+11+(4+1+4+1+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
@@ -386,7 +408,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(qr.getIsMeasuredSpeed());
         assertTrue(qr.getHadSuccessfulUpload());
         assertTrue(qr.getSupportsChat());
-          
+    }
+    
+    public void testNetworkQHDBusyPushBitsDefinedAndUnset() throws Exception {
         //Normal case: busy and push bits defined and unset
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
@@ -411,7 +435,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertFalse(qr.getIsMeasuredSpeed());
         assertFalse(qr.getHadSuccessfulUpload());
         assertFalse("LiME!=LIME when looking at private area", qr.getSupportsChat());
-
+    }
+    
+    public void testCreateQHDFromScratch() throws Exception {
         //Create extended QHD from scratch
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
@@ -439,52 +465,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(!qr.isReplyToMulticastQuery());
-
+    }
+    
+    public void testCreateQHDFromScratchOtherBits() throws Exception {
         //Create extended QHD from scratch with different bits set
-        responses=new Response[2];
-        responses[0]=new Response(11,22,"Sample.txt");
-        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          true, false, false, true, false, false);
-
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(!qr.isReplyToMulticastQuery());
-
-        //And check raw bytes....
-        ByteArrayOutputStream out=new ByteArrayOutputStream();
-        qr.write(out);
-
-        byte[] bytes=out.toByteArray();
-        int ggepLen = _ggepUtil.getQRGGEP(true, false, false,
-                                          new HashSet(), null).length;
-        //Length includes header, query hit header and footer, responses, and
-        //QHD (public and private)
-        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
-        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
-        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
-
-        // check read back....
-        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(!qr.isReplyToMulticastQuery());
-
-        //Create extended QHD from scratch with different bits set
-        // Do not set multicast, as that will unset pushing, busy, etc..
-        // and generally confuse the test.
+        ConnectionSettings.TLS_INCOMING.setValue(false);
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
@@ -501,13 +486,110 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertFalse(qr.isReplyToMulticastQuery());
+        assertFalse(qr.isTLSCapable());
 
         //And check raw bytes....
         out=new ByteArrayOutputStream();
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, false,
+        ggepLen = _ggepUtil.getQRGGEP(true, false, false, false, 
+                                          new HashSet(), null).length;
+        //Length includes header, query hit header and footer, responses, and
+        //QHD (public and private)
+        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
+        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
+        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
+
+        // check read back....
+        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertFalse(qr.isTLSCapable());
+    }
+    
+    public void testCreateQHDWithTLS() throws Exception {
+        //Create extended QHD from scratch with different bits set
+        ConnectionSettings.TLS_INCOMING.setValue(true);
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid,
+                          true, false, false, true, false, false);
+
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertTrue(qr.isTLSCapable());
+
+        //And check raw bytes....
+        out=new ByteArrayOutputStream();
+        qr.write(out);
+
+        bytes=out.toByteArray();
+        ggepLen = _ggepUtil.getQRGGEP(true, false, false, true, 
+                                          new HashSet(), null).length;
+        //Length includes header, query hit header and footer, responses, and
+        //QHD (public and private)
+        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
+        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
+        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
+
+        // check read back....
+        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertTrue(qr.isTLSCapable());
+    }
+    
+    public void testCreateQHDOtherBits2() throws Exception {
+        //Create extended QHD from scratch with different bits set
+        // Do not set multicast, as that will unset pushing, busy, etc..
+        // and generally confuse the test.
+        ConnectionSettings.TLS_INCOMING.setValue(false);
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid,
+                          true, false, false, true, false, false);
+
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertFalse(qr.isTLSCapable());
+
+        //And check raw bytes....
+        out=new ByteArrayOutputStream();
+        qr.write(out);
+
+        bytes=out.toByteArray();
+        ggepLen = _ggepUtil.getQRGGEP(true, false, false,false,
                                       new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -528,7 +610,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertFalse(qr.isReplyToMulticastQuery());
-
+        assertFalse(qr.isTLSCapable());
+    }
+    
+    public void testCreateQHDOtherBits3() throws Exception {
         //Create extended QHD from scratch with different bits set
         // Do not set multicast, as that will unset pushing, busy, etc..
         // and generally confuse the test.
@@ -541,6 +626,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
+        ConnectionSettings.TLS_INCOMING.setValue(false);
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid, new byte[0],
@@ -556,13 +642,14 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(qr.getSupportsBrowseHost());
         assertFalse(qr.isReplyToMulticastQuery());
         assertTrue(qr.getSupportsFWTransfer());
+        assertFalse(qr.isTLSCapable());
 
         //And check raw bytes....
         out=new ByteArrayOutputStream();
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, true,
+        ggepLen = _ggepUtil.getQRGGEP(true, false, true,false,
                                       proxies, null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -584,7 +671,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(qr.getSupportsBrowseHost());
         assertFalse(qr.isReplyToMulticastQuery());
         assertTrue(qr.getSupportsFWTransfer());
-
+        assertFalse(qr.isTLSCapable());
+    }
+    
+    public void testCreateQHDNoBits() throws Exception {
         //Create from scratch with no bits set
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
@@ -596,18 +686,22 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.getVendor();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
+        
         try {
             qr.getNeedsPush();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
+        
         try {
             qr.getIsBusy();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
+        
         try {
             qr.getHadSuccessfulUpload();
             fail("qr should have been invalid");
         } catch (BadPacketException e) { }
+        
         try {
             qr.getIsMeasuredSpeed();
             fail("qr should have been invalid");
@@ -656,15 +750,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         // test standard null GGEP....
         try {
             // this shouldn't even work....
-            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,
+            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false,
                                                     new HashSet(), null), 
                                 0, null);
-            assertTrue(false);
+            fail("expected exception");
         }
         catch (BadGGEPBlockException expected) {}
 
         // test just BH GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,false,
                                                 new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -672,7 +766,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test just multicast GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,false,
                                                 new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -680,7 +774,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test combo GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,false,
                                                 new HashSet(), null),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
@@ -691,60 +785,66 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     
     public void testGGEPUtilWritesSecurityToken() throws Exception {
         // assert token is written
-        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, _token), 0, null);
+        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, false,null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, _token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         Set<IpPort> proxies = new HashSet<IpPort>();
         proxies.add(new Endpoint("127.0.0.1:6464"));
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, _token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,proxies, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         // assert token is not written
         try {
-            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, null), 0, null);
+            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false, null, null), 0, null);
             fail("exception should have been thrown");
         }
         catch (BadGGEPBlockException bgbe) {
         }
                 
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, null), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,null, null), 0, null);
         assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, null), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true,false, proxies, null), 0, null);
         assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
     }
 
 
     public void testBasicPushProxyGGEP() throws Exception {
-        basicTest(false, false, false);
-        basicTest(false, true, false);
-        basicTest(true, false, false);
-        basicTest(true, true, false);
-        basicTest(false, false, true);
-        basicTest(false, true, true);
-        basicTest(true, false, true);
-        basicTest(true, true, true);
+        for(byte i = 0; i < 0x1F; i++) {
+            BitNumbers bn = new BitNumbers(new byte[] { i } );
+            basicTest(bn.isSet(3), bn.isSet(4), bn.isSet(5), bn.isSet(6), bn.isSet(7));
+        }
     }
 
-    public void basicTest(final boolean browseHost, 
+    private static final Random RND = new Random();
+    public void basicTest(final boolean browseHost,
                           final boolean multicast,
-                          final boolean fwTransfer) throws Exception {
+                          final boolean fwTransfer,
+                          final boolean tls,
+                          final boolean proxiesTLS) throws Exception {
+        
         int numHeaders = 1;
 
-        // first take input of proxies
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.stanford.edu"};
+        // these are in order so that the TreeSet doesn't re-order them -- makes TLS matching easier
+        String[] hosts = {"1.2.3.4", "1.2.3.5", "1.2.3.6", "1.2.3.7"};
         Set proxies = new TreeSet(IpPort.COMPARATOR);
-        for (int i = 0; i < hosts.length; i++)
-            proxies.add(new IpPortImpl(hosts[i], 6346));
+        BitNumbers bn = new BitNumbers(4);
+        for (int i = 0; i < hosts.length; i++) {
+            if(!proxiesTLS || !RND.nextBoolean()) {
+                proxies.add(new IpPortImpl(hosts[i], 6346));
+            } else {
+                proxies.add(new ConnectableImpl(hosts[i], 6346, true));
+                bn.set(i);
+            }
+        }
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     fwTransfer, proxies, null), 
+                                                     fwTransfer, tls, proxies, null), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
@@ -758,6 +858,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             numHeaders++;
             assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_FW_TRANS));
         }
+        if (tls) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE));
+        }
+        
+        if(proxiesTLS && !bn.isEmpty()) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+            assertEquals(bn.toByteArray(), testGGEP.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+        }
+        
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
         assertEquals(numHeaders, testGGEP.getHeaders().size());
         Set retProxies = _ggepUtil.getPushProxies(testGGEP);
@@ -938,6 +1049,54 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             assertEquals(retProxies, proxies);
             assertEquals(proxies, retProxies);
         }
+    }
+    
+    public void testPushProxyWithTLS() throws Exception {
+        Set proxies = new IpPortSet();
+        proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.5", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.6", 5, true));
+        proxies.add(new ConnectableImpl("1.2.3.7", 5, false));
+        QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
+                6346, IP, 0, new Response[0],
+                GUID.makeGuid(), new byte[0],
+                false, false, true, true, true, false,
+                proxies);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        qr.write(out);
+        
+        // All we care about is the GGEP in the reply,
+        // which should begin at:
+        // + 0  // beginning
+        // + 23 // header
+        // + 11 // responses
+        // + 0  // (0 responses)
+        // + 10 // GGEP area of QHD
+        GGEP ggep = new GGEP(out.toByteArray(), 44);
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+        byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+        assertEquals(new byte[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 5, 5, 0, 1, 2, 3, 6, 5, 0, 1, 2, 3, 7, 5, 0 }, bytes);
+        bytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS);
+        assertEquals(new byte[] { (byte)0xE0 }, bytes);
+        
+        // Make sure we can deserialize it too.
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        qr = (QueryReply)MessageFactory.read(in);
+        assertEquals(4, qr.getPushProxies().size());
+        int tls = 0;
+        IpPort nonTLS = null;
+        for(IpPort ipp : qr.getPushProxies()) {
+            if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
+                tls++;
+            else
+                nonTLS = ipp;
+        }
+        assertEquals(3, tls);
+        assertEquals("1.2.3.7", nonTLS.getAddress());
+        proxies.retainAll(qr.getPushProxies());
+        assertEquals(4, proxies.size()); // make sure it's the right ones!
+        
     }
     
     public void testQueryReplyHasAlternates() throws Exception {
@@ -1256,10 +1415,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private void addAlternateLocationsToFiles() throws Exception {
         FileDesc[] fds = fman.getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
-            String urn = fds[i].getSHA1Urn().httpStringValue();
+            URN urn = fds[i].getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
-                RouterService.getAltlocManager().add(AlternateLocation.create(loc), null);
+                RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn), null);
             }
         }
     }

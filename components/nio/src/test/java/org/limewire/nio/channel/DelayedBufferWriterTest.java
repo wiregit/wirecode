@@ -4,14 +4,17 @@ package org.limewire.nio.channel;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
@@ -231,7 +234,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         Runnable r = scheduler.tasks.get(0);
         
         // that should turn interest on
-        Thread.sleep(200);
+        Thread.sleep(201);
         r.run();
         assertTrue(sink.status); // TODO: fix
     }
@@ -275,23 +278,56 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         delayer.setWriteChannel(sink);
     }
     
-    private class StubScheduler implements SchedulingThreadPool {
+    private class StubScheduler extends AbstractExecutorService implements ScheduledExecutorService {
 
     	List<Runnable> tasks = new ArrayList<Runnable>();
     	List<StubFuture> futures = new ArrayList<StubFuture>();
-		public Future invokeLater(Runnable r, long delay) {
-			tasks.add(r);
-			StubFuture f = new StubFuture(delay, r); 
-			futures.add(f);
-			return f;
-		}
 
-		public void invokeLater(Runnable runner) {
-			throw new IllegalArgumentException();
-		}
+        public ScheduledFuture<?> schedule(Runnable r, long delay, TimeUnit unit) {
+            tasks.add(r);
+            StubFuture f = new StubFuture(delay, r); 
+            futures.add(f);
+            return f;
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isShutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isTerminated() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void execute(Runnable command) {
+            throw new UnsupportedOperationException();
+        }
     }
     
-    private class StubFuture implements Future {
+    private class StubFuture implements ScheduledFuture {
     	final long delay;
     	final Runnable r;
     	boolean cancelled;
@@ -319,6 +355,12 @@ public class DelayedBufferWriterTest extends BaseTestCase {
 		public boolean isDone() {
 			return false;
 		}
+        public long getDelay(TimeUnit unit) {
+            return 0;
+        }
+        public int compareTo(Delayed o) {
+            return 0;
+        }
     	
     }
 }

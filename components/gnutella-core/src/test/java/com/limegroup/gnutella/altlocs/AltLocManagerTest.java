@@ -37,19 +37,19 @@ public class AltLocManagerTest extends LimeTestCase {
         assertEquals(1,c.getAltLocsSize());
         assertTrue(c.contains(direct));
         
-        c = manager.getPush(HugeTestUtils.SHA1, false);
+        c = manager.getPushNoFWT(HugeTestUtils.SHA1);
         assertEquals(1,c.getAltLocsSize());
         assertTrue(c.contains(push));
         
         
-        c = manager.getPush(HugeTestUtils.SHA1, true);
+        c = manager.getPushFWT(HugeTestUtils.SHA1);
         assertEquals(1,c.getAltLocsSize());
         assertTrue(c.contains(pushFWT));
         
         manager.purge();
         assertEquals(AlternateLocationCollection.EMPTY,manager.getDirect(HugeTestUtils.SHA1));
-        assertEquals(AlternateLocationCollection.EMPTY,manager.getPush(HugeTestUtils.SHA1, false));
-        assertEquals(AlternateLocationCollection.EMPTY,manager.getPush(HugeTestUtils.SHA1, true));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getPushNoFWT(HugeTestUtils.SHA1));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getPushFWT(HugeTestUtils.SHA1));
     }
     
     

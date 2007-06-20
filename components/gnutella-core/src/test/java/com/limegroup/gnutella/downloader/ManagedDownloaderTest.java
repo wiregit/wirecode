@@ -45,7 +45,6 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -123,14 +122,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	URN partialURN = 
     		URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-    	
-    	AlternateLocationCollection 
-			col = AlternateLocationCollection.create(partialURN);
-    	
+        
     	IncompleteFileDescStub partialDesc = 
     		new IncompleteFileDescStub("incomplete",partialURN,3);
     	
-    	partialDesc.setAlternateLocationCollection(col);
     	
     	Map urnMap = new HashMap(); urnMap.put(partialURN,partialDesc);
     	List descList = new LinkedList();descList.add(partialDesc);
@@ -326,7 +321,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader=new TestUploader("ManagedDownloaderTest", PORT);
+            uploader=new TestUploader("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
             uploader.setSendThexTree(false);
@@ -571,7 +566,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         return new RemoteFileDesc("127.0.0.1", PORT, 13l,
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",null, -1);
+                                  false, false,"",null, -1, false);
     }
     
     private void requestStart(ManagedDownloader dl) throws Exception {

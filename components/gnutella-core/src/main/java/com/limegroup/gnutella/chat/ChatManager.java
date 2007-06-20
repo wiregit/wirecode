@@ -48,9 +48,9 @@ public final class ChatManager implements ConnectionAcceptor {
     public void initialize() {
         RouterService.getConnectionDispatcher().
         addConnectionAcceptor(this,
-                new String[]{"CHAT"},
                 false,
-                false);
+                false,
+                "CHAT");
     }
     
 	/**

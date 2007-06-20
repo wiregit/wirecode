@@ -2,16 +2,14 @@ package com.limegroup.gnutella.altlocs;
 
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.StringTokenizer;
 
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -80,30 +78,6 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
      * Two counter objects to keep track of altloc expiration
      */
     private final Average legacy, ping, response;
-    
-    ////////////////////////"Constructors"//////////////////////////////
-    
-	/**
-	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
-	 * specified string argument.  
-	 *
-	 * @param location a string containing a single alternate location,
-	 *  including a full URL for a file and an optional date
-	 * @throws <tt>IOException</tt> if there is any problem constructing
-	 *  the new instance from the specified string, or if the <tt<location</tt>
-	 *  argument is either null or the empty string -- we could (should?) 
-	 *  throw NullPointerException here, but since we're already forcing the
-	 *  caller to catch IOException, we might as well throw in in both cases
-	 */
-	public static AlternateLocation create(final String location) 
-                                                           throws IOException {
-		if(location == null || location.equals(""))
-			throw new IOException("null or empty location");
-
-		URL url = AlternateLocation.createUrl(location);
-		URN sha1 = URN.createSHA1UrnFromURL(url);
-		return new DirectAltLoc(url,sha1);
-	}
 	
 	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
@@ -118,36 +92,54 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 	 * If the first is given, then the SHA1 in the string MUST match
 	 * the SHA1 given.
 	 * 
-	 * @param good whether the proxies contained in the string representation
-	 * should be added to or removed from the current set of proxies
+	 * @param location the URL or IP[port]
+     * @param URN the urn to use when the location doesn't contain a URN
 	 *
 	 * @throws <tt>IOException</tt> if there is any problem constructing
 	 *  the new instance.
 	 */
 	public static AlternateLocation create(final String location,
 	                                       final URN urn) throws IOException {
+        return create(location, urn, false);
+    }
+    
+    /**
+     * Constructs a new <tt>AlternateLocation</tt> instance based on the
+     * specified string argument and URN.  The location created this way
+     * assumes the name "ALT" for the file.
+     *
+     * @param location a string containing one of the following:
+     *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS" or
+     *  "1.2.3.4[:6346]" or
+     *  http representation of a PushEndpoint.
+     * 
+     * If the first is given, then the SHA1 in the string MUST match
+     * the SHA1 given.
+     * 
+     * @param location the URL or IP[port]
+     * @param URN the urn to use when the location doesn't contain a URN
+     * @param tlsCapable if the alternate location is capable of receiving
+     *                   TLS connections.  valid only if the location was
+     *                   not a full URL.
+     *
+     * @throws <tt>IOException</tt> if there is any problem constructing
+     *  the new instance.
+     */
+    public static AlternateLocation create(String location,
+                                           URN urn,
+                                           boolean tlsCapable) throws IOException {
 	    if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
             throw new IOException("null URN.");
          
-        // Case 1. Old-Style direct alt loc.
-        if(location.toLowerCase().startsWith("http")) {
-            URL url = createUrl(location);
-            URN sha1 = URN.createSHA1UrnFromURL(url);
-            AlternateLocation al = new DirectAltLoc(url,sha1);
-            if(!al.SHA1_URN.equals(urn))
-                throw new IOException("mismatched URN");
-            return al;
-        }
-        
-        // Case 2. Direct Alt Loc
+        // Case 1. Direct Alt Loc
         if (location.indexOf(";")==-1) {
-        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
+        	IpPort addr = AlternateLocation.createUrlFromMini(location, urn, tlsCapable);
 			return new DirectAltLoc(addr, urn);
         }
         
-        //Case 3. Push Alt loc
+        //Case 2. Push Alt loc
         PushEndpoint pe = new PushEndpoint(location);
         return new PushAltLoc(pe,urn);
     }
@@ -189,13 +181,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 		    throw new NullPointerException("cannot accept null URN");
 
 		if (!rfd.needsPush()) {
-			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
+			return new DirectAltLoc(new ConnectableImpl(rfd.getHost(),rfd.getPort(), rfd.isTLSCapable()), urn);
 		} else {
 		    PushEndpoint copy;
             if (rfd.getPushAddr() != null) 
                 copy = rfd.getPushAddr();
             else 
-                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,0,0,null);
+                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,PushEndpoint.PLAIN,0,null);
 		    return new PushAltLoc(copy,urn);
 		} 
 	}
@@ -372,51 +364,12 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
     }
     
     ///////////////////////////////helpers////////////////////////////////
-
-	/**
-	 * Creates a new <tt>URL</tt> instance based on the URL specified in
-	 * the alternate location header.
-	 * 
-	 * @param locationHeader the alternate location header from an HTTP
-	 *  header
-	 * @return a new <tt>URL</tt> instance for the URL in the alternate
-	 *  location header
-	 * @throws <tt>IOException</tt> if the url could not be extracted from
-	 *  the header in the expected format
-	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
-	 *  formatted correctly
-	 */
-	private static URL createUrl(final String locationHeader) 
-		throws IOException {
-		String locHeader = locationHeader.toLowerCase();
-		
-		//Doesn't start with http? Bad.
-		if(!locHeader.startsWith("http"))
-		    throw new IOException("invalid location: " + locationHeader);
-		
-		//Had multiple http's in it? Bad.
-		if(locHeader.lastIndexOf("http://") > 4) 
-            throw new IOException("invalid location: " + locationHeader);
-            
-        String urlStr = AlternateLocation.removeTimestamp(locHeader);
-        URL url = new URL(urlStr);
-        String host = url.getHost();
-        
-        // Invalid host? Bad.
-        if(host == null || host.equals(""))
-            throw new IOException("invalid location: " + locationHeader);        
-        // If no port, fake it at 80.
-        if(url.getPort()==-1)
-            url = new URL("http",url.getHost(),80,url.getFile());
-
-		return url;
-	}
 	
 	/**
 	 * Creates a new <tt>URL</tt> based on the IP and port in the location
 	 * The location MUST be a dotted IP address.
 	 */
-	private static IpPort createUrlFromMini(final String location, URN urn)
+	private static IpPort createUrlFromMini(final String location, URN urn, boolean tlsCapable)
 	  throws IOException {
 	    int port = location.indexOf(':');
 	    final String loc =
@@ -451,35 +404,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
         if(!NetworkUtils.isValidPort(port))
             throw new IOException("invalid port: " + port);
 	    
-	    return new Endpoint(loc,port);
+	    return new ConnectableImpl(loc,port, tlsCapable);
     }
-
-	/**
-	 * Removes the timestamp from an alternate location header.  This will
-	 * remove the timestamp from an alternate location header string that 
-	 * includes the header name, or from an alternate location string that
-	 * only contains the alternate location header value.
-	 *
-	 * @param locationHeader the string containing the full header, or only
-	 *  the header value
-	 * @return the same string as supplied in the <tt>locationHeader</tt> 
-	 *  argument, but with the timestamp removed
-	 */
-	private static String removeTimestamp(final String locationHeader) {
-		StringTokenizer st = new StringTokenizer(locationHeader);
-		int numToks = st.countTokens();
-		if(numToks == 1) {
-			return locationHeader;
-		}
-		String curTok = null;
-		for(int i=0; i<numToks; i++) {
-			curTok = st.nextToken();
-		}
-		
-		int tsIndex = locationHeader.indexOf(curTok);
-		if(tsIndex == -1) return null;
-		return locationHeader.substring(0, tsIndex);
-	}
 
     /////////////////////Object's overridden methods////////////////
 

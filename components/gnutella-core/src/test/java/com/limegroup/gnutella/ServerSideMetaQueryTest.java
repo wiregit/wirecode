@@ -6,16 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -97,7 +97,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, false, 
+                             null, null, true, Network.TCP, false, 0, false, 
                              0);
        
         MediaType.Aggregator filter = MediaType.getAggregator(query);
@@ -138,7 +138,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     private void testAggregator(int flag) throws Exception {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, false,
+                             null, null, true, Network.TCP, false, 0, false,
                              flag);
        
         MediaType.Aggregator filter = MediaType.getAggregator(query);
@@ -174,7 +174,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with no meta flag info
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0);
         
         testUP[0].send(query);
@@ -195,7 +195,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // test a query for audio
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | QueryRequest.AUDIO_MASK);
         
         testUP[1].send(query);
@@ -217,7 +217,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // test a query for documents
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | QueryRequest.DOC_MASK);
         
         testUP[2].send(query);
@@ -243,7 +243,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with several meta flags
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "meta", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | 
                              QueryRequest.AUDIO_MASK | 
                              QueryRequest.DOC_MASK |
@@ -277,7 +277,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with several meta flags
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "meta", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | 
                              QueryRequest.AUDIO_MASK | 
                              QueryRequest.DOC_MASK |
@@ -309,7 +309,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with several meta flags
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "txt", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | 
                              QueryRequest.DOC_MASK |
                              QueryRequest.IMAGE_MASK);
@@ -338,7 +338,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with several meta flags
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "txt", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | 
                              QueryRequest.LIN_PROG_MASK |
                              QueryRequest.IMAGE_MASK);
@@ -369,7 +369,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // first test a normal query with several meta flags
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "susheel", "", null,
-                             null, null, false, Message.N_TCP, false, 0, false,
+                             null, null, false, Network.TCP, false, 0, false,
                              0 | QueryRequest.AUDIO_MASK);
         
         testUP[0].send(query);
@@ -392,7 +392,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
-                             null, null, false, Message.N_TCP, false, 
+                             null, null, false, Network.TCP, false, 
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0);
         
@@ -415,7 +415,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
-                             null, null, false, Message.N_TCP, false, 
+                             null, null, false, Network.TCP, false, 
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.AUDIO_MASK);
         
@@ -443,7 +443,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
-                             null, null, false, Message.N_TCP, false, 
+                             null, null, false, Network.TCP, false, 
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.DOC_MASK);
         
@@ -472,7 +472,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
-                             null, null, false, Message.N_TCP, false, 
+                             null, null, false, Network.TCP, false, 
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.LIN_PROG_MASK);
         

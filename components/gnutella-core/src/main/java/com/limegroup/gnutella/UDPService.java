@@ -30,6 +30,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -308,7 +309,7 @@ public class UDPService implements ReadWriteObserver {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Message.N_UDP);
+                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Network.UDP);
                     if (message == null)
                         continue;
 
@@ -421,7 +422,7 @@ public class UDPService implements ReadWriteObserver {
      * @param host the host to send the message to
      */
     public void send(Message msg, IpPort host) {
-        send(msg, new InetSocketAddress(host.getInetAddress(), host.getPort()));
+        send(msg, host.getInetSocketAddress());
     }
 
 	/**

@@ -26,7 +26,7 @@ public class InspectionRequest extends RoutableGGEPMessage {
     private final boolean timestamp;
     
     public InspectionRequest(byte[] guid, byte ttl, byte hops, 
-            int version, byte[] payload, int network)
+            int version, byte[] payload, Network network)
             throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_INSPECTION_REQ, version, payload, network);
         String requested;

@@ -50,8 +50,12 @@ public class GGEP {
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
+    /** The extension header (key) for PushProxy TLS indexes. */
+    public static final String GGEP_HEADER_PUSH_PROXY_TLS = "PUSH_TLS";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
+    /** The extension header (key) for AlternateLocations that support TLS */
+    public static final String GGEP_HEADER_ALTS_TLS = "ALT_TLS";
     /** The extention header (key) for IpPort request */
     public static final String GGEP_HEADER_IPPORT="IP";
     /** The extension header (key) for UDP HostCache pongs. */
@@ -60,6 +64,10 @@ public class GGEP {
     public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
     /** The extension header (key) for packed IP/Ports */
     public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension header (key) for which packed IP/Ports support TLS. */
+    public static final String GGEP_HEADER_PACKED_IPPORTS_TLS="IPP_TLS";
+    /** The extension header (key) for understanding TLS. */
+    public static final String GGEP_HEADER_TLS_CAPABLE="TLS";
     /** The extension header (key) for packed UDP Host Caches */
     public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
     /** The extension header (key) for SHA1 urns. */
@@ -167,7 +175,7 @@ public class GGEP {
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
         throws BadGGEPBlockException {
 
-        if (messageBytes.length < 4)
+        if (messageBytes.length - beginOffset < 4)
             throw new BadGGEPBlockException();
 
         // all GGEP blocks start with this prefix....
@@ -427,7 +435,26 @@ public class GGEP {
         toWrite = 0x40 | end;
         out.write(toWrite);
     }
-
+    
+    /**
+     * Returns the amount of overhead that will be added 
+     * when the following key/value pair is written.
+     * 
+     * This does *NOT* work for non-ASCII headers, or compressed data.
+     */
+    public int getHeaderOverhead(String key) {
+        byte[] data = get(key);
+        if(data == null)
+            throw new IllegalArgumentException("no data for key: " + key);
+        
+        return 1 + // flags
+               key.length() + // header
+               data.length + // data
+               1 + // required data length
+               (data.length > 0x3F ? 1 : 0) + // optional data
+               (data.length > 0xFFF ? 1 : 0); // more option data
+    }
+    
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
     
     /**
@@ -448,6 +475,8 @@ public class GGEP {
                 put(key, ((Integer)value).intValue());
             else if(value instanceof Long)
                 put(key, ((Long)value).longValue());
+            else if(value instanceof Byte)
+                put(key, ((Byte)value).byteValue());
             else
                 throw new IllegalArgumentException("Unknown value: " + value);
         }
@@ -461,6 +490,16 @@ public class GGEP {
         //validateValue(value); // done when writing.  TODO: do here?
         _props.put(key, new NeedsCompression(value));
     }
+    
+    /** 
+     * Adds a key with byte value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data.
+     */
+    public void put(String key, byte value) throws IllegalArgumentException {
+        put(key, new byte[] { value } );
+    }    
 
     /** 
      * Adds a key with raw byte value.
@@ -476,7 +515,6 @@ public class GGEP {
         validateValue(value);
         _props.put(key, value);
     }
-
 
     /** 
      * Adds a key with string value, using the default character encoding.

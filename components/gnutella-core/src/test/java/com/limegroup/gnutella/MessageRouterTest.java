@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
@@ -834,28 +834,34 @@ public final class MessageRouterTest extends LimeTestCase {
     
     private void addFreeLeafSlotHosts(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
-        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
-        for(int i = 0; i < num; i++)
-            set.add(new Endpoint("1.2.3." + i, i+1));
+        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        for(int i = 0; i < num; i++) {
+            ExtendedEndpoint e =new ExtendedEndpoint("1.2.3." + i, i+1);
+            set.put(e, e);
+        }
     }
     
     private void addFreeLeafSlotHostsClassB(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
-        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
-        for(int i = 0; i < num; i++)
-            set.add(new Endpoint("1.2." + i+".3", i+1));
+        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        for(int i = 0; i < num; i++) {
+            ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
+           set.put(e, e);
+        }
     }
     
     private void addFreeUltrapeerSlotHostsClassB(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
-        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
-        for(int i = 0; i < num; i++)
-            set.add(new Endpoint("1.2." + i+".3", i+1));
+        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        for(int i = 0; i < num; i++) {
+            ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
+           set.put(e, e);
+        }
     }
     
     private void clearFreeLeafSlotHosts() throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
-        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
+        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
         set.clear();
     }        
         

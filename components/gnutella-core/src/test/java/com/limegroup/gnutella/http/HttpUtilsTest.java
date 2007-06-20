@@ -2,6 +2,7 @@ package com.limegroup.gnutella.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -258,4 +259,23 @@ public final class HttpUtilsTest extends LimeTestCase {
 			assertEquals("values should be equal", value, curValue);
 		}
 	}
+    
+    public void testParseValue() throws Exception {
+        assertEquals("value", HTTPUtils.parseValue("key=value"));
+        assertEquals("value", HTTPUtils.parseValue("key= value"));
+        assertEquals("value", HTTPUtils.parseValue("key= value "));
+        assertEquals("VAlue", HTTPUtils.parseValue("key = VAlue"));
+        
+        try {
+            fail("got: " + HTTPUtils.parseValue("key="));
+        } catch(IOException expected) {}
+        
+        try {
+            fail("got: " + HTTPUtils.parseValue("key"));
+        } catch(IOException expected) {}
+        
+        try {
+            fail("got: " + HTTPUtils.parseValue(""));
+        } catch(IOException expected) {}
+    }
 }

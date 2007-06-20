@@ -1,9 +1,9 @@
 package com.limegroup.bittorrent.tracking;
 
 import java.util.Collection;
-import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
@@ -42,7 +42,7 @@ public class TrackerManager {
 	
 	private final ManagedTorrent torrent;
 	
-	private volatile TimerTask scheduledAnnounce;
+	private volatile ScheduledFuture<?> scheduledAnnounce;
 	
 	TrackerManager(ManagedTorrent torrent) {
 		this.torrent = torrent;
@@ -89,9 +89,9 @@ public class TrackerManager {
 	
 	public void announceStop() {
 		// stop any current or future announcements
-		TimerTask t = scheduledAnnounce;
+        ScheduledFuture<?>  t = scheduledAnnounce;
 		if (t != null)
-			t.cancel();
+			t.cancel(true);
 		
 		announceToAll(Tracker.Event.STOP);	
 	}
@@ -151,7 +151,7 @@ public class TrackerManager {
 		};
 		LOG.debug("scheduling new tracker request");
 		if (scheduledAnnounce != null)
-			scheduledAnnounce.cancel();
+			scheduledAnnounce.cancel(true);
 		scheduledAnnounce = RouterService.schedule(scheduled, minDelay, 0);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}

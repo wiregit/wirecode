@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -35,6 +36,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -126,7 +128,7 @@ public class LeafRoutingTest extends LimeTestCase {
     private static Connection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         RouterService.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          
@@ -349,7 +351,7 @@ public class LeafRoutingTest extends LimeTestCase {
         // send a query that should hit
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
                                               "berkeley", null, null, null,
-                                              null, false, 0, false, 0);
+                                              null, false, Network.UNKNOWN, false, 0);
         ultrapeer2.send(query);
         ultrapeer2.flush();
         

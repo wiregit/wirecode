@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
+import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.CircularByteBuffer;
 import org.limewire.nio.channel.ChannelReadObserver;
@@ -46,7 +46,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	 * <tt>ThreadPool</tt> on which its safe to schedule calls
 	 * to handleRead
 	 */
-	private final SchedulingThreadPool networkInvoker;
+	private final ScheduledExecutorService networkInvoker;
 	
 	/**
 	 * Cached runnable that drains any data read in the buffer
@@ -63,7 +63,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	 */
 	public BTMessageReader(IOErrorObserver ioxObserver, 
 			BTMessageHandler handler,
-            SchedulingThreadPool networkInvoker,
+            ScheduledExecutorService networkInvoker,
 			ByteBufferCache cache) {
 		_in = new CircularByteBuffer(BUFFER_SIZE, cache);
 		this.networkInvoker = networkInvoker;
@@ -165,7 +165,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 		if (stateChange) {
 			currentState = readerState.getEntryState();
 			if (_in.size() > 0 && !shutdown)
-				networkInvoker.invokeLater(getDrainer());
+				networkInvoker.execute(getDrainer());
 		}
 	}
 	

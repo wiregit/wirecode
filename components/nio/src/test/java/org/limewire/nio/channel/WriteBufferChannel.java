@@ -11,11 +11,11 @@ import org.limewire.nio.observer.WriteObserver;
 
 public class WriteBufferChannel implements ChannelWriter, InterestWritableByteChannel {
     private ByteBuffer buffer;
-    private boolean closed = false;
-    public InterestWritableByteChannel channel;
-    public WriteObserver observer;
-    public boolean status;
-    private boolean shutdown;
+    private volatile boolean closed = false;
+    public volatile InterestWritableByteChannel channel;
+    public volatile WriteObserver observer;
+    public volatile boolean status;
+    private volatile boolean shutdown;
     
     public WriteBufferChannel(int size) {
         buffer = ByteBuffer.allocate(size);

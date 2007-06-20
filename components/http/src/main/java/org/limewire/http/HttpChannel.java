@@ -113,7 +113,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void shutdown() {
         if (!closed.getAndSet(true)) {
-            NIODispatcher.instance().invokeLater(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                 public void run() {
                     eventDispatch.disconnected(session);
                 }               

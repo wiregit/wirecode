@@ -8,11 +8,13 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -20,8 +22,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.BitNumbers;
+import org.limewire.collection.Function;
 import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -38,7 +43,6 @@ import org.limewire.nio.statemachine.ReadState;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
@@ -51,6 +55,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -69,10 +74,8 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -273,38 +276,46 @@ public class HTTPDownloader implements BandwidthTracker {
     
 
     /**
-     * Creates an uninitialized client-side normal download.  Call 
-     * connectTCP and connectHTTP() on this before any other methods.  
-     * Non-blocking.
+     * Allows subclasses to construct the class without an initialized
+     * socket.
      *
      * @param rfd complete information for the file to download, including
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
-     * @param start the place to start reading from the network and writing to 
-     *  the file
-     * @param stop the last byte to read+1
+     *  @param inNetwork true if this download is for an in-network downloader
      */
-	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile, inNetwork);
+	protected HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
+        this(null, rfd, incompleteFile, inNetwork, false);
 	}	
 
 	/**
-     * Creates an uninitialized server-side push download. connectTCP() and 
-     * connectHTTP() on this before any other methods.  Non-blocking.
+     * Constructs an HTTPDownloader with the given socket.
+     * If the socket was a PUSH socket, the GIV must have already been
+     * read off it.
      * 
-     * @param socket the socket to download from.  The "GIV..." line must
-     *  have been read from socket.  HTTP headers may not have been read or 
-     *  buffered -- this can be <tt>null</tt>
+     * You must call initializeTCP prior to connectHTTP.
+     * 
+     * @param socket the socket to download from.
      * @param rfd complete information for the file to download, including
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
+     * @param inNetwork true if this is for an in-network downloader.
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
+        this(socket, rfd, incompleteFile, inNetwork, true);
+    }
+    
+    /**
+     * Constructs this HTTPDownloader with all the necessary parameters.
+     * If requireSocket is true, the socket parameter must be non-null.
+     */
+    private HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork, boolean requireSocket) {
         if(rfd == null)
             throw new NullPointerException("null rfd");
+        if(requireSocket && socket == null)
+            throw new NullPointerException("null socket");
         
         _rfd=rfd;
         _socket=socket;
@@ -315,8 +326,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		_amountToRead = 0;
 		_port = rfd.getPort();
 		_host = rfd.getHost();
-		_chatEnabled = rfd.chatEnabled();
-        _browseEnabled = rfd.browseHostEnabled();
+		_chatEnabled = rfd.isChatEnabled();
+        _browseEnabled = rfd.isBrowseHostEnabled();
         _locationsReceived = new HashSet<RemoteFileDesc>();
         _goodLocs = new HashSet<DirectAltLoc>();
         _badLocs = new HashSet<DirectAltLoc>();
@@ -345,62 +356,45 @@ public class HTTPDownloader implements BandwidthTracker {
 	    return _locationsReceived;
     }
     
+    /**
+     * Stores the location in the specific sets.
+     * Both 'remove' sets have the location removed while the lock is held on removeWithLock,
+     * and addTo is added if it isn't within contains (while the lock is held on addTo.
+     */
+    private static <T extends AlternateLocation> void storeLocation(T loc, Set<T> removeWithLock, Set<T> removeAlso, Set<T> addTo, Set<T> contains) {
+        synchronized(removeWithLock) {
+            removeAlso.remove(loc);
+            removeWithLock.remove(loc);
+        }
+        
+        synchronized(addTo) {
+            if(!contains.contains(loc))
+                addTo.add(loc);
+        }
+    }
+    
+    /** Stores the location as a success, for writing as an X-Alt or X-FAlt. */
     void addSuccessfulAltLoc(AlternateLocation loc) {
     	if (loc instanceof DirectAltLoc) {
-    		synchronized(_badLocs) {
-    			//If we ever thought loc was bad, forget that we did, so that we can
-    			//add it to the n-alts list again, if it fails -- remove from
-    			//writtenBadlocs
-    			_writtenBadLocs.remove(loc);           
-    			_badLocs.remove(loc);
-    		}
-    		synchronized(_goodLocs) {
-    			if(!_writtenGoodLocs.contains(loc)) //not written earlier
-    				_goodLocs.add((DirectAltLoc)loc); //duplicates make no difference
-    		}
+            DirectAltLoc direct = (DirectAltLoc)loc;
+            storeLocation(direct, _badLocs, _writtenBadLocs, _goodLocs, _writtenGoodLocs);
     	} else if(loc instanceof PushAltLoc){
-    		synchronized(_badPushLocs) {
-    			//If we ever thought loc was bad, forget that we did, so that we can
-    			//add it to the n-alts list again, if it fails -- remove from
-    			//writtenBadlocs
-    			_writtenBadPushLocs.remove(loc);           
-    			_badPushLocs.remove(loc);
-    		}
-    		synchronized(_goodPushLocs) {
-    			if(!_writtenPushLocs.contains(loc)) //not written earlier
-    				_goodPushLocs.add((PushAltLoc)loc); //duplicates make no difference
-    				
-    		}
+            PushAltLoc push = (PushAltLoc)loc;
+            storeLocation(push, _badPushLocs, _writtenBadPushLocs, _goodPushLocs, _writtenPushLocs);
     	} else {
     	    throw new IllegalStateException("bad location of class: " + loc.getClass());
         }
     }
     
+    /** Stores the location as a failed alternate location, for writing as X-NAlt or X-NFAlt. */
     void addFailedAltLoc(AlternateLocation loc) {
-        //if we ever thought it was good, forget that we did, so we can write it
-        //out as good again -- remove it from writtenGoodLocs if it was there
-    	
-    	if (loc instanceof DirectAltLoc){
-    		synchronized(_goodLocs) {
-    			_writtenGoodLocs.remove(loc);
-    			_goodLocs.remove(loc);
-    		}
-        
-    		synchronized(_badLocs) {
-    			if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
-    				_badLocs.add((DirectAltLoc)loc); //duplicates make no difference
-    		}
-    	} else if(loc instanceof PushAltLoc){
-    		synchronized(_goodPushLocs) {
-    			_writtenPushLocs.remove(loc);
-    			_goodPushLocs.remove(loc);
-    		}
-        
-    		synchronized(_badPushLocs) {
-    			if(!_writtenBadPushLocs.contains(loc))//no need to repeat to uploader
-    				_badPushLocs.add((PushAltLoc)loc); //duplicates make no difference
-    		}
-    	} else {
+        if (loc instanceof DirectAltLoc) {
+            DirectAltLoc direct = (DirectAltLoc)loc;
+            storeLocation(direct, _goodLocs, _writtenGoodLocs, _badLocs, _writtenBadLocs);
+        } else if(loc instanceof PushAltLoc){
+            PushAltLoc push = (PushAltLoc)loc;
+            storeLocation(push, _goodPushLocs, _writtenPushLocs, _badPushLocs, _writtenBadPushLocs);
+        } else {
             throw new IllegalStateException("bad location of class: " + loc.getClass());
         }
     }
@@ -408,22 +402,16 @@ public class HTTPDownloader implements BandwidthTracker {
     ///////////////////////////////// Connection /////////////////////////////
 
     /** 
-     * Initializes this by connecting to the remote host (in the case of a
-     * normal client-side download). Blocks for up to timeout milliseconds 
-     * trying to connect, unless timeout is zero, in which case there is 
-     * no timeout.  This MUST be uninitialized, i.e., connectTCP may not be 
-     * called more than once.
-     * <p>
-     * @param timeout the timeout to use for connecting, in milliseconds,
-     *  or zero if no timeout
-     * @exception IOException could not establish a TCP connection
+     * Initializes the TCP connection by installing readers & writers
+     * on the socket and setting the appropriate keepAlive & soTimeout
+     * socket options.
+     * 
+     * If the TCP connection could not be initialized, this
+     * throws an IOException.
      */
-	public void connectTCP(int timeout) throws IOException {
-        if (_socket == null) {
-            long curTime = System.currentTimeMillis();
-            _socket = Sockets.connect(_host, _port, timeout);
-            NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
-        }
+	public void initializeTCP() throws IOException {
+        if(_socket == null)
+            throw new IllegalStateException("no socket!");
         
         try {
             _socket.setKeepAlive(true);
@@ -533,41 +521,9 @@ public class HTTPDownloader implements BandwidthTracker {
 		if ( sha1 != null )
             headers.put(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1);
 
-        //We don't want to hold locks while doing network operations, so we use
-        //this variable to clone _goodLocs and _badLocs and write to network
-        //while iterating over the clone
-        Set<AlternateLocation> writeClone = null;
-        
-        //write altLocs 
-        synchronized(_goodLocs) {
-            if(_goodLocs.size() > 0) {
-                writeClone = new HashSet<AlternateLocation>();
-                for(DirectAltLoc loc : _goodLocs) {
-                    writeClone.add(loc);
-                    _writtenGoodLocs.add(loc);
-                }
-                _goodLocs.clear();
-            }
-        }
-        if(writeClone != null) //have something to write?
-            headers.put(HTTPHeaderName.ALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
-        
-        writeClone = null;
-        //write-nalts        
-        synchronized(_badLocs) {
-            if(_badLocs.size() > 0) {
-                writeClone = new HashSet<AlternateLocation>();
-                for(DirectAltLoc loc : _badLocs) {
-                    writeClone.add(loc);
-                    _writtenBadLocs.add(loc);
-                }
-                _badLocs.clear();
-            }
-        }
-
-        if(writeClone != null) //have something to write?
-            headers.put(HTTPHeaderName.NALTS, new HTTPHeaderValueCollection(writeClone));
-        
+        writeAlternateLocations(headers, HTTPHeaderName.ALT_LOCATION, _goodLocs, _writtenGoodLocs, true);
+        writeAlternateLocations(headers, HTTPHeaderName.NALTS, _badLocs, _writtenBadLocs, false);
+ 
         // if the other side indicated they want firewalled altlocs, send some
         //
         // Note: we send both types of firewalled altlocs to the uploader since even if
@@ -576,53 +532,11 @@ public class HTTPDownloader implements BandwidthTracker {
         // Note2: we can't know whether the other side wants to receive pushlocs until
         // we read their headers. Therefore pushlocs will be sent from the second
         // http request on.
-        
-        if (_wantsFalts) {
-        	writeClone = null;
-        	synchronized(_goodPushLocs) {
-        		if(_goodPushLocs.size() > 0) {
-        			writeClone = new HashSet<AlternateLocation>();
-                    for(PushAltLoc loc : _goodPushLocs) {
-        				// we should not have empty proxies unless this is ourselves
-        				if (loc.getPushAddress().getProxies().isEmpty()) {
-        				    if (loc.getPushAddress() instanceof PushEndpointForSelf)
-        				        continue;
-        				    else
-        				        Assert.that(false,"empty pushloc in downloader");
-        				}
-        				
-        				writeClone.add(loc);
-        				_writtenPushLocs.add(loc);
-        			}
-        			_goodPushLocs.clear();
-        		}
-        	}
-        	if (writeClone!=null)
-                headers.put(HTTPHeaderName.FALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
-        	
-        	//do the same with bad push locs
-        	writeClone = null;
-        	synchronized(_badPushLocs) {
-                if(_badPushLocs.size() > 0) {
-                    writeClone = new HashSet<AlternateLocation>();
-                    for(PushAltLoc loc : _badPushLocs) {
-                        // no empty proxies allowed here
-        				Assert.that(!loc.getPushAddress().getProxies().isEmpty());
-        				
-        				writeClone.add(loc);
-                        _writtenBadPushLocs.add(loc);
-                    }
-                    _badPushLocs.clear();
-                }
-            }
-        	
-        	if (writeClone!=null) 
-                headers.put(HTTPHeaderName.BFALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
+        if(_wantsFalts) {
+            writeAlternateLocations(headers, HTTPHeaderName.FALT_LOCATION, _goodPushLocs, _writtenPushLocs, false);
+            writeAlternateLocations(headers, HTTPHeaderName.BFALT_LOCATION, _badPushLocs, _writtenBadPushLocs, false);
         }
         
-        
-        
-
         headers.put(HTTPHeaderName.RANGE, new SimpleHTTPHeaderValue("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
 		if (RouterService.acceptedIncomingConnection() &&
@@ -663,6 +577,53 @@ public class HTTPDownloader implements BandwidthTracker {
         _stateMachine.addStates(new IOState[] { writer, reader } );
         _headerReader = reader;
 	}
+    
+    /** Adds some locations to the set of locations we'll write, and stores them in the already-written set. */
+    private <T extends AlternateLocation> void writeAlternateLocations(Map<HTTPHeaderName, HTTPHeaderValue> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {        
+        //We don't want to hold locks while doing network operations, so we use
+        //this variable to clone the location before writing to the network
+        List<HTTPHeaderValue> valuesToWrite = null;
+        BitNumbers bn = null;
+        synchronized(locs) {
+            if(locs.size() > 0) {
+                valuesToWrite = new ArrayList<HTTPHeaderValue>(locs.size());
+                if(includeTLS)
+                    bn = new BitNumbers(locs.size());
+                for(T loc : locs) {
+                    // we should not have empty proxies unless this is ourselves
+                    if(loc instanceof PushAltLoc) {
+                        PushAltLoc pushLoc = (PushAltLoc)loc;
+                        if (pushLoc.getPushAddress().getProxies().isEmpty()) {
+                            if (pushLoc.getPushAddress() instanceof PushEndpointForSelf)
+                                continue;
+                            else
+                                assert false : "empty pushloc in downloader";
+                        }
+                    } else if(loc instanceof DirectAltLoc) {
+                        IpPort host = ((DirectAltLoc)loc).getHost();
+                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable())
+                            bn.set(valuesToWrite.size());
+                    }
+                    valuesToWrite.add(loc);
+                    stored.add(loc);
+                }
+                locs.clear();
+            }
+        }
+        
+        if(valuesToWrite != null) {
+            if(bn != null && !bn.isEmpty()) {
+                final String hex = bn.toHexString();
+                valuesToWrite.add(0, new HTTPHeaderValue() {
+                    public String httpStringValue() {
+                        return DirectAltLoc.TLS_IDX + hex;
+                    }
+                });
+            }
+            
+            headers.put(header, new HTTPHeaderValueCollection(valuesToWrite));
+        }
+    }
 	
 	/**
 	 * Consumes the body of the HTTP message that was previously exchanged,
@@ -845,7 +806,7 @@ public class HTTPDownloader implements BandwidthTracker {
             else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.is(header))
 				checkContentUrnHeader(value, _rfd.getSHA1Urn());
 			else if(HTTPHeaderName.ALT_LOCATION.is(header))
-                readAlternateLocations(value);
+                readAlternateLocations(value, true);
             else if(HTTPHeaderName.QUEUE.is(header)) 
                 parseQueueHeaders(value, refQueueInfo);
             else if (HTTPHeaderName.SERVER.is(header)) 
@@ -973,36 +934,19 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *
 	 * @param altHeader the full alternate locations header
 	 */
-	private void readAlternateLocations(final String altStr) {
-		if(altStr == null)
-		    return;
-
-        final URN sha1 = _rfd.getSHA1Urn();
-        if(sha1 == null)
-            return;
-            
-		StringTokenizer st = new StringTokenizer(altStr, ",");
-		while(st.hasMoreTokens()) {
-			try {
-				AlternateLocation al =
-					AlternateLocation.create(st.nextToken().trim(), sha1);
-                Assert.that(al.getSHA1Urn().equals(sha1));
-                if (al.isMe())
-                    continue;
-                
-                RemoteFileDesc rfd = al.createRemoteFileDesc(_rfd.getSize());
-                
+	private void readAlternateLocations(String altStr, boolean allowTLS) {
+        AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, new Function<AlternateLocation, Void>() {
+            public Void apply(AlternateLocation location) {
+                RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize());
                 if(_locationsReceived.add(rfd)) {
-                    if (al instanceof DirectAltLoc)
+                    if (location instanceof DirectAltLoc)
                         DownloadStat.ALTERNATE_COLLECTED.incrementStat();
                     else
                         DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
                 }
-			} catch(IOException e) {
-				// continue without adding it.
-				continue;
-			}
-		}
+                return null;
+            }
+        });
 	}
 	
 	/**
@@ -1436,7 +1380,7 @@ public class HTTPDownloader implements BandwidthTracker {
     	_wantsFalts=true;
     	
     	//this just delegates to readAlternateLocationHeader
-    	readAlternateLocations(str);
+    	readAlternateLocations(str, false);
     }
       
     
@@ -1686,7 +1630,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         public void writeScheduled() {
             LOG.debug("Delayed write scheduled");
-            NIODispatcher.instance().invokeLater(this);
+            NIODispatcher.instance().getScheduledExecutorService().execute(this);
         }
         
         public void run() {
@@ -1708,7 +1652,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	    }
         
         // Close in the NIO thread, so everything stays there.
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 IOUtils.close(_socket);
             }

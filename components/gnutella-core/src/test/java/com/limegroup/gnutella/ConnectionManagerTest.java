@@ -6,11 +6,16 @@ import java.net.ServerSocket;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import org.limewire.util.PrivilegedAccessor;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -20,7 +25,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -33,8 +37,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class ConnectionManagerTest extends LimeTestCase {
 
     private static TestHostCatcher CATCHER;
-
     private static RouterService ROUTER_SERVICE;
+    private static ConnectionListener LISTENER;
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -52,6 +56,9 @@ public class ConnectionManagerTest extends LimeTestCase {
         ROUTER_SERVICE =
             new RouterService(new ActivityCallbackStub());
         CATCHER = new TestHostCatcher();
+        LISTENER = new ConnectionListener();
+        
+        RouterService.getConnectionManager().addEventListener(LISTENER);
         
         setSettings();
         launchAllBackends();
@@ -72,6 +79,9 @@ public class ConnectionManagerTest extends LimeTestCase {
         //      to pick on someone, so it will be Morpheus =)
         String [] agents = {"morpheus"};
         ConnectionSettings.EVIL_HOSTS.setValue( agents );
+        
+        CATCHER.resetLatches();
+        CATCHER.endpoint = null;
     }
     
     private static void setSettings() throws Exception {
@@ -88,26 +98,12 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
     }
 
-    public void tearDown() {
-        //Ensure no more threads.
+    public void tearDown() throws Exception {
+        //Kill all connections
         RouterService.disconnect();
         RouterService.clearHostCatcher();
-        CATCHER.connectSuccess = 0;
-        CATCHER.connectFailures = 0;
-        CATCHER.endpoint = null;
-        sleep();
+        Thread.sleep(500);
     }
-    
-    /**
-     * Tests the method for checking whether or not connections should be 
-     * allowed.
-     * 
-     * @throws Exception if an error occurs
-     */
- //   public void testAllowConnection() throws Exception {
-        // NOTA BENE: you may have to turn on ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-    	// which is deactivated in this.setSettings()
- //   }
     
     /**
      * Tests the method for allowing ultrapeer 2 ultrapeer connections.
@@ -416,37 +412,71 @@ public class ConnectionManagerTest extends LimeTestCase {
      * Tests to make sure that a connection does not succeed with an
      * unreachable host.
      */
-    public void testUnreachableHost() {
+    public void testUnreachableHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("1.2.3.4", 5000);
         RouterService.connect();
-        sleep(15000);
-        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
+        assertTrue(CATCHER.waitForFailure(10000));
+        assertEquals(0, CATCHER.getSuccessCount());
     }
 
     /**
      * Test to make sure tests does not succeed with a host reporting
      * the wrong protocol.
      */
-    public void testWrongProtocolHost() {
+    public void testWrongProtocolHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("www.yahoo.com", 80);
         RouterService.connect();
-        sleep();
-        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
-        //assertEquals("should have received failure", 1, CATCHER.connectFailures);
+        assertTrue(CATCHER.waitForFailure(10000));
+        assertEquals(0, CATCHER.getSuccessCount());
     }
 
     /**
      * Test to make sure that a good host is successfully connected to.
      */
-    public void testGoodHost() {
-        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
-        
+    public void testGoodHost() throws Exception {
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);        
         RouterService.connect();
-        sleep();
-        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
-        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
+        assertTrue(CATCHER.waitForSuccess(5000));
+        assertEquals(0, CATCHER.getFailureCount());
+        
+        Thread.sleep(1000); // let capVM send
+        
+        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertTrue(mc.isTLSCapable());
+        assertFalse(mc.isTLSEncoded());
+    }
+    
+    public void testGoodTLSHost() throws Exception {
+        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
+        CATCHER.endpoint.setTLSCapable(true);        
+        RouterService.connect();
+        assertTrue(CATCHER.waitForSuccess(5000));
+        assertEquals(0, CATCHER.getFailureCount());
+
+        Thread.sleep(1000); // let capVM send
+        
+        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertTrue(mc.isTLSCapable());
+        assertTrue(mc.isTLSEncoded());
+    }
+    
+    public void testGoodTLSHostNotUsedIfNoSetting() throws Exception {
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
+        CATCHER.endpoint.setTLSCapable(true);        
+        RouterService.connect();
+        assertTrue(CATCHER.waitForSuccess(5000));
+        assertEquals(0, CATCHER.getFailureCount());
+
+        Thread.sleep(1000); // let capVM send
+        
+        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertTrue(mc.isTLSCapable());
+        assertFalse(mc.isTLSEncoded());
     }
 
 
@@ -455,13 +485,11 @@ public class ConnectionManagerTest extends LimeTestCase {
      * catcher as a connection that was made (at least temporarily) even
      * if the server sent a 503.
      */
-    public void testRejectHost() {
-        CATCHER.endpoint = 
-            new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
+    public void testRejectHost() throws Exception {
+        CATCHER.endpoint =  new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
         RouterService.connect();
-        sleep();
-        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
-        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
+        assertTrue(CATCHER.waitForSuccess(5000));
+        assertEquals(0, CATCHER.getFailureCount());
     }
     
     public void testRecordConnectionTime() throws Exception{
@@ -473,14 +501,20 @@ public class ConnectionManagerTest extends LimeTestCase {
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
         mgr.connect();
-        sleep(2000);
+        LISTENER.getLock().lock();
+        try {
+            mgr.connect();
+            LISTENER.waitForInitialized(2000);
+        } finally {
+            LISTENER.getLock().unlock();
+        }
         mgr.disconnect(false);
         long totalConnect = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue();
         long averageTime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
         assertEquals(totalConnect,
                 averageTime);
         mgr.connect();
-        sleep(6000);
+        Thread.sleep(6000);
         mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
@@ -521,10 +555,18 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
-        mgr.connect();
-        while(!mgr.isConnected())
-            sleep(10);
-        sleep(2000);
+        LISTENER.getLock().lock();
+        try {
+            mgr.connect();
+            LISTENER.waitForInitialized(2000);
+        } finally {
+            LISTENER.getLock().unlock();
+        }
+        
+        if(!mgr.isConnected())
+            fail("couldn't connect!");
+        
+        Thread.sleep(2000);
         //this should have lowered average time
         assertLessThan((30L*60L*1000L), mgr.getCurrentAverageUptime());
         assertGreaterThan((((60L*60L*1000L)+2L*1000L)/3L)-1, mgr.getCurrentAverageUptime());
@@ -645,13 +687,24 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     private static class TestHostCatcher extends HostCatcher {
         private volatile ExtendedEndpoint endpoint;
-        private volatile int connectSuccess=0;
-        private volatile int connectFailures=0;
+        private volatile CountDownLatch successLatch;
+        private volatile CountDownLatch failureLatch;
+        private volatile AtomicInteger successes;
+        private volatile AtomicInteger failures;
         
         TestHostCatcher() {
             super();
+            resetLatches();
         }
         
+        void resetLatches() {
+            successLatch = new CountDownLatch(1);
+            failureLatch = new CountDownLatch(1);
+            successes = new AtomicInteger();
+            failures = new AtomicInteger();
+        }
+        
+        @Override
         protected ExtendedEndpoint getAnEndpointInternal() {
             if(endpoint == null)
                 return null;
@@ -662,16 +715,37 @@ public class ConnectionManagerTest extends LimeTestCase {
             }
         }
         
-        public synchronized void doneWithConnect(Endpoint e, boolean success) {
-            if (success)
-                connectSuccess++;
-            else
-                connectFailures++;
+        @Override
+        public void doneWithConnect(Endpoint e, boolean success) {
+            if (success) {
+                successLatch.countDown();
+                successes.incrementAndGet();
+            } else {
+                failureLatch.countDown();
+                failures.incrementAndGet();
+            }
+        }
+        
+        boolean waitForSuccess(int millis) throws Exception {
+            return successLatch.await(millis, TimeUnit.MILLISECONDS);
+        }
+        
+        boolean waitForFailure(int millis) throws Exception {
+            return failureLatch.await(millis, TimeUnit.MILLISECONDS);
+        }
+        
+        long getSuccessCount() {
+            return successes.get();
+        }
+        
+        long getFailureCount() {
+            return failures.get();
         }
         
         //  Overridden because initialize() was previously overridden, but that missed
         //  setting up some required members.  Now, the code which was intended to be 
         //  skipped was moved into this function (on the base class)
+        @Override
         public void scheduleServices() {            
         }
     }
@@ -681,10 +755,13 @@ public class ConnectionManagerTest extends LimeTestCase {
             new ArrayBlockingQueue<EndpointObserver>(100);
         final BlockingQueue<Endpoint> endpoints = 
             new ArrayBlockingQueue<Endpoint>(100);
+        
+        @Override
         public void getAnEndpoint(EndpointObserver observer) {
             assertTrue(observers.offer(observer));
         }
         
+        @Override
         public boolean add(Endpoint e, boolean asdf) {
             assertTrue(endpoints.offer(e));
             return false;
@@ -712,20 +789,19 @@ public class ConnectionManagerTest extends LimeTestCase {
             this.received=received;
         }
 
+        @Override
         public boolean isOutgoing() {
             return isOutgoing;
         }
 
+        @Override
         public int getNumMessagesSent() {
             return sent;
         }
         
+        @Override
         public int getNumMessagesReceived() {
             return received;
-        }
-        
-        protected void startOutputRunner() {
-            // do nothing
         }
     }
     
@@ -738,12 +814,15 @@ public class ConnectionManagerTest extends LimeTestCase {
             isLime = lime;
         }
         
+        @Override
         public boolean isClientSupernodeConnection() {
             return true;
         }
+        @Override
         public boolean isSupernodeClientConnection() {
             return false;
         }
+        @Override
         public boolean isLimeWire() {
             return isLime;
         }
@@ -756,12 +835,15 @@ public class ConnectionManagerTest extends LimeTestCase {
             super(false, 0, 0);
             isLime = lime;
         }
+        @Override
         public boolean isClientSupernodeConnection() {
             return false;
         }
+        @Override
         public boolean isSupernodeClientConnection() {
             return true;
         }
+        @Override
         public boolean isLimeWire() {
             return isLime;
         }
@@ -774,15 +856,19 @@ public class ConnectionManagerTest extends LimeTestCase {
             super(false, 0, 0);
             isLime = lime;
         }
+        @Override
         public boolean isSupernodeSupernodeConnection() {
             return false;
         }
+        @Override
         public boolean isClientSupernodeConnection() {
             return false;
         }
+        @Override
         public boolean isSupernodeClientConnection() {
             return false;
         }
+        @Override
         public boolean isLimeWire() {
             return isLime;
         }
@@ -791,12 +877,87 @@ public class ConnectionManagerTest extends LimeTestCase {
     private void pretendConnected() throws Exception {
         ConnectionManager mgr = RouterService.getConnectionManager();
         PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
-        PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections", null);
+        PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections");
     }
     
     private class NullOutputRunner implements OutputRunner {
         //  Overridden methods do nothing
         public void send(Message m) {}
         public void shutdown() {}
+    }
+    
+    private static class ConnectionListener implements ConnectionLifecycleListener {
+        private final Lock lock = new ReentrantLock();
+        private final Condition connected = lock.newCondition();
+        private final Condition connecting = lock.newCondition();
+        private final Condition capabilities = lock.newCondition();
+        private final Condition closed = lock.newCondition();
+        private final Condition initialized = lock.newCondition();
+        private final Condition initializing = lock.newCondition();
+        private final Condition disconnected = lock.newCondition();
+        private final Condition noInternet = lock.newCondition();
+        
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+            try {
+                lock.lock();
+                switch(evt.getType()) {
+                case CONNECTED: connected.signal(); break;
+                case CONNECTING:  connecting.signal(); break;
+                case CONNECTION_CAPABILITIES: capabilities.signal(); break;
+                case CONNECTION_CLOSED: closed.signal(); break;
+                case CONNECTION_INITIALIZED: initialized.signal(); break;
+                case CONNECTION_INITIALIZING: initializing.signal(); break;
+                case DISCONNECTED: disconnected.signal(); break;
+                case NO_INTERNET: noInternet.signal(); break;
+                    
+                default:
+                    throw new IllegalStateException("invalid type: " + evt.getType());
+                    
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+        
+        boolean waitForConnected(int millis) throws Exception {
+            return await(connected, millis);
+        }
+        
+        boolean waitForConnecting(int millis) throws Exception {
+            return await(connecting, millis);
+        }
+        
+        boolean waitForCapabilities(int millis) throws Exception {
+            return await(capabilities, millis);
+        }
+        
+        boolean waitForClosed(int millis) throws Exception {
+            return await(closed, millis);
+        }
+        
+        boolean waitForInitialized(int millis) throws Exception {
+            return await(initialized, millis);
+        }
+        
+        boolean waitForInitializing(int millis) throws Exception {
+            return await(initializing, millis);
+        }
+        
+        boolean waitForDisconnected(int millis) throws Exception {
+            return await(disconnected, millis);
+        }
+        
+        boolean waitForNoInternet(int millis) throws Exception {
+            return await(noInternet, millis);
+        }
+        
+        private boolean await(Condition x, int millis) throws Exception {
+            return x.await(millis, TimeUnit.MILLISECONDS);
+        }
+        
+        Lock getLock() {
+            return lock;
+        }
+        
     }
 }

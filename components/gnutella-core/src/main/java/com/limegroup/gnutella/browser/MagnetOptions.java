@@ -69,7 +69,7 @@ public class MagnetOptions implements Serializable {
 		if (urn != null) {
 			addAppend(map, Option.XT, urn.httpStringValue());
 		}
-		InetSocketAddress isa = fileDetails.getSocketAddress();
+		InetSocketAddress isa = fileDetails.getInetSocketAddress();
 		String url = null;
 		if (isa != null && urn != null) {
             StringBuilder addr = new StringBuilder("http://");

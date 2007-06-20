@@ -57,6 +57,15 @@
     	</do.tests2html>
     </target>    
     
+    <target name="test2html" depends="initialize">
+        <mkdir dir="${tests.limewire.components.limewire.xml}"/>
+        <do.tests2html component="limewire">
+            <more-xml-locations>
+                <fileset dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
+			</more-xml-locations>
+    	</do.tests2html>
+    </target>
+    
     <target name="test-components"
          	description="Tests all components"
          	depends="compile, lw-components.test-all">

@@ -24,12 +24,16 @@ import com.limegroup.gnutella.util.DataUtils;
 
 public class PingRequest extends Message {
 
-    /**
-     * various flags related to the SCP ggep field
-     */
+    /* various flags related to the SCP ggep field */
+    /** Mask for where leaf/ultrapeer requests are. */
     public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
+    /** If we're requesting leaf hosts. */
     public static final byte SCP_LEAF = 0x0;
+    /** If we're requesting ultrapeer hosts. */
     public static final byte SCP_ULTRAPEER = 0x1;
+    /** If we support incoming TLS. */
+    public static final byte SCP_TLS = 0x2;
+    
     
     /**
      * GUID to send out for UDP pings.
@@ -151,16 +155,23 @@ public class PingRequest extends Message {
         } else {
             l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
             guid = UDPService.instance().getSolicitedGUID();
-        }
+        }        
+        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
+        
+        return guid;
+    }
+    
+    private static byte[] getSCPData() {
         byte[] data = new byte[1];
         if(RouterService.isSupernode())
             data[0] = SCP_ULTRAPEER;
         else
             data[0] = SCP_LEAF;
         
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        if(ConnectionSettings.TLS_INCOMING.getValue())
+            data[0] |= SCP_TLS; // add our support for TLS.
         
-        return guid;
+        return data;
     }
     
     /**
@@ -168,14 +179,9 @@ public class PingRequest extends Message {
      * for sending to the multicast network.
      */
     public static PingRequest createMulticastPing() {
-        GUID guid = new GUID();
-        byte[] data = new byte[1];
-        if(RouterService.isSupernode())
-            data[0] = 0x1;
-        else
-            data[0] = 0x0;
+        GUID guid = new GUID();        
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
         return new PingRequest(guid.bytes(), (byte)1, l);
     }    
             
@@ -189,15 +195,6 @@ public class PingRequest extends Message {
         // the ping is still written even if there's no payload
         SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
         //Do nothing...there is no payload!
-    }
-
-    public Message stripExtendedPayload() {
-        if (payload==null)
-            return this;
-        else
-            return new PingRequest(this.getGUID(), 
-                                   this.getTTL(), 
-                                   this.getHops());
     }
 
 	// inherit doc comment

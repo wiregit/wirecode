@@ -40,7 +40,7 @@ public interface FileDetails {
 	 * Returns address of the host that holds the file.
 	 * @return
 	 */
-	InetSocketAddress getSocketAddress();
+	InetSocketAddress getInetSocketAddress();
 	/**
 	 * Returns whether or not the host that holds this file is firewalled.
 	 * @return

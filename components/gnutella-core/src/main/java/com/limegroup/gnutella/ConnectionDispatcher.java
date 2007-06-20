@@ -41,10 +41,23 @@ public class ConnectionDispatcher {
     	}
     }
 
+    /**
+     * Associates the given ConnectionAcceptor with the given words.
+     * If localOnly is true, non-local-host sockets will be closed
+     * when using the word.  Otherwise, localhost sockets will be
+     * forbidden from using the word.
+     * If blocking is true, a new thread will be spawned when calling
+     * acceptor.acceptConnection.
+     * 
+     * @param acceptor The ConnectionAcceptor to call acceptConnection on
+     * @param localOnly True if localhost connections are required, false if none allowed
+     * @param blocking True if the acceptor may block on I/O after acceptConnection is called
+     * @param words The list of words to associate with this ConnectionAcceptor
+     */
     public void addConnectionAcceptor(ConnectionAcceptor acceptor,
-    		String [] words,
     		boolean localOnly,
-    		boolean blocking) {
+    		boolean blocking,
+    		String... words) {
     	Delegator d = new Delegator(acceptor, localOnly, blocking);
     	synchronized(protocols) {
     		for (int i = 0; i < words.length; i++) {
@@ -55,7 +68,8 @@ public class ConnectionDispatcher {
     	}
     }
     
-    public void removeConnectionAcceptor(String [] words) {
+    /** Removes any ConnectionAcceptors from being associated with the given words. */
+    public void removeConnectionAcceptor(String... words) {
     	synchronized(protocols) {
             protocols.keySet().removeAll(Arrays.asList(words));
     		longestWordSize = 0;
@@ -65,6 +79,12 @@ public class ConnectionDispatcher {
     		}
     	}
     }
+    
+    /** Determines if the word is valid for the understood protocols. */
+    public boolean isValidProtocolWord(String word) {
+        return protocols.containsKey(word);
+    }
+    
     
     /**
      * Dispatches this incoming connection to the appropriate manager, depending
@@ -79,6 +99,7 @@ public class ConnectionDispatcher {
         try {
             client.setSoTimeout(0);
         } catch(SocketException se) {
+            LOG.warn("Unable to set soTimeout, closing client", se);
             IOUtils.close(client);
             return;
         }
@@ -103,7 +124,7 @@ public class ConnectionDispatcher {
      * supposed to be local, and whether the reading should happen
      * in a new thread or not.
      */
-    private class Delegator {
+    private static class Delegator {
     	private final ConnectionAcceptor acceptor;
     	private final boolean localOnly, blocking;
     	
@@ -115,16 +136,18 @@ public class ConnectionDispatcher {
     		this.blocking = blocking;
     	}
     	
-    	public void delegate(final String word, 
-    			final Socket sock, 
-    			boolean newThread) {
+    	public void delegate(final String word,  final Socket sock, boolean newThread) {
     		boolean localHost = NetworkUtils.isLocalHost(sock);
     		boolean drop = false;
-    		if (localOnly && !localHost)
+    		if (localOnly && !localHost) {
+                LOG.debug("Dropping because we want a local connection, and this isn't localhost");
     			drop = true;
-    		if (!localOnly && localHost && 
-    				ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            }
+            
+    		if (!localOnly && localHost && ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+                LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
+            }
     		
     		if (drop) {
     			IOUtils.close(sock);
@@ -137,9 +160,14 @@ public class ConnectionDispatcher {
     					acceptor.acceptConnection(word, sock);
     				}
     			};
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Spawning new thread to dispatch: " + word);
     			ThreadExecutor.startThread(r, "IncomingConnection");
-    		} else
+    		} else {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Handling dispatched word: " + word + " in same thread");
     			acceptor.acceptConnection(word, sock);
+            }
     	}
     }
 }

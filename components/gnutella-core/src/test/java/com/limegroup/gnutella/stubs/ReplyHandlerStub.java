@@ -2,6 +2,7 @@ package com.limegroup.gnutella.stubs;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -89,6 +90,10 @@ public class ReplyHandlerStub implements ReplyHandler {
     
     public String getAddress() {
         return "30.24.0.5";
+    }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
     }
     
     public int getPort() {

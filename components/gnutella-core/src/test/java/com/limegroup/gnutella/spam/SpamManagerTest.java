@@ -289,7 +289,7 @@ public class SpamManagerTest extends LimeTestCase {
                 doc, urns,
                 false,false,
                 "ALT",
-                Collections.EMPTY_SET, 0l);
+                Collections.EMPTY_SET, 0l, false);
     }
     
 }

@@ -1,16 +1,15 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import junit.framework.Test;
+
 import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -43,8 +42,7 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
         
 		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
             try {
-                _alternateLocations.add(
-                        HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]));
+                _alternateLocations.add(AlternateLocation.create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.URNS[0]));
             } catch (IOException e) {
                 fail("could not set up test");
             }
@@ -207,7 +205,7 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
  		}
     }
 
-    public void testClonedSharedLocsWork() {
+    public void testClonedSharedLocsWork() throws Exception {
         AlternateLocationCollection c1=
         AlternateLocationCollection.create(_alCollection.getSHA1Urn());
         AlternateLocationCollection c2=
@@ -216,22 +214,15 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
         AlternateLocation[] alts = new AlternateLocation[5];
         
         for(int i=0; i<5; i++) {
-            AlternateLocation al = null;
-            try {
-                al= HugeTestUtils.create(HugeTestUtils.EQUAL_URLS[i]);
-            } catch (MalformedURLException e) {
-                fail("unable to set up test");
-            } catch (IOException e) {
-                fail("unable to set up test");
-            }
+            AlternateLocation al = AlternateLocation.create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.URNS[0]);
             alts[i] = al;
             c1.add(al);
         }
         
         try {
-            c1.add(HugeTestUtils.create(HugeTestUtils.UNEQUAL_URLS[2]));
+            c1.add(AlternateLocation.create(HugeTestUtils.SOME_IPS[6], HugeTestUtils.URNS[1]));
             fail("exception should have been thrown by now");
-        } catch(Exception e) {
+        } catch(IllegalArgumentException e) {
             //expected behaviour
         }        
         

@@ -6,6 +6,7 @@ import java.nio.channels.Channel;
 
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
+import org.limewire.util.BufferUtils;
 
 
 
@@ -124,6 +125,9 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
         	if (totalRead > 0)
         		available -= totalRead;
         } else {
+            // Humour the underlying channel -- it may need
+            // to read data internally.
+            channel.read(BufferUtils.getEmptyBuffer());
         	channel.interestRead(false);
         	if(lastInterestState)
         		throttle.interest(this);

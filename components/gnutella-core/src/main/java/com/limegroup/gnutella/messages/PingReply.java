@@ -6,13 +6,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -24,22 +28,26 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable, IpPort {
+public class PingReply extends Message implements Serializable, IpPort, Connectable {
     
     /**
      * The list of extra Gnutella ip/ports contained in this reply.
@@ -149,6 +157,9 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Contant for the DHT mode (active/passive/none)
      */
     private final DHTMode DHT_MODE;
+    
+    /** True if the remote host supports TLS. */
+    private final boolean TLS_CAPABLE;
 
     /**
      * Constant boolean for whether or not this pong contains any GGEP
@@ -544,7 +555,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         try {
             ip = InetAddress.getByName(NetworkUtils.ip2string(ipBytes));
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
         byte[] extensions = null;
         if(ggep != null) {
@@ -581,18 +592,16 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
         
         try {
-            return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Message.N_UNKNOWN);
+            return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Network.UNKNOWN);
         } catch (BadPacketException e) {
-            // cannot happen
-            assert false;
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
     public static PingReply 
     createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
     throws BadPacketException {
-        return createFromNetwork(guid, ttl, hops, payload, Message.N_UNKNOWN);
+        return createFromNetwork(guid, ttl, hops, payload, Network.UNKNOWN);
     }
 
     /**
@@ -606,7 +615,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      *  any reason
      */
     public static PingReply 
-        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
+        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
         throws BadPacketException {
         if(guid == null) {
             throw new NullPointerException("null guid");
@@ -715,7 +724,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @throws BadPacketException 
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip, int network) throws BadPacketException {
+                      GGEP ggep, InetAddress ip, Network network) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
@@ -735,6 +744,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         int freeLeafSlots = -1;
         int freeUltrapeerSlots = -1;
         AddressSecurityToken key = null;
+        boolean tlsCapable = false;
         
         String locale /** def. val from settings? */
             = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
@@ -867,6 +877,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                     packedIPs = NetworkUtils.unpackIps(data);
                 } catch(BadGGEPPropertyException bad) {
                 } catch(InvalidDataException bpe) {}
+                
+                if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS)) {
+                    try {
+                        byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS);
+                        packedIPs = decoratePackedIPs(data, packedIPs);
+                    } catch(BadGGEPPropertyException bad) {
+                    }
+                }
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS)) {
@@ -884,6 +902,8 @@ public class PingReply extends Message implements Serializable, IpPort {
                     packedCaches = listCaches(data);
                 } catch(BadGGEPPropertyException bad) {}
             }
+            
+            tlsCapable = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
         }
         
         MY_IP = myIP;
@@ -908,6 +928,48 @@ public class PingReply extends Message implements Serializable, IpPort {
         PACKED_UDP_HOST_CACHES = packedCaches;
         DHT_VERSION = dhtVersion;
         DHT_MODE = dhtMode;
+        TLS_CAPABLE = tlsCapable;
+    }
+    
+    /** Iterates through the hosts and sets TLS data if the data indicated the host supports TLS. */
+    private static List<IpPort> decoratePackedIPs(byte[] tlsData, List<IpPort> hosts) {
+        if(tlsData.length == 0)
+            return hosts;
+        
+        List<IpPort> decorated = null; 
+        BitNumbers tlsBits = new BitNumbers(tlsData);
+        int hostIdx = 0;
+        for(IpPort next : hosts) {
+            if(tlsBits.isSet(hostIdx)) {
+                ExtendedEndpoint ep = new ExtendedEndpoint(next.getInetAddress(), next.getPort());
+                ep.setTLSCapable(true);
+                if(decorated == null) {
+                    decorated = new ArrayList<IpPort>(hosts.size());
+                    decorated.addAll(hosts.subList(0, hostIdx)); // add all prior hosts.
+                }
+                decorated.add(ep);
+            } else if(decorated != null) {
+                decorated.add(next); // preserve decorated
+            }
+            
+            // If we've gone past the end of however much is stored,
+            // we're done.
+            if(hostIdx >= tlsBits.getMax()) {
+                // add the rest of the hosts to the decorated list if necessary
+                if(decorated != null && hostIdx+1 < hosts.size())
+                    decorated.addAll(hosts.subList(hostIdx+1, hosts.size()));
+                break;
+            }
+            
+            hostIdx++;
+        }
+        
+        if(decorated != null) {
+            assert decorated.size() == hosts.size() : "decorated: " + decorated + ", hosts: " + hosts;
+            return decorated;
+        } else {
+            return hosts;
+        }
     }
 
 
@@ -936,6 +998,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
+        
+        // add our support of TLS
+        if(ConnectionSettings.TLS_INCOMING.getValue())
+            ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;
     }
@@ -992,6 +1058,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         if(gnutHosts != null && !gnutHosts.isEmpty()) {
             ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(gnutHosts));
+            byte[] data = getTLSData(gnutHosts);
+            if(data.length != 0)
+                ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
         }
         
         if(dhtHosts != null && !dhtHosts.isEmpty()) {
@@ -999,6 +1068,36 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
         
         return ggep;
+    }
+    
+    /**
+     * Returns a byte[] of data that indicates if the hosts are TLS capable.
+     * If no hosts are capable, this returns an empty array.
+     * Otherwise, it returns a byte[] where each bit in the array
+     * corresponds to the element (in order) of the hosts.  If the bit
+     * is on, that host supports TLS.
+     * 
+     * For example, if this is supplied the hosts:
+     *  1.2.3.4:5, 5.4.3.2.1:1, and 2.3.4.5:6
+     * and the first and third hosts are TLS capable,
+     * then this will return a single byte of:
+     *  10100000
+     * 
+     */ 
+    private static byte[] getTLSData(Collection<? extends IpPort> hosts) {
+        HostCatcher catcher = RouterService.getHostCatcher();
+        if(catcher == null)
+            return DataUtils.EMPTY_BYTE_ARRAY;
+        
+        BitNumbers bn = new BitNumbers(hosts.size());
+        int i = 0;
+        for(IpPort ipp : hosts) {
+            if(catcher.isHostTLSCapable(ipp))
+                bn.set(i);
+            i++;
+        }
+        
+        return bn.toByteArray();
     }
 
     /**
@@ -1295,28 +1394,6 @@ public class PingReply extends Message implements Serializable, IpPort {
             return null;
         }
     }
-
-
-    // inherit doc comment from message superclass
-    public Message stripExtendedPayload() {
-        //TODO: if this is too slow, we can alias parts of this, as as the
-        //payload.  In fact we could even return a subclass of PingReply that
-        //simply delegates to this.
-        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(PAYLOAD, 0,
-                         newPayload, 0,
-                         STANDARD_PAYLOAD_SIZE);
-
-        try {
-            return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                                 newPayload, null, IP, getNetwork());
-        } catch (BadPacketException e) {
-            // cannot happen
-            ErrorService.error(e);
-            assert false;
-            return null;
-        }
-    }
     
     /**
      * Unzips data about UDP host caches & returns a list of'm.
@@ -1478,6 +1555,10 @@ public class PingReply extends Message implements Serializable, IpPort {
     public InetAddress getInetAddress() {
         return IP;
     }
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return new InetSocketAddress(getInetAddress(), getPort());
+    }
 
     public InetAddress getMyInetAddress() {
         return MY_IP;
@@ -1510,6 +1591,11 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     public String getUDPCacheAddress() {
         return UDP_CACHE_ADDRESS;
+    }
+    
+    /** Returns true if the host supports TLS. */
+    public boolean isTLSCapable() {
+        return TLS_CAPABLE;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

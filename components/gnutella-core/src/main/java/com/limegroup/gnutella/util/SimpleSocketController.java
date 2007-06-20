@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.limewire.nio.NBSocket;
-import org.limewire.nio.SocketFactory;
+import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -20,14 +20,14 @@ class SimpleSocketController implements SocketController {
      * If observer is null, this will block.
      * Otherwise, the observer will be notified of success or failure.
      */
-    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) 
+    public Socket connect(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) 
       throws IOException {  
         int proxyType = ProxyUtils.getProxyType(addr.getAddress());  
                        
         if (proxyType != ConnectionSettings.C_NO_PROXY)  
-            return connectProxy(proxyType, addr, timeout, observer);  
+            return connectProxy(factory, proxyType, addr, timeout, observer);  
         else
-            return connectPlain(addr, timeout, observer);  
+            return connectPlain(factory, addr, timeout, observer);  
     }
 
     /** Allows endless # of sockets. */
@@ -51,10 +51,10 @@ class SimpleSocketController implements SocketController {
      * If observer is null, this will block until a connection is established or an IOException is thrown.
      * Otherwise, this will return immediately and the Observer will be notified of success or failure.
      */
-    protected Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer)
+    protected Socket connectPlain(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer)
         throws IOException {
         
-        NBSocket socket = SocketFactory.newSocket();
+        NBSocket socket = factory.createSocket();
         bindSocket(socket);
         
         if(observer == null)
@@ -82,16 +82,16 @@ class SimpleSocketController implements SocketController {
     /**
      * Connects to a host using a proxy.
      */
-    protected Socket connectProxy(int type, InetSocketAddress addr, int timeout, ConnectObserver observer)
+    protected Socket connectProxy(NBSocketFactory factory, int type, InetSocketAddress addr, int timeout, ConnectObserver observer)
       throws IOException {
         String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
         int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
         InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, proxyPort);
         
         if(observer != null) {
-            return connectPlain(proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout));
+            return connectPlain(factory, proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout));
         } else {
-            Socket proxySocket = connectPlain(proxyAddr, timeout, null);
+            Socket proxySocket = connectPlain(factory, proxyAddr, timeout, null);
             try {
                 return ProxyUtils.establishProxy(type, proxySocket, addr, timeout);
             } catch(IOException iox) {

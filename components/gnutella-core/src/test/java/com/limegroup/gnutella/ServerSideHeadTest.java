@@ -54,7 +54,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	socket2.setSoTimeout(300);
     	
 
-    	ping1 = new HeadPing(FileManagerStub._notHave);
+    	ping1 = new HeadPing(FileManagerStub.NOT_HAVE);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
 
 

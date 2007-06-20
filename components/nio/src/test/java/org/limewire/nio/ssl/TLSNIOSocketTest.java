@@ -74,7 +74,7 @@ public class TLSNIOSocketTest extends BaseTestCase {
         
         WriteBufferChannel clientOut = new WriteBufferChannel();
         socket.setWriteObserver(clientOut);
-        NIODispatcher.instance().invokeAndWait(new Runnable() {public void run() {}}); //wait for write to set 
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get(); //wait for write to set 
         clientOut.setBuffer(ByteBuffer.wrap("TEST TEST\r\n\r\n".getBytes()));
         byte[] serverB = new byte[1000];
         int serverRead = accepted.getInputStream().read(serverB);
@@ -124,7 +124,7 @@ public class TLSNIOSocketTest extends BaseTestCase {
         
         WriteBufferChannel clientOutNB = new WriteBufferChannel();
         socket.setWriteObserver(clientOutNB);
-        NIODispatcher.instance().invokeAndWait(new Runnable() {public void run() {}}); //wait for write to set
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get(); //wait for write to set
         clientOutNB.setBuffer(ByteBuffer.wrap("MORE TEST\r\n".getBytes()));
         serverB = new byte[16];
         serverRead = accepted.getInputStream().read(serverB);

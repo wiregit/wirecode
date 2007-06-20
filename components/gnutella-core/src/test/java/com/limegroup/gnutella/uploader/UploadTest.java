@@ -211,7 +211,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-
+    
     public void testHTTP10DownloadRange() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.addRequestHeader("Range", "bytes=2-");
@@ -442,7 +442,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 1-3");
         try {
@@ -462,7 +461,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         method = new GetMethod(incompleteHashUrl);
         method.addRequestHeader("Range", "bytes 0-20");
         try {
@@ -527,7 +525,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -537,7 +534,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -555,7 +551,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         method = new GetMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -689,7 +684,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
         assertConnectionIsOpen(true);
 
         method = new GetMethod(otherFileNameUrl);
@@ -702,7 +696,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-
+    
     public void testIncompleteFileUpload() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -1016,7 +1010,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-
+        
         // the request is checked for a valid bitprint length
         method = new GetMethod("/uri-res/N2R?urn:bitprint:" + baseHash + "."
                 + "asdoihffd");
@@ -1089,7 +1083,7 @@ public class UploadTest extends LimeTestCase {
                     for (int j = 0; j < current.length; j++) {
                         assertEquals("offset: " + offset + ", idx: " + j,
                                 current[j], data[offset++]);
-                    }
+                	}
                 }
             }
             assertEquals(data.length, offset);
@@ -1137,5 +1131,4 @@ public class UploadTest extends LimeTestCase {
         assertEquals(open, connection.isOpen());
         client.getHttpConnectionManager().releaseConnection(connection);
     }
-
 }

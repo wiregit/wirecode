@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,9 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         DatagramSocket _ds;
         public IpPortImpl(DatagramSocket ds) {
             _ds = ds;
+        }
+        public InetSocketAddress getInetSocketAddress() {
+            return new InetSocketAddress(getInetAddress(), getPort());
         }
         public InetAddress getInetAddress() { 
             try {

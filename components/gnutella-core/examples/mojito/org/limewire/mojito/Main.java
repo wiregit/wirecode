@@ -55,6 +55,10 @@ public class Main {
             public boolean isLocalAddressPrivate() {
                 return NetworkSettings.LOCAL_IS_PRIVATE.getValue();
             }
+
+            public boolean isTLSCapable() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
         });
         
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);

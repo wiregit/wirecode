@@ -12,6 +12,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class DHTContactsMessageTest extends LimeTestCase {
@@ -57,7 +58,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         System.arraycopy(raw, 23, payload, 0, payload.length);
         
         DHTContactsMessage msg2 = (DHTContactsMessage)VendorMessageFactory.deriveVendorMessage(
-                guid, ttl, hops, payload, DHTContactsMessage.N_UDP);
+                guid, ttl, hops, payload, Message.Network.UDP);
         
         assertEquals(2, msg2.getContacts().size());
         

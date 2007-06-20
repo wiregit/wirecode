@@ -21,6 +21,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
@@ -39,15 +40,17 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * specific data as well, such as the server's 16-byte GUID.<p>
  *
  * This class is serialized to disk as part of the downloads.dat file.  Hence
- * you must be very careful before making any changes.  Deleting or changing the
- * types of fields is DISALLOWED.  Adding field a F is acceptable as long as the
+ * you must be very careful before making any changes.  Changing the
+ * types of fields is DISALLOWED.  Deleting fields is not recommended,
+ * as it can cause problems in the future if the field is re-added. 
+ * Adding field a F is acceptable as long as the
  * readObject() method of this initializes F to a reasonable value when
  * reading from older files where the fields are not present.  This is exactly
  * what we do with _urns and _browseHostEnabled.  On the other hand, older
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
+public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDetails {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
@@ -108,6 +111,9 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * if this is false, we set it to true if any URNs are present.
      */
     private boolean _http11;
+    
+    /** True if this host is TLS capable. */
+    public transient boolean _tlsCapable;
     
     /**
      * The <tt>PushEndpoint</tt> for this RFD.
@@ -184,6 +190,11 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      */
     private Map<String, Serializable> propertiesMap; 
     
+    /** A list of keys of properties inserted into the propertiesMap. */
+    private static enum RFDProperties {
+        PUSH_ADDR, CONNECT_TYPE;
+    }
+    
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
      * but with a different remote host.
@@ -202,15 +213,18 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
               false,                        // chat capable
               2,                            // quality
               false,                        // browse hostable
-              rfd.getXMLDocument(),              // xml doc
+              rfd.getXMLDocument(),         // xml doc
               rfd.getUrns(),                // urns
               false,                        // reply to MCast
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
-              IpPort.EMPTY_SET,            // push proxies
-              rfd.getCreationTime(),       // creation time
+              IpPort.EMPTY_SET,             // push proxies
+              rfd.getCreationTime(),        // creation time
               0,                            // firewalled transfer
-              null);                       // no PE cause not firewalled
+              null,                         // no PE cause not firewalled
+          ep instanceof Connectable ? 
+      ((Connectable)ep).isTLSCapable() : false // TLS capable if ep is.
+             );
     }
     
     /**
@@ -219,25 +233,26 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * head pongs.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
-    	this( pe.getAddress(),              // host - ignored
+    	this( pe.getAddress(),                // host - ignored
                 pe.getPort(),                 // port -ignored
                 COPY_INDEX,                   // index (unknown)
                 rfd.getFileName(),            // filename
                 rfd.getSize(),                // filesize
                 DataUtils.EMPTY_GUID,         // guid
-                rfd.getSpeed(),                            // speed
+                rfd.getSpeed(),               // speed
                 false,                        // chat capable
-                rfd.getQuality(),                            // quality
+                rfd.getQuality(),             // quality
                 false,                        // browse hostable
-                rfd.getXMLDocument(),              // xml doc
+                rfd.getXMLDocument(),         // xml doc
                 rfd.getUrns(),                // urns
                 false,                        // reply to MCast
-                true,                        // is firewalled
+                true,                         // is firewalled
                 AlternateLocation.ALT_VENDOR, // vendor
-                null,
-                rfd.getCreationTime(),	// creation time
-                0,
-                pe);                // use existing PE
+                null,                         // push proxies
+                rfd.getCreationTime(),	      // creation time
+                0,                            // firewalled transfer
+                pe,                           // use existing PE
+                false);                       // not TLS capable (they connect to us anyway)
     }
 
 	/** 
@@ -250,8 +265,8 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 * @param size the completed size of this file
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
+	 * @param chat true if the location is chattable
+	 * @param quality the quality of the connection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
 	 * @param browseHost specifies whether or not the remote host supports
@@ -261,9 +276,9 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 * @param replyToMulticast true if its from a reply to a multicast query
 	 * @param firewalled true if the host is firewalled
 	 * @param vendor the vendor of the remote host
-	 * @param timestamp the time this RemoteFileDesc was instantiated
 	 * @param proxies the push proxies for this host
 	 * @param createTime the network-wide creation time of this file
+	 * @param tlsCapable true if the remote host supports TLS
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
      * @throws <tt>NullPointerException</tt> if the host argument is 
@@ -275,10 +290,10 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, 
-                          Set<? extends IpPort> proxies, long createTime) {
+                          Set<? extends IpPort> proxies, long createTime, boolean tlsCapable) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, proxies, createTime, 0, null);
+             vendor, proxies, createTime, 0, null, tlsCapable);
     }
 
 	/** 
@@ -290,17 +305,17 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 * @param filename the name of the file
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
+	 * @param chat true if the location is chattable
+	 * @param quality the quality of the connection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
-     * @param xmlDocs the array of XML documents pertaining to this file
 	 * @param browseHost specifies whether or not the remote host supports
 	 *  browse host
 	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
 	 * @param replyToMulticast true if its from a reply to a multicast query
-	 *
+	 * @param tlsCapable true if the host supports a TLS connection
+	 * @param xmlDocs the array of XML documents pertaining to this file
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
      * @throws <tt>NullPointerException</tt> if the host argument is 
@@ -313,30 +328,48 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, 
                           Set<? extends IpPort> proxies, long createTime, 
-                          int FWTVersion) {
-		this(host,port,index,filename,size, clientGUID,speed,chat,quality,browseHost,
-                xmlDoc, urns, replyToMulticast, firewalled,vendor, proxies,
-                createTime, FWTVersion, null); // create pe if firewalled
+                          int FWTVersion, boolean tlsCapable) {
+		this(host,
+             port,
+             index,
+             filename,
+             size,
+             clientGUID,
+             speed,
+             chat,
+             quality,
+             browseHost,
+             xmlDoc,
+             urns, 
+             replyToMulticast,
+             firewalled,
+             vendor, 
+             proxies,
+             createTime,
+             FWTVersion, 
+             null, // this will create a PE to house the data if the host is firewalled
+             tlsCapable); 
 	}
 	
+    /** Constructs a RemoteFileDesc using the given PushEndpoint. */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 	        			int size,int speed,boolean chat, int quality, boolean browseHost,
 	        			LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
 	        			boolean firewalled, String vendor,long createTime,
 	        			PushEndpoint pe) {
         this(host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
-                replyToMulticast,firewalled,vendor,null,createTime,0,pe); // use exising pe
+                replyToMulticast,firewalled,vendor,null,createTime,0,pe, false); // use exising pe
     }
     
     /**
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE object is passed a new one is created. 
+     * no PE object is passed a new one is created.
      */
     private RemoteFileDesc (String host, int port, long index, String filename,
             int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
-            int FWTVersion, PushEndpoint pe) {
+            int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
 	    
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
@@ -377,7 +410,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
                         PushEndpoint.PLAIN, FWTVersion, 
                         new IpPortImpl(_host,_port));
                 }catch (UnknownHostException uhe) {
-                    throw new IllegalArgumentException("invalid host");
+                    throw new IllegalArgumentException(uhe);
                 }
             }
             
@@ -392,16 +425,19 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 		_replyToMulticast = replyToMulticast;
         _vendor = vendor;
         _creationTime = createTime;
-		
-	if(xmlDoc!=null) //not strictly needed
+        _tlsCapable = tlsCapable;
+        
+        if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
             _xmlDocs = null;
+        
 		if(urns == null) {
 			_urns = Collections.emptySet();
 		} else {
 			_urns = Collections.unmodifiableSet(urns);
 		}
+        
         _http11 = ( !_urns.isEmpty() );
 	}
 
@@ -440,7 +476,14 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
         
         // if we saved any properties, read them now
         if (propertiesMap != null) {
-            String http = (String)propertiesMap.get("_pushAddr");
+            Boolean tlsCapable = (Boolean)propertiesMap.get(RFDProperties.CONNECT_TYPE.name());
+            if(tlsCapable != null)
+                _tlsCapable = tlsCapable.booleanValue();
+            
+            String http = (String)propertiesMap.get(RFDProperties.PUSH_ADDR.name());
+            // try the older serialized name if it didn't have the newer one.
+            if(http == null)
+                http = (String)propertiesMap.get("_pushAddr");
             if (http != null) {
                 try {
                     _pushAddr = new PushEndpoint(http);
@@ -450,8 +493,9 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
                     }
                 } catch (IOException iox) {}
             }
-            // currently, we do not need the map to exist during the life of the object
-            // since we will not serialize pe unless told so this lifetime
+            
+            // erase the map so it's reconstructed with the most recent
+            // values upon the first write.
             propertiesMap = null;
         }
     }
@@ -461,14 +505,33 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     }
     
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        if (_serializeProxies && _pushAddr != null) {
-            if (propertiesMap == null)
-                propertiesMap = new HashMap<String, Serializable>();
-            
-            // this will also update the PE in case it changed since last serialization
-            propertiesMap.put("_pushAddr",_pushAddr.httpStringValue());
+        if(_tlsCapable) {
+            initPropertiesMap();
+            propertiesMap.put(RFDProperties.CONNECT_TYPE.name(), Boolean.TRUE);
         }
+        
+        if (_serializeProxies && _pushAddr != null) {
+            initPropertiesMap();
+            // this will also update the PE in case it changed since last serialization
+            propertiesMap.put(RFDProperties.PUSH_ADDR.name(), _pushAddr.httpStringValue());
+        }
+        
         stream.defaultWriteObject();
+    }
+    
+    private void initPropertiesMap() {
+        if(propertiesMap == null)
+            propertiesMap = new HashMap<String, Serializable>();
+    }
+    
+    /** Returns true if the host supports TLS. */
+    public boolean isTLSCapable() {
+        return _tlsCapable;
+    }
+    
+    /** Sets whether or not this host is TLS capable. */
+    public void setTLSCapable(boolean tlsCapable) {
+        _tlsCapable = tlsCapable;
     }
     
     /** 
@@ -679,8 +742,8 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     
     public final String getVendor() {return _vendor;}
 
-	public final boolean chatEnabled() {return _chatEnabled;}
-	public final boolean browseHostEnabled() {return _browseHostEnabled;}
+	public final boolean isChatEnabled() {return _chatEnabled;}
+	public final boolean isBrowseHostEnabled() {return _browseHostEnabled;}
 
 	/**
 	 * Returns the "quality" of the remote file in terms of firewalled status,
@@ -787,7 +850,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * @return the <tt>Set</tt> of proxy hosts that will accept push requests
      *  for this host -- can be empty
      */
-    public final Set<IpPort> getPushProxies() {
+    public final Set<? extends IpPort> getPushProxies() {
     	if (_pushAddr!=null)
     		return _pushAddr.getProxies();
     	else
@@ -965,7 +1028,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
         return _queueStatus;
     }
 
-	public InetSocketAddress getSocketAddress() {
+	public InetSocketAddress getInetSocketAddress() {
 		InetAddress addr = getInetAddress();
 		if (addr != null) {
 			return new InetSocketAddress(addr, getPort());

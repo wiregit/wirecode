@@ -31,15 +31,11 @@ public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage>
     protected final T delegate;
     
     AbstractLimeRUDPMessage(T delegate) {
-        super(GUID, RUDPMessage.F_RUDP_MESSAGE, TTL, HOPS, 0, N_UDP);
+        super(GUID, RUDPMessage.F_RUDP_MESSAGE, TTL, HOPS, 0, Network.UDP);
         this.delegate = delegate;
     }
 
     public void recordDrop() {
-    }
-
-    public Message stripExtendedPayload() {
-        return this;
     }
 
     public OpCode getOpCode() {

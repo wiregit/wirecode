@@ -3,9 +3,9 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
@@ -16,13 +16,13 @@ import org.limewire.util.StringUtils;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
+public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Serializable {
 
-    static final long serialVersionUID = 4686711693494625070L; 
+    private static final long serialVersionUID = 4686711693494625070L; 
     
     private InetAddress addr = null;
     private String hostname = null;
-    int port = 0;
+    private int port = 0;
     /** Number of files at the host, or -1 if unknown */
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
@@ -247,7 +247,7 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
         return port;
     }
 
-    public SocketAddress getSocketAddress() {
+    public InetSocketAddress getInetSocketAddress() {
         InetAddress addr = getInetAddress();
         if (addr == null) {
             return null;
@@ -385,10 +385,13 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
     
-    /**
-     * Determines if this is a UDP host cache.
-     */
+    /** Determines if this is a UDP host cache. */
     public boolean isUDPHostCache() {
+        return false;
+    }
+    
+    /** Determines if this endpoint supports TLS. */
+    public boolean isTLSCapable() {
         return false;
     }
 }

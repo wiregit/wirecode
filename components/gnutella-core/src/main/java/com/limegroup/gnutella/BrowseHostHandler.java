@@ -5,7 +5,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -28,6 +32,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -121,10 +126,20 @@ public class BrowseHostHandler {
      * @param canDoFWTransfer Whether or not this guy can do a firewall
      * transfer.
      */
-    public void browseHost(String host, int port, Set<? extends IpPort> proxies,
+    public void browseHost(Connectable host, Set<? extends IpPort> proxies,
                            boolean canDoFWTransfer) {
-        if(!NetworkUtils.isValidPort(port)  
-        		|| !NetworkUtils.isValidAddress(host)) {
+        
+        // If this wasn't initially resolved, resolve it now...
+        if(host.getInetSocketAddress().isUnresolved()) {
+            try {
+                host = new ConnectableImpl(host.getAddress(), host.getPort(), host.isTLSCapable());
+            } catch(UnknownHostException uhe) {
+                failed();
+                return;
+            }
+        }
+        
+        if(!NetworkUtils.isValidIpPort(host)) {
             failed();
             return;
         }
@@ -137,13 +152,14 @@ public class BrowseHostHandler {
         //   a. if so, just send a Push out.
         //   b. if not, try direct connect.  If it doesn't work, send a push.
         
-        if (canConnectDirectly(host, port) || isLocalBrowse(host)) {
+        if (canConnectDirectly(host) || isLocalBrowse(host)) {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
                 LOG.trace("Attempting direct connection");
-                Socket socket = Sockets.connect(host, port,
-                                                DIRECT_CONNECT_TIME);
+                ConnectType type = host.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+                Socket socket = Sockets.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
+                                                DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
                 browseExchange(socket);
                 
@@ -162,10 +178,11 @@ public class BrowseHostHandler {
         	failed();
         } else {
         	RemoteFileDesc fakeRFD = 
-        		new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
+        		new RemoteFileDesc(host.getAddress(), host.getPort(), SPECIAL_INDEX, "fake", 0, 
         				_serventID.bytes(), 0, false, 0, false,
         				null, null,false,true,"", proxies,
-        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0);
+        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0,
+        				host.isTLSCapable()); 
         	// register with the map so i get notified about a response to my
         	// Push.
         	synchronized (_pushedHosts) {
@@ -374,10 +391,10 @@ public class BrowseHostHandler {
 	 * because it is a private address or was unreachable in the past. Returns
 	 * false, otherwise or if <tt>host</tt> is the local address. 
 	 */
-    private boolean canConnectDirectly(String host, int port) {
+    private boolean canConnectDirectly(IpPort host) {
         return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() 
-        		|| !NetworkUtils.isPrivateAddress(host)
-        		|| NetworkUtils.isMe(host, port);
+        		|| !NetworkUtils.isPrivateAddress(host.getAddress())
+        		|| NetworkUtils.isMe(host.getAddress(), host.getPort());
     }
 
     /**
@@ -386,8 +403,8 @@ public class BrowseHostHandler {
      * This will make a push impossible so a direct connect is attempted
      * instead.
      */
-    private boolean isLocalBrowse(String host) {
-        return _serventID == null && NetworkUtils.isPrivateAddress(host);
+    private boolean isLocalBrowse(IpPort host) {
+        return _serventID == null && NetworkUtils.isPrivateAddress(host.getAddress());
     }
     
 	/**

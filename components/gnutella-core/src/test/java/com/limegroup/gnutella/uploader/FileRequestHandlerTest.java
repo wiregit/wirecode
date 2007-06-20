@@ -17,8 +17,8 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpExecutionContext;
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
@@ -39,10 +39,10 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
     private ConnectionManager proxyManager = new ConnectionManagerStub() {
         @Override
-        public Set<IpPort> getPushProxies() {
-            IpPort ip;
+        public Set<Connectable> getPushProxies() {
+            Connectable ip;
             try {
-                ip = new IpPortImpl("127.0.0.1:9999");
+                ip = new ConnectableImpl("127.0.0.1", 9999, false);
                 return Collections.singleton(ip);
             } catch (UnknownHostException e) {
             }

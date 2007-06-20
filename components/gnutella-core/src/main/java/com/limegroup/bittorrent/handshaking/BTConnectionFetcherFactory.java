@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.handshaking;
 
-import org.limewire.concurrent.SchedulingThreadPool;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 
@@ -14,7 +14,7 @@ public class BTConnectionFetcherFactory {
 	
 	protected BTConnectionFetcherFactory(){}
 	
-	public BTConnectionFetcher getBTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
+	public BTConnectionFetcher getBTConnectionFetcher(ManagedTorrent torrent, ScheduledExecutorService scheduler) {
 		return new BTConnectionFetcher(torrent, scheduler);
 	}
 }

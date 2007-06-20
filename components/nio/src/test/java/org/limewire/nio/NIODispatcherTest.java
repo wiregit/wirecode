@@ -13,6 +13,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -519,7 +520,7 @@ public class NIODispatcherTest extends BaseTestCase {
     public void testSchedulingTasks() throws Exception {
     	// first get a ref to the dispatch thread
     	final AtomicReference<Thread>t = new AtomicReference<Thread>();
-    	NIODispatcher.instance().invokeLater(new Runnable() {
+    	NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
     		public void run() {
     			t.set(Thread.currentThread());
     		}
@@ -529,19 +530,44 @@ public class NIODispatcherTest extends BaseTestCase {
     		Thread.sleep(10);
     	
     	final CountDownLatch executed = new CountDownLatch(1);
-    	java.util.concurrent.Future f = NIODispatcher.instance().submit(new Runnable() {
+    	Future<?> f = NIODispatcher.instance().getScheduledExecutorService().schedule(new Runnable() {
     		public void run() {
     			// should be executed on the dispatch thread
     			assertSame(t.get(), Thread.currentThread());
     			executed.countDown();
     		}
-    	}, 500);
+    	}, 500, TimeUnit.MILLISECONDS);
 
     	// and not get executed until the timeout elapses
     	assertFalse(executed.await(480,TimeUnit.MILLISECONDS));
     	assertFalse(f.isDone());
     	assertTrue(executed.await(40,TimeUnit.MILLISECONDS));
     	assertTrue(f.isDone());
+    }
+    
+    /** Tests that re-registration discards old attachments. */
+    public void testReRegisterDiscardsOldAttachment() throws Exception {
+        StubReadObserver o1 = new StubReadObserver();
+        SocketChannel c1 = o1.getChannel();
+        c1.connect(LISTEN_ADDR);
+        
+        o1.setReadTimeout(1023);
+        NIODispatcher.instance().registerRead(c1, o1);
+        StubReadObserver o2 = new StubReadObserver();
+        o2.setReadTimeout(1001);
+        NIODispatcher.instance().registerRead(c1, o2);
+        
+        o2.waitForIOException(2000);
+        assertInstanceof(SocketTimeoutException.class, o2.getIox());
+        assertEquals("operation timed out (1001)", o2.getIox().getMessage());
+        assertTrue(o2.isShutdown());
+        assertEquals(0, o2.getReadsHandled());
+        
+        assertNull(o1.getIox());
+        assertFalse(o1.isShutdown());
+        assertEquals(0, o1.getReadsHandled());
+        
+        c1.close();
     }
     
     private void connect(SocketChannel c, SocketAddress a, StubReadConnectObserver o) throws Exception {

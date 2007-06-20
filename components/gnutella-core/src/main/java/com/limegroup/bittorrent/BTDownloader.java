@@ -441,7 +441,7 @@ public class BTDownloader extends AbstractDownloader
 		ifm = manager.getIncompleteFileManager();
 		TorrentManager torrentManager = RouterService.getTorrentManager();
 		_torrent = new ManagedTorrent(context, torrentManager,
-				NIODispatcher.instance().getSchedulingThreadPool()); 
+				NIODispatcher.instance().getScheduledExecutorService()); 
 		torrentManager.addEventListener(this);
 		ifm.addTorrentEntry(_info.getURN());
 	}

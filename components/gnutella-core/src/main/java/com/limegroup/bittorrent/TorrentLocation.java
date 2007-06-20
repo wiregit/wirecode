@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 
 import org.limewire.io.IpPort;
@@ -65,9 +66,9 @@ public class TorrentLocation extends IpPortImpl {
 	 * Constructs a torrent location with the specified address, port,
 	 * peerId and extention bytes.
 	 */
-	public TorrentLocation(InetAddress address, int port, byte[] peerId,
+	public TorrentLocation(InetSocketAddress address, byte[] peerId,
 			byte[] extensionBytes) {
-		super(address, address.getHostAddress(), port);
+		super(address);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
 		EXTENSION_BYTES = extensionBytes;
 	}
@@ -77,13 +78,13 @@ public class TorrentLocation extends IpPortImpl {
 	 * (Tracker responses do not carry that information)
 	 */
 	public TorrentLocation(InetAddress address, int port, byte [] peerId) {
-		super(address, address.getHostAddress(), port);
+		super(address, port);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
 		EXTENSION_BYTES = EXTENTION_BYTES;
 	}
 
 	public TorrentLocation(TorrentLocation to) {
-		this(to.getInetAddress(), to.getPort(), to.getPeerID(),
+		this(to.getInetSocketAddress(), to.getPeerID(),
 				to.EXTENSION_BYTES);
 	}
 

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -264,7 +265,7 @@ public class ExternalControl {
 		    port = ConnectionSettings.PORT.getValue();
         }   
 		try {
-			socket = Sockets.connect(LOCALHOST, port, 500);
+			socket = Sockets.connect(new InetSocketAddress(LOCALHOST, port), 500);
 			InputStream istream = socket.getInputStream(); 
 			socket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);

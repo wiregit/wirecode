@@ -19,6 +19,7 @@ import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -203,7 +204,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
@@ -236,7 +237,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
@@ -256,7 +257,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false,
+                             null, null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
@@ -353,7 +354,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, 
+                             null, null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -419,7 +420,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, 
+                             null, null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -488,7 +489,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, 
+                             null, null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -599,7 +600,7 @@ public class ServerSideWhatIsNewTest
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
-        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT);
+        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
         Set urns = new HashSet();
@@ -609,7 +610,7 @@ public class ServerSideWhatIsNewTest
                                                 TestFile.length(), 
                                                 guid, 1, false, 3,
                                                 false, null, urns, false,
-                                                false, "LIME", new HashSet(), -1);
+                                                false, "LIME", new HashSet(), -1, false);
         Downloader downloader = 
             RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
@@ -662,7 +663,7 @@ public class ServerSideWhatIsNewTest
         Long cTime[] = new Long[uploader.length];
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
-            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
+            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i, false);
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
@@ -672,7 +673,7 @@ public class ServerSideWhatIsNewTest
                                          "anita.txt", TestFile.length(), 
                                          guid, 1, false, 3,
                                          false, null, urns, false,
-                                         false, "LIME", new HashSet(), -1);
+                                         false, "LIME", new HashSet(), -1, false);
         }
 
         Downloader downloader = RouterService.download(rfds, false, new GUID(guid));

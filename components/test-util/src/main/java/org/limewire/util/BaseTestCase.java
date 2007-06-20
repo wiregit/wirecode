@@ -39,6 +39,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     static {
         INTERRUPT_FIXER.setDaemon(true);
         INTERRUPT_FIXER.start();
+        DeadlockMonitor.startDeadlockMonitoring();
     }
     
     /**

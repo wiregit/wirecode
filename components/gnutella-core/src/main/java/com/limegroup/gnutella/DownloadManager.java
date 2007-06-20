@@ -199,7 +199,7 @@ public class DownloadManager implements BandwidthTracker {
             }}, 
     		router,
     		RouterService.getHttpExecutor(),
-    		RouterService.getSchedulingThreadPool(),
+    		RouterService.getScheduledExecutorService(),
     		RouterService.getAcceptor());
         pushManager.initialize(RouterService.getConnectionDispatcher());
     }

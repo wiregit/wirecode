@@ -17,6 +17,7 @@ import org.limewire.service.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 
 /**
  * This class handles Multicast messages.
@@ -208,7 +209,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = MessageFactory.read(in, HEADER_BUF, Message.N_MULTICAST);
+                    Message message = MessageFactory.read(in, HEADER_BUF, Network.MULTICAST);
                     if(message == null)
                         continue;
                     RouterService.getMessageDispatcher().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());

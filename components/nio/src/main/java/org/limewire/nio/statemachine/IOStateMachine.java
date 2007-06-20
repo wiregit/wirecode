@@ -29,9 +29,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /** The current state. */
     private IOState currentState;
     /** The sink we write to. */
-    private InterestWritableByteChannel writeSink;
+    private volatile InterestWritableByteChannel writeSink;
     /** The sink we read from. */
-    private InterestReadableByteChannel readSink;
+    private volatile InterestReadableByteChannel readSink;
     /** The ByteBuffer to use for reading. */
     private ByteBuffer readBuffer;
     /** Whether or not we've shutdown this handshaker. */
@@ -53,7 +53,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * Adds a new state to process.
      */
     public void addState(final IOState newState) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding single state: " + newState);
@@ -69,7 +69,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * Adds a collection of new states to process.
      */
     public void addStates(final List<? extends IOState> newStates) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding multiple states: " + newStates);
@@ -84,7 +84,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * Adds an array of new states to process.
      */
     public void addStates(final IOState... newStates) {
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding multiple states...");
@@ -162,7 +162,10 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
                         // We must read up data otherwise it could be lost.
                         // (it would be lost if we were transfering observers
                         //  and the prior observer had already read data)
-                        while(readBuffer.hasRemaining() && readSink.read(readBuffer) > 0);
+                        int read = 0;
+                        while(readBuffer.hasRemaining() && (read = readSink.read(readBuffer)) > 0);
+                        if(readBuffer.position() == 0 && read == -1)
+                            throw new ClosedChannelException(); 
                     } else if (!state.process(readSink, readBuffer))
                         nextState(true, false);
                 } else {
@@ -257,8 +260,10 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     }
 
     public void close() throws IOException {
-        readSink.close();
-        writeSink.close();
+        if(readSink != null)
+            readSink.close();
+        if(writeSink != null)
+            writeSink.close();
     }
 
     /**
@@ -282,7 +287,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
         // This must be done on the NIO thread, else the NIO thread could
         // currently be processing this buffer, and things may continue to
         // process it after we release it.
-        NIODispatcher.instance().invokeLater(new Runnable() {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 NIODispatcher.instance().getBufferCache().release(readBuffer);
             }

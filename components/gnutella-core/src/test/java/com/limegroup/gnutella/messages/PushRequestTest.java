@@ -6,6 +6,8 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.messages.Message.Network;
+
 public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public PushRequestTest(String name) {
         super(name);
@@ -37,6 +39,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
                            clientGUID, u4, ip, u2);
         assertEquals(u4, pr.getIndex());
         assertEquals(u2, pr.getPort());
+        assertFalse(pr.isTLSCapable());
     }
 
     public void testBigPush() throws Exception {        
@@ -60,6 +63,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected func", Message.F_PUSH, pr.getFunc());
         assertEquals("unexpected hops", (byte)1, pr.getHops());
         assertEquals("unexpected ttl", (byte)2, pr.getTTL());
+        assertFalse(pr.isTLSCapable());
 
         //2. Test that yields returns the same thing
         ByteArrayOutputStream out=new ByteArrayOutputStream();
@@ -69,22 +73,60 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
             outBytes.length, bytes.length);
         for (int i=0; i<outBytes.length; i++)
             assertEquals("byte # " + i + " not equal", bytes[i], outBytes[i]);
+        assertFalse(pr.isTLSCapable());
+    }
+    
+    public void testGGEPPush() throws Exception {        
+        GGEP ggep = new GGEP(true);
+        ggep.put("TLS");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ggep.write(out);
+        byte[] ggepBytes = out.toByteArray();
 
-        //assertTrue("written bytes should be equal", 
-        //           Arrays.equals(out.toByteArray(), bytes));
+        byte[] bytes=new byte[23+26+ggepBytes.length];
+        bytes[16]=Message.F_PUSH;
+        bytes[17]=(byte)2;     //ttl .. ttl + hops must be <= 3
+        bytes[18]=(byte)1;     //hops
+        bytes[19]=(byte)(26+ggepBytes.length); //payload length
+        bytes[23+16]=(byte)3;  //index
+        bytes[23+20]=(byte)254; // non-zero ip.
+        bytes[23+24]=(byte)1;  //non-zero port.
+        System.arraycopy(ggepBytes, 0, bytes, 23+26, ggepBytes.length);
+        
+        ByteArrayInputStream in=new ByteArrayInputStream(bytes);
+        //1. Test that we can read ggep push
+        PushRequest pr=(PushRequest)MessageFactory.read(in);     
+        assertEquals("unexpected push index", 3, pr.getIndex());
+        assertEquals("unexpected total length", bytes.length,
+            pr.getTotalLength() );
+        assertEquals("unexpected length", bytes.length-23,
+            pr.getLength());
+        assertEquals("unexpected func", Message.F_PUSH, pr.getFunc());
+        assertEquals("unexpected hops", (byte)1, pr.getHops());
+        assertEquals("unexpected ttl", (byte)2, pr.getTTL());
+        assertTrue(pr.isTLSCapable());
 
-        //3. Test that we can strip the payload out
-        PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
-        assertEquals("unexpected length", 26, pr2.getLength());
-        assertEquals("unexpected hops", pr.getHops(), pr2.getHops());
-        ByteArrayOutputStream out2=new ByteArrayOutputStream();
-        pr2.write(out2);
-        byte[] bytes2=out2.toByteArray();
-        assertEquals("unexpected bytes length", 23+26, bytes2.length);
-        for (int i=0; i<bytes2.length; i++)
-            if (i!=19) //skip payload length
-                assertEquals("byte # " + i + " not equal", bytes[i], bytes2[i]);
-
+        //2. Test that yields returns the same thing
+        out=new ByteArrayOutputStream();
+        pr.write(out);
+        byte[] outBytes = out.toByteArray();        
+        assertEquals("written push different length than read push",
+            outBytes.length, bytes.length);
+        for (int i=0; i<outBytes.length; i++)
+            assertEquals("byte # " + i + " not equal", bytes[i], outBytes[i]);
+        assertTrue(pr.isTLSCapable());
+        
+        pr = new PushRequest(new byte[16], (byte)3, new byte[16], (byte)3,
+                             new byte[] { (byte)254, 0, 0, 0 }, 1, Network.UNKNOWN, true);
+        pr.hop(); // make ttl & hops match up
+        out=new ByteArrayOutputStream();
+        pr.write(out);
+        outBytes = out.toByteArray();        
+        assertEquals("written push different length than read push",
+            outBytes.length, bytes.length);
+        for (int i=0; i<outBytes.length; i++)
+            assertEquals("byte # " + i + " not equal", bytes[i], outBytes[i]);
+        assertTrue(pr.isTLSCapable());
     }
 
     public void testPushTooSmall() throws Exception {
@@ -98,9 +140,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         try {
             MessageFactory.read(in);
             fail("No exception thrown");
-        } catch (BadPacketException pass) { 
-            //Pass!
-        }
+        } catch (BadPacketException expected) {}
         
     }
     
@@ -114,14 +154,16 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         PushRequest pr=new PushRequest(guid, (byte)0,
                                        clientGUID, index, ip, port,
-									   Message.N_UDP);
+                                       Network.UDP);
         
-        assertEquals(Message.N_UDP,pr.getNetwork());
+        assertEquals(Network.UDP,pr.getNetwork());
+        assertFalse(pr.isTLSCapable());
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         PushRequest pr2 = (PushRequest)MessageFactory.read(bais);
         assertNotNull(pr2);
+        assertFalse(pr.isTLSCapable());
     }
 }

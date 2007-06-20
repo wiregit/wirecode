@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,19 +14,28 @@ import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 import org.limewire.collection.NECallable;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ThrottleReader;
 
-import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.bittorrent.disk.TorrentDiskManager;
+import com.limegroup.bittorrent.messages.BTBitField;
+import com.limegroup.bittorrent.messages.BTCancel;
+import com.limegroup.bittorrent.messages.BTChoke;
+import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.bittorrent.messages.BTInterested;
+import com.limegroup.bittorrent.messages.BTMessage;
+import com.limegroup.bittorrent.messages.BTNotInterested;
+import com.limegroup.bittorrent.messages.BTPieceMessage;
+import com.limegroup.bittorrent.messages.BTRequest;
+import com.limegroup.bittorrent.messages.BTUnchoke;
+import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.disk.TorrentDiskManager;
-import com.limegroup.bittorrent.messages.*;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 
 /**
@@ -155,7 +165,7 @@ PieceSendListener, PieceReadListener {
 	private BTLinkListener listener;
 	
 	/** executor of network-related tasks */
-	private SchedulingThreadPool invoker;
+	private ScheduledExecutorService invoker;
 	
 	/**
 	 * Constructs instance of this
@@ -188,7 +198,7 @@ PieceSendListener, PieceReadListener {
 		
 		_writer = new BTMessageWriter(this, this);
 		_reader = new BTMessageReader(this, this,
-				NIODispatcher.instance().getSchedulingThreadPool(),
+				NIODispatcher.instance().getScheduledExecutorService(),
 				NIODispatcher.instance().getBufferCache());
 
 	}
@@ -197,7 +207,7 @@ PieceSendListener, PieceReadListener {
 	 * Initializes the connection 
 	 */
 	public void init(AbstractNBSocket socket, 
-			BTLinkListener listener, SchedulingThreadPool invoker) {
+			BTLinkListener listener, ScheduledExecutorService invoker) {
 		// if we were shutdown before initializing, return.
 		if (closing)
 			return;
@@ -545,7 +555,7 @@ PieceSendListener, PieceReadListener {
 				_writer.enqueue(new BTPieceMessage(in, data));
 			}
 		};
-		invoker.invokeLater(pieceSender);
+		invoker.execute(pieceSender);
 	}
 	
 	/* (non-Javadoc)
@@ -818,7 +828,7 @@ PieceSendListener, PieceReadListener {
 	
 	
 	public void releaseSlot() {
-		invoker.invokeLater(getSlotReleaser());
+		invoker.execute(getSlotReleaser());
 	}
 	
 	private Runnable getSlotReleaser() {
@@ -835,7 +845,7 @@ PieceSendListener, PieceReadListener {
 	}
 	
 	public void slotAvailable() {
-		invoker.invokeLater(getSlotNotifier());
+		invoker.execute(getSlotNotifier());
 	}
 
 	private Runnable getSlotNotifier() {

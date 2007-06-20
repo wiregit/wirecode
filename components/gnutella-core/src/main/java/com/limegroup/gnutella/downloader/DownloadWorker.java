@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
@@ -25,12 +26,14 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * Class that performs the logic of downloading a file from a single host.
@@ -634,7 +637,7 @@ public class DownloadWorker {
                     }
                 }
                 
-                NIODispatcher.instance().invokeLater(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         incrementState(null);
                     }
@@ -725,11 +728,12 @@ public class DownloadWorker {
      */
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
+            ConnectType type = _rfd.isTLSCapable() && ConnectionSettings.TLS_OUTGOING.getValue() ? ConnectType.TLS : ConnectType.PLAIN;
             if(LOG.isTraceEnabled())
-                LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
+                LOG.trace("WORKER: attempt asynchronous direct connection w/ " + type + " to: " + _rfd);
             _connectObserver = observer;
             try {
-                Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, observer);
+                Socket socket = Sockets.connect(new InetSocketAddress(_rfd.getHost(), _rfd.getPort()), NORMAL_CONNECT_TIME, observer, type);
                 if(!observer.isShutdown())
                     observer.setSocket(socket);
             } catch (IOException iox) {
@@ -1533,7 +1537,7 @@ public class DownloadWorker {
             //LOG.debug(_rfd + " -- Handling connect from PushConnector");
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
             try {
-               dl.connectTCP(0);
+               dl.initializeTCP();
                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
             } catch(IOException iox) {
                 //LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
@@ -1621,7 +1625,7 @@ public class DownloadWorker {
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
             try {
-                dl.connectTCP(0); // already connected, timeout doesn't matter.
+                dl.initializeTCP(); // already connected, timeout doesn't matter.
             } catch(IOException iox) {
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;

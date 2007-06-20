@@ -3,11 +3,12 @@ package com.limegroup.bittorrent.choking;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NECallable;
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.bittorrent.Chokable;
@@ -25,7 +26,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 	/**
 	 * The invoker on which to perform network-related tasks
 	 */
-	protected final SchedulingThreadPool invoker;
+	protected final ScheduledExecutorService invoker;
 	
 	/**
 	 * The source of the chokables.  The list it provides must be
@@ -37,7 +38,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 	private volatile Future periodic;
 	private final Runnable immediateChoker = new ImmediateChoker();
 	
-	Choker(NECallable<List<? extends Chokable>>chokables, SchedulingThreadPool invoker) {
+	Choker(NECallable<List<? extends Chokable>>chokables, ScheduledExecutorService invoker) {
 		this.invoker = invoker;
 		this.chokablesSource = chokables;
 	}
@@ -55,7 +56,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 	 */
 	public void start() {
 		shutdown();
-		periodic = invoker.invokeLater(this, RECHOKE_TIMEOUT);
+		periodic = invoker.schedule(this, RECHOKE_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -64,7 +65,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 	public final void rechoke() {
 		// final to make sure immediate rechokes happen through
 		// the invoker.
-		invoker.invokeLater(immediateChoker);
+		invoker.execute(immediateChoker);
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 		
 		rechokeImpl(true);
 		
-		periodic = invoker.invokeLater(this, RECHOKE_TIMEOUT);
+		periodic = invoker.schedule(this, RECHOKE_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 	
 	

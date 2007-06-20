@@ -1,15 +1,16 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.collection.Function;
 import org.limewire.http.HeaderInterceptor;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -30,17 +31,17 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
             throws HttpException, IOException {
         if (HTTPHeaderName.ALT_LOCATION.matches(header)) {
             parseAlternateLocations(uploader.getAltLocTracker(), header.getValue(),
-                    true);
+                    true, true);
         } else if (HTTPHeaderName.NALTS.matches(header)) {
             parseAlternateLocations(uploader.getAltLocTracker(), header.getValue(),
-                    false);
+                    false, false);
         } else if (HTTPHeaderName.FALT_LOCATION.matches(header)) {
             AltLocTracker tracker = uploader.getAltLocTracker();
-            parseAlternateLocations(tracker, header.getValue(), true);
+            parseAlternateLocations(tracker, header.getValue(), true, false);
             tracker.setWantsFAlts(true);
         } else if (HTTPHeaderName.BFALT_LOCATION.matches(header)) {
             AltLocTracker tracker = uploader.getAltLocTracker();
-            parseAlternateLocations(tracker, header.getValue(), false);
+            parseAlternateLocations(tracker, header.getValue(), false, false);
             tracker.setWantsFAlts(false);
         }
     }
@@ -54,37 +55,24 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
      * @param altLocTracker the tracker that stores locations
      * @param altHeader the full alternate locations header
      */
-    private void parseAlternateLocations(AltLocTracker tracker,
-            final String alternateLocations, boolean isGood) {
-        StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        while (st.hasMoreTokens()) {
-            try {
-                // note that the trim method removes any CRLF character
-                // sequences that may be used if the sender is using
-                // continuations.
-                AlternateLocation al = AlternateLocation.create(st.nextToken()
-                        .trim(), tracker.getUrn());
-
-                if (al.isMe())
-                    continue;
-
-                if (al instanceof PushAltLoc)
-                    ((PushAltLoc) al).updateProxies(isGood);
-                
+    private void parseAlternateLocations(final AltLocTracker tracker,
+            String alternateLocations, final boolean isGood, boolean allowTLS) {
+        AltLocUtils.parseAlternateLocations(tracker.getUrn(), alternateLocations, allowTLS, new Function<AlternateLocation, Void>() {
+            public Void apply(AlternateLocation location) {
+                if (location instanceof PushAltLoc)
+                    ((PushAltLoc) location).updateProxies(isGood);
                 // Note: if this thread gets preempted at this point,
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if (isGood)
-                    RouterService.getAltlocManager().add(al, null);
+                    RouterService.getAltlocManager().add(location, null);
                 else
-                    RouterService.getAltlocManager().remove(al, null);
+                    RouterService.getAltlocManager().remove(location, null);
 
-                tracker.addLocation(al);
-            } catch (IOException e) {
-                // just return without adding it.
-                continue;
+                tracker.addLocation(location);
+                return null;
             }
-        }
+        });
     }
 
 }

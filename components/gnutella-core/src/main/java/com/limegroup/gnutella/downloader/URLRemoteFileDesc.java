@@ -36,7 +36,7 @@ public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
                              Set<? extends IpPort> proxies, int FWTversion) {
         super(host, port, index, filename, size, clientGUID, speed, chat,
               quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-              vendor, proxies, -1, FWTversion);
+              vendor, proxies, -1, FWTversion, false);
         this._url=url;
     }
 

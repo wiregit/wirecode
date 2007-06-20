@@ -1,11 +1,16 @@
 package org.limewire.security;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.util.BaseTestCase;
 
@@ -105,29 +110,73 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
        
     }
 
-    private static class WrappingSchedulingTestThreadPool implements SchedulingThreadPool {
+    private static class WrappingSchedulingTestThreadPool extends AbstractExecutorService implements ScheduledExecutorService {
         
-        private SchedulingThreadPool pool = SimpleTimer.sharedTimer();
+        private ScheduledExecutorService pool = SimpleTimer.sharedTimer();
         
         private NotifyinRunnable r;
         
         private NotifyinRunnable r2;
         
         private int modCounter = 0;
-
-        public void invokeLater(Runnable r) {
-            throw new UnsupportedOperationException("Not used in old tests, implement if needed");
-        }
-
-        public Future invokeLater(Runnable r, long delay) {
+        
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
             if ((modCounter++ % 2) == 0) {
-                this.r = new NotifyinRunnable(r);
-                return pool.invokeLater(this.r, delay);
+                this.r = new NotifyinRunnable(command);
+                return pool.schedule(this.r, delay, unit);
             }
             else {
-                this.r2 = new NotifyinRunnable(r);
-                return pool.invokeLater(this.r2, delay);
+                this.r2 = new NotifyinRunnable(command);
+                return pool.schedule(this.r2, delay, unit);
             }
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isShutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isTerminated() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        public <T> Future<T> submit(Callable<T> task) {
+            throw new UnsupportedOperationException();
+        }
+
+        public Future<?> submit(Runnable task) {
+            throw new UnsupportedOperationException();
+        }
+
+        public <T> Future<T> submit(Runnable task, T result) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void execute(Runnable command) {
+            throw new UnsupportedOperationException();
         }
                 
     }
@@ -154,23 +203,68 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
         
     }
     
-    private static class SchedulingTestThreadPool implements SchedulingThreadPool {
+    private static class SchedulingTestThreadPool extends AbstractExecutorService implements ScheduledExecutorService {
 
         Runnable r;
         Runnable r2;
         
-        public void invokeLater(Runnable r) {
-
-        }
-
-        public Future invokeLater(Runnable r, long delay) {
+        
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
             if (this.r == null) {
-                this.r = r;
+                this.r = command;
             }
             else {
-                r2 = r;
+                r2 = command;
             }
             return null;
+        }
+
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isShutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isTerminated() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        public <T> Future<T> submit(Callable<T> task) {
+            throw new UnsupportedOperationException();
+        }
+
+        public Future<?> submit(Runnable task) {
+            throw new UnsupportedOperationException();
+        }
+
+        public <T> Future<T> submit(Runnable task, T result) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void execute(Runnable command) {
+            throw new UnsupportedOperationException();
         }
         
     }

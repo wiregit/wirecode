@@ -27,7 +27,7 @@ public class AdvancedStatsToggle extends RoutableGGEPMessage {
      * Network constructor.. this message will not be sent from nodes.
      */
     public AdvancedStatsToggle(byte[] guid, byte ttl, byte hops,
-            int version, byte[] payload, int network)
+            int version, byte[] payload, Network network)
             throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ADVANCED_TOGGLE, version, payload, network);
         try {

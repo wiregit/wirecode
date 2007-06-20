@@ -190,6 +190,7 @@ public final class HTTPUtils {
 
 	/**
 	 * Parses out the header value from the HTTP header string.
+     * Given a string of "X-Header: MyValue", this will return "MyValue".
 	 *
 	 * @return the header value for the specified full header string, or
 	 *  <tt>null</tt> if the value could not be extracted
@@ -317,6 +318,15 @@ public final class HTTPUtils {
         }catch (NumberFormatException bad) {
             throw new ProblemReadingHeaderException(bad);
         }
+    }
+    
+    /** Utility for extracting a value from a K=V string. */
+    public static String parseValue(String keyValuePair) throws IOException {
+        int equalIndex = keyValuePair.indexOf("=");
+        if(equalIndex == -1 || equalIndex >= keyValuePair.length() -1)
+            throw new IOException("invalid keyValuePair: " + keyValuePair);
+        
+        return keyValuePair.substring(equalIndex+1).trim();
     }
     
     /**

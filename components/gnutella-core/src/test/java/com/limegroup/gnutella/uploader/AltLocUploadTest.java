@@ -68,6 +68,8 @@ public class AltLocUploadTest extends LimeTestCase {
 
     /** The hash of the file contents. */
     private static final String baseHash = "GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
+    
+    private static /* final */ URN hashURN;
 
     private static final String hash = "urn:sha1:" + baseHash;
 
@@ -107,19 +109,16 @@ public class AltLocUploadTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() {
+    public static void globalSetUp() throws Exception {
         ROUTER_SERVICE = new RouterService(new FManCallback());
         UPLOAD_MANAGER = new TestUploadManager();
 
         // Overwrite the original UploadManager with
         // our custom TestUploadManager. See latter
         // for more Info!
-        try {
-            PrivilegedAccessor.setValue(ROUTER_SERVICE, "uploadManager",
-                    UPLOAD_MANAGER);
-        } catch (Exception e) {
-            fail(e);
-        }
+        PrivilegedAccessor.setValue(ROUTER_SERVICE, "uploadManager", UPLOAD_MANAGER);
+        
+        hashURN = URN.createSHA1Urn(hash);
     }
 
     public static void globalTearDown() {
@@ -264,7 +263,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-FAlt"));
             String value = method.getResponseHeader("X-FAlt").getValue();
-            assertEquals((push.httpStringValue() + ", "
+            assertEquals((push.httpStringValue() + ","
                     + pushFwt.httpStringValue()).length(), value.length());
             assertTrue(value.contains(push.httpStringValue()));
             assertTrue(value.contains(pushFwt.httpStringValue()));
@@ -345,21 +344,20 @@ public class AltLocUploadTest extends LimeTestCase {
 
         assertEquals(2, RouterService.getAltlocManager().getNumLocs(
                 FD.getSHA1Urn()));
-        assertEquals(1, RouterService.getAltlocManager().getPush(
-                FD.getSHA1Urn(), false).getAltLocsSize());
+        assertEquals(1, RouterService.getAltlocManager().getPushNoFWT(
+                FD.getSHA1Urn()).getAltLocsSize());
         assertEquals(1, RouterService.getAltlocManager().getDirect(
                 FD.getSHA1Urn()).getAltLocsSize());
 
-        assertTrue(RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),
-                false).contains(push));
+        assertTrue(RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn())
+                .contains(push));
         assertTrue(RouterService.getAltlocManager().getDirect(FD.getSHA1Urn())
                 .contains(direct));
     }
 
    public void testAlternateLocationAddAndRemove() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -389,8 +387,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // add a second one, so we can check to make sure
         // another removal removes the first one.
-        String loc2 = "http://2.2.2.2:2/uri-res/N2R?" + hash;
-        AlternateLocation al2 = AlternateLocation.create(loc2);
+        AlternateLocation al2 = AlternateLocation.create("2.2.2.2:2", hashURN);
         RouterService.getAltlocManager().add(al2, null);
         method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -399,7 +396,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-Alt"));
             String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("2.2.2.2:2, 1.1.1.1:1".length(), value.length());
+            assertEquals("2.2.2.2:2,1.1.1.1:1".length(), value.length());
             assertTrue(value.contains("1.1.1.1:1"));
             assertTrue(value.contains("2.2.2.2:2"));
         } finally {
@@ -423,8 +420,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     public void testSentHeaderIsUsed() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -439,10 +435,9 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // add a header that gives a new location.
-        String sendLoc = "http://2.2.2.2:2/uri-res/N2R?" + hash;
-        AlternateLocation sendAl = AlternateLocation.create(sendLoc);
+        AlternateLocation sendAl = AlternateLocation.create("2.2.2.2:2", hashURN);
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", sendLoc);
+        method.addRequestHeader("X-Alt", sendAl.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -473,7 +468,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-Alt"));
             String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("2.2.2.2:2, 1.1.1.1:1".length(), value.length());
+            assertEquals("2.2.2.2:2,1.1.1.1:1".length(), value.length());
             assertTrue(value.contains("1.1.1.1:1"));
             assertTrue(value.contains("2.2.2.2:2"));
         } finally {
@@ -482,7 +477,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // demote the location (don't remove)
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", sendLoc);
+        method.addRequestHeader("X-NAlt", sendAl.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -504,7 +499,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // now remove
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", sendLoc);
+        method.addRequestHeader("X-NAlt", sendAl.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -521,8 +516,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     public void testMiniNewHeaderIsUsed() throws Exception {
         // Add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -537,8 +531,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // now try a header without a port, should be 6346.
-        String sendLoc = "http://2.3.4.5:6346/uri-res/N2R?" + hash;
-        AlternateLocation sendAl = AlternateLocation.create(sendLoc);
+        AlternateLocation sendAl = AlternateLocation.create("2.3.4.5:6346", hashURN);
         method = new GetMethod(hashUrl);
         method.addRequestHeader("X-Alt", "2.3.4.5");
         method.addRequestHeader("Connection", "close");
@@ -570,8 +563,7 @@ public class AltLocUploadTest extends LimeTestCase {
      */
     public void testMultipleAlternates() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -586,14 +578,12 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // add a header that gives a new location.
-        String send1 = "http://1.2.3.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al1 = AlternateLocation.create(send1);
-        String send2 = "http://1.2.3.2:2/uri-res/N2R?" + hash;
-        AlternateLocation al2 = AlternateLocation.create(send2);
-        String send3 = "http://1.2.3.4:6346/uri-res/N2R?" + hash;
-        AlternateLocation al3 = AlternateLocation.create(send3);
+        AlternateLocation al1 = AlternateLocation.create("1.2.3.1:1", hashURN);
+        AlternateLocation al2 = AlternateLocation.create("1.2.3.2:2", hashURN);
+        AlternateLocation al3 = AlternateLocation.create("1.2.3.4:6346", hashURN);
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", send1 + ", " + send2 + ", " + send3);
+        method.addRequestHeader("X-Alt", al1.httpStringValue() + ", " + 
+                                al2.httpStringValue() + ", " + al3.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -620,7 +610,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // demote
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", "1.2.3.1:1, " + send2 + ", " + send3);
+        method.addRequestHeader("X-NAlt", "1.2.3.1:1, " + al2.httpStringValue() + ", " + al3.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -634,7 +624,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // remove
         method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", send1 + ", 1.2.3.2:2, " + send3);
+        method.addRequestHeader("X-NAlt", al1.httpStringValue() + ", 1.2.3.2:2, " + al3.httpStringValue());
         method.addRequestHeader("Connection", "close");
         try {
             int response = client.executeMethod(method);
@@ -679,7 +669,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // two of the proxies of bcd should be gone
         assertEquals("wrong # locs", 1, RouterService.getAltlocManager()
-                .getPush(FD.getSHA1Urn(), false).getAltLocsSize());
+                .getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies", 1, bcd.getPushAddress().getProxies()
                 .size());
 
@@ -698,7 +688,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // all proxies should be gone, and bcd should be removed from
         // the filedesc
         assertEquals("wrong # locs", 0, RouterService.getAltlocManager()
-                .getPush(FD.getSHA1Urn(), false).getAltLocsSize());
+                .getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies", 0, bcd.getPushAddress().getProxies()
                 .size());
     }
@@ -708,8 +698,7 @@ public class AltLocUploadTest extends LimeTestCase {
     // is false, which turns off isPrivateAddress checking.
     public void testInvalidAltsAreIgnored() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -798,8 +787,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     public void test10AltsAreSent() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.setHttp11(false);
@@ -815,8 +803,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         for (int i = 0; i < 20; i++) {
             RouterService.getAltlocManager().add(
-                    AlternateLocation.create("http://1.1.1." + i
-                            + ":6346/uri-res/N2R?" + hash), null);
+                    AlternateLocation.create("1.1.1." + i + ":6346", hashURN), null);
         }
         assertEquals(21, RouterService.getAltlocManager().getDirect(
                 FD.getSHA1Urn()).getAltLocsSize());
@@ -856,8 +843,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testAltsExpire() throws Exception {
         UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float) Math.E - 0.2f);
         // test that an altloc will expire if given out too often
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         RouterService.getAltlocManager().add(al, null);
 
@@ -901,8 +887,7 @@ public class AltLocUploadTest extends LimeTestCase {
         UploadSettings.RESPONSE_BIAS.setValue(0f);
 
         // create an altloc
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         assertTrue(al.canBeSent(AlternateLocation.MESH_PING));
         assertTrue(al.canBeSent(AlternateLocation.MESH_RESPONSE));
@@ -916,7 +901,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 .hasAltlocs(al.getSHA1Urn()));
 
         // and re-add the altloc
-        al = AlternateLocation.create(loc);
+        al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
 
         // repeat
@@ -926,7 +911,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertFalse(RouterService.getAltlocManager()
                 .hasAltlocs(al.getSHA1Urn()));
 
-        al = AlternateLocation.create(loc);
+        al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
 
         // repeat 2
@@ -980,13 +965,12 @@ public class AltLocUploadTest extends LimeTestCase {
                 sock = new DatagramSocket(10000 + i);
                 sock.setSoTimeout(2000);
                 sock.send(toSend);
-                byte[] recv = new byte[1000];
+                byte[] recv = new byte[5000];
                 DatagramPacket rcv = new DatagramPacket(recv, recv.length);
                 sock.receive(rcv);
-                ByteArrayInputStream bais = new ByteArrayInputStream(recv, 0,
-                        rcv.getLength());
+                ByteArrayInputStream bais = new ByteArrayInputStream(recv, 0, rcv.getLength());
                 HeadPong pong = (HeadPong) MessageFactory.read(bais);
-                if (pong.getAltLocs().isEmpty())
+                if (pong.getAltLocs() == null || pong.getAltLocs().isEmpty())
                     break;
             } finally {
                 if (sock != null)
@@ -1036,8 +1020,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     public void testChunksGiveDifferentLocs() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -1053,8 +1036,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         for (int i = 0; i < 20; i++) {
             RouterService.getAltlocManager().add(
-                    AlternateLocation.create("http://1.1.1." + i
-                            + ":6346/uri-res/N2R?" + hash), null);
+                    AlternateLocation.create("1.1.1." + i + ":6346", hashURN), null);
         }
         assertEquals(21, RouterService.getAltlocManager().getNumLocs(
                 FD.getSHA1Urn()));
@@ -1112,8 +1094,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // Now if some more are added to file desc, make sure they're reported.
         RouterService.getAltlocManager().add(
-                AlternateLocation.create("http://1.1.1.99:6346/uri-res/N2R?"
-                        + hash), null);
+                AlternateLocation.create("1.1.1.99:6346", hashURN), null);
         required = pre + 99 + post;
         method = new GetMethod(hashUrl);
         method.addRequestHeader("Range", "bytes=6-7");
@@ -1129,8 +1110,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     public void testPrioritizingAlternates() throws Exception {
         // add a simple marker alt so we know it only contains that
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         RouterService.getAltlocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
@@ -1148,8 +1128,7 @@ public class AltLocUploadTest extends LimeTestCase {
         RouterService.getAltlocManager().remove(al, null);
 
         for (int i = 0; i < 50; i++) {
-            al = AlternateLocation.create("http://1.1.1." + i
-                    + ":6346/uri-res/N2R?" + hash);
+            al = AlternateLocation.create("1.1.1." + i + ":6346", hashURN);
 
             RouterService.getAltlocManager().add(al, null);
 
@@ -1277,8 +1256,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testAltsDontExpire() throws Exception {
         UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float) Math.E / 4);
         // test that an altloc will not expire if given out less often
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
+        AlternateLocation al = AlternateLocation.create("1.1.1.1:1", hashURN);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         RouterService.getAltlocManager().add(al, null);
 

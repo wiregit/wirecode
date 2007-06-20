@@ -5,6 +5,8 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -268,25 +270,28 @@ public class HTTPAcceptor {
         }
 
         final AtomicBoolean inited = new AtomicBoolean(false);
+        Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+            public void run() {
+                initializeReactor();
+                inited.set(true);
+            }
+        });
         try {
-            NIODispatcher.instance().invokeAndWait(new Runnable() {
-                public void run() {
-                    initializeReactor();
-                    inited.set(true);
-                }
-            });
+            future.get();
         } catch (InterruptedException e) {
             if (inited.get())
                 LOG.warn("Interrupted while waiting for reactor initialization", e);
             else
                 ErrorService.error(e); // this is a problem.
+        } catch(ExecutionException ee) {
+            ErrorService.error(ee); // this is a problem too.
         }
 
         dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
             public void acceptConnection(String word, Socket socket) {
                 reactor.acceptConnection(word + " ", socket);
             }
-        }, SUPPORTED_METHODS, false, false);
+        }, false, false, SUPPORTED_METHODS);
     }
 
     /**

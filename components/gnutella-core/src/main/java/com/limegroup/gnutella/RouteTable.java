@@ -13,6 +13,7 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
 
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
@@ -131,8 +132,8 @@ public final class RouteTable  {
             resultCounts.add((double)count);
         }
         
-        void countHopsTTLNet(int network, byte hop, byte ttl) {
-            networks[Math.max(0,Math.min(network,networks.length - 1))]++;
+        void countHopsTTLNet(Network network, byte hop, byte ttl) {
+            networks[Math.max(0,Math.min(network.ordinal(),networks.length - 1))]++;
             hops[Math.min(hops.length - 1, Math.max(0,hop-1))]++;
             ttls[Math.min(ttls.length - 1, Math.max(0,ttl-1))]++;
         }

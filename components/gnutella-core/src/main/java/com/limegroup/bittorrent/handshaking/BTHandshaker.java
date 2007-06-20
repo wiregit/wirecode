@@ -6,6 +6,7 @@ package com.limegroup.bittorrent.handshaking;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
@@ -128,7 +129,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 				
 				// add the connection and re-schedule fetching.
 				if (torrent.addConnection(btc))
-					btc.init(sock, torrent, torrent.getScheduler());
+					btc.init(sock, torrent, torrent.getNetworkScheduledExecutorService());
 				observer.handshakerDone(this);
 			}
 			else {
@@ -186,4 +187,8 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	public int getPort() {
 		return loc.getPort();
 	}
+    
+    public InetSocketAddress getInetSocketAddress() {
+        return loc.getInetSocketAddress();
+    }
 }
