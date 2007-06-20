@@ -174,7 +174,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     // This is only done if we know the dispatcher is not going to immediately call
                     // handleRead on the socket.  If this were not done, buffered data within the chain
                     // would not be read until future incoming data triggered another handleRead.
-                    if(isConnected() && !NIODispatcher.instance().isReadReadyThisIteration(getChannel()));
+                    if(isConnected() && !NIODispatcher.instance().isReadReadyThisIteration(getChannel()))
                         reader.handleRead();
                         
                     source.interestRead(true);
