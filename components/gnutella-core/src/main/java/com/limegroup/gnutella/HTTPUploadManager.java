@@ -22,6 +22,7 @@ import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
+import org.limewire.http.HttpAcceptorListener;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
@@ -769,7 +770,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Manages the {@link HTTPUploadSession} associated with a connection.
      */
-    private class ResponseListener implements HTTPAcceptorListener {
+    private class ResponseListener implements HttpAcceptorListener {
 
         public void connectionOpen(NHttpConnection conn) {
         }

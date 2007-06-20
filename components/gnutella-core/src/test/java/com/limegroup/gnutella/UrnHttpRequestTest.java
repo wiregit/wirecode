@@ -83,7 +83,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        acceptor.stop(connectionDispatcher);
+        acceptor.stop();
         uploadManager.stop(acceptor);
         fm.stop();
     }

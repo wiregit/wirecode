@@ -3,11 +3,6 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,35 +13,14 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
-import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.nio.NHttpConnection;
-import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpParamsLinker;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.ResponseContent;
-import org.apache.http.protocol.ResponseDate;
-import org.apache.http.protocol.ResponseServer;
-import org.limewire.http.HttpIOReactor;
+import org.limewire.http.BasicHttpAcceptor;
+import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpIOSession;
-import org.limewire.http.HttpServiceEventListener;
-import org.limewire.http.HttpServiceHandler;
-import org.limewire.http.LimeResponseConnControl;
-import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
-import org.limewire.net.ConnectionAcceptor;
-import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
@@ -57,40 +31,21 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
- * Processes HTTP requests which are forwarded to {@link HttpRequestHandler}
- * objects that can be registered for a URL pattern.
- * <p>
- * The acceptor uses HttpCore and LimeWire's HTTP component for connection
- * handling. It needs to be start by invoking
- * {@link #start(ConnectionDispatcher)} in order to accept connection.
+ * Processes HTTP requests for Gnutella uploads.
  */
-public class HTTPAcceptor {
+public class HTTPAcceptor extends BasicHttpAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
 
     private static final String[] SUPPORTED_METHODS = new String[] { "GET",
             "HEAD", };
 
-    private final HttpRequestHandlerRegistry registry;
-
     private final HttpRequestHandler notFoundHandler;
 
-    private final List<HTTPAcceptorListener> acceptorListeners = new CopyOnWriteArrayList<HTTPAcceptorListener>();
-
-    private HttpIOReactor reactor;
-
-    private HttpParams params;
-
-    private ConnectionEventListener connectionListener;
-
-    private BasicHttpProcessor processor;
-
-    private DefaultHttpResponseFactory responseFactory;
-
-    private AtomicBoolean started = new AtomicBoolean();
-
     public HTTPAcceptor() {
-        this.registry = new SynchronizedHttpRequestHandlerRegistry();
+        super(false, SUPPORTED_METHODS, createDefaultParams(LimeWireUtils
+                .getHttpServer(), Constants.TIMEOUT));
+
         this.notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
@@ -100,58 +55,13 @@ public class HTTPAcceptor {
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
         };
-        
+
+        addAcceptorListener(new ConnectionEventListener());
+
+        addRequestInterceptor(new RequestStatisticTracker());
+        addResponseInterceptor(new HeaderStatisticTracker());
+
         inititalizeDefaultHandlers();
-    }
-
-    /**
-     * Note: Needs to be called from the NIODispatcher thread.
-     */
-    private void initializeReactor() {
-        this.params = new BasicHttpParams();
-        this.params.setIntParameter(HttpConnectionParams.SO_TIMEOUT,
-                Constants.TIMEOUT);
-        this.params.setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT,
-                Constants.TIMEOUT);
-        // size of the per connection buffers used for headers and by the
-        // decoder/encoder
-        this.params.setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE,
-                8 * 1024);
-        this.params.setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true);
-        this.params.setIntParameter(HttpConnectionParams.MAX_LINE_LENGTH, 4096);
-        this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 50);
-        this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
-                LimeWireUtils.getHttpServer());
-        
-        this.connectionListener = new ConnectionEventListener();
-
-        // intercepts HTTP requests and responses
-        processor = new BasicHttpProcessor();
-
-        processor.addInterceptor(new RequestStatisticTracker());
-
-        processor.addInterceptor(new ResponseDate());
-        processor.addInterceptor(new ResponseServer());
-        processor.addInterceptor(new ResponseContent());
-        processor.addInterceptor(new LimeResponseConnControl());
-        processor.addInterceptor(new HeaderStatisticTracker());
-
-        responseFactory = new DefaultHttpResponseFactory();
-
-        HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
-                responseFactory, new DefaultConnectionReuseStrategy(), params);
-        serviceHandler.setEventListener(connectionListener);
-        serviceHandler.setHandlerResolver(this.registry);
-
-        this.reactor = new HttpIOReactor(params);
-        IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
-                serviceHandler, reactor.getHttpParams());
-        try {
-            this.reactor.execute(ioEventDispatch);
-        } catch (IOException e) {
-            // can not happen
-            throw new RuntimeException("Unexpected exception", e);
-        }
     }
 
     private void inititalizeDefaultHandlers() {
@@ -171,25 +81,21 @@ public class HTTPAcceptor {
     }
 
     /**
-     * Handles an incoming HTTP push request. This needs to be called from the NIO thread.
+     * Handles an incoming HTTP push request. This needs to be called from the
+     * NIO thread.
      */
     public void acceptConnection(Socket socket, HTTPConnectionData data) {
-        if (reactor == null) {
+        assert NIODispatcher.instance().isDispatchThread();
+
+        if (getReactor() == null) {
             LOG.warn("Received upload request before reactor was initialized");
             return;
         }
-        
-        DefaultNHttpServerConnection conn = reactor.acceptConnection(null,
+
+        DefaultNHttpServerConnection conn = getReactor().acceptConnection(null,
                 socket);
         if (conn != null)
             HttpContextParams.setConnectionData(conn.getContext(), data);
-    }
-
-    /**
-     * Adds a listener for acceptor events.
-     */
-    public void addAcceptorListener(HTTPAcceptorListener listener) {
-        acceptorListeners.add(listener);
     }
 
     /**
@@ -199,167 +105,34 @@ public class HTTPAcceptor {
         return notFoundHandler;
     }
 
-    /* Simulates the processing of request for testing. */
-    protected HttpResponse process(HttpRequest request) throws IOException,
-            HttpException {
-        HttpExecutionContext context = new HttpExecutionContext(null);
-        HttpResponse response = responseFactory.newHttpResponse(request
-                .getRequestLine().getHttpVersion(), HttpStatus.SC_OK, context);
-        HttpParamsLinker.link(response, this.params);
-
-        // HttpContextParams.setLocal(context, true);
-        context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
-        context.setAttribute(HttpExecutionContext.HTTP_RESPONSE, response);
-
-        processor.process(request, context);
-
-        HttpRequestHandler handler = null;
-        if (this.registry != null) {
-            String requestURI = request.getRequestLine().getUri();
-            handler = this.registry.lookup(requestURI);
-        }
-        if (handler != null) {
-            handler.handle(request, response, context);
-        } else {
-            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
-        }
-
-        return response;
-    }
-
-    /**
-     * Removes <code>listener</code> from the list of acceptor listeners.
-     * 
-     * @see #addAcceptorListener(HTTPAcceptorListener)
-     */
-    public void removeAcceptorListener(HTTPAcceptorListener listener) {
-        acceptorListeners.remove(listener);
-    }
-
-    /**
-     * Registers a request handler for a request pattern. See
-     * {@link HttpRequestHandlerRegistry} for a description of valid patterns.
-     * <p>
-     * If a request matches multiple handlers, the handler with the longer
-     * pattern is preferred.
-     * <p>
-     * Only a single handler may be registered per pattern.
-     * 
-     * @param pattern the URI pattern to handle requests for
-     * @param handler the handler that processes the request
-     */
-    public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
-        registry.register(pattern, handler);
-    }
-
-    /**
-     * Unregisters the handlers for <code>pattern</code>.
-     * 
-     * @see #registerHandler(String, HttpRequestHandler)
-     */
-    public void unregisterHandler(final String pattern) {
-        registry.unregister(pattern);
-    }
-
-    /**
-     * Registers the acceptor at <code>dispatcher</code> for incoming
-     * connections.
-     */
-    public void start(ConnectionDispatcher dispatcher) {
-        if (started.getAndSet(true)) {
-            throw new IllegalStateException();
-        }
-
-        final AtomicBoolean inited = new AtomicBoolean(false);
-        Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
-            public void run() {
-                initializeReactor();
-                inited.set(true);
-            }
-        });
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            if (inited.get())
-                LOG.warn("Interrupted while waiting for reactor initialization", e);
-            else
-                ErrorService.error(e); // this is a problem.
-        } catch(ExecutionException ee) {
-            ErrorService.error(ee); // this is a problem too.
-        }
-
-        dispatcher.addConnectionAcceptor(new ConnectionAcceptor() {
-            public void acceptConnection(String word, Socket socket) {
-                reactor.acceptConnection(word + " ", socket);
-            }
-        }, false, false, SUPPORTED_METHODS);
-    }
-
-    /**
-     * Unregisters the acceptor at <code>dispatcher</code>.
-     * 
-     * @see #start(ConnectionDispatcher)
-     */
-    public void stop(ConnectionDispatcher dispatcher) {
-        dispatcher.removeConnectionAcceptor(SUPPORTED_METHODS);
-
-        started.set(false);
-    }
-
     /**
      * Forwards events from the underlying protocol layer to acceptor event
      * listeners.
      */
-    private class ConnectionEventListener implements HttpServiceEventListener {
+    private class ConnectionEventListener implements HttpAcceptorListener {
 
         public void connectionOpen(NHttpConnection conn) {
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.connectionOpen(conn);
-            }
         }
 
         public void connectionClosed(NHttpConnection conn) {
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.connectionClosed(conn);
-            }
         }
 
         public void connectionTimeout(NHttpConnection conn) {
-            // should never happen since LimeWire will close the socket on
-            // timeouts which will trigger a connectionClosed() event
-            throw new RuntimeException();
         }
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
-            LOG.debug("HTTP connection error", e);
-
             if (HttpContextParams.isPush(conn.getContext())) {
                 if (HttpContextParams.isFirewalled(conn.getContext())) {
                     UploadStat.FW_FW_FAILURE.incrementStat();
                 }
                 UploadStat.PUSH_FAILED.incrementStat();
             }
-
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.connectionClosed(conn);
-            }
         }
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
-            LOG.debug("HTTP protocol error", e);
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.connectionClosed(conn);
-            }
         }
 
         public void requestReceived(NHttpConnection conn, HttpRequest request) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Processing request: " + request.getRequestLine());
-
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.requestReceived(conn, request);
-            }
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {
@@ -369,10 +142,6 @@ public class HTTPAcceptor {
                     .setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
                             .getValue());
             session.setThrottle(null);
-
-            for (HTTPAcceptorListener listener : acceptorListeners) {
-                listener.responseSent(conn, response);
-            }
         }
 
     }
@@ -427,7 +196,7 @@ public class HTTPAcceptor {
          */
         public void process(HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
-            for (Iterator<?> it = response.headerIterator(); it.hasNext();) {
+            for (Iterator it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();
                 BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header
                         .getName().length()
@@ -436,5 +205,4 @@ public class HTTPAcceptor {
         }
 
     }
-
 }

@@ -141,7 +141,7 @@ public class UploaderTest extends BaseTestCase {
     public void tearDown() {
         StalledUploadWatchdog.DELAY_TIME = savedDelayTime;
         
-        RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
+        RouterService.getHTTPUploadAcceptor().stop();
         
         upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager.cleanup();
