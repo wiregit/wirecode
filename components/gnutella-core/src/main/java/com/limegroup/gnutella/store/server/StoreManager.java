@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.store.server.ConnectionListener;
+import org.limewire.store.server.Dispatchee;
 import org.limewire.store.server.Dispatcher;
-
-
+import org.limewire.store.server.StoreServerFactory;
 
 /**
  * The interface to which GUI and other units program for the store server. This
@@ -29,6 +29,30 @@ import org.limewire.store.server.Dispatcher;
  * with the rules that only <u>one</u> handler may be registered per command
  * and zero or more listeners may be added for every command. It's expected that
  * at least one handler or listener will be registered for every command.
+ * <br>
+ * Here is an example of registering handlers, in which we want to control the music player from a web page:
+ * <pre>
+ *        RouterService.getStoreManager().registerHandler("Back", new StoreManager.AbstractHandler.OK("Back") {
+ *            protected void doHandle(Map<String, String> args) {
+ *                MediaPlayerComponent.instance().backSong();
+ *            }
+ *        });
+ *        RouterService.getStoreManager().registerHandler("Stop", new StoreManager.AbstractHandler.OK("Stop") {
+ *            protected void doHandle(Map<String, String> args) {
+ *                MediaPlayerComponent.instance().doStopSong();
+ *            }
+ *        });
+ *        RouterService.getStoreManager().registerHandler("Play", new StoreManager.AbstractHandler.OK("Play") {
+ *            protected void doHandle(Map<String, String> args) {
+ *                MediaPlayerComponent.instance().playSong();
+ *            }
+ *        });
+ *        RouterService.getStoreManager().registerHandler("Next", new StoreManager.AbstractHandler.OK("Next") {
+ *            protected void doHandle(Map<String, String> args) {
+ *                MediaPlayerComponent.instance().nextSong();
+ *            }
+ *        }); 
+ * </pre>
  */
 public interface StoreManager extends ConnectionListener.HasSome {
 
@@ -56,6 +80,27 @@ public interface StoreManager extends ConnectionListener.HasSome {
      * @return the instance of {@link HttpRequestHandler} responsible for passing along messages
      */
     HttpRequestHandler getHandler();
+    
+    /**
+     * Register a listener for the command <tt>cmd</tt>, and returns <tt>true</tt> on success
+     * and <tt>false</tt> on failure.  There can be only <b>one</b> {@link StoreManager.Handler} for
+     * every command.
+     * 
+     * @param cmd   String that invokes this listener
+     * @param lis   listener
+     * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if this command
+     *         is already registered
+     */
+    boolean registerHandler(String cmd, Handler lis);
+
+    /**
+     * Registers a listener for the command <tt>cmd</tt>.  There can be multiple listeners
+     * 
+     * @param cmd
+     * @param lis
+     * @return
+     */
+    boolean registerListener(String cmd, Listener lis);    
     
     /**
      * Is able to return and possibly construct an instance.
@@ -143,26 +188,62 @@ public interface StoreManager extends ConnectionListener.HasSome {
             boolean registerListener(String cmd, Listener lis);
         }        
     }
-
+    
     /**
-     * Register a listener for the command <tt>cmd</tt>, and returns <tt>true</tt> on success
-     * and <tt>false</tt> on failure.  There can be only <b>one</b> {@link StoreManager.Handler} for
-     * every command.
-     * 
-     * @param cmd   String that invokes this listener
-     * @param lis   listener
-     * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if this command
-     *         is already registered
+     * An abstract implementation of {@link Handler} that abstract away
+     * {@link #name()}.
      */
-    boolean registerHandler(String cmd, Handler lis);
+    public abstract class AbstractHandler implements Handler {
 
+        private final String name;
+
+        public AbstractHandler(String name) {
+            this.name = name;
+        }
+
+        public final String name() {
+            return name;
+        }
+
+        /**
+         * An abstract implementation of {@link AbstractHandler} that abstract away
+         * returning a value from {@link #handle(Map)}.
+         */
+        public abstract static class OK extends AbstractHandler {
+
+            public OK(String name) {
+                super(name);
+            }
+
+            public final String handle(Map<String, String> args) {
+                doHandle(args);
+                return "OK";
+            }
+
+            /**
+             * Override this to do some work, but return nothing.
+             * 
+             * @param args unchanged CGI parameters passed in to
+             *        {@link #handle(Map)}
+             */
+            abstract void doHandle(Map<String, String> args);
+        }
+    }
+    
     /**
-     * Registers a listener for the command <tt>cmd</tt>.  There can be multiple listeners
-     * 
-     * @param cmd
-     * @param lis
-     * @return
+     * An abstract implementation of {@link Listener} that abstract away {@link #name()}.
      */
-    boolean registerListener(String cmd, Listener lis);
+    public abstract class AbstractListener implements Listener {
+
+        private final String name;
+        
+        public AbstractListener(String name) {
+            this.name = name;
+        }
+
+        public final String name() {
+            return name;
+        }   
+    }    
 
 }
