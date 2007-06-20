@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.net;
 
 import java.net.Socket;
 

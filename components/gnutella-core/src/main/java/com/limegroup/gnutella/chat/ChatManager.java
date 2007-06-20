@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
+import org.limewire.net.ConnectionAcceptor;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;

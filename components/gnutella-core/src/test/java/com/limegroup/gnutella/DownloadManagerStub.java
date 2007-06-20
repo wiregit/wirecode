@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.net.Socket;
 
+import org.limewire.net.ConnectionDispatcher;
+
 
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;

@@ -31,6 +31,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.UDPMultiplexor;

@@ -5,6 +5,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;

@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.net.ConnectionAcceptor;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 

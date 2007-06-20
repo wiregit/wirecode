@@ -43,6 +43,8 @@ import org.limewire.http.HttpServiceEventListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 

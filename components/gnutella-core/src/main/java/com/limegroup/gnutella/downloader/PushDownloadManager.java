@@ -25,6 +25,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
@@ -33,8 +35,6 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
 
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
