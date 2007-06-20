@@ -1,12 +1,7 @@
 package org.limewire.store.server;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.Test;
 import junit.textui.TestRunner;
-
-import org.limewire.store.server.Util;
 
 /**
  * Tests the proper way to handle a bad message.

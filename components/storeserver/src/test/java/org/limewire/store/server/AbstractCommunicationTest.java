@@ -3,16 +3,11 @@ package org.limewire.store.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.textui.TestRunner;
-
 import org.limewire.store.server.Util;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
  * each aspect of this communication separately.
- * 
- * @author jpalm
  */
 abstract class AbstractCommunicationTest extends DemoSupport {
 

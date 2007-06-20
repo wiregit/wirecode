@@ -2,8 +2,8 @@ package org.limewire.store.server;
 
 /*
  * $HeadURL$
- * $Revision: 1.1.4.3 $
- * $Date: 2007-06-13 16:15:49 $
+ * $Revision: 1.1.4.4 $
+ * $Date: 2007-06-20 20:39:36 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -30,7 +30,6 @@ package org.limewire.store.server;
  * <http://www.apache.org/>.
  *
  */
-import java.util.Map;
 
 import org.limewire.http.AsyncHttpRequestHandler;
 

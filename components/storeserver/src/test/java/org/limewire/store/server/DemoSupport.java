@@ -11,8 +11,6 @@ import org.limewire.util.BaseTestCase;
 
 /**
  * Skeleton code for test cases using the servers.
- * 
- * @author jpalm
  */
 public abstract class DemoSupport extends BaseTestCase {
     

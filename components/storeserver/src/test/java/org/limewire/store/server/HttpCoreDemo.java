@@ -1,7 +1,5 @@
 package org.limewire.store.server;
 
-import java.io.IOException;
-
 public class HttpCoreDemo {
 
     public static void main(String[] args) {

@@ -12,8 +12,6 @@ import org.limewire.store.server.ServerImpl;
 /**
  * This class represents fake javascript code that can
  * communicate to the remote server and local server on the client.
- * 
- * @author jpalm
  */
 final class FakeCode {
 

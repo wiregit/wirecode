@@ -1,7 +1,5 @@
 package org.limewire.store.server;
 
-
-
 /**
  * This represents an instance of a local server.
  */

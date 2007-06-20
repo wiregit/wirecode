@@ -221,7 +221,15 @@ public final class Util {
      * Returns a string with the urlencoded arguments removed with these
      * arguments separated by {@link Constants#ARGUMENT_SEPARATOR}. This method
      * has the side-affect of putting these urlencoded arguments into
-     * <tt>args</tt>.
+     * <tt>args</tt>. Arguments with no equals sign will have
+     * <code>null</code> values, arguments with nothing after the equal sign
+     * will have an empty value, non-empty arguments will be as expected. Here
+     * are a couple exampels:
+     * <ul>
+     * <li>one=1 &rarr; <code>{one=1}</code></li>
+     * <li>one= &rarr; <code>{one=}</code></li>
+     * <li>one &rarr; <code>{one=null}</code></li>
+     * </ul>
      * 
      * @param cmd original command, this can be <code>null</code>
      * @param args original arguments (SIDEEFFECT: these are updated)
@@ -236,12 +244,17 @@ public final class Util {
         if (ihuh == -1) return cmd;
 
         final String newCmd = cmd.substring(0, ihuh);
+        //
+        // We have to decode the rest because the commands are identified using
+        // CGI parameters, but the value of the arguments are often parameters,
+        // and get encoded.
+        //
         String tmpRest = cmd.substring(ihuh + 1);
         try {
             tmpRest = URLDecoder.decode(tmpRest, "UTF-8");
         } catch (Exception e) { ErrorService.error(e); }
         final String rest = tmpRest;
-        for (StringTokenizer st = new StringTokenizer(rest, DispatcherSupport.Constants.ARGUMENT_SEPARATOR, false); 
+        for (StringTokenizer st = new StringTokenizer(rest, "&", false); 
              st.hasMoreTokens();) {
             final String tok = st.nextToken();
             int ieq = tok.indexOf('=');

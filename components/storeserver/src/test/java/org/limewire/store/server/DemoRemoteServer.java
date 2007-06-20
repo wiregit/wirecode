@@ -11,8 +11,6 @@ import org.limewire.store.server.URLSocketOpenner;
 
 /**
  * A simple remote server.
- * 
- * @author jpalm
  */
 public class DemoRemoteServer extends AbstractRemoteServer implements
         RemoteServer {

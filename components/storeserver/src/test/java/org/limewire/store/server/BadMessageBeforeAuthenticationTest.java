@@ -6,8 +6,6 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
-import org.limewire.store.server.Util;
-
 /**
  * Tests that we handle a bad message correctly.
  */

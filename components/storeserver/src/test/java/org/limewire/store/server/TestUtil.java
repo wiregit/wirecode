@@ -12,8 +12,6 @@ import junit.framework.TestSuite;
 /**
  * Convenience class for adding all the test cases on to a test suite
  * found in a path <tt>bin</tt>
- * 
- * @author jpalm
  */
 public class TestUtil {
 

@@ -5,11 +5,7 @@ import java.util.regex.Pattern;
 import org.limewire.store.server.Util;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.textui.TestRunner;
 
 public class CreateCookieDateTest extends BaseTestCase {
@@ -17,7 +13,7 @@ public class CreateCookieDateTest extends BaseTestCase {
     public CreateCookieDateTest(String s) { super(s); }
     
     public static Test suite() {
-        return buildTestSuite(CookieGenTest.class);
+        return buildTestSuite(KeyGenTest.class);
     }
     
     

@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 
 import org.limewire.store.server.AbstractDispatchee;
 
-
 /**
  * Pops up a java thing with a shopping cart to stay in sync with the page.
  * 

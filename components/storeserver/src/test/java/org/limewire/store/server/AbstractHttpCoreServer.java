@@ -2,8 +2,8 @@ package org.limewire.store.server;
 
 /*
  * $HeadURL$
- * $Revision: 1.1.4.1 $
- * $Date: 2007-06-08 15:04:31 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2007-06-20 20:39:36 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;

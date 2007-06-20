@@ -3,18 +3,15 @@ package org.limewire.store.server;
 import org.limewire.store.server.Util;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.textui.TestRunner;
 
-public class CookieGenTest extends BaseTestCase {
+public class KeyGenTest extends BaseTestCase {
 
-    public CookieGenTest(String s) { super(s); }
+    public KeyGenTest(String s) { super(s); }
     
     public static Test suite() {
-        return buildTestSuite(CookieGenTest.class);
+        return buildTestSuite(KeyGenTest.class);
     }
     
     public static void main(String[] args) {

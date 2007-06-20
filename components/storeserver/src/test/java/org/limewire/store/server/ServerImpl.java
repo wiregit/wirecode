@@ -1,8 +1,5 @@
 package org.limewire.store.server;
 
-
-import org.limewire.concurrent.ManagedThread;
-
 /**
  * Base class for local servers.
  */

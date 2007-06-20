@@ -3,7 +3,6 @@ package org.limewire.store.server;
 import java.rmi.server.RemoteServer;
 import java.util.Map;
 
-
 /**
  * Sample local server that connects to a {@link RemoteServer} running on <tt>localhost:8090</tt>.
  */
