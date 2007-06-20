@@ -46,6 +46,12 @@ import org.limewire.util.ByteOrder;
 public class IntervalSet implements Iterable<Interval>, Serializable{
     
 	private static final long serialVersionUID = -7791242963023638684L;
+    
+    /** 
+     * size below which binary search is not worth it.  Total guess..
+     */
+    private static final int LINEAR = 16;
+    
     /**
      * The sorted set of intervals this contains.
      */
@@ -74,7 +80,8 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         final int high = addInterval.high;
         Interval lower=null;
         Interval higher=null;
-        for(Iterator<Interval> iter = intervals.iterator(); iter.hasNext(); ) {
+        int start = narrowStart(addInterval)[0];
+        for(Iterator<Interval> iter = intervals.subList(start, intervals.size()).iterator(); iter.hasNext(); ) {
             Interval interval = iter.next();
             if (low<=interval.low && interval.high<=high) {//  <low-------high>
                 iter.remove();                             //      interval
@@ -134,7 +141,8 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         int high = deleteMe.high;
         Interval lower = null;
         Interval higher = null;
-        for (Iterator<Interval> iter = intervals.iterator(); iter.hasNext();) {
+        int [] range = narrowRange(deleteMe);
+        for (Iterator<Interval> iter = intervals.subList(range[0],range[1]).iterator(); iter.hasNext();) {
             Interval interval = iter.next();
             if (interval.high >= low && interval.low <= high) { //found
                 iter.remove();                                  // overlap
@@ -213,14 +221,53 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
 	 * @return whether this interval set contains fully the given interval
 	 */
 	public boolean contains(Interval i) {
-        for(int j = 0; j < intervals.size(); j++) {
-            Interval ours = intervals.get(j);
-            if (ours.low <= i.low && ours.high >= i.high)
-                return true;
-            if (ours.low > i.high)
-                break;
-        }
+	    int [] range = narrowStart(i);
+	    for(int j = range[0]; j < range[1]; j++) {
+	        Interval ours = intervals.get(j);
+	        if (ours.low <= i.low && ours.high >= i.high)
+	            return true;
+	        if (ours.low > i.high)
+	            break;
+	    }
         return false;        
+    }
+    
+    /**
+     * narrows the index range where an interval would be found.
+     * @return integer array with the start index at position 0 and end index at position 1.
+     */
+    private int [] narrowStart(Interval i) {
+        int size = intervals.size();
+        // not worth doing binary search if too smal
+        if (size < LINEAR) 
+            return new int[]{0,size};
+        int point = Collections.binarySearch(intervals, i,IntervalComparator.INSTANCE);
+        if (point < 0)
+            point = -(point + 1);
+        int low = Math.max(0, point - 1);
+        int high = Math.min(size, point + 1);
+        return new int[]{low, high};
+    }
+    
+    /**
+     * narrows the index range where any interval overlapping with the provided interval 
+     * would be found.
+     * @return integer array with the start index at position 0 and end index at position 1.
+     */
+    private int [] narrowRange(Interval i) {
+        int size = intervals.size();
+        if (size < LINEAR) 
+            return new int[]{0,size};
+        
+        int a = Collections.binarySearch(intervals, i,IntervalComparator.INSTANCE);
+        if (a < 0)
+            a = -(a + 1);
+        int b = Collections.binarySearch(intervals, new Interval(i.high, i.high),IntervalComparator.INSTANCE);
+        if (b < 0)
+            b = -(b + 1);
+        a = Math.max(0, a - 1);
+        b = Math.min(size, b + 1);
+        return new int[]{a,b};
     }
     
     /**
@@ -229,7 +276,9 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     public boolean containsAny(Interval i) {
         int low = i.low;
         int high = i.high;
-        for(Interval interval : this) {
+        int [] range = narrowStart(i);
+        for(int j = range[0]; j < range[1]; j++) {
+            Interval interval = intervals.get(j);
             if (low<=interval.low && interval.high<=high)  //  <low-------high>
                 return true;                               //      interval
 
@@ -259,12 +308,10 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         if (low > high)
             return overlapBlocks;
         
-        //TODO2:For now we iterate over each of the intervals we have, 
-        //but there should be a faster way of finding which intervals we 
-        //can overlap, Actually there is a max of  two intervals we can overlap
-        //one on the top end and one on the bottom end. We need to make this 
-        //more efficient
-        for(Interval interval : intervals) {
+        
+        int []range = narrowRange(checkInterval);
+        for(int j = range[0]; j < range[1]; j++) {
+            Interval interval = intervals.get(j);
             //case a:
             if(low <= interval.low && interval.high <= high) {
                 //Need to check the whole interval, starting point=interval.low
