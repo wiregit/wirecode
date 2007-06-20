@@ -1496,6 +1496,8 @@ CV_COLUMN_VENDOR=विक्रेता/आवर्तन
 CV_COLUMN_TIME=समय
 #### CV_COLUMN_COMPRESSION=Compressed (I/O)
 CV_COLUMN_COMPRESSION=दबाया हुआ
+#### CV_COLUMN_SSL=SSL Overhead (I/O)
+#? CV_COLUMN_SSL=
 #### CV_COLUMN_QRP_FULL=QRP (%)
 CV_COLUMN_QRP_FULL=QRP (%)
 #### CV_COLUMN_QRP_USED=QRP Empty
@@ -1544,6 +1546,8 @@ CV_STRING_STATUS=कनैक्शन वस्तुस्थितिः
 CV_ADD_HOST_LABEL=होस्ट्
 #### CV_ADD_PORT_LABEL=Port:
 CV_ADD_PORT_LABEL=पोर्ट
+#### CV_ADD_TLS_LABEL=Use TLS:
+#? CV_ADD_TLS_LABEL=
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
 CV_ADD_DIALOG_TITLE=Gnutella कनेक्शन जोड़ें
 
