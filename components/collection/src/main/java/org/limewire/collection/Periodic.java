@@ -105,7 +105,7 @@ public class Periodic {
 	 */
 	public synchronized void unschedule() {
 		if (future != null) {
-			future.cancel(true);
+			future.cancel(false);
 			future = null;
 			nextExecuteTime = -1;
 		}

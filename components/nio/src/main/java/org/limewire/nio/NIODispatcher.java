@@ -590,6 +590,8 @@ public class NIODispatcher implements Runnable {
                     } else {
                         long nanoNow = System.nanoTime();
                         try {
+                            if (Thread.interrupted())
+                                LOG.warn("interrupted?");
                             primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
                         } finally {
                             stats.updateSelectTime(System.nanoTime() - nanoNow);
@@ -620,7 +622,7 @@ public class NIODispatcher implements Runnable {
                         checkTime = true;
                     } else if(startSelect + 30 >= now) {
                         if(LOG.isWarnEnabled())
-                            LOG.warn("Spinning detected, current spins: " + zeroes);
+                            LOG.warn("Spinning detected, current spins: " + zeroes+" startSelect "+startSelect+" now "+now+" keys "+primarySelector.keys());
                         if(zeroes++ > SPIN_AMOUNT)
                             throw new SpinningException();
                     } else { // waited the timeout just fine, reset everything.
