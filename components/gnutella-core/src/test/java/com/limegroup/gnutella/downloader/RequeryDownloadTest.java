@@ -264,10 +264,6 @@ public class RequeryDownloadTest
         String qString =QueryUtils.createQueryString(_filename);
         assertEquals("should have queried for filename", qString, 
                      qr.getQuery());
-        assertNotNull("should have some requested urn types", 
-            qr.getRequestedUrnTypes() );
-        assertEquals("unexpected amount of requested urn types",
-            1, qr.getRequestedUrnTypes().size() );
         Set urns=qr.getQueryUrns();
         assertNotNull("urns shouldn't be null", urns);
         assertEquals("should only have NO urn", 0, urns.size());

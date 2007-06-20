@@ -384,7 +384,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                                  0 | QueryRequest.SPECIAL_MINSPEED_MASK |
                                  QueryRequest.SPECIAL_FIREWALL_MASK,
                                  "berkeley", "", null, 
-                                 null, null, false, Network.UNKNOWN, false, 
+                                 null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
 
             testUP[0].send(query);testUP[0].flush();
@@ -401,7 +401,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                                  QueryRequest.SPECIAL_FIREWALL_MASK |
                                  QueryRequest.SPECIAL_FWTRANS_MASK,
                                  "susheel", "", null, 
-                                 null, null, false, Network.UNKNOWN, false, 
+                                 null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
 
             testUP[0].send(query);testUP[0].flush();
@@ -418,7 +418,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                                  0 | QueryRequest.SPECIAL_MINSPEED_MASK |
                                  QueryRequest.SPECIAL_XML_MASK,
                                  "susheel", "", null, 
-                                 null, null, false, Network.UNKNOWN, false, 
+                                 null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
 
             testUP[1].send(query);testUP[1].flush();
@@ -459,7 +459,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                                  QueryRequest.SPECIAL_FIREWALL_MASK |
                                  QueryRequest.SPECIAL_FWTRANS_MASK,
                                  "susheel", "", null, 
-                                 null, null, false, Network.UNKNOWN, false, 
+                                 null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
 
             testUP[2].send(query);testUP[2].flush();

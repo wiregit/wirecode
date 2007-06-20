@@ -255,7 +255,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         {
         drainAll();    
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
-                                              "whatever", null, null, null, 
+                                              "whatever", null, null,
                                               null, false, 
                                               Network.UNKNOWN, false, 0,
                                               true, 0);
@@ -652,7 +652,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     public void testDropUnsolicited() throws Exception {
     	drainAll();
     	QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
-                "not proxied", null, null, null, 
+                "not proxied", null, null,
                 null, false, 
                 Network.UNKNOWN, false, 0,
                 true, 0);

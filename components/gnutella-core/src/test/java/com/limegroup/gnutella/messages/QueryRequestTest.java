@@ -12,8 +12,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
 
@@ -309,9 +309,6 @@ public final class QueryRequestTest extends LimeTestCase {
 			URN_BYTES[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
 			URN_BYTES[i].write(0);
 			Set curUrnSet = new HashSet();
-			Set curUrnTypeSet = new HashSet();
-			curUrnTypeSet.add(URN.Type.ANY_TYPE_SET);
-			curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
 			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
 				URN_BYTES[i].write(HugeTestUtils.URNS[j].toString().getBytes());
 				curUrnSet.add(HugeTestUtils.URNS[j]);
@@ -500,8 +497,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 
-		runStandardChecks(qr, false, URN.Type.ANY_TYPE_SET, 
-						  Collections.EMPTY_SET, key);		
+		runStandardChecks(qr, false, Collections.EMPTY_SET, key);		
 		assertEquals("unexpected query", "test", qr.getQuery());
 		assertNull("unexpected xml query", qr.getRichQuery());
 	}
@@ -525,8 +521,6 @@ public final class QueryRequestTest extends LimeTestCase {
 		assertEquals("unexpected query", "\\", qr.getQuery());
 		assertNull("xml should be empty", qr.getRichQuery());
 		assertTrue("should have URNs", qr.hasQueryUrns());
-		assertEquals("unexpected requested URN types", URN.Type.SHA1_SET, 
-					 qr.getRequestedUrnTypes());
 		assertTrue("should be a requery", qr.isLimeRequery());
 	}
 
@@ -534,8 +528,6 @@ public final class QueryRequestTest extends LimeTestCase {
 		assertEquals("unexpected query", query, qr.getQuery());
 		assertNull("xml should be null", qr.getRichQuery());
 		assertTrue("should not have URNs", !qr.hasQueryUrns());
-		assertEquals("unexpected requested URN types", URN.Type.ANY_TYPE_SET, 
-					 qr.getRequestedUrnTypes());
 		assertTrue("should be a requery", qr.isLimeRequery());
 	}
 
@@ -550,7 +542,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * @param qr the query to check
 	 */
 	private void runStandardChecks(QueryRequest qr, 
-								   boolean multicast, Set urnTypes,
+								   boolean multicast,
 								   Set urns, AddressSecurityToken key) {
 		if(!multicast) {
 			assertTrue("should not be multicast", !qr.isMulticast());
@@ -565,8 +557,6 @@ public final class QueryRequestTest extends LimeTestCase {
 			assertEquals("unexpected query key", key, qr.getQueryKey());
 		}
 		assertTrue("should want XML", qr.desiresXMLResponses());
-		assertEquals("unexpected requested URN types", urnTypes, 
-					 qr.getRequestedUrnTypes());	
 		assertEquals("URNs should be equal", urns, 
 					 qr.getQueryUrns());	
         if(qr.getQueryUrns().size() == 0) {
@@ -577,17 +567,17 @@ public final class QueryRequestTest extends LimeTestCase {
 
 	private void runStandardChecksMulticast(QueryRequest qr, String query) {
 		assertEquals("queries should be equal", query, qr.getQuery());
-		runStandardChecks(qr, true, URN.Type.ANY_TYPE_SET,
+		runStandardChecks(qr, true,
 						  Collections.EMPTY_SET, null);
 	}
 
 	private void runStandardChecks(QueryRequest qr) {
-		runStandardChecks(qr, false, URN.Type.ANY_TYPE_SET,
+		runStandardChecks(qr, false,
 						  Collections.EMPTY_SET, null);
 	}
 
 	private void runStandardChecks(QueryRequest qr, Set urns) {
-		runStandardChecks(qr, false, URN.Type.SHA1_SET, urns, null);
+		runStandardChecks(qr, false, urns, null);
 	}
 	
 	/**
@@ -944,7 +934,7 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testMetaFlagConstructor() throws Exception {
         try {
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Network.TCP, false, 0, false, 
+                             null, true, Network.TCP, false, 0, false, 
                              1);
             assertTrue(false);
         }
@@ -984,7 +974,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         try {
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Network.TCP, false, 0, false,
+                             null, true, Network.TCP, false, 0, false,
                              0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
                              flags[4] | flags[5]);
             assertTrue(false);
@@ -997,7 +987,7 @@ public final class QueryRequestTest extends LimeTestCase {
         try {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Network.TCP, false, 0, false,
+                             null, true, Network.TCP, false, 0, false,
                              flag);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
@@ -1259,7 +1249,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         // oob not set
-        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP, false, 0);
+        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP, false, 0);
         assertFalse(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
@@ -1317,7 +1307,7 @@ public final class QueryRequestTest extends LimeTestCase {
     }
     
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "",
                 URN.NO_URN_SET,
                 new AddressSecurityToken(InetAddress.getLocalHost(), 1094),
                 false, Network.MULTICAST, false, 0, false, 0, false);
@@ -1350,7 +1340,6 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
-        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
         
         // idempotence
         proxy.originate();
@@ -1367,7 +1356,6 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
-        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

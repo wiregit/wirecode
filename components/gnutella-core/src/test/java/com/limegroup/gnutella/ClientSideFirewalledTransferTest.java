@@ -134,7 +134,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
                                  QueryRequest.SPECIAL_FIREWALL_MASK |
                                  QueryRequest.SPECIAL_FWTRANS_MASK,
                                  "berkeley", "", null, 
-                                 null, null, false, Network.UNKNOWN, false, 
+                                 null, false, Network.UNKNOWN, false, 
                                  0, false, 0);
         testUP[0].send(query);
         testUP[0].flush();

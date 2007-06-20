@@ -127,7 +127,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
-                                              "berkeley", null, null, null,
+                                              "berkeley", null, null,
                                               null, false, Network.UNKNOWN, false, 0);
         testUP[0].send(query);
         testUP[0].flush();

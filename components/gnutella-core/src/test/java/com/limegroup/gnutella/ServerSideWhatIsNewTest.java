@@ -204,7 +204,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
@@ -237,7 +237,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
@@ -257,7 +257,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
@@ -354,7 +354,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false, 
+                             null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -420,7 +420,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false, 
+                             null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -489,7 +489,7 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false, 
+                             null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();

@@ -515,8 +515,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 			Set queryUrnSet = new HashSet();
 			queryUrnSet.add(urn);
 			for(int j = 0; j < requestedUrnSets.length; j++) {
-				QueryRequest qr = QueryRequest.createQuery(
-                                requestedUrnSets[j], queryUrnSet);
+				QueryRequest qr = QueryRequest.createQuery(queryUrnSet);
 				Response[] hits = fman.query(qr);
 				assertEquals("there should only be one response", 1, hits.length);
 				assertEquals("responses should be equal", testResponse, hits[0]);		

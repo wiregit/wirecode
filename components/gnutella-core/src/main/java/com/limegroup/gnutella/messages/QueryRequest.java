@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -127,11 +126,6 @@ public class QueryRequest extends Message implements Serializable{
     
     // HUGE v0.93 fields
     /** 
-	 * The types of requested URNs.
-	 */
-    private final Set<URN.Type> REQUESTED_URN_TYPES;
-
-    /** 
 	 * Specific URNs requested.
 	 */
     private final Set<URN> QUERY_URNS;
@@ -203,7 +197,7 @@ public class QueryRequest extends Message implements Serializable{
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "", 
-                                URN.Type.SHA1_SET, sha1Set, null,
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
 
@@ -223,7 +217,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
-                                DEFAULT_URN_QUERY, "",  URN.Type.SHA1_SET, 
+                                DEFAULT_URN_QUERY, "",
                                 sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
@@ -250,7 +244,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
-                                URN.Type.SHA1_SET, sha1Set, null,
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
 
@@ -277,7 +271,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
-                                URN.Type.SHA1_SET, sha1Set, null,
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
 
@@ -304,27 +298,24 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
-                                URN.Type.SHA1_SET, sha1Set, null,
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
-	 * Creates a new query for the specified UrnType set and URN set.
+	 * Creates a new query for the specified URN set.
 	 *
-	 * @param urnTypeSet the <tt>Set</tt> of <tt>UrnType</tt>s to request.
 	 * @param urnSet the <tt>Set</tt> of <tt>URNs</tt>s to request.
 	 * @return a new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
 	 * @throws <tt>NullPointerException</tt> if either sets are null.
 	 */
-	public static QueryRequest createQuery(Set<URN.Type> urnTypeSet, Set<? extends URN> urnSet) {
+	public static QueryRequest createQuery(Set<? extends URN> urnSet) {
 	    if(urnSet == null)
 	        throw new NullPointerException("null urnSet");
-	    if(urnTypeSet == null)
-	        throw new NullPointerException("null urnTypeSet");
 	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "",
-	                            urnTypeSet, urnSet, null,
+	                            urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
     }
@@ -476,7 +467,7 @@ public class QueryRequest extends Message implements Serializable{
                                                     MediaType type) {
         if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
-                                "", null, null, null,
+                                "", null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 
                                 FeatureSearchData.WHAT_IS_NEW, false, 
@@ -503,7 +494,7 @@ public class QueryRequest extends Message implements Serializable{
                                                        MediaType type) {
         if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
-                                "", null, null, null,
+                                "", null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
                                 false, getMetaFlag(type));
@@ -719,7 +710,7 @@ public class QueryRequest extends Message implements Serializable{
         // so we can use the copy constructor and set OOB to false
         return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
                 qr.getQuery(), qr.getRichQueryString(), 
-                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryUrns(),
                 qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
                 qr.desiresOutOfBandReplies(),
                 qr.getFeatureSelector(), true, // do not proxy
@@ -747,7 +738,7 @@ public class QueryRequest extends Message implements Serializable{
         // so we can use the copy constructor and set OOB to false
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                 qr.getQuery(), qr.getRichQueryString(), 
-                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryUrns(),
                 qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
                 false, // set oob to false
                 qr.getFeatureSelector(), qr.doNotProxy(),
@@ -779,7 +770,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null query key");
         }
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
-                                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, key,
+                                URN.NO_URN_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
     }
@@ -808,7 +799,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
-                                "", URN.Type.SHA1_SET, sha1Set, key,
+                                "", sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
                                 Network.UNKNOWN, false, 0, false, 0);
     }
@@ -862,7 +853,7 @@ public class QueryRequest extends Message implements Serializable{
         //       into the GGEP section.
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQueryString(), 
-                                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                                qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Network.UNKNOWN,
                                 qr.desiresOutOfBandReplies(),
                                 qr.getFeatureSelector(), false,
@@ -878,7 +869,7 @@ public class QueryRequest extends Message implements Serializable{
 	public static QueryRequest createBrowseHostQuery() {
 		return new QueryRequest(newQueryGUID(false), (byte)1, 
 				FileManager.INDEXING_QUERY, "", 
-                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+                URN.NO_URN_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
                 Network.UNKNOWN, false, 0, false, 0, false);
 	}
@@ -896,7 +887,7 @@ public class QueryRequest extends Message implements Serializable{
 		createNonFirewalledQuery(String query, byte ttl) {
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
-                                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+                                URN.NO_URN_SET, null,
                                 false, Network.UNKNOWN, false, 0, false, 0);
 	}
 
@@ -954,7 +945,7 @@ public class QueryRequest extends Message implements Serializable{
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
-        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
              false, 0, false, 0);
     }
@@ -969,7 +960,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          MediaType type) {
-        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
              false, 0, false, getMetaFlag(type));
     }
@@ -984,7 +975,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies) {
-        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, 0);
     }
@@ -999,7 +990,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies, MediaType type) {
-        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
     }
@@ -1034,9 +1025,6 @@ public class QueryRequest extends Message implements Serializable{
      * set canReceiveOutOfBandReplies .
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
@@ -1045,13 +1033,12 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
-                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector) {
         // calls me with the doNotProxy flag set to false
-        this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
+        this(guid, ttl, query, richQuery, queryUrns,
              addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, false, 0);
     }
@@ -1063,9 +1050,6 @@ public class QueryRequest extends Message implements Serializable{
      * set canReceiveOutOfBandReplies .
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
@@ -1074,13 +1058,12 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
-                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
-        this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
+        this(guid, ttl, 0, query, richQuery, queryUrns,
              addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
@@ -1091,14 +1074,13 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
-                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask,
                         boolean normalize) {
-        this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
+        this(guid, ttl, 0, query, richQuery, queryUrns,
              addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, normalize);
     }
@@ -1110,9 +1092,6 @@ public class QueryRequest extends Message implements Serializable{
      * set canReceiveOutOfBandReplies .
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
@@ -1121,13 +1100,12 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
-                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
-        this(guid, ttl, minSpeed, query, richQuery, requestedUrnTypes,
+        this(guid, ttl, minSpeed, query, richQuery,
              queryUrns, addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
@@ -1139,9 +1117,6 @@ public class QueryRequest extends Message implements Serializable{
      * set canReceiveOutOfBandReplies .
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
      * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
      * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
@@ -1150,7 +1125,6 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
-                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
@@ -1239,14 +1213,8 @@ public class QueryRequest extends Message implements Serializable{
             }
             this.XML_DOC = doc;
 		}
-		Set<URN.Type> tempRequestedUrnTypes = null;
-		Set<URN> tempQueryUrns = null;
-		if(requestedUrnTypes != null && !requestedUrnTypes.isEmpty()) {
-			tempRequestedUrnTypes = EnumSet.copyOf(requestedUrnTypes);
-		} else {
-			tempRequestedUrnTypes = URN.Type.NO_TYPE_SET;
-		}
 		
+		Set<URN> tempQueryUrns = null;
 		if(queryUrns != null) {
 			tempQueryUrns = new UrnSet(queryUrns);
 		} else {
@@ -1285,12 +1253,6 @@ public class QueryRequest extends Message implements Serializable{
 			    writeGemExtensions(baos, addDelimiterBefore, 
 								   tempQueryUrns == null ? null : 
 								   tempQueryUrns.iterator());
-
-			// add the urn types
-            addDelimiterBefore = 
-			    writeGemExtensions(baos, addDelimiterBefore, 
-								   tempRequestedUrnTypes == null ? null : 
-								   tempRequestedUrnTypes.iterator());
 
             // add the GGEP Extension, if necessary....
             // *----------------------------
@@ -1355,8 +1317,6 @@ public class QueryRequest extends Message implements Serializable{
 		updateLength(PAYLOAD.length);
 
 		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
-		this.REQUESTED_URN_TYPES = Collections.unmodifiableSet(tempRequestedUrnTypes);
-
     }
 
 
@@ -1408,13 +1368,6 @@ public class QueryRequest extends Message implements Serializable{
 		else {
 			QUERY_URNS = Collections.unmodifiableSet(parser.queryUrns);
 		}
-		if(parser.requestedUrnTypes == null) {
-			REQUESTED_URN_TYPES = Collections.emptySet();
-		}
-		else {
-			REQUESTED_URN_TYPES =
-			    Collections.unmodifiableSet(parser.requestedUrnTypes);
-		}	
         QUERY_KEY = parser.addressSecurityToken;
 		if(QUERY.length() == 0 &&
 		   parser.richQuery.length() == 0 &&
@@ -1503,16 +1456,6 @@ public class QueryRequest extends Message implements Serializable{
             return XML_DOC.getXMLString();
     }       
  
-	/**
-	 * Returns the <tt>Set</tt> of URN types requested for this query.
-	 *
-	 * @return the <tt>Set</tt> of <tt>UrnType</tt> instances requested for this
-     * query, which may be empty (not null) if no types were requested
-	 */
-    public Set<URN.Type> getRequestedUrnTypes() {
-		return REQUESTED_URN_TYPES;
-    }
-    
 	/**
 	 * Returns the <tt>Set</tt> of <tt>URN</tt> instances for this query.
 	 *
@@ -1865,7 +1808,6 @@ public class QueryRequest extends Message implements Serializable{
 			result = (37*result) + QUERY.hashCode();
 			if( XML_DOC != null )
 			    result = (37*result) + XML_DOC.hashCode();
-			result = (37*result) + REQUESTED_URN_TYPES.hashCode();
 			result = (37*result) + QUERY_URNS.hashCode();
 			if(QUERY_KEY != null) {
 				result = (37*result) + QUERY_KEY.hashCode();
@@ -1885,7 +1827,6 @@ public class QueryRequest extends Message implements Serializable{
 				QUERY.equals(qr.QUERY) &&
 				(XML_DOC == null ? qr.XML_DOC == null : 
 				    XML_DOC.equals(qr.XML_DOC)) &&
-				REQUESTED_URN_TYPES.equals(qr.REQUESTED_URN_TYPES) &&
 				QUERY_URNS.equals(qr.QUERY_URNS) &&
 				Arrays.equals(getGUID(), qr.getGUID()) &&
 				Arrays.equals(PAYLOAD, qr.PAYLOAD));
@@ -1897,7 +1838,6 @@ public class QueryRequest extends Message implements Serializable{
             "ttl: "+getTTL()+", "+
             "hops: "+getHops()+", "+            
             "meta: \""+getRichQueryString()+"\", "+
-            "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
 

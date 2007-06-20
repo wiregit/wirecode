@@ -350,7 +350,7 @@ public class LeafRoutingTest extends LimeTestCase {
 
         // send a query that should hit
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
-                                              "berkeley", null, null, null,
+                                              "berkeley", null, null,
                                               null, false, Network.UNKNOWN, false, 0);
         ultrapeer2.send(query);
         ultrapeer2.flush();

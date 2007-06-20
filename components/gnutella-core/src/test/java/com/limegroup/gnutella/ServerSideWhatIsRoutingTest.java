@@ -232,7 +232,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false, 
+                             null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
@@ -257,7 +257,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false, 
+                             null, false, Network.UNKNOWN, false, 
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
@@ -276,7 +276,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)1, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -302,7 +302,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -328,7 +328,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
@@ -354,7 +354,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.WHAT_IS_NEW);
         LEAF.send(whatIsNewQuery);
         LEAF.flush();
@@ -383,7 +383,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
@@ -414,7 +414,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         QueryRequest unknownFeatureQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Network.UNKNOWN, false,
+                             null, false, Network.UNKNOWN, false,
                              FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
