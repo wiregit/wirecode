@@ -73,7 +73,7 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      *  L = 1001100 <br>
      * <p>
      * If the Trie contained 'H' and 'L', a lookup of 'D' would return 'L',
-     * because the XOR distance between D & L is less than the XOR distance 
+     * because the XOR distance between D & L is smaller than the XOR distance 
      * between D & H. 
      */
     public V select(K key);
