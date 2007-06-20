@@ -1,7 +1,5 @@
 package org.limewire.collection;
 
-
-
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -20,10 +18,9 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * <p>
      * In a fixed-keysize Trie, this is essentially a 'get' operation.
      * <p>
-     * For example, if the trie contains 'Lime', 'LimeWire', 
+     * For example, if the Trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'Lime' would return 'Lime', 'LimeRadio', and 'LimeWire'.
-     * 
      */
     public SortedMap<K, V> getPrefixedBy(K key);
     
@@ -34,11 +31,10 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * Fixed-keysize Tries will not support this operation
      * (because all keys will be the same length).
      * <p>
-     * For example, if the trie contains 'Lime', 'LimeWire', 
+     * For example, if the Trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'LimePlastics' with a length of 4 would
      * return 'Lime', 'LimeRadio', and 'LimeWire'.
-     *  
      */
     public SortedMap<K, V> getPrefixedBy(K key, int length);
     
@@ -49,11 +45,10 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * Fixed-keysize Tries will not support this operation
      * (because all keys are the same length).
      * <p>
-     * For example, if the trie contains 'Lime', 'LimeWire', 
+     * For example, if the Trie contains 'Lime', 'LimeWire', 
      * 'LimeRadio', 'Lax', 'Later', 'Lake', and 'Lovely', then
      * a lookup of 'The Lime Plastics' with an offset of 4 and a 
      * length of 4 would return 'Lime', 'LimeRadio', and 'LimeWire'.
-     * 
      */
     public SortedMap<K, V> getPrefixedBy(K key, int offset, int length);
     
@@ -66,7 +61,6 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * addresses, you can lookup all addresses that begin with
      * '192.168' by providing the key '192.168.X.X' and a length of 16
      * would return all addresses that begin with '192.168'.
-     * 
      */
     public SortedMap<K, V> getPrefixedByBits(K key, int bitLength);
     
@@ -78,16 +72,16 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      *  H = 1001000 <br> 
      *  L = 1001100 <br>
      * <p>
-     * If the trie contained 'H' and 'L', a lookup of 'D' would return 'L',
-     * because the XOR between D & L is closer than the XOR between D & H. 
-     *  
+     * If the Trie contained 'H' and 'L', a lookup of 'D' would return 'L',
+     * because the XOR distance between D & L is less than the XOR distance 
+     * between D & H. 
      */
     public V select(K key);
     
     /**
-     * Iterates through the trie, starting with the entry whose bitwise
+     * Iterates through the Trie, starting with the entry whose bitwise
      * value is closest in an XOR metric to the given key.  After the closest
-     * entry is found, the trie will call select on that entry and continue
+     * entry is found, the Trie will call select on that entry and continue
      * calling select for each entry (traversing in order of XOR closeness,
      * NOT lexicographically) until the cursor returns 
      * <code>Cursor.SelectStatus.EXIT</code>.<br>
@@ -104,7 +98,7 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);
     
     /**
-     * Traverses the trie in lexicographical order. <code>Cursor.select</code> 
+     * Traverses the Trie in lexicographical order. <code>Cursor.select</code> 
      * will be called on each entry.<p>
      * The traversal will stop when the cursor returns <code>Cursor.SelectStatus.EXIT</code>.<br>
      * <code>Cursor.SelectStatus.CONTINUE</code> is used to continue traversing.<br>
@@ -143,8 +137,8 @@ public interface Trie<K, V> extends SortedMap<K, V> {
     public static interface Cursor<K, V> {
         
         /**
-         * Notification that the trie is currently looking at the given entry.
-         * Return <code>EXIT</code> to finish the trie operation, 
+         * Notification that the Trie is currently looking at the given entry.
+         * Return <code>EXIT</code> to finish the Trie operation, 
          * <code>CONTINUE</code> to look at the next entry, <code>REMOVE</code>
          * to remove the entry and continue iterating, or
          * <code>REMOVE_AND_EXIT</code> to remove the entry and stop iterating. 
