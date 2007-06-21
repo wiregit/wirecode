@@ -1486,7 +1486,20 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void locationAdded(AlternateLocation loc) {
         Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        addDownload(loc.createRemoteFileDesc((int)getContentLength()),false);
+        long contentLength = getContentLength();
+        
+        // The content length (file size) can be negative if the 
+        // downloader was created from a magnet link. In this
+        // specific case we found an AltLoc in the DHT but doesn't
+        // help us much as the size is still unknown.
+        if (contentLength < 0) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Unknown file size: " + contentLength);
+            }
+            return;
+        }
+        
+        addDownload(loc.createRemoteFileDesc((int)contentLength), false);
     }
     
     /** 
