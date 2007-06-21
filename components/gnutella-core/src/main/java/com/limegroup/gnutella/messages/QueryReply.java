@@ -1320,7 +1320,7 @@ public class QueryReply extends Message implements SecureMessage {
         
         private byte[] create(ByteArrayOutputStream out, String... headers) {
             out.reset();
-            GGEP combo = new GGEP(false);
+            GGEP combo = new GGEP(true);
             for(String header : headers)
                 combo.put(header);
             try {
@@ -1348,7 +1348,7 @@ public class QueryReply extends Message implements SecureMessage {
                     proxies = Collections.emptySet();
 
                 final int MAX_PROXIES = 4;
-                GGEP retGGEP = new GGEP();
+                GGEP retGGEP = new GGEP(true);
 
                 // write easy extensions if applicable
                 if (supportsBH)

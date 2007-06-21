@@ -49,7 +49,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public void testGGEPPing() throws Exception {
         // first make a GGEP block....
-        GGEP ggepBlock = new GGEP(false);
+        GGEP ggepBlock = new GGEP(true);
         ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ggepBlock.write(baos);

@@ -119,11 +119,8 @@ public class GGEP {
      */
     private final Map<String, Object> _props = new TreeMap<String, Object>();
 
-    /**
-     * False iff this should COBS encode values to prevent null bytes.
-     * Default is false, to be conservative.
-     */
-    public boolean notNeedCOBS=false;
+    /** True if COBS encoding is required. */
+    public final boolean useCOBS;
 
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
@@ -138,17 +135,14 @@ public class GGEP {
      * Creates a new empty GGEP block.  Typically this is used for outgoing
      * messages and mutated before encoding.  
      *
-     * @param notNeedCOBS true if nulls are allowed in extension values;false if
+     * @param useCOBS false if nulls are allowed in extension values;true if
      *  this should activate COBS encoding if necessary to remove null bytes. 
      */
-    public GGEP(boolean notNeedCOBS) {
-        this.notNeedCOBS=notNeedCOBS;
+    public GGEP(boolean useCOBS) {
+        this.useCOBS = useCOBS;
     }    
 
-    /** 
-     * Creates a new empty GGEP block.  Typically this is used for outgoing
-     * messages and mutated before encoding.  This does do COBS encoding.
-     */
+    /**  Creates a new empty GGEP block that does not needs COBS encoding. */
     public GGEP() {
         this(false);
     }
@@ -173,7 +167,7 @@ public class GGEP {
      *  correctly.
      */
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
-        throws BadGGEPBlockException {
+      throws BadGGEPBlockException {
 
         if (messageBytes.length - beginOffset < 4)
             throw new BadGGEPBlockException();
@@ -182,6 +176,7 @@ public class GGEP {
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
             throw new BadGGEPBlockException();
 
+        boolean tUseCOBS = false;
         boolean onLastExtension = false;
         int currIndex = beginOffset + 1;
         while (!onLastExtension) {
@@ -229,6 +224,7 @@ public class GGEP {
                 }
 
                 if (encoded) {
+                    tUseCOBS = true;
                     try {
                         data = COBSUtil.cobsDecode(data);
                     } catch (IOException badCobsEncoding) {
@@ -256,8 +252,11 @@ public class GGEP {
                 _props.put(extensionHeader, extensionData);
 
         }
+        
         if ((endOffset != null) && (endOffset.length > 0))
             endOffset[0] = currIndex;
+        
+        useCOBS = tUseCOBS;
     }
     
     /**
@@ -390,7 +389,7 @@ public class GGEP {
     private final boolean shouldCOBSEncode(byte[] data) {
         // if nulls are allowed from construction time and if nulls are present
         // in the data...
-        return (!notNeedCOBS && containsNull(data));
+        return (useCOBS && containsNull(data));
     }
     
     private final boolean shouldCompress(String header) {

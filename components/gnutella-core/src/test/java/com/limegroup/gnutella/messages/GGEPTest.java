@@ -28,7 +28,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
             nulls[i] = (byte)(i % 2);
         String someNulls = "Hello" + new String(nulls);
         try {
-            GGEP one = new GGEP(false);
+            GGEP one = new GGEP(true);
             one.put("Susheel", nulls);
             one.put("Daswani", someNulls);
             one.put("Number", 10);
@@ -54,7 +54,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         putm.add(new NameValue("string", "value"));
         putm.add(new NameValue("byte[]", new byte[] { 1, 2 } ));
         
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.putAll(putm);
         
         assertTrue(temp.hasKey("int"));
@@ -69,7 +69,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
 
     public void testStringKeys() throws Exception {
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.put("A", "B");
         temp.put("C", (String)null);
         temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
@@ -81,14 +81,14 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
 
     public void testByteKeys() throws Exception {
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.put("A", new byte[] { (byte)3 });
         assertTrue(temp.hasKey("A"));
         assertEquals(temp.getBytes("A"), new byte[] { (byte)3 });
     }
 
     public void testIntKeys() throws Exception {
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.put("A", 527);
         assertTrue(temp.hasKey("A"));
         assertEquals(527, temp.getInt("A"));
@@ -97,7 +97,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testLongKeys() throws Exception {
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.put("A", 0xABCDL);
         assertTrue(temp.hasKey("A"));
         assertEquals(0xABCDL, temp.getLong("A"));
@@ -115,7 +115,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  throw an exception */
     public void testKeyTooBig() {
         try {
-            GGEP temp = new GGEP(true);
+            GGEP temp = new GGEP();
             temp.put("THIS KEY IS WAY TO LONG!", "");
             fail("No IllegalArgumentException.");
         } catch (IllegalArgumentException pass) { 
@@ -130,7 +130,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
             bigBoy.append("1");
         
         try {
-            GGEP temp = new GGEP(true);
+            GGEP temp = new GGEP();
             temp.put("WHATEVER", bigBoy.toString());
             fail("No IllegalArgumentException.");
         } catch (IllegalArgumentException pass) { }
@@ -146,7 +146,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         String[] keys = {"Susheel", "is", "an", "Idiot!!"};
 
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         for (int i = 0; i < keys.length; i++)
             temp.put(keys[i], bigBoy.toString());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -167,7 +167,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
-        GGEP temp = new GGEP(true);
+        GGEP temp = new GGEP();
         temp.put("WHATEVER", hasANull);
     }
 
@@ -179,18 +179,18 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
-        GGEP temp = new GGEP(false);
+        GGEP temp = new GGEP(true);
         temp.put("WHATEVER", hasANull);
     }
 
     public void testEquals() {
-        GGEP a1=new GGEP(true);
+        GGEP a1=new GGEP();
         a1.put("K1", "V1");
-        GGEP a2=new GGEP(true);
+        GGEP a2=new GGEP();
         a2.put("K1", "V1");
-        GGEP b1=new GGEP(true);
+        GGEP b1=new GGEP();
         b1.put("K1");
-        GGEP b2=new GGEP(true);
+        GGEP b2=new GGEP();
         b2.put("K1");
 
         assertEquals(a1, a1);
@@ -200,10 +200,10 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertNotEquals(a1, b1);
         assertNotEquals(b1, a1);
         
-        GGEP c1=new GGEP(true);
+        GGEP c1=new GGEP();
         c1.put("K1", "V1");
         c1.put("K2", "V2");
-        GGEP c2=new GGEP(true);
+        GGEP c2=new GGEP();
         c2.put("K1", "V1");
         c2.put("K2", "V2");        
 
@@ -215,7 +215,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public void testPutCompressed() throws Exception {
         byte[] middleValue = "middle".getBytes();
-        GGEP g = new GGEP();
+        GGEP g = new GGEP(true);
         g.put("1", "begin");
         g.putCompressed("2", middleValue);
         g.put("3", "end");
@@ -733,7 +733,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testMissingMiddleValueSize() throws Exception {
     	
     	int length = 0x0003f03f;    // in the size 258111, the 6 bytes in the middle are missing 00000000 00000011 11110000 00111111
-    	GGEP ggep = new GGEP(true); // don't do COBS encoding
+    	GGEP ggep = new GGEP(); // don't do COBS encoding
     	byte[] value = new byte[length];
     	ggep.put("TEST", value);
     	
@@ -752,7 +752,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
      * Test if empty GGEP values can be written and read.
      */
     public void testEmptyGGEPValues() {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("EM", new byte[0]);
         
         byte[] read = ggep.get("EM");
@@ -760,7 +760,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testNullGGEPValues() {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("EM", (byte[])null);
         assertNull(ggep.get("EM"));
     }

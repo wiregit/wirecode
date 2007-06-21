@@ -168,7 +168,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testReadGGEP() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put("F", (byte)0x1);                               // TLS capable.
         ggep.put("C", (byte)0x2 | 0x8);                         // response code (partial, downloading)
         ggep.put("V", new byte[] { 'S', 'A', 'M', 'B' } );      // vendor
@@ -256,7 +256,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testHigherVersionGGEP() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put("F", (byte)0x1);                               // TLS capable.
         ggep.put("C", (byte)0x2 | 0x8);                         // response code (partial, downloading)
         ggep.put("V", new byte[] { 'S', 'A', 'M', 'B' } );      // vendor
@@ -337,7 +337,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testGGEP404() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put("C", (byte)0);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
@@ -366,7 +366,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testTLSCapableAndUnknownFeatures() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[4]);
@@ -379,7 +379,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testNotTLSCapableButOtherFeatures() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[4]);
@@ -392,7 +392,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testNotTLSCapableBecauseOfLackOfFeatureKey() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[4]);
@@ -403,7 +403,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testQueueRequired() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[4]);
@@ -415,7 +415,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testVendorRequired() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("Q", (byte)0);
@@ -427,7 +427,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testCodeRequired() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("V", new byte[4]);
         ggep.put("Q", (byte)0);
@@ -439,7 +439,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testEmptyQueueFails() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[4]);
@@ -452,7 +452,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testEmptyVendorFails() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", (byte)0x1);
         ggep.put("V", new byte[0]);
@@ -465,7 +465,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testEmptyCodeFails() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         // required fields.
         ggep.put("C", new byte[0]);
         ggep.put("V", new byte[4]);

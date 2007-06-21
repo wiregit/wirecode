@@ -84,7 +84,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 AddressSecurityToken qk = new AddressSecurityToken(bytes);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
-                GGEP ggepBlock = new GGEP(false); // do COBS
+                GGEP ggepBlock = new GGEP(true); // do COBS
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
                 ggepBlock.write(baos[i]);
@@ -1114,7 +1114,7 @@ public final class QueryRequestTest extends LimeTestCase {
     }
     
     public void testPatchInGGEP() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
         
@@ -1171,7 +1171,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(gemBytes, part);
         
         // unknown gem + GGEP with unknown keys
-        GGEP unknownKeysGGEP = new GGEP(false);
+        GGEP unknownKeysGGEP = new GGEP(true);
         unknownKeysGGEP.put("FB", "BF");
         unknownKeysGGEP.put("uk");
         unknownKeysGGEP.write(out);

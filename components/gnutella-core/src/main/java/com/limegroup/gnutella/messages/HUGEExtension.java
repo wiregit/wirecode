@@ -88,7 +88,7 @@ public class HUGEExtension {
                 try {
                     GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
                     if (_ggep == null) {
-                        _ggep = new GGEP(true);
+                        _ggep = new GGEP();
                     }
                     _ggep.merge(ggep);
                     if (_ggepBlocks == null) {

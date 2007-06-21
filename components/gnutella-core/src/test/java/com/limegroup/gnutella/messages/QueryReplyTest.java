@@ -890,7 +890,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         } catch (IllegalArgumentException expected) {}
 
         // from the network
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         badBytes[0] = (byte) 0;
         badBytes[1] = (byte) 0;
         badBytes[2] = (byte) 0;
@@ -909,7 +909,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         } catch (IllegalArgumentException expected) {}
 
         // this should work fine...
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         badBytes[0] = (byte) 1;
         badBytes[1] = (byte) 1;
         badBytes[2] = (byte) 2;
@@ -934,7 +934,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                     badBytes[j] = (byte)i;
                 }
             }
-            ggep = new GGEP();
+            ggep = new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
             if (i == 0)
                 assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
@@ -965,7 +965,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             }
 
             // from the network
-            ggep = new GGEP();
+            ggep = new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, bytes);
 
             Set proxies = _ggepUtil.getPushProxies(ggep);
@@ -1246,7 +1246,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         int indexes[] = new int[2];
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
         
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         ggep.put("SB");
         QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
         assertTrue(reply.hasSecureData());
@@ -1258,7 +1258,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         int indexes[] = new int[2];
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
         
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         ggep.put("SB");
         byte[] sig = new byte[100];
         new Random().nextBytes(sig);
@@ -1273,7 +1273,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         int indexes[] = new int[2];
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
         
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         ggep.put("SC");
         byte[] sig = new byte[100];
         new Random().nextBytes(sig);
@@ -1296,7 +1296,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     public void testSecureStatus() throws Exception {
         int indexes[] = new int[2];
         ByteArrayOutputStream payload = new ByteArrayOutputStream();        
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
         assertEquals(SecureMessage.INSECURE, reply.getSecureStatus());
         reply.setSecureStatus(SecureMessage.FAILED);
@@ -1367,7 +1367,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ByteOrder.short2leb((short)1, out); // xml size
         out.write(0); // no chat
         
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         ggep.put("test", "data");
         ggep.write(out); // normal ggep block.
         

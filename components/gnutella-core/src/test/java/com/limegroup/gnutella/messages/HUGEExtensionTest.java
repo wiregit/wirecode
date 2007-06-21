@@ -16,7 +16,7 @@ public class HUGEExtensionTest extends BaseTestCase {
     
     public void testMultipleGGEPParsing() throws IOException, BadGGEPBlockException {
         PositionByteArrayOutputStream out = new PositionByteArrayOutputStream();
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("1", "1");
         ggep.write(out);
         out.write(0x1c);

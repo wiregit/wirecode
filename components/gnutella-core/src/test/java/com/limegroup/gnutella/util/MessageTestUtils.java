@@ -69,7 +69,7 @@ public class MessageTestUtils {
     private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
                                 boolean isGUESSCapable, boolean freeLeaf, 
                                 boolean freeUP) {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         
         if (dailyUptime >= 0)
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);

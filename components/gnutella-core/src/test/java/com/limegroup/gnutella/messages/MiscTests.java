@@ -64,7 +64,7 @@ public class MiscTests extends LimeTestCase {
             AddressSecurityToken addressSecurityToken = new AddressSecurityToken(qk);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             addressSecurityToken.write(baos);
-            GGEP in = new GGEP(false);
+            GGEP in = new GGEP(true);
             in.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                    baos.toByteArray());
             baos = new ByteArrayOutputStream();

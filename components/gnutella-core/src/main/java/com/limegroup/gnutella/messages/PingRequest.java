@@ -245,7 +245,7 @@ public class PingRequest extends Message {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             if (_ggep == null)
-                _ggep = new GGEP(true);
+                _ggep = new GGEP();
 
             _ggep.putAll(ggeps);
             _ggep.write(baos);

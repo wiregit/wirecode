@@ -384,7 +384,7 @@ public class InterClientTest extends PeerTestCase {
         if (!hasGGEP)
             return DataUtils.EMPTY_BYTE_ARRAY;
         
-        GGEP g = new GGEP();
+        GGEP g = new GGEP(true);
         if (requestsCompressed)
             g.put("C");
         else

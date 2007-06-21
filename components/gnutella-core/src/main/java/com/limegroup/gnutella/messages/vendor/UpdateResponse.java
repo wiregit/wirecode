@@ -55,7 +55,7 @@ public final class UpdateResponse extends VendorMessage {
         if (!request.hasGGEP()) 
             return new UpdateResponse(update, NON_GGEP_VERSION);
         
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         if (request.requestsCompressed()) {
             ggep.putCompressed(UpdateRequest.COMPRESSED_UPDATE_KEY,update);
         } else

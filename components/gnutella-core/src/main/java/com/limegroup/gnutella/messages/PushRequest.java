@@ -21,7 +21,7 @@ public class PushRequest extends Message implements Serializable {
     public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
     
     /** A null GGEP to mark a failed parsing. */
-    private static final GGEP NULL_GGEP = new GGEP();
+    private static final GGEP NULL_GGEP = new GGEP(true);
     
     /** The unparsed payload--because I don't care what's inside.
      *  NOTE: IP address is BIG-endian.
@@ -184,7 +184,7 @@ public class PushRequest extends Message implements Serializable {
     private static class PushGGEPHelper {
         private static final byte[] TLS_GGEP;
         static {
-            GGEP tlsGGEP = new GGEP(true);
+            GGEP tlsGGEP = new GGEP();
             tlsGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {

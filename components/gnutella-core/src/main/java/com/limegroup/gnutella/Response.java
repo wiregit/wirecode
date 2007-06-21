@@ -664,7 +664,7 @@ public class Response {
             if( ggep == null || (ggep.locations.size() == 0 && ggep.createTime <= 0))
                 throw new NullPointerException("null or empty locations");
             
-            GGEP info = new GGEP();
+            GGEP info = new GGEP(true);
             if(ggep.locations.size() > 0) {
                 BitNumbers bn = new BitNumbers(ggep.locations.size());
                 int i = 0;

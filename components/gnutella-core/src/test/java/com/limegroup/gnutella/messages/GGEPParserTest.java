@@ -29,7 +29,7 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testSimpleGGEPParse() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -49,13 +49,13 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testMultipleGGEPsMerged() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test2", "data2");
         ggep.write(out);
@@ -75,7 +75,7 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testSecureGGEP() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("SB");
         ggep.put("other", "stuff");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -95,7 +95,7 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testSecureGGEPWithNormal() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -103,7 +103,7 @@ public class GGEPParserTest extends LimeTestCase {
  
         int sizeOne = out.size();
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("SB");
         ggep.put("other", "stuff");
         ggep.write(out);
@@ -127,20 +127,20 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testMergeAndSecure() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test2", "data2");
         ggep.write(out);
         
         int sizeOne = out.size();
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("SB");
         ggep.put("other", "stuff");
         ggep.write(out);
@@ -165,20 +165,20 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testDataAfterSecure() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         int sizeOne = out.size();
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("SB");
         ggep.put("other", "stuff");
         ggep.write(out);
         int sizeTwo = out.size();
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test2", "data2");
         ggep.write(out);
@@ -206,7 +206,7 @@ public class GGEPParserTest extends LimeTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[100]);
         
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ggep.write(out);
@@ -238,7 +238,7 @@ public class GGEPParserTest extends LimeTestCase {
         out.write(new byte[100]);
         out.write(GGEP.GGEP_PREFIX_MAGIC_NUMBER);
         
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ggep.write(out);
@@ -252,7 +252,7 @@ public class GGEPParserTest extends LimeTestCase {
     }
     
     public void testMergingMustBeNextToEachOther() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test1", "data");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -260,7 +260,7 @@ public class GGEPParserTest extends LimeTestCase {
         
         out.write(0);
         
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("test");
         ggep.put("test2", "data2");
         ggep.write(out);

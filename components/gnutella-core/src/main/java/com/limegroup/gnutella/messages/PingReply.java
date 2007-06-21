@@ -976,7 +976,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
     /** Returns the GGEP payload bytes to encode the given uptime */
     private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
                                 boolean isGUESSCapable) {
-        GGEP ggep=new GGEP(true);
+        GGEP ggep=new GGEP();
         
         if (dailyUptime >= 0)
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
@@ -1010,7 +1010,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
     /** Returns the GGEP payload bytes to encode the given AddressSecurityToken */
     private static GGEP qkGGEP(AddressSecurityToken addressSecurityToken) {
         try {
-            GGEP ggep=new GGEP(true);
+            GGEP ggep=new GGEP();
 
             // get qk bytes....
             ByteArrayOutputStream baos=new ByteArrayOutputStream();

@@ -457,7 +457,7 @@ public class HeadPong extends VendorMessage {
     
     /** Constructs the payload in GGEP format. */
     private static byte[] constructGGEPPayload(HeadPongRequestor ping) {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
         FileDesc desc = _fileManager.getFileDescForUrn(urn);

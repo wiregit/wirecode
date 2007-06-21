@@ -278,7 +278,7 @@ public class RestrictedResponderTest extends BaseTestCase {
                 public GGEP getSecureGGEP(GGEP original) {
                     return original;
                 }
-            },new GGEP());
+            },new GGEP(true));
         }
         
         @Override

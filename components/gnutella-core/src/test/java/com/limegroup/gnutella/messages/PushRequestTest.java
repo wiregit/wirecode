@@ -77,7 +77,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testGGEPPush() throws Exception {        
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put("TLS");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);

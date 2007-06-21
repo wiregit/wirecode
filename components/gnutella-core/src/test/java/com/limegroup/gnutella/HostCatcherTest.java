@@ -626,7 +626,7 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(0, uhc.getSize());
         
         // Test with UDPHC pongs.
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
@@ -644,7 +644,7 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(2, uhc.getSize());
         
         // Test with a name in the cache.
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
         pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
@@ -664,7 +664,7 @@ public class HostCatcherTest extends LimeTestCase {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
         assertEquals(0, hc.getNumHosts());
         
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 1, 1, 2, 1, 0 } ); // same class C - filtered
@@ -685,7 +685,7 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(0, hc.getNumHosts());
         assertEquals(0, uhc.getSize());
         
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -707,7 +707,7 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(0, hc.getNumHosts());
         assertEquals(0, uhc.getSize());
         
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         String addrs ="1.2.3.4:81\n" +
         	"www.limewire.com:6379\n"+
         	"www.eff.org\n"+
@@ -944,7 +944,7 @@ public class HostCatcherTest extends LimeTestCase {
         // Hand-craft a PingReply w/ TLS IPPs to see if they're added as
         // TLS capable hosts.
         assertEquals(2, hc.getNumHosts());
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );

@@ -147,7 +147,7 @@ public class InspectionTest extends ServerSideTestCase {
         InspectionRequest request = new InspectionRequest(
                 new RoutableGGEPMessage.GGEPSigner() {
                     public GGEP getSecureGGEP(GGEP original) {
-                        GGEP ret = new GGEP(false);
+                        GGEP ret = new GGEP(true);
                         ret.put(GGEP.GGEP_HEADER_SECURE_BLOCK);
                         ret.put(GGEP.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
                         return ret;

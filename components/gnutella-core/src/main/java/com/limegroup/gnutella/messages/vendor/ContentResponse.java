@@ -61,7 +61,7 @@ public class ContentResponse extends VendorMessage {
         if(sha1 == null)
             throw new NullPointerException("null sha1");
         
-        GGEP ggep =  new GGEP(true);
+        GGEP ggep =  new GGEP();
         // TODO use bytes instead of String, or pack into GUID.
         ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());
         ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);

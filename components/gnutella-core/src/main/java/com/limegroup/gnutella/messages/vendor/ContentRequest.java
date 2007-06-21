@@ -46,7 +46,7 @@ public class ContentRequest extends VendorMessage {
         if(sha1 == null)
             throw new NullPointerException("null sha1");
         
-        GGEP ggep =  new GGEP(true);
+        GGEP ggep =  new GGEP();
         ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {

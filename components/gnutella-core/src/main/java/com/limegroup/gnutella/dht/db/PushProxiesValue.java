@@ -147,7 +147,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
      * A helper method to serialize PushProxiesValues
      */
     protected static byte[] serialize(PushProxiesValue value) {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         ggep.put(CLIENT_ID, value.getGUID());
         // Preserve insertion as an int, not a byte, for backwards compatability.
         ggep.put(FEATURES, (int)value.getFeatures());

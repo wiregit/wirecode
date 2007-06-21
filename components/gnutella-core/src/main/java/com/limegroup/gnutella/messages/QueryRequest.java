@@ -677,7 +677,7 @@ public class QueryRequest extends Message implements Serializable{
             newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
         else
             newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
-        GGEP ggep = new GGEP(false);
+        GGEP ggep = new GGEP(true);
         // signal oob capability
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
         
@@ -1257,7 +1257,7 @@ public class QueryRequest extends Message implements Serializable{
             // add the GGEP Extension, if necessary....
             // *----------------------------
             // construct the GGEP block
-            GGEP ggepBlock = new GGEP(false); // do COBS
+            GGEP ggepBlock = new GGEP(true); // do COBS
 
             // add the query key?
             if (this.QUERY_KEY != null) {
@@ -1851,7 +1851,7 @@ public class QueryRequest extends Message implements Serializable{
             // from the network: this is not good
             GGEPBlock block = getLastBlock(huge.getGGEPBlocks());
             if (block != null) {
-                GGEP merge = new GGEP(false);
+                GGEP merge = new GGEP(true);
                 // first merge in original block and then ours, to make sure
                 // our values prevail
                 merge.merge(block.getGGEP());

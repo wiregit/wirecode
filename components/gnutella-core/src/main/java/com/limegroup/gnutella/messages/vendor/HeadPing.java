@@ -185,7 +185,7 @@ public class HeadPing extends VendorMessage implements HeadPongRequestor {
 		GGEP ggep = null;
 		if (clientGUID != null) {
 			features |= GGEP_PING; // make sure we indicate we'll have ggep.
-			ggep = new GGEP(true);
+			ggep = new GGEP();
 			ggep.put(GGEP_PUSH,clientGUID.bytes());
 		}
 		

@@ -158,7 +158,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         }        
 
         // make sure we reject bad ggep
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         payload = new byte[3];
         // set 'LIM'  -- incorrect value to make sure it fails
         System.arraycopy("LIM".getBytes(),
@@ -677,7 +677,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     
     public void testUDPHostCacheExtension() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
@@ -693,7 +693,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(read.isUDPHostCache());
         assertEquals("1.1.1.1", read.getUDPCacheAddress());
         
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.nowhere.org");
         pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
@@ -711,7 +711,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testPackedIPsInPong() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -738,7 +738,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(4, ipp.getPort());
         
         // Try with invalid list of IPs (invalid by not being multiple of 6)
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -751,7 +751,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(l.isEmpty());
         
         // Try with invalid IPs (invalid by invalid IP addr)
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         out = new ByteArrayOutputStream();
         out.write(new byte[] { 0, 0, 0, 0, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -764,7 +764,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(l.isEmpty());
         
         // Try with invalid IPs (invalid by invalid port)
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 0, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -777,7 +777,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(l.isEmpty());
         
         // Make sure the extension works with other GGEP flags (like UDP Host Cache)
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -897,7 +897,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testNetworkTLSPackedIpPorts() throws Exception {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
@@ -960,7 +960,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public void testPackedHostCachesInPong() throws Exception {
         // test with compression.
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         List addrs = new LinkedList();
         addrs.add("1.2.3.4:81");
         addrs.add("www.limewire.com:6379");
@@ -989,7 +989,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0, s.size());
         
         // test without compression
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         addrs.clear();
         addrs.add("1.2.3.4:81");
         addrs.add("www.limewire.com:6379");
@@ -1016,7 +1016,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         s.remove(ipp);
         assertEquals(0, s.size());        
         
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         addrs.clear();
         addrs.add("1.2.3.4:");
         addrs.add("3.4.2.3");
@@ -1033,21 +1033,21 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         s.remove(ipp);
         assertEquals(0, s.size());
         
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[0]);
         pr = PingReply.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertEquals(0, pr.getPackedUDPHostCaches().size());
         
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[] { 1, 1, 1, 1 } );
         pr = PingReply.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertEquals(0, pr.getPackedUDPHostCaches().size());
         
-        ggep = new GGEP(true);
+        ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[] { 1, 1, 1, 1 } );
         pr = PingReply.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },

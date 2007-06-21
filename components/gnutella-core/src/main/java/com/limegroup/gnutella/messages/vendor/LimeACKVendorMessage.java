@@ -143,7 +143,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
         ByteOrder.short2leb((short) numResults, bytes, 0);
         out.write(bytes[0]); 
 
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityTokenBytes);
         try {
             ggep.write(out);

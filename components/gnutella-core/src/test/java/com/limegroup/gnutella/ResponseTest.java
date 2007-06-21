@@ -389,7 +389,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    GGEP info = new GGEP();
+	    GGEP info = new GGEP(true);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
 	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
 	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
@@ -424,7 +424,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         byte[] name = new byte[] { 's', 'a', 'm', 0 };
         baos.write(name);
         
-        GGEP info = new GGEP();
+        GGEP info = new GGEP(true);
         // locations: 1.2.3.4:1, 4.3.2.1:2, 2.3.4.5:6, 5.4.3.2:7, 2.3.3.2:8
         byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0, 2, 3, 4, 5, 6, 0, 5, 4, 3, 2, 7, 0, 2, 3, 3, 2, 8, 0 };
         info.put(GGEP.GGEP_HEADER_ALTS, alts);
@@ -481,7 +481,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    GGEP info = new GGEP();
+	    GGEP info = new GGEP(true);
 	    long time = System.currentTimeMillis();
 	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
 	    info.write(baos);
@@ -514,7 +514,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    GGEP info = new GGEP();
+	    GGEP info = new GGEP(true);
 	    long time = System.currentTimeMillis();
 	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
@@ -561,7 +561,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    baos.write((byte)0x1c);
 	    
-	    GGEP info = new GGEP();
+	    GGEP info = new GGEP(true);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
 	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
 	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
@@ -698,7 +698,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
      * Tests the GGEPUtil.getGGEP method.
      */
     public void testGGEPUtilGetGGEP() throws Exception {
-        GGEP ggep = new GGEP();
+        GGEP ggep = new GGEP(true);
         Response.GGEPContainer container;
         long ctime;
         Set locs;
@@ -737,7 +737,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("wrong endpoints", eps, locs);
         
         // ctime.
-        ggep = new GGEP();
+        ggep = new GGEP(true);
         ggep.put("CT", 5341L);
         ctime = getGGEP(ggep).createTime;
         assertEquals(5341000, ctime);
