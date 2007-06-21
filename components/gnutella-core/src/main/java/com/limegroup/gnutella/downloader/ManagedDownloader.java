@@ -1489,9 +1489,9 @@ public class ManagedDownloader extends AbstractDownloader
         long contentLength = getContentLength();
         
         // The content length (file size) can be negative if the 
-        // downloader was created from a magnet link. In this
-        // specific case we found an AltLoc in the DHT but doesn't
-        // help us much as the size is still unknown.
+        // downloader was created from a magnet link. In this specific
+        // case we found an AltLoc in the DHT but it doesn't help 
+        // us much as the size is still unknown.
         if (contentLength < 0) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Unknown file size: " + contentLength);
