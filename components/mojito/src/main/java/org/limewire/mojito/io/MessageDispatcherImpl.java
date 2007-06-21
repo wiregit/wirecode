@@ -43,13 +43,17 @@ import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.Verifier;
 
-
 /**
  * This is a stand alone/reference implementation of MessageDispatcher
  */
 public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
+    
+    /**
+     * The maximum time to wait on 'lock'
+     */
+    private static final long WAIT_ON_LOCK = 5000L;
     
     /**
      * The receive buffer size for the Socket
@@ -218,9 +222,36 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 thread.setDaemon(Boolean.getBoolean("com.limegroup.mojito.io.MessageDispatcherIsDaemon"));
                 thread.start();
                 
-                super.start();
+                Runnable startup = new Runnable() {
+                    public void run() {
+                        synchronized(lock) {
+                            try {
+                                superStart();
+                            } finally {
+                                lock.notifyAll();
+                            }
+                        }
+                    }
+                };
+                
+                process(startup);
+                
+                try {
+                    lock.wait(WAIT_ON_LOCK);
+                } catch (InterruptedException err) {
+                    LOG.error("InterruptedException", err);
+                }
             }
         }
+    }
+    
+    /**
+     * A helper method to call the start() method of the super
+     * class because it's not possible to call a method of a
+     * super class from an anonymous inner class.
+     */
+    private void superStart() {
+        super.start();
     }
     
     @Override
@@ -284,21 +315,23 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 Runnable shutdown = new Runnable() {
                     public void run() {
                         synchronized (lock) {
-                            running = false;
-                            lock.notifyAll();
+                            try {
+                                running = false;
+                                superStop();
+                            } finally {
+                                lock.notifyAll();
+                            }
                         }
                     }
                 };
-                
+
                 process(shutdown);
                 
                 try {
-                    lock.wait(5000L);
+                    lock.wait(WAIT_ON_LOCK);
                 } catch (InterruptedException err) {
                     LOG.error("InterruptedException", err);
                 }
-                
-                super.stop();
                 
                 if (thread != null) {
                     thread.interrupt();
@@ -309,6 +342,15 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 outputQueue.clear();
             }
         }
+    }
+    
+    /**
+     * A helper method to call the stop() method of the super
+     * class because it's not possible to call a method of a
+     * super class from an anonymous inner class.
+     */
+    private void superStop() {
+        super.stop();
     }
     
     @Override
