@@ -852,7 +852,7 @@ public final class MessageRouterTest extends LimeTestCase {
     
     private void addFreeUltrapeerSlotHostsClassB(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
-        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
            set.put(e, e);
