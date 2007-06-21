@@ -123,7 +123,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * A helper method to serialize AltLocValues
      */
     protected static byte[] serialize(AltLocValue value) {
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP();
         
         ggep.put(CLIENT_ID, value.getGUID());
         

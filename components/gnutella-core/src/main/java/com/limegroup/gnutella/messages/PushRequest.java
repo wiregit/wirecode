@@ -21,7 +21,7 @@ public class PushRequest extends Message implements Serializable {
     public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
     
     /** A null GGEP to mark a failed parsing. */
-    private static final GGEP NULL_GGEP = new GGEP(true);
+    private static final GGEP NULL_GGEP = new GGEP();
     
     /** The unparsed payload--because I don't care what's inside.
      *  NOTE: IP address is BIG-endian.

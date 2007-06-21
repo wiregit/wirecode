@@ -83,7 +83,7 @@ public class InspectionRequest extends RoutableGGEPMessage {
         else
             ret = b.toString();
         
-        GGEP g = new GGEP(true);
+        GGEP g = new GGEP();
         g.putCompressed(INSPECTION_KEY, ret.getBytes());
         if (timestamp)
             g.put(TIMESTAMP_KEY);

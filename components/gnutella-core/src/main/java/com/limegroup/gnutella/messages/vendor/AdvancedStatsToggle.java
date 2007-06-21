@@ -50,7 +50,7 @@ public class AdvancedStatsToggle extends RoutableGGEPMessage {
         
         // ggep does not support negative integers, so if this is a
         // shut off just put the shut off key.
-        GGEP g = new GGEP(true);
+        GGEP g = new GGEP();
         if (time >= 0)
             g.put(TIME_KEY, time);
         else
