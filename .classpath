@@ -49,7 +49,7 @@
 	<classpathentry kind="lib" path="lib/jars/looks.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.6.0_01"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
 	<classpathentry kind="lib" path="tests/lib/junit.jar"/>
@@ -61,13 +61,13 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jakarta-httpcore.jar"/>
-	<classpathentry kind="lib" path="lib/jars/basicplayer3.0.jar"/>
 	<classpathentry kind="lib" path="lib/jars/other/themes.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jars/mp3spi1.9.4.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jogg-0.0.7.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jorbis-0.0.15.jar"/>
-	<classpathentry kind="lib" path="lib/jars/tritonus_share.jar"/>
-	<classpathentry kind="lib" path="lib/jars/vorbisspi1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/basicplayer.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jogg.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jorbis.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mp3spi.jar"/>
+	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
