@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
 import org.limewire.service.MessageService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.ConverterObjectInputStream;
@@ -343,8 +344,8 @@ public class DownloadManager implements BandwidthTracker {
      */
     private synchronized void pumpDownloads() {
         int index = 1;
-        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
-            AbstractDownloader md = (AbstractDownloader)i.next();
+        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
+            AbstractDownloader md = i.next();
             if(md.isAlive()) {
                 continue;
             } else if(md.shouldBeRemoved()) {
@@ -396,7 +397,7 @@ public class DownloadManager implements BandwidthTracker {
     
     public synchronized int getNumIndividualDownloaders() {
         int ret = 0;
-        for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+        for (Iterator<AbstractDownloader> iter=active.iterator(); iter.hasNext(); ) {  //active
         	Object next = iter.next();
         	if (! (next instanceof ManagedDownloader))
         		continue; // TODO: count torrents separately
@@ -499,8 +500,7 @@ public class DownloadManager implements BandwidthTracker {
         } catch (IOException e) {
             return false;
         } finally {
-            if (out != null)
-                try {out.close();}catch(IOException ignored){}
+            IOUtils.close(out);
         }
     }
 
@@ -535,17 +535,14 @@ public class DownloadManager implements BandwidthTracker {
         // downloader was written to disk twice.
         buf = new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
 
-        //Initialize and start downloaders.  Must catch ClassCastException since
-        //the data could be corrupt.  This code is a little tricky.  It is
+        //Initialize and start downloaders. This code is a little tricky.  It is
         //important that instruction (3) follow (1) and (2), because we must not
         //pass an uninitialized Downloader to the GUI.  (The call to getFileName
         //will throw NullPointerException.)  I believe the relative order of (1)
         //and (2) does not matter since this' monitor is held.  (The download
         //thread must obtain the monitor to acquire a queue slot.)
         try {
-            for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
-                AbstractDownloader downloader=(AbstractDownloader)iter.next();
-                
+            for (AbstractDownloader downloader : buf) {                
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)
                     continue;
@@ -555,8 +552,6 @@ public class DownloadManager implements BandwidthTracker {
                 callback(downloader).addDownload(downloader);                        //3
             }
             return true;
-        } catch (ClassCastException e) {
-            return false;
         } finally {
             // Remove entries that are too old or no longer existent and not actively 
             // downloaded.  
@@ -567,16 +562,15 @@ public class DownloadManager implements BandwidthTracker {
      
     private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
         List<File> ret = new ArrayList<File>(downloaders.size());
-        for (Iterator iter = downloaders.iterator(); iter.hasNext();) {
-            Downloader d = (Downloader) iter.next();
-	    File f = d.getFile();
-	    if (f != null) {
+        for (Downloader d : downloaders) {
+    	    File f = d.getFile();
+    	    if (f != null) {
                 try {
                     ret.add(FileUtils.getCanonicalFile(f));
                 } catch (IOException iox) { 
                     ret.add(f.getAbsoluteFile());
                 }
-	    }
+    	    }
         }
         
         return ret;
@@ -941,7 +935,7 @@ public class DownloadManager implements BandwidthTracker {
                 !RouterService.acceptedIncomingConnection()) < 1)
             return;
 
-        List responses;
+        List<Response> responses;
         HostData data;
         try {
             responses = qr.getResultsAsList();
@@ -958,7 +952,7 @@ public class DownloadManager implements BandwidthTracker {
      * up to any existing downloaders, adding them as possible
      * sources if they do.
      */
-    private void addDownloadWithResponses(List responses, HostData data) {
+    private void addDownloadWithResponses(List<? extends Response> responses, HostData data) {
         if(responses == null)
             throw new NullPointerException("null responses");
         if(data == null)
@@ -980,12 +974,10 @@ public class DownloadManager implements BandwidthTracker {
         // to at most one downloader.
         // TODO: it's possible that downloader x could accept response[i] but
         //that would cause a conflict with downloader y.  Check for this.
-        for(Iterator i = responses.iterator(); i.hasNext(); ) {
-            Response r = (Response)i.next();
+        for(Response r : responses) {
             // Don't bother with making XML from the EQHD.
             RemoteFileDesc rfd = r.toRemoteFileDesc(data);
-            for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
-            	Downloader current = (Downloader)j.next();
+            for(Downloader current : downloaders) {
             	if ( !(current instanceof ManagedDownloader))
             		continue; // can't add sources to torrents yet
                 ManagedDownloader currD = (ManagedDownloader) current;
@@ -993,11 +985,9 @@ public class DownloadManager implements BandwidthTracker {
                 // add any alternates that this response might have
                 // also.
                 if (currD.addDownload(rfd, true)) {
-                    Set alts = r.getLocations();
-                    for(Iterator k = alts.iterator(); k.hasNext(); ) {
-                        Endpoint ep = (Endpoint)k.next();
+                    for(IpPort ipp : r.getLocations()) {
                         // don't cache alts.
-                        currD.addDownload(new RemoteFileDesc(rfd, ep), false);
+                        currD.addDownload(new RemoteFileDesc(rfd, ipp), false);
                     }
                     break;
                 }
