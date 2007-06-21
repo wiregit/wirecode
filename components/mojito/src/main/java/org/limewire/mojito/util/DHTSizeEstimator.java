@@ -109,6 +109,9 @@ public class DHTSizeEstimator {
      */
     public synchronized void addEstimatedRemoteSize(BigInteger remoteSize) {
         if (!ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
+            // Clear the list of remotely estimated DHT sizes as they're
+            // no longer needed.
+            remoteSizeHistory.clear();
             return;
         }
         
