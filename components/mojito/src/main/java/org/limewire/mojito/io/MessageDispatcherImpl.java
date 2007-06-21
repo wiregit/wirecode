@@ -226,7 +226,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                     public void run() {
                         synchronized(lock) {
                             try {
-                                superStart();
+                                MessageDispatcherImpl.super.start();
                             } finally {
                                 lock.notifyAll();
                             }
@@ -243,15 +243,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 }
             }
         }
-    }
-    
-    /**
-     * A helper method to call the start() method of the super
-     * class because it's not possible to call a method of a
-     * super class from an anonymous inner class.
-     */
-    private void superStart() {
-        super.start();
     }
     
     @Override
@@ -317,7 +308,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                         synchronized (lock) {
                             try {
                                 running = false;
-                                superStop();
+                                MessageDispatcherImpl.super.stop();
                             } finally {
                                 lock.notifyAll();
                             }
@@ -342,15 +333,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 outputQueue.clear();
             }
         }
-    }
-    
-    /**
-     * A helper method to call the stop() method of the super
-     * class because it's not possible to call a method of a
-     * super class from an anonymous inner class.
-     */
-    private void superStop() {
-        super.stop();
     }
     
     @Override
