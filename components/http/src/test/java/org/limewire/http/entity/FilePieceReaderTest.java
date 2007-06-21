@@ -3,12 +3,11 @@ package org.limewire.http.entity;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Random;
 
 import junit.framework.Test;
 
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.http.HttpTestUtils;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.util.BaseTestCase;
 
@@ -292,21 +291,7 @@ public class FilePieceReaderTest extends BaseTestCase {
     private void createFile(int size) throws IOException {
         file = File.createTempFile("limewire", "");
         file.deleteOnExit();
-        data = writeRandomData(file, size);
-    }
-
-    public static byte[] writeRandomData(File file, int size)
-            throws IOException {
-        byte[] data = new byte[size];
-        Random r = new Random();
-        r.nextBytes(data);
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        try {
-            raf.write(data);
-        } finally {
-            raf.close();
-        }
-        return data;
+        data = HttpTestUtils.writeRandomData(file, size);
     }
 
     private class MyPieceListener implements PieceListener {

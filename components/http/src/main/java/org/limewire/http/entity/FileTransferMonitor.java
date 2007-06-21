@@ -1,6 +1,6 @@
 package org.limewire.http.entity;
 
-public interface FileTransfer {
+public interface FileTransferMonitor {
 
     void start();
 

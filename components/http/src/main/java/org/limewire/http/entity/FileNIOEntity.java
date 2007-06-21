@@ -1,7 +1,11 @@
 package org.limewire.http.entity;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
@@ -17,13 +21,14 @@ import org.limewire.nio.observer.Shutdownable;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
- * corresponding {@link FileTransfer} is updated with progress.
+ * corresponding {@link FileTransferMonitor} is updated with progress.
  */
-public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdownable {
+public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
+        Shutdownable {
 
     private static final Log LOG = LogFactory.getLog(FileNIOEntity.class);
-    
-    private final FileTransfer transfer;
+
+    private final FileTransferMonitor transfer;
 
     private final File file;
 
@@ -44,12 +49,12 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
     /** Piece that is currently transferred. */
     private Piece piece;
 
-    /** Cancels the transfer if inactivity for too long. */  
-//    private StalledUploadWatchdog watchdog;
-
+    /** Cancels the transfer if inactivity for too long. */
+    // private StalledUploadWatchdog watchdog;
     private IOControl ioctrl;
-    
-    public FileNIOEntity(File file, String contentType, FileTransfer transfer, long beginIndex, long length) {
+
+    public FileNIOEntity(File file, String contentType,
+            FileTransferMonitor transfer, long beginIndex, long length) {
         super(file, contentType);
 
         this.transfer = transfer;
@@ -58,54 +63,106 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
         this.length = length;
         this.remaining = length;
     }
-    
-    public FileNIOEntity(File file, String contentType, FileTransfer transfer) {
+
+    public FileNIOEntity(File file, String contentType,
+            FileTransferMonitor transfer) {
         this(file, contentType, transfer, 0, file.length());
     }
-    
+
     @Override
     public long getContentLength() {
         return length;
     }
 
+    @Override
+    public InputStream getContent() throws IOException {
+        final FileInputStream in = new FileInputStream(this.file);
+        return new InputStream() {
+            @Override
+            public int read() throws IOException {
+                if (remaining == 0) {
+                    return -1;
+                }
+                remaining--;
+                return in.read();
+            }
+        };
+    }
+
+    @Override
+    public boolean isRepeatable() {
+        return false;
+    }
+
+    @Override
+    public void writeTo(final OutputStream outstream) throws IOException {
+        if (outstream == null) {
+            throw new IllegalArgumentException("Output stream may not be null");
+        }
+        InputStream instream = new BufferedInputStream(new FileInputStream(
+                this.file));
+        try {
+            byte[] tmp = new byte[4096];
+            int l;
+            instream.skip(this.begin);
+            while (remaining > 0 && (l = instream.read(tmp, 0, //
+                    (int) Math.min(remaining, tmp.length))) != -1) {
+                outstream.write(tmp, 0, l);
+                remaining -= l;
+            }
+            outstream.flush();
+        } finally {
+            instream.close();
+        }
+    }
+
+    public File getFile() {
+        return file;
+    }
+
     public void initializeReader() throws IOException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
+            LOG.debug("Initializing upload of " + file.getName() + " [begin="
+                    + begin + ",length=" + length + "]");
 
-//        watchdog = new StalledUploadWatchdog();
+        // watchdog = new StalledUploadWatchdog();
 
         transfer.start();
 
-        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
+        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(),
+                file, begin, length, new PieceHandler());
         reader.start();
     }
 
     public void initializeWriter() throws IOException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Initializing download of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
+            LOG.debug("Initializing download of " + file.getName() + " [begin="
+                    + begin + ",length=" + length + "]");
 
-//        watchdog = new StalledUploadWatchdog();
+        // watchdog = new StalledUploadWatchdog();
 
         transfer.start();
 
-        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
+        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(),
+                file, begin, length, new PieceHandler());
         reader.start();
     }
 
     public void finished() {
-//        if (watchdog != null) {
-//            watchdog.deactivate();
-//            watchdog = null;
-//        }
+        // if (watchdog != null) {
+        // watchdog.deactivate();
+        // watchdog = null;
+        // }
         if (reader != null) {
             reader.shutdown();
             reader = null;
         }
-        
+
         ioctrl = null;
     }
-    
-    public void produceContent(ContentEncoder encoder, IOControl ioctrl) throws IOException {
+
+    public void produceContent(ContentEncoder encoder, IOControl ioctrl)
+            throws IOException {
         if (this.ioctrl == null) {
             this.ioctrl = ioctrl;
 
@@ -117,7 +174,7 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
             int written = encoder.write(buffer);
             transfer.addAmountUploaded(written);
             if (buffer.hasRemaining()) {
-//                watchdog.activate(this);
+                // watchdog.activate(this);
                 return;
             } else if (remaining == 0) {
                 reader.release(piece);
@@ -141,16 +198,17 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
                         // interest back on when the next piece is available
                         buffer = null;
                         ioctrl.suspendInput();
-//                        watchdog.activate(this);
+                        // watchdog.activate(this);
                         return;
                     }
                     buffer = piece.getBuffer();
                     remaining -= buffer.remaining();
                 }
             }
-            
+
             if (LOG.isTraceEnabled())
-                LOG.trace("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
+                LOG.trace("Uploading " + file.getName() + " [read="
+                        + buffer.remaining() + ",remaining=" + remaining + "]");
 
             written = encoder.write(buffer);
             transfer.addAmountUploaded(written);
@@ -159,16 +217,16 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
         if (remaining == 0 && !buffer.hasRemaining()) {
             encoder.complete();
         } else {
-//            watchdog.activate(this);
+            // watchdog.activate(this);
         }
     }
 
     public int consumeContent(ContentDecoder decoder, IOControl ioctrl)
-        throws IOException {
-        //      TODO Auto-generated method stub
-        return 0;
+            throws IOException {
+        // TODO implement
+        throw new UnsupportedOperationException();
     }
-    
+
     public void shutdown() {
         if (LOG.isWarnEnabled())
             LOG.warn("File transfer timed out: " + transfer);
@@ -177,9 +235,9 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity, Shutdown
 
     @Override
     public String toString() {
-        return getClass().getName() + " [file=" + file.getName() + "]"; 
+        return getClass().getName() + " [file=" + file.getName() + "]";
     }
-    
+
     private class PieceHandler implements PieceListener {
 
         public void readFailed(IOException e) {

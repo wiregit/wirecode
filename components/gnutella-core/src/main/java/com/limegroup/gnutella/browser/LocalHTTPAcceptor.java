@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.browser;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -10,9 +11,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AsyncHttpRequestHandler;
 import org.limewire.http.BasicHttpAcceptor;
+import org.limewire.http.handler.BasicMimeTypeProvider;
+import org.limewire.http.handler.FileRequestHandler;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -50,7 +52,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
         registerHandler("/magnet10/default.js", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/pause", new MagnetPauseRequestHandler());
         registerHandler("/magcmd/detail", new MagnetDetailRequestHandler());
-        registerHandler("*", new FileRequestHandler());
+        registerHandler("*", new FileRequestHandler(new File("root"), new BasicMimeTypeProvider()));
     }
 
     private class MagnetCommandRequestHandler implements AsyncHttpRequestHandler {
@@ -82,13 +84,6 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
             StringEntity entity = new StringEntity(page);
             entity.setContentType("text/html");
             response.setEntity(entity);
-        }
-    }
-
-    private class FileRequestHandler implements HttpRequestHandler {
-        public void handle(HttpRequest request, HttpResponse response,
-                HttpContext context) throws HttpException, IOException {
-            response.setStatusCode(HttpStatus.SC_NOT_FOUND);
         }
     }
 
