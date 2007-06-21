@@ -7,7 +7,12 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.concurrent.SimpleTimer;
 
 /**
- * Class for managing statistics recording.
+ * Manages recording {@link Statistic Statistics}. When a <code>Statistic</code>s
+ * is instantiated, the <code>Statistic</code> is managed by this Singleton 
+ * <code>StatisticsManager</code>.
+ * <p> 
+ * Additionally, <code>StatisticsManager</code> includes methods to set and get 
+ * that status whether to record advanced statistics.
  */
 public final class StatisticsManager implements Runnable {
 	
@@ -22,7 +27,7 @@ public final class StatisticsManager implements Runnable {
 	private volatile List<Statistic> ADVANCED_STATS = new LinkedList<Statistic>();
 
 	/**
-	 * <tt>List</tt> of all advanced numberical statistics classes.
+	 * <tt>List</tt> of all advanced numerical statistics classes.
 	 */
 	private volatile List<Statistic> NUMERICAL_STATS = new LinkedList<Statistic>();
 
@@ -39,7 +44,7 @@ public final class StatisticsManager implements Runnable {
     private volatile boolean _recordAdvancedStatisticsManual;
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> isntance.
+	 * Constant for the <tt>StatisticsManager</tt> instance.
 	 */
 	private static final StatisticsManager INSTANCE = new StatisticsManager();
 
@@ -82,7 +87,7 @@ public final class StatisticsManager implements Runnable {
 	}
 
 	/**
-	 * Adds an <tt>NumericalStatistic</tt> to the set of Numerical
+	 * Adds a <tt>NumericalStatistic</tt> to the set of Numerical
 	 * statistics to record.
 	 *
 	 * @param stat the <tt>NumericalStatistic</tt> to add

@@ -6,7 +6,8 @@ import java.io.Writer;
 import org.limewire.collection.Buffer;
 
 /**
- * Interface for generalized access to a <tt>Statistic</tt>.
+ * Defines an interface for generalized access to store and summarize numeric
+ * data.
  */
 public interface Statistic {
 

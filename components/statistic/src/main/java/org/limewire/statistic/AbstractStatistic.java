@@ -12,13 +12,83 @@ import java.util.StringTokenizer;
 
 import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionUtils;
 import org.limewire.service.ErrorService;
 
 /**
- * This class provides a default implementation of the <tt>Statistic</tt>
- * interface, providing such functionality as keeping track of the
- * history for the given statistic, providing access to the average
- * value, the maximum value, etc.
+ * Provides a default implementation of the <code>Statistic</code> interface as an
+ * abstract class. <code>AbstractStatistic</code> tracks the history for the 
+ * given statistic, provides access to the average value, the maximum value 
+ * and optionally writes values to disk.
+ * <p>
+ * Additionally, <code>AbstractStatistic</code> implements {@link Inspectable} 
+ * and the <code>inspect</code> method is called in 
+ * {@link InspectionUtils#inspectValue(String)}.
+ * <pre>
+    class Stats extends AbstractStatistic{
+
+        public void addData(int data) {
+            super.addData(data);
+            synchronized(_buffer) {
+                initializeBuffer();
+                _buffer.addLast((double)data);
+            }
+            _totalStatsRecorded++;
+            if(data > _max) {
+                _max = data;
+            }
+        }
+    }
+    
+    AbstractStatistic s = new Stats();      
+    
+    s.addData(1);
+    
+    //3 2s
+    for(int i = 0; i < 3; i++)
+        s.addData(2);
+
+    //5 3s
+    for(int i = 0; i < 5; i++)
+        s.addData(3);
+
+    //3 4s
+    for(int i = 0; i < 3; i++)
+        s.addData(4);
+
+    s.addData(5);
+                    
+    System.out.println("Average (Arithmetic mean): " + s.getAverage());
+    System.out.println("Maximum value: " + s.getMax());
+    System.out.println("Total: " + s.getTotal());
+
+    Buffer&lt;Double&gt; bd = new Buffer<Double>(100);
+    bd = s.getStatHistory();
+    
+    System.out.print("[");
+    for(Double i : bd){
+        if(!i.equals(Double.NaN) )
+            System.out.print(i + " ");
+    }
+    System.out.println("]");
+
+    System.out.println("");
+
+    List<Double> l = new ArrayList<Double>(s.getStatHistory().size());
+    for (Double i : s.getStatHistory()) {
+        if(!i.equals(Double.NaN) )
+            l.add((double)i);        
+    }
+    System.out.println(l.toString());
+
+    Output:
+        Average (Arithmetic mean): 3.0
+        Maximum value: 5.0
+        Total: 39.0
+        [1.0 2.0 2.0 2.0 3.0 3.0 3.0 3.0 3.0 4.0 4.0 4.0 5.0 ]
+        
+        [1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0, 5.0]
+</pre>
  */
 public abstract class AbstractStatistic implements Statistic, Inspectable {
 
@@ -35,12 +105,12 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	protected final Buffer<Double> _buffer = new Buffer<Double>(HISTORY_LENGTH);
     
 	/**
-	 * Int for the statistic currently being added to.
+	 * int for the statistic currently being added to.
 	 */
 	protected volatile int _current = 0;
 
 	/**
-	 * Int for the most recently stored statistic. 
+	 * int for the most recently stored statistic. 
 	 */
 	private volatile int _lastStored = 0;
 

@@ -2,8 +2,27 @@ package org.limewire.statistic;
 
 
 /**
- * Specialized statistics class that just records numerical statistics,
- * i.e. statistics that are not time-based.
+ * Abstract class that records numerical statistics, i.e. statistics that are 
+ * not time-based.
+ * <pre>
+    class Stats extends NumericalStatistic{}       
+    Statistic s = new Stats();
+
+    s.addData(1);
+    s.addData(2);
+    s.addData(3);
+    s.addData(4);       
+    s.addData(5);
+    
+    System.out.println("Total: " + s.getTotal());
+    System.out.println("Max: " + s.getMax());
+    System.out.println("Average: " + s.getAverage());
+    
+    Output:
+        Total: 15.0
+        Max: 5.0
+        Average: 3.0
+ * </pre>
  */
 public abstract class NumericalStatistic extends AbstractStatistic {
 

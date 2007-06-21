@@ -6,30 +6,47 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-
+/**
+ * Inspects an encoded field and returns a representation of that
+ * field. The field must:
+ * <p>
+ * a) implement the {@link Inspectable} interface, in which case the
+ * return value of the <code>inspect</code> method is returned, 
+ * or else
+ * <p>
+ * b) be annotated with {@link InspectablePrimitive @InspectablePrimitive}, in 
+ * which case the <code>String.valueOf</code> is returned, or else
+ * <p>
+ * c) be annotated with {@link InspectableForSize @InspectableForSize} and have a 
+ * <code>size</code> method in which case the return value of the <code>size</code>
+ * method call is returned.
+ *
+ */
 
 public class InspectionUtils {
     /**
      * 
      * Inspects an encoded field and returns a representation of that
-     * field.  The field must
-     * 
-     * a) implement the Inspectable interface, in which case the
-     * return value of the inspect() method is returned, 
+     * field. The field must:
+     * <p>
+     * a) implement the {@link Inspectable} interface, in which case the
+     * return value of the <code>inspect</code> method is returned, 
      * or else
-     * b) be annotated with @InspectablePrimitive, in which case the 
-     * String.valueOf is returned 
-     * or else
-     * c) be annotated with @InspectableForSize and have a size() method
-     * in which case the return value of the size() call is returned.
+     * <p>
+     * b) be annotated with {@link InspectablePrimitive @InspectablePrimitive}, in 
+     * which case the <code>String.valueOf</code> is returned, or else
+     * <p>
+     * c) be annotated with {@link InspectableForSize @InspectableForSize} and have a 
+     * <code>size</code> method in which case the return value of the <code>size</code>
+     * method call is returned.
      * 
      * @param encodedField - name of the field we want to get, starting with
      * a fully qualified class name, and followed by comma-separated
      * field names that will help us reach the target field.
-     *
-     * Example:
-     * "com.limegroup.gnutella.RouterService,downloadManager,active"
-     * will return the list of active downloads.
+     * <p>
+     * For example:
+     * "com.limegroup.gnutella.gui.GUIMediator,DOWNLOAD_MEDIATOR,resumeClicks"
+     * will return the count of resume clicks.
      *
      * @return the object pointed to by the last field, or an Exception
      * object if such was thrown trying to get it.

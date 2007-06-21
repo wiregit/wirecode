@@ -2,8 +2,9 @@ package org.limewire.inspection;
 
 
 /**
- * interface to be implemented by objects that wish to
- * be inspected by InspectionUtils 
+ * Defines the interface for objects that wish to be inspected by 
+ * {@link InspectionUtils}. 
+ *
  */
 public interface Inspectable {
     /**

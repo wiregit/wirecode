@@ -7,6 +7,114 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Provides convenience methods to return the number, arithmetic mean average,
+ * variance, minimum, median and maximum value of a list of values, and other 
+ * statistical values. 
+ * <p>
+ * Additionally, <code>StatsUtils</code> includes methods
+ * to get a histogram list approach to the data; each data segment includes the 
+ * counts of data. For example, [1,4,5,3,1] has five segments with
+ * one data value in the first segment and five data values in the third segment.
+ *
+ *<pre>
+    class MyStats extends AbstractStatistic{
+        public void addData(int data) {
+            super.addData(data);
+            synchronized(_buffer) {
+                initializeBuffer();
+                _buffer.addLast((double)data);
+            }
+            _totalStatsRecorded++;
+            if(data > _max)
+                _max = data;
+        }
+    }
+    
+    Statistic s = new MyStats();        
+    s.addData(1);
+    
+    //4 2s
+    for(int i = 0; i < 4; i++)
+        s.addData(2);
+
+    //5 3s
+    for(int i = 0; i < 5; i++)
+        s.addData(3);
+
+    //3 4s
+    for(int i = 0; i < 3; i++)
+        s.addData(4);
+
+    s.addData(5);
+                    
+    List&lt;Double&gt; l = new ArrayList&lt;Double&gt;(s.getStatHistory().size());
+    for (Double i : s.getStatHistory())
+        if(!i.equals(Double.NaN) )
+            l.add((double)i);        
+
+    DoubleStats d = StatsUtils.quickStatsDouble(l);
+
+    int max = ByteOrder.beb2int((byte[])(d.getMax()), 0);
+    System.out.println("Maximum value: " + Float.intBitsToFloat(max));
+
+    int min = ByteOrder.beb2int((byte[])(d.getMin()), 0);
+    System.out.println("Minimum value: " + Float.intBitsToFloat(min));
+
+    int med = ByteOrder.beb2int((byte[])(d.getMed()), 0);
+    System.out.println("Median: " + Float.intBitsToFloat(med));
+
+    int mode = ByteOrder.beb2int((byte[])(d.getMode()), 0);
+    System.out.println("Mode: " + Float.intBitsToFloat(mode));
+
+    int avg = ByteOrder.beb2int((byte[])(d.getAvg()), 0);
+    System.out.println("Average (Arithmetic mean): " + Float.intBitsToFloat(avg));
+
+    int signTest = ByteOrder.beb2int((byte[])(d.getST()), 0);
+    System.out.println("Sign Test (number of values greater than the arithmetic mean): " 
+            + Float.intBitsToFloat(signTest));
+    
+    int q1 = ByteOrder.beb2int((byte[])(d.getQ1()), 0);
+    System.out.println("Quartile 1: " + Float.intBitsToFloat(q1));
+
+    int q3 = ByteOrder.beb2int((byte[])(d.getQ3()), 0);
+    System.out.println("Quartile 3: " + Float.intBitsToFloat(q3));
+
+    int m2 = ByteOrder.beb2int((byte[])(d.getM2()), 0);
+    System.out.println("Central Moment 2 (variance): " + Float.intBitsToFloat(m2));
+
+    int m3 = ByteOrder.beb2int((byte[])(d.getM3()), 0);
+    System.out.println("Central Moment 3 (used to define skewness): " + Float.intBitsToFloat(m3));
+
+    int m4 = ByteOrder.beb2int((byte[])(d.getM4()), 0);
+    System.out.println("Central Moment 4 (used to define kurtosis): " + Float.intBitsToFloat(m4));
+
+    System.out.println("");
+
+    List&lt;Integer&gt; h = StatsUtils.getHistogram(l,5);
+    for(int i : h)
+        System.out.println(i);
+    
+    Output:
+        Maximum value: 5.0
+        Minimum value: 1.0
+        Median: 3.0
+        Mode: 3.0
+        Average (Arithmetic mean): 2.9285715
+        Sign Test (number of values greater than the arithmetic mean): 9.0
+        Quartile 1: 2.0
+        Quartile 3: 4.0
+        Central Moment 2 (variance): 1.1483517
+        Central Moment 3 (used to define skewness): 0.16954474
+        Central Moment 4 (used to define kurtosis): 3.0132596
+
+        1
+        4
+        5
+        3
+        1
+ *</pre>
+ */
 public class StatsUtils {
     private StatsUtils() {}
     
@@ -190,7 +298,7 @@ public class StatsUtils {
      * Creates a histogram of the provided data.
      * 
      * @param data list of observations
-     * @param breaks # of breaks in the histogram
+     * @param breaks number of breaks in the histogram
      * @return List of integer values size of the breaks
      */
     public static List<Integer> getHistogram(List<Double> data, int breaks) {
@@ -211,7 +319,7 @@ public class StatsUtils {
     }
     
     /**
-     * Same as getHistogram but operates on BigIntegers.
+     * Same as <code>getHistogram</code> but operates on <code>BigIntegers</code>.
      */
     public static List<Integer> getHistogramBigInt(List<BigInteger> data, int breaks) {
         if (data.isEmpty())
@@ -234,8 +342,29 @@ public class StatsUtils {
     
     
     /**
-     * A stats object holding the minimum, maximum, median
-     * average, quartiles 1 and 3 and second, third and fourth central moments
+     * An abstract class that holds the minimum, maximum, median
+     * average, quartiles one and three, and second, third and fourth <a href=
+     * "http://en.wikipedia.org/wiki/Central_moment">central moments</a>.
+     * See {@link StatsUtils} for sample code of <code>DoubleStats</code>
+     * which extends <code>Stats</code>.
+     * 
+     * <table cellpadding="5">
+     * <tr>
+     * <td><b>Central Moment</b></td>
+     * <td><b>Use</b></td>
+     * </tr>
+     * <td>second</td>
+     * <td>variance</td>
+     * </tr>
+     * </tr>
+     * <td>third</td>
+     * <td>to define skewness</td>
+     * </tr>
+     * </tr>
+     * <td>fourth</td>
+     * <td>to define kurtosis</td>
+     * </tr>
+     * </table>
      */
     public abstract static class Stats {
         
@@ -309,7 +438,8 @@ public class StatsUtils {
     }
     
     /**
-     * Implementation of <tt>Stats</tt> using the double primitive. 
+     * Extension of <code>Stats</code> using the double primitive. See 
+     * {@link StatsUtils} for sample code which uses <code>DoubleStats</code>.
      */
     public static class DoubleStats extends Stats {
         DoubleStats() {}
@@ -371,7 +501,7 @@ public class StatsUtils {
     }
 
     /**
-     * Implementation of <tt>Stats</tt> using <tt>BigInteger</tt> 
+     * Extension of <code>Stats</code> using {@link BigInteger}. 
      */
     public static class BigIntStats extends Stats {
         public BigIntStats(){}
@@ -444,7 +574,8 @@ public class StatsUtils {
     }
     
     /**
-     * Runs the Shapiro-Wilk test on a list of double values.
+     * Runs the <a href="http://en.wikipedia.org/wiki/Shapiro-Wilk_test">Shapiro-Wilk test</a>
+     * on a list of double values.
      * @return an array of size two if everything goes well, or null
      * if there's an error.
      */
