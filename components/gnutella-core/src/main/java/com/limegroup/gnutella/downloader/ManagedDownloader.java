@@ -921,9 +921,8 @@ public class ManagedDownloader extends AbstractDownloader
      */
     private boolean shouldGiveUpDHTQueries() {
     	if (!DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-    			|| !RouterService.getDHTManager().isMemberOfDHT()) {
-    		
-    		return true;
+    	        || !RouterService.getDHTManager().isMemberOfDHT()) {
+    	    return true;
     	}
     	
     	return numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue();
@@ -953,7 +952,8 @@ public class ManagedDownloader extends AbstractDownloader
     private void sendRequery() {
         if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
                 && RouterService.getDHTManager().isMemberOfDHT() 
-                && (firstQueryAttempt || alreadyTriedGnutella)) {
+                && (firstQueryAttempt || alreadyTriedGnutella)
+                && (getContentLength() >= 0L)) { // See #locationAdded(...)
             
             if (sendDHTQuery()) {
                 firstQueryAttempt = false;
