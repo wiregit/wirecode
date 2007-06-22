@@ -323,6 +323,13 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     }
 
     /**
+     * @return Returns the root hash of the TigerTree
+     */
+    public byte[] getRootHashBytes() {
+        return ROOT_HASH;
+    }
+    
+    /**
      * @return String the THEX_URI.
      */
     public String getThexURI() {

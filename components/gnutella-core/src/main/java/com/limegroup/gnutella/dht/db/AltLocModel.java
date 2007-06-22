@@ -23,6 +23,8 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 /**
  * The AltLocPublisher publishes the localhost as an alternate 
@@ -55,11 +57,18 @@ public class AltLocModel implements StorableModel {
             // Step One: Add every new FileDesc to the Map
             for (FileDesc fd : fds) {
                 if (!(fd instanceof IncompleteFileDesc)) {
-                    KUID primaryKey = KUIDUtils.toKUID(fd.getSHA1Urn());
+                    URN urn = fd.getSHA1Urn();
+                    KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
+                        long fileSize = fd.getFileSize();
+                        HashTree hashTree = TigerTreeCache.instance().getHashTree(urn);
+                        byte[] ttroot = null;
+                        if (hashTree != null) {
+                            ttroot = hashTree.getRootHashBytes();
+                        }
                         
-                        values.put(primaryKey, new Storable(
-                                primaryKey, AltLocValue.SELF));
+                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot);
+                        values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }
             }

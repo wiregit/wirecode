@@ -9,6 +9,7 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
@@ -27,21 +28,38 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      */
     public static final DHTValueType ALT_LOC = DHTValueType.valueOf("Gnutella Alternate Location", "ALOC");
     
+    /*
+     * AltLocValue version history
+     * 
+     * Version 0:
+     * GUID
+     * Port
+     * Firewalled
+     * 
+     * Version 1:
+     * File Length
+     * TigerTree Root Hash (optional)
+     */
+    
+    /**
+     * 
+     */
+    public static final Version VERSION_ONE = Version.valueOf(1);
+    
     /**
      * Version of AltLocDHTValue
      */
-    public static final Version VERSION = Version.valueOf(0);
-    
-    /**
-     * An AltLocDHTValue for the localhost
-     */
-    public static final AltLocValue SELF = new AltLocForSelf();
+    public static final Version VERSION = VERSION_ONE;
     
     private static final String CLIENT_ID = "client-id";
     
     private static final String PORT = "port";
     
     private static final String FIREWALLED = "firewalled";
+    
+    private static final String LENGTH = "length";
+    
+    private static final String TTROOT = "ttroot";
     
     protected final Version version;
     
@@ -55,8 +73,19 @@ public abstract class AltLocValue implements DHTValue, Serializable {
     /**
      * Factory method for testing purposes
      */
-    static AltLocValue createAltLocValue(Version version, byte[] guid, int port, boolean firewalled) {
-        return new AltLocValueImpl(version, guid, port, firewalled);
+    static AltLocValue createAltLocValue(Version version, byte[] guid, int port, 
+            long length, byte[] ttroot, boolean firewalled) {
+        return new AltLocValueImpl(version, guid, port, length, ttroot, firewalled);
+    }
+    
+    /**
+     * 
+     * @param fileSize
+     * @param ttroot
+     * @return
+     */
+    public static AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot) {
+        return new AltLocForSelf(fileSize, ttroot);
     }
     
     public AltLocValue(Version version) {
@@ -98,6 +127,16 @@ public abstract class AltLocValue implements DHTValue, Serializable {
     public abstract int getPort();
     
     /**
+     * The length of the file
+     */
+    public abstract long getFileSize();
+    
+    /**
+     * The TigerTree root hash
+     */
+    public abstract byte[] getRootHash();
+    
+    /**
      * Returns true if the AltLoc is firewalled
      */
     public abstract boolean isFirewalled();
@@ -110,7 +149,10 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         StringBuilder buffer = new StringBuilder();
         buffer.append("AltLoc: guid=").append(new GUID(getGUID()))
             .append(", port=").append(getPort())
-            .append(", firewalled=").append(isFirewalled());
+            .append(", firewalled=").append(isFirewalled())
+            .append(", fileSize=").append(getFileSize())
+            .append(", ttroot=").append(getRootHash() != null 
+                    ? ArrayUtils.toHexString(getRootHash()) : "null");
         
         if (this instanceof AltLocForSelf) {
             buffer.append(", local=true");
@@ -123,6 +165,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * A helper method to serialize AltLocValues
      */
     protected static byte[] serialize(AltLocValue value) {
+        Version version = value.getVersion();
+        
         GGEP ggep = new GGEP();
         
         ggep.put(CLIENT_ID, value.getGUID());
@@ -133,6 +177,17 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         byte[] firewalled = { (byte)(value.isFirewalled() ? 1 : 0) };
         ggep.put(FIREWALLED, firewalled);
+        
+        if (version.compareTo(VERSION_ONE) >= 0) {
+            byte[] fileSizeBytes = new byte[8];
+            ByteOrder.long2beb(value.getFileSize(), fileSizeBytes, 0);
+            ggep.put(LENGTH, fileSizeBytes);
+            
+            byte[] ttroot = value.getRootHash();
+            if (ttroot != null) {
+                ggep.put(TTROOT, ttroot);
+            }
+        }
         
         return ggep.toByteArray();
     }
@@ -148,6 +203,10 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         private final int port;
         
+        private final long fileSize;
+        
+        private final byte[] ttroot;
+        
         private final boolean firewalled;
         
         private final byte[] data;
@@ -155,10 +214,13 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         /**
          * Constructor for testing purposes
          */
-        private AltLocValueImpl(Version version, byte[] guid, int port, boolean firewalled) {
+        private AltLocValueImpl(Version version, byte[] guid, int port, 
+                long fileSize, byte[] ttroot, boolean firewalled) {
             super(version);
             this.guid = guid;
             this.port = port;
+            this.fileSize = fileSize;
+            this.ttroot = ttroot;
             this.firewalled = firewalled;
             this.data = serialize(this);
         }
@@ -197,6 +259,28 @@ public abstract class AltLocValue implements DHTValue, Serializable {
                 
                 this.firewalled = (firewalled[0] != 0);
                 
+                if (version.compareTo(VERSION_ONE) >= 0) {
+                    byte[] fileSizeBytes = ggep.getBytes(LENGTH);
+                    if (fileSizeBytes.length != 8) {
+                        throw new DHTValueException("Illegal file size length: " + fileSizeBytes.length);
+                    }
+                    this.fileSize = ByteOrder.beb2long(fileSizeBytes, 0, fileSizeBytes.length);
+                    
+                    if (ggep.hasKey(TTROOT)) {
+                        byte[] ttroot = ggep.getBytes(TTROOT);
+                        if (ttroot.length != 20) {
+                            throw new DHTValueException("Illegal ttroot length: " + ttroot.length);
+                        }
+                        this.ttroot = ttroot;
+                        
+                    } else {
+                        this.ttroot = null;
+                    }
+                } else {
+                    this.fileSize = -1L;
+                    this.ttroot = null;
+                }
+                
             } catch (BadGGEPPropertyException err) {
                 throw new DHTValueException(err);
                 
@@ -205,28 +289,29 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             }
         }
         
-        /*
-         * (non-Javadoc)
-         * @see com.limegroup.gnutella.dht.db.AltLocValue#getPort()
-         */
+        @Override
         public int getPort() {
             return port;
         }
         
-        /*
-         * (non-Javadoc)
-         * @see com.limegroup.gnutella.dht.db.AltLocValue#getGUID()
-         */
+        @Override
         public byte[] getGUID() {
             return guid;
         }
         
-        /*
-         * (non-Javadoc)
-         * @see com.limegroup.gnutella.dht.db.AltLocValue#isFirewalled()
-         */
+        @Override
         public boolean isFirewalled() {
             return firewalled;
+        }
+        
+        @Override
+        public long getFileSize() {
+            return fileSize;
+        }
+        
+        @Override
+        public byte[] getRootHash() {
+            return ttroot;
         }
         
         /*
@@ -255,10 +340,17 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         private static final long serialVersionUID = 8101291047246461600L;
         
-        public AltLocForSelf() {
+        private final long fileSize;
+        
+        private final byte[] ttroot;
+        
+        public AltLocForSelf(long fileSize, byte[] ttroot) {
             super(VERSION);
+            
+            this.fileSize = fileSize;
+            this.ttroot = ttroot;
         }
-
+        
         /*
          * (non-Javadoc)
          * @see org.limewire.mojito.db.DHTValue#getValue()
@@ -267,20 +359,37 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             return serialize(this);
         }
         
+        /*
+         * (non-Javadoc)
+         * @see org.limewire.mojito.db.DHTValue#write(java.io.OutputStream)
+         */
         public void write(OutputStream out) throws IOException {
             out.write(getValue());
         }
 
+        @Override
         public int getPort() {
             return RouterService.getPort();
         }
         
+        @Override
         public byte[] getGUID() {
             return RouterService.getMyGUID();
         }
         
+        @Override
         public boolean isFirewalled() {
             return !RouterService.acceptedIncomingConnection();
+        }
+
+        @Override
+        public long getFileSize() {
+            return fileSize;
+        }
+
+        @Override
+        public byte[] getRootHash() {
+            return ttroot;
         }
     }
 }

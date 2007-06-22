@@ -56,6 +56,7 @@ import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -952,8 +953,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void sendRequery() {
         if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
                 && RouterService.getDHTManager().isMemberOfDHT() 
-                && (firstQueryAttempt || alreadyTriedGnutella)
-                && (getContentLength() >= 0L)) { // See #locationAdded(...)
+                && (firstQueryAttempt || alreadyTriedGnutella)) {
             
             if (sendDHTQuery()) {
                 firstQueryAttempt = false;
@@ -1486,19 +1486,50 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void locationAdded(AlternateLocation loc) {
         Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        long contentLength = getContentLength();
         
-        // The content length (file size) can be negative if the 
-        // downloader was created from a magnet link. In this specific
-        // case we found an AltLoc in the DHT but it doesn't help 
-        // us much as the size is still unknown.
-        if (contentLength < 0) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Unknown file size: " + contentLength);
+        long contentLength = -1L;
+        if (loc instanceof DirectDHTAltLoc) {
+            long fileSize = ((DirectDHTAltLoc)loc).getFileSize();
+            
+            // Compare the file size from the AltLoc with the contentLength
+            // if possible.
+            
+            if (fileSize >= 0L) {
+                // Get the current contentLength and compare it with
+                // the file size from the AltLocValue
+                synchronized (this) {
+                    contentLength = getContentLength();
+                    if (contentLength < 0L) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Using file size from AltLocValue: " + fileSize);
+                        }
+                        contentLength = fileSize;
+                        
+                        assert (contentLength >= 0L && contentLength <= Integer.MAX_VALUE);
+                        propertiesMap.put(FILE_SIZE, (int)contentLength);
+                    }
+                }
+                
+                if (fileSize != contentLength) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("File sizes do not match: " 
+                                + fileSize + " vs. " + contentLength);
+                    }
+                    return;
+                }
             }
+        }
+        
+        contentLength = getContentLength();
+        if (contentLength < 0L) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unknown file size: " + contentLength);
+            }
+            
             return;
         }
         
+        assert (contentLength >= 0L && contentLength <= Integer.MAX_VALUE);
         addDownload(loc.createRemoteFileDesc((int)contentLength), false);
     }
     

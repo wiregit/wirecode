@@ -163,9 +163,13 @@ public class AltLocFinder {
                         creator.getContactAddress()).getAddress();
                 
                 IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
+                
+                long fileSize = altLoc.getFileSize();
+                byte[] ttroot = altLoc.getRootHash();
+                
                 try {
                     AlternateLocation location 
-                        = AlternateLocation.createDirectAltLoc(ipp, urn);
+                        = AlternateLocation.createDirectDHTAltLoc(ipp, urn, fileSize, ttroot);
                     AltLocManager.instance().add(location, this);
                 } catch (IOException e) {
                     // As above but possible if IpPort is not a 

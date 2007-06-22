@@ -147,8 +147,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
     /**
      * Creates a new direct AlternateLocation
      */
-	public static AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
+    public static AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
         return new DirectAltLoc(ipp, urn);
+    }
+    
+    public static AlternateLocation createDirectDHTAltLoc(IpPort ipp, URN urn, 
+            long fileSize, byte[] ttroot) throws IOException {
+        return new DirectDHTAltLoc(ipp, urn, fileSize, ttroot);
     }
     
     /**
