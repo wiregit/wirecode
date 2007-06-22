@@ -70,11 +70,12 @@ public class THEXUploadState extends UploadState {
             ConstantHTTPHeaderValue.SERVER_VALUE,
             os);
 
+        // disabled since URN matches file not THEX data
         // write the URN in case the caller wants it
-        HTTPUtils.writeHeader(
-            HTTPHeaderName.GNUTELLA_CONTENT_URN,
-            FILE_DESC.getSHA1Urn(),
-            os);
+//        HTTPUtils.writeHeader(
+//            HTTPHeaderName.GNUTELLA_CONTENT_URN,
+//            FILE_DESC.getSHA1Urn(),
+//            os);
 
         HTTPUtils.writeHeader(
             HTTPHeaderName.CONTENT_LENGTH,
