@@ -63,15 +63,19 @@ public class BrowseRequestHandler implements HttpRequestHandler {
     public class BrowseResponseEntity extends AbstractHttpNIOEntity {
 
         private static final int RESPONSES_PER_REPLY = 10;
+        
+        private static final int MAX_PENDING_REPLIES = 5;
 
-        private HTTPUploader uploader;
+        private final HTTPUploader uploader;
 
         private QueryRequest query;
 
         private Iterator<Response> iterable;
 
-        MessageWriter sender;
+        private MessageWriter sender;
         
+        private volatile int pendingMessageCount = 0;
+
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
 
@@ -91,6 +95,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {
                     uploader.addAmountUploaded(m.getTotalLength());
+                    pendingMessageCount--;
                 }                
             };
             
@@ -104,8 +109,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         
         @Override
         public void interestWrite(WriteObserver observer, boolean status) {
-            // make sure all events are delegated through this 
-            super.interestWrite(this, status);
+            // we are never interested in turning write interest off 
         }
         
         @Override
@@ -113,6 +117,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             addMessages();
             
             boolean more = sender.handleWrite();
+            assert more || pendingMessageCount == 0;
             return more || iterable.hasNext();
         }
         
@@ -121,16 +126,20 @@ public class BrowseRequestHandler implements HttpRequestHandler {
          * message queue.
          */
         private void addMessages() {
-            List<Response> responses = new ArrayList<Response>(10); 
+            if (pendingMessageCount >= MAX_PENDING_REPLIES) {
+                return;
+            }
+            
+            List<Response> responses = new ArrayList<Response>(RESPONSES_PER_REPLY); 
             for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
                 responses.add(iterable.next());
             }
             
             Iterable<QueryReply> it = RouterService.getMessageRouter()
                     .responsesToQueryReplies(responses.toArray(new Response[0]), query);
-
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
+                pendingMessageCount++;
             }
         }
 
