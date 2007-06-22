@@ -571,9 +571,11 @@ public class NIODispatcher implements Runnable {
                 if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
                     
-                if(!immediate)
+                if(!immediate) {
+                    if (Thread.interrupted())
+                        LOG.warn("interrupted?");
                     primarySelector.select(100);
-                else
+                }else
                     primarySelector.selectNow();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
