@@ -40,7 +40,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * Version 1:
      * File Length
      * TigerTree root hash (optional)
-     * TigerTree depth (only if root hash exists)
      */
     
     /**
@@ -63,8 +62,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
     
     private static final String TTROOT = "ttroot";
     
-    private static final String DEPTH = "depth";
-    
     protected final Version version;
     
     /**
@@ -78,8 +75,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * Factory method for testing purposes
      */
     static AltLocValue createAltLocValue(Version version, byte[] guid, int port, 
-            long length, byte[] ttroot, int depth, boolean firewalled) {
-        return new AltLocValueImpl(version, guid, port, length, ttroot, depth, firewalled);
+            long length, byte[] ttroot, boolean firewalled) {
+        return new AltLocValueImpl(version, guid, port, length, ttroot, firewalled);
     }
     
     /**
@@ -88,8 +85,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * @param ttroot
      * @return
      */
-    public static AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot, int depth) {
-        return new AltLocForSelf(fileSize, ttroot, depth);
+    public static AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot) {
+        return new AltLocForSelf(fileSize, ttroot);
     }
     
     public AltLocValue(Version version) {
@@ -141,11 +138,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
     public abstract byte[] getRootHash();
     
     /**
-     * The depth of the TigerTree
-     */
-    public abstract int getDepth();
-    
-    /**
      * Returns true if the AltLoc is firewalled
      */
     public abstract boolean isFirewalled();
@@ -161,8 +153,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             .append(", firewalled=").append(isFirewalled())
             .append(", fileSize=").append(getFileSize())
             .append(", ttroot=").append(getRootHash() != null 
-                    ? ArrayUtils.toHexString(getRootHash()) : "null")
-            .append(", depth=").append(getDepth());
+                    ? ArrayUtils.toHexString(getRootHash()) : "null");
         
         if (this instanceof AltLocForSelf) {
             buffer.append(", local=true");
@@ -194,7 +185,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             byte[] ttroot = value.getRootHash();
             if (ttroot != null) {
                 ggep.put(TTROOT, ttroot);
-                ggep.put(DEPTH, /* int */ value.getDepth());
             }
         }
         
@@ -216,8 +206,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         private final byte[] ttroot;
         
-        private final int depth;
-        
         private final boolean firewalled;
         
         private final byte[] data;
@@ -226,7 +214,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
          * Constructor for testing purposes
          */
         private AltLocValueImpl(Version version, byte[] guid, int port, 
-                long fileSize, byte[] ttroot, int depth, boolean firewalled) {
+                long fileSize, byte[] ttroot, boolean firewalled) {
             super(version);
             
             if (guid == null || guid.length != 16) {
@@ -242,14 +230,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
                     throw new IllegalArgumentException("Illegal fileSize: " + fileSize);
                 }
                 
-                if (ttroot != null) {
-                    if (ttroot.length != TigerTree.HASHSIZE) {
-                        throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
-                    }
-                    
-                    if (depth < 0) {
-                        throw new IllegalArgumentException("Illegal depth: " + depth);
-                    }
+                if (ttroot != null && ttroot.length != TigerTree.HASHSIZE) {
+                    throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
                 }
             }
             
@@ -257,7 +239,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             this.port = port;
             this.fileSize = fileSize;
             this.ttroot = ttroot;
-            this.depth = depth;
             this.firewalled = firewalled;
             this.data = serialize(this);
         }
@@ -306,16 +287,13 @@ public abstract class AltLocValue implements DHTValue, Serializable {
                             throw new DHTValueException("Illegal ttroot length: " + ttroot.length);
                         }
                         this.ttroot = ttroot;
-                        this.depth = ggep.getInt(DEPTH);
                         
                     } else {
                         this.ttroot = null;
-                        this.depth = -1;
                     }
                 } else {
                     this.fileSize = -1L;
                     this.ttroot = null;
-                    this.depth = -1;
                 }
                 
             } catch (BadGGEPPropertyException err) {
@@ -351,11 +329,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             return ttroot;
         }
         
-        @Override
-        public int getDepth() {
-            return depth;
-        }
-
         /*
          * (non-Javadoc)
          * @see org.limewire.mojito.db.DHTValue#getValue()
@@ -386,30 +359,19 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         private final byte[] ttroot;
         
-        private final int depth;
-        
-        public AltLocForSelf(long fileSize, byte[] ttroot, int depth) {
+        public AltLocForSelf(long fileSize, byte[] ttroot) {
             super(VERSION);
             
             if (fileSize < 0L) {
                 throw new IllegalArgumentException("Illegal fileSize: " + fileSize);
             }
             
-            if (ttroot != null) {
-                if (ttroot != null) {
-                    if (ttroot.length != TigerTree.HASHSIZE) {
-                        throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
-                    }
-                    
-                    if (depth < 0) {
-                        throw new IllegalArgumentException("Illegal depth: " + depth);
-                    }
-                }
+            if (ttroot != null && ttroot.length != TigerTree.HASHSIZE) {
+                throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
             }
             
             this.fileSize = fileSize;
             this.ttroot = ttroot;
-            this.depth = depth;
         }
         
         /*
@@ -451,11 +413,6 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         @Override
         public byte[] getRootHash() {
             return ttroot;
-        }
-
-        @Override
-        public int getDepth() {
-            return depth;
         }
     }
 }

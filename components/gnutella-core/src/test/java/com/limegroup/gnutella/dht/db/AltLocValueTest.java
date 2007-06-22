@@ -33,7 +33,7 @@ public class AltLocValueTest extends DHTTestCase {
         boolean firewalled = true;
         
         AltLocValue value1 = AltLocValue.createAltLocValue(
-                Version.ZERO, guid, port, -1L, null, -1, firewalled);
+                Version.ZERO, guid, port, -1L, null, firewalled);
         
         assertEquals(guid, value1.getGUID());
         assertEquals(port, value1.getPort());
@@ -63,7 +63,6 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(value1.getPort(), value2.getPort());
         assertEquals(-1L, value2.getFileSize());
         assertEquals(null, value2.getRootHash());
-        assertEquals(-1, value2.getDepth());
         assertEquals(value1.isFirewalled(), value2.isFirewalled());
     }
     
@@ -72,14 +71,13 @@ public class AltLocValueTest extends DHTTestCase {
         int port = 1234;
         long fileSize = 334455;
         byte[] ttroot = new byte[TigerTree.HASHSIZE];
-        int depth = 21;
         boolean firewalled = true;
         
         Random random = new Random();
         random.nextBytes(ttroot);
         
         AltLocValue value1 = AltLocValue.createAltLocValue(
-            AltLocValue.VERSION_ONE, guid, port, fileSize, ttroot, depth, firewalled);
+            AltLocValue.VERSION_ONE, guid, port, fileSize, ttroot, firewalled);
         
         assertEquals(guid, value1.getGUID());
         assertEquals(port, value1.getPort());
@@ -109,7 +107,6 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(value1.getPort(), value2.getPort());
         assertEquals(value1.getFileSize(), value2.getFileSize());
         assertEquals(value1.getRootHash(), value2.getRootHash());
-        assertEquals(value1.getDepth(), value2.getDepth());
         assertEquals(value1.isFirewalled(), value2.isFirewalled());
         
         // De-serialize it but do as if it's a Version 0 value!
@@ -126,7 +123,6 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(value1.getPort(), value3.getPort());
         assertEquals(-1L, value3.getFileSize());
         assertEquals(null, value3.getRootHash());
-        assertEquals(-1, value3.getDepth());
         assertEquals(value1.isFirewalled(), value3.isFirewalled());
     }
 }

@@ -63,13 +63,11 @@ public class AltLocModel implements StorableModel {
                         long fileSize = fd.getFileSize();
                         HashTree hashTree = TigerTreeCache.instance().getHashTree(urn);
                         byte[] ttroot = null;
-                        int depth = -1;
                         if (hashTree != null) {
                             ttroot = hashTree.getRootHashBytes();
-                            depth = hashTree.getDepth();
                         }
                         
-                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot, depth);
+                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot);
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }

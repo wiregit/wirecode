@@ -15,15 +15,12 @@ public class DirectDHTAltLoc extends DirectAltLoc {
     
     private final byte[] ttroot;
     
-    private final int depth;
-    
     public DirectDHTAltLoc(IpPort address, URN sha1, 
-            long fileSize, byte[] ttroot, int depth) throws IOException {
+            long fileSize, byte[] ttroot) throws IOException {
         super(address, sha1);
         
         this.fileSize = fileSize;
         this.ttroot = ttroot;
-        this.depth = depth;
     }
     
     /**
@@ -38,12 +35,5 @@ public class DirectDHTAltLoc extends DirectAltLoc {
      */
     public byte[] getRootHash() {
         return ttroot;
-    }
-    
-    /**
-     * Returns the depth of the TigerTree or -1 if it's unknown
-     */
-    public int getDepth() {
-        return depth;
     }
 }
