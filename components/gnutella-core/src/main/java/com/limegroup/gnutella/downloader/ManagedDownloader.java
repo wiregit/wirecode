@@ -1505,8 +1505,10 @@ public class ManagedDownloader extends AbstractDownloader
                         }
                         contentLength = fileSize;
                         
-                        assert (contentLength >= 0L && contentLength <= Integer.MAX_VALUE);
-                        propertiesMap.put(FILE_SIZE, (int)contentLength);
+                        // TODO: Gnutella is not 64bit compatible
+                        if (contentLength <= Integer.MAX_VALUE) {
+                            propertiesMap.put(FILE_SIZE, (int)contentLength);
+                        }
                     }
                 }
                 
@@ -1529,7 +1531,14 @@ public class ManagedDownloader extends AbstractDownloader
             return;
         }
         
-        assert (contentLength >= 0L && contentLength <= Integer.MAX_VALUE);
+        // TODO: Gnutella is not 64bit compatible
+        if (contentLength > Integer.MAX_VALUE) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Content length is too big: " + contentLength);
+            }
+            return;
+        }
+        
         addDownload(loc.createRemoteFileDesc((int)contentLength), false);
     }
     
