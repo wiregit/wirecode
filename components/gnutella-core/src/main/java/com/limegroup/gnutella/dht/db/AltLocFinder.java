@@ -166,10 +166,11 @@ public class AltLocFinder {
                 
                 long fileSize = altLoc.getFileSize();
                 byte[] ttroot = altLoc.getRootHash();
+                int depth = altLoc.getDepth();
                 
                 try {
                     AlternateLocation location 
-                        = AlternateLocation.createDirectDHTAltLoc(ipp, urn, fileSize, ttroot);
+                        = AlternateLocation.createDirectDHTAltLoc(ipp, urn, fileSize, ttroot, depth);
                     AltLocManager.instance().add(location, this);
                 } catch (IOException e) {
                     // As above but possible if IpPort is not a 

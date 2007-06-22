@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.9 2006-06-29 23:35:00 sberlin Exp $
+ * $Id: TigerTree.java,v 1.10 2007-06-22 17:28:43 rkapsi Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -23,7 +23,7 @@ import com.limegroup.gnutella.Assert;
  */
 public class TigerTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;
-    private static final int HASHSIZE = 24;
+    public static final int HASHSIZE = 24;
 
     /** a Marker for the Stack */
     private static final byte[] MARKER = new byte[0];

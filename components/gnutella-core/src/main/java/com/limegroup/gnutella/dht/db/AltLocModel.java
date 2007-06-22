@@ -63,11 +63,13 @@ public class AltLocModel implements StorableModel {
                         long fileSize = fd.getFileSize();
                         HashTree hashTree = TigerTreeCache.instance().getHashTree(urn);
                         byte[] ttroot = null;
+                        int depth = -1;
                         if (hashTree != null) {
                             ttroot = hashTree.getRootHashBytes();
+                            depth = hashTree.getDepth();
                         }
                         
-                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot);
+                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot, depth);
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }
@@ -96,7 +98,8 @@ public class AltLocModel implements StorableModel {
                 
                 // Publish only rare FileDescs and removed entities
                 // respectively
-                if (fd == null || (fileManager.isRareFile(fd) && DatabaseUtils.isPublishingRequired(storable))) {
+                if (fd == null || (fileManager.isRareFile(fd) 
+                        && DatabaseUtils.isPublishingRequired(storable))) {
                     publish.add(storable);
                 }
             }
