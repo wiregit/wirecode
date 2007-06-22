@@ -15,7 +15,6 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -351,75 +350,6 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
     }
     
-    public void testGiveStatsVendorMessages() throws Exception {
-        GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
-                              GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                              GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                              Message.N_TCP);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        statsVM.write(baos);
-        ByteArrayInputStream bias = 
-                        new ByteArrayInputStream(baos.toByteArray());
-        GiveStatsVendorMessage gsvm=(GiveStatsVendorMessage)MessageFactory.read(bias);
-        assertEquals("Both messages should be equal",gsvm, statsVM);
-
-        StatisticVendorMessage svm = null;
-        try {
-             svm = new StatisticVendorMessage(statsVM);
-        } catch (Exception e) {
-            fail("StatisticVendorMessage not created successfully");
-        }
-        
-        baos = new ByteArrayOutputStream();
-        svm.write(baos);
-        
-        bias = null;
-        bias = new ByteArrayInputStream(baos.toByteArray());
-        
-        StatisticVendorMessage svm2=(StatisticVendorMessage)MessageFactory.read(bias);
-                
-        assertEquals("Both messages should be equal", svm2, svm);
-                
-        //Now, lets try some values that should not be allowed to be constructed
-        try {
-            statsVM = new GiveStatsVendorMessage((byte)-1, 
-                               GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                               Message.N_TCP);
-            fail("-1 invalid stats control");
-        } catch (Exception bpx) {
-            //good expected behaviour -- keep going
-        }
-
-        try {
-            statsVM = new GiveStatsVendorMessage(
-                               GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                               (byte) -1, Message.N_TCP);
-            fail("-1 invalid stats type");
-        } catch (Exception bpx) {
-            //good expected behaviour -- keep going
-        }
-        
-        try {
-            statsVM = new GiveStatsVendorMessage(
-                               GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                               (byte)4, Message.N_TCP);
-            fail("4 invalid stats type -- too big");
-        } catch (Exception bpx) {
-            //good expected behaviour -- keep going
-        }
-        
-        try {
-            statsVM = new GiveStatsVendorMessage((byte)4, 
-                               GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                               Message.N_TCP);
-            fail("4 invalid stats control -- too big");
-        } catch (Exception bpx) {
-            //good expected behaviour -- keep going
-        }
-
-    }
-    
-
     public void testUDPCrawlerPingMessage() throws Exception {
     	GUID guid = new GUID(GUID.makeGuid());
     	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);

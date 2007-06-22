@@ -36,7 +36,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -47,7 +46,6 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -328,8 +326,6 @@ public abstract class MessageRouter {
         setMessageHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
         setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
         setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
-        setMessageHandler(GiveStatsVendorMessage.class, new GiveStatsHandler());
-        setMessageHandler(StatisticVendorMessage.class, new StatisticsHandler());
         setMessageHandler(HeadPing.class, new HeadPingHandler());
         setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
         setMessageHandler(SimppVM.class, new SimppVMHandler());
@@ -345,8 +341,6 @@ public abstract class MessageRouter {
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, new UDPReplyNumberMessageHandler());
-        setUDPMessageHandler(GiveStatsVendorMessage.class, new UDPGiveStatsHandler());
-        setUDPMessageHandler(StatisticVendorMessage.class, new UDPStatisticsMessageHandler());
         setUDPMessageHandler(UDPCrawlerPing.class, new UDPUDPCrawlerPingHandler());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
@@ -1998,49 +1992,6 @@ public abstract class MessageRouter {
         return true;
     }
 
-    private void handleGiveStats(final GiveStatsVendorMessage gsm, 
-                                             final ReplyHandler replyHandler) {
-        StatisticVendorMessage statVM = null;
-        try {
-            //create the reply if we understand how
-            if(StatisticVendorMessage.isSupported(gsm)) {
-                statVM = new StatisticVendorMessage(gsm);
-                //OK. Now send this message back to the client that asked for
-                //stats
-                replyHandler.handleStatisticVM(statVM);
-            }
-        } catch(IOException iox) {
-            return; //what can we really do now?
-        }
-    }
-
-    private void handleStatisticsMessage(final StatisticVendorMessage svm, 
-                                         final ReplyHandler handler) {
-//        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
-//            Thread statHandler = new ManagedThread("Stat writer ") {
-//                public void managedRun() {
-//                    RandomAccessFile file = null;
-//                    try {
-//                        file = new RandomAccessFile("stats_log.log", "rw");
-//                        file.seek(file.length());//go to the end.
-//                        file.writeBytes(svm.getReportedStats()+"\n");
-//                    } catch (IOException iox) {
-//                        ErrorService.error(iox);
-//                    } finally {
-//                        if(file != null) {
-//                            try {
-//                                file.close();
-//                            } catch (IOException iox) {
-//                                ErrorService.error(iox);
-//                            }
-//                        }
-//                    }
-//                }
-//            };
-//            statHandler.start();
-//        }
-    }
-
     /**
      *  If we get and SimppRequest, get the payload we need from the
      *  SimppManager and send the simpp bytes the the requestor in a SimppVM. 
@@ -2999,20 +2950,6 @@ public abstract class MessageRouter {
         }
     }
     
-    private class GiveStatsHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            // TODO: add the statistics recording code
-            handleGiveStats((GiveStatsVendorMessage)msg, handler);
-        }
-    }
-    
-    private class StatisticsHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            // TODO: add the statistics recording code
-            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
-        }
-    }
-    
     private class HeadPingHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             //TODO: add the statistics recording code
@@ -3127,18 +3064,6 @@ public abstract class MessageRouter {
     private class UDPReplyNumberMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
-        }
-    }
-    
-    private class UDPGiveStatsHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleGiveStats((GiveStatsVendorMessage) msg, handler);
-        }
-    }
-    
-    private class UDPStatisticsMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
     }
     

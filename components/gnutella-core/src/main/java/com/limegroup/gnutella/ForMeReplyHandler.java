@@ -20,7 +20,6 @@ import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -392,10 +391,6 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         return NetworkUtils.ip2string(RouterService.getAddress());
     }
     
-    public void handleStatisticVM(StatisticVendorMessage vm) {
-        Assert.that(false, "ForMeReplyHandler asked to send vendor message");
-    }
-
     public void handleSimppVM(SimppVM simppVM) {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }

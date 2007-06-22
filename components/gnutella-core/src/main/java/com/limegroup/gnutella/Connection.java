@@ -32,7 +32,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
@@ -1445,14 +1444,6 @@ public class Connection implements IpPort {
      *  supportsGGEP()==true. */
     public boolean supportsGGEP() {
 		return _headersRead.supportsGGEP();
-    }
-
-    /**
-     * Sends the StatisticVendorMessage down the connection
-     */
-    public void handleStatisticVM(StatisticVendorMessage svm) 
-                                                            throws IOException {
-        send(svm);
     }
 
     /**

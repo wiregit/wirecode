@@ -362,7 +362,7 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
         FACTORY.createSettablePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
-                "ConnectionSettings.QRTSizeInKibiEntries", 64, 256);
+                "ConnectionSettings.QRTSize", 128, 256);
     
     /**
      * Helper method left from Settings Manager

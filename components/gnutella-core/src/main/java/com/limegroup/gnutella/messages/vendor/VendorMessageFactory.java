@@ -46,8 +46,6 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_TCP_CONNECT_BACK, VendorMessage.F_LIME_VENDOR_ID, new TCPConnectBackRedirectParser());
         setParser(VendorMessage.F_UDP_CONNECT_BACK_REDIR, VendorMessage.F_LIME_VENDOR_ID, new UDPConnectBackRedirectParser());
         setParser(VendorMessage.F_CAPABILITIES, VendorMessage.F_NULL_VENDOR_ID, new CapabilitiesVMParser());
-        setParser(VendorMessage.F_GIVE_STATS, VendorMessage.F_LIME_VENDOR_ID, new GiveStatsVendorMessageParser());
-        setParser(VendorMessage.F_STATISTICS, VendorMessage.F_LIME_VENDOR_ID, new StatisticVendorMessageParser());
         setParser(VendorMessage.F_SIMPP_REQ, VendorMessage.F_LIME_VENDOR_ID, new SimppRequestVMParser());
         setParser(VendorMessage.F_SIMPP, VendorMessage.F_LIME_VENDOR_ID, new SimppVMParser());
         setParser(VendorMessage.F_CRAWLER_PING, VendorMessage.F_LIME_VENDOR_ID, new UDPCrawlerPingParser());
@@ -274,20 +272,6 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, int network) throws BadPacketException {
             return new CapabilitiesVM(guid, ttl, hops, version, restOf);
-        }
-    }
-    
-    private static class GiveStatsVendorMessageParser implements VendorMessageParser {
-        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
-            return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf, network);
-        }
-    }
-    
-    private static class StatisticVendorMessageParser implements VendorMessageParser {
-        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
-            return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
         }
     }
     

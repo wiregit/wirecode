@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import java.net.InetAddress;
 
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -10,7 +9,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -226,14 +224,6 @@ public final class UDPReplyHandler implements ReplyHandler {
         return true;
     }
 
-    /**
-     * sends a Vendor Message to the host/port in this reply handler by UDP
-     * datagram.
-     */
-    public void handleStatisticVM(StatisticVendorMessage m) throws IOException {
-        UDPService.instance().send(m, IP, PORT);
-    }
-    
     /**
      * As of now there is no need to send SimppMessages via UDP, 
      */ 
