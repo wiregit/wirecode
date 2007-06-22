@@ -34,12 +34,12 @@ public class IPList {
     /**
      * Determines if any hosts exist in this list.
      */
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return ips.isEmpty();
     }
     
     /** Gets the number of addresses loaded. */
-    public int size() {
+    public synchronized int size() {
         return ips.size();
     }
     
@@ -62,7 +62,7 @@ public class IPList {
      * Adds a certain IP to the IPList.
      * @param ipStr a String containing the IP, see IP.java for formatting
      */
-    public void add(IP ip) {
+    public synchronized void add(IP ip) {
         // SPECIAL-CASE:
         // If the IP we're adding is the 'null' key (0.0.0.0/0.0.0.0)
         // then we must clear the trie.  The AddFilter trick will not
@@ -101,12 +101,12 @@ public class IPList {
      * @param String equal to an IP
      * @returns true if ip_address is contained somewhere in the list of IPs
      */
-    public boolean contains(IP lookup) {
+    public synchronized boolean contains(IP lookup) {
         IP ip = (IP) ips.select(lookup);        
         return ip != null && ip.contains(lookup);
     }
     
-    public boolean isValidFilter(boolean allowPrivateIPs) {
+    public synchronized boolean isValidFilter(boolean allowPrivateIPs) {
         ValidFilter filter = new ValidFilter(allowPrivateIPs);
         ips.traverse(filter);
         return filter.isValid();
@@ -140,7 +140,7 @@ public class IPList {
      * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
      * @return 32-bit unsigned distance (using xor metric), represented as Java int
      */
-    public int minDistanceTo(IP lookup) {
+    public synchronized int minDistanceTo(IP lookup) {
         if (lookup.mask != -1) {
             throw new IllegalArgumentException("Expected single IP, not an IP range.");
         }
