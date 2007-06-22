@@ -179,18 +179,18 @@ public class BTUploader implements Uploader, TorrentEventListener {
     }
 
     public String getAddress() {
-        return _torrent.getTorrentLocation().getAddress();
+        return "torrent upload";
     }
 
     public InetAddress getInetAddress() {
-        return _torrent.getTorrentLocation().getInetAddress();
+        return null;
     }
 
     public int getPort() {
-        return _torrent.getTorrentLocation().getPort();
+        return -1;
     }
     
     public InetSocketAddress getInetSocketAddress() {
-        return _torrent.getTorrentLocation().getInetSocketAddress();
+        return null;
     }
 }
