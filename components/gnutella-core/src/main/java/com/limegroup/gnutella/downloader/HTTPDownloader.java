@@ -65,6 +65,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -1472,9 +1473,11 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private void updatePEAddress() throws IOException {
-        IpPort newAddr = new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()); 
-        if (NetworkUtils.isValidExternalIpPort(newAddr))
-            PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+        if (_socket instanceof UDPConnection) {
+            IpPort newAddr = new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()); 
+            if (NetworkUtils.isValidExternalIpPort(newAddr))
+                PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+        }
     }
     
     /////////////////////////////// Download ////////////////////////////////
