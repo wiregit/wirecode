@@ -24,6 +24,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -204,7 +205,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             method.releaseConnection();
         }
         LimeTestUtils.waitForNIO();
-        assertEquals(Uploader.COMPLETE, uploader.getState());
+        assertEquals(UploadStatus.COMPLETE, uploader.getState());
     }
 
     public void testDownloadUpdateXML() throws Exception {
@@ -228,7 +229,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-        assertEquals(Uploader.COMPLETE, uploader.getState());
+        assertEquals(UploadStatus.COMPLETE, uploader.getState());
     }
 
     private static class MyActivityCallback extends ActivityCallbackStub {

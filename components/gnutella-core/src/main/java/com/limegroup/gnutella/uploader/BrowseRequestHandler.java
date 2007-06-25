@@ -18,7 +18,7 @@ import org.limewire.nio.observer.WriteObserver;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
@@ -47,7 +47,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, UploadType.BROWSE_HOST, "Browse-File");
-        uploader.setState(Uploader.BROWSE_HOST);
+        uploader.setState(UploadStatus.BROWSE_HOST);
         
         if (!HttpCoreUtils.hasHeader(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {

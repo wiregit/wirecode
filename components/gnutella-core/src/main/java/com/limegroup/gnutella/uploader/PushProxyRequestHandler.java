@@ -21,7 +21,7 @@ import org.limewire.util.Base32;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -60,12 +60,12 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
             uploader = sessionManager.getOrCreateUploader(request,
                     context, UploadType.MALFORMED_REQUEST,
                     "Malformed Request");
-            uploader.setState(Uploader.MALFORMED_REQUEST);
+            uploader.setState(UploadStatus.MALFORMED_REQUEST);
             UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
         } else {
             uploader = sessionManager.getOrCreateUploader(request,
                     context, UploadType.PUSH_PROXY, pushProxyRequest.clientGUID);
-            uploader.setState(Uploader.PUSH_PROXY);
+            uploader.setState(UploadStatus.PUSH_PROXY);
             if (!sendRequest(pushProxyRequest)) {
                 response.setStatusCode(HttpStatus.SC_GONE);
                 response.setReasonPhrase("Servent not connected");

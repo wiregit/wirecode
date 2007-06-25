@@ -58,9 +58,9 @@ public abstract class AbstractUploader implements Uploader {
 
     private final String filename;
 
-    private int state = CONNECTING;
+    private UploadStatus state = UploadStatus.CONNECTING;
 
-    private int lastTransferState;
+    private UploadStatus lastTransferState;
 
     private boolean firstReply;
 
@@ -100,7 +100,7 @@ public abstract class AbstractUploader implements Uploader {
      * Reinitializes this uploader for a new request.
      */
     public void reinitialize() {
-        setState(CONNECTING);
+        setState(UploadStatus.CONNECTING);
         host = null;
         port = -1;
         synchronized (bwLock) {
@@ -131,7 +131,7 @@ public abstract class AbstractUploader implements Uploader {
         setFileSize(fd.getFileSize());
     }
 
-    public void setState(int state) {
+    public void setState(UploadStatus state) {
         assert this.state != state;
         this.lastTransferState = this.state;
         this.state = state;
@@ -141,7 +141,7 @@ public abstract class AbstractUploader implements Uploader {
      * Returns the queued position if queued.
      */
     public int getQueuePosition() {
-        if (lastTransferState != QUEUED || state == INTERRUPTED)
+        if (lastTransferState != UploadStatus.QUEUED || state == UploadStatus.INTERRUPTED)
             return -1;
         else
             return session.positionInQueue();
@@ -208,11 +208,11 @@ public abstract class AbstractUploader implements Uploader {
         return this.filename;
     }
 
-    public int getState() {
+    public UploadStatus getState() {
         return state;
     }
 
-    public int getLastTransferState() {
+    public UploadStatus getLastTransferState() {
         return lastTransferState;
     }
 

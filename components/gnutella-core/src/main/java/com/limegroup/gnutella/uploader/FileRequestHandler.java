@@ -22,7 +22,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -82,7 +82,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                     uploader = sessionManager.getOrCreateUploader(request,
                             context, UploadType.INVALID_URN,
                             "Invalid URN query");
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
+                    uploader.setState(UploadStatus.FILE_NOT_FOUND);
                     response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 }
             } else {
@@ -104,7 +104,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             } else {
                 uploader = sessionManager.getOrCreateUploader(request, context,
                         UploadType.SHARED_FILE, fileRequest.filename);
-                uploader.setState(Uploader.FILE_NOT_FOUND);
+                uploader.setState(UploadStatus.FILE_NOT_FOUND);
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
         }
@@ -155,7 +155,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (!validateHeaders(uploader, fileRequest.isThexRequest())) {
-            uploader.setState(Uploader.FILE_NOT_FOUND);
+            uploader.setState(UploadStatus.FILE_NOT_FOUND);
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return uploader;
         }
@@ -193,7 +193,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             HTTPUploader uploader) {
         UploadStat.MALFORMED_REQUEST.incrementStat();
 
-        uploader.setState(Uploader.MALFORMED_REQUEST);
+        uploader.setState(UploadStatus.MALFORMED_REQUEST);
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase("Malformed Request");
     }
@@ -213,7 +213,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                         response, context);
                 break;
             case BANNED:
-                uploader.setState(Uploader.BANNED_GREEDY);
+                uploader.setState(UploadStatus.BANNED_GREEDY);
                 response.setStatusCode(HttpStatus.SC_FORBIDDEN);
                 response.setReasonPhrase("Banned");
                 break;
@@ -289,7 +289,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         response.setEntity(new FileResponseEntity(uploader, fd.getFile()));
-        uploader.setState(Uploader.UPLOADING);
+        uploader.setState(UploadStatus.UPLOADING);
 
         if (uploader.isPartial()) {
             response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
@@ -314,7 +314,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         HashTree tree = fd.getHashTree();
         if (tree == null) {
             // tree was requested before hashing completed
-            uploader.setState(Uploader.FILE_NOT_FOUND);
+            uploader.setState(UploadStatus.FILE_NOT_FOUND);
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return;
         }
@@ -328,7 +328,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // see CORE-174
         // response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
 
-        uploader.setState(Uploader.THEX_REQUEST);
+        uploader.setState(UploadStatus.THEX_REQUEST);
         response.setEntity(new THEXResponseEntity(uploader, tree, uploader.getFileSize()));
         response.setStatusCode(HttpStatus.SC_OK);
     }
@@ -350,7 +350,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         }
 
-        uploader.setState(Uploader.UNAVAILABLE_RANGE);
+        uploader.setState(UploadStatus.UNAVAILABLE_RANGE);
         response.setStatusCode(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
         response.setReasonPhrase("Requested Range Unavailable");
     }
@@ -386,7 +386,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         response.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
 
-        uploader.setState(Uploader.QUEUED);
+        uploader.setState(UploadStatus.QUEUED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
@@ -456,32 +456,30 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     protected void updateStatistics(HTTPUploader uploader) {
         switch (uploader.getState()) {
-        case HTTPUploader.UNAVAILABLE_RANGE:
+        case UNAVAILABLE_RANGE:
             UploadStat.UNAVAILABLE_RANGE.incrementStat();
             break;
-        case HTTPUploader.FILE_NOT_FOUND:
+        case FILE_NOT_FOUND:
             UploadStat.FILE_NOT_FOUND.incrementStat();
             break;
-        case HTTPUploader.LIMIT_REACHED:
+        case LIMIT_REACHED:
             UploadStat.LIMIT_REACHED.incrementStat();
             break;
-        case HTTPUploader.QUEUED:
+        case QUEUED:
             UploadStat.QUEUED.incrementStat();
             break;
-        case HTTPUploader.BANNED_GREEDY:
+        case BANNED_GREEDY:
             UploadStat.BANNED.incrementStat();
             break;
-        case HTTPUploader.CONNECTING:
+        case CONNECTING:
             UploadStat.UPLOADING.incrementStat();
             break;
-        case HTTPUploader.THEX_REQUEST:
+        case THEX_REQUEST:
             UploadStat.THEX.incrementStat();
             break;
-        case HTTPUploader.COMPLETE:
-        case HTTPUploader.INTERRUPTED:
-            Assert.that(false,
-                    "Invalid state in FileRequestHandler.updateStatistics()");
-            break;
+        case COMPLETE:
+        case INTERRUPTED:
+            throw new IllegalStateException("Invalid state in FileRequestHandler.updateStatistics()");
         }
     }
 

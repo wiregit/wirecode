@@ -68,25 +68,25 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		return BITTORRENT_UPLOAD;
 	}
 
-	public int getState() {
+	public UploadStatus getState() {
 		if (!_torrent.isActive()) {
 			if (_torrent.isComplete() && _torrent.getRatio() > 1)
-				return Uploader.COMPLETE;
-			return Uploader.INTERRUPTED;
+				return UploadStatus.COMPLETE;
+			return UploadStatus.INTERRUPTED;
 		}
 		
 		if (_torrent.isUploading())
-			return Uploader.UPLOADING;
+			return UploadStatus.UPLOADING;
 		
 		if (_torrent.isSuspended())
-			return Uploader.SUSPENDED;
+			return UploadStatus.SUSPENDED;
 		
 		// neither uploading, nor suspended..
-		return Uploader.WAITING_REQUESTS;
+		return UploadStatus.WAITING_REQUESTS;
 	}
 
-	public int getLastTransferState() {
-		return Uploader.UPLOADING;
+	public UploadStatus getLastTransferState() {
+		return UploadStatus.UPLOADING;
 	}
 
 	public boolean isChatEnabled() {

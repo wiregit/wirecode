@@ -11,7 +11,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.statistics.UploadStat;
 
@@ -46,7 +46,7 @@ public class UpdateFileRequestHandler implements HttpRequestHandler {
             File file = new File(CommonUtils.getUserSettingsDir(),
                     "update.xml");
             uploader.setFile(file);
-            uploader.setState(Uploader.UPDATE_FILE);
+            uploader.setState(UploadStatus.UPDATE_FILE);
 
             response.setEntity(new FileResponseEntity(uploader, file));
         }

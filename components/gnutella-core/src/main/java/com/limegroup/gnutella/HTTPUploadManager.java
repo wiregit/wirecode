@@ -25,6 +25,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -268,7 +269,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             IOException {
         UploadStat.FREELOADER.incrementStat();
 
-        uploader.setState(Uploader.FREELOADER);
+        uploader.setState(UploadStatus.FREELOADER);
         freeLoaderRequestHandler.handle(request, response, context);
     }
 
@@ -278,7 +279,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * uploaders).
      */
     private boolean shouldBypassQueue(HttpRequest request, HTTPUploader uploader) {
-        assert uploader.getState() == HTTPUploader.CONNECTING;
+        assert uploader.getState() == UploadStatus.CONNECTING;
         return "HEAD".equals(request.getRequestLine().getMethod())
             || uploader.isForcedShare();
     }
@@ -296,8 +297,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (LOG.isTraceEnabled())
             LOG.trace("Cleaning uploader " + uploader);
 
-        int state = uploader.getState();
-        int lastState = uploader.getLastTransferState();
+        UploadStatus state = uploader.getState();
+        UploadStatus lastState = uploader.getLastTransferState();
         // assertAsFinished(state);
 
         long finishTime = System.currentTimeMillis();
@@ -312,13 +313,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         switch (state) {
-        case HTTPUploader.COMPLETE:
+        case COMPLETE:
             UploadStat.COMPLETED.incrementStat();
-            if (lastState == HTTPUploader.UPLOADING
-                    || lastState == HTTPUploader.THEX_REQUEST)
+            if (lastState == UploadStatus.UPLOADING
+                    || lastState == UploadStatus.THEX_REQUEST)
                 UploadStat.COMPLETED_FILE.incrementStat();
             break;
-        case HTTPUploader.INTERRUPTED:
+        case INTERRUPTED:
             UploadStat.INTERRUPTED.incrementStat();
             break;
         }
@@ -327,8 +328,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 && !uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null
-                    && state == HTTPUploader.COMPLETE
-                    && (lastState == HTTPUploader.UPLOADING || lastState == HTTPUploader.THEX_REQUEST)) {
+                    && state == UploadStatus.COMPLETE
+                    && (lastState == UploadStatus.UPLOADING || lastState == UploadStatus.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
                 activityCallback .handleSharedFileUpdate(fd.getFile());
             }
@@ -704,7 +705,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     // the GUI would show two lines with the the same slot
                     // until the newer line finished, at which point
                     // the first one would display as a -1 queue position.
-                    uploader.setState(Uploader.INTERRUPTED);
+                    uploader.setState(UploadStatus.INTERRUPTED);
                 } else {
                     slotManager.requestDone(session);
                 }
@@ -787,11 +788,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     if (stillInQueue) {
                         // If it was queued, also set the state to INTERRUPTED
                         // (changing from COMPLETE)
-                        uploader.setState(Uploader.INTERRUPTED);
-                    } else if (uploader.getState() != Uploader.COMPLETE) {
+                        uploader.setState(UploadStatus.INTERRUPTED);
+                    } else if (uploader.getState() != UploadStatus.COMPLETE) {
                         // the complete state may have been set by
                         // responseSent() already
-                        uploader.setState(Uploader.COMPLETE);
+                        uploader.setState(UploadStatus.COMPLETE);
                     }
                     uploader.setLastResponse(null);
                     cleanupFinishedUploader(uploader);
@@ -809,7 +810,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 HTTPUploader uploader = session.getUploader();
                 if (uploader != null && uploader.getLastResponse() == response) {
                     uploader.setLastResponse(null);
-                    uploader.setState(Uploader.COMPLETE);
+                    uploader.setState(UploadStatus.COMPLETE);
                 }
 
                 if (session.getQueueStatus() == QueueStatus.QUEUED) {

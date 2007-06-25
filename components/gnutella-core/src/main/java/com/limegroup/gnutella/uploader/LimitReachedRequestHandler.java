@@ -13,7 +13,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
@@ -98,7 +98,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
             }
         }
 
-        uploader.setState(Uploader.LIMIT_REACHED);
+        uploader.setState(UploadStatus.LIMIT_REACHED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
         response.setEntity(new StringEntity(errorMsg));
     }
