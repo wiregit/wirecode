@@ -11,19 +11,19 @@ import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Interval;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerStub;
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
@@ -94,15 +94,15 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader=newResumeDownloader();
-        while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
-			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.GAVE_UP, 
+        while (downloader.getState()!=DownloadStatus.WAITING_FOR_RESULTS) {         
+			if ( downloader.getState() != DownloadStatus.QUEUED )
+                assertEquals(DownloadStatus.GAVE_UP, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
         // give the downloader time to change its state
         Thread.sleep(1000);
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
         //Serialize it!
@@ -127,7 +127,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_USER, downloader.getState());
+        assertEquals(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }

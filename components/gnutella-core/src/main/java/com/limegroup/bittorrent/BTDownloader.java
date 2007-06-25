@@ -161,38 +161,38 @@ public class BTDownloader extends AbstractDownloader
 	 * Specifically, this maps the states of a torrent
 	 * download to the states of a regular download.
 	 */
-	public int getState() {
+	public DownloadStatus getState() {
 		// aborted seeding torrents are shown as complete in the
 		// downloads pane.
 		if (_torrent.isComplete()) 
-			return COMPLETE;
+			return DownloadStatus.COMPLETE;
 		switch(_torrent.getState()) {
 		case WAITING_FOR_TRACKER :
-			return WAITING_FOR_RESULTS;
+			return DownloadStatus.WAITING_FOR_RESULTS;
 		case VERIFYING:
-			return RESUMING;
+			return DownloadStatus.RESUMING;
 		case CONNECTING:
-			return CONNECTING;
+			return DownloadStatus.CONNECTING;
 		case DOWNLOADING:
-			return DOWNLOADING;
+			return DownloadStatus.DOWNLOADING;
 		case SAVING:
-			return SAVING;
+			return DownloadStatus.SAVING;
 		case SEEDING:
-			return COMPLETE;
+			return DownloadStatus.COMPLETE;
 		case QUEUED:
-			return QUEUED;
+			return DownloadStatus.QUEUED;
 		case PAUSED:
-			return PAUSED;
+			return DownloadStatus.PAUSED;
 		case STOPPED:
-			return ABORTED;
+			return DownloadStatus.ABORTED;
 		case DISK_PROBLEM:
-			return DISK_PROBLEM;
+			return DownloadStatus.DISK_PROBLEM;
 		case TRACKER_FAILURE:
-			return WAITING_FOR_USER; // let the user trigger a scrape
+			return DownloadStatus.WAITING_FOR_USER; // let the user trigger a scrape
 		case SCRAPING:
-			return ITERATIVE_GUESSING; // bad name but practically the same
+			return DownloadStatus.ITERATIVE_GUESSING; // bad name but practically the same
 		case INVALID:
-			return INVALID;
+			return DownloadStatus.INVALID;
 		}
 		throw new IllegalStateException("unknown torrent state");
 	}
@@ -206,7 +206,7 @@ public class BTDownloader extends AbstractDownloader
 	 * tracker requests.
 	 */
 	public int getRemainingStateTime() {
-		if (getState() != Downloader.WAITING_FOR_RESULTS)
+		if (getState() != DownloadStatus.WAITING_FOR_RESULTS)
 			return 0;
 		return Math.max(0,(int)(_torrent.getNextTrackerRequestTime() - 
 				System.currentTimeMillis()) / 1000);
@@ -458,7 +458,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == QUEUED && RouterService.getTorrentManager().allowNewTorrent(); 
+		return getState() == DownloadStatus.QUEUED && RouterService.getTorrentManager().allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {

@@ -13,6 +13,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -615,7 +616,7 @@ public class ServerSideWhatIsNewTest
             RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         int sleeps = 0;
-        while (downloader.getState() != Downloader.COMPLETE) {
+        while (downloader.getState() != DownloadStatus.COMPLETE) {
             Thread.sleep(1000);
             sleeps++;
             if (sleeps > 320) assertTrue("download never completed", false);
@@ -679,13 +680,13 @@ public class ServerSideWhatIsNewTest
         Downloader downloader = RouterService.download(rfds, false, new GUID(guid));
         
         Thread.sleep(2000);
-        assertTrue(downloader.getState() != Downloader.COMPLETE);
+        assertTrue(downloader.getState() != DownloadStatus.COMPLETE);
         // make sure that the partial file has a creation time - by now one of
         // the downloaders must have got X-Create-Time
         assertNotNull(ctCache.getCreationTime(TestFile.hash()));
 
         int sleeps = 0;
-        while (downloader.getState() != Downloader.COMPLETE) {
+        while (downloader.getState() != DownloadStatus.COMPLETE) {
             Thread.sleep(1000);
             sleeps++;
             if (sleeps > 120) assertTrue("download never completed", false);

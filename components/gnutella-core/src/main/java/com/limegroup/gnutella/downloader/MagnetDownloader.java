@@ -19,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
@@ -110,13 +109,13 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * overrides ManagedDownloader to ensure that we issue requests to the known
      * locations until we find out enough information to start the download 
      */
-    protected int initializeDownload() {
+    protected DownloadStatus initializeDownload() {
         
 		if (!hasRFD()) {
 			MagnetOptions magnet = getMagnet();
 			String[] defaultURLs = magnet.getDefaultURLs();
 			if (defaultURLs.length == 0 )
-				return Downloader.GAVE_UP;
+				return DownloadStatus.GAVE_UP;
 
 
 			RemoteFileDesc firstDesc = null;
@@ -133,7 +132,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         
 			// if all locations included in the magnet URI fail we can't do much
 			if (firstDesc == null)
-				return GAVE_UP;
+				return DownloadStatus.GAVE_UP;
 		}
         return super.initializeDownload();
     }

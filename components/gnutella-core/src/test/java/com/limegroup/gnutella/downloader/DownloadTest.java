@@ -50,6 +50,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -1667,7 +1668,7 @@ public class DownloadTest extends LimeTestCase {
         }
         
         // ManagedDownloader clears validAlts and invalidAlts after completion
-        assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
+        assertEquals(DownloadStatus.COMPLETE, DOWNLOADER.getState());
         assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "validAlts")).isEmpty());
         assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "invalidAlts")).isEmpty());
     }    
@@ -1704,7 +1705,7 @@ public class DownloadTest extends LimeTestCase {
         assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
         
         // ManagedDownloader clears validAlts and invalidAlts after completion
-        assertEquals(Downloader.COMPLETE, DOWNLOADER.getState());
+        assertEquals(DownloadStatus.COMPLETE, DOWNLOADER.getState());
         assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "validAlts")).isEmpty());
         assertTrue(((Set)PrivilegedAccessor.getValue(DOWNLOADER, "invalidAlts")).isEmpty());
     }
@@ -2405,7 +2406,7 @@ public class DownloadTest extends LimeTestCase {
         Downloader downloader = RouterService.download(rfds,false,null);
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
-                     Downloader.BUSY, downloader.getState());
+                DownloadStatus.BUSY, downloader.getState());
     }
         
     /**
@@ -2731,18 +2732,18 @@ public class DownloadTest extends LimeTestCase {
         }
         
         if ( state == CORRUPT )
-            assertEquals("unexpected state", Downloader.CORRUPT_FILE, DOWNLOADER.getState());
+            assertEquals("unexpected state", DownloadStatus.CORRUPT_FILE, DOWNLOADER.getState());
         else if(state == INVALID)
-            assertEquals("unexpected state", Downloader.INVALID, DOWNLOADER.getState());
+            assertEquals("unexpected state", DownloadStatus.INVALID, DOWNLOADER.getState());
         else if(state == COMPLETE)
-            assertEquals("unexpected state", Downloader.COMPLETE, DOWNLOADER.getState());
+            assertEquals("unexpected state", DownloadStatus.COMPLETE, DOWNLOADER.getState());
         else
             fail("bad expectation: " + state);
     }        
     
     private static void waitForBusy(Downloader downloader) {
         for(int i=0; i< 12; i++) { //wait 12 seconds
-            if(downloader.getState() == Downloader.BUSY)
+            if(downloader.getState() == DownloadStatus.BUSY)
                 return;
             try {
                 Thread.sleep(1000);// try again after a second

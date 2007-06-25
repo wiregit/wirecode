@@ -34,6 +34,7 @@ import org.limewire.util.GenericsUtils.ScanMode;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
@@ -1229,7 +1230,7 @@ public class DownloadManager implements BandwidthTracker {
         public void removeDownload(Downloader d) {
             InNetworkDownloader downloader = (InNetworkDownloader)d;
             UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
-                    downloader.getState() == Downloader.COMPLETE);
+                    downloader.getState() == DownloadStatus.COMPLETE);
         }
         
         public void downloadsComplete() {}

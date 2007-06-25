@@ -19,6 +19,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
@@ -617,7 +618,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         final int MAX_TRIES = 60;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(1000);
-            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+            if (downloader.getState() == DownloadStatus.ITERATIVE_GUESSING)
                 break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
         }
@@ -648,7 +649,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                      //(System.currentTimeMillis() - currTime));
         int guessWaitTime = ((Integer)PrivilegedAccessor.getValue(ManagedDownloader.class,"GUESS_WAIT_TIME")).intValue();
         Thread.sleep(guessWaitTime+2000);
-        assertEquals(Downloader.BUSY, downloader.getState());
+        assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();
@@ -735,7 +736,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         final int MAX_TRIES = 60;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(500);
-            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+            if (downloader.getState() == DownloadStatus.ITERATIVE_GUESSING)
                 break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
         }
@@ -812,7 +813,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         long timeoutVal = 8000 - (System.currentTimeMillis() - currTime);
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
-        assertEquals(Downloader.BUSY, downloader.getState());
+        assertEquals(DownloadStatus.BUSY, downloader.getState());
         // purge front end of query
         ((MyCallback)getCallback()).clearGUID();
 
@@ -838,7 +839,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // after a while, the download should finish, the bypassed results
         // should be discarded
         Thread.sleep(10000);
-        assertEquals(Downloader.COMPLETE, downloader.getState());
+        assertEquals(DownloadStatus.COMPLETE, downloader.getState());
 
         {
             // now we should make sure MessageRouter clears the map
@@ -934,7 +935,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         final int MAX_TRIES = 60;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(500);
-            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+            if (downloader.getState() == DownloadStatus.ITERATIVE_GUESSING)
                 break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
         }
@@ -968,7 +969,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Thread.sleep((UDP_ACCESS.length * 1500) - 
                      (System.currentTimeMillis() - currTime));
 
-        assertEquals(Downloader.BUSY, downloader.getState());
+        assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();
@@ -1064,9 +1065,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         boolean oneGood = false, twoGood = false;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(500);
-            if (downloader.getState() == Downloader.BUSY)
+            if (downloader.getState() == DownloadStatus.BUSY)
                 oneGood = true;
-            if (downloader2.getState() == Downloader.BUSY)
+            if (downloader2.getState() == DownloadStatus.BUSY)
                 twoGood = true;
             if (oneGood && twoGood) break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
@@ -1174,7 +1175,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         final int MAX_TRIES = 60;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(500);
-            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+            if (downloader.getState() == DownloadStatus.ITERATIVE_GUESSING)
                 break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
         }
@@ -1267,7 +1268,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         
-        assertEquals(Downloader.BUSY, downloader.getState());
+        assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();

@@ -27,6 +27,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouteTable;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -230,11 +231,11 @@ public class RequeryDownloadTest
         Downloader downloader = null;
         downloader = _mgr.download(_incompleteFile);
         assertTrue(downloader instanceof ResumeDownloader);
-        assertEquals(Downloader.QUEUED,downloader.getState());
+        assertEquals(DownloadStatus.QUEUED,downloader.getState());
         
         int counts = 0;
 		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() == Downloader.QUEUED) {
+        while (downloader.getState() == DownloadStatus.QUEUED) {
             Thread.sleep(100);
             if(counts++ > 50)
                 fail("took too long, state: " + downloader.getState());
@@ -244,7 +245,7 @@ public class RequeryDownloadTest
         Thread.sleep(1000);
         
         assertEquals("downloader isn't waiting for results", 
-            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+                DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
 
         // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
         // automatically
@@ -292,11 +293,11 @@ public class RequeryDownloadTest
         counts = 0;
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
-            while (downloader.getState()!=Downloader.COMPLETE) {            
-			    if ( downloader.getState() != Downloader.CONNECTING &&
-			         downloader.getState() != Downloader.HASHING &&
-			         downloader.getState() != Downloader.SAVING )
-                    assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            while (downloader.getState()!=DownloadStatus.COMPLETE) {            
+			    if ( downloader.getState() != DownloadStatus.CONNECTING &&
+			         downloader.getState() != DownloadStatus.HASHING &&
+			         downloader.getState() != DownloadStatus.SAVING )
+                    assertEquals(DownloadStatus.DOWNLOADING, downloader.getState());
                 Thread.sleep(500);
                 if(counts++ > 60)
                     fail("took too long, state: " + downloader.getState());
@@ -305,7 +306,7 @@ public class RequeryDownloadTest
         else {
             //b) No match: keep waiting for results
             assertEquals("downloader should wait for user", 
-                Downloader.WAITING_FOR_RESULTS, downloader.getState());
+                    DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
             downloader.stop();
         }
     }

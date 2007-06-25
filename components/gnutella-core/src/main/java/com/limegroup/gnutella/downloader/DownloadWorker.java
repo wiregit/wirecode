@@ -24,6 +24,7 @@ import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -668,17 +669,17 @@ public class DownloadWorker {
         final boolean needsPush = _rfd.needsPush();
         
         synchronized (_manager) {
-            int state = _manager.getState();
+            DownloadStatus state = _manager.getState();
             //If we're just increasing parallelism, stay in DOWNLOADING
             //state.  Otherwise the following call is needed to restart
             //the timer.
-            if (_manager.getNumDownloaders() == 0 && state != ManagedDownloader.COMPLETE && 
-                state != ManagedDownloader.ABORTED && state != ManagedDownloader.GAVE_UP && 
-                state != ManagedDownloader.DISK_PROBLEM && state != ManagedDownloader.CORRUPT_FILE && 
-                state != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
+            if (_manager.getNumDownloaders() == 0 && state != DownloadStatus.COMPLETE && 
+                state != DownloadStatus.ABORTED && state != DownloadStatus.GAVE_UP && 
+                state != DownloadStatus.DISK_PROBLEM && state != DownloadStatus.CORRUPT_FILE && 
+                state != DownloadStatus.HASHING && state != DownloadStatus.SAVING) {
                     if(_interrupted)
                         return; // we were signalled to stop.
-                    _manager.setState(ManagedDownloader.CONNECTING);
+                    _manager.setState(DownloadStatus.CONNECTING);
                 }
         }
 
@@ -1371,7 +1372,7 @@ public class DownloadWorker {
             if(_manager.getActiveWorkers().isEmpty()) {
                 if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
                     return ConnectionStatus.getNoData(); // we were signalled to stop.
-                _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+                _manager.setState(DownloadStatus.REMOTE_QUEUED);
             }
             _rfd.resetFailedCount();                
             return ConnectionStatus.getQueued(position, pollTime);

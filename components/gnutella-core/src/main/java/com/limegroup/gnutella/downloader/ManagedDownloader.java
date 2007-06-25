@@ -370,7 +370,7 @@ public class ManagedDownloader extends AbstractDownloader
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
       *  etc.   Should be modified only through setState. */
-    private int state;
+    private DownloadStatus state;
     /** The system time that we expect to LEAVE the current state, or
      *  Integer.MAX_VALUE if we don't know. Should be modified only through
      *  setState. */
@@ -654,7 +654,7 @@ public class ManagedDownloader extends AbstractDownloader
         browseList=new DownloadBrowseHostList();
         stopped=false;
         paused = false;
-        setState(QUEUED);
+        setState(DownloadStatus.QUEUED);
         pushes = new PushList();
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
@@ -706,7 +706,7 @@ public class ManagedDownloader extends AbstractDownloader
             initializeIncompleteFile();
             initializeVerifyingFile();
         }catch(IOException bad) {
-            setState(DISK_PROBLEM);
+            setState(DownloadStatus.DISK_PROBLEM);
             reportDiskProblem(bad);
             return;
         }
@@ -715,7 +715,7 @@ public class ManagedDownloader extends AbstractDownloader
         firstQueryAttempt = true;
         alreadyTriedGnutella = false;
         
-        setState(QUEUED);
+        setState(DownloadStatus.QUEUED);
     }
     
     private void reportDiskProblem(IOException cause) {
@@ -762,13 +762,13 @@ public class ManagedDownloader extends AbstractDownloader
                     receivedNewSources = false;
                     // reset tried hosts count
                     triedHosts = 0;
-                    int status = performDownload();
+                    DownloadStatus status = performDownload();
                     completeDownload(status);
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
                     ManagedDownloader.this.stop();
-                    setState(ABORTED);
+                    setState(DownloadStatus.ABORTED);
                     manager.remove(ManagedDownloader.this, true);
                     
                     ErrorService.error(t);
@@ -786,7 +786,7 @@ public class ManagedDownloader extends AbstractDownloader
      * This essentially pumps the state of the download to different
      * areas, depending on what is required or what has already occurred.
      */
-    private void completeDownload(int status) {
+    private void completeDownload(DownloadStatus status) {
     
         boolean complete;
         boolean clearingNeeded = false;
@@ -807,11 +807,11 @@ public class ManagedDownloader extends AbstractDownloader
             case GAVE_UP:
                 if(invalidated) {
                     clearingNeeded = true;
-                    setState(INVALID);
+                    setState(DownloadStatus.INVALID);
                 } else if(stopped) {
-                    setState(ABORTED);
+                    setState(DownloadStatus.ABORTED);
                 } else if(paused) {
-                    setState(PAUSED);
+                    setState(DownloadStatus.PAUSED);
                 } else {
                     setState(status); // BUSY or GAVE_UP
                 }
@@ -863,7 +863,7 @@ public class ManagedDownloader extends AbstractDownloader
             ; // all done.
             
         // if this is paused, nothing else to do also.
-        } else if(getState() == PAUSED) {
+        } else if(getState() == DownloadStatus.PAUSED) {
             ; // all done for now.
             
         // Try iterative GUESSing...
@@ -872,19 +872,19 @@ public class ManagedDownloader extends AbstractDownloader
             ; // all done for now.
             
             // If busy, try waiting for that busy host.
-        } else if (getState() == BUSY) {
-            setState(BUSY, waitTime);
+        } else if (getState() == DownloadStatus.BUSY) {
+            setState(DownloadStatus.BUSY, waitTime);
             
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
         // from that query.
         } else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
-            setState(WAITING_FOR_RESULTS,
+            setState(DownloadStatus.WAITING_FOR_RESULTS,
                      TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
         
         // If we're at our requery limit, give up.
         } else if(shouldGiveUp()) {
-            setState(GAVE_UP);
+            setState(DownloadStatus.GAVE_UP);
             
         // If we want to send the requery immediately, do so.
         } else if(shouldSendRequeryImmediately(numGnutellaQueries)) {
@@ -892,7 +892,7 @@ public class ManagedDownloader extends AbstractDownloader
             
         // Otherwise, wait for the user to initiate the query.            
         } else {
-            setState(WAITING_FOR_USER);
+            setState(DownloadStatus.WAITING_FOR_USER);
         }
         
         if(LOG.isTraceEnabled()) {
@@ -972,7 +972,7 @@ public class ManagedDownloader extends AbstractDownloader
         if (manager.sendDHTQuery(getSHA1Urn())) {
             lastQuerySent = System.currentTimeMillis();
             numDHTQueries++;
-            setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+            setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
             return true;
         } else {
             lastQuerySent = -1;
@@ -991,7 +991,7 @@ public class ManagedDownloader extends AbstractDownloader
                 if(manager.sendQuery(this, qr)) {
                     lastQuerySent = System.currentTimeMillis();
                     numGnutellaQueries++;
-                    setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                    setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
                     return true;
                 } else {
                     lastQuerySent = -1; // mark as wanting to requery.
@@ -1003,7 +1003,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         } else {
             lastQuerySent = -1; // mark as wanting to requery.
-            setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
+            setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
             return false;
         }
     }
@@ -1026,22 +1026,22 @@ public class ManagedDownloader extends AbstractDownloader
             // but we're still inactive, then we queue ourselves
             // and wait till we get restarted.
             if(getRemainingStateTime() <= 0 || hasNewSources())
-                setState(QUEUED);
+                setState(DownloadStatus.QUEUED);
             break;
         case WAITING_FOR_RESULTS:
             // If we have new sources but are still inactive,
             // then queue ourselves and wait to restart.
             if(hasNewSources())
-                setState(QUEUED);
+                setState(DownloadStatus.QUEUED);
             // Otherwise, we've ran out of time waiting for results,
             // so give up.
             else if(getRemainingStateTime() <= 0)
-                setState(GAVE_UP);
+                setState(DownloadStatus.GAVE_UP);
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
         	if (hasNewSources())
-        		setState(QUEUED);
+        		setState(DownloadStatus.QUEUED);
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -1067,7 +1067,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(guessLocs.isEmpty())
             return false;
 
-        setState(ITERATIVE_GUESSING, GUESS_WAIT_TIME);
+        setState(DownloadStatus.ITERATIVE_GUESSING, GUESS_WAIT_TIME);
         triedLocatingSources = true;
 
         //TODO: should we increment a stat to get a sense of
@@ -1735,7 +1735,7 @@ public class ManagedDownloader extends AbstractDownloader
             paused = true;
             // if we're already inactive, mark us as paused immediately.
             if(isInactive())
-                setState(PAUSED);
+                setState(DownloadStatus.PAUSED);
         }
     }
     
@@ -1750,17 +1750,17 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     public boolean isPausable() {
-    	int state = getState();
-    	return !isPaused() && !isCompleted() && state != SAVING && state != HASHING;
+        DownloadStatus state = getState();
+    	return !isPaused() && !isCompleted() && state != DownloadStatus.SAVING && state != DownloadStatus.HASHING;
     }
     
     public boolean isResumable() {
     	// inactive but not queued
-    	return isInactive() && state != QUEUED;
+    	return isInactive() && state != DownloadStatus.QUEUED;
     }
     
     public boolean isLaunchable() {
-    	return state == COMPLETE || amountForPreview() > 0;
+    	return state == DownloadStatus.COMPLETE || amountForPreview() > 0;
     }
     
     /**
@@ -1939,7 +1939,7 @@ public class ManagedDownloader extends AbstractDownloader
 
         // if we were waiting for the user to start us,
         // then try to send the requery.
-        if(getState() == WAITING_FOR_USER) {
+        if(getState() == DownloadStatus.WAITING_FOR_USER) {
             lastQuerySent = -1; // inform requerying that we wanna go.
             firstQueryAttempt = true;
             alreadyTriedGnutella = false;
@@ -1956,7 +1956,7 @@ public class ManagedDownloader extends AbstractDownloader
         }
             
         // queue ourselves so we'll try and become active immediately
-        setState(QUEUED);
+        setState(DownloadStatus.QUEUED);
         
         return true;
     }
@@ -1968,7 +1968,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(incompleteFile == null)
             return null;
             
-        if(state == COMPLETE)
+        if(state == DownloadStatus.COMPLETE)
             return getSaveFile();
         else
             return incompleteFile;
@@ -1990,14 +1990,14 @@ public class ManagedDownloader extends AbstractDownloader
         
         //a) Special case for saved corrupt fragments.  We don't worry about
         //removing holes.
-        if (state==CORRUPT_FILE) 
+        if (state==DownloadStatus.CORRUPT_FILE) 
             return corruptFile; //m	ay be null
         //b) If the file is being downloaded, create *copy* of first
         //block of incomplete file.  The copy is needed because some
         //programs, notably Windows Media Player, attempt to grab
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
-        else if (state!=COMPLETE) {
+        else if (state!=DownloadStatus.COMPLETE) {
             File file=new File(incompleteFile.getParent(),
                                IncompleteFileManager.PREVIEW_PREFIX
                                    +incompleteFile.getName());
@@ -2073,15 +2073,15 @@ public class ManagedDownloader extends AbstractDownloader
      * @param deserialized True if this downloader was deserialized from disk,
      * false if it was newly constructed.
      */
-    protected int performDownload() {
+    protected DownloadStatus performDownload() {
         if(checkHosts()) {//files is global
-            setState(GAVE_UP);
-            return GAVE_UP;
+            setState(DownloadStatus.GAVE_UP);
+            return DownloadStatus.GAVE_UP;
         }
 
         // 1. initialize the download
-        int status = initializeDownload();
-        if ( status == CONNECTING) {
+        DownloadStatus status = initializeDownload();
+        if ( status == DownloadStatus.CONNECTING) {
             try {
                 //2. Do the download
                 try {
@@ -2092,7 +2092,7 @@ public class ManagedDownloader extends AbstractDownloader
                 }
                 
                 // 4. if all went well, save
-                if (status == COMPLETE) 
+                if (status == DownloadStatus.COMPLETE) 
                     status = verifyAndSave();
                 else if(LOG.isDebugEnabled())
                     LOG.debug("stopping early with status: " + status); 
@@ -2103,13 +2103,13 @@ public class ManagedDownloader extends AbstractDownloader
                 if (!stopped && !paused)
                     ErrorService.error(e);
                 else
-                    status = GAVE_UP;
+                    status = DownloadStatus.GAVE_UP;
                 
                 // if we were stopped due to corrupt download, cleanup
                 if (corruptState == CORRUPT_STOP_STATE) {
                     // TODO is this really what cleanupCorrupt expects?
                     cleanupCorrupt(incompleteFile, getSaveFile().getName());
-                    status = CORRUPT_FILE;
+                    status = DownloadStatus.CORRUPT_FILE;
                 }
             }
         }
@@ -2147,11 +2147,11 @@ public class ManagedDownloader extends AbstractDownloader
      * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
      * CONNECTING if we're ready to connect
      */
-    protected int initializeDownload() {
+    protected DownloadStatus initializeDownload() {
         
         synchronized (this) {
             if (cachedRFDs.size()==0 && !ranker.hasMore()) 
-                return GAVE_UP;
+                return DownloadStatus.GAVE_UP;
         }
         
         try {
@@ -2160,7 +2160,7 @@ public class ManagedDownloader extends AbstractDownloader
             openVerifyingFile();
         } catch (IOException iox) {
             reportDiskProblem(iox);
-            return DISK_PROBLEM;
+            return DownloadStatus.DISK_PROBLEM;
         }
 
         // Create a new validAlts for this sha1.
@@ -2171,7 +2171,7 @@ public class ManagedDownloader extends AbstractDownloader
         // load up the ranker with the hosts we know about
         initializeRanker();
         
-        return CONNECTING;
+        return DownloadStatus.CONNECTING;
     }
     
     /**
@@ -2181,7 +2181,7 @@ public class ManagedDownloader extends AbstractDownloader
      * @throws InterruptedException if we get interrupted while waiting for user
      * response.
      */
-    private int verifyAndSave() throws InterruptedException {
+    private DownloadStatus verifyAndSave() throws InterruptedException {
         
         // Find out the hash of the file and verify that its the same
         // as our hash.
@@ -2189,7 +2189,7 @@ public class ManagedDownloader extends AbstractDownloader
         if (corruptState == CORRUPT_STOP_STATE) {
             // TODO is this what cleanup Corrupt expects?
             cleanupCorrupt(incompleteFile, getSaveFile().getName());
-            return CORRUPT_FILE;
+            return DownloadStatus.CORRUPT_FILE;
         }
         
         // Save the file to disk.
@@ -2246,7 +2246,7 @@ public class ManagedDownloader extends AbstractDownloader
         URN fileHash=null;
         try {
             // let the user know we're hashing the file
-            setState(HASHING);
+            setState(DownloadStatus.HASHING);
             fileHash = URN.createSHA1Urn(incompleteFile);
         }
         catch(IOException ignored) {}
@@ -2296,16 +2296,16 @@ public class ManagedDownloader extends AbstractDownloader
     /**
      * Saves the file to disk.
      */
-    private int saveFile(URN fileHash){
+    private DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
-        setState( SAVING );
+        setState( DownloadStatus.SAVING );
         
         //4. Move to library.
         // Make sure we can write into the complete file's directory.
         if (!FileUtils.setWriteable(getSaveFile().getParentFile())) {
             reportDiskProblem("could not set file writeable " + 
                     getSaveFile().getParentFile());
-            return DISK_PROBLEM;
+            return DownloadStatus.DISK_PROBLEM;
         }
         File saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
@@ -2327,7 +2327,7 @@ public class ManagedDownloader extends AbstractDownloader
         if (!success) {
             reportDiskProblem("forceRename failed "+incompleteFile+
                     " -> "+ saveFile);
-            return DISK_PROBLEM;
+            return DownloadStatus.DISK_PROBLEM;
         }
             
         //Add file to library.
@@ -2364,7 +2364,7 @@ public class ManagedDownloader extends AbstractDownloader
 		else
 		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
-		return COMPLETE;
+		return DownloadStatus.COMPLETE;
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 
@@ -2435,7 +2435,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(!_workers.contains(worker))
             throw new IllegalStateException("attempting to start invalid worker: " + worker);
         
-        setState(ManagedDownloader.DOWNLOADING);
+        setState(DownloadStatus.DOWNLOADING);
         addActiveWorker(worker);
         chatList.addHost(worker.getDownloader());
         browseList.addHost(worker.getDownloader());
@@ -2535,7 +2535,7 @@ public class ManagedDownloader extends AbstractDownloader
      *  a corruption was detected and they chose to kill and discard the
      *  download.  Calls to resume() do not result in InterruptedException.
      */
-    private int fireDownloadWorkers() throws InterruptedException {
+    private DownloadStatus fireDownloadWorkers() throws InterruptedException {
         LOG.trace("MANAGER: entered fireDownloadWorkers");
 
         //While there is still an unfinished region of the file...
@@ -2558,7 +2558,7 @@ public class ManagedDownloader extends AbstractDownloader
                 }
                 stop();
                 reportDiskProblem(dio);
-                return DISK_PROBLEM;
+                return DownloadStatus.DISK_PROBLEM;
             }
             
           //  LOG.debug("Finished waiting for pending");
@@ -2569,7 +2569,7 @@ public class ManagedDownloader extends AbstractDownloader
                 killAllWorkers();
                 
                 LOG.trace("MANAGER: terminating because of completion");
-                return COMPLETE;
+                return DownloadStatus.COMPLETE;
             }
             
             synchronized(this) { 
@@ -2581,10 +2581,10 @@ public class ManagedDownloader extends AbstractDownloader
                     
                     if ( ranker.calculateWaitTime() > 0) {
                         LOG.trace("MANAGER: terminating with busy");
-                        return BUSY;
+                        return DownloadStatus.BUSY;
                     } else {
                         LOG.trace("MANAGER: terminating w/o hope");
-                        return GAVE_UP;
+                        return DownloadStatus.GAVE_UP;
                     }
                 }
                 
@@ -2813,7 +2813,7 @@ public class ManagedDownloader extends AbstractDownloader
     /////////////////////////////Display Variables////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
-    synchronized void setState(int newState) {
+    synchronized void setState(DownloadStatus newState) {
         this.state=newState;
         this.stateTime=Long.MAX_VALUE;
     }
@@ -2825,7 +2825,7 @@ public class ManagedDownloader extends AbstractDownloader
      * @param time the time we expect to state in this state, in 
      *  milliseconds. 
      */
-    synchronized void setState(int newState, long time) {
+    synchronized void setState(DownloadStatus newState, long time) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
     }
@@ -2836,7 +2836,7 @@ public class ManagedDownloader extends AbstractDownloader
         return this.originalQueryGUID;
     }
 
-    public synchronized int getState() {
+    public synchronized DownloadStatus getState() {
         return state;
     }
 
@@ -2886,9 +2886,9 @@ public class ManagedDownloader extends AbstractDownloader
     public long getAmountRead() {
         VerifyingFile ourFile;
         synchronized(this) {
-            if ( state == CORRUPT_FILE )
+            if ( state == DownloadStatus.CORRUPT_FILE )
                 return corruptFileBytes;
-            else if ( state == HASHING ) {
+            else if ( state == DownloadStatus.HASHING ) {
                 if ( incompleteFile == null )
                     return 0;
                 else
@@ -3055,7 +3055,7 @@ public class ManagedDownloader extends AbstractDownloader
         if ( active.size() > 0 ) {
             HTTPDownloader dl = active.get(0).getDownloader();
             return dl.getVendor();
-        } else if (getState() == REMOTE_QUEUED) {
+        } else if (getState() == DownloadStatus.REMOTE_QUEUED) {
             return queuedVendor;
         } else {
             return "";
