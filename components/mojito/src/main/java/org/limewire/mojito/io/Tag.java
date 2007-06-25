@@ -55,15 +55,15 @@ public class Tag {
     
     private static final Log LOG = LogFactory.getLog(Tag.class);
     
-    private KUID nodeId;
-    private SocketAddress dst;
+    private final KUID nodeId;
+    private final SocketAddress dst;
     
-    private DHTMessage message;
+    private final DHTMessage message;
     
     private ByteBuffer data;
     private int size = -1;
     
-    private ResponseHandler responseHandler;
+    private final ResponseHandler responseHandler;
     
     private long sent = -1L;
     
@@ -75,6 +75,7 @@ public class Tag {
         this.dst = contact.getContactAddress();
         
         this.message = message;
+        this.responseHandler = null;
     }
     
     Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) {
@@ -104,7 +105,7 @@ public class Tag {
     }
     
     /**
-     * Retruns true if this is a reuqest
+     * Retruns true if this is a request
      */
     public boolean isRequest() {
         return responseHandler != null 
@@ -195,7 +196,7 @@ public class Tag {
     
     /**
      * A delegate method to notify the ResponseHandler that
-     * an error occured
+     * an error occurred
      */
     public void handleError(IOException e) {
         if (responseHandler != null) {
@@ -360,7 +361,7 @@ public class Tag {
         }
         
         /**
-         * Checks if the ResponseMessage fulfils all exepcted
+         * Checks if the ResponseMessage fulfills all expected
          * requirements
          */
         public boolean sanityCheck(ResponseMessage response) {
@@ -378,7 +379,7 @@ public class Tag {
         
         /**
          * A delegate method to notify the ResponseHandler that 
-         * an error occured
+         * an error occurred
          */
         public void handleError(IOException e) {
             if (responseHandler != null) {
@@ -396,6 +397,9 @@ public class Tag {
             }
         }
         
+        /**
+         * Returns true if this Receipt was cancelled
+         */
         public boolean isCancelled() {
             return Tag.this.isCancelled();
         }
