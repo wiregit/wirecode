@@ -256,7 +256,8 @@ public class DefaultMessageHandler {
     }
     
     /**
-     * 
+     * Determinates whether to remove, forward or to do nothing with the
+     * value that is associated with the given valueId.
      */
     private Operation getOperation(Contact node, Contact existing, KUID valueId) {
         // To avoid redundant STORE forward, a node only transfers a value 
