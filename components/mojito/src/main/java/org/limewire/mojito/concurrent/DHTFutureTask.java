@@ -35,7 +35,14 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.exceptions.LockTimeoutException;
 
 /**
+ * A cancellable asynchronous DHT task. This class provides a base implementation 
+ * of {@link DHTFuture}, with methods to start and cancel a DHT task, query to see 
+ * if the task is complete, and retrieve the result of the task. The result can only 
+ * be retrieved when the computation has completed; the get method will block if 
+ * the task has not yet completed. Once the task has completed, the computation 
+ * cannot be restarted or cancelled.
  * 
+ * {@see java.util.concurrent.FutureTask}
  */
 public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
