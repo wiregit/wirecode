@@ -75,10 +75,10 @@ public class BasicHttpAcceptor {
 
     private ConnectionDispatcher dispatcher;
 
-    public BasicHttpAcceptor(boolean localOnly, String[] supportedMethods, HttpParams params) {
+    public BasicHttpAcceptor(boolean localOnly, HttpParams params, String... supportedMethods) {
         this.localOnly = localOnly;
-        this.supportedMethods = supportedMethods;
         this.params = params;
+        this.supportedMethods = supportedMethods;
         
         this.registry = new SynchronizedHttpRequestHandlerRegistry();
         this.processor = new SynchronizedHttpProcessor();

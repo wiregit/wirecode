@@ -17,24 +17,22 @@ import org.limewire.nio.observer.AcceptObserver;
  */
 public class SocketAcceptor {
 
-    /**
-     * The socket that listens for incoming connections. Can be changed to
-     * listen to new ports.
-     * 
-     * LOCKING: obtain _socketLock before modifying either. Notify _socketLock
-     * when done.
-     */
-    private volatile ServerSocket listeningSocket = null;
-
     private final ConnectionDispatcher dispatcher = new ConnectionDispatcher();
 
-    private int listeningPort = -1;
+    /** 
+     * The socket that listens for incoming connections.
+     * <p> 
+     * Note: Obtain <code>this</code> lock before accessing. 
+     */
+    private ServerSocket listeningSocket = null;
+
+    private volatile int listeningPort = -1;
 
     private volatile boolean localOnly;
 
     public SocketAcceptor() {
     }
-    
+
     public boolean isLocalOnly() {
         return localOnly;
     }
@@ -52,46 +50,40 @@ public class SocketAcceptor {
      *          connections. This is properly synchronized and can be called
      *          even while run() is being called.
      */
-    public synchronized void setPort(int port) throws IOException {
-        // 1. Special case: if unchanged, do nothing.
+    public synchronized void bind(int port) throws IOException {
+        // if unchanged, do nothing.
         if (this.listeningSocket != null && this.listeningPort == port) {
             return;
         }
-        // 2. Special case if port==0. This ALWAYS works.
-        // Note that we must close the socket BEFORE grabbing
-        // the lock. Otherwise deadlock will occur since
-        // the acceptor thread is listening to the socket
-        // while holding the lock. Also note that port
-        // will not have changed before we grab the lock.
-        else if (port == 0) {
-            IOUtils.close(listeningSocket);
-            this.listeningSocket = null;
-            this.listeningPort = 0;
-        }
-        // 3. Normal case. See note about locking above.
-        else {
-            // a) Try new port.
-            ServerSocket newSocket = null;
-            try {
-                newSocket = SocketFactory.newServerSocket(port,
-                        new SocketListener());
-            } catch (IOException e) {
-                throw e;
-            }
 
-            // b) Close old socket
-            IOUtils.close(listeningSocket);
+        // try new port.
+        ServerSocket newSocket = SocketFactory.newServerSocket(port,
+                new SocketListener());
 
-            // c) Replace with new sock.
-            this.listeningSocket = newSocket;
-            this.listeningPort = port;
+        // close old socket
+        if (listeningSocket != null) {
+            IOUtils.close(listeningSocket);
         }
+
+        // replace with new sock.
+        this.listeningSocket = newSocket;
+        this.listeningPort = port;
+    }
+
+    public synchronized void unbind() {
+        if (this.listeningSocket == null) {
+            return;
+        }
+
+        IOUtils.close(this.listeningSocket);
+        this.listeningSocket = null;
+        this.listeningPort = -1;
     }
 
     /**
      * Return the listening port.
      */
-    public synchronized int getPort() {
+    public int getPort() {
         return listeningPort;
     }
 

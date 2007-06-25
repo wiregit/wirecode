@@ -45,8 +45,8 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
     private long MIN_REQUEST_INTERVAL = 1500;
 
     public LocalHTTPAcceptor() {
-        super(true, SUPPORTED_METHODS, createDefaultParams(LimeWireUtils
-                .getHttpServer(), Constants.TIMEOUT));
+        super(true, createDefaultParams(LimeWireUtils
+                .getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
         
         registerHandler("magnet:", new MagnetCommandRequestHandler());
         registerHandler("/magnet10/default.js", new MagnetCommandRequestHandler());

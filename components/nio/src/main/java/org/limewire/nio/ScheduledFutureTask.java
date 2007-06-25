@@ -33,7 +33,7 @@ class ScheduledFutureTask<V> extends FutureTask<V> implements ScheduledFuture<V>
      */
     ScheduledFutureTask(Runnable r, V result, long ns) {
         super(r, result);
-        this.time = ns;
+        this.time = now() + ns;
         this.sequenceNumber = sequencer.getAndIncrement();
     }
 
@@ -42,7 +42,7 @@ class ScheduledFutureTask<V> extends FutureTask<V> implements ScheduledFuture<V>
      */
     ScheduledFutureTask(Callable<V> callable, long ns) {
         super(callable);
-        this.time = ns;
+        this.time = now() + ns;
         this.sequenceNumber = sequencer.getAndIncrement();
     }
 

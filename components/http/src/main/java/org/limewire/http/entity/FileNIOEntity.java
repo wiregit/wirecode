@@ -17,14 +17,12 @@ import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.http.HttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.observer.Shutdownable;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
  * corresponding {@link FileTransferMonitor} is updated with progress.
  */
-public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
-        Shutdownable {
+public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
 
     private static final Log LOG = LogFactory.getLog(FileNIOEntity.class);
 
@@ -49,10 +47,12 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
     /** Piece that is currently transferred. */
     private Piece piece;
 
-    /** Cancels the transfer if inactivity for too long. */
-    // private StalledUploadWatchdog watchdog;
     private IOControl ioctrl;
 
+    private NIOWatchdog watchdog;
+
+    private int timeout = NIOWatchdog.DEFAULT_DELAY_TIME;
+    
     public FileNIOEntity(File file, String contentType,
             FileTransferMonitor transfer, long beginIndex, long length) {
         super(file, contentType);
@@ -69,11 +69,19 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
         this(file, contentType, transfer, 0, file.length());
     }
 
+    public int getTimeout() {
+        return timeout;
+    }
+    
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+    
     @Override
     public long getContentLength() {
         return length;
     }
-
+    
     @Override
     public InputStream getContent() throws IOException {
         final FileInputStream in = new FileInputStream(this.file);
@@ -125,34 +133,28 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
             LOG.debug("Initializing upload of " + file.getName() + " [begin="
                     + begin + ",length=" + length + "]");
 
-        // watchdog = new StalledUploadWatchdog();
-
         transfer.start();
 
+        this.watchdog = new NIOWatchdog(NIODispatcher.instance(), transfer, getTimeout());
+        
         reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(),
                 file, begin, length, new PieceHandler());
         reader.start();
     }
 
     public void initializeWriter() throws IOException {
-        if (LOG.isDebugEnabled())
-            LOG.debug("Initializing download of " + file.getName() + " [begin="
-                    + begin + ",length=" + length + "]");
-
-        // watchdog = new StalledUploadWatchdog();
-
-        transfer.start();
-
-        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(),
-                file, begin, length, new PieceHandler());
-        reader.start();
+        // TODO implement
+        throw new UnsupportedOperationException();
     }
 
     public void finished() {
-        // if (watchdog != null) {
-        // watchdog.deactivate();
-        // watchdog = null;
-        // }
+        deactivateWatchdog();
+        
+        if (watchdog != null) {
+            watchdog.deactivate();
+            watchdog = null;
+        }
+        
         if (reader != null) {
             reader.shutdown();
             reader = null;
@@ -165,16 +167,17 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
             throws IOException {
         if (this.ioctrl == null) {
             this.ioctrl = ioctrl;
-
             initializeReader();
         }
 
+        deactivateWatchdog();
+        
         // flush current buffer
         if (buffer != null && buffer.hasRemaining()) {
             int written = encoder.write(buffer);
             transfer.addAmountUploaded(written);
             if (buffer.hasRemaining()) {
-                // watchdog.activate(this);
+                activateWatchdog();
                 return;
             } else if (remaining == 0) {
                 reader.release(piece);
@@ -197,8 +200,8 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
                         // need to wait for the disk, PieceHandler will turn
                         // interest back on when the next piece is available
                         buffer = null;
-                        ioctrl.suspendInput();
-                        // watchdog.activate(this);
+                        ioctrl.suspendOutput();
+                        activateWatchdog();
                         return;
                     }
                     buffer = piece.getBuffer();
@@ -217,20 +220,22 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
         if (remaining == 0 && !buffer.hasRemaining()) {
             encoder.complete();
         } else {
-            // watchdog.activate(this);
+            activateWatchdog();
         }
+    }
+
+    protected void activateWatchdog() {
+        this.watchdog.activate();
+    }
+
+    protected void deactivateWatchdog() {
+        this.watchdog.deactivate();
     }
 
     public int consumeContent(ContentDecoder decoder, IOControl ioctrl)
             throws IOException {
         // TODO implement
         throw new UnsupportedOperationException();
-    }
-
-    public void shutdown() {
-        if (LOG.isWarnEnabled())
-            LOG.warn("File transfer timed out: " + transfer);
-        transfer.stop();
     }
 
     @Override
@@ -243,11 +248,13 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity,
         public void readFailed(IOException e) {
             if (LOG.isWarnEnabled())
                 LOG.warn("Error reading file from disk: " + transfer, e);
-            transfer.stop();
+            transfer.shutdown();
         }
 
         public void readSuccessful() {
-            ioctrl.requestOutput();
+            synchronized (FileNIOEntity.this) {
+                ioctrl.requestOutput();
+            }
         }
 
     }

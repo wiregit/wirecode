@@ -43,8 +43,8 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     private final HttpRequestHandler notFoundHandler;
 
     public HTTPAcceptor() {
-        super(false, SUPPORTED_METHODS, createDefaultParams(LimeWireUtils
-                .getHttpServer(), Constants.TIMEOUT));
+        super(false, createDefaultParams(LimeWireUtils.getHttpServer(),
+                Constants.TIMEOUT), SUPPORTED_METHODS);
 
         this.notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,

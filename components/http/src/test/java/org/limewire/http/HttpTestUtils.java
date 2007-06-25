@@ -21,11 +21,14 @@ public class HttpTestUtils {
         return data;
     }
 
-    public static void writeData(File file, String data)
-            throws IOException {
+    public static void writeData(File file, String data) throws IOException {
+        writeData(file, data.getBytes("US-ASCII"));
+    }
+
+    public static void writeData(File file, byte[] data) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
         try {
-            raf.write(data.getBytes("US-ASCII"));
+            raf.write(data);
         } finally {
             raf.close();
         }

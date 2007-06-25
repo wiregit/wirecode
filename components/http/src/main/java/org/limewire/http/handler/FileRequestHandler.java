@@ -11,8 +11,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.entity.BasicFileTransferMonitor;
 import org.limewire.http.entity.FileNIOEntity;
-import org.limewire.http.entity.FileTransferMonitorAdapter;
 import org.limewire.http.entity.NotFoundEntity;
 
 /**
@@ -29,6 +29,8 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private final MimeTypeProvider mimeTypeProvider;
 
+    private int timeout = -1;
+    
     /**
      * Constructs a request handler. The <code>rootDirectory</code> specifies
      * the root directory of the web server, i.e. a request for <code>/</code>
@@ -56,12 +58,23 @@ public class FileRequestHandler implements HttpRequestHandler {
         return indexFilename;
     }
     
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+    
+    public int getTimeout() {
+        return timeout;
+    }
+    
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         File file = getFile(request);         
         if (file.exists() && file.isFile()) {
             String mimeType = mimeTypeProvider.getMimeType(file);
-            FileNIOEntity entity = new FileNIOEntity(file, mimeType , new FileTransferMonitorAdapter());
+            FileNIOEntity entity = new FileNIOEntity(file, mimeType , new BasicFileTransferMonitor(context));
+            if (timeout != -1) {
+                entity.setTimeout(timeout);
+            }
             response.setEntity(entity);
         } else {
             response.setEntity(new NotFoundEntity(request));

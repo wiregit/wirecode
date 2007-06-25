@@ -27,15 +27,15 @@ public class SocketAcceptorTest extends BaseTestCase {
     
     public void tearDown() throws Exception {
         if (acceptor != null) {
-            acceptor.setPort(0);
+            acceptor.bind(0);
         }
     }
     
     public void testSetPort() throws Exception {
         acceptor = new SocketAcceptor();
-        acceptor.setPort(LISTEN_PORT);
+        acceptor.bind(LISTEN_PORT);
         write(LISTEN_PORT, "Hello");
-        acceptor.setPort(LISTEN_PORT + 1);
+        acceptor.bind(LISTEN_PORT + 1);
         try {
             write(LISTEN_PORT, "Hello");
             fail("Expected connect exception");

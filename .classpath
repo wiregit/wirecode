@@ -35,7 +35,7 @@
 	<classpathentry kind="src" path="components/net/src/main/java"/>
 	<classpathentry kind="src" path="components/net/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar" sourcepath="/limewire/lib/sources/commons-httpclient-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-pool.jar"/>

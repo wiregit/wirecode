@@ -1,10 +1,14 @@
 package org.limewire.http.entity;
 
-public interface FileTransferMonitor {
+import org.limewire.nio.observer.Shutdownable;
 
-    void start();
+public interface FileTransferMonitor extends Shutdownable {
 
     void addAmountUploaded(int written);
+
+    void shutdown();
+    
+    void start();
 
     void stop();
 

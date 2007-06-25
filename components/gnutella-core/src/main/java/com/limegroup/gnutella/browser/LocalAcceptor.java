@@ -42,7 +42,7 @@ public class LocalAcceptor {
         // onward.
         // 1. Try suggested port.
         try {
-            acceptor.setPort(listeningPort);
+            acceptor.bind(listeningPort);
         } catch (IOException e) {
             boolean error = true;
             // 2. Try 20 different consecutive ports from 45100 to 45119
@@ -55,7 +55,7 @@ public class LocalAcceptor {
             for (int i = 1; i < 20; i++) {
                 listeningPort = i + 45100;
                 try {
-                    acceptor.setPort(listeningPort);
+                    acceptor.bind(listeningPort);
                     error = false;
                     break;
                 } catch (IOException ignored) {
