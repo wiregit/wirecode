@@ -115,6 +115,42 @@ public final class NetworkUtils {
     }
 	
     /**
+     * @return true if the provided string is a dotted ipv4 address
+     * of the format "a.b.c.d"
+     */
+    public static boolean isDottedIPV4(String s) {
+        int octets = 0;
+        while(octets < 3) {
+            int dot = s.indexOf(".");
+            if (dot == -1)
+                return false;
+            String octet = s.substring(0,dot);
+            try {
+
+                int parsed = Integer.parseInt(octet);
+                if (parsed < 0 || parsed > 255)
+                    return false;
+            }
+            catch (NumberFormatException bad) {
+                return false;
+            }
+            octets++;
+            s = s.substring(Math.min(dot+1,s.length()),s.length());
+        }
+        if (s.indexOf(".") != -1)
+            return false;
+        try {
+            int parsed = Integer.parseInt(s);
+            if (parsed < 0 || parsed > 255)
+                return false;
+        }
+        catch (NumberFormatException bad) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * @return whether the IpPort is a valid external address.
      */
     public static boolean isValidExternalIpPort(IpPort addr) {

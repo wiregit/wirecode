@@ -86,6 +86,26 @@ public class NetworkUtilsTest extends BaseTestCase {
         LocalSocketAddressService.setSocketAddressProvider(defaultProvider);
     }
 
+    public void testIsDottedIPV4() throws Exception {
+        for (String s : PUBLIC_ADDRESSES)
+            assertTrue(NetworkUtils.isDottedIPV4(s));
+        for (String s : PRIVATE_ADDRESSES)
+            assertTrue(NetworkUtils.isDottedIPV4(s));
+        
+        assertFalse(NetworkUtils.isDottedIPV4("a.b.c.d"));
+        assertFalse(NetworkUtils.isDottedIPV4("1.2.3"));
+        assertFalse(NetworkUtils.isDottedIPV4("1.2.3."));
+        assertFalse(NetworkUtils.isDottedIPV4("1.2.3.4."));
+        assertFalse(NetworkUtils.isDottedIPV4("1.2.3.4 "));
+        assertFalse(NetworkUtils.isDottedIPV4(".1.2.3.4"));
+        assertFalse(NetworkUtils.isDottedIPV4(""));
+        assertFalse(NetworkUtils.isDottedIPV4("1"));
+        assertFalse(NetworkUtils.isDottedIPV4("."));
+        assertFalse(NetworkUtils.isDottedIPV4("........"));
+        assertFalse(NetworkUtils.isDottedIPV4("1.2.3.400"));
+        assertFalse(NetworkUtils.isDottedIPV4("-1.2.3.4"));
+    }
+    
     /**
      * Tests the method for checking whether or not an IP address is
      * "close" to this address.
