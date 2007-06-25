@@ -31,13 +31,13 @@ import org.limewire.mojito.messages.RequestMessage;
  */
 abstract class DHTRequestException extends DHTException {
     
-    private KUID nodeId;
+    private final KUID nodeId;
     
-    private SocketAddress address;
+    private final SocketAddress address;
     
-    private RequestMessage request;
+    private final RequestMessage request;
     
-    private long time;
+    private final long time;
     
     public DHTRequestException(KUID nodeId, SocketAddress address, 
             RequestMessage request, long time, Throwable cause) {

@@ -27,7 +27,7 @@ import org.limewire.mojito.messages.ResponseMessage;
  */
 abstract class DHTResponseException extends DHTException {
     
-    private ResponseMessage response;
+    private final ResponseMessage response;
     
     public DHTResponseException(ResponseMessage response) {
         super();
