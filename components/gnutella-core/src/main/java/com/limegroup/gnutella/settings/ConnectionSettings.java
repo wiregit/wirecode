@@ -229,7 +229,7 @@ public final class ConnectionSettings extends LimeProps {
     
     /** Whether or not we want to accept incoming TLS connections. */
     public static final BooleanSetting TLS_INCOMING =
-        FACTORY.createBooleanSetting("TLS_INCOMING", false);
+        FACTORY.createBooleanSetting("TLS_INCOMING", true);
     
     /** Whether or not we want to make outgoing connections with TLS. */
     public static final BooleanSetting TLS_OUTGOING =
