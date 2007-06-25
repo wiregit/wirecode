@@ -12,6 +12,7 @@ public interface Downloader extends BandwidthTracker {
     
     /** The states a download can be in. */
     public static enum DownloadStatus {
+        INITIALIZING,
         QUEUED,
         CONNECTING,
         DOWNLOADING,

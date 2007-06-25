@@ -370,7 +370,7 @@ public class ManagedDownloader extends AbstractDownloader
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
       *  etc.   Should be modified only through setState. */
-    private DownloadStatus state;
+    private DownloadStatus state = DownloadStatus.INITIALIZING;
     /** The system time that we expect to LEAVE the current state, or
      *  Integer.MAX_VALUE if we don't know. Should be modified only through
      *  setState. */
@@ -513,7 +513,7 @@ public class ManagedDownloader extends AbstractDownloader
 		throws SaveLocationException {
 		this(files, ifc, originalQueryGUID);
         
-        Assert.that(files.length > 0 || fileName != null);
+        assert files.length > 0 || fileName != null;
         if (files.length == 0)
             propertiesMap.put(DEFAULT_FILENAME,fileName);
         
@@ -626,8 +626,8 @@ public class ManagedDownloader extends AbstractDownloader
                     String.class, Serializable.class, GenericsUtils.ScanMode.REMOVE);
         }
 
-	if (attributes == null)
-	    attributes = new HashMap<String, Serializable>();
+    	if (attributes == null)
+    	    attributes = new HashMap<String, Serializable>();
     }
 
     /** 
@@ -1115,6 +1115,7 @@ public class ManagedDownloader extends AbstractDownloader
         if (isInactive())
             return true;
         switch (getState()) {
+        case INITIALIZING:
         case CONNECTING:
         case DOWNLOADING:
         case REMOTE_QUEUED:
@@ -1145,6 +1146,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public boolean isInactive() {
         switch(getState()) {
+        case INITIALIZING:
         case QUEUED:
         case GAVE_UP:
         case WAITING_FOR_RESULTS:
