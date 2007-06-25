@@ -23,8 +23,9 @@ package org.limewire.mojito.exceptions;
  * The DHTBadResponseException is thrown if we received a
  * bad response from a remote Node.
  */
-@SuppressWarnings("serial")
 public class DHTBadResponseException extends DHTException {
+    
+    private static final long serialVersionUID = -6675234483339058663L;
 
     public DHTBadResponseException() {
         super();

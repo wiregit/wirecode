@@ -22,8 +22,9 @@ package org.limewire.mojito.exceptions;
 /**
  * A DHTException is thrown as a result of an another exception.
  */
-@SuppressWarnings("serial")
 public class DHTException extends Exception {
+    
+    private static final long serialVersionUID = -7106993079200472787L;
 
     public DHTException() {
         super();

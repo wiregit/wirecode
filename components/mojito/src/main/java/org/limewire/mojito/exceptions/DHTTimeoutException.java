@@ -30,8 +30,9 @@ import org.limewire.mojito.util.ContactUtils;
  * The DHTTimeoutException is thrown if an operation times out,
  * for example if a remote Node does not respond to a ping.
  */
-@SuppressWarnings("serial")
 public class DHTTimeoutException extends DHTRequestException {
+    
+    private static final long serialVersionUID = -6706120265698443279L;
 
     public DHTTimeoutException(KUID nodeId, SocketAddress address, 
             RequestMessage request, long time) {

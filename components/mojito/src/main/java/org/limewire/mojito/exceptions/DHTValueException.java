@@ -21,8 +21,12 @@ package org.limewire.mojito.exceptions;
 
 import java.io.IOException;
 
-@SuppressWarnings("serial")
+/**
+ * Thrown if there's a problem with a DHTValue.
+ */
 public class DHTValueException extends IOException {
+    
+    private static final long serialVersionUID = -2488641245100658950L;
 
     public DHTValueException() {
         super();
@@ -34,6 +38,11 @@ public class DHTValueException extends IOException {
     
     public DHTValueException(Throwable cause) {
         super();
+        initCause(cause);
+    }
+    
+    public DHTValueException(String s, Throwable cause) {
+        super(s);
         initCause(cause);
     }
 }

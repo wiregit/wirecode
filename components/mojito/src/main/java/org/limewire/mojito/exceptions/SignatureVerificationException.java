@@ -22,7 +22,7 @@ package org.limewire.mojito.exceptions;
 import java.security.SignatureException;
 
 /**
- * A SignatureVerificationException is thrown if a signature cannot be verifed.
+ * A SignatureVerificationException is thrown if a signature cannot be verified.
  */
 public class SignatureVerificationException extends SignatureException {
 

@@ -25,8 +25,9 @@ package org.limewire.mojito.exceptions;
  * finish in order to prevent the system from getting locked up which could
  * be a bug). 
  */
-@SuppressWarnings("serial")
 public class LockTimeoutException extends DHTException {
+    
+    private static final long serialVersionUID = 3478473068451195409L;
 
     public LockTimeoutException() {
         super();

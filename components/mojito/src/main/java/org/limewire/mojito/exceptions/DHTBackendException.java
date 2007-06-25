@@ -24,14 +24,14 @@ import java.net.SocketAddress;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.RequestMessage;
 
-
 /**
- * The DHTBackendException is thrown if an Exception occured
+ * The DHTBackendException is thrown if an Exception occurred
  * in the backend which leads to the termination of the process
  * (ping, lookup, store, whatever).
  */
-@SuppressWarnings("serial")
 public class DHTBackendException extends DHTRequestException {
+    
+    private static final long serialVersionUID = 3413546060227617160L;
 
     public DHTBackendException(KUID nodeId, SocketAddress address, 
             RequestMessage request, Throwable cause) {

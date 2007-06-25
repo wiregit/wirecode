@@ -23,9 +23,10 @@ package org.limewire.mojito.exceptions;
  * The NotBootstrappedException is thrown if the user is attempting
  * to execute certain operations that require a bootstrapped DHT.
  */
-@SuppressWarnings("serial")
 public class NotBootstrappedException extends IllegalStateException {
     
+    private static final long serialVersionUID = 5286215339791253173L;
+
     public NotBootstrappedException(String name, String operation) {
         super(getErrorMessage(name, operation));
     }
