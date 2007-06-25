@@ -6,6 +6,8 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
@@ -20,6 +22,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
 
 public class HostileFilter extends SpamFilter {
 
+    private static final Log LOG = LogFactory.getLog(HostileFilter.class);
+    
     private static final ExecutorService IP_LOADER = ExecutorsHelper.newProcessingQueue("IpLoader");
     
     private volatile IPList hostileHosts = new IPList();
@@ -80,7 +84,14 @@ public class HostileFilter extends SpamFilter {
         } catch(IllegalArgumentException badHost) {
             return false;
         }
-        return allowImpl(ip);
+        return allowLogged(ip);
+    }
+    
+    private boolean allowLogged(IP ip) {
+        boolean yes = allowImpl(ip);
+        if (LOG.isDebugEnabled())
+            LOG.debug("" + (yes ? "" : "NOT ")+" allowing "+ip);
+        return yes;
     }
     
     protected boolean allowImpl(IP ip) {
@@ -119,7 +130,7 @@ public class HostileFilter extends SpamFilter {
     }
     
     public boolean allow(InetAddress addr) {
-        return allowImpl(new IP(addr.getAddress()));
+        return allowLogged(new IP(addr.getAddress()));
     }
     
     /** 
@@ -136,6 +147,8 @@ public class HostileFilter extends SpamFilter {
             ip = new IP(host);
         } catch (IllegalArgumentException badHost) {
             try {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("doing dns lookup for "+host);
                 InetAddress lookUp = InetAddress.getByName(host);
                 host = lookUp.getHostAddress();
                 ip = new IP(host);
@@ -147,7 +160,7 @@ public class HostileFilter extends SpamFilter {
                 return false;
             }
         }        
-        return allowImpl(ip);
+        return allowLogged(ip);
     }
 
 }

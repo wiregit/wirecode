@@ -8,6 +8,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IP;
@@ -20,6 +22,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
  * Blocks messages and hosts based on IP address.  
  */
 public final class IPFilter extends HostileFilter {
+    
+    private static final Log LOG = LogFactory.getLog(IPFilter.class);
     
     private volatile IPList badHosts;
     private volatile IPList goodHosts;
@@ -58,6 +62,8 @@ public final class IPFilter extends HostileFilter {
     /** Does the work of setting new good  & bad hosts. */
     protected void refreshHostsImpl() {
         super.refreshHostsImpl();
+        LOG.debug("refreshing hosts");
+        
         // Load basic bad...
         IPList newBad = new IPList();
         String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
@@ -75,6 +81,8 @@ public final class IPFilter extends HostileFilter {
         // Load data from hostiles.txt (if it wasn't already loaded!)...
         if(!loadedHostiles) {
             loadedHostiles = true;
+            
+            LOG.debug("loading hostiles");
             File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
             BufferedReader reader = null;
             try {
@@ -84,6 +92,7 @@ public final class IPFilter extends HostileFilter {
                     hostilesTXTHosts.add(read);
                 }
             } catch(IOException ignored) {
+                LOG.debug("iox loading hostiles",ignored);
             } finally {
                 IOUtils.close(reader);
             }
@@ -112,6 +121,9 @@ public final class IPFilter extends HostileFilter {
     }
     
     private void banIP(String ip) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("banning "+ip);
+        
         String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         Arrays.sort(bannedIPs, Comparators.stringComparator());
         if ( Arrays.binarySearch(bannedIPs, ip, 
