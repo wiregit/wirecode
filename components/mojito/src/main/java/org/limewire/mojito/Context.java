@@ -1084,7 +1084,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
-     * 
+     * Stores the given Storable
      */
     public DHTFuture<StoreResult> store(Storable storable) {
         return store(DHTValueEntity.createFromStorable(this, storable));
