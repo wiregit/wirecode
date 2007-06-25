@@ -83,7 +83,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             sent = dispatcher.send(node, request, null);
             assertFalse(sent);
             
-            // Same as abvobe but sender is firewalled
+            // Same as above but sender is firewalled
             sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
                     context.getLocalNodeID().invert(), 

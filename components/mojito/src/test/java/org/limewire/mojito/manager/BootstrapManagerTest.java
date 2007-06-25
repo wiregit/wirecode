@@ -118,7 +118,6 @@ public class BootstrapManagerTest extends MojitoTestCase {
         assertEquals(BOOTSTRAP_DHT.getLocalNodeID(), result.getContact().getNodeID());
     }
     
-    @SuppressWarnings("unchecked")
     public void testBootstrapFromRouteTable() throws Exception{
         //try ping from RT
         RouteTable rt = TEST_DHT.getRouteTable();
@@ -166,7 +165,5 @@ public class BootstrapManagerTest extends MojitoTestCase {
         
         // See if RT was purged
         assertNotContains(rt.getActiveContacts(), node);
-        
-        
     }
 }

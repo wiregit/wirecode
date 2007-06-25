@@ -36,7 +36,7 @@ public class LocalContactTest extends MojitoTestCase {
         local.setExternalPort(1024);
         assertEquals(new InetSocketAddress("localhost", 1024), local.getContactAddress());
         
-        // Accept everyting
+        // Accept everything
         SocketAddress externalAddress1 = new InetSocketAddress("limewire.org", 2048);
         local.setExternalAddress(externalAddress1);
         assertEquals(new InetSocketAddress("limewire.org", 1024), local.getContactAddress());

@@ -229,7 +229,7 @@ public class DatabaseTest extends MojitoTestCase {
     public void testIndirectAdd() throws Exception {
         Database database = new DatabaseImpl();
         
-        // Add an indiriectly stored value
+        // Add an indirectly stored value
         DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());

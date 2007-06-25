@@ -190,9 +190,10 @@ public class DHTSettings extends LimeProps {
     /**
      * Setting for whether or not the Database should be persisted on disk
      */
+    // Default value is true in LW 4.13.8 and older
     public static final BooleanSetting PERSIST_DHT_DATABASE
         = FACTORY.createRemoteBooleanSetting("PERSIST_DHT_DATABASE", 
-                true, "DHTSettings.PersistDatabase");
+                false, "DHTSettings.PersistDatabase");
     
     /**
      * Setting for the time at which point a file is considered rare

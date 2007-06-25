@@ -70,7 +70,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             Thread.sleep(waitForFutureDone);
             
             // A Node that's bootstrapping should not respond to
-            // Pings to prevent other Nodes from seleting it as
+            // Pings to prevent other Nodes from selecting it as
             // their initial bootstrap Node
             Context context1 = (Context)dht1;
             
@@ -108,7 +108,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             Thread.sleep(waitForFutureDone);
             
             // Re-Enable local assertion to make sure you can't create
-            // malfored collision pings like above
+            // malformed collision pings like above
             ContextSettings.ASSERT_COLLISION_PING.setValue(true);
             try {
                 PingResult result = context2.collisionPing(dht1.getLocalNode()).get();
