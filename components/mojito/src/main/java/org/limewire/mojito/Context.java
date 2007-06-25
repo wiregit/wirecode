@@ -721,7 +721,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
+     * A helper method to set whether or not the Mojito DHT
+     * instance is bootstrapped.
      * 
+     * Note: This method is primarily for testing.
      */
     public synchronized void setBootstrapped(boolean bootstrapped) {
         bootstrapManager.setBootstrapped(bootstrapped);
@@ -1138,7 +1141,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
-     * Updates the approxmiate DHT size based on the given Contacts
+     * Updates the approximate DHT size based on the given Contacts
      */
     public void updateEstimatedSize(Collection<? extends Contact> nodes) {
         estimator.updateSize(nodes);
