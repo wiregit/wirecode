@@ -110,6 +110,25 @@ public class SystemUtils {
     	}
     	return null;
     }
+    
+    /** A list of places that getSpecialPath uses. */
+    public static enum SpecialLocations {
+        DOCUMENTS("Documents"),
+        APPLICATION_DATA("ApplicationData"),
+        DESKTOP("Desktop"),
+        START_MENU("StartMenu"),
+        START_MENU_PROGRAMS("StartMenuPrograms"),
+        START_MENU_STARTUP("StartMenuStartup");
+        
+        private final String name;
+        SpecialLocations(String name) {
+            this.name = name;
+        }
+        
+        public String getName() {
+            return name;
+        }
+    }
 
     /**
 	 * Gets the complete path to a special folder in the platform operating system shell.
@@ -129,13 +148,19 @@ public class SystemUtils {
 	 * @param name The name of a special folder
 	 * @return     The path to that folder, or null on error
 	 */
-    public static final String getSpecialPath(String name) {
+    public static final String getSpecialPath(SpecialLocations location) {
     	if (OSUtils.isWindows() && isLoaded) {
-    		String path = getSpecialPathNative(name);
-    		if (path.equals(""))
-                return null;
-    		else
-                return path;
+            try {
+        		String path = getSpecialPathNative(location.getName());
+        		if(!path.equals(""))
+                    return path;
+            } catch(UnsatisfiedLinkError error) {
+                // Must catch the error because earlier versions of the dll didn't
+                // include this method, and installs that happen to have not
+                // updated this dll for whatever reason will receive the error
+                // otherwise.
+                LOG.error("Unable to use getSpecialPath!", error);
+            }
     	}
     	return null;
     }    

@@ -8,6 +8,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.VersionUtils;
+import org.limewire.util.SystemUtils.SpecialLocations;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -356,7 +357,7 @@ public final class LimeWireUtils {
             FileUtils.setWriteable(userDir);
         File settingsDir = new File(userDir, LIMEWIRE_PREFS_DIR_NAME);
         if (OSUtils.isWindows()) {
-            String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
+            String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath(SpecialLocations.APPLICATION_DATA));
             if (appdata != null && appdata.length() > 0) {
                 appdata = stripQuotes(appdata);
                 File tempSettingsDir = new File(appdata, "LimeWire");
