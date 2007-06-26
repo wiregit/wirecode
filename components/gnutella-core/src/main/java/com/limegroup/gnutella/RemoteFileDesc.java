@@ -70,7 +70,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	private final long _index;
 	private final byte[] _clientGUID;
 	private final int _speed;
-	private final int _size;
+	private final long _size;
 	private final boolean _chatEnabled;
     private final int _quality;
     private final boolean _replyToMulticast;
@@ -285,7 +285,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
+						  long size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
@@ -322,7 +322,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
+						  long size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
@@ -353,7 +353,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	
     /** Constructs a RemoteFileDesc using the given PushEndpoint. */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-	        			int size,int speed,boolean chat, int quality, boolean browseHost,
+	        			long size,int speed,boolean chat, int quality, boolean browseHost,
 	        			LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
 	        			boolean firewalled, String vendor,long createTime,
 	        			PushEndpoint pe) {
@@ -366,7 +366,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      * no PE object is passed a new one is created.
      */
     private RemoteFileDesc (String host, int port, long index, String filename,
-            int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
+            long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
@@ -383,7 +383,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		if(filename.equals("")) {
 			throw new IllegalArgumentException("cannot accept empty string file name");
 		}
-		if((size & 0xFFFFFFFF00000000L) != 0) {
+		if((size < 0) ) {
 			throw new IllegalArgumentException("invalid size: "+size);
 		}
 		if((index & 0xFFFFFFFF00000000L) != 0) {
@@ -713,7 +713,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	 *
 	 * @return the size in bytes of this file
 	 */
-	public final int getSize() {return _size;}
+	public final long getSize() {return _size;}
 	
 	public final long getFileSize() { return _size; }
 
@@ -995,7 +995,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             int result = 17;
             result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
-			result = (37* result)+_size;
+			result = (int)((37* result)+_size);
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
                 result = (37* result)+(new GUID(_clientGUID)).hashCode();

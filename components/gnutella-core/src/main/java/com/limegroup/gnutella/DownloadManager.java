@@ -888,7 +888,7 @@ public class DownloadManager implements BandwidthTracker {
 	 * and the fileSize is performed
 	 * @return
 	 */
-	public boolean conflicts(URN urn, int fileSize, File... fileName) {
+	public boolean conflicts(URN urn, long fileSize, File... fileName) {
 		
 		if (urn == null && fileSize == 0) {
 			return false;

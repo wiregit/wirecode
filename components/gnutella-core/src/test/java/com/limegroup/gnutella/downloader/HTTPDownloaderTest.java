@@ -189,7 +189,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         vf.open(f);
         HTTPDownloader dl = new HTTPDownloader(rfd, vf, false);
         
-        PrivilegedAccessor.setValue(dl, "_amountToRead", new Integer(rfd.getSize()));
+        PrivilegedAccessor.setValue(dl, "_amountToRead", new Long(rfd.getSize()));
         
         
         assertEquals(Range.createRange(1, 9), 

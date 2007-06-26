@@ -56,7 +56,7 @@ public class PushAltLoc extends AlternateLocation {
 		return _pushAddress.httpStringValue();
 	}
 	
-	public RemoteFileDesc createRemoteFileDesc(int size) {
+	public RemoteFileDesc createRemoteFileDesc(long size) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
  

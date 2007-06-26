@@ -207,8 +207,8 @@ public class IncompleteFileManager implements Serializable {
     }
     
     /** @see similar(RemoteFileDesc, RemoteFileDesc) */
-    static boolean same(String name1, int size1, URN hash1,
-                        String name2, int size2, URN hash2) {
+    static boolean same(String name1, long size1, URN hash1,
+                        String name2, long size2, URN hash2) {
         //Either they have the same hashes...
         if (hash1!=null && hash2!=null)
             return hash1.equals(hash2);
@@ -242,7 +242,7 @@ public class IncompleteFileManager implements Serializable {
      * Stub for calling
      *  getFile(String, URN, int, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
      */
-    public synchronized File getFile(String name, URN sha1, int size) throws IOException {
+    public synchronized File getFile(String name, URN sha1, long size) throws IOException {
         return getFile(name, sha1, size, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
     }
     
@@ -271,7 +271,7 @@ public class IncompleteFileManager implements Serializable {
      * @throws IOException if there was an IOError while determining the
      * file's name.
      */
-    public synchronized File getFile(String name, URN sha1, int size, File incDir) throws IOException {
+    public synchronized File getFile(String name, URN sha1, long size, File incDir) throws IOException {
         boolean dirsMade = false;
         File baseFile = null;
         File canonFile = null;
@@ -354,7 +354,7 @@ public class IncompleteFileManager implements Serializable {
      * @param count a suffix to attach before the file extension in parens
      *  before the file extension, or 1 for none. 
      */
-    private static String tempName(String filename, int size, int suffix) {
+    private static String tempName(String filename, long size, int suffix) {
         if (suffix<=1) {
             //a) No suffix
             return "T-"+size+"-"+filename;

@@ -1151,7 +1151,7 @@ public class UploaderTest extends BaseTestCase {
         try { Thread.sleep(1000); } catch (InterruptedException ignored) { }
     }
     
-    private static void connectHTTP(HTTPDownloader dloader, int start, int stop, boolean queue) throws Exception {
+    private static void connectHTTP(HTTPDownloader dloader, long start, long stop, boolean queue) throws Exception {
         StubIOStateObserver observer = new StubIOStateObserver();
         synchronized(observer) {
             dloader.connectHTTP(start, stop, queue, 0, observer);
