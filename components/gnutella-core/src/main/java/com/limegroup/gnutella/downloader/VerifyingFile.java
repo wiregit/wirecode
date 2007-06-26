@@ -798,8 +798,9 @@ public class VerifyingFile {
         if (LOG.isDebugEnabled())
             LOG.debug("verifying interval "+i);
         
-        
-        int length = (int)(i.getHigh() - i.getLow() + 1);
+        long length64 = i.getHigh() - i.getLow() + 1;
+        assert length64 <= Integer.MAX_VALUE;
+        int length = (int)(length64);
         byte[] b = CHUNK_CACHE.get(length);
         // read the interval from the file
         try {
@@ -889,6 +890,7 @@ public class VerifyingFile {
         public ChunkHandler(byte[] buf, Range intvl) {
             this.buf = buf;
             this.intvl = intvl;
+            assert Integer.MAX_VALUE >= (intvl.getHigh() - intvl.getLow() + 1);
         }
         
         public void run() {

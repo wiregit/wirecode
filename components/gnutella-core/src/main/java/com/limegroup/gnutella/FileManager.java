@@ -1876,7 +1876,7 @@ public abstract class FileManager {
             return false;
                 
         long fileLength = file.length();
-        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+        if (fileLength <= 0) 
             return false;
         
         return true;
