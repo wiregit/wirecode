@@ -212,8 +212,13 @@ public final class Launcher {
             } catch (IOException ignored) {
             } 
             
-            // launches explorer and highlights the file
-            return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
+            if(file.isDirectory()) {
+                // launches explorer in the directory
+                LimeProcess.exec(new String[] { "explorer", explorePath });
+            } else {
+                // launches explorer and highlights the file
+                return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
+            }
             
         } else if (OSUtils.isMacOSX()) {
             // launches the Finder and highlights the file
