@@ -215,7 +215,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
-    private static int contentLength(URL url) throws IOException {
+    private static long contentLength(URL url) throws IOException {
         try {
             // Verify that the URL is valid.
             new URI(url.toExternalForm().toCharArray());
@@ -237,7 +237,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 throw new IOException("Got " + head.getStatusCode() +
                                       " instead of 200");
             
-            int length = head.getResponseContentLength();
+            long length = head.getResponseContentLength();
             if (length<0)
                 throw new IOException("No content length");
             return length;

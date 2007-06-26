@@ -25,7 +25,6 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.service.MessageService;
-import org.limewire.util.ByteOrder;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -743,8 +742,7 @@ public class DownloadManager implements BandwidthTracker {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
             String name=IncompleteFileManager.getCompletedName(incompleteFile);
-            int size=ByteOrder.long2int(
-                IncompleteFileManager.getCompletedSize(incompleteFile));
+            long size= IncompleteFileManager.getCompletedSize(incompleteFile);
             downloader = new ResumeDownloader(incompleteFileManager,
                                               incompleteFile,
                                               name,

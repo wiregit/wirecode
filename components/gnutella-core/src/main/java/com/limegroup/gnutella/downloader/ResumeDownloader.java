@@ -1,7 +1,12 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.io.ObjectInputStream.GetField;
 
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -23,13 +28,16 @@ public class ResumeDownloader extends ManagedDownloader
         implements Serializable {
     /** Ensures backwards compatibility of the downloads.dat file. */
     static final long serialVersionUID = -4535935715006098724L;
-
+    /** Make everything transient */
+    private static final ObjectStreamField[] serialPersistentFields = 
+        ObjectStreamClass.NO_FIELDS;
+    
     /** The temporary file to resume to. */
-    private final File _incompleteFile;
+    private volatile File _incompleteFile;
     /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
-    private final String _name;
-    private final int _size;
+    private volatile String _name;
+    private volatile long _size;
     
     /**
      * The hash of the completed file.  This field was not included in the LW
@@ -41,7 +49,7 @@ public class ResumeDownloader extends ManagedDownloader
      * SHA1 anyway.  It is still used, however, to keep the sha1 between
      * sessions, since it is serialized.
      */
-    private final URN _hash;
+    private volatile URN _hash;
     
 
     /** 
@@ -59,7 +67,7 @@ public class ResumeDownloader extends ManagedDownloader
     public ResumeDownloader(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
                             String name,
-                            int size) {
+                            long size) {
         super( new RemoteFileDesc[0], incompleteFileManager, null);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
@@ -162,5 +170,19 @@ public class ResumeDownloader extends ManagedDownloader
         else
             return QueryRequest.createQuery(queryName);
     }
-
+    
+    private void readObject(ObjectInputStream stream)
+    throws IOException, ClassNotFoundException {
+        GetField gets = stream.readFields();
+        _hash = (URN)gets.get("_hash", null);
+        _name = (String) gets.get("_name", null);
+        _incompleteFile = (File)gets.get("_incompleteFile",null);
+        Long l;
+        try {
+            l = new Long(gets.get("_size",0)); 
+        } catch (NoSuchFieldError itsLong) {
+            l = new Long(gets.get("_size", 0l));
+        }
+        _size = l.longValue();
+    }
 }

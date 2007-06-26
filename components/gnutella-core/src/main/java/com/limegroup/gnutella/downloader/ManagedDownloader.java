@@ -1509,7 +1509,7 @@ public class ManagedDownloader extends AbstractDownloader
                         
                         // TODO: Gnutella is not 64bit compatible
                         if (contentLength <= Integer.MAX_VALUE) {
-                            propertiesMap.put(FILE_SIZE, (int)contentLength);
+                            propertiesMap.put(FILE_SIZE, contentLength);
                         }
                     }
                 }
@@ -2872,8 +2872,8 @@ public class ManagedDownloader extends AbstractDownloader
 	 * properties map under {@link #FILE_SIZE}.
 	 */
     public synchronized long getContentLength() {
-        Integer i = (Integer)propertiesMap.get(FILE_SIZE);
-        return i != null ? i.intValue() : -1;
+        Number i = (Number)propertiesMap.get(FILE_SIZE);
+        return i != null ? i.longValue() : -1;
     }
 
     /**
