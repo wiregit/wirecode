@@ -119,7 +119,7 @@ public class BrowseTest extends LimeTestCase {
 
             InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
             List<String> files = new ArrayList<String>();
-            while (in.available() > 0) {
+            while (true) {
                 Message m;
                 try {
                     m = MessageFactory.read(in);
