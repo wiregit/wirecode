@@ -62,7 +62,7 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
      */
     public boolean handleWrite() throws IOException {
         WriteObserver chain = interested;
-        if(chain != null) 
+        if(lastInterest && chain != null) 
             return chain.handleWrite();
         else
             return false;
