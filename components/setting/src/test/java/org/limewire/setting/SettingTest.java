@@ -3,6 +3,7 @@ package org.limewire.setting;
 import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -385,5 +386,51 @@ public class SettingTest extends BaseTestCase {
         // should be more yes than no but still some no's
         assertGreaterThan(0, no);
         assertGreaterThan(no, yes);
+    }
+    
+    public void testPBooleanArraySetting() throws Exception {
+        File f = new File("testSettings.props");
+        f.deleteOnExit();
+        SettingsFactory factory = new SettingsFactory(f);
+        
+        PBooleanArraySetting set = factory.createPBooleanArraySetting("a", new String[0]);
+        
+        // test all true
+        set.setValue("1.0","1.0","1.0","1.0");
+        assertEquals(4,set.length());
+        for (int i = 0; i < set.length(); i++)
+            assertTrue(set.get(i));
+        
+        // test all false
+        set.setValue("0.0","0.0","0.0","0.0","0.0");
+        assertEquals(5,set.length());
+        for (int i = 0; i < set.length(); i++)
+            assertFalse(set.get(i));
+        
+        // if all are set to 0.5, about half should be true
+        String [] values = new String[1000];
+        for (int i = 0; i < 1000; i++)
+            values[i] = "0.5";
+        set.setValue(values);
+        assertEquals(1000, set.length());
+        BitSet bitset = new BitSet(1000);
+        for (int i = 0; i < 1000; i++) {
+            if (set.get(i))
+                bitset.set(i);
+        }
+        // allow +- 50
+        assertGreaterThan(450, bitset.cardinality());
+        assertLessThan(550, bitset.cardinality());
+        
+        // but which ones are set should be different every time
+        set.setValue("0.0");
+        set.setValue(values);
+        BitSet other = new BitSet(1000);
+        for (int i = 0; i < 1000; i++) {
+            if (set.get(i))
+                other.set(i);
+        }
+        bitset.xor(other);
+        assertGreaterThan(0, bitset.cardinality());
     }
 }

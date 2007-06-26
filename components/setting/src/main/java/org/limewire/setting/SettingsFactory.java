@@ -745,6 +745,20 @@ public final class SettingsFactory implements Iterable<Setting> {
         return result;
     }
     
+    public synchronized PBooleanArraySetting createPBooleanArraySetting(
+            String key, String [] defaultValue) {
+        PBooleanArraySetting result = new PBooleanArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
+    public synchronized PBooleanArraySetting createRemotePBooleanArraySetting(
+            String key, String [] defaultValue, String remoteKey) {
+        PBooleanArraySetting result = new PBooleanArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, remoteKey);
+        return result;
+    }
+    
     /**
      * Creates a new <tt>PasswordSetting</tt> instance with the specified
      * key and default value.
