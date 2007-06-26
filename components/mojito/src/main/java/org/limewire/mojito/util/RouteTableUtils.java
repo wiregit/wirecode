@@ -37,6 +37,10 @@ public class RouteTableUtils {
      */
     public static float getPercentageOfAliveContacts(RouteTable routeTable) {
         Collection<Contact> activeContacts = routeTable.getActiveContacts();
+        if (activeContacts.isEmpty()) {
+            return 0.0f;
+        }
+        
         int alive = 0;
         for (Contact node : activeContacts) {
             if (node.isAlive()) {
