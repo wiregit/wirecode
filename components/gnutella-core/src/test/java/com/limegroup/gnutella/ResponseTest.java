@@ -626,7 +626,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1);
+        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1, 0);
         addGGEP(baos, gc);
         
         // See if we can correctly read the GGEP block.
@@ -668,7 +668,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1);
+        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1, 0);
         addGGEP(baos, gc);
         
         // See if we can correctly read the GGEP block.
@@ -794,6 +794,28 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertResponseParsingFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
         assertResponseParsingFails(new Response(4545, 3454, ""));
         assertResponseParsingFails(new Response(1454, 3245, "dlksdf\r"));
+    }
+    
+    public void testLargeFiles() throws Exception {
+        Response resp = new Response(1, Long.MAX_VALUE, "asdf");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resp.writeToStream(baos);
+        byte [] data = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        Response read = Response.createFromStream(bais);
+        assertEquals(Long.MAX_VALUE, read.getSize());
+        
+        // also check the data manually
+        
+        // 1. the legacy size field should have all bits set
+        for (int i = 4; i < 8; i++)
+            assertEquals(-1, data[i]);
+        
+        // find where the ggep starts
+        int firstNull = 8;
+        while(data[firstNull++] != 0x0);
+        GGEP g = new GGEP(data, firstNull);
+        assertEquals(Long.MAX_VALUE, g.getLong(GGEP.GGEP_HEADER_LARGE_FILE));
     }
     
     private static void assertResponseParsingFails(Response r) throws Exception {

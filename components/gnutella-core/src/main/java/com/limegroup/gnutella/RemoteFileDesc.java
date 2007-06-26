@@ -400,7 +400,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		_port = port;
 		_index = index;
 		_filename = filename;
-		_size = size < Integer.MAX_VALUE ? (int) size : -1;
+		_size = size <= Integer.MAX_VALUE ? (int) size : -1;
         longSize = size;
         _firewalled = firewalled;
 		

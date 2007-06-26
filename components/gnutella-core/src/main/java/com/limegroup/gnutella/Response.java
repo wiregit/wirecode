@@ -150,7 +150,8 @@ public class Response {
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
 			    getAsIpPorts(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
-			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
+			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn()),
+                fd.getFileSize()),
 			 null);
 	}
 
@@ -180,7 +181,7 @@ public class Response {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
         // see note in createFromStream about Integer.MAX_VALUE
-        if (size > Integer.MAX_VALUE || size < 0)
+        if (size < 0)
             throw new IllegalArgumentException("invalid size: " + size);
             
         this.index=index;
@@ -208,9 +209,12 @@ public class Response {
 		else
 			this.urns = Collections.unmodifiableSet(urns);
 		
-        if(ggepData == null)
-            this.ggepData = GGEPContainer.EMPTY;
-        else
+        if(ggepData == null) {
+            if (size <= Integer.MAX_VALUE)
+                this.ggepData = GGEPContainer.EMPTY;
+            else
+                this.ggepData = new GGEPContainer(null,-1l, size);
+        } else
 		    this.ggepData = ggepData;
 		
 		if (extensions != null)
@@ -237,11 +241,7 @@ public class Response {
         
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IOException("invalid index: " + index);
-        // must use Integer.MAX_VALUE instead of mask because
-        // this value is later converted to an int, so we want
-        // to ensure that when it's converted it doesn't become
-        // negative.
-        if (size > Integer.MAX_VALUE || size < 0)
+        if (size < 0)
             throw new IOException("invalid size: " + size);        
 
         //The file name is terminated by a null terminator.  
@@ -292,6 +292,8 @@ public class Response {
             }
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
+            if (ggep.size64 > Integer.MAX_VALUE)
+                size = ggep.size64;
 
 			return new Response(index, size, name, 
 			                    urns, doc, ggep, rawMeta);
@@ -381,7 +383,7 @@ public class Response {
 	 */
 	private static byte[] createExtBytes(Set<? extends URN> urns, GGEPContainer ggep) {
         try {
-            if( isEmpty(urns) && ggep.isEmpty() )
+            if( isEmpty(urns) && ggep.isEmpty())
                 return DataUtils.EMPTY_BYTE_ARRAY;
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();            
@@ -462,7 +464,10 @@ public class Response {
      */
     public void writeToStream(OutputStream os) throws IOException {
         ByteOrder.int2leb((int)index, os);
-        ByteOrder.int2leb((int)size, os);
+        if (size > Integer.MAX_VALUE)
+            os.write(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF});
+        else
+            ByteOrder.int2leb((int)size, os);
         for (int i = 0; i < nameBytes.length; i++)
             os.write(nameBytes[i]);
         //Write first null terminator.
@@ -588,7 +593,7 @@ public class Response {
                  data.getPort(),
                  getIndex(),
                  getName(),
-                 (int)getSize(),
+                 getSize(),
                  data.getClientGUID(),
                  data.getSpeed(),
                  data.isChatEnabled(),
@@ -630,7 +635,7 @@ public class Response {
 
 
     public int hashCode() {
-        return  31 * 31 * getName().hashCode() + 31 * (int)getSize()+(int)getIndex();
+        return  (int)((31 * 31 * getName().hashCode() + 31 * getSize()+getIndex()));
     }
 
 	/**
@@ -661,8 +666,9 @@ public class Response {
          */
         static void addGGEP(OutputStream out, GGEPContainer ggep)
           throws IOException {
-            if( ggep == null || (ggep.locations.size() == 0 && ggep.createTime <= 0))
-                throw new NullPointerException("null or empty locations");
+            if( ggep == null || (ggep.locations.size() == 0 && 
+                    ggep.createTime <= 0 && ggep.size64 <= Integer.MAX_VALUE))
+                throw new NullPointerException("null or empty locations and small size");
             
             GGEP info = new GGEP(true);
             if(ggep.locations.size() > 0) {
@@ -683,6 +689,8 @@ public class Response {
             if(ggep.createTime > 0)
                 info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
             
+            if (ggep.size64 > Integer.MAX_VALUE)
+                info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
             
             info.write(out);
         }
@@ -697,6 +705,7 @@ public class Response {
 
             Set<? extends IpPort> locations = null;
             long createTime = -1;
+            long size64 = 0;
             
             // if the block has a ALTS value, get it, parse it,
             // and move to the next.
@@ -719,8 +728,14 @@ public class Response {
                 } catch(BadGGEPPropertyException bad) {}
             }
             
-            return (locations == null && createTime == -1) ?
-                GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
+            if (ggep.hasKey(GGEP.GGEP_HEADER_LARGE_FILE)) {
+                try {
+                    size64 = ggep.getLong(GGEP.GGEP_HEADER_LARGE_FILE);
+                } catch(BadGGEPPropertyException bad) {}
+            }
+            
+            return (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE) ?
+                GGEPContainer.EMPTY : new GGEPContainer(locations, createTime, size64);
         }
         
         /**
@@ -782,22 +797,24 @@ public class Response {
     static final class GGEPContainer {
         final Set<? extends IpPort> locations;
         final long createTime;
+        final long size64;
         private static final GGEPContainer EMPTY = new GGEPContainer();
         
         private GGEPContainer() {
-            this(null, -1);
+            this(null, -1, 0);
         }
         
-        GGEPContainer(Set<? extends IpPort> locs, long create) {
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64) {
             if(locs == null)
                 locations = Collections.emptySet();
             else
                 locations = Collections.unmodifiableSet(locs);
             createTime = create;
+            this.size64 = size64;
         }
         
         boolean isEmpty() {
-            return locations.isEmpty() && createTime <= 0;
+            return locations.isEmpty() && createTime <= 0 && size64 <= Integer.MAX_VALUE;
         }
     }
 }
