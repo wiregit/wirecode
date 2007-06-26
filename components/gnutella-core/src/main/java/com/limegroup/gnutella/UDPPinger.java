@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.Message;
@@ -138,6 +139,8 @@ public class UDPPinger {
             bundle = new SenderBundle(hosts, listener, canceller, message, DEFAULT_LISTEN_EXPIRE_TIME);
         }
         
+        bundle.validateHosts();
+        
         QUEUE.execute(bundle);
     }
     
@@ -244,6 +247,17 @@ public class UDPPinger {
 
         public void run() {
             send(hosts,listener,canceller,message,expireTime);
+        }
+        
+        /**
+         * Runs through all the hosts and throws an IllegalArgumentException
+         * if any host is invalid.
+         */
+        void validateHosts() {
+            for(IpPort host : hosts) {
+                if(!NetworkUtils.isValidIpPort(host))
+                    throw new IllegalArgumentException("invalid host: " + host);
+            }
         }
     }
 }
