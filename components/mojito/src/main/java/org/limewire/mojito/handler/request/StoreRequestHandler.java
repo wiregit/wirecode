@@ -20,6 +20,7 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +41,7 @@ import org.limewire.security.SecurityToken;
 
 /**
  * The StoreRequestHandler handles incoming store requests as
- * sent by other Nodes. It performs some probabilty tests to
+ * sent by other Nodes. It performs some probability tests to
  * make sure the request makes sense (i.e. if the Key is close
  * to us and so on).
  */
@@ -72,7 +73,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        if (!securityToken.isFor(new AddressSecurityToken.AddressTokenData(request.getContact().getContactAddress()))) {
+        SocketAddress addr = request.getContact().getContactAddress();
+        if (!securityToken.isFor(new AddressSecurityToken.AddressTokenData(addr))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);

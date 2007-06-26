@@ -40,7 +40,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 
 
 /**
- * The FindNodeRequestHandler handles incoming FIND_VALUE requests
+ * The FindValueRequestHandler handles incoming FIND_VALUE requests
  */
 public class FindValueRequestHandler extends AbstractRequestHandler {
     
@@ -113,7 +113,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                 && availableKeys.isEmpty()) {
             
             if (LOG.isInfoEnabled()) {
-                LOG.info("No values for " + lookupId + ", returning Contacts instead to " + request.getContact());
+                LOG.info("No values for " + lookupId 
+                    + ", returning Contacts instead to " + request.getContact());
             }
             
             // OK, send Contacts instead!
