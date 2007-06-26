@@ -273,6 +273,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      * Otherwise, returns true.
      */
     private boolean processHandshakeResult(boolean reading, boolean writing, HandshakeStatus hs) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Processing result from: " + engine + ", result: " + hs);
+        
         needsHandshakeWrap = false;
         needsHandshakeUnwrap = false;
         switch(hs) {
@@ -281,13 +284,32 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             return false;
         case NEED_WRAP:
             needsHandshakeWrap = true;
-            writeSink.interestWrite(this, true);
+            // IMPORTANT:  read interest must be turned off before write
+            //             interest is turned on.  This is necessary because
+            //             if write interest is turned on from the TASK thread,
+            //             it can get immediate notification from NIODispatcher,
+            //             which can continue processing more results, and will
+            //             set read interest on.  Then, when the context switches
+            //             back to this thread, it would turn read interest off.
+            //             So: TURN READ INTEREST OFF FIRST!
             readSink.interestRead(false);
+            writeSink.interestWrite(this, true);
             return writing;
         case NEED_UNWRAP:
-            needsHandshakeUnwrap = true;
-            readSink.interestRead(true);
+            // IMPORTANT:  write interest must be turned off before write
+            //             interest is turned on.  This is necessary because
+            //             if read interest is turned on from the TASK thread,
+            //             it can get immediate notification from NIODispatcher,
+            //             which can continue processing more results, and will
+            //             set read interest on.  Then, when the context switches
+            //             back to this thread, it would turn write interest off.
+            //             So: TURN WRITE INTEREST OFF FIRST!
+            
             writeSink.interestWrite(null, false);
+            synchronized(readInterestLock) {
+                needsHandshakeUnwrap = true;
+                readSink.interestRead(true);
+            }
             // If we had previously buffered read data, force a read.
             if(readDataLeft && !reading)
                 NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
@@ -498,7 +520,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         synchronized(taskLock) {
             synchronized(readInterestLock) {
                 readInterest = status;
-                readSink.interestRead(!taskScheduled && (needsHandshakeUnwrap || status));
+                boolean interest = !taskScheduled && (needsHandshakeUnwrap || status);
+                readSink.interestRead(interest);
             }
         }
     }
