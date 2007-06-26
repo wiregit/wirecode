@@ -3,10 +3,12 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream.PutField;
 
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -184,5 +186,14 @@ public class ResumeDownloader extends ManagedDownloader
             l = new Long(gets.get("_size", 0l));
         }
         _size = l.longValue();
+    }
+    
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        PutField puts = stream.putFields();
+        puts.put("_name", _name);
+        puts.put("_incompleteFile",_incompleteFile);
+        puts.put("_size", _size);
+        puts.put("_hash",_hash);
+        stream.writeFields();
     }
 }
