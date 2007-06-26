@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -76,11 +76,11 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         assertNull(ifm.getEntry(file));
         assertEquals(0, ifm.getBlockSize(file));
         //1 block
-        vf.addInterval(new Interval(0,10));
+        vf.addInterval(Range.createRange(0,10));
         ifm.addEntry(file,vf);
         assertEquals(11, ifm.getBlockSize(file));//full inclusive now
         iter=ifm.getEntry(file).getBlocks().iterator();
-        assertEquals(new Interval(0, 10), iter.next());
+        assertEquals(Range.createRange(0, 10), iter.next());
         assertTrue(! iter.hasNext());
         
         SharingSettings.INCOMPLETE_PURGE_TIME.setValue(26);
@@ -333,7 +333,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             File incomplete=ifm1.getFile(rfd);
             VerifyingFile vf=new VerifyingFile(1839);
-            vf.addInterval(new Interval(10, 100));  //inclusive
+            vf.addInterval(Range.createRange(10, 100));  //inclusive
             ifm1.addEntry(incomplete, vf);
 
             //Write to disk.
@@ -365,7 +365,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
             assertTrue(vf2!=null);
             Iterator /* of Interval */ iter=vf2.getBlocks().iterator();
             assertTrue(iter.hasNext());
-            assertEquals(new Interval(10, 100), iter.next());
+            assertEquals(Range.createRange(10, 100), iter.next());
             assertTrue(!iter.hasNext());
             assertEquals(new File(inDir, "T-1839-file name.txt"),
                 ifm2.getFile(newRFD("different name.txt", 1839, 

@@ -40,7 +40,7 @@ public class BandwidthTrackerImpl implements Serializable {
     private transient float cachedBandwidth = 0;
     
     long lastTime;
-    int lastAmountRead;
+    long lastAmountRead;
 
     /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
      *  for backwards serialization reasons. */
@@ -55,7 +55,7 @@ public class BandwidthTrackerImpl implements Serializable {
      *  Should be larger than the argument passed in the last call to
      *  measureBandwidth(..).
      */
-    public synchronized void measureBandwidth(int amountRead) {
+    public synchronized void measureBandwidth(long amountRead) {
         long currentTime=System.currentTimeMillis();
         //We always discard the first sample, and any others until after
         //progress is made.  

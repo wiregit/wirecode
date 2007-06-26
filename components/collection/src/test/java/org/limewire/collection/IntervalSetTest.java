@@ -74,11 +74,11 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals("getSize() broken", 6, iSet.getSize());
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 39, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 39, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testLowerBoundaryColation() throws Exception {
@@ -87,8 +87,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals("lower boundry colating failed", 1, iSet.getNumberOfIntervals());
         interval = getIntervalAt(0);
-        assertEquals("lower boundry colating failed", 45, interval.high);
-        assertEquals("lower boundry colating failed", 35, interval.low);
+        assertEquals("lower boundry colating failed", 45, interval.getHigh());
+        assertEquals("lower boundry colating failed", 35, interval.getLow());
         assertEquals("getSize() broken", 11, iSet.getSize());
     }
     
@@ -98,8 +98,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals("lower overlap colating failed", 1, iSet.getNumberOfIntervals());
         interval = getIntervalAt(0);
-        assertEquals("lower boundry colating failed", 45, interval.high);
-        assertEquals("lower boundry colating failed", 30, interval.low);
+        assertEquals("lower boundry colating failed", 45, interval.getHigh());
+        assertEquals("lower boundry colating failed", 30, interval.getLow());
     }
     
     public void testLowerNonOverlap() throws Exception {
@@ -110,14 +110,14 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals("getSize() broken", 22, iSet.getSize());
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 19, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 19, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 26, interval.low);
-        assertEquals("getNeededInterval broken", 29, interval.high);
+        assertEquals("getNeededInterval broken", 26, interval.getLow());
+        assertEquals("getNeededInterval broken", 29, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testUpperNonOverlap() throws Exception {
@@ -129,17 +129,17 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals("getSize() broken", 33, iSet.getSize());
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 19, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 19, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 26, interval.low);
-        assertEquals("getNeededInterval broken", 29, interval.high);
+        assertEquals("getNeededInterval broken", 26, interval.getLow());
+        assertEquals("getNeededInterval broken", 29, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 49, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 49, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 61, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 61, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsMidRange() throws Exception {
@@ -153,11 +153,11 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 2, list.size());
         interval = (Interval)list.get(0);//first interval
-        assertEquals("getOverlapIntervals broken", 23, interval.low);
-        assertEquals("getOverlapIntervals broken", 25, interval.high);
+        assertEquals("getOverlapIntervals broken", 23, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 25, interval.getHigh());
         interval = (Interval)list.get(1);
-        assertEquals("getOverlapIntervals broken", 30, interval.low);
-        assertEquals("getOverlapIntervals broken", 32, interval.high);
+        assertEquals("getOverlapIntervals broken", 30, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 32, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsBoundary() throws Exception {
@@ -169,11 +169,11 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 2, list.size());
         interval = (Interval)list.get(0);//first interval
-        assertEquals("getOverlapIntervals broken", 25, interval.low);
-        assertEquals("getOverlapIntervals broken", 25, interval.high);
+        assertEquals("getOverlapIntervals broken", 25, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 25, interval.getHigh());
         interval = (Interval)list.get(1);
-        assertEquals("getOverlapIntervals broken", 30, interval.low);
-        assertEquals("getOverlapIntervals broken", 30, interval.high);
+        assertEquals("getOverlapIntervals broken", 30, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 30, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsLowRange() throws Exception {
@@ -185,8 +185,8 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 1, list.size());
         interval = (Interval)list.get(0);
-        assertEquals("getOverlapIntervals broken", 20, interval.low);
-        assertEquals("getOverlapIntervals broken", 23, interval.high);
+        assertEquals("getOverlapIntervals broken", 20, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 23, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsLowBoundary() throws Exception {
@@ -198,8 +198,8 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 1, list.size());
         interval = (Interval)list.get(0);
-        assertEquals("getOverlapIntervals broken", 20, interval.low);
-        assertEquals("getOverlapIntervals broken", 20, interval.high);
+        assertEquals("getOverlapIntervals broken", 20, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 20, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsHighRange() throws Exception {
@@ -211,8 +211,8 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 1, list.size());
         interval = (Interval)list.get(0);
-        assertEquals("getOverlapIntervals broken", 23, interval.low);
-        assertEquals("getOverlapIntervals broken", 25, interval.high);
+        assertEquals("getOverlapIntervals broken", 23, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 25, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsHighBoundary() throws Exception {
@@ -224,8 +224,8 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 1, list.size());
         interval = (Interval)list.get(0);
-        assertEquals("getOverlapIntervals broken", 25, interval.low);
-        assertEquals("getOverlapIntervals broken", 25, interval.high);
+        assertEquals("getOverlapIntervals broken", 25, interval.getLow());
+        assertEquals("getOverlapIntervals broken", 25, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsNoRange() throws Exception {
@@ -251,14 +251,14 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 3, list.size());
         interval = (Interval)list.get(0);
-        assertEquals(23, interval.low);
-        assertEquals(25, interval.high);
+        assertEquals(23, interval.getLow());
+        assertEquals(25, interval.getHigh());
         interval = (Interval)list.get(1);
-        assertEquals(30, interval.low);
-        assertEquals(45, interval.high);
+        assertEquals(30, interval.getLow());
+        assertEquals(45, interval.getHigh());
         interval = (Interval)list.get(2);
-        assertEquals(50, interval.low);
-        assertEquals(53, interval.high);
+        assertEquals(50, interval.getLow());
+        assertEquals(53, interval.getHigh());
     }
     
     public void testGetOverlapIntervalsAllRanges() throws Exception {
@@ -270,14 +270,14 @@ public class IntervalSetTest extends BaseTestCase {
         list = iSet.getOverlapIntervals(interval);
         assertEquals("getOverlapIntervals broken", 3, list.size());
         interval = (Interval)list.get(0);
-        assertEquals(20, interval.low);
-        assertEquals(25, interval.high);
+        assertEquals(20, interval.getLow());
+        assertEquals(25, interval.getHigh());
         interval = (Interval)list.get(1);
-        assertEquals(30, interval.low);
-        assertEquals(45, interval.high);
+        assertEquals(30, interval.getLow());
+        assertEquals(45, interval.getHigh());
         interval = (Interval)list.get(2);
-        assertEquals(50, interval.low);
-        assertEquals(60, interval.high);
+        assertEquals(50, interval.getLow());
+        assertEquals(60, interval.getHigh());
     }
     
     public void testAddHighColation() throws Exception {
@@ -289,8 +289,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(2);
-        assertEquals(50, interval.low);
-        assertEquals(70, interval.high);
+        assertEquals(50, interval.getLow());
+        assertEquals(70, interval.getHigh());
         assertEquals("getSize() broken", 43, iSet.getSize());
     }
     
@@ -302,16 +302,16 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(2);
-        assertEquals(50, interval.low);
-        assertEquals(75, interval.high);
+        assertEquals(50, interval.getLow());
+        assertEquals(75, interval.getHigh());
         assertEquals("getSize() broken", 48, iSet.getSize());
         //test some boundry conditions [20-25],[30-45],[50-75]
         interval = new Interval(75,80);
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(2);
-        assertEquals(50, interval.low);
-        assertEquals(80, interval.high);
+        assertEquals(50, interval.getLow());
+        assertEquals(80, interval.getHigh());
     }
 
     public void testAddLowBoundaryColation() {
@@ -322,8 +322,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(0);
-        assertEquals(15, interval.low);
-        assertEquals(25, interval.high);
+        assertEquals(15, interval.getLow());
+        assertEquals(25, interval.getHigh());
         assertEquals("getSize() broken", 58, iSet.getSize());
     }
     
@@ -333,17 +333,17 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(new Interval(50,80));
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 14, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 14, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 26, interval.low);
-        assertEquals("getNeededInterval broken", 29, interval.high);
+        assertEquals("getNeededInterval broken", 26, interval.getLow());
+        assertEquals("getNeededInterval broken", 29, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 49, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 49, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 81, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 81, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testAddOverlappingInterval() {
@@ -354,8 +354,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(2);
-        assertEquals(49, interval.low);
-        assertEquals(81, interval.high);
+        assertEquals(49, interval.getLow());
+        assertEquals(81, interval.getHigh());
         assertEquals("getSize() broken", 60, iSet.getSize());
     }
     
@@ -367,8 +367,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(3, iSet.getNumberOfIntervals());
         interval = getIntervalAt(2);
-        assertEquals(49, interval.low);
-        assertEquals(81, interval.high);
+        assertEquals(49, interval.getLow());
+        assertEquals(81, interval.getHigh());
     }
     
     public void testAddFullBetweenInterval() {
@@ -379,18 +379,18 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(2, iSet.getNumberOfIntervals());
         interval = getIntervalAt(0);
-        assertEquals(15, interval.low);
-        assertEquals(45, interval.high);
+        assertEquals(15, interval.getLow());
+        assertEquals(45, interval.getHigh());
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 14, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 14, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 48, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 48, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 82, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 82, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
      
     public void testGetNeededIntervalsAgain() {   
@@ -402,20 +402,20 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 2, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 2, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 6, interval.low);
-        assertEquals("getNeededInterval broken", 6, interval.high);
+        assertEquals("getNeededInterval broken", 6, interval.getLow());
+        assertEquals("getNeededInterval broken", 6, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 10, interval.low);
-        assertEquals("getNeededInterval broken", 14, interval.high);
+        assertEquals("getNeededInterval broken", 10, interval.getLow());
+        assertEquals("getNeededInterval broken", 14, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 46, interval.low);
-        assertEquals("getNeededInterval broken", 48, interval.high);
+        assertEquals("getNeededInterval broken", 46, interval.getLow());
+        assertEquals("getNeededInterval broken", 48, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 82, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 82, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testAddFullLowCoveringInterval() {
@@ -428,8 +428,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(interval);
         assertEquals(2, iSet.getNumberOfIntervals());
         interval = getIntervalAt(0);
-        assertEquals(2, interval.low);
-        assertEquals(45, interval.high);
+        assertEquals(2, interval.getLow());
+        assertEquals(45, interval.getHigh());
         assertEquals("getSize() broken", 77, iSet.getSize());
     }
     
@@ -441,16 +441,16 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(1, iSet.getNumberOfIntervals());
         //{[2-81]}
         interval = getIntervalAt(0);
-        assertEquals(2, interval.low);
-        assertEquals(81, interval.high);
+        assertEquals(2, interval.getLow());
+        assertEquals(81, interval.getHigh());
         assertEquals("getSize() broken", 80, iSet.getSize());
         iter = iSet.getNeededIntervals(100);
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 0, interval.low);
-        assertEquals("getNeededInterval broken", 1, interval.high);
+        assertEquals("getNeededInterval broken", 0, interval.getLow());
+        assertEquals("getNeededInterval broken", 1, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals("getNeededInterval broken", 82, interval.low);
-        assertEquals("getNeededInterval broken", 99, interval.high);
+        assertEquals("getNeededInterval broken", 82, interval.getLow());
+        assertEquals("getNeededInterval broken", 99, interval.getHigh());
     }
     
     public void testGetNeededWithNoneAndSome() {
@@ -461,8 +461,8 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(new Interval(6,10));
         iter = iSet.getNeededIntervals(20);
         interval = (Interval)iter.next();
-        assertEquals(11, interval.low);
-        assertEquals(19, interval.high);
+        assertEquals(11, interval.getLow());
+        assertEquals(19, interval.getHigh());
         assertTrue(!iter.hasNext());
     }
     
@@ -479,23 +479,23 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(6, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(12, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(12, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(16, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(16, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(24, interval.low);
-        assertEquals(24, interval.high);
+        assertEquals(24, interval.getLow());
+        assertEquals(24, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(32, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(32, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(36, interval.low);
-        assertEquals(40, interval.high);
+        assertEquals(36, interval.getLow());
+        assertEquals(40, interval.getHigh());
     }
     
     public void testDeleteNothing() {
@@ -509,23 +509,23 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(6, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(12, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(12, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(16, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(16, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(24, interval.low);
-        assertEquals(24, interval.high);
+        assertEquals(24, interval.getLow());
+        assertEquals(24, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(32, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(32, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(36, interval.low);
-        assertEquals(40, interval.high);
+        assertEquals(36, interval.getLow());
+        assertEquals(40, interval.getHigh());
     }
     
     public void testDeleteBoundaries() {
@@ -539,23 +539,23 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(6, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(11, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(11, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(17, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(17, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(24, interval.low);
-        assertEquals(24, interval.high);
+        assertEquals(24, interval.getLow());
+        assertEquals(24, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(32, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(32, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(36, interval.low);
-        assertEquals(40, interval.high);
+        assertEquals(36, interval.getLow());
+        assertEquals(40, interval.getHigh());
     }
     
     public void testDeleteFullInterval() {
@@ -569,20 +569,20 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(5, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(11, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(11, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(17, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(17, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(32, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(32, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(36, interval.low);
-        assertEquals(40, interval.high);
+        assertEquals(36, interval.getLow());
+        assertEquals(40, interval.getHigh());
     }
     
     public void testDeleteSplitsIntoTwo() {
@@ -595,23 +595,23 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(6, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(11, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(11, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(17, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(17, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(28, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(28, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(31, interval.low);
-        assertEquals(32, interval.high);        
+        assertEquals(31, interval.getLow());
+        assertEquals(32, interval.getHigh());        
         interval = (Interval)iter.next();
-        assertEquals(36, interval.low);
-        assertEquals(40, interval.high);
+        assertEquals(36, interval.getLow());
+        assertEquals(40, interval.getHigh());
     }
 
     public void testDeleteFullUpper() {
@@ -625,20 +625,20 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(5, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(8, interval.low);
-        assertEquals(11, interval.high);
+        assertEquals(8, interval.getLow());
+        assertEquals(11, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(17, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(17, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(28, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(28, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(31, interval.low);
-        assertEquals(32, interval.high); 
+        assertEquals(31, interval.getLow());
+        assertEquals(32, interval.getHigh()); 
     }
     
     public void testDeleteIntervalSet() {
@@ -654,20 +654,20 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(5, iSet.getNumberOfIntervals());
         iter = iSet.getAllIntervals();
         interval = (Interval)iter.next();
-        assertEquals(0, interval.low);
-        assertEquals(4, interval.high);
+        assertEquals(0, interval.getLow());
+        assertEquals(4, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(17, interval.low);
-        assertEquals(17, interval.high);
+        assertEquals(17, interval.getLow());
+        assertEquals(17, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(20, interval.low);
-        assertEquals(20, interval.high);
+        assertEquals(20, interval.getLow());
+        assertEquals(20, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(28, interval.low);
-        assertEquals(28, interval.high);
+        assertEquals(28, interval.getLow());
+        assertEquals(28, interval.getHigh());
         interval = (Interval)iter.next();
-        assertEquals(31, interval.low);
-        assertEquals(32, interval.high); 
+        assertEquals(31, interval.getLow());
+        assertEquals(32, interval.getHigh()); 
     }
     
     public void testGetFirstAndIsEmpty() {

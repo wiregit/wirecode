@@ -43,7 +43,7 @@ import org.limewire.util.ByteOrder;
  /* This is a first cut of the class and does
  * not support all the operations IntSet does, just the ones we need for now.
  */ 
-public class IntervalSet implements Iterable<Interval>, Serializable{
+public class IntervalSet implements Iterable<Range>, Serializable{
     
 	private static final long serialVersionUID = -7791242963023638684L;
     
@@ -55,11 +55,11 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     /**
      * The sorted set of intervals this contains.
      */
-    private final List<Interval> intervals;
+    private final List<Range> intervals;
     
     //constructor.
     public IntervalSet() {
-        intervals = new ArrayList<Interval>();
+        intervals = new ArrayList<Range>();
     }
 
     /**
@@ -75,31 +75,31 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         return ret;
     }
     
-    public void add(Interval addInterval) {
-        final int low = addInterval.low;
-        final int high = addInterval.high;
-        Interval lower=null;
-        Interval higher=null;
+    public void add(Range addInterval) {
+        final long low = addInterval.getLow();
+        final long high = addInterval.getHigh();
+        Range lower=null;
+        Range higher=null;
         int start = narrowStart(addInterval)[0];
-        for(Iterator<Interval> iter = intervals.subList(start, intervals.size()).iterator(); iter.hasNext(); ) {
-            Interval interval = iter.next();
-            if (low<=interval.low && interval.high<=high) {//  <low-------high>
+        for(Iterator<Range> iter = intervals.subList(start, intervals.size()).iterator(); iter.hasNext(); ) {
+            Range interval = iter.next();
+            if (low<=interval.getLow() && interval.getHigh()<=high) {//  <low-------high>
                 iter.remove();                             //      interval
                 continue;
             }
 
-            if (low >= interval.low && interval.high >= high) //   <low, high>
+            if (low >= interval.getLow() && interval.getHigh() >= high) //   <low, high>
                 return;                                       // ....interval....
             
-            if (low<=interval.high + 1 && interval.low < low)    //     <low, high>
+            if (low<=interval.getHigh() + 1 && interval.getLow() < low)    //     <low, high>
                 lower=interval;                                  //  interval........
 
-            if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
+            if (interval.getLow() - 1 <=high && interval.getHigh() > high)  //     <low, high>
                 higher=interval;                                  //  .........interval
             
             // if high < interval.low we must have found all overlaps since
             // intervals is sorted.
-            if (higher != null || interval.low > high)
+            if (higher != null || interval.getLow() > high)
                 break;
         }
 
@@ -107,20 +107,20 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         //because there are typically few blocks.
         if (lower==null && higher==null) {
             //a) Doesn't overlap
-            addImpl(new Interval(low, high));
+            addImpl(Range.createRange(low, high));
         } else if (lower!=null && higher!=null) {
             //b) Join two blocks
             removeImpl(higher);
             removeImpl(lower);
-            addImpl(new Interval(lower.low, higher.high));
+            addImpl(Range.createRange(lower.getLow(), higher.getHigh()));
         } else if (higher!=null) {
             //c) Join with higher
             removeImpl(higher);
-            addImpl(new Interval(low, higher.high));
+            addImpl(Range.createRange(low, higher.getHigh()));
         } else /*if (lower!=null)*/ {
             //d) Join with lower
             removeImpl(lower);
-            addImpl(new Interval(lower.low, high));
+            addImpl(Range.createRange(lower.getLow(), high));
         }   
     }
     
@@ -128,7 +128,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * Adds a whole IntervalSet into this IntervalSet.
      */
     public void add(IntervalSet set) {
-        for(Interval interval : set)
+        for(Range interval : set)
             add(interval);
     }
     
@@ -136,33 +136,33 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * Deletes any overlap of existing intervals with the Interval to delete.
      * @param deleteMe the Interval that should be deleted.
      */
-    public void delete(Interval deleteMe) {
-        int low = deleteMe.low;
-        int high = deleteMe.high;
-        Interval lower = null;
-        Interval higher = null;
+    public void delete(Range deleteMe) {
+        long low = deleteMe.getLow();
+        long high = deleteMe.getHigh();
+        Range lower = null;
+        Range higher = null;
         int [] range = narrowRange(deleteMe);
-        for (Iterator<Interval> iter = intervals.subList(range[0],range[1]).iterator(); iter.hasNext();) {
-            Interval interval = iter.next();
-            if (interval.high >= low && interval.low <= high) { //found
+        for (Iterator<Range> iter = intervals.subList(range[0],range[1]).iterator(); iter.hasNext();) {
+            Range interval = iter.next();
+            if (interval.getHigh() >= low && interval.getLow() <= high) { //found
                 iter.remove();                                  // overlap
-                if (interval.high <= high) {
-                    if (interval.low < low)
+                if (interval.getHigh() <= high) {
+                    if (interval.getLow() < low)
                         // interval.low < low <= interval.high <= high
-                        lower = new Interval(interval.low, low - 1);
+                        lower = new Interval(interval.getLow(), low - 1);
                     // else 
                     // low <= interval.low <= interval.high <= high
                     // do nothing, the interval has already been removed
                         
-                } else if (interval.low >= low) {
+                } else if (interval.getLow() >= low) {
                     // low <= interval.low <= high < interval.high
-                    higher = new Interval(high + 1, interval.high);
+                    higher = new Interval(high + 1, interval.getHigh());
                     // safe to break here because intervals is sorted.
                     break;
                 } else {
                     // interval.low < low <= high < interval.high
-                    lower = new Interval(interval.low, low - 1);
-                    higher = new Interval(high + 1, interval.high);
+                    lower = new Interval(interval.getLow(), low - 1);
+                    higher = new Interval(high + 1, interval.getHigh());
                     // we can break here because no other intervals will
                     // overlap with deleteMe
                     break;
@@ -171,7 +171,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
             // stop here because intervals is sorted and all following 
             // intervals will be out of range:
             // low <= high < interval.low <= interval.high
-            else if (interval.low >= high)
+            else if (interval.getLow() >= high)
                 break;
         }
         if (lower != null)
@@ -185,7 +185,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * from this set.
      */
     public void delete(IntervalSet set) {
-        for(Interval interval : set)
+        for(Range interval : set)
             delete(interval);
     }
     
@@ -193,7 +193,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * Returns the first element without modifying this IntervalSet.
      * @throws NoSuchElementException if no intervals exist.
      */
-    public Interval getFirst() throws NoSuchElementException {
+    public Range getFirst() throws NoSuchElementException {
         if(intervals.isEmpty())
             throw new NoSuchElementException();
         
@@ -204,11 +204,11 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * Returns the last element without modifying this IntervalSet.
      * @throws NoSuchElementException if no intervals exist.
      */
-    public Interval getLast() throws NoSuchElementException {
+    public Range getLast() throws NoSuchElementException {
         if(intervals.isEmpty())
             throw new NoSuchElementException();
         
-        Interval ret = intervals.get(intervals.size()-1);
+        Range ret = intervals.get(intervals.size()-1);
         return ret;
     }
     
@@ -220,13 +220,13 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
 	/**
 	 * @return whether this interval set contains fully the given interval
 	 */
-	public boolean contains(Interval i) {
+	public boolean contains(Range i) {
 	    int [] range = narrowStart(i);
 	    for(int j = range[0]; j < range[1]; j++) {
-	        Interval ours = intervals.get(j);
-	        if (ours.low <= i.low && ours.high >= i.high)
+	        Range ours = intervals.get(j);
+	        if (ours.getLow() <= i.getLow() && ours.getHigh() >= i.getHigh())
 	            return true;
-	        if (ours.low > i.high)
+	        if (ours.getLow() > i.getHigh())
 	            break;
 	    }
         return false;        
@@ -236,7 +236,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * narrows the index range where an interval would be found.
      * @return integer array with the start index at position 0 and end index at position 1.
      */
-    private int [] narrowStart(Interval i) {
+    private int [] narrowStart(Range i) {
         int size = intervals.size();
         // not worth doing binary search if too smal
         if (size < LINEAR) 
@@ -254,7 +254,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * would be found.
      * @return integer array with the start index at position 0 and end index at position 1.
      */
-    private int [] narrowRange(Interval i) {
+    private int [] narrowRange(Range i) {
         int size = intervals.size();
         if (size < LINEAR) 
             return new int[]{0,size};
@@ -262,7 +262,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         int a = Collections.binarySearch(intervals, i,IntervalComparator.INSTANCE);
         if (a < 0)
             a = -(a + 1);
-        int b = Collections.binarySearch(intervals, new Interval(i.high, i.high),IntervalComparator.INSTANCE);
+        int b = Collections.binarySearch(intervals, Range.createRange(i.getHigh(), i.getHigh()),IntervalComparator.INSTANCE);
         if (b < 0)
             b = -(b + 1);
         a = Math.max(0, a - 1);
@@ -273,22 +273,22 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     /**
      * @return whether this interval set contains any part of the given interval
      */
-    public boolean containsAny(Interval i) {
-        int low = i.low;
-        int high = i.high;
+    public boolean containsAny(Range i) {
+        long low = i.getLow();
+        long high = i.getHigh();
         int [] range = narrowStart(i);
         for(int j = range[0]; j < range[1]; j++) {
-            Interval interval = intervals.get(j);
-            if (low<=interval.low && interval.high<=high)  //  <low-------high>
+            Range interval = intervals.get(j);
+            if (low<=interval.getLow() && interval.getHigh()<=high)  //  <low-------high>
                 return true;                               //      interval
 
-            if (low >= interval.low && interval.high >= high) //   <low, high>
+            if (low >= interval.getLow() && interval.getHigh() >= high) //   <low, high>
                 return true;                                  // ....interval....
             
-            if (low<=interval.high + 1 && interval.low < low)    //     <low, high>
+            if (low<=interval.getHigh() + 1 && interval.getLow() < low)    //     <low, high>
                 return true;                                     //  interval........
 
-            if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
+            if (interval.getLow() - 1 <=high && interval.getHigh() > high)  //     <low, high>
                 return true;                                     //  .........interval
         }
         
@@ -301,31 +301,31 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * this method should return a list of 2 intervals {[3-4],[6-8]}
      * If there are no overlaps, this method returns an empty List.
      */
-    public List<Interval> getOverlapIntervals(Interval checkInterval) {
-        List<Interval> overlapBlocks = new ArrayList<Interval>(); //initialize for this write
-        long high =checkInterval.high;
-        long low = checkInterval.low;
+    public List<Range> getOverlapIntervals(Range checkInterval) {
+        List<Range> overlapBlocks = new ArrayList<Range>(); //initialize for this write
+        long high =checkInterval.getHigh();
+        long low = checkInterval.getLow();
         if (low > high)
             return overlapBlocks;
         
         
         int []range = narrowRange(checkInterval);
         for(int j = range[0]; j < range[1]; j++) {
-            Interval interval = intervals.get(j);
+            Range interval = intervals.get(j);
             //case a:
-            if(low <= interval.low && interval.high <= high) {
+            if(low <= interval.getLow() && interval.getHigh() <= high) {
                 //Need to check the whole interval, starting point=interval.low
                 overlapBlocks.add(interval);
                 continue;
             }
             //case b:
-            if(low<=interval.high && interval.low < low) {
-                overlapBlocks.add(new Interval(low,
-                                           Math.min(high,interval.high)));
+            if(low<=interval.getHigh() && interval.getLow() < low) {
+                overlapBlocks.add(Range.createRange(low,
+                                           Math.min(high,interval.getHigh())));
             }
             //case c:
-            if(interval.low <= high && interval.high > high) {
-                overlapBlocks.add(new Interval(Math.max(interval.low,low),
+            if(interval.getLow() <= high && interval.getHigh() > high) {
+                overlapBlocks.add(new Interval(Math.max(interval.getLow(),low),
                                                high));
             }
             //Note: There is one condition under which case b and c are both
@@ -339,22 +339,22 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         return overlapBlocks;
     }
 
-    public Iterator<Interval> getAllIntervals() {
+    public Iterator<Range> getAllIntervals() {
         return intervals.iterator();
     }
     
-    public Iterator<Interval> iterator() {
+    public Iterator<Range> iterator() {
         return intervals.iterator();
     }
 
-    public List<Interval> getAllIntervalsAsList() {
-        return new ArrayList<Interval>(intervals);
+    public List<Range> getAllIntervalsAsList() {
+        return new ArrayList<Range>(intervals);
     }
 
-    public int getSize() {
-        int sum=0;
-        for(Interval block : intervals) {
-            sum+=block.high-block.low+1;
+    public long getSize() {
+        long sum=0;
+        for(Range block : intervals) {
+            sum+=block.getHigh()-block.getLow()+1;
         }
         return sum;
     }
@@ -372,12 +372,12 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * IntervalSet
      * @return IntervalSet containing all ranges not contained in this
      */
-    public IntervalSet invert(int maxSize) {
+    public IntervalSet invert(long maxSize) {
         IntervalSet ret = new IntervalSet();
         if(maxSize < 1) 
             return ret; //return an empty IntervalSet
         if (intervals.size()==0) {//Nothing recorded?
-            Interval block=new Interval(0, maxSize-1);
+            Range block=Range.createRange(0, maxSize-1);
             ret.add(block);
             return ret;
         }
@@ -386,13 +386,13 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
         //We take advantage of the fact that intervals are disjoint.  Treat
         //beginning specially.  
         //LOOP INVARIANT: interval!=null ==> low==interval.high
-        int low=-1;
-        Interval interval=null;
+        long low=-1;
+        Range interval=null;
         boolean fixed = false;
-        for (Iterator<Interval> iter=intervals.iterator(); iter.hasNext(); ) {
+        for (Iterator<Range> iter=intervals.iterator(); iter.hasNext(); ) {
             interval = iter.next();
-            if (interval.low!=0 && low<interval.low) {//needed for first interval
-                if (low+1 > interval.low-1) {
+            if (interval.getLow()!=0 && low<interval.getLow()) {//needed for first interval
+                if (low+1 > interval.getLow()-1) {
                     if(!fixed) {
                         fixed = true;
                         fix();
@@ -404,17 +404,17 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
                         throw new IllegalArgumentException("constructing invalid interval "+
                                 " while trying to invert \n"+toString()+
                                 " \n with size "+maxSize+
-                                " low:"+low+" interval.low:"+interval.low);
+                                " low:"+low+" interval.low:"+interval.getLow());
                     }
                 }
-                ret.add(new Interval(low+1, interval.low-1));
+                ret.add(Range.createRange(low+1, interval.getLow()-1));
             }
-            low=interval.high;
+            low=interval.getHigh();
         }
         //Special case space between last block and end of file.
         assert interval!=null : "Null interval in getFreeBlocks";
-        if (interval.high < maxSize-1)
-            ret.add(new Interval(interval.high+1, maxSize-1));
+        if (interval.getHigh() < maxSize-1)
+            ret.add(Range.createRange(interval.getHigh()+1, maxSize-1));
         return ret;
     }
         
@@ -423,7 +423,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      * IntervalSet. Note that the IntervalSet does not know the maximum value of
      * all the intervals.
      */
-    public Iterator<Interval> getNeededIntervals(int maxSize) {
+    public Iterator<Range> getNeededIntervals(long maxSize) {
         return this.invert(maxSize).getAllIntervals();
     }
 
@@ -434,7 +434,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
      */
     public IntervalSet clone() {
         IntervalSet ret = new IntervalSet();
-        for(Interval interval : this)
+        for(Range interval : this)
             // access the internal TreeSet directly, - it's faster that way.
             ret.intervals.add(interval);
         return ret;
@@ -443,7 +443,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     /**
      * Adds into the list, in order.
      */
-    private void addImpl(Interval i) {
+    private void addImpl(Range  i) {
         int point = Collections.binarySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point >= 0)
             throw new IllegalStateException("interval (" + i + ") already in list: " + intervals);
@@ -454,7 +454,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     /**
      * Removes from the list, quickly.
      */
-    private void removeImpl(Interval i) {
+    private void removeImpl(Range i) {
         int point = Collections.binarySearch(intervals, i, IntervalComparator.INSTANCE);
         if(point < 0)
             throw new IllegalStateException("interval (" + i + ") doesn't exist in list: " + intervals);
@@ -464,12 +464,12 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     /**
      * Comparator for intervals.
      */
-    private static class IntervalComparator implements Comparator<Interval> {
+    private static class IntervalComparator implements Comparator<Range> {
         private static final IntervalComparator INSTANCE = new IntervalComparator();
-        public int compare(Interval ia, Interval ib) {
-            if ( ia.low > ib.low ) 
+        public int compare(Range ia, Range ib) {
+            if ( ia.getLow() > ib.getLow()) 
                 return 1;
-            else if (ia.low < ib.low )
+            else if (ia.getLow() < ib.getLow() )
                 return -1;
             else
                 return 0;
@@ -510,7 +510,7 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     public byte [] toBytes() {
     	byte [] ret = new byte[intervals.size()*8];
     	int pos = 0;
-        for(Interval current : intervals) {
+        for(Range current : intervals) {
     		current.toBytes(ret,pos);
     		pos+=8;
     	}
@@ -541,9 +541,9 @@ public class IntervalSet implements Iterable<Interval>, Serializable{
     private void fix() {
         String preIntervals = intervals.toString();
         
-        List<Interval> oldIntervals = new ArrayList<Interval>(intervals);
+        List<Range> oldIntervals = new ArrayList<Range>(intervals);
         intervals.clear();
-        for(Iterator<Interval> i = oldIntervals.iterator(); i.hasNext(); )
+        for(Iterator<Range> i = oldIntervals.iterator(); i.hasNext(); )
             add(i.next());
         
         String postIntervals = intervals.toString();

@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -120,7 +120,7 @@ public class HeadTest extends LimeTestCase {
 		_ranges = new IntervalSet();
 		for (int i=2;i<10;i++) {
 			int low = base;
-			_ranges.add(new Interval(low,low+i));
+			_ranges.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -128,7 +128,7 @@ public class HeadTest extends LimeTestCase {
 		_rangesMedium = new IntervalSet();
 		for (int i=2;i<70;i++) {
 			int low = base;
-			_rangesMedium.add(new Interval(low,low+i));
+			_rangesMedium.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -136,7 +136,7 @@ public class HeadTest extends LimeTestCase {
 		_rangesJustFit = new IntervalSet();
 		for (int i=2;i<73;i++) {
 			int low = base;
-			_rangesJustFit.add(new Interval(low,low+i));
+			_rangesJustFit.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -144,7 +144,7 @@ public class HeadTest extends LimeTestCase {
 		_rangesTooBig = new IntervalSet();
 		for (int i=2;i<220;i++) {
 			int low = base;
-			_rangesTooBig.add(new Interval(low,low+i));
+			_rangesTooBig.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		

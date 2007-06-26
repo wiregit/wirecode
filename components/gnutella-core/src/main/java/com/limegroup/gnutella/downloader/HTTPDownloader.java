@@ -24,8 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -135,13 +135,13 @@ public class HTTPDownloader implements BandwidthTracker {
      * HTTP connections
      * LOCKING: this
      */
-    private int _totalAmountRead;
+    private long _totalAmountRead;
     
     /**
      *  The amount we've downloaded.
      * LOCKING: this 
      */
-	private int _amountRead;
+	private long _amountRead;
 	
     /** 
      * The amount we'll have downloaded if the download completes properly. 
@@ -149,7 +149,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  _amountToRead - _amountRead.
      * LOCKING: this 
      */
-	private int _amountToRead;
+	private long _amountToRead;
     
     /**
      * Whether to disconnect after reading the amount we have wanted to read
@@ -160,13 +160,13 @@ public class HTTPDownloader implements BandwidthTracker {
      *  The index to start reading from the server 
      * LOCKING: this 
      */
-	private int _initialReadingPoint;
+	private long _initialReadingPoint;
 	
     /** 
      *  The index to actually start writing to the file.
      *  LOCKING:this
      */
-    private int _initialWritingPoint;
+    private long _initialWritingPoint;
     
 	/**
 	 * The content-length of the output, useful only for when we
@@ -264,7 +264,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private boolean _isActive = false;
 
 
-    private Interval _requestedInterval = null;
+    private Range _requestedInterval = null;
     
     /**
      * whether the other side wants to receive firewalled altlocs
@@ -468,7 +468,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException could not parse headers
      * @exception UnknownCodeException unknown response code
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing, int amountDownloaded, IOStateObserver observer) {
+    public void connectHTTP(long start, long stop, boolean supportQueueing, long amountDownloaded, IOStateObserver observer) {
         if(start < 0)
             throw new IllegalArgumentException("invalid start: " + start);
         if(stop <= start)
@@ -482,7 +482,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
-            _requestedInterval = new Interval(_initialReadingPoint, stop-1);
+            _requestedInterval = Range.createRange(_initialReadingPoint, stop-1);
         }
 		
         observerHandler.setDelegate(observer);
@@ -840,7 +840,7 @@ public class HTTPDownloader implements BandwidthTracker {
             else if (code == 416) {//requested range not available
                 //See if the uploader is up to mischief
                 if(_rfd.isPartialSource()) {
-                    for(Interval next : _rfd.getAvailableRanges()) {
+                    for(Range next : _rfd.getAvailableRanges()) {
                         if(_requestedInterval.isSubrange(next))
                             throw new ProblemReadingHeaderException("Bad ranges sent");
                     }
@@ -1066,9 +1066,9 @@ public class HTTPDownloader implements BandwidthTracker {
         }
     }
     
-    private void validateContentRange(Interval responseRange) throws IOException {
-        int low = responseRange.low;
-        int high = responseRange.high + 1;
+    private void validateContentRange(Range responseRange) throws IOException {
+        long low = responseRange.getLow();
+        long high = responseRange.getHigh() + 1;
         synchronized(this) {
             // were we stolen from in the meantime?
             if (_disconnect)
@@ -1109,10 +1109,10 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException some problem
      *  extracting the start offset.  
      */
-    private Interval parseContentRange(String str) throws IOException {
-        int numBeforeDash;
-        int numBeforeSlash;
-        int numAfterSlash;
+    private Range parseContentRange(String str) throws IOException {
+        long numBeforeDash;
+        long numBeforeSlash;
+        long numAfterSlash;
 
         if (LOG.isDebugEnabled())
             LOG.debug("reading content range: "+str);
@@ -1132,13 +1132,13 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like */?, " + str);
                 synchronized(this) {
-                    return new Interval(0, _amountToRead - 1);
+                    return Range.createRange(0, _amountToRead - 1);
                 }
             }
 
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
-            numBeforeDash=Integer.parseInt(str.substring(start, dash));
-            numBeforeSlash=Integer.parseInt(str.substring(dash+1, slash));
+            numBeforeDash=Long.parseLong(str.substring(start, dash));
+            numBeforeSlash=Long.parseLong(str.substring(dash+1, slash));
 
             if(numBeforeSlash < numBeforeDash)
                 throw new ProblemReadingHeaderException(
@@ -1150,10 +1150,10 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like #-#/*, " + str);
 
-                return new Interval(numBeforeDash, numBeforeSlash);
+                return Range.createRange(numBeforeDash, numBeforeSlash);
             }
 
-            numAfterSlash=Integer.parseInt(str.substring(slash+1));
+            numAfterSlash=Long.parseLong(str.substring(slash+1));
         } catch (IndexOutOfBoundsException e) {
             throw new ProblemReadingHeaderException(str);
         } catch (NumberFormatException e) {
@@ -1175,7 +1175,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " Content-Range like #-#/#, " + str);
-        return new Interval(numBeforeDash, numBeforeSlash);
+        return Range.createRange(numBeforeDash, numBeforeSlash);
     }
 
     /**
@@ -1209,13 +1209,13 @@ public class HTTPDownloader implements BandwidthTracker {
 
             // this is the interval to store the available 
             // range we are parsing in.
-            Interval interval = null;
+            Range interval = null;
     
             try {
                 // read number before dash
                 // bytes A-B, C-D
                 //       ^
-                int low = Integer.parseInt(line.substring(start, stop).trim());
+                long low = Long.parseLong(line.substring(start, stop).trim());
                 
                 // now moving the start index to the 
                 // character after the dash:
@@ -1233,7 +1233,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // read number after dash
                 // bytes A-B, C-D
                 //         ^
-                int high = Integer.parseInt(line.substring(start, stop).trim());
+                long high = Long.parseLong(line.substring(start, stop).trim());
 
                 // start parsing after the next comma. If we are at the
                 // end of the header line start will be set to 
@@ -1247,7 +1247,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     continue;
 
                 // this interval should be inclusive at both ends
-                interval = new Interval( low, high );
+                interval = Range.createRange( low, high );
                 
             } catch (NumberFormatException e) {
                 throw new ProblemReadingHeaderException(e);
@@ -1483,10 +1483,10 @@ public class HTTPDownloader implements BandwidthTracker {
 
         private boolean readImpl(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
             while(true) {
-                int read = 0;
+                long read = 0;
                     
                 // first see how much we have left to read, if any
-                int left;
+                long left;
                 synchronized(HTTPDownloader.this) {
                     if (_amountRead >= _amountToRead) {
                         LOG.debug("Read >= to needed, done.");
@@ -1497,14 +1497,14 @@ public class HTTPDownloader implements BandwidthTracker {
                 }
                 
                 // Account for data already in the buffer.
-                int preread = Math.min(left, buffer.position());
+                long preread = Math.min(left, buffer.position());
                 if(preread != 0 && LOG.isDebugEnabled())
                     LOG.debug("Using preread data of: " + preread);
                 
                 if(left - preread > 0) {
                     // ensure we don't read more into the buffer than we want.
                     if(buffer.limit() > left)
-                        buffer.limit(left);
+                        buffer.limit((int)left);
                    
                     while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
                 
@@ -1512,11 +1512,11 @@ public class HTTPDownloader implements BandwidthTracker {
                     buffer.limit(buffer.capacity());
                 }
                 
-                int totalRead = buffer.position();
+                long totalRead = buffer.position();
                 if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(totalRead);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData((int)totalRead);
                 else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(totalRead);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData((int)totalRead);
                 
                 // If nothing could be read at all, leave.
                 if(totalRead == 0) {
@@ -1543,13 +1543,13 @@ public class HTTPDownloader implements BandwidthTracker {
                             return false;
                         }
                         
-                        int skipped = Math.min(totalRead, Math.max(0, (int)(_initialWritingPoint - currPos)));
+                        int skipped = (int)Math.min(totalRead, Math.max(0, _initialWritingPoint - currPos));
                         if(skipped > 0)
                             LOG.debug("Amount we should skip: " + skipped);
 
                         
                         // setup data for writing.
-                        dataLength = totalRead - skipped;
+                        dataLength = (int)(totalRead - skipped);
                         dataStart = skipped;
                         filePosition = currPos + skipped;
                         // maintain data for next read.
@@ -1665,12 +1665,12 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param stop the index just past the last byte to read;
      *  stop-1 is the index of the last byte to be downloaded
      */
-    public synchronized void stopAt(int stop) {
+    public synchronized void stopAt(long stop) {
         _disconnect = true;
         _amountToRead = Math.min(_amountToRead,stop-_initialReadingPoint);
     }
     
-    public synchronized void startAt(int start) {
+    public synchronized void startAt(long start) {
         _initialWritingPoint = start;
     }
     
@@ -1684,11 +1684,11 @@ public class HTTPDownloader implements BandwidthTracker {
     
     ///////////////////////////// Accessors ///////////////////////////////////
 
-    public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
-    public synchronized int getInitialWritingPoint() {return _initialWritingPoint;}
-	public synchronized int getAmountRead() {return _amountRead;}
-	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
-	public synchronized int getAmountToRead() {return _amountToRead;}
+    public synchronized long getInitialReadingPoint() {return _initialReadingPoint;}
+    public synchronized long getInitialWritingPoint() {return _initialWritingPoint;}
+	public synchronized long getAmountRead() {return _amountRead;}
+	public synchronized long getTotalAmountRead() {return _totalAmountRead + _amountRead;}
+	public synchronized long getAmountToRead() {return _amountToRead;}
 	public synchronized boolean isActive() { return _isActive; }
     synchronized boolean isVictim() {return _disconnect; }
 
@@ -1748,7 +1748,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
-        int totalAmountRead = 0;
+        long totalAmountRead = 0;
         synchronized(this) {
             if (!_isActive)
                 return;

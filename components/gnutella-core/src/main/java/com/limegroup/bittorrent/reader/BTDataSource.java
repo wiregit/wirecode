@@ -9,7 +9,9 @@ import java.nio.channels.WritableByteChannel;
  * from a data container
  */
 interface BTDataSource {
-	public int getInt();
+    /** returns a 32-bit unsigned int value */
+	public long getInt();
+    
 	public byte get();
 	public void discard(int howMuch);
 	public int size();

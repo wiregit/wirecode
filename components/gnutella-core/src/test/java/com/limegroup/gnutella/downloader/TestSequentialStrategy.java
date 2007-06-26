@@ -4,8 +4,8 @@ package com.limegroup.gnutella.downloader;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 
 
 /** 
@@ -15,7 +15,7 @@ import org.limewire.collection.IntervalSet;
  */
 @SuppressWarnings( { "unchecked", "cast" } )
 public class TestSequentialStrategy implements SelectionStrategy {
-    public Interval pickAssignment(IntervalSet availableBytes,
+    public Range pickAssignment(IntervalSet availableBytes,
             IntervalSet neededBytes,
             long blockSize) throws NoSuchElementException {
         
@@ -24,13 +24,13 @@ public class TestSequentialStrategy implements SelectionStrategy {
         
         // If we don't need alignment, we're done
         if (blockSize < 1 && intervalIterator.hasNext())
-            return (Interval) intervalIterator.next();
+            return (Range) intervalIterator.next();
         
         // Loop over intervals, looking for a suitable candidate
         while (intervalIterator.hasNext()) {
-            Interval candidate = (Interval) intervalIterator.next();
+            Range candidate = (Range) intervalIterator.next();
             // align the high point of the interval
-            long alignedHigh = candidate.low;
+            long alignedHigh = candidate.getLow();
             // step ahead one block size
             alignedHigh += blockSize;
             // cut back to the block boundary
@@ -38,8 +38,8 @@ public class TestSequentialStrategy implements SelectionStrategy {
             // step back one more byte
             alignedHigh -= 1;
             
-            if (alignedHigh <= candidate.high) {
-                return new Interval((int)candidate.low, (int) alignedHigh);
+            if (alignedHigh <= candidate.getHigh()) {
+                return Range.createRange((int)candidate.getLow(), (int) alignedHigh);
             } else {
                 return candidate;
             }

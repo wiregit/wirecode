@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -50,24 +50,24 @@ public class IncompleteFileDescTest extends LimeTestCase {
         assertEquals("bytes", ifd.getAvailableRanges());
         
         // add a small range and ensure it doesn't get listed.
-        Interval small = new Interval(0);
+        Range small = Range.createRange(0);
         addInterval(small);
         assertEquals(ifd.getAvailableRanges(),
             "bytes", ifd.getAvailableRanges());
         
-        Interval notLargeEnough = new Interval(0, 102398);
+        Range notLargeEnough = Range.createRange(0, 102398);
         addInterval(notLargeEnough);
         assertEquals(ifd.getAvailableRanges(),
             "bytes", ifd.getAvailableRanges());
         
         // extend from the middle ...
-        Interval extended = new Interval(102300, 102500);
+        Range extended = Range.createRange(102300, 102500);
         addInterval(extended);
         assertEquals(ifd.getAvailableRanges(),
             "bytes 0-102499", ifd.getAvailableRanges());
         
         // add one not connected ...
-        Interval other = new Interval(102550, 204950);
+        Range other = Range.createRange(102550, 204950);
         addInterval(other);
         assertEquals(ifd.getAvailableRanges(),
             "bytes 0-102499, 102550-204949", ifd.getAvailableRanges());
@@ -85,11 +85,11 @@ public class IncompleteFileDescTest extends LimeTestCase {
         assertFalse( ifd.isRangeSatisfiable(0, 150) );
         
         // add a range.
-        Interval small = new Interval(0);
+        Range small = Range.createRange(0);
         addInterval(small);
         assertTrue( ifd.isRangeSatisfiable(0, 0) );
         
-        Interval medium = new Interval(0, 102399);
+        Range medium = Range.createRange(0, 102399);
         addInterval(medium);
         assertTrue( ifd.isRangeSatisfiable(0, 102399) );
         assertTrue( ifd.isRangeSatisfiable(50,100000) );
@@ -98,19 +98,19 @@ public class IncompleteFileDescTest extends LimeTestCase {
         assertFalse( ifd.isRangeSatisfiable(102400, 102500) );
         
         // extend from the middle ...
-        Interval extended = new Interval(102300, 102500);
+        Range extended = Range.createRange(102300, 102500);
         addInterval(extended);
         assertTrue( ifd.isRangeSatisfiable(0, 102500) );
         assertFalse( ifd.isRangeSatisfiable(1,102501) );
         
         // add one not connected ...
-        Interval other = new Interval(102550, 204950);
+        Range other = Range.createRange(102550, 204950);
         addInterval(other);
         assertTrue( ifd.isRangeSatisfiable( 102550, 204950) );
         assertFalse( ifd.isRangeSatisfiable(102399, 102550) );
     }
     
-    private void addInterval(Interval i) throws Exception {
+    private void addInterval(Range i) throws Exception {
         IntervalSet set = (IntervalSet)
             PrivilegedAccessor.getValue(vf,"verifiedBlocks");
         

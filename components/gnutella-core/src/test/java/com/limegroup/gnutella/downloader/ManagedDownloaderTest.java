@@ -21,7 +21,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.service.ErrorService;
@@ -267,7 +267,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
         VerifyingFile vf=new VerifyingFile(1024);
-        vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
+        vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 
         //Start downloader, make it sure requeries, etc.

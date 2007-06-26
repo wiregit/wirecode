@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
@@ -2005,7 +2005,7 @@ public class ManagedDownloader extends AbstractDownloader
                                    +incompleteFile.getName());
             //Get the size of the first block of the file.  (Remember
             //that swarmed downloads don't always write in order.)
-            int size=amountForPreview();
+            long size=amountForPreview();
             if (size<=0)
                 return null;
             //Copy first block, returning if nothing was copied.
@@ -2024,14 +2024,14 @@ public class ManagedDownloader extends AbstractDownloader
      * Returns the amount of the file written on disk that can be safely
      * previewed. 
      */
-    private synchronized int amountForPreview() {
+    private synchronized long amountForPreview() {
         //And find the first block.
         if (commonOutFile == null)
             return 0; // trying to preview before incomplete file created
         synchronized (commonOutFile) {
-            for(Interval interval : commonOutFile.getBlocks()) {
-                if (interval.low==0)
-                    return interval.high;
+            for(Range interval : commonOutFile.getBlocks()) {
+                if (interval.getLow()==0)
+                    return interval.getHigh();
             }
         }
         return 0;//Nothing to preview!
@@ -2909,7 +2909,7 @@ public class ManagedDownloader extends AbstractDownloader
             ourFile = commonOutFile;
         }
         
-        return ourFile == null ? 0 : ourFile.getPendingSize();
+        return (int)(ourFile == null ? 0 : ourFile.getPendingSize());
     }
      
     public int getNumHosts() {

@@ -3,8 +3,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Random;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 
@@ -75,23 +75,23 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         availableBytes = IntervalSet.createSingletonSet(0, fileSize-1);
         // Cut out everything below 1MB, except 2 blocks at the beginning
         // and end of that range.
-        availableBytes.delete(new Interval(2*blockSize-7, previewLimit-blockSize-2));
+        availableBytes.delete(Range.createRange(2*blockSize-7, previewLimit-blockSize-2));
         // 4 arbitrary floats for our 4 sequential downloads... make sure to test
         // 1.0 and 0.0
         float[] floats = {1.0f-EPSILON, 0.0f, 0.3728f, 0.18281828f};
         prng.setFloats(floats);
         
         strategy = createBiasedRandomStrategy(fileSize, prng);
-        Interval[] expectations = new Interval[4];
+        Range[] expectations = new Range[4];
         // full block chunk
-        expectations[0] = new Interval(0, blockSize-1);
+        expectations[0] = Range.createRange(0, blockSize-1);
         // partial block chunk
-        expectations[1] = new Interval(blockSize, 2*blockSize-8);
+        expectations[1] = Range.createRange(blockSize, 2*blockSize-8);
         // Skip a few...
         // single byte chunk
-        expectations[2] = new Interval(previewLimit-blockSize-1);
+        expectations[2] = Range.createRange(previewLimit-blockSize-1);
         // full block
-        expectations[3] = new Interval(previewLimit-blockSize,
+        expectations[3] = Range.createRange(previewLimit-blockSize,
                 previewLimit-1);
         
         // Check that we got our 4 sequential downloads
@@ -105,12 +105,12 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         // Set the random index location and a non-sequential random location
         prng.setInt(3);
         prng.setLong(1);
-        Interval assignment = strategy.pickAssignment(availableBytes,
+        Range assignment = strategy.pickAssignment(availableBytes,
                 availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random", 
-                previewLimit, assignment.low);
+                previewLimit, assignment.getLow());
         
         // Check that we cannot still force a sequential download, since the preview
         // length is now greater than 50%
@@ -122,8 +122,8 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
-                availableBytes.getFirst().low,
-                assignment.low);
+                availableBytes.getFirst().getLow(),
+                assignment.getLow());
     }
     
     /** Test behavior for a file just over twice MIN_PREVIEW_BYTES.
@@ -141,23 +141,23 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         availableBytes = IntervalSet.createSingletonSet(0, fileSize-1);
         // Cut out everything below 1MB, except 2 blocks at the beginning
         // and end of that range.
-        availableBytes.delete(new Interval(2*blockSize-7, previewLimit-blockSize-2));
+        availableBytes.delete(Range.createRange(2*blockSize-7, previewLimit-blockSize-2));
         // 4 arbitrary floats for our 4 sequential downloads... make sure to test
         // 1.0 and 0.0
         float[] floats = {1.0f-EPSILON, 0.6298f, 0.77f, 0.0f};
         prng.setFloats(floats);
         
         strategy = createBiasedRandomStrategy(fileSize, prng);
-        Interval[] expectations = new Interval[4];
+        Range[] expectations = new Range[4];
         // full block chunk
-        expectations[0] = new Interval(0, blockSize-1);
+        expectations[0] = Range.createRange(0, blockSize-1);
         // partial block chunk
-        expectations[1] = new Interval(blockSize, 2*blockSize-8);
+        expectations[1] = Range.createRange(blockSize, 2*blockSize-8);
         // Skip a few...
         // single byte chunk
-        expectations[2] = new Interval(previewLimit-blockSize-1);
+        expectations[2] = Range.createRange(previewLimit-blockSize-1);
         // full block
-        expectations[3] = new Interval(previewLimit-blockSize,
+        expectations[3] = Range.createRange(previewLimit-blockSize,
                 previewLimit-1);
         
         // Check that we got our 4 sequential downloads
@@ -171,12 +171,12 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         // Set the random index location and a non-sequential random location
         prng.setInt(3);
         prng.setLong(1);
-        Interval assignment = strategy.pickAssignment(availableBytes,
+        Range assignment = strategy.pickAssignment(availableBytes,
                 availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random.", 
-                previewLimit, assignment.low);
+                previewLimit, assignment.getLow());
         
         // Check that we still force a sequential download while the preview
         // length is less than 50%
@@ -186,10 +186,10 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertEquals("Expected sequential assignment.",
-                availableBytes.getFirst().low,
-                assignment.low);
+                availableBytes.getFirst().getLow(),
+                assignment.getLow());
         assertEquals("Expected a full block assignment",
-                blockSize, assignment.high-assignment.low+1);
+                blockSize, assignment.getHigh()-assignment.getLow()+1);
         availableBytes.delete(assignment);
         
         // This last download pushed us over 50% previewable.
@@ -202,10 +202,10 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
-                availableBytes.getFirst().low,
-                assignment.low);
+                availableBytes.getFirst().getLow(),
+                assignment.getLow());
         assertEquals("Expected a full block assignment",
-                blockSize, assignment.high-assignment.low+1);
+                blockSize, assignment.getHigh()-assignment.getLow()+1);
     }
     
     /** Test behavior for a file where fileSize * MIN_PREVIEW_FRACTION
@@ -232,7 +232,7 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         availableBytes = IntervalSet.createSingletonSet(0, fileSize-1);
         // Cut out everything below previewFraction, except 2 blocks at the beginning
         // and end of that range.
-        availableBytes.delete(new Interval(2*blockSize-7, 
+        availableBytes.delete(Range.createRange(2*blockSize-7, 
                 alignedPreviewLimit-blockSize-2));
         // 4 arbitrary floats for our 4 sequential downloads... make sure to test
         // 1.0 and 0.0
@@ -240,16 +240,16 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         prng.setFloats(floats);
         
         strategy = createBiasedRandomStrategy(fileSize, prng);
-        Interval[] expectations = new Interval[4];
+        Range[] expectations = new Range[4];
         // full block chunk
-        expectations[0] = new Interval(0, blockSize-1);
+        expectations[0] = Range.createRange(0, blockSize-1);
         // partial block chunk
-        expectations[1] = new Interval(blockSize, 2*blockSize-8);
+        expectations[1] = Range.createRange(blockSize, 2*blockSize-8);
         // Skip a few...
         // single byte chunk
-        expectations[2] = new Interval(alignedPreviewLimit-blockSize-1);
+        expectations[2] = Range.createRange(alignedPreviewLimit-blockSize-1);
         // full block
-        expectations[3] = new Interval(alignedPreviewLimit-blockSize,
+        expectations[3] = Range.createRange(alignedPreviewLimit-blockSize,
                 alignedPreviewLimit-1);
         
         // Check that we got our 4 sequential downloads
@@ -263,12 +263,12 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         // Set the random index location and a non-sequential random location
         prng.setInt(3);
         prng.setLong(1);
-        Interval assignment = strategy.pickAssignment(availableBytes,
+        Range assignment = strategy.pickAssignment(availableBytes,
                 availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random.", 
-                previewLimit, assignment.low);
+                previewLimit, assignment.getLow());
         
         // Check that we still force a sequential download while the preview
         // length is less than 50%
@@ -278,16 +278,16 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertEquals("Expected sequential assignment.",
-                availableBytes.getFirst().low,
-                assignment.low);
+                availableBytes.getFirst().getLow(),
+                assignment.getLow());
         assertEquals("Expected a full block assignment",
-                blockSize, assignment.high-assignment.low+1);
+                blockSize, assignment.getHigh()-assignment.getLow()+1);
         availableBytes.delete(assignment);
         
         // Fast-forward to the case where the download is 
         // over 50% previewable.
         
-        availableBytes.delete(new Interval(0, 1+fileSize/2));
+        availableBytes.delete(Range.createRange(0, 1+fileSize/2));
         
         // Test that we can no longer force the download to be non-random
         prng.setFloat(1.0f-EPSILON); // Nearly highest probability of being sequential
@@ -298,10 +298,10 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
-                availableBytes.getFirst().low,
-                assignment.low);
+                availableBytes.getFirst().getLow(),
+                assignment.getLow());
         assertEquals("Expected a full block assignment",
-                blockSize, assignment.high-assignment.low+1);
+                blockSize, assignment.getHigh()-assignment.getLow()+1);
     }
     
     /**
@@ -326,11 +326,11 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         prng.setLong(1);
         prng.setInt(1);
         
-        Interval assignment = strategy.pickAssignment(availableBytes,
+        Range assignment = strategy.pickAssignment(availableBytes,
                 availableBytes, blockSize);
         
         assertNotEquals("Idle download should not be sequential.", 
-                0, assignment.low);
+                0, assignment.getLow());
         
         /*  Make the user non-idle */
         PrivilegedAccessor.setValue(strategy, "idleTime", 
@@ -342,7 +342,7 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertEquals("Non-idle download should be sequential if few bytes"+
-                " have been assigned.", 0, assignment.low);
+                " have been assigned.", 0, assignment.getLow());
     }
     
     
@@ -418,9 +418,9 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
      */
     private void testAssignments(SelectionStrategy strategy,
             IntervalSet availableBytes, long fileSize, long blockSize,
-            Interval[] expectedAssignments) {
+            Range[] expectedAssignments) {
         for (int i = 0; i < expectedAssignments.length; i++) {
-            Interval assignment = strategy.pickAssignment(availableBytes,
+            Range assignment = strategy.pickAssignment(availableBytes,
                     availableBytes, blockSize);
             availableBytes.delete(assignment);
             assertEquals("Wrong assignment for chunk #" + i,

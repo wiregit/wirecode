@@ -21,12 +21,12 @@ import org.limewire.collection.AndView;
 import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
 import org.limewire.collection.RRProcessingQueue;
+import org.limewire.collection.Range;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
@@ -245,7 +245,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	private void writeBlockImpl(BTInterval in, byte[] buf) 
 	throws IOException {
 		
-		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
+		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
 		diskController.write(startOffset, buf);
 		
 		synchronized(this) {
@@ -375,8 +375,8 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 	}
 	
-	private boolean isCompleteBlock(Interval in, int id) {
-		return in.low == 0 && in.high == getPieceSize(id) - 1;
+	private boolean isCompleteBlock(Range in, int id) {
+		return in.getLow() == 0 && in.getHigh() == getPieceSize(id) - 1;
 	}
 	
 	public synchronized boolean hasBlock(int block) {
@@ -495,8 +495,8 @@ class VerifyingFolder implements TorrentDiskManager {
 			
 			if (LOG.isDebugEnabled())
 				LOG.debug("reading piece " + in);
-			int length = in.high - in.low + 1;
-			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
+			int length = (int)(in.getHigh() - in.getLow() + 1);
+			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
 			int offset = 0;
 			byte[] buf = new byte[length];
 			boolean success = false;
@@ -545,8 +545,8 @@ class VerifyingFolder implements TorrentDiskManager {
 		BTInterval leased = findRandom(interesting, exclude);
 		
 		if (leased != null) {
-			if (leased.high - leased.low + 1 > BLOCK_SIZE)
-				leased = new BTInterval(leased.low, leased.low + BLOCK_SIZE - 1, leased.getId());
+			if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
+				leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
 			requestedRanges.addInterval(leased);
 			
 			if (LOG.isDebugEnabled())
@@ -649,7 +649,7 @@ class VerifyingFolder implements TorrentDiskManager {
 				needed.delete(pending);
 			
 			// exclude any specified intervals 
-			for (Interval excluded : exclude) 
+			for (Range excluded : exclude) 
 				needed.delete(excluded);
 			
 			// try not to request any parts that are already requested
@@ -664,7 +664,7 @@ class VerifyingFolder implements TorrentDiskManager {
 					needed = requested.clone();
 					
 					// exclude the specified intervals again
-					for (Interval excluded : exclude) 
+					for (Range excluded : exclude) 
 						needed.delete(excluded);
 				}
 			}
@@ -695,7 +695,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			return false;
 		if (set.getNumberOfIntervals() != 1)
 			return false;
-		Interval i = set.getFirst();
+		Range i = set.getFirst();
 		return isCompleteBlock(i, pieceNum);
 	}
 

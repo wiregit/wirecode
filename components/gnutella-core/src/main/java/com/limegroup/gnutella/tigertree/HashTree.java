@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
@@ -232,25 +232,25 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     /**
      * Checks whether the specific area of the file matches the hash tree. 
      */
-    public boolean isCorrupt(Interval in, byte [] data) {
+    public boolean isCorrupt(Range in, byte [] data) {
         return isCorrupt(in, data, data.length);
     }
  
     /**
      * Checks whether the specific area of the file matches the hash tree.
      */
-    public boolean isCorrupt(Interval in, byte[] data, int length) {
-        Assert.that(in.high <= FILE_SIZE);
+    public boolean isCorrupt(Range in, byte[] data, int length) {
+        Assert.that(in.getHigh() <= FILE_SIZE);
         
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
-        if (in.low % _nodeSize == 0 && 
-                in.high - in.low +1 <= _nodeSize &&
-                (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
+        if (in.getLow() % _nodeSize == 0 && 
+                in.getHigh() - in.getLow() +1 <= _nodeSize &&
+                (in.getHigh() == in.getLow()+_nodeSize-1 || in.getHigh() == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
             digest.update(data, 0, length);
             byte [] hash = digest.digest();
-            byte [] treeHash = NODES.get(in.low / _nodeSize);
+            byte [] treeHash = NODES.get((int)(in.getLow() / _nodeSize));
             boolean ok = Arrays.equals(treeHash, hash);
             if (LOG.isDebugEnabled())
                 LOG.debug("interval "+in+" verified "+ok);

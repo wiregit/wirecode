@@ -13,7 +13,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.PrivilegedAccessor;
@@ -49,7 +49,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
         new RouterService(new ActivityCallbackStub());
         incompleteFile=ifm.getFile(rfd);
         VerifyingFile vf=new VerifyingFile(size);
-        vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
+        vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 		// Make sure that we don't wait for network on requery
 		ManagedDownloader.NO_DELAY = true;

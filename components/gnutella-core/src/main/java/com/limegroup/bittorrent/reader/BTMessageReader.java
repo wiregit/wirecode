@@ -212,9 +212,12 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 			_in.get(dest);
 		}
 
-		public int getInt() {
+		public long getInt() {
 			_in.order(ByteOrder.BIG_ENDIAN);
-			return _in.getInt();
+            long ret = _in.getInt();
+            if (ret < 0)
+                ret = Integer.MAX_VALUE - ret;
+			return ret;
 		}
 
 		public int size() {

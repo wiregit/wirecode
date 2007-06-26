@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -99,9 +99,9 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 		_ranges=what;
 	}
     
-    public void setRangesAsIntervals(Interval... intervals) {
+    public void setRangesAsIntervals(Range... intervals) {
         IntervalSet set = new IntervalSet();
-        for(Interval intvl : intervals)
+        for(Range intvl : intervals)
             set.add(intvl);
         _ranges = set.toBytes();
     }

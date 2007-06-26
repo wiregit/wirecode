@@ -22,8 +22,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpRequest;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -428,7 +428,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testHTTP11IncompleteRange() throws Exception {
-        Interval iv = new Interval(2, 6);
+        Range iv = Range.createRange(2, 6);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
         "verifiedBlocks");
         vb.add(iv);
@@ -721,7 +721,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testIncompleteFileWithRanges() throws Exception {
         // add a range to the incomplete file.
-        Interval iv = new Interval(50, 102500);
+        Range iv = Range.createRange(50, 102500);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
         "verifiedBlocks");
         vb.add(iv);
@@ -741,7 +741,7 @@ public class UploadTest extends LimeTestCase {
         assertConnectionIsOpen(true);
 
         // add another range and make sure we display it.
-        iv = new Interval(150050, 252450);
+        iv = Range.createRange(150050, 252450);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -758,7 +758,7 @@ public class UploadTest extends LimeTestCase {
         assertConnectionIsOpen(true);
 
         // add an interval too small to report and make sure we don't report
-        iv = new Interval(102505, 150000);
+        iv = Range.createRange(102505, 150000);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -776,9 +776,9 @@ public class UploadTest extends LimeTestCase {
 
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
-        iv = new Interval(102500, 102505);
+        iv = Range.createRange(102500, 102505);
         vb.add(iv);
-        iv = new Interval(150000, 150050);
+        iv = Range.createRange(150000, 150050);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -913,7 +913,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testCreationTimeHeaderReturnedForIncompleteFile()
     throws Exception {
-        Interval iv = new Interval(2, 5);
+        Range iv = Range.createRange(2, 5);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
         "verifiedBlocks");
         vb.add(iv);

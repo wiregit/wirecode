@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -167,18 +167,18 @@ public class HashTreeTest extends LimeTestCase {
         for (int i = 0;i < 3*chunkSize ;i+=chunkSize) {
             raf.seek(i);
             raf.read(chunk);
-            assertFalse(hashTree.isCorrupt(new Interval(i,i+chunkSize-1),chunk));
+            assertFalse(hashTree.isCorrupt(Range.createRange(i,i+chunkSize-1),chunk));
         }
         
         // the 4th is corrupt
         raf.seek(3*chunkSize);
         raf.read(chunk);
-        assertTrue(hashTree.isCorrupt(new Interval(3*chunkSize,4*chunkSize-1),chunk));
+        assertTrue(hashTree.isCorrupt(Range.createRange(3*chunkSize,4*chunkSize-1),chunk));
         
         // 5th works
         raf.seek(4*chunkSize);
         raf.read(chunk);
-        assertFalse(hashTree.isCorrupt(new Interval(4*chunkSize,5*chunkSize-1),chunk));
+        assertFalse(hashTree.isCorrupt(Range.createRange(4*chunkSize,5*chunkSize-1),chunk));
 
         raf.close();
         
