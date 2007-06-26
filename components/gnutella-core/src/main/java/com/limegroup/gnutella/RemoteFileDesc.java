@@ -70,7 +70,8 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	private final long _index;
 	private final byte[] _clientGUID;
 	private final int _speed;
-	private final long _size;
+    @Deprecated
+	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
     private final boolean _replyToMulticast;
@@ -183,6 +184,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     /** the security of this RemoteFileDesc. */
     private transient int _secureStatus = SecureMessage.INSECURE;
     
+    private transient volatile long longSize;
     /**
      * A map of various properties we want to serialize.  Currently we use
      * this object only during de/serialization, but we keep it cached if we
@@ -192,7 +194,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     
     /** A list of keys of properties inserted into the propertiesMap. */
     private static enum RFDProperties {
-        PUSH_ADDR, CONNECT_TYPE;
+        PUSH_ADDR, CONNECT_TYPE, LONG_SIZE;
     }
     
     /**
@@ -398,7 +400,8 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		_port = port;
 		_index = index;
 		_filename = filename;
-		_size = size;
+		_size = size < Integer.MAX_VALUE ? (int) size : -1;
+        longSize = size;
         _firewalled = firewalled;
 		
 		if (firewalled) {
@@ -494,6 +497,11 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 } catch (IOException iox) {}
             }
             
+            Long size64 = (Long)propertiesMap.get(RFDProperties.LONG_SIZE.name());
+            if (size64 == null)
+                longSize = _size;
+            else
+                longSize = size64.longValue();
             // erase the map so it's reconstructed with the most recent
             // values upon the first write.
             propertiesMap = null;
@@ -505,6 +513,10 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     }
     
     private void writeObject(ObjectOutputStream stream) throws IOException {
+        if (longSize > Integer.MAX_VALUE) {
+            initPropertiesMap();
+            propertiesMap.put(RFDProperties.LONG_SIZE.name(), longSize);
+        } 
         if(_tlsCapable) {
             initPropertiesMap();
             propertiesMap.put(RFDProperties.CONNECT_TYPE.name(), Boolean.TRUE);
@@ -713,9 +725,9 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	 *
 	 * @return the size in bytes of this file
 	 */
-	public final long getSize() {return _size;}
+	public final long getSize() {return longSize;}
 	
-	public final long getFileSize() { return _size; }
+	public final long getFileSize() { return longSize; }
 
 	/**
 	 * Accessor for the file name for this file, which can be <tt>null</tt>.
@@ -961,7 +973,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
         if (! (nullEquals(_host, other._host) && (_port==other._port)) )
             return false;
 
-        if (_size != other._size)
+        if (longSize != other.longSize)
             return false;
         
         if ( (_clientGUID ==null) != (other._clientGUID==null) )
@@ -995,7 +1007,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             int result = 17;
             result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
-			result = (int)((37* result)+_size);
+			result = (int)((37* result)+longSize);
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
                 result = (37* result)+(new GUID(_clientGUID)).hashCode();
