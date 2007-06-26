@@ -67,28 +67,52 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         
         exchanger = new OnewayExchanger<T, ExecutionException>(true) {
             @Override
-            public synchronized void setValue(T value) {
-                if (!isDone()) {
-                    super.setValue(value);
+            public void setValue(T value) {
+                boolean done = false;
+                synchronized (this) {
+                    if (!isDone()) {
+                        super.setValue(value);
+                        killWatchdog();
+                        done = true;
+                    }
+                }
+                
+                if (done) {
                     internalDone();
                 }
             }
 
             @Override
-            public synchronized void setException(ExecutionException exception) {
-                if (!isDone()) {
-                    super.setException(exception);
+            public void setException(ExecutionException exception) {
+                boolean done = false;
+                synchronized (this) {
+                    if (!isDone()) {
+                        super.setException(exception);
+                        killWatchdog();
+                        done = true;
+                    }
+                }
+                
+                if (done) {
                     internalDone();
                 }
             }
 
             @Override
-            public synchronized boolean cancel() {
-                if (super.cancel()) {
-                    internalDone();
-                    return true;
+            public boolean cancel() {
+                boolean done = false;
+                synchronized (this) {
+                    if (super.cancel()) {
+                        killWatchdog();
+                        done = true;
+                    }
                 }
-                return false;
+                
+                if (done) {
+                    internalDone();
+                }
+                
+                return done;
             }
         };
     }
@@ -110,6 +134,9 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         }
     }
 
+    /**
+     * Starts the Watchdog
+     */
     private void initWatchdog() {
         Runnable r = new Runnable() {
             public void run() {
@@ -137,7 +164,19 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                 r, task.getWaitOnLockTimeout(), TimeUnit.MILLISECONDS);
     }
     
-	/**
+    /**
+     * Stops the Watchdog
+     */
+    private void killWatchdog() {
+        synchronized (exchanger) {
+            if (watchdog != null) {
+                watchdog.cancel(true);
+                watchdog = null;
+            }
+        }
+    }
+    
+    /**
      * Protected method invoked when this task transitions to state isDone 
      * (whether normally or via cancellation). The default implementation 
      * does nothing. Subclasses may override this method to invoke completion 
@@ -153,13 +192,6 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * Calls done() and notifies all DHTFutureListeners
      */
     private void internalDone() {
-    	
-        // NOTE: YOU ARE HOLDING A LOCK ON THE EXCHANGER RIGHT NOW!!!
-    	
-        if (watchdog != null) {
-            watchdog.cancel(true);
-            watchdog = null;
-        }
     	
         done();
     	
