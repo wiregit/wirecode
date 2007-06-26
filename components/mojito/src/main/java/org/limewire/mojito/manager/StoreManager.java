@@ -76,7 +76,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * must have the same valueId!
      */
     public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
-        StoreProcess task = new StoreProcess(values);
+        StoreProcess task = new StoreProcess(context, values);
         StoreFuture future = new StoreFuture(task);
         
         context.getDHTExecutorService().execute(future);
@@ -91,7 +91,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         Entry<Contact, SecurityToken> entry 
             = new EntryImpl<Contact, SecurityToken>(node, securityToken);
-        StoreProcess task = new StoreProcess(entry, values);
+        StoreProcess task = new StoreProcess(context, entry, values);
         
         StoreFuture future = new StoreFuture(task);
         context.getDHTExecutorService().execute(future);
@@ -110,11 +110,31 @@ public class StoreManager extends AbstractManager<StoreResult> {
     
     
     /**
+     * The StoreProcess controls the whole process of storing
+     * values along a path. There are 3 different options:
      * 
+     * 1) No Contact(s) are specified.
+     *    The StoreProcess will do a full lookup for the k-closest 
+     *    Nodes and will store the value(s) along the path.
+     *    
+     * 2) A single Contact is specified but SecurityToken is missing.
+     *    The StoreProcess will try to obtain the SecurityToken
+     *    and will store the value(s) at the given Node.
+     *    
+     * 3) A single Contact is specified and a SecurityToken is not required.
+     *    This is a special case and will never occur in reality.
+     *    It's meant for DHT implementations (say you want to create a
+     *    DHT is a closed environment where SecurityTokens make little
+     *    sense).
+     *    
+     * Regards values and the first case. It's possible to store multiple
+     * values in a batch but all values must have the same primary key!
      */
-    private class StoreProcess implements DHTTask<StoreResult> {
+    private static class StoreProcess implements DHTTask<StoreResult> {
         
-    	private final Log LOG = LogFactory.getLog(StoreProcess.class);
+    	private static final Log LOG = LogFactory.getLog(StoreProcess.class);
+    	
+    	private final Context context;
     	
         private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
         
@@ -130,13 +150,14 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         private final long waitOnLock;
         
-        public StoreProcess(Collection<? extends DHTValueEntity> entities) {
-            this(null, entities);
+        public StoreProcess(Context context, Collection<? extends DHTValueEntity> entities) {
+            this(context, null, entities);
         }
         
-        public StoreProcess(Entry<? extends Contact, ? extends SecurityToken> node,
+        public StoreProcess(Context context, Entry<? extends Contact, ? extends SecurityToken> node,
                 Collection<? extends DHTValueEntity> entities) {
             
+            this.context = context;
             this.entities = entities;
             this.node = node;
             

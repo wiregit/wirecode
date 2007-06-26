@@ -119,11 +119,11 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         // Make sure there is only one bootstrap process active!
-        // Having parallel bootstrap proccesses is too expensive!
+        // Having parallel bootstrap processes is too expensive!
         stop();
         
         // Bootstrap...
-        BootstrapProcess process = new BootstrapProcess(node);
+        BootstrapProcess process = new BootstrapProcess(context, this, node);
         BootstrapFuture future = new BootstrapFuture(process);
         synchronized (this) {
             this.future = future;
@@ -142,11 +142,11 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         // Make sure there is only one bootstrap process active!
-        // Having parallel bootstrap proccesses is too expensive!
+        // Having parallel bootstrap processes is too expensive!
         stop();
         
         // Bootstrap...
-        BootstrapProcess process = new BootstrapProcess(dst);
+        BootstrapProcess process = new BootstrapProcess(context, this, dst);
         BootstrapFuture future = new BootstrapFuture(process);
         synchronized (this) {
             this.future = future;
@@ -169,7 +169,8 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     }
     
     /**
-     * The bootstrap process looks like:
+     * The BootstrapProcess controls the whole process of bootstrapping.
+     * The sequence looks like this:
      * 
      *     0) Find a Node that's connected to the DHT
      * +--->
@@ -179,10 +180,17 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      * |   3) Refresh all Buckets with prefixed random IDs
      * +---4) Prune RouteTable and restart if too many errors in #3
      *     5) Done
+     *     
+     * TODO: Step 3 can be done in parallel! It would speed up bootstrapping
+     * a lot!
      */
-    private class BootstrapProcess implements DHTTask<BootstrapResult> {
+    private static class BootstrapProcess implements DHTTask<BootstrapResult> {
 
         private OnewayExchanger<BootstrapResult, ExecutionException> exchanger;
+        
+        private final Context context;
+        
+        private final BootstrapManager manager;
         
         private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
         
@@ -204,12 +212,17 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private final long waitOnLock;
         
-        public BootstrapProcess(Contact node) {
+        public BootstrapProcess(Context context, BootstrapManager manager, Contact node) {
+            this.context = context;
+            this.manager = manager;
             this.node = node;
             waitOnLock = BootstrapSettings.getWaitOnLock(true);
         }
         
-        public BootstrapProcess(Set<? extends SocketAddress> dst) {
+        public BootstrapProcess(Context context, BootstrapManager manager, 
+                Set<? extends SocketAddress> dst) {
+            this.context = context;
+            this.manager = manager;
             this.dst = dst;
             waitOnLock = BootstrapSettings.getWaitOnLock(false);
         }
@@ -528,7 +541,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             
             ResultType type = ResultType.BOOTSTRAP_FAILED;
             if (bootstrapped) {
-                setBootstrapped(true);
+                manager.setBootstrapped(true);
                 type = ResultType.BOOTSTRAP_SUCCEEDED;
             }
             
