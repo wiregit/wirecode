@@ -347,7 +347,7 @@ public class FileUtils {
     public static boolean verySafeSave(File dir, String name, byte[] data) {
         File tmp;
         try {
-            tmp = File.createTempFile(name, "tmp", dir);
+            tmp = FileUtils.createTempFile(name, "tmp", dir);
         } catch(IOException hrorible) {
             return false;
         }
@@ -690,6 +690,46 @@ public class FileUtils {
         //copy(File,int,File) to terminate immediately.
         long length=src.length();
         return copy(src, (int)length, dst)==length;
+    }
+    
+    /**
+     * Creates a temporary file using
+     * {@link File#createTempFile(String, String, File)}, trying a few times.
+     * This is a workaround for Sun Bug: 6325169: createTempFile occasionally
+     * fails (throwing an IOException).
+     */
+    public static File createTempFile(String prefix, String suffix, File directory) throws IOException {
+        IOException iox = null;
+        
+        for(int i = 0; i < 10; i++) {
+            try {
+                return File.createTempFile(prefix, suffix, directory);
+            } catch(IOException x) {
+                iox = x;
+            }
+        }
+        
+        throw iox;
+    }
+    
+    /**
+     * Creates a temporary file using
+     * {@link File#createTempFile(String, String)}, trying a few times.
+     * This is a workaround for Sun Bug: 6325169: createTempFile occasionally
+     * fails (throwing an IOException).
+     */
+    public static File createTempFile(String prefix, String suffix) throws IOException {
+        IOException iox = null;
+        
+        for(int i = 0; i < 10; i++) {
+            try {
+                return File.createTempFile(prefix, suffix);
+            } catch(IOException x) {
+                iox = x;
+            }
+        }
+        
+        throw iox;
     }
     
 }

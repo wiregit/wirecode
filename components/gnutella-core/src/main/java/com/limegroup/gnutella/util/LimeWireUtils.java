@@ -283,7 +283,7 @@ public final class LimeWireUtils {
 
     /** Returns a temporary directory that can be used for settings. */
     public static File getTemporarySettingsDirectory() throws IOException {
-        File tempDir = File.createTempFile("limewire", "-temp").getAbsoluteFile();
+        File tempDir = FileUtils.createTempFile("limewire", "-temp").getAbsoluteFile();
         File tempDirParent = tempDir.getParentFile();
         tempDir.delete();
         if(!tempDir.exists()) {
@@ -306,14 +306,14 @@ public final class LimeWireUtils {
             }
         }
         
-        throw new IOException("couldn't find a temporary directory to use");
+        throw new IOException("temporary directory failed.  parent [" + tempDirParent + "]");
     }
     
     /** Clears all potential temporary LW directories. */
     public static void clearTemporarySettingsDirectories() {
         File tempDir;
         try {
-            tempDir = File.createTempFile("limewire", "-temp").getAbsoluteFile();
+            tempDir = FileUtils.createTempFile("limewire", "-temp").getAbsoluteFile();
         } catch(IOException failure) {
             return; // can't do much from here.
         }

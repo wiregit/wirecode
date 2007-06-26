@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
@@ -461,7 +462,7 @@ public class MagnetOptions implements Serializable {
             }
         }
         try {
-            File file = File.createTempFile("magnet", "");
+            File file = FileUtils.createTempFile("magnet", "");
             file.deleteOnExit();
             tempFileName = file.getName();
             return tempFileName;

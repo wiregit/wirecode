@@ -85,7 +85,7 @@ public class JOrbisComment {
     	tempFile=null;
     
     	try {
-    		tempFile = File.createTempFile(file.getName(),"tmp");
+    		tempFile = FileUtils.createTempFile(file.getName(),"tmp");
     	}catch(IOException e) {
     		//sometimes either the temp path is messed up or
     		//	there isn't enough space on that partition.

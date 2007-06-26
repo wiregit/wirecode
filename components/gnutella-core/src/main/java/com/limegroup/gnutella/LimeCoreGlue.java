@@ -29,7 +29,7 @@ public class LimeCoreGlue {
     private LimeCoreGlue() {}
     
     /** Wires initial pieces together that are required for nearly everything. */
-    public static void preinstall() {
+    public static void preinstall() throws InstallFailedException {
         // Only preinstall once
         if(!preinstalled.compareAndSet(false, true))
             return;
@@ -47,34 +47,31 @@ public class LimeCoreGlue {
         //  - Otherwise, success.
         try {
             CommonUtils.setUserSettingsDir(LimeWireUtils.getRequestedUserSettingsLocation());
-        } catch(IOException iox) {
+        } catch(IOException requestedFailed) {
             try {
+                // First clear any older temporary settings directories.
+                LimeWireUtils.clearTemporarySettingsDirectories();
+                // Then try to set a temporary directory...
                 File temporaryDir;
                 try {
                     temporaryDir = LimeWireUtils.getTemporarySettingsDirectory();
-                } catch(IOException tempFull) {
-                    tempFull.printStackTrace();
-                    tempFull.initCause(iox);
-                    LimeWireUtils.clearTemporarySettingsDirectories();
-                    try {
-                        temporaryDir = LimeWireUtils.getTemporarySettingsDirectory();
-                    } catch(IOException stillBad) {
-                        stillBad.initCause(tempFull);
-                        throw stillBad;
-                    }
+                } catch(IOException tempFailed) {
+                    tempFailed.initCause(requestedFailed);
+                    throw tempFailed;
                 }
+                
                 temporaryDir.deleteOnExit();
+                
                 try {
                     CommonUtils.setUserSettingsDir(temporaryDir);
                 } catch(IOException cannotSet) {
-                    cannotSet.initCause(iox);
+                    cannotSet.initCause(requestedFailed);
                     throw cannotSet;
                 }
                 
                 LimeWireUtils.setTemporaryDirectoryInUse(true);
-            } catch(IOException reallyBad) {
-                // If the settings directory cannot be created, bail.
-                throw new RuntimeException(reallyBad);
+            } catch(IOException totalFailure) {
+                throw new InstallFailedException("Settings Directory Failure", totalFailure);
             }
         }
     }
@@ -124,6 +121,26 @@ public class LimeCoreGlue {
         };
         
         MACCalculatorRepositoryManager.setDefaultSettingsProvider(settingsProvider);
+    }
+    
+    /** Simple exception for failure to install. */
+    public static class InstallFailedException extends RuntimeException {
+        public InstallFailedException() {
+            super();
+        }
+
+        public InstallFailedException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public InstallFailedException(String message) {
+            super(message);
+        }
+
+        public InstallFailedException(Throwable cause) {
+            super(cause);
+        }
+        
     }
 
 }

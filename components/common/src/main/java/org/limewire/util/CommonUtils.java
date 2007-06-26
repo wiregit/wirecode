@@ -539,10 +539,10 @@ public class CommonUtils {
         }
 
         if(!dir.canWrite())
-            throw new IOException("settings dir not writable");
+            throw new IOException("settings dir not writable: " + dir);
 
         if(!dir.canRead())
-            throw new IOException("settings dir not readable");
+            throw new IOException("settings dir not readable: " + dir);
         
         return dir;
     }
