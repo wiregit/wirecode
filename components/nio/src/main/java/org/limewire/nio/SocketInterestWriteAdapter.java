@@ -18,8 +18,6 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
     
     /** the last party that was interested.  null if none. */
     private volatile WriteObserver interested;
-    /** if the last party was interested. */
-    private volatile boolean lastInterest = false;
     /** the SocketChannel this is proxying. */
     private SocketChannel channel;
     /** whether or not we're shutdown. */
@@ -51,8 +49,7 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
      */
     public synchronized void interestWrite(WriteObserver observer, boolean on) {
         if(!shutdown) {
-            lastInterest = on;
-            interested = observer;
+            interested = on ? observer : null;
             NIODispatcher.instance().interestWrite(channel, on);
         }
     }
@@ -62,7 +59,7 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
      */
     public boolean handleWrite() throws IOException {
         WriteObserver chain = interested;
-        if(lastInterest && chain != null) 
+        if(chain != null) 
             return chain.handleWrite();
         else
             return false;
