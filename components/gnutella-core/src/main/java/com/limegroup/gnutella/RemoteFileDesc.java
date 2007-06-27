@@ -385,7 +385,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		if(filename.equals("")) {
 			throw new IllegalArgumentException("cannot accept empty string file name");
 		}
-		if((size < 0) ) {
+		if((size < 0 || size > Constants.MAX_FILE_SIZE) ) {
 			throw new IllegalArgumentException("invalid size: "+size);
 		}
 		if((index & 0xFFFFFFFF00000000L) != 0) {
