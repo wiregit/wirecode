@@ -14,7 +14,7 @@ import com.limegroup.gnutella.Assert;
  */
 class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 
-	private final long length;
+	private final int length;
 	private final BTDataSource buf;
 	
 	private int chunkId = -1;
@@ -82,7 +82,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 		
 		if (currentOffset + available == complete.getHigh() + 1) {
 			BTMessageStat.INCOMING_PIECE.incrementStat();
-			BTMessageStatBytes.INCOMING_PIECE.addData((int)(5 + length));
+			BTMessageStatBytes.INCOMING_PIECE.addData(5 + length);
 			
 			// we're done receiving this piece, request more.
 			readerState.getHandler().finishReceivingPiece();
@@ -100,7 +100,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 	}
 	
 	private int getAmountLeft() {
-		return Math.min(buf.size(), (int)(complete.getHigh() - currentOffset + 1));
+		return (int)Math.min(buf.size(), complete.getHigh() - currentOffset + 1);
 	}
 	
 	public BTPiece call() {

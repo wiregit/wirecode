@@ -495,7 +495,9 @@ class VerifyingFolder implements TorrentDiskManager {
 			
 			if (LOG.isDebugEnabled())
 				LOG.debug("reading piece " + in);
-			int length = (int)(in.getHigh() - in.getLow() + 1);
+            long length64 = in.getHigh() - in.getLow() + 1;
+            assert length64 <= Integer.MAX_VALUE;
+			int length = (int)length64;
 			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
 			int offset = 0;
 			byte[] buf = new byte[length];
