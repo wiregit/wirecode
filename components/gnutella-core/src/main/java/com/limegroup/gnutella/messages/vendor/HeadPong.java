@@ -494,12 +494,12 @@ public class HeadPong extends VendorMessage {
                 // was already done above.)
                 ggep.put(QUEUE, BUSY);
             } else if(size + ranges.length() + 6 <= PACKET_SIZE) {
-                if (ranges.l4.length > 0) {
-                    ggep.put(RANGES, ranges.l4);
+                if (ranges.ints.length > 0) {
+                    ggep.put(RANGES, ranges.ints);
                     size += ggep.getHeaderOverhead(RANGES);
                 }
-                if (ranges.l5.length > 0) {
-                    ggep.put(RANGES5, ranges.l5);
+                if (ranges.longs.length > 0) {
+                    ggep.put(RANGES5, ranges.longs);
                     size += ggep.getHeaderOverhead(RANGES5);
                 }
             }
@@ -871,13 +871,13 @@ public class HeadPong extends VendorMessage {
 		IntervalSet.ByteIntervals ranges = deriveRanges(desc);
 
         // this is a non-ggep pong so we should not be serving long files.
-        assert  ranges.l5.length == 0;
+        assert  ranges.longs.length == 0;
         
 		//write the ranges only if they will fit in the packet
-		if (caos.getAmountWritten()+2 + ranges.l4.length <= PACKET_SIZE) {
+		if (caos.getAmountWritten()+2 + ranges.ints.length <= PACKET_SIZE) {
 			LOG.debug("added ranges");
-			daos.writeShort((short)ranges.l4.length);
-			caos.write(ranges.l4);
+			daos.writeShort((short)ranges.ints.length);
+			caos.write(ranges.ints);
 			return true;
 		} 
 		else { //the ranges will not fit - say we didn't send them.

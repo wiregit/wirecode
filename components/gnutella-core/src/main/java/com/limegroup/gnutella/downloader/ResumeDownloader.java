@@ -175,6 +175,7 @@ public class ResumeDownloader extends ManagedDownloader
     
     private void readObject(ObjectInputStream stream)
     throws IOException, ClassNotFoundException {
+        System.out.println("reading resume");
         GetField gets = stream.readFields();
         _hash = (URN)gets.get("_hash", null);
         _name = (String) gets.get("_name", null);
@@ -183,7 +184,8 @@ public class ResumeDownloader extends ManagedDownloader
         try {
             l = new Long(gets.get("_size",0)); 
         } catch (NoSuchFieldError itsLong) {
-            l = new Long(gets.get("_size", 0l));
+            itsLong.printStackTrace();
+            l = new Long(gets.get("_size", 0L));
         }
         _size = l.longValue();
     }

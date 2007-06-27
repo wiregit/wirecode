@@ -2,6 +2,9 @@ package org.limewire.collection;
 
 import java.io.Serializable;
 
+/**
+ * An ordered tuple of long values, (low, high).  
+ */
 public abstract class Range implements Serializable {
 
     private static final long serialVersionUID = -2562093104400487223L;
@@ -12,14 +15,26 @@ public abstract class Range implements Serializable {
         return (getLow() >= other.getLow() && getHigh() <= other.getHigh());
     }
 
+    /**
+     * @return a byte [] representation of this range.  The representation will
+     * be 8 bytes if isLong() is false, 10 bytes otherwise. 
+     */
     public abstract byte[] toBytes();
 
+    /**
+     * places a byte[] representation of this range in the specified
+     * array at the specified offset.
+     */
     public abstract void toBytes(byte[] dest, int offset);
 
     public abstract long getLow();
 
     public abstract long getHigh();
 
+    /**
+     * @return a Range with the provided values that will use
+     * the least amount of memory.
+     */
     public static Range createRange(long start, long end) {
         if (start <= Integer.MAX_VALUE && end <= Integer.MAX_VALUE)
             return new Interval(start, end);
@@ -27,14 +42,13 @@ public abstract class Range implements Serializable {
             return new LongInterval(start, end);
     }
     
+    /**
+     * @return a range (singleton,singleton)
+     */
     public static Range createRange(long singleton) {
         return createRange(singleton, singleton);
     }
     
-    public static Range createLong(long start, long end) {
-        return new LongInterval(start, end);
-    }
-
     public String toString() {
         if (getLow()==getHigh())
             return String.valueOf(getLow());
@@ -47,6 +61,10 @@ public abstract class Range implements Serializable {
             return false;
         Range other=(Range)o;
         return getLow()==other.getLow() && getHigh()==other.getHigh();
+    }
+    
+    public int hashCode() {
+        return (int)((getLow() * getHigh()) % Integer.MAX_VALUE);
     }
     
     /**

@@ -353,7 +353,7 @@ public class HeadTest extends LimeTestCase {
         pong.updateRFD(blankRFD);
         assertFalse(blankRFD.isPartialSource());        
 		
-		assertTrue(Arrays.equals(_ranges.toBytes().l4,pongi.getRanges().toBytes().l4));
+		assertTrue(Arrays.equals(_ranges.toBytes().ints,pongi.getRanges().toBytes().ints));
     }
     
     public void testRangesDontFit() throws Exception {		
@@ -475,7 +475,7 @@ public class HeadTest extends LimeTestCase {
 		
 		assertNull(pong1.getRanges());
 		assertNotNull(pong2.getRanges());
-		assertTrue(Arrays.equals(_rangesMedium.toBytes().l4,pong2.getRanges().toBytes().l4));
+		assertTrue(Arrays.equals(_rangesMedium.toBytes().ints,pong2.getRanges().toBytes().ints));
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
 		
 		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());

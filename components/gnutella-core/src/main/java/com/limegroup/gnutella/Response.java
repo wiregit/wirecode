@@ -213,7 +213,7 @@ public class Response {
             if (size <= Integer.MAX_VALUE)
                 this.ggepData = GGEPContainer.EMPTY;
             else
-                this.ggepData = new GGEPContainer(null,-1l, size);
+                this.ggepData = new GGEPContainer(null,-1L, size);
         } else
 		    this.ggepData = ggepData;
 		
@@ -670,7 +670,7 @@ public class Response {
           throws IOException {
             if( ggep == null || (ggep.locations.size() == 0 && 
                     ggep.createTime <= 0 && ggep.size64 <= Integer.MAX_VALUE))
-                throw new NullPointerException("null or empty locations and small size");
+                throw new IllegalArgumentException("null or empty locations and small size");
             
             GGEP info = new GGEP(true);
             if(ggep.locations.size() > 0) {

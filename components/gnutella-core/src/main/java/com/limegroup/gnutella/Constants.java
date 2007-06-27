@@ -50,5 +50,5 @@ public final class Constants {
 	public static final String UTF_8_ENCODING = "UTF-8";
     
     /** Maximum file size we'll share */
-    public static final long MAX_FILE_SIZE = 0xFFFFFFFFFFl; // 1TB
+    public static final long MAX_FILE_SIZE = 0xFFFFFFFFFFL; // 1TB
 }

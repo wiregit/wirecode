@@ -542,7 +542,7 @@ public class ManagedDownloader extends AbstractDownloader
 		if (propertiesMap.get(DEFAULT_FILENAME) == null)
 			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
 		if (propertiesMap.get(FILE_SIZE) == null)
-			propertiesMap.put(FILE_SIZE,new Long(rfd.getSize()));
+			propertiesMap.put(FILE_SIZE,Long.valueOf(rfd.getSize()));
     }
     
     /** 

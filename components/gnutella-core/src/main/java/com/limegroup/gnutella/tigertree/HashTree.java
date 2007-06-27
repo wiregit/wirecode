@@ -149,7 +149,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
-        long maxNodes = 1l << depth;        
+        long maxNodes = 1 << depth;        
         // calculate ideal node size, 
         long idealNodeSize = fileSize / maxNodes;
         // rounding up!

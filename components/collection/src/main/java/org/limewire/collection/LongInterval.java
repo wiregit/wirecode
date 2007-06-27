@@ -4,10 +4,13 @@ import java.io.Serializable;
 
 import org.limewire.util.ByteOrder;
 
+/**
+ * An implementation of range that stores data in longs
+ */
 public class LongInterval extends Range implements Serializable {
     private static final long serialVersionUID = -2562093104400487445L;
     
-    static final long MAX_SIZE = 0xFFFFFFFFFFl;
+    static final long MAX_VALUE = 0xFFFFFFFFFFL;
     
     private final long low;
     private final long high;
@@ -15,13 +18,11 @@ public class LongInterval extends Range implements Serializable {
         if(high < low)
             throw new IllegalArgumentException("low: " + low +
                                             ", high: " + high);
-        // Since high >= low, low >= Integer.MIN_VALUE implies
-        // high >= Integer.MIN_VALUE.  Only one check is necessary.
         if(low < 0)
             throw new IllegalArgumentException("low < min int:"+low);
-        // high <= MAX_SIZE implies
-        // low <= MAX_SIZE.  Only one check is necessary.
-        if(high > MAX_SIZE)
+        // high <= MAX_VALUE implies
+        // low <= MAX_VALUE.  Only one check is necessary.
+        if(high > MAX_VALUE)
             throw new IllegalArgumentException("high > max int:"+high);
         
         this.low = low;

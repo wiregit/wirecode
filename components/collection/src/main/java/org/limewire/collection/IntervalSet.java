@@ -578,13 +578,13 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     public static class ByteIntervals {
-        public final byte[] l4, l5;
+        public final byte[] ints, longs;
         private ByteIntervals(byte[] ranges, byte []ranges5) {
-            this.l4 = ranges;
-            this.l5 = ranges5;
+            this.ints = ranges;
+            this.longs = ranges5;
         }
         public int length() {
-            return l4.length + l5.length;
+            return ints.length + longs.length;
         }
     }
 }

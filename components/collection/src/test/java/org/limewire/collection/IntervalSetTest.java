@@ -759,9 +759,9 @@ public class IntervalSetTest extends BaseTestCase {
     	}
     	
     	IntervalSet.ByteIntervals asByte = set.toBytes();
-        assertEquals(0,asByte.l4.length);
+        assertEquals(0,asByte.ints.length);
     	
-    	IntervalSet set2 = IntervalSet.parseBytes(asByte.l4, asByte.l5);
+    	IntervalSet set2 = IntervalSet.parseBytes(asByte.ints, asByte.longs);
     	assertEquals(set.getSize(),set2.getSize());
     	
     	assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
@@ -769,12 +769,12 @@ public class IntervalSetTest extends BaseTestCase {
         // test long ranges
         set.add(Range.createRange(0xFFFFFFFFF0l, 0xFFFFFFFFFFl));
         asByte = set.toBytes();
-        assertEquals(10,asByte.l5.length);
+        assertEquals(10,asByte.longs.length);
         // check manually
-        assertEquals(0xFFFFFFFFF0l, ByteOrder.beb2long(asByte.l5, 0, 5));
-        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(asByte.l5, 5, 5));
+        assertEquals(0xFFFFFFFFF0l, ByteOrder.beb2long(asByte.longs, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(asByte.longs, 5, 5));
         // and check parsing
-        set2 = IntervalSet.parseBytes(asByte.l4,asByte.l5);
+        set2 = IntervalSet.parseBytes(asByte.ints,asByte.longs);
         assertEquals(set.getSize(),set2.getSize());
         assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
         
