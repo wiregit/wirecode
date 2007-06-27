@@ -116,7 +116,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         ROOT_HASH = allNodes.get(0).get(0);
         DEPTH = allNodes.size()-1;
         Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
-        Assert.that(NODES.size() * nodeSize >= fileSize);
+        Assert.that(NODES.size() * (long)nodeSize >= fileSize);
         HashTreeNodeManager.instance().register(this, allNodes);
         _nodeSize = nodeSize;
     }
@@ -149,9 +149,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
-        int maxNodes = 1 << depth;        
+        long maxNodes = 1 << depth;        
         // calculate ideal node size, 
-        int idealNodeSize = (int) (fileSize) / maxNodes;
+        long idealNodeSize = (fileSize) / maxNodes;
         // rounding up!
         if (fileSize % maxNodes != 0)
             idealNodeSize++;
@@ -168,11 +168,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize * (long)maxNodes >= fileSize,
+        Assert.that(nodeSize * maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-        Assert.that(nodeSize * (long)maxNodes <= fileSize * 2,
+        Assert.that(nodeSize * maxNodes <= fileSize * 2,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
@@ -190,6 +190,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                                            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
+        System.out.println("nodesize "+nodeSize+" depth "+calculateDepth(fileSize));
         List<byte[]> nodes = createTTNodes(nodeSize, fileSize, is);
         
         // calculate the intermediary nodes to get the root hash & others.
@@ -439,8 +440,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             return 9;
         else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
             return 10;
-        else
+        else if (size < 4096 * MB) 
             return 11; // 2MB chunks, 49128B tree
+        else // file is getting big, don't create more than 4MB chunks
+            return TigerTree.log2Ceil(size / (4 * MB));
     }
     
     /**
