@@ -466,8 +466,8 @@ public class Response {
      */
     public void writeToStream(OutputStream os) throws IOException {
         ByteOrder.int2leb((int)index, os);
-        if (size > Integer.MAX_VALUE)
-            os.write(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF});
+        if (size > Integer.MAX_VALUE) 
+            ByteOrder.int2leb(0xFFFFFFFF, os);
         else
             ByteOrder.int2leb((int)size, os);
         for (int i = 0; i < nameBytes.length; i++)
