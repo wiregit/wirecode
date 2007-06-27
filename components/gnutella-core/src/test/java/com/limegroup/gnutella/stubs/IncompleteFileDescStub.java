@@ -29,7 +29,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     
     private boolean _activelyDownloading;
         
-    private byte [] _ranges;
+    private byte [][] _ranges;
     
     public static final int size = 1126400;
     static {
@@ -91,11 +91,11 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	 * @see com.limegroup.gnutella.IncompleteFileDesc#getRangesAsByte()
 	 */
     @Override
-	public byte[] getRangesAsByte() {
+	public byte[][] getRangesAsByte() {
 		return _ranges;
 	}
 	
-	public void setRangesByte(byte [] what) {
+	public void setRangesByte(byte [][] what) {
 		_ranges=what;
 	}
     

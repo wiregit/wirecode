@@ -109,6 +109,7 @@ public class HeadPong extends VendorMessage {
     private static final String VENDOR    = "V";
     private static final String QUEUE     = "Q";
     private static final String RANGES    = "R";
+    private static final String RANGES5    = "R5";
     private static final String PUSH_LOCS = "P";
     private static final String LOCS      = "A";
     private static final String TLS_LOCS  = "T";
@@ -294,8 +295,9 @@ public class HeadPong extends VendorMessage {
         
         try {
             byte[] ranges = getOptionalGGEPField(ggep, RANGES);
-            if(ranges.length > 0)
-                _ranges = parseRanges(ranges);
+            byte [] ranges5 = getOptionalGGEPField(ggep, RANGES5);
+            if(ranges.length > 0 || ranges5.length > 0)
+                _ranges = parseRanges(ranges, ranges5);
             
             byte[] pushLocs = getOptionalGGEPField(ggep, PUSH_LOCS);
             if(pushLocs.length > 0)
@@ -404,8 +406,8 @@ public class HeadPong extends VendorMessage {
     		if (LOG.isDebugEnabled())
     			LOG.debug("writing features "+features);
     		
-    		//if we don't have the file..
-    		if (desc == null) {
+    		//if we don't have the file or its too large...
+    		if (desc == null || desc.getFileSize() > Integer.MAX_VALUE) {
     			LOG.debug("we do not have the file");
     			daos.write(FILE_NOT_FOUND);
     			return baos.toByteArray();
@@ -484,16 +486,23 @@ public class HeadPong extends VendorMessage {
         ggep.put(QUEUE, calculateQueueStatus()); size += ggep.getHeaderOverhead(QUEUE);        
         
         if((code & PARTIAL_FILE) == PARTIAL_FILE && ping.requestsRanges()) {
-            byte[] ranges = deriveRanges(desc);
-            if(ranges.length == 0) {
+            byte[][] ranges = deriveRanges(desc);
+            int combinedLength = ranges[0].length + ranges[1].length;
+            if(combinedLength == 0) {
                 // If we have no ranges available, change queue status to busy,
                 // so that they come back and ask us later, when we may have
                 // more ranges available. (but don't increment size, since that
                 // was already done above.)
                 ggep.put(QUEUE, BUSY);
-            } else if(size + ranges.length + 3 <= PACKET_SIZE) {
-                ggep.put(RANGES, ranges);
-                size += ggep.getHeaderOverhead(RANGES);
+            } else if(size + combinedLength + 6 <= PACKET_SIZE) {
+                if (ranges[0].length > 0) {
+                    ggep.put(RANGES, ranges[0]);
+                    size += ggep.getHeaderOverhead(RANGES);
+                }
+                if (ranges[1].length > 0) {
+                    ggep.put(RANGES5, ranges[1]);
+                    size += ggep.getHeaderOverhead(RANGES5);
+                }
             }
         }
         
@@ -778,12 +787,12 @@ public class HeadPong extends VendorMessage {
 		int rangeLength=dais.readUnsignedShort();
 		byte [] ranges = new byte[rangeLength];
 		dais.readFully(ranges);
-        return parseRanges(ranges);
+        return parseRanges(ranges, DataUtils.EMPTY_BYTE_ARRAY);
     }
     
     /** Parses available ranges. */
-    private IntervalSet parseRanges(byte[] ranges) throws IOException {
-		return IntervalSet.parseBytes(ranges);
+    private IntervalSet parseRanges(byte[] ranges, byte [] ranges5) throws IOException {
+		return IntervalSet.parseBytes(ranges, ranges5);
 	}
 	
 	/**
@@ -860,13 +869,16 @@ public class HeadPong extends VendorMessage {
 	private static final boolean writeRanges(CountingOutputStream caos, FileDesc desc) throws IOException{
 		DataOutputStream daos = new DataOutputStream(caos);
 		LOG.debug("adding ranges to pong");
-		byte[] ranges = deriveRanges(desc);
-		
+		byte[][] ranges = deriveRanges(desc);
+
+        // this is a non-ggep pong so we should not be serving long files.
+        assert  ranges[1].length == 0;
+        
 		//write the ranges only if they will fit in the packet
 		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
 			LOG.debug("added ranges");
-			daos.writeShort((short)ranges.length);
-			caos.write(ranges);
+			daos.writeShort((short)ranges[0].length);
+			caos.write(ranges[0]);
 			return true;
 		} 
 		else { //the ranges will not fit - say we didn't send them.
@@ -876,7 +888,7 @@ public class HeadPong extends VendorMessage {
 	}
     
     /** Returns the byte[] of the ranges. */
-    private static final byte[] deriveRanges(FileDesc desc) {
+    private static final byte[][] deriveRanges(FileDesc desc) {
         return ((IncompleteFileDesc)desc).getRangesAsByte();
     }
 	

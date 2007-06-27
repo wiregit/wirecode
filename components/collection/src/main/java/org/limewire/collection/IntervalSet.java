@@ -506,32 +506,55 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     /**
      *
      * @return packed representation of the intervals.
+     * at position 0 are all intervals that can fit in 31 bit representation,
+     * at position 1 are the long ones (currently 40 bits).
      */
-    public byte [] toBytes() {
-    	byte [] ret = new byte[intervals.size()*8];
+    public byte [][] toBytes() {
+        int longRanges = 0;
+        for (Range current: intervals)
+            longRanges += current.isLong() ? 1 : 0;
+    	byte [] ret = new byte[(intervals.size() - longRanges) *8];
+        byte [] ret2 = new byte[longRanges * 10];
     	int pos = 0;
+        int pos2 = 0;
         for(Range current : intervals) {
-    		current.toBytes(ret,pos);
-    		pos+=8;
+            if (current.isLong()) {
+                current.toBytes(ret2, pos2);
+                pos2 += 10;
+            } else {
+                current.toBytes(ret,pos);
+                pos+=8;
+            }
     	}
-    	return ret;
+    	return new byte[][] {ret, ret2};
     }
     
     /**
-     * parses an IntervalSet from a byte array.  
+     * parses an IntervalSet from a byte array.  At position 0 are
+     * intervals that fit in 31 bits, at position 1 are those that
+     * need 40 bits.
      */
-    public static IntervalSet parseBytes(byte [] data) throws IOException {
-        if (data.length % 8 != 0) 
+    public static IntervalSet parseBytes(byte []ranges, byte []ranges5) throws IOException {
+        if (ranges.length % 8 != 0 || ranges5.length % 10 != 0) 
             throw new IOException();
         
     	IntervalSet ret = new IntervalSet();
-    	for (int i =0; i< data.length/8;i++) {
-    		int low = (int)ByteOrder.uint2long(ByteOrder.beb2int(data,i*8));
-    		int high = (int)ByteOrder.uint2long(ByteOrder.beb2int(data,i*8+4));
-            if (high < low || high < 0 || low < 0)
+    	for (int i =0; i< ranges.length/8;i++) {
+    		int low = (int)ByteOrder.uint2long(ByteOrder.beb2int(ranges,i*8));
+    		int high = (int)ByteOrder.uint2long(ByteOrder.beb2int(ranges,i*8+4));
+            if (high < low || low < 0)
                 throw new IOException();
-    		ret.add(new Interval(low,high));
+    		ret.add(Range.createRange(low,high));
     	}
+        
+        for (int i = 0; i < ranges5.length / 10; i++) {
+            long low = ByteOrder.beb2long(ranges5, i * 10, 5);
+            long high = ByteOrder.beb2long(ranges5, i * 10 + 5, 5);
+            if (high < low || low < 0)
+                throw new IOException();
+            ret.add(Range.createRange(low, high));
+        }
+        
     	return ret;
     }
     

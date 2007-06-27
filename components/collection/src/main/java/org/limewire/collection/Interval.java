@@ -87,4 +87,8 @@ class Interval extends Range implements Serializable {
     public final long getHigh() {
         return high;
     }
+    
+    public final boolean isLong() {
+        return false;
+    }
 }

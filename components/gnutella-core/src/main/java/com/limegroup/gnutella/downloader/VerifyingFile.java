@@ -464,7 +464,7 @@ public class VerifyingFile {
     /**
      * @return byte-packed representation of the verified blocks.
      */
-    public synchronized byte [] toBytes() {
+    public synchronized byte [][] toBytes() {
     	return verifiedBlocks.toBytes();
     }
     

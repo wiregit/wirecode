@@ -102,7 +102,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
             return true;
         }
     }
-    public byte [] getRangesAsByte() {
+    public byte [][] getRangesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**

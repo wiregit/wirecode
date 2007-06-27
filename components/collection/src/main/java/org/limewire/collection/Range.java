@@ -48,4 +48,9 @@ public abstract class Range implements Serializable {
         Range other=(Range)o;
         return getLow()==other.getLow() && getHigh()==other.getHigh();
     }
+    
+    /**
+     * @return true if this range has values > Integer.MAX_VALUE.
+     */
+    public abstract boolean isLong();
 }

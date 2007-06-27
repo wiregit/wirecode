@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteOrder;
 
 
 /**
@@ -757,12 +758,30 @@ public class IntervalSetTest extends BaseTestCase {
     		set.add(inter);
     	}
     	
-    	byte [] asByte = set.toBytes();
+    	byte [][] asByte = set.toBytes();
+        assertEquals(0,asByte[1].length);
     	
-    	IntervalSet set2 = IntervalSet.parseBytes(asByte);
+    	IntervalSet set2 = IntervalSet.parseBytes(asByte[0], asByte[1]);
     	assertEquals(set.getSize(),set2.getSize());
     	
     	assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
+        
+        // test long ranges
+        set.add(Range.createRange(0xFFFFFFFFF0l, 0xFFFFFFFFFFl));
+        asByte = set.toBytes();
+        assertEquals(10,asByte[1].length);
+        // check manually
+        assertEquals(0xFFFFFFFFF0l, ByteOrder.beb2long(asByte[1], 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(asByte[1], 5, 5));
+        // and check parsing
+        set2 = IntervalSet.parseBytes(asByte[0],asByte[1]);
+        assertEquals(set.getSize(),set2.getSize());
+        assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
+        
+        // the large interval will be last
+        Range large = set2.getLast();
+        assertEquals(0xFFFFFFFFF0l, large.getLow());
+        assertEquals(0xFFFFFFFFFFl, large.getHigh());
     }
     
     // Test failure cases from beta testing
