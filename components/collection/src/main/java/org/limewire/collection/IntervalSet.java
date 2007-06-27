@@ -509,7 +509,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * at position 0 are all intervals that can fit in 31 bit representation,
      * at position 1 are the long ones (currently 40 bits).
      */
-    public byte [][] toBytes() {
+    public ByteIntervals toBytes() {
         int longRanges = 0;
         for (Range current: intervals)
             longRanges += current.isLong() ? 1 : 0;
@@ -526,7 +526,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
                 pos+=8;
             }
     	}
-    	return new byte[][] {ret, ret2};
+    	return new ByteIntervals(ret, ret2);
     }
     
     /**
@@ -575,5 +575,16 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             "IntervalSet invariants broken.\n" + 
             "Pre  Fixing: " + preIntervals + "\n" +
             "Post Fixing: " + postIntervals));
+    }
+    
+    public static class ByteIntervals {
+        public final byte[] l4, l5;
+        private ByteIntervals(byte[] ranges, byte []ranges5) {
+            this.l4 = ranges;
+            this.l5 = ranges5;
+        }
+        public int length() {
+            return l4.length + l5.length;
+        }
     }
 }

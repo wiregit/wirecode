@@ -398,7 +398,7 @@ public class DownloadTest extends LimeTestCase {
                     incomplete = ifm.getFile(rfd);
                     assertNotNull(incomplete);
                     VerifyingFile vf = ifm.getEntry(incomplete);
-                    fileSize = ((Integer)PrivilegedAccessor.getValue(vf, "completedSize")
+                    fileSize = ((Long)PrivilegedAccessor.getValue(vf, "completedSize")
                                   ).longValue();
                     assertNotNull(vf);
             	    leased = (IntervalSet)

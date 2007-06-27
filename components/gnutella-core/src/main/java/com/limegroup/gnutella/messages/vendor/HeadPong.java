@@ -486,21 +486,20 @@ public class HeadPong extends VendorMessage {
         ggep.put(QUEUE, calculateQueueStatus()); size += ggep.getHeaderOverhead(QUEUE);        
         
         if((code & PARTIAL_FILE) == PARTIAL_FILE && ping.requestsRanges()) {
-            byte[][] ranges = deriveRanges(desc);
-            int combinedLength = ranges[0].length + ranges[1].length;
-            if(combinedLength == 0) {
+            IntervalSet.ByteIntervals ranges = deriveRanges(desc);
+            if(ranges.length() == 0) {
                 // If we have no ranges available, change queue status to busy,
                 // so that they come back and ask us later, when we may have
                 // more ranges available. (but don't increment size, since that
                 // was already done above.)
                 ggep.put(QUEUE, BUSY);
-            } else if(size + combinedLength + 6 <= PACKET_SIZE) {
-                if (ranges[0].length > 0) {
-                    ggep.put(RANGES, ranges[0]);
+            } else if(size + ranges.length() + 6 <= PACKET_SIZE) {
+                if (ranges.l4.length > 0) {
+                    ggep.put(RANGES, ranges.l4);
                     size += ggep.getHeaderOverhead(RANGES);
                 }
-                if (ranges[1].length > 0) {
-                    ggep.put(RANGES5, ranges[1]);
+                if (ranges.l5.length > 0) {
+                    ggep.put(RANGES5, ranges.l5);
                     size += ggep.getHeaderOverhead(RANGES5);
                 }
             }
@@ -869,16 +868,16 @@ public class HeadPong extends VendorMessage {
 	private static final boolean writeRanges(CountingOutputStream caos, FileDesc desc) throws IOException{
 		DataOutputStream daos = new DataOutputStream(caos);
 		LOG.debug("adding ranges to pong");
-		byte[][] ranges = deriveRanges(desc);
+		IntervalSet.ByteIntervals ranges = deriveRanges(desc);
 
         // this is a non-ggep pong so we should not be serving long files.
-        assert  ranges[1].length == 0;
+        assert  ranges.l5.length == 0;
         
 		//write the ranges only if they will fit in the packet
-		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
+		if (caos.getAmountWritten()+2 + ranges.l4.length <= PACKET_SIZE) {
 			LOG.debug("added ranges");
-			daos.writeShort((short)ranges[0].length);
-			caos.write(ranges[0]);
+			daos.writeShort((short)ranges.l4.length);
+			caos.write(ranges.l4);
 			return true;
 		} 
 		else { //the ranges will not fit - say we didn't send them.
@@ -888,7 +887,7 @@ public class HeadPong extends VendorMessage {
 	}
     
     /** Returns the byte[] of the ranges. */
-    private static final byte[][] deriveRanges(FileDesc desc) {
+    private static final IntervalSet.ByteIntervals deriveRanges(FileDesc desc) {
         return ((IncompleteFileDesc)desc).getRangesAsByte();
     }
 	

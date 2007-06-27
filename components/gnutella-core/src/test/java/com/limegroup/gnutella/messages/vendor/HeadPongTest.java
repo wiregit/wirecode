@@ -839,6 +839,51 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(24, ranges.length);
     }
     
+    public void testWriteLongRanges() throws Exception {
+        byte[] guid = new byte[16];
+        Random r = new Random();
+        r.nextBytes(guid);
+        
+        MockHeadPongRequestor req = new MockHeadPongRequestor();
+        req.setPongGGEPCapable(true);
+        req.setUrn(HugeTestUtils.SHA1);
+        req.setGuid(guid);
+        req.setRequestsRanges(true);
+        
+        IncompleteFileDescStub fd = new IncompleteFileDescStub();
+        fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
+        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
+        
+        HeadPong pong = new HeadPong(req);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        pong.write(out);
+        byte[] written = out.toByteArray();
+        
+        assertEquals(guid, written, 0, 16);
+        // 16...23, rest of Gnutella header, ignore.
+        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        
+        int[] endOffset = new int[1];
+        GGEP writtenGGEP = new GGEP(written, 31, endOffset);
+        assertEquals(written.length, endOffset[0]);
+        
+        assertEquals("got headers: " + writtenGGEP.getHeaders(), 5, writtenGGEP.getHeaders().size());
+        assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
+        assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
+        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        byte[] ranges = writtenGGEP.getBytes("R");
+        assertEquals(8, ranges.length);
+        assertEquals(0,     ByteOrder.beb2int(ranges, 0));
+        assertEquals(500,   ByteOrder.beb2int(ranges, 4));
+        byte[] ranges5 = writtenGGEP.getBytes("R5");
+        assertEquals(10, ranges5.length);
+        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+    }
+    
     public void testWriteRangesOnlyIfRequested() throws Exception {
         byte[] guid = new byte[16];
         Random r = new Random();

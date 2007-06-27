@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -102,7 +103,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
             return true;
         }
     }
-    public byte [][] getRangesAsByte() {
+    public IntervalSet.ByteIntervals getRangesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**
