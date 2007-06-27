@@ -15,6 +15,7 @@ import org.apache.http.HttpStatus;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
 import org.limewire.net.SocketAcceptor;
+import org.limewire.nio.NIOTestUtils;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -69,7 +70,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         httpAcceptor.start(acceptor.getDispatcher());
     }
     
-    private void stopAcceptor() {
+    private void stopAcceptor() throws Exception {
         if (httpAcceptor != null) {
             httpAcceptor.stop();
             httpAcceptor = null;
@@ -78,6 +79,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             acceptor.unbind();
             acceptor = null;
         }
+        NIOTestUtils.waitForNIO();
     }
     
     public void testWatchdogTriggeredTimeout() throws IOException, Exception {
@@ -149,6 +151,18 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             int result = client.executeMethod(method);
             fail("Expected IOException, got: " + result);
         } catch (IOException expected) {
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testDefaultHandler() throws IOException, Exception {
+        initializeAcceptor(TIMEOUT, "HEAD");
+        
+        HeadMethod method = new HeadMethod("/");
+        try {
+            int result = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result);
         } finally {
             method.releaseConnection();
         }
