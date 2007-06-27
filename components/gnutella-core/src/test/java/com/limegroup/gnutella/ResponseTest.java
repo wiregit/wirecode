@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -797,13 +798,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testLargeFiles() throws Exception {
-        Response resp = new Response(1, Long.MAX_VALUE, "asdf");
+        Response resp = new Response(1, Constants.MAX_FILE_SIZE, "asdf");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resp.writeToStream(baos);
         byte [] data = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         Response read = Response.createFromStream(bais);
-        assertEquals(Long.MAX_VALUE, read.getSize());
+        assertEquals(Constants.MAX_FILE_SIZE, read.getSize());
         
         // also check the data manually
         
@@ -815,7 +816,26 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         int firstNull = 8;
         while(data[firstNull++] != 0x0);
         GGEP g = new GGEP(data, firstNull);
-        assertEquals(Long.MAX_VALUE, g.getLong(GGEP.GGEP_HEADER_LARGE_FILE));
+        assertEquals(Constants.MAX_FILE_SIZE, g.getLong(GGEP.GGEP_HEADER_LARGE_FILE));
+        
+        // if the file is too large, we do not construct
+        try {
+            resp = new Response(1, Constants.MAX_FILE_SIZE + 1, "asdf");
+            fail("constructed too large file");
+        } catch (IllegalArgumentException expected){}
+        
+        // we don't parse responses from network either
+        g = new GGEP(true);
+        g.put(GGEP.GGEP_HEADER_LARGE_FILE,Constants.MAX_FILE_SIZE + 1);
+        baos = new ByteArrayOutputStream();
+        baos.write(data,0, firstNull);
+        g.write(baos);
+        baos.write(0x0);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        try {
+            Response.createFromStream(bais);
+            fail("read a response with too large file");
+        } catch (IOException expected){}
     }
     
     private static void assertResponseParsingFails(Response r) throws Exception {

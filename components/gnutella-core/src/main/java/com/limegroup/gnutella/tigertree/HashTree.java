@@ -43,8 +43,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private static transient final Log LOG = LogFactory.getLog(HashTree.class);
 
     // some static constants
-    private static transient final int  KB                   = 1024;
-    private static transient final int  MB                   = 1024 * KB;
+    private static transient final long  KB                   = 1024;
+    private static transient final long  MB                   = 1024 * KB;
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
     
@@ -149,9 +149,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
-        long maxNodes = 1 << depth;        
+        long maxNodes = 1l << depth;        
         // calculate ideal node size, 
-        long idealNodeSize = (fileSize) / maxNodes;
+        long idealNodeSize = fileSize / maxNodes;
         // rounding up!
         if (fileSize % maxNodes != 0)
             idealNodeSize++;
@@ -190,7 +190,6 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                                            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
-        System.out.println("nodesize "+nodeSize+" depth "+calculateDepth(fileSize));
         List<byte[]> nodes = createTTNodes(nodeSize, fileSize, is);
         
         // calculate the intermediary nodes to get the root hash & others.
@@ -442,8 +441,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             return 10;
         else if (size < 4096 * MB) 
             return 11; // 2MB chunks, 49128B tree
-        else // file is getting big, don't create more than 4MB chunks
-            return TigerTree.log2Ceil(size / (4 * MB));
+        else if (size < 64 * 1024 * MB) 
+            return 12; // 80kb tree
+        else 
+            return 13; // 160KB tree, 8k * 128MB chunks for 1TB file
     }
     
     /**

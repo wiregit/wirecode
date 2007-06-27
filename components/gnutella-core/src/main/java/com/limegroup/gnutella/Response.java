@@ -181,7 +181,7 @@ public class Response {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
         // see note in createFromStream about Integer.MAX_VALUE
-        if (size < 0)
+        if (size < 0 || size > Constants.MAX_FILE_SIZE)
             throw new IllegalArgumentException("invalid size: " + size);
             
         this.index=index;
@@ -292,6 +292,8 @@ public class Response {
             }
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
+            if (ggep.size64 > Constants.MAX_FILE_SIZE)
+                throw new IOException(" file too large "+ggep.size64);
             if (ggep.size64 > Integer.MAX_VALUE)
                 size = ggep.size64;
 
@@ -689,7 +691,7 @@ public class Response {
             if(ggep.createTime > 0)
                 info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
             
-            if (ggep.size64 > Integer.MAX_VALUE)
+            if (ggep.size64 > Integer.MAX_VALUE && ggep.size64 <= Constants.MAX_FILE_SIZE)
                 info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
             
             info.write(out);
