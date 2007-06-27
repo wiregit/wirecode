@@ -42,6 +42,7 @@ public class LimeCoreGlueTest extends BaseTestCase {
         
         List<String> expected = new LinkedList<String>(Arrays.asList(new String[]
                             {"com.limegroup.gnutella.LimeCoreGlue", 
+                             "com.limegroup.gnutella.LimeCoreGlue$InstallFailedException",
                              "org.limewire.setting.RemoteSettingManager",
                              "org.limewire.io.LocalSocketAddressProvider",
                              "org.limewire.security.SettingsProvider", 
@@ -49,8 +50,10 @@ public class LimeCoreGlueTest extends BaseTestCase {
                              "org.limewire.util.CommonUtils", 
                              "org.limewire.util.FileUtils", 
                              "org.limewire.util.OSUtils"}));
-        if(OSUtils.isWindows() || OSUtils.isMacOSX())
+        if(OSUtils.isWindows() || OSUtils.isMacOSX()) {
             expected.add("org.limewire.util.SystemUtils");
+            expected.add("org.limewire.util.SystemUtils$SpecialLocations");
+        }
         
         removeClasses(nextLoaded, expected);
         
