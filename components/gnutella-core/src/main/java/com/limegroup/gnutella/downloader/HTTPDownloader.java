@@ -1512,7 +1512,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     buffer.limit(buffer.capacity());
                 }
                 
-                long totalRead = buffer.position();
+                int totalRead = buffer.position();
                 if (_inNetwork)
                     BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData((int)totalRead);
                 else
@@ -1534,7 +1534,7 @@ public class HTTPDownloader implements BandwidthTracker {
     			synchronized(this) {
                     if (_isActive) {
                         // see if we were stolen from while reading
-                        totalRead = Math.min(totalRead, _amountToRead - _amountRead);
+                        totalRead = (int)Math.min(totalRead, _amountToRead - _amountRead);
                         if (totalRead <=0 ) {
                             LOG.debug("Someone stole completely from us while reading");
                             // if were told to not read anything more, finish
@@ -1549,7 +1549,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
                         
                         // setup data for writing.
-                        dataLength = (int)(totalRead - skipped);
+                        dataLength = totalRead - skipped;
                         dataStart = skipped;
                         filePosition = currPos + skipped;
                         // maintain data for next read.
