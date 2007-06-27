@@ -665,7 +665,7 @@ public class FileUtils {
             out=new BufferedOutputStream(new FileOutputStream(dst));
             byte[] buf=new byte[BUFFER_SIZE];
             while (amountToRead>0) {
-                int read=in.read(buf, 0, Math.min(BUFFER_SIZE, (int)amountToRead));
+                int read=in.read(buf, 0, (int)Math.min(BUFFER_SIZE, amountToRead));
                 if (read==-1)
                     break;
                 amountToRead-=read;
