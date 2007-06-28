@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import junit.framework.Test;
 
 import org.limewire.collection.BitNumbers;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -32,6 +32,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -122,10 +123,10 @@ public class HeadPongTest extends LimeTestCase {
         HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 1, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
-        Iterator<Interval> iterator = pong.getRanges().iterator();
-        assertEquals(new Interval(1, 1000), iterator.next());
-        assertEquals(new Interval(1050, 2001), iterator.next());
-        assertEquals(new Interval(2500, 2525), iterator.next());
+        Iterator<Range> iterator = pong.getRanges().iterator();
+        assertEquals(Range.createRange(1, 1000), iterator.next());
+        assertEquals(Range.createRange(1050, 2001), iterator.next());
+        assertEquals(Range.createRange(2500, 2525), iterator.next());
         assertFalse(iterator.hasNext());
         Set<IpPort> expectedLocs = new IpPortSet(new IpPortImpl("4.5.6.7:8"), new IpPortImpl("5.6.7.8:9"), new IpPortImpl("6.7.8.9:10"));
         assertEquals(expectedLocs, pong.getAltLocs());
@@ -206,10 +207,10 @@ public class HeadPongTest extends LimeTestCase {
         HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
-        Iterator<Interval> iterator = pong.getRanges().iterator();
-        assertEquals(new Interval(1, 1000), iterator.next());
-        assertEquals(new Interval(1050, 2001), iterator.next());
-        assertEquals(new Interval(2500, 2525), iterator.next());
+        Iterator<Range> iterator = pong.getRanges().iterator();
+        assertEquals(Range.createRange(1, 1000), iterator.next());
+        assertEquals(Range.createRange(1050, 2001), iterator.next());
+        assertEquals(Range.createRange(2500, 2525), iterator.next());
         assertFalse(iterator.hasNext());
         Set<IpPort> expectedLocs = new IpPortSet(new IpPortImpl("4.5.6.7:8"), new IpPortImpl("5.6.7.8:9"), new IpPortImpl("6.7.8.9:10"));
         assertEquals(expectedLocs, pong.getAltLocs());
@@ -294,10 +295,10 @@ public class HeadPongTest extends LimeTestCase {
         HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 3, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
-        Iterator<Interval> iterator = pong.getRanges().iterator();
-        assertEquals(new Interval(1, 1000), iterator.next());
-        assertEquals(new Interval(1050, 2001), iterator.next());
-        assertEquals(new Interval(2500, 2525), iterator.next());
+        Iterator<Range> iterator = pong.getRanges().iterator();
+        assertEquals(Range.createRange(1, 1000), iterator.next());
+        assertEquals(Range.createRange(1050, 2001), iterator.next());
+        assertEquals(Range.createRange(2500, 2525), iterator.next());
         assertFalse(iterator.hasNext());
         Set<IpPort> expectedLocs = new IpPortSet(new IpPortImpl("4.5.6.7:8"), new IpPortImpl("5.6.7.8:9"), new IpPortImpl("6.7.8.9:10"));
         assertEquals(expectedLocs, pong.getAltLocs());
@@ -806,7 +807,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fd.setRangesAsIntervals(new Interval(0, 500), new Interval(705, 1000), new Interval(20000, 25000));
+        fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
@@ -839,6 +840,71 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(24, ranges.length);
     }
     
+    public void testWriteLongRanges() throws Exception {
+        byte[] guid = new byte[16];
+        Random r = new Random();
+        r.nextBytes(guid);
+        
+        MockHeadPongRequestor req = new MockHeadPongRequestor();
+        req.setPongGGEPCapable(true);
+        req.setUrn(HugeTestUtils.SHA1);
+        req.setGuid(guid);
+        req.setRequestsRanges(true);
+        
+        IncompleteFileDescStub fd = new IncompleteFileDescStub();
+        fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
+        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
+        
+        HeadPong pong = new HeadPong(req);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        pong.write(out);
+        byte[] written = out.toByteArray();
+        
+        assertEquals(guid, written, 0, 16);
+        // 16...23, rest of Gnutella header, ignore.
+        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        
+        int[] endOffset = new int[1];
+        GGEP writtenGGEP = new GGEP(written, 31, endOffset);
+        assertEquals(written.length, endOffset[0]);
+        
+        assertEquals("got headers: " + writtenGGEP.getHeaders(), 5, writtenGGEP.getHeaders().size());
+        assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
+        assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
+        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        byte[] ranges = writtenGGEP.getBytes("R");
+        assertEquals(8, ranges.length);
+        assertEquals(0,     ByteOrder.beb2int(ranges, 0));
+        assertEquals(500,   ByteOrder.beb2int(ranges, 4));
+        byte[] ranges5 = writtenGGEP.getBytes("R5");
+        assertEquals(10, ranges5.length);
+        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+        
+        // try only long ranges now
+        fd.setRangesAsIntervals(Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
+        pong = new HeadPong(req);
+        out = new ByteArrayOutputStream();
+        pong.write(out);
+        written = out.toByteArray();
+        
+        writtenGGEP = new GGEP(written, 31, endOffset);
+        assertEquals(written.length, endOffset[0]);
+        
+        // there should not be an R extention
+        try {
+            writtenGGEP.getBytes("R");
+            fail("there was an R extention with only long ranges");
+        } catch (BadGGEPPropertyException expected){}
+        ranges5 = writtenGGEP.getBytes("R5");
+        assertEquals(10, ranges5.length);
+        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+    }
+    
     public void testWriteRangesOnlyIfRequested() throws Exception {
         byte[] guid = new byte[16];
         Random r = new Random();
@@ -851,7 +917,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setRequestsRanges(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fd.setRangesAsIntervals(new Interval(0, 500), new Interval(705, 1000), new Interval(20000, 25000));
+        fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         

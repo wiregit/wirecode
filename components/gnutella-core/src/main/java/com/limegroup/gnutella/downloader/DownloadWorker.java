@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
@@ -464,7 +464,7 @@ public class DownloadWorker {
                     if (_commonOutFile.isHopeless())
                         _manager.promptAboutCorruptDownload();
     
-                    int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountRead();
+                    long stop = _downloader.getInitialReadingPoint() + _downloader.getAmountRead();
                     if (LOG.isDebugEnabled())
                         LOG.debug("WORKER: terminating from " + _downloader + " at " + stop + " error? " + !success);
                     
@@ -575,7 +575,7 @@ public class DownloadWorker {
             return;
         
         HTTPDownloader downloader = _downloader;
-        int high, low;
+        long high, low;
         synchronized(downloader) {
         	
             // If this downloader was a thief and had to skip any ranges, do not
@@ -588,10 +588,10 @@ public class DownloadWorker {
         if( (high-low)>=0) {//dloader failed to download a part assigned to it?
             
             if (LOG.isDebugEnabled())
-                LOG.debug("releasing ranges "+new Interval(low,high));
+                LOG.debug("releasing ranges "+Range.createRange(low,high));
 
             try {
-            	_commonOutFile.releaseBlock(new Interval(low,high));
+            	_commonOutFile.releaseBlock(Range.createRange(low,high));
             } catch (AssertFailure bad) {
             	downloader.createAssertionReport(bad);
             }
@@ -800,7 +800,7 @@ public class DownloadWorker {
         if(LOG.isTraceEnabled())
             LOG.trace("assignAndRequest for: " + _rfd);
     
-        Interval interval = null;
+        Range interval = null;
         try {
         	synchronized(_commonOutFile) {
         		if (_commonOutFile.hasFreeBlocksToAssign() > 0) 
@@ -831,7 +831,7 @@ public class DownloadWorker {
      * @param range The range initially requested
      * @param victim The possibly null victim to steal from. 
      */
-    private void completeAssignAndRequest(IOException x, Interval range, DownloadWorker victim) {
+    private void completeAssignAndRequest(IOException x, Range range, DownloadWorker victim) {
         ConnectionStatus status = completeAssignAndRequestImpl(x, range, victim);
         if (victim != null) {
             victim.setStealing(false);
@@ -852,7 +852,7 @@ public class DownloadWorker {
      * @param victim The possibly null victim to steal from. 
      * @return
      */
-    private ConnectionStatus completeAssignAndRequestImpl(IOException x, Interval range, DownloadWorker victim) {
+    private ConnectionStatus completeAssignAndRequestImpl(IOException x, Range range, DownloadWorker victim) {
         try {
             try {
                 _downloader.parseHeaders();
@@ -960,16 +960,16 @@ public class DownloadWorker {
      * Upon completion of the request, completeAssignAndRequest will
      * be called with the appropriate parameters.
      */
-    private void assignWhite(Interval interval) {
+    private void assignWhite(Range interval) {
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.
-        final int low = interval.low;
-        final int high = interval.high; // INCLUSIVE
+        final long low = interval.getLow();
+        final long high = interval.getHigh(); // INCLUSIVE
 		_shouldRelease=true;
         _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize(), new IOStateObserver() {
             public void handleStatesFinished() {
-                completeAssignAndRequest(null, new Interval(low, high), null);
+                completeAssignAndRequest(null, Range.createRange(low, high), null);
             }
 
             public void handleIOException(IOException iox) {
@@ -990,7 +990,7 @@ public class DownloadWorker {
      * 
      * @param expectedRange
      */
-    private void completeAssignWhite(Interval expectedRange) {
+    private void completeAssignWhite(Range expectedRange) {
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
         //We only want to release a range if the reported subrange
@@ -998,10 +998,10 @@ public class DownloadWorker {
         //in case this worker became a victim during the header exchange, we do not
         //clip any ranges.
         synchronized(_downloader) {
-            int low = expectedRange.low;
-            int high = expectedRange.high;
-            int newLow = _downloader.getInitialReadingPoint();
-            int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+            long low = expectedRange.getLow();
+            long high = expectedRange.getHigh();
+            long newLow = _downloader.getInitialReadingPoint();
+            long newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
             if (newHigh-newLow >= 0) {
                 if(newLow > low) {
                     if(LOG.isDebugEnabled())
@@ -1009,7 +1009,7 @@ public class DownloadWorker {
                                 " Host gave subrange, different low.  Was: " +
                                 low + ", is now: " + newLow);
                     
-                    _commonOutFile.releaseBlock(new Interval(low, newLow-1));
+                    _commonOutFile.releaseBlock(Range.createRange(low, newLow-1));
                 }
                 
                 if(newHigh < high) {
@@ -1018,7 +1018,7 @@ public class DownloadWorker {
                                 " Host gave subrange, different high.  Was: " +
                                 high + ", is now: " + newHigh);
                     
-                    _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
+                    _commonOutFile.releaseBlock(Range.createRange(newHigh+1, high));
                 }
                 
                 if(LOG.isDebugEnabled()) {
@@ -1039,8 +1039,8 @@ public class DownloadWorker {
      * @throws NoSuchRangeException if the remote host is partial and doesn't 
      * have the ranges we need
      */
-    private Interval pickAvailableInterval() throws NoSuchRangeException {
-        Interval interval = null;
+    private Range pickAvailableInterval() throws NoSuchRangeException {
+        Range interval = null;
         //If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
@@ -1072,9 +1072,9 @@ public class DownloadWorker {
         return interval;
     }
 
-    private int findChunkSize() {
-        int chunkSize = _commonOutFile.getChunkSize();
-        int free = _commonOutFile.hasFreeBlocksToAssign();
+    private long findChunkSize() {
+        long chunkSize = _commonOutFile.getChunkSize();
+        long free = _commonOutFile.hasFreeBlocksToAssign();
         
         // if we have less than one free chunk, take half of that
         if (free <= chunkSize && _manager.getActiveWorkers().size() > 1) 
@@ -1113,9 +1113,9 @@ public class DownloadWorker {
         }
 		
         // see what ranges is the victim requesting
-        final Interval slowestRange = slowest.getDownloadInterval();
+        final Range slowestRange = slowest.getDownloadInterval();
         
-        if (slowestRange.low == slowestRange.high) {
+        if (slowestRange.getLow() == slowestRange.getHigh()) {
             handleNoMoreDownloaders();
             return false;
         }
@@ -1124,7 +1124,7 @@ public class DownloadWorker {
         //line could throw a bunch of exceptions (not queuedException)
         slowest.setStealing(true);
         setStealing(true);
-        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize(), new IOStateObserver() {
+        _downloader.connectHTTP(slowestRange.getLow(), slowestRange.getHigh(), false,_commonOutFile.getBlockSize(), new IOStateObserver() {
             public void handleStatesFinished() {
                 completeAssignAndRequest(null, slowestRange, slowest);
             }
@@ -1151,9 +1151,9 @@ public class DownloadWorker {
      * @param slowestRange
      * @throws IOException
      */
-    private void completeAssignGrey(DownloadWorker victim, Interval slowestRange) throws IOException {
-        Interval newSlowestRange;
-        int newStart;
+    private void completeAssignGrey(DownloadWorker victim, Range slowestRange) throws IOException {
+        Range newSlowestRange;
+        long newStart;
         synchronized(victim.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!victim.getDownloader().isActive()) {
@@ -1165,39 +1165,39 @@ public class DownloadWorker {
             // it is possible that in that time some other worker died and freed his ranges, and
             // the victim has already been assigned some new ranges.  If that happened we don't steal.
             newSlowestRange = victim.getDownloadInterval();
-            if (newSlowestRange.high != slowestRange.high) {
+            if (newSlowestRange.getHigh() != slowestRange.getHigh()) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
                             newSlowestRange+" vs. "+slowestRange);
                 throw new NoSuchElementException();
             }
             
-            if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
-                LOG.debug("victim managed to download "+(newSlowestRange.low - slowestRange.low)
+            if (newSlowestRange.getLow() > slowestRange.getLow() && LOG.isDebugEnabled()) {
+                LOG.debug("victim managed to download "+(newSlowestRange.getLow() - slowestRange.getLow())
                         +" bytes while stealer was connecting");
             }
             
-            int myLow = _downloader.getInitialReadingPoint();
-            int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
+            long myLow = _downloader.getInitialReadingPoint();
+            long myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
             
             // If the stealer isn't going to give us everything we need,
             // there's no point in stealing, so throw an exception and
             // don't steal.
-            if( myHigh < slowestRange.high ) {
+            if( myHigh < slowestRange.getHigh() ) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("WORKER: not stealing because stealer " +
-                            "gave a subrange.  Expected low: " + slowestRange.low +
-                            ", high: " + slowestRange.high + ".  Was low: " + myLow +
+                            "gave a subrange.  Expected low: " + slowestRange.getLow() +
+                            ", high: " + slowestRange.getHigh() + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
                 throw new IOException();
             }
             
-            newStart = Math.max(newSlowestRange.low,myLow);
+            newStart = Math.max(newSlowestRange.getLow(),myLow);
             if(LOG.isDebugEnabled()) {
                 LOG.debug("WORKER:"+
                         " picking stolen grey "
-                        +newStart + "-"+slowestRange.high+" from ["+victim+"] to [" + this + "]");
+                        +newStart + "-"+slowestRange.getHigh()+" from ["+victim+"] to [" + this + "]");
             }
             
             
@@ -1211,16 +1211,16 @@ public class DownloadWorker {
         _shouldRelease = true;
     }
     
-    Interval getDownloadInterval() {
+    Range getDownloadInterval() {
         HTTPDownloader downloader = _downloader;
         synchronized(downloader) {
             
-            int start = Math.max(downloader.getInitialReadingPoint() + downloader.getAmountRead(),
+            long start = Math.max(downloader.getInitialReadingPoint() + downloader.getAmountRead(),
                     downloader.getInitialWritingPoint());
             
-            int stop = downloader.getInitialReadingPoint() + downloader.getAmountToRead();
+            long stop = downloader.getInitialReadingPoint() + downloader.getAmountToRead();
             
-            return new Interval(start,stop);
+            return Range.createRange(start,stop);
         }
     }
     

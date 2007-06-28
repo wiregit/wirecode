@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -61,17 +61,17 @@ public class HeadTest extends LimeTestCase {
 	/**
 	 * URNs for the 3 files that will be requested
 	 */
-    private static URN _haveFull,_notHave,_havePartial, _tlsURN;
+    private static URN _haveFull,_notHave,_havePartial, _tlsURN, _largeURN;
 	
 	/**
 	 * file descs for the partial and complete files
 	 */
-    private static IncompleteFileDescStub _partial;
+    private static IncompleteFileDescStub _partial, _partialLarge;
     private static FileDescStub _complete;
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig;
+    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge, _rangesOnlyLarge;
 	
     private static PushEndpoint pushCollectionPE, tlsCollectionPE;
     
@@ -120,7 +120,7 @@ public class HeadTest extends LimeTestCase {
 		_ranges = new IntervalSet();
 		for (int i=2;i<10;i++) {
 			int low = base;
-			_ranges.add(new Interval(low,low+i));
+			_ranges.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -128,7 +128,7 @@ public class HeadTest extends LimeTestCase {
 		_rangesMedium = new IntervalSet();
 		for (int i=2;i<70;i++) {
 			int low = base;
-			_rangesMedium.add(new Interval(low,low+i));
+			_rangesMedium.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -136,7 +136,7 @@ public class HeadTest extends LimeTestCase {
 		_rangesJustFit = new IntervalSet();
 		for (int i=2;i<73;i++) {
 			int low = base;
-			_rangesJustFit.add(new Interval(low,low+i));
+			_rangesJustFit.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
 		
@@ -144,30 +144,46 @@ public class HeadTest extends LimeTestCase {
 		_rangesTooBig = new IntervalSet();
 		for (int i=2;i<220;i++) {
 			int low = base;
-			_rangesTooBig.add(new Interval(low,low+i));
+			_rangesTooBig.add(Range.createRange(low,low+i));
 			base+=2*i;
 		}
+        
+        _rangesLarge = new IntervalSet();
+        _rangesLarge.add(Range.createRange(10, 20));
+        _rangesLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
+        _rangesOnlyLarge = new IntervalSet();
+        _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
 		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
 		_notHave =      FileManagerStub.NOT_HAVE;
 		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
         _tlsURN =      URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
+        _largeURN =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
 		
 		_partial = new IncompleteFileDescStub("incomplete",_havePartial,3);
 		_partial.setRangesByte(_ranges.toBytes());
+        _partialLarge = new IncompleteFileDescStub("incompleteLArge", _largeURN, 4) {
+            public long getFileSize() {
+                return 0xFFFFFFFF00l;
+            }
+        };
+        _partialLarge.setRangesByte(_rangesLarge.toBytes());
 		_complete = new FileDescStub("complete",_haveFull,2);		
 		
 		Map urns = new HashMap();
 		urns.put(_havePartial,_partial);
 		urns.put(_haveFull,_complete);
+        urns.put(_largeURN, _partialLarge);
 		List descs = new LinkedList();
 		descs.add(_partial);
 		descs.add(_complete);
-		
+		descs.add(_partialLarge);
+        
         _um = new UploadManagerStub();
 		_fm = new FileManagerStub(urns,descs);
 		
 		assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
+        assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));
 		assertEquals(_complete,_fm.getFileDescForUrn(_haveFull));
 		
 		PrivilegedAccessor.setValue(HeadPong.class, "_fileManager",_fm);
@@ -217,6 +233,22 @@ public class HeadTest extends LimeTestCase {
 		assertNull(pong.getRanges());
 	}
 	
+    /** Tests that a binary headping gets a 404 for large files */
+    public void testBinaryLarge() throws Exception {
+        MockHeadPongRequestor ping = new MockHeadPongRequestor();
+        ping.setGuid(GUID.makeGuid());
+        ping.setUrn(_largeURN);
+        ping.setPongGGEPCapable(false);
+        HeadPong pong = new HeadPong(ping);
+        pong = reparse(pong);
+        assertFalse(pong.hasFile());
+        
+        ping.setPongGGEPCapable(true);
+        pong = new HeadPong(ping);
+        pong = reparse(pong);
+        assertTrue(pong.hasFile());
+    }
+    
 	/**
 	 * tests the scenarios where an incomplete and complete files are
 	 * behind firewall or open.
@@ -323,7 +355,7 @@ public class HeadTest extends LimeTestCase {
         pong.updateRFD(blankRFD);
         assertFalse(blankRFD.isPartialSource());        
 		
-		assertTrue(Arrays.equals(_ranges.toBytes(),pongi.getRanges().toBytes()));
+		assertTrue(Arrays.equals(_ranges.toBytes().ints,pongi.getRanges().toBytes().ints));
     }
     
     public void testRangesDontFit() throws Exception {		
@@ -343,6 +375,26 @@ public class HeadTest extends LimeTestCase {
         }
 	}
 	
+    public void testLargeRanges() throws Exception {
+       _partialLarge.setRangesByte(_rangesLarge.toBytes());
+       HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
+       HeadPong pong = new HeadPong(ping);
+       clearStoredProxies();
+       pong = reparse(pong);
+       IntervalSet large = pong.getRanges();
+       assertEquals(_rangesLarge, large);
+    }
+    
+    public void testOnlyLargeRanges() throws Exception {
+        _partialLarge.setRangesByte(_rangesOnlyLarge.toBytes());
+        HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
+        HeadPong pong = new HeadPong(ping);
+        clearStoredProxies();
+        pong = reparse(pong);
+        IntervalSet large = pong.getRanges();
+        assertEquals(_rangesOnlyLarge, large); 
+    }
+    
 	/**
 	 * tests various values for the queue rank
 	 */
@@ -435,7 +487,7 @@ public class HeadTest extends LimeTestCase {
 		
 		assertNull(pong1.getRanges());
 		assertNotNull(pong2.getRanges());
-		assertTrue(Arrays.equals(_rangesMedium.toBytes(),pong2.getRanges().toBytes()));
+		assertTrue(Arrays.equals(_rangesMedium.toBytes().ints,pong2.getRanges().toBytes().ints));
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
 		
 		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());

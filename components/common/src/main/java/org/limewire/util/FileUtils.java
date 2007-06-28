@@ -654,9 +654,9 @@ public class FileUtils {
      * @return the number of bytes actually copied.  Returns 'amount' if the
      *  entire requested range was copied.
      */
-    public static int copy(File src, int amount, File dst) {
+    public static long copy(File src, long amount, File dst) {
         final int BUFFER_SIZE=1024;
-        int amountToRead=amount;
+        long amountToRead=amount;
         InputStream in=null;
         OutputStream out=null;
         try {
@@ -665,7 +665,7 @@ public class FileUtils {
             out=new BufferedOutputStream(new FileOutputStream(dst));
             byte[] buf=new byte[BUFFER_SIZE];
             while (amountToRead>0) {
-                int read=in.read(buf, 0, Math.min(BUFFER_SIZE, amountToRead));
+                int read=in.read(buf, 0, (int)Math.min(BUFFER_SIZE, amountToRead));
                 if (read==-1)
                     break;
                 amountToRead-=read;

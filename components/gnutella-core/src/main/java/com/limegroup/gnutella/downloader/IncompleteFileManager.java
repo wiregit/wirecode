@@ -19,7 +19,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -207,8 +207,8 @@ public class IncompleteFileManager implements Serializable {
     }
     
     /** @see similar(RemoteFileDesc, RemoteFileDesc) */
-    static boolean same(String name1, int size1, URN hash1,
-                        String name2, int size2, URN hash2) {
+    static boolean same(String name1, long size1, URN hash1,
+                        String name2, long size2, URN hash2) {
         //Either they have the same hashes...
         if (hash1!=null && hash2!=null)
             return hash1.equals(hash2);
@@ -242,7 +242,7 @@ public class IncompleteFileManager implements Serializable {
      * Stub for calling
      *  getFile(String, URN, int, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
      */
-    public synchronized File getFile(String name, URN sha1, int size) throws IOException {
+    public synchronized File getFile(String name, URN sha1, long size) throws IOException {
         return getFile(name, sha1, size, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
     }
     
@@ -271,7 +271,7 @@ public class IncompleteFileManager implements Serializable {
      * @throws IOException if there was an IOError while determining the
      * file's name.
      */
-    public synchronized File getFile(String name, URN sha1, int size, File incDir) throws IOException {
+    public synchronized File getFile(String name, URN sha1, long size, File incDir) throws IOException {
         boolean dirsMade = false;
         File baseFile = null;
         File canonFile = null;
@@ -354,7 +354,7 @@ public class IncompleteFileManager implements Serializable {
      * @param count a suffix to attach before the file extension in parens
      *  before the file extension, or 1 for none. 
      */
-    private static String tempName(String filename, int size, int suffix) {
+    private static String tempName(String filename, long size, int suffix) {
         if (suffix<=1) {
             //a) No suffix
             return "T-"+size+"-"+filename;
@@ -459,13 +459,13 @@ public class IncompleteFileManager implements Serializable {
                 List list = (List)o;
                 for(Iterator iter = list.iterator(); iter.hasNext(); ) {
                     Object next = iter.next();
-                    if(next instanceof Interval) {
-                        Interval interval = (Interval)next;
+                    if(next instanceof Range) {
+                        Range interval = (Range)next;
                         // older intervals excuded the high'th byte, so we decrease
                         // the value of interval.high. An effect of this is that
                         // an older client with a newer download.dat downloads one
                         // byte extra for each interval.
-                        interval = new Interval(interval.low, interval.high - 1);
+                        interval = Range.createRange(interval.getLow(), interval.getHigh() - 1);
                         vf.addInterval(interval);
                     }
                 }
@@ -485,21 +485,21 @@ public class IncompleteFileManager implements Serializable {
     
     /** Takes a map of File->VerifyingFile and returns a new equivalent Map
      *  of File->List<Interval>*/
-    private Map<File, List<Interval>> invTransform() {
-        Map<File, List<Interval>> retMap = new HashMap<File, List<Interval>>();
+    private Map<File, List<Range>> invTransform() {
+        Map<File, List<Range>> retMap = new HashMap<File, List<Range>>();
         for(Map.Entry<File, VerifyingFile> entry : blocks.entrySet()) {
             File incompleteFile = entry.getKey();
             VerifyingFile vf  = entry.getValue();
-            List<Interval> writeList;
+            List<Range> writeList;
             synchronized(vf) {
-                List<Interval> l = vf.getSerializableBlocks();
-                writeList = new ArrayList<Interval>(l.size());
+                List<Range> l = vf.getSerializableBlocks();
+                writeList = new ArrayList<Range>(l.size());
                 for(int i=0; i< l.size(); i++ ) {
                     //clone the list because we cant mutate VerifyingFile's List
-                    Interval inter = l.get(i);
+                    Range inter = l.get(i);
                     //Increment interval.high by 1 to maintain semantics of
                     //Inerval
-                    Interval interval = new Interval(inter.low,inter.high+1);
+                    Range interval = Range.createRange(inter.getLow(),inter.getHigh()+1);
                     writeList.add(interval);
                 }
             }
@@ -562,7 +562,7 @@ public class IncompleteFileManager implements Serializable {
         return blocks.get(incompleteFile);
     }
     
-    public synchronized int getBlockSize(File incompleteFile) {
+    public synchronized long getBlockSize(File incompleteFile) {
         VerifyingFile vf = blocks.get(incompleteFile);
         if(vf==null)
             return 0;
@@ -728,7 +728,7 @@ public class IncompleteFileManager implements Serializable {
             if (! first)
                 buf.append(", ");
 
-            List<Interval> intervals= blocks.get(file).getVerifiedBlocksAsList();
+            List<Range> intervals= blocks.get(file).getVerifiedBlocksAsList();
             buf.append(file);
             buf.append(":");
             buf.append(intervals.toString());            

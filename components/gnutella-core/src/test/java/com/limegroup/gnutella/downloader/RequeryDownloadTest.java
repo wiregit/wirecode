@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -178,7 +178,7 @@ public class RequeryDownloadTest
 
        //Record information in IncompleteFileManager.
        VerifyingFile vf=new VerifyingFile(TestFile.length());
-       vf.addInterval(new Interval(0, 1));  //inclusive
+       vf.addInterval(Range.createRange(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;
     }

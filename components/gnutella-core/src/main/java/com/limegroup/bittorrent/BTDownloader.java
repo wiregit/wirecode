@@ -469,7 +469,7 @@ public class BTDownloader extends AbstractDownloader
 		return !isResumable();
 	}
 	
-	public boolean conflicts(URN urn, int fileSize, File... file) {
+	public boolean conflicts(URN urn, long fileSize, File... file) {
 		if (_info.getURN().equals(urn))
 			return true;
 		for (File f : file) {

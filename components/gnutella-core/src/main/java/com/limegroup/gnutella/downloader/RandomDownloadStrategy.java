@@ -6,8 +6,8 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 
 
 /** 
@@ -69,11 +69,11 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public Interval pickAssignment(IntervalSet candidateBytes,
+    public Range pickAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
-        long lowerBound = neededBytes.getFirst().low;
-        long upperBound = neededBytes.getLast().high;
+        long lowerBound = neededBytes.getFirst().getLow();
+        long upperBound = neededBytes.getLast().getHigh();
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
         if (lowerBound < 0)
@@ -89,15 +89,15 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         long idealLocation = getIdealLocation(neededBytes, blockSize);
         
         // First aligned chunk after idealLocation
-        Interval intervalAbove = null;
+        Range intervalAbove = null;
         
         // Last aligned chunk before idealLocation
-        Interval intervalBelow = null;
-        for(Interval candidateInterval : candidateBytes) {
-            if (candidateInterval.low < idealLocation)
+        Range intervalBelow = null;
+        for(Range candidateInterval : candidateBytes) {
+            if (candidateInterval.getLow() < idealLocation)
                 intervalBelow = optimizeIntervalBelow(candidateInterval, idealLocation,
                         blockSize);
-            if (candidateInterval.high >= idealLocation) {
+            if (candidateInterval.getHigh() >= idealLocation) {
                 intervalAbove = optimizeIntervalAbove(candidateInterval,idealLocation,
                         blockSize);
                 // Since we started iterating from the low end of candidateBytes,
@@ -154,12 +154,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             // in both directions until they coalesce.
             int randomFragmentNumber = pseudoRandom.nextInt(fragmentCount + 1);
             if (randomFragmentNumber == fragmentCount)
-                return neededBytes.getLast().high + 1;
+                return neededBytes.getLast().getHigh() + 1;
             else
-                return (neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
+                return (neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).getLow();
         } else {
             // There are fragments to spare, so download from a random location
-            return getRandomLocation(neededBytes.getFirst().low, neededBytes.getLast().high, blockSize);
+            return getRandomLocation(neededBytes.getFirst().getLow(), neededBytes.getLast().getHigh(), blockSize);
         }
     }
     
@@ -173,12 +173,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 
      * Required precondition: candidate.high >= location
      */
-    private Interval optimizeIntervalAbove(Interval candidate,
+    private Range optimizeIntervalAbove(Range candidate,
             long location, long blockSize) {
         
         // Calculate the most suitable low value contained
         // in candidate. (satisfying goals 1 & 2)
-        long bestLow = candidate.low;
+        long bestLow = candidate.getLow();
         if (bestLow < location) {
             bestLow = location;
         }
@@ -187,12 +187,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // This will be at most blockSize-1 bytes greater than bestLow
         long bestHigh = alignHigh(bestLow,blockSize);
       
-        if (bestHigh > candidate.high)
-            bestHigh = candidate.high;
+        if (bestHigh > candidate.getHigh())
+            bestHigh = candidate.getHigh();
                 
-        if (candidate.high == bestHigh && candidate.low == bestLow)
+        if (candidate.getHigh() == bestHigh && candidate.getLow() == bestLow)
             return candidate;
-        return new Interval(bestLow,bestHigh); 
+        return Range.createRange(bestLow,bestHigh); 
     }
     
     /** Returns candidate or a sub-interval of candidate that best 
@@ -205,12 +205,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 
      * Required precondition: candidate.low < location
      */
-    private Interval optimizeIntervalBelow(Interval candidate,
+    private Range optimizeIntervalBelow(Range candidate,
             long location, long blockSize) {
         
         // Calculate the most suitable low value contained
         // in candidate. (satisfying goals 1 & 2)
-        long bestHigh = candidate.high;
+        long bestHigh = candidate.getHigh();
         if (bestHigh >= location) {
             bestHigh = location - 1;
         }
@@ -219,12 +219,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // This will be at most blockSize-1 bytes greater than bestLow
         long bestLow = alignLow(bestHigh,blockSize);
       
-        if (bestLow < candidate.low)
-            bestLow = candidate.low;
+        if (bestLow < candidate.getLow())
+            bestLow = candidate.getLow();
                 
-        if (candidate.high == bestHigh && candidate.low == bestLow)
+        if (candidate.getHigh() == bestHigh && candidate.getLow() == bestLow)
             return candidate;
-        return new Interval(bestLow,bestHigh); 
+        return Range.createRange(bestLow,bestHigh); 
     }
     
     /**

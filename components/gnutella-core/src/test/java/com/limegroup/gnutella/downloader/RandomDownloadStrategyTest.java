@@ -4,8 +4,8 @@ package com.limegroup.gnutella.downloader;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -43,11 +43,11 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
         prng.setInts(new int[] {-1,487137, -2, 65538});
 
         // Set the expected assignments
-        Interval[] expectations = new Interval[4];
-        expectations[0] = new Interval(5 * blockSize, 6 * blockSize - 1);
-        expectations[1] = new Interval(6 * blockSize, 7 * blockSize - 1);
-        expectations[2] = new Interval(4 * blockSize, 5 * blockSize - 1);
-        expectations[3] = new Interval(3 * blockSize, 4 * blockSize - 1);
+        Range[] expectations = new Range[4];
+        expectations[0] = Range.createRange(5 * blockSize, 6 * blockSize - 1);
+        expectations[1] = Range.createRange(6 * blockSize, 7 * blockSize - 1);
+        expectations[2] = Range.createRange(4 * blockSize, 5 * blockSize - 1);
+        expectations[3] = Range.createRange(3 * blockSize, 4 * blockSize - 1);
         
         // Test
         testAssignments(strategy, availableBytes, fileSize, blockSize,
@@ -57,8 +57,8 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
     /** Tests that an interval spanning idealLocation gets split in two */
     public void testSplitInterval() {
         // Break the neededBytes into 3 intervals
-        availableBytes.delete(new Interval(fileSize/3));
-        availableBytes.delete(new Interval((2*fileSize)/3));
+        availableBytes.delete(Range.createRange(fileSize/3));
+        availableBytes.delete(Range.createRange((2*fileSize)/3));
         
         
         // Set things up to ask for a chunk bothe before and after
@@ -71,11 +71,11 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
         // something after the idealLocation
         prng.setInts(new int[] {0,1});
         
-        Interval assignment = strategy.pickAssignment(availableBytes, 
+        Range assignment = strategy.pickAssignment(availableBytes, 
                 availableBytes, blockSize);
         
         assertEquals("Failed to break Interval before idealLocation",
-                new Interval((idealLocations[0]-1)*blockSize,
+                Range.createRange((idealLocations[0]-1)*blockSize,
                         idealLocations[0]*blockSize-1), 
                 assignment);
         
@@ -83,15 +83,15 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
                 availableBytes, blockSize);
         
         assertEquals("Failed to break Interval after idealLocation",
-                new Interval(idealLocations[1]*blockSize,
+                Range.createRange(idealLocations[1]*blockSize,
                         (idealLocations[1]+1)*blockSize-1), 
                 assignment);
     }
     
     public void testSingleByteChunk() throws Exception {
         // Remove two single bytes
-        availableBytes.delete(new Interval(5 * blockSize + 1));
-        availableBytes.delete(new Interval(6 * blockSize - 2));
+        availableBytes.delete(Range.createRange(5 * blockSize + 1));
+        availableBytes.delete(Range.createRange(6 * blockSize - 2));
         
         // Set up the random number generator so that
         // it tries both above and below our single byte
@@ -99,9 +99,9 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
         prng.setInts(new int[] {3,0}); //go forward, then go backward
 
         // We expect a single byte assignment
-        Interval[] expectation = new Interval[2];
-        expectation[0] = new Interval(5 * blockSize);
-        expectation[1] = new Interval(6 * blockSize-1);
+        Range[] expectation = new Range[2];
+        expectation[0] = Range.createRange(5 * blockSize);
+        expectation[1] = Range.createRange(6 * blockSize-1);
 
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectation);
@@ -116,7 +116,7 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
         prng.setInt(1);
         prng.setLong(0);
         
-        Interval assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
+        Range assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
         assertTrue("Return optimization not working", availableBytes.getFirst() == assignment);
     }
     
@@ -127,7 +127,7 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
         // Set ideal location before the sliver
         prng.setLong(1);
         availableBytes = IntervalSet.createSingletonSet(2475, 2483);
-        Interval assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
+        Range assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
         assertEquals("Only a sliver of the file left, and something other than the sliver"+
                 "was returned", availableBytes.getFirst(), assignment);
         
@@ -214,9 +214,9 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
      */
     private void testAssignments(SelectionStrategy strategy,
             IntervalSet availableBytes, long fileSize, long blockSize,
-            Interval[] expectedAssignments) {
+            Range[] expectedAssignments) {
         for (int i = 0; i < expectedAssignments.length; i++) {
-            Interval assignment = strategy.pickAssignment(availableBytes, 
+            Range assignment = strategy.pickAssignment(availableBytes, 
                     IntervalSet.createSingletonSet(0, fileSize - 1), blockSize);
             availableBytes.delete(assignment);
             assertEquals("Wrong assignment for chunk #" + i,

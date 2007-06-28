@@ -25,7 +25,7 @@ class LengthState extends BTReadMessageState {
 		if (buf.size() < 4)
 			return null;
 		
-		int length = buf.getInt();
+		long length = buf.getInt();
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug(this +" parsed length " + length);
@@ -40,7 +40,7 @@ class LengthState extends BTReadMessageState {
 		}
 		
 		length--;
-		readerState.setLength(length);
+		readerState.setLength((int)length);
 		return TYPE_STATE;
 	}
 	

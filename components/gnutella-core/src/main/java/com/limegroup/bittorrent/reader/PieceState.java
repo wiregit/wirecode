@@ -18,8 +18,8 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 	private final BTDataSource buf;
 	
 	private int chunkId = -1;
-	private int offset = -1;
-	private int currentOffset;
+	private long offset = -1;
+	private long currentOffset;
 	private BTInterval complete;
 	
 	PieceState(ReaderData readerState) {
@@ -46,7 +46,10 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 		
 		// read chunk id
 		if (chunkId < 0) {
-			chunkId = buf.getInt();
+            long newId = buf.getInt();
+            if (newId > Integer.MAX_VALUE)
+                throw new BadBTMessageException("unsupported bit chunk id");
+            chunkId = (int)newId;
 			return this; // shortcut :)
 		}
 		
@@ -77,7 +80,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 			available = 0;
 		}
 		
-		if (currentOffset + available == complete.high + 1) {
+		if (currentOffset + available == complete.getHigh() + 1) {
 			BTMessageStat.INCOMING_PIECE.incrementStat();
 			BTMessageStatBytes.INCOMING_PIECE.addData(5 + length);
 			
@@ -97,7 +100,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 	}
 	
 	private int getAmountLeft() {
-		return Math.min(buf.size(), complete.high - currentOffset + 1);
+		return (int)Math.min(buf.size(), complete.getHigh() - currentOffset + 1);
 	}
 	
 	public BTPiece call() {
@@ -113,7 +116,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 			readerState.getHandler().readBytes(toRead);
 			byte []data = new byte[toRead];
 			buf.get(data);
-			readerState.getPieceListener().dataConsumed(currentOffset > complete.high);
+			readerState.getPieceListener().dataConsumed(currentOffset > complete.getHigh());
 			return new ReceivedPiece(in, data);
 		}
 	}

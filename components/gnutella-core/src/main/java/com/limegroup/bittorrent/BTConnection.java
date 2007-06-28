@@ -634,7 +634,7 @@ PieceSendListener, PieceReadListener {
 		for (Iterator<BTInterval> iter = _requested.iterator(); iter.hasNext();) {
 			BTInterval current = iter.next();
 			if (in.getId() == current.getId() &&
-					(in.low <= current.high && current.low <= in.high))
+					(in.getLow() <= current.getHigh() && current.getLow() <= in.getHigh()))
 				iter.remove();
 		}
 	}
@@ -662,7 +662,7 @@ PieceSendListener, PieceReadListener {
 		}
 		// we skip all requests for ranges larger than MAX_BLOCK_SIZE as
 		// proposed by the BitTorrent spec.
-		if (in.high - in.low + 1 > MAX_BLOCK_SIZE) {
+		if (in.getHigh() - in.getLow() + 1 > MAX_BLOCK_SIZE) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("got long request");
 			return;

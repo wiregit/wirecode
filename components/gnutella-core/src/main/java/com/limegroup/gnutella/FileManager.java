@@ -60,6 +60,7 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -1876,7 +1877,7 @@ public abstract class FileManager {
             return false;
                 
         long fileLength = file.length();
-        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE) 
             return false;
         
         return true;

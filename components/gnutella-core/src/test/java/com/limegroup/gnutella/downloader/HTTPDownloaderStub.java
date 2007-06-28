@@ -50,10 +50,10 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	AlternateLocationCollection getAltLocsReceived() {
 		return null;
 	}
-	public int getAmountRead() {
+	public long getAmountRead() {
 		return 0;
 	}
-	public int getAmountToRead() {
+	public long getAmountToRead() {
 		return 0;
 	}
 	public float getAverageBandwidth() {
@@ -71,7 +71,7 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	public InetAddress getInetAddress() {
 		return null;
 	}
-	public int getInitialReadingPoint() {
+	public long getInitialReadingPoint() {
 		return 0;
 	}
 	public float getMeasuredBandwidth() throws InsufficientDataException {
@@ -83,7 +83,7 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	public RemoteFileDesc getRemoteFileDesc() {
 		return null;
 	}
-	public int getTotalAmountRead() {
+	public long getTotalAmountRead() {
 		return 0;
 	}
 	public String getVendor() {

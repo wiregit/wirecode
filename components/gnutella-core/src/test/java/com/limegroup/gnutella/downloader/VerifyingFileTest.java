@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Test;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -80,16 +80,16 @@ public class VerifyingFileTest extends LimeTestCase {
         PrivilegedAccessor.setValue(vf, "blockChooser",
                 new TestSequentialStrategy());
         for (long i = 0; i < 5; i++) {
-            Interval leased = vf.leaseWhite(chunkSize);
-            assertEquals(i * chunkSize, leased.low);
-            assertEquals((i + 1) * chunkSize - 1, leased.high);
+            Range leased = vf.leaseWhite(chunkSize);
+            assertEquals(i * chunkSize, leased.getLow());
+            assertEquals((i + 1) * chunkSize - 1, leased.getHigh());
         }
 
         // the last interval is shorter
-        Interval last = vf.leaseWhite(chunkSize);
-        assertLessThan(chunkSize, last.high - last.low + 1);
-        assertEquals(chunkSize * 5, last.low);
-        assertEquals(completeFile.length(), last.high + 1);
+        Range last = vf.leaseWhite(chunkSize);
+        assertLessThan(chunkSize, last.getHigh() - last.getLow() + 1);
+        assertEquals(chunkSize * 5, last.getLow());
+        assertEquals(completeFile.length(), last.getHigh() + 1);
     }
 
     /**
@@ -103,9 +103,9 @@ public class VerifyingFileTest extends LimeTestCase {
         // rather than hard-coding the old 100,000 byte value.
         // However, running at least one test with a block size that
         // isn't a power of two has a certain appeal for testing.
-        Interval firstLease = vf.leaseWhite(100000);
-        if (firstLease.high % 100000 != 99999
-                && firstLease.high != fileSize - 1) {
+        Range firstLease = vf.leaseWhite(100000);
+        if (firstLease.getHigh() % 100000 != 99999
+                && firstLease.getHigh() != fileSize - 1) {
             assertTrue("First chunk is not aligned.", false);
         }
 
@@ -115,28 +115,28 @@ public class VerifyingFileTest extends LimeTestCase {
 
         // TODO KAM -- not really sure why this is relavant, but I have
         // modified the test to test what the javadoc claims to test
-        Interval secondLease = vf.leaseWhite(512 * 1024 + 1);
-        if (secondLease.high % (512 * 1024 + 1) != 512 * 1024
-                && secondLease.high != firstLease.low - 1
-                && secondLease.high != fileSize - 1) {
+        Range secondLease = vf.leaseWhite(512 * 1024 + 1);
+        if (secondLease.getHigh() % (512 * 1024 + 1) != 512 * 1024
+                && secondLease.getHigh() != firstLease.getLow() - 1
+                && secondLease.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 512k+1 aligned chunk.", false);
         }
 
         // now assume the chunk size is 512K
-        Interval leased = vf.leaseWhite(512 * 1024);
-        if (leased.high % (512 * 1024) != 512 * 1024 - 1
-                && leased.high != firstLease.low - 1
-                && leased.high != secondLease.low - 1
-                && leased.high != fileSize - 1) {
+        Range leased = vf.leaseWhite(512 * 1024);
+        if (leased.getHigh() % (512 * 1024) != 512 * 1024 - 1
+                && leased.getHigh() != firstLease.getLow() - 1
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 512k-aligned chunk.", false);
         }
 
         // now lease assuming the chunk size is 256K
         leased = vf.leaseWhite(256 * 1024);
-        if (leased.high % (256 * 1024) != 256 * 1024 - 1
-                && leased.high != firstLease.low - 1
-                && leased.high != secondLease.low - 1
-                && leased.high != fileSize - 1) {
+        if (leased.getHigh() % (256 * 1024) != 256 * 1024 - 1
+                && leased.getHigh() != firstLease.getLow() - 1
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 256k-aligned chunk.", false);
         }
     }
@@ -150,19 +150,19 @@ public class VerifyingFileTest extends LimeTestCase {
         // This test assumes a sequential download strategy.
         PrivilegedAccessor.setValue(vf, "blockChooser",
                 new TestSequentialStrategy());
-        Interval leased = vf.leaseWhite(512 * 1024);
-        vf.releaseBlock(new Interval(128 * 1024, 3 * 128 * 1024 - 1));
+        Range leased = vf.leaseWhite(512 * 1024);
+        vf.releaseBlock(Range.createRange(128 * 1024, 3 * 128 * 1024 - 1));
 
         // we should fill up everything up to the chunk offset
         leased = vf.leaseWhite(256 * 1024);
-        assertEquals(128 * 1024, leased.low);
-        assertEquals(256 * 1024 - 1, leased.high);
+        assertEquals(128 * 1024, leased.getLow());
+        assertEquals(256 * 1024 - 1, leased.getHigh());
 
         // the next lease should fill up to the start of the previously leased
         // area
         leased = vf.leaseWhite(256 * 1024);
-        assertEquals(256 * 1024, leased.low);
-        assertEquals(3 * 128 * 1024 - 1, leased.high);
+        assertEquals(256 * 1024, leased.getLow());
+        assertEquals(3 * 128 * 1024 - 1, leased.getHigh());
     }
 
     /**
@@ -353,10 +353,10 @@ public class VerifyingFileTest extends LimeTestCase {
         assertEquals(chunk.length, vf.getBlockSize());
 
         // and if we try to lease an interval, it will be from within that hole
-        Interval leased = vf.leaseWhite(hashTree.getNodeSize());
+        Range leased = vf.leaseWhite(hashTree.getNodeSize());
 
-        assertEquals(chunk.length, leased.low);
-        assertEquals(chunk.length * 2 - 1, leased.high);
+        assertEquals(chunk.length, leased.getLow());
+        assertEquals(chunk.length * 2 - 1, leased.getHigh());
     }
 
     /**

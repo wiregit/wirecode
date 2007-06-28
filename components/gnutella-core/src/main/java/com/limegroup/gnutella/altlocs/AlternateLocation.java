@@ -294,7 +294,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
 	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
 
-	public abstract RemoteFileDesc createRemoteFileDesc(int size);
+	public abstract RemoteFileDesc createRemoteFileDesc(long size);
 	
 	/**
 	 * 

@@ -70,8 +70,8 @@ public class BTRequest extends BTMessage {
 			ByteBuffer buf = ByteBuffer.allocate(12);
 			buf.order(ByteOrder.BIG_ENDIAN);
 			buf.putInt(in.getId());
-			buf.putInt(in.low);
-			buf.putInt(in.high - in.low + 1);
+			buf.putInt(in.get32BitLow());
+			buf.putInt(in.get32BitLength());
 			_payload = buf.asReadOnlyBuffer();
 		}
 		_payload.clear();

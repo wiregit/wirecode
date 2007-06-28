@@ -160,7 +160,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
      */
 	public abstract void finish();
 	
-	public abstract boolean conflicts(URN urn, int fileSize, File... files);
+	public abstract boolean conflicts(URN urn, long fileSize, File... files);
 	
 	public abstract boolean conflictsWithIncompleteFile(File incomplete);
 	

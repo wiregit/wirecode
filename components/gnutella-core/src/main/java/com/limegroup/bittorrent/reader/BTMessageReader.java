@@ -28,7 +28,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	private final IOErrorObserver ioxObserver;
 	
 	// the ByteBuffer for the message currently being read from the network.
-	private CircularByteBuffer _in;
+	private final CircularByteBuffer _in;
 
 	/** Whether this reader is shutdown */
 	private volatile boolean shutdown;
@@ -68,7 +68,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 		_in = new CircularByteBuffer(BUFFER_SIZE, cache);
 		this.networkInvoker = networkInvoker;
 		this.ioxObserver = ioxObserver;
-		readerState = new ReaderData(handler, new CBBDataSource(), this);
+		readerState = new ReaderData(handler, new CBCDataSource(_in), this);
 		currentState = new LengthState(readerState);
 		readerState.setEntryState(currentState);
 	}
@@ -191,42 +191,6 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 					shutdown();
 				}
 			}
-		}
-	}
-	
-	/**
-	 * An implementation of <tt>BTDataSource</tt> that delegates to the 
-	 * local CircularByteBuffer
-	 */
-	private class CBBDataSource implements BTDataSource {
-
-		public void discard(int howMuch) {
-			_in.discard(howMuch);
-		}
-
-		public byte get() {
-			return _in.get();
-		}
-
-		public void get(byte[] dest) {
-			_in.get(dest);
-		}
-
-		public int getInt() {
-			_in.order(ByteOrder.BIG_ENDIAN);
-			return _in.getInt();
-		}
-
-		public int size() {
-			return _in.size();
-		}
-		
-		public void get(ByteBuffer dest) {
-			_in.get(dest);
-		}
-		
-		public void write(WritableByteChannel to, int howMuch) throws IOException {
-			_in.write(to, howMuch);
 		}
 	}
 }

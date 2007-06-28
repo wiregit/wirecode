@@ -25,8 +25,8 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -381,7 +381,7 @@ public class DownloadTest extends LimeTestCase {
             //public void thexRequestStarted() {}
 
             /** The only lease that is DEFAULT_CHUNK_SIZE large */
-       	    private Interval firstLease = null;
+       	    private Range firstLease = null;
             
             public void requestHandled(){}
             public void thexRequestStarted() {}
@@ -391,14 +391,14 @@ public class DownloadTest extends LimeTestCase {
             public void requestStarted(TestUploader uploader) {
                 long fileSize = 0;
                 
-       	        Interval i = null;
+       	        Range i = null;
                 try {
        	            IntervalSet leased = null;
        	            File incomplete = null;
                     incomplete = ifm.getFile(rfd);
                     assertNotNull(incomplete);
                     VerifyingFile vf = ifm.getEntry(incomplete);
-                    fileSize = ((Integer)PrivilegedAccessor.getValue(vf, "completedSize")
+                    fileSize = ((Long)PrivilegedAccessor.getValue(vf, "completedSize")
                                   ).longValue();
                     assertNotNull(vf);
             	    leased = (IntervalSet)
@@ -406,7 +406,7 @@ public class DownloadTest extends LimeTestCase {
             	    assertNotNull(leased);
                     List l = leased.getAllIntervalsAsList();
                     assertEquals(1,l.size());
-                    i = (Interval)l.get(0);
+                    i = (Range)l.get(0);
                 } catch (Exception bad) {
                   fail(bad);
                 }
@@ -415,9 +415,9 @@ public class DownloadTest extends LimeTestCase {
                     // first request, we should have the chunk aligned to
                     // a DEFAULT_CHUNK_SIZE boundary
                     assertEquals("First chunk has improperly aligned low byte.",
-                            0, i.low % VerifyingFile.DEFAULT_CHUNK_SIZE);
-                    if (i.high != fileSize-1 &&
-                            i.high % VerifyingFile.DEFAULT_CHUNK_SIZE != 
+                            0, i.getLow() % VerifyingFile.DEFAULT_CHUNK_SIZE);
+                    if (i.getHigh() != fileSize-1 &&
+                            i.getHigh() % VerifyingFile.DEFAULT_CHUNK_SIZE != 
                                 VerifyingFile.DEFAULT_CHUNK_SIZE-1) {
                         assertTrue("First chunk has improperly aligned high byte.",
                                 false);
@@ -426,16 +426,16 @@ public class DownloadTest extends LimeTestCase {
                 } else {
                     // on all other requests, we have 256k blocks
                     // Check that the low byte is aligned    
-                    if (i.low % (256 * 1024) != 0 &&
-                            i.low != firstLease.high + 1) {
+                    if (i.getLow() % (256 * 1024) != 0 &&
+                            i.getLow() != firstLease.getHigh() + 1) {
                         assertTrue("Un-aligned low byte on chunk that is "+
                                 "not adjascent to the DEFAULT_CHUNK_SIZE chunk.",
                                 false);
                     }
                     // Check that the high byte is aligned    
-                    if (i.high % (256 * 1024) != 256*1024-1 &&
-                            i.high != firstLease.low - 1 &&
-                            i.high != fileSize-1) {
+                    if (i.getHigh() % (256 * 1024) != 256*1024-1 &&
+                            i.getHigh() != firstLease.getLow() - 1 &&
+                            i.getHigh() != fileSize-1) {
                         assertTrue("Un-aligned high byte on chunk that is "+
                                 "not adjascent to the DEFAULT_CHUNK_SIZE chunk "+
                                 "and is not the last chunk of the file",

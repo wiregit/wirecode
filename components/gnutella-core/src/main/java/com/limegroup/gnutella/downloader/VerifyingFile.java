@@ -14,10 +14,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ByteArrayCache;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.PowerOf2ByteArrayCache;
+import org.limewire.collection.Range;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.DiskException;
@@ -104,12 +104,12 @@ public class VerifyingFile {
     /**
      * The eventual completed size of the file we're writing.
      */
-    private final int completedSize;
+    private final long completedSize;
 	
 	/**
 	 * How much data did we lose due to corruption
 	 */
-	private int lostSize;
+	private long lostSize;
     
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
@@ -191,7 +191,7 @@ public class VerifyingFile {
      * Holds the iterable for all blocks, is lazily instantiated when
      * needed for the first time.
      */
-    private MultiIterable<Interval> allBlocksIterable = null;
+    private MultiIterable<Range> allBlocksIterable = null;
     
     /**
      * Constructs a new VerifyingFile, without a given completion size.
@@ -251,7 +251,7 @@ public class VerifyingFile {
      * used to add blocks direcly. Blocks added this way are marked
      * partial.
      */
-    public synchronized void addInterval(Interval interval) {
+    public synchronized void addInterval(Range interval) {
         //delegates to underlying IntervalSet
         partialBlocks.add(interval);
     }
@@ -331,7 +331,7 @@ public class VerifyingFile {
         return true;
     }
     
-    private synchronized void updateState(Interval intvl) {
+    private synchronized void updateState(Range intvl) {
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
             Assert.that(false, "trying to write an interval "+intvl+
@@ -408,7 +408,7 @@ public class VerifyingFile {
      * 
      * This method will not break up contiguous chunks into smaller chunks.
      */
-    public Interval leaseWhite() throws NoSuchElementException {
+    public Range leaseWhite() throws NoSuchElementException {
         return leaseWhiteHelper(null, completedSize);
     }
     
@@ -416,7 +416,7 @@ public class VerifyingFile {
      * Returns a block of data that needs to be written.
      * The returned block will NEVER be larger than chunkSize.
      */
-    public Interval leaseWhite(int chunkSize) 
+    public Range leaseWhite(long chunkSize) 
       throws NoSuchElementException {
         return leaseWhiteHelper(null, chunkSize);
     }
@@ -426,7 +426,7 @@ public class VerifyingFile {
      * and is within the specified set of ranges.
      * The parameter IntervalSet is modified
      */
-    public Interval leaseWhite(IntervalSet ranges)
+    public Range leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
         return leaseWhiteHelper(ranges, DEFAULT_CHUNK_SIZE);
     }
@@ -436,7 +436,7 @@ public class VerifyingFile {
      * and is within the specified set of ranges.
      * The returned block will NEVER be larger than chunkSize.
      */
-    public Interval leaseWhite(IntervalSet ranges, int chunkSize)
+    public Range leaseWhite(IntervalSet ranges, long chunkSize)
       throws NoSuchElementException {
         return leaseWhiteHelper(ranges, chunkSize);
     }
@@ -444,7 +444,7 @@ public class VerifyingFile {
     /**
      * Removes the specified internal from the set of leased intervals.
      */
-    public synchronized void releaseBlock(Interval in) {
+    public synchronized void releaseBlock(Range in) {
         if (!leasedBlocks.contains(in)) {
             Assert.that(false, "trying to release an interval "+in+
                     " that wasn't leased "+dumpState());
@@ -457,14 +457,14 @@ public class VerifyingFile {
     /**
      * Returns all verified blocks with an Iterator.
      */
-    public synchronized Iterable<Interval> getVerifiedBlocks() {
+    public synchronized Iterable<Range> getVerifiedBlocks() {
         return verifiedBlocks;
     }
     
     /**
      * @return byte-packed representation of the verified blocks.
      */
-    public synchronized byte [] toBytes() {
+    public synchronized IntervalSet.ByteIntervals toBytes() {
     	return verifiedBlocks.toBytes();
     }
     
@@ -475,9 +475,9 @@ public class VerifyingFile {
     /**
      * @return List of Intervals that should be serialized.  Excludes pending intervals.
      */
-    public synchronized List<Interval> getSerializableBlocks() {
+    public synchronized List<Range> getSerializableBlocks() {
         IntervalSet ret = new IntervalSet();
-        for(Interval next : new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks))
+        for(Range next : new MultiIterable<Range>(verifiedBlocks, partialBlocks, savedCorruptBlocks))
             ret.add(next);
         return ret.getAllIntervalsAsList();
         
@@ -487,9 +487,9 @@ public class VerifyingFile {
      * be held to ensure the interval lists are not modified elsewhere.
      * @return all downloaded blocks as list
      */
-    public synchronized Iterable<Interval> getBlocks() {
+    public synchronized Iterable<Range> getBlocks() {
         if (allBlocksIterable == null) {
-        	allBlocksIterable = new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks, pendingBlocks); 
+        	allBlocksIterable = new MultiIterable<Range>(verifiedBlocks, partialBlocks, savedCorruptBlocks, pendingBlocks); 
         }
         return allBlocksIterable;
     }
@@ -497,21 +497,21 @@ public class VerifyingFile {
     /**
      * Returns all verified blocks as a List.
      */ 
-    public synchronized List<Interval> getVerifiedBlocksAsList() {
+    public synchronized List<Range> getVerifiedBlocksAsList() {
         return verifiedBlocks.getAllIntervalsAsList();
     }
 
     /**
      * Returns the total number of bytes written to disk.
      */
-    public synchronized int getBlockSize() {
+    public synchronized long getBlockSize() {
         return verifiedBlocks.getSize() +
         	partialBlocks.getSize() +
         	savedCorruptBlocks.getSize() +
         	pendingBlocks.getSize();
     }
     
-    public synchronized int getPendingSize() {
+    public synchronized long getPendingSize() {
         return pendingBlocks.getSize();
     }
     
@@ -522,14 +522,14 @@ public class VerifyingFile {
     /**
      * Returns the total number of verified bytes written to disk.
      */
-    public synchronized int getVerifiedBlockSize() {
+    public synchronized long getVerifiedBlockSize() {
         return verifiedBlocks.getSize();
     }
   
 	/**
 	 * @return how much data was lost due to corruption
 	 */
-	public synchronized int getAmountLost() {
+	public synchronized long getAmountLost() {
 		return lostSize;
 	}
 	
@@ -548,7 +548,7 @@ public class VerifyingFile {
     /** Returns all missing pieces. */
     public synchronized String listMissingPieces() {
         IntervalSet all = new IntervalSet();
-        all.add(new Interval(0, completedSize-1));
+        all.add(Range.createRange(0, completedSize-1));
         all.delete(verifiedBlocks);
         all.delete(savedCorruptBlocks);
         if(hashTree == null)
@@ -601,7 +601,7 @@ public class VerifyingFile {
      * Determines if there are any blocks that are not assigned
      * or written.
      */
-    public synchronized int hasFreeBlocksToAssign() {
+    public synchronized long hasFreeBlocksToAssign() {
         return  completedSize - (verifiedBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
@@ -639,7 +639,7 @@ public class VerifyingFile {
      *      a chunkSize boundary and will be at most chunkSize bytes large.
      * @return the leased interval
      */
-    private synchronized Interval leaseWhiteHelper(IntervalSet availableBytes, long chunkSize) throws NoSuchElementException {
+    private synchronized Range leaseWhiteHelper(IntervalSet availableBytes, long chunkSize) throws NoSuchElementException {
         if (LOG.isDebugEnabled())
             LOG.debug("leasing white, state:\n"+dumpState());
       
@@ -661,7 +661,7 @@ public class VerifyingFile {
         // Calculate the intersection of neededBytes and availableBytes
         availableBytes.delete(neededBytes.invert(completedSize));
         
-        Interval ret = blockChooser.pickAssignment(availableBytes, neededBytes,
+        Range ret = blockChooser.pickAssignment(availableBytes, neededBytes,
                 chunkSize);
         
         leaseBlock(ret);
@@ -676,7 +676,7 @@ public class VerifyingFile {
     /**
      * Leases the specified interval.
      */
-    private synchronized void leaseBlock(Interval in) {
+    private synchronized void leaseBlock(Range in) {
         //if(LOG.isDebugEnabled())
             //LOG.debug("Obtaining interval: " + in);
         leasedBlocks.add(in);
@@ -773,7 +773,7 @@ public class VerifyingFile {
 	    HashTree tree = getHashTree(); // capture the tree.
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
-            for(Interval i : findVerifyableBlocks(existingFileSize)) {
+            for(Range i : findVerifyableBlocks(existingFileSize)) {
                 boolean good = verifyChunk(i, tree);
                 synchronized (this) {
                     partialBlocks.delete(i);
@@ -783,7 +783,7 @@ public class VerifyingFile {
                         if (!fullScan) {
                             if (!discardBad)
                                 savedCorruptBlocks.add(i);
-                            lostSize += (i.high - i.low + 1);
+                            lostSize += (i.getHigh() - i.getLow() + 1);
                         }
                     }
                 }
@@ -794,17 +794,18 @@ public class VerifyingFile {
     /**
      * @return whether this chunk is corrupt according to the given hash tree
      */
-    private boolean verifyChunk(Interval i, HashTree tree) {
+    private boolean verifyChunk(Range i, HashTree tree) {
         if (LOG.isDebugEnabled())
             LOG.debug("verifying interval "+i);
         
-        
-        int length = i.high - i.low + 1;
+        long length64 = i.getHigh() - i.getLow() + 1;
+        assert length64 <= Integer.MAX_VALUE;
+        int length = (int)(length64);
         byte[] b = CHUNK_CACHE.get(length);
         // read the interval from the file
         try {
 			synchronized(fos) {
-				fos.seek(i.low);
+				fos.seek(i.getLow());
 				fos.readFully(b, 0, length);
 			}
         } catch (IOException bad) {
@@ -828,32 +829,32 @@ public class VerifyingFile {
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
      * per method call unless the downloader is being deserialized from disk
      */
-    private synchronized List<Interval> findVerifyableBlocks(long existingFileSize) {
+    private synchronized List<Range> findVerifyableBlocks(long existingFileSize) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
         
         boolean fullScan = existingFileSize != -1;
-        List<Interval> verifyable = new ArrayList<Interval>(2);
-        List<Interval> partial;
+        List<Range> verifyable = new ArrayList<Range>(2);
+        List<Range> partial;
         int chunkSize = getChunkSize();
         
         if(fullScan) {
             IntervalSet temp = partialBlocks.clone();
-            temp.add(new Interval(0, existingFileSize));
+            temp.add(Range.createRange(0, existingFileSize));
             partial = temp.getAllIntervalsAsList();
         } else {
             partial = partialBlocks.getAllIntervalsAsList();
         }
         
         for (int i = 0; i < partial.size() ; i++) {
-            Interval current = partial.get(i);
+            Range current = partial.get(i);
             
             // find the beginning of the first chunk offset
-            int lowChunkOffset = current.low - current.low % chunkSize;
-            if (current.low % chunkSize != 0)
+            long lowChunkOffset = current.getLow() - current.getLow() % chunkSize;
+            if (current.getLow() % chunkSize != 0)
                 lowChunkOffset += chunkSize;
-            while (current.high >= lowChunkOffset+chunkSize-1) {
-                Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
+            while (current.getHigh() >= lowChunkOffset+chunkSize-1) {
+                Range complete = Range.createRange(lowChunkOffset, lowChunkOffset+chunkSize -1); 
                 verifyable.add(complete);
                 lowChunkOffset += chunkSize;
             }
@@ -861,15 +862,15 @@ public class VerifyingFile {
         
         // special case for the last chunk
         if (!partial.isEmpty()) {
-            int lastChunkOffset = completedSize - (completedSize % chunkSize);
+            long lastChunkOffset = completedSize - (completedSize % chunkSize);
             if (lastChunkOffset == completedSize)
                 lastChunkOffset-=chunkSize;
-            Interval last = partial.get(partial.size() - 1);
-            if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
+            Range last = partial.get(partial.size() - 1);
+            if (last.getHigh() == completedSize-1 && last.getLow() <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
                      LOG.debug("adding the last chunk for verification");
                 
-                verifyable.add(new Interval(lastChunkOffset, last.high));
+                verifyable.add(Range.createRange(lastChunkOffset, last.getHigh()));
             }
         }
         
@@ -884,11 +885,12 @@ public class VerifyingFile {
         private final byte[] buf;
         
         /** The interval that we are about to write */
-        private final Interval intvl;
+        private final Range intvl;
         
-        public ChunkHandler(byte[] buf, Interval intvl) {
+        public ChunkHandler(byte[] buf, Range intvl) {
             this.buf = buf;
             this.intvl = intvl;
+            assert Integer.MAX_VALUE >= (intvl.getHigh() - intvl.getLow() + 1);
         }
         
         public void run() {
@@ -898,8 +900,8 @@ public class VerifyingFile {
     		        LOG.trace("Writing intvl: " + intvl);
                 
     			synchronized(fos) {
-    				fos.seek(intvl.low);
-    				fos.write(buf, 0, intvl.high - intvl.low + 1);
+    				fos.seek(intvl.getLow());
+    				fos.write(buf, 0, (int)(intvl.getHigh() - intvl.getLow() + 1));
     			}
     			
     			synchronized(VerifyingFile.this) {
@@ -1048,14 +1050,14 @@ public class VerifyingFile {
     	public final int start;
     	public final int length;
     	public final byte[] buf;
-    	public final Interval in;
+    	public final Range in;
     	private boolean processed, done, scheduled;
     	WriteRequest(long currPos, int start, int length, byte [] buf) {
     		this.currPos = currPos;
     		this.start = start;
     		this.length = length;
     		this.buf = buf;
-    		in = new Interval(currPos, currPos + length - 1);
+    		in = Range.createRange(currPos, currPos + length - 1);
     	}
     	
     	private synchronized void startProcessing() {
