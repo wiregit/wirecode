@@ -1514,9 +1514,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 
                 int totalRead = buffer.position();
                 if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData((int)totalRead);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(totalRead);
                 else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData((int)totalRead);
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(totalRead);
                 
                 // If nothing could be read at all, leave.
                 if(totalRead == 0) {

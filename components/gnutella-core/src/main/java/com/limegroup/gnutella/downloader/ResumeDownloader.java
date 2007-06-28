@@ -3,12 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.io.ObjectInputStream.GetField;
-import java.io.ObjectOutputStream.PutField;
 
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -30,16 +26,21 @@ public class ResumeDownloader extends ManagedDownloader
         implements Serializable {
     /** Ensures backwards compatibility of the downloads.dat file. */
     static final long serialVersionUID = -4535935715006098724L;
-    /** Make everything transient */
-    private static final ObjectStreamField[] serialPersistentFields = 
-        ObjectStreamClass.NO_FIELDS;
     
     /** The temporary file to resume to. */
     private volatile File _incompleteFile;
+    
     /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
     private volatile String _name;
-    private volatile long _size;
+    
+    /** The old size field.  Kept around for backwards-compatibility */
+    @Deprecated
+    @SuppressWarnings("unused")
+    private volatile int _size;
+    
+    /** The size of the file*/
+    private volatile long _size64;
     
     /**
      * The hash of the completed file.  This field was not included in the LW
@@ -77,7 +78,7 @@ public class ResumeDownloader extends ManagedDownloader
         if(name==null || name.equals(""))
             throw new IllegalArgumentException("Bad name in ResumeDownloader");
         this._name=name;
-        this._size=size;
+        this._size64=size;
         this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
     }
 
@@ -109,7 +110,7 @@ public class ResumeDownloader extends ManagedDownloader
         //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
         //but more efficient since no allocations in IncompleteFileManager.
         return IncompleteFileManager.same(
-            _name, _size, downloadSHA1,     
+            _name, _size64, downloadSHA1,     
             other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
@@ -119,11 +120,11 @@ public class ResumeDownloader extends ManagedDownloader
      * when no locations have been found.
      */
     public synchronized long getContentLength() {
-        return _size;
+        return _size64;
     }
 
     protected synchronized String getDefaultFileName() {
-        return _name;
+        return _name.toString();
     }
 
     /**
@@ -175,27 +176,14 @@ public class ResumeDownloader extends ManagedDownloader
     
     private void readObject(ObjectInputStream stream)
     throws IOException, ClassNotFoundException {
-        System.out.println("reading resume");
         GetField gets = stream.readFields();
         _hash = (URN)gets.get("_hash", null);
         _name = (String) gets.get("_name", null);
         _incompleteFile = (File)gets.get("_incompleteFile",null);
-        Long l;
-        try {
-            l = new Long(gets.get("_size",0)); 
-        } catch (NoSuchFieldError itsLong) {
-            itsLong.printStackTrace();
-            l = new Long(gets.get("_size", 0L));
-        }
-        _size = l.longValue();
-    }
-    
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        PutField puts = stream.putFields();
-        puts.put("_name", _name);
-        puts.put("_incompleteFile",_incompleteFile);
-        puts.put("_size", _size);
-        puts.put("_hash",_hash);
-        stream.writeFields();
+        
+        // try to read the long size first, if not there read the int
+        _size64 = gets.get("_size64", -1L);
+        if (_size64 == -1L)
+            _size64 = gets.get("_size",0);
     }
 }
