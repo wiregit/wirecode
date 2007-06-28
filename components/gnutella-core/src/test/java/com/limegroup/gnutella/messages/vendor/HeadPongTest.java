@@ -32,6 +32,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -879,6 +880,26 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(0,     ByteOrder.beb2int(ranges, 0));
         assertEquals(500,   ByteOrder.beb2int(ranges, 4));
         byte[] ranges5 = writtenGGEP.getBytes("R5");
+        assertEquals(10, ranges5.length);
+        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+        
+        // try only long ranges now
+        fd.setRangesAsIntervals(Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
+        pong = new HeadPong(req);
+        out = new ByteArrayOutputStream();
+        pong.write(out);
+        written = out.toByteArray();
+        
+        writtenGGEP = new GGEP(written, 31, endOffset);
+        assertEquals(written.length, endOffset[0]);
+        
+        // there should not be an R extention
+        try {
+            writtenGGEP.getBytes("R");
+            fail("there was an R extention with only long ranges");
+        } catch (BadGGEPPropertyException expected){}
+        ranges5 = writtenGGEP.getBytes("R5");
         assertEquals(10, ranges5.length);
         assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
         assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));

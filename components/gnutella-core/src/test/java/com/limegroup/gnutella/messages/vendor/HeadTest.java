@@ -71,7 +71,7 @@ public class HeadTest extends LimeTestCase {
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge;
+    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge, _rangesOnlyLarge;
 	
     private static PushEndpoint pushCollectionPE, tlsCollectionPE;
     
@@ -151,6 +151,8 @@ public class HeadTest extends LimeTestCase {
         _rangesLarge = new IntervalSet();
         _rangesLarge.add(Range.createRange(10, 20));
         _rangesLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
+        _rangesOnlyLarge = new IntervalSet();
+        _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
 		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
 		_notHave =      FileManagerStub.NOT_HAVE;
@@ -381,6 +383,16 @@ public class HeadTest extends LimeTestCase {
        pong = reparse(pong);
        IntervalSet large = pong.getRanges();
        assertEquals(_rangesLarge, large);
+    }
+    
+    public void testOnlyLargeRanges() throws Exception {
+        _partialLarge.setRangesByte(_rangesOnlyLarge.toBytes());
+        HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
+        HeadPong pong = new HeadPong(ping);
+        clearStoredProxies();
+        pong = reparse(pong);
+        IntervalSet large = pong.getRanges();
+        assertEquals(_rangesOnlyLarge, large); 
     }
     
 	/**
