@@ -33,6 +33,7 @@ import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
@@ -385,7 +386,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		if(filename.equals("")) {
 			throw new IllegalArgumentException("cannot accept empty string file name");
 		}
-		if((size < 0 || size > Constants.MAX_FILE_SIZE) ) {
+		if((size < 0 || size > MAX_FILE_SIZE) ) {
 			throw new IllegalArgumentException("invalid size: "+size);
 		}
 		if((index & 0xFFFFFFFF00000000L) != 0) {

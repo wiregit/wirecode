@@ -14,6 +14,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.PrivilegedAccessor;
@@ -44,6 +45,9 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
     static final RemoteFileDesc rfd=newRFD(name, size, hash);
     static final IncompleteFileManager ifm=new IncompleteFileManager();
     static File incompleteFile;
+    
+    /** A serialized version with 32 bit size field with value 11111 */
+    private static final String Serialized32Bit1111 = "VTWQABLTOIADEY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZSG653ONRXWCZDFOIXFEZLTOVWWKRDPO5XGY33BMRSXFQINDZ76ODOS3QBAABCJAACV643JPJSUYAAFL5UGC43IOQABYTDDN5WS63DJNVSWO4TPOVYC6Z3OOV2GK3DMMEXVKUSOHNGAAD27NFXGG33NOBWGK5DFIZUWYZLUAAHEY2TBOZQS62LPF5DGS3DFHNGAABK7NZQW2ZLUAAJEY2TBOZQS63DBNZTS6U3UOJUW4ZZ3PBZAAM3DN5WS43DJNVSWO4TPOVYC4Z3OOV2GK3DMMEXGI33XNZWG6YLEMVZC4TLBNZQWOZLEIRXXO3TMN5QWIZLSEZ5CM5KUZ6S4SAYAAB4HEABUMNXW2LTMNFWWKZ3SN52XALTHNZ2XIZLMNRQS4ZDPO5XGY33BMRSXELSBMJZXI4TBMN2EI33XNZWG6YLEMVZIZV6IVOQERQWOAIAAA6DQONZAAELKMF3GCLTVORUWYLSIMFZWQU3FOS5EJBMVS24LONADAAAHQ4DXBQAAAAAQH5AAAAAAAAAAA6DTOIADOY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZSG653ONRXWCZDFOIXES3TDN5WXA3DFORSUM2LMMVGWC3TBM5SXFFNYJYT4LRYQXIBQAASMAADGE3DPMNVXG5AAB5GGUYLWMEXXK5DJNQXU2YLQHNGAABTIMFZWQZLTOEAH4AAKPBYHG4QACFVGC5TBFZ2XI2LMFZEGC43IJVQXABIH3LA4GFTA2EBQAASGAAFGY33BMRDGCY3UN5ZESAAJORUHEZLTNBXWYZDYOA7UAAAAAAAAADDXBAAAAAAQAAAAAALTOIAAY2TBOZQS42LPFZDGS3DFAQW2IRIOBXSP6AYAAFGAABDQMF2GQ4IAPYAAG6DQOQAEEQZ2LRRXSZ3XNFXFY2DPNVSVY6TCMFWGK5TTNN4VY3DJNVSVY2DFMFSFY3DJNVSXO2LSMVOFILJRGEYS22LOMNXW24DMMV2GKRTJNRSTGMTXAIAFY6DTOIABG2TBOZQS45LUNFWC4QLSOJQXSTDJON2HRAOSDWM4OYM5AMAACSIAARZWS6TFPBYAAAAAAB3QIAAAAAAHQ6DTOEAH4AAMH5AAAAAAAAAAY5YIAAAAAEAAAAAAA6DYONYQA7QABQ7UAAAAAAAAADDXBAAAAAAQAAAAAALUAAFGC5DUOJUWE5LUMVZXG4IAPYAAYP2AAAAAAAAABR3QQAAAAAIAAAAAAB4HQ6AAAACFO4DTOEAH4AAOOQABMVBNGEYTCLLJNZRW63LQNRSXIZKGNFWGKMZSO4BAAXDYOQAAYZTJNRSW4YLNMUXHI6DU";
     
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
@@ -90,6 +94,25 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
 
     ////////////////////////////////////////////////////////////////////////////
 
+    public void testLoads32Bit() throws Exception {
+        ObjectInputStream ois = new ObjectInputStream(
+                new ByteArrayInputStream(Base32.decode(Serialized32Bit1111)));
+        ResumeDownloader loaded = (ResumeDownloader)ois.readObject();
+        assertEquals(1111, loaded.getContentLength());
+        
+        // serializing this will result in different byte[]
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(loaded);
+        byte [] newSerialized = baos.toByteArray();
+        assertNotEquals(Serialized32Bit1111, Base32.encode(newSerialized));
+        
+        // which when deserialized will retain the proper size
+        ois = new ObjectInputStream(new ByteArrayInputStream(newSerialized));
+        ResumeDownloader newLoaded = (ResumeDownloader)ois.readObject();
+        assertEquals(1111, newLoaded.getContentLength());
+    }
+    
     /** Tests that the progress is not 0% while requerying.
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() throws Exception {
