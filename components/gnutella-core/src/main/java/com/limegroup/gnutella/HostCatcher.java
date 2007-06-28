@@ -1283,7 +1283,12 @@ public class HostCatcher {
      * Notifies this that connect() has been called.  This may decide to give
      * out bootstrap pongs if necessary.
      */
-    public void expire() {        
+    public void expire() {
+        synchronized(this) {
+            long now = System.currentTimeMillis();
+            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
+        }
+        
         recoverHosts();
         
         // schedule new runnable to clear the set of endpoints that
