@@ -759,7 +759,7 @@ public class IntervalSetTest extends BaseTestCase {
     	}
     	
     	IntervalSet.ByteIntervals asByte = set.toBytes();
-        assertEquals(0,asByte.ints.length);
+        assertEquals(0,asByte.longs.length);
     	
     	IntervalSet set2 = IntervalSet.parseBytes(asByte.ints, asByte.longs);
     	assertEquals(set.getSize(),set2.getSize());
