@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.collection.Range;
+
 /**
 * A class to keep together the constants that may be used by multiple classes
 * @author  Anurag Singla
@@ -50,5 +52,5 @@ public final class Constants {
 	public static final String UTF_8_ENCODING = "UTF-8";
     
     /** Maximum file size we'll share */
-    public static final long MAX_FILE_SIZE = 0xFFFFFFFFFFL; // 1TB
+    public static final long MAX_FILE_SIZE = Range.MAX_VALUE; // 1TB
 }

@@ -10,8 +10,6 @@ import org.limewire.util.ByteOrder;
 public class LongInterval extends Range implements Serializable {
     private static final long serialVersionUID = -2562093104400487445L;
     
-    static final long MAX_VALUE = 0xFFFFFFFFFFL;
-    
     private final long low;
     private final long high;
     protected LongInterval(long low, long high) {

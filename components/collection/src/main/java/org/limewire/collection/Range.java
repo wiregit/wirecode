@@ -8,6 +8,10 @@ import java.io.Serializable;
 public abstract class Range implements Serializable {
 
     private static final long serialVersionUID = -2562093104400487223L;
+    
+    /** Maximum value a Range can hold */
+    public static final long MAX_VALUE = 0xFFFFFFFFFFL;
+    
     /**
      * @return true if this Interval is a "subrange" of the other interval 
      */
