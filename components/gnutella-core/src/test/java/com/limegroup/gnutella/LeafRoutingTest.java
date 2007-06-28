@@ -83,7 +83,6 @@ public class LeafRoutingTest extends LimeTestCase {
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-		ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.setValue(Long.MAX_VALUE);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");

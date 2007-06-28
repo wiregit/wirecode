@@ -428,7 +428,6 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);         
 

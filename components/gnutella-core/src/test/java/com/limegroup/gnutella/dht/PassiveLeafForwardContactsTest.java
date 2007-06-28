@@ -73,14 +73,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.MAX_LEAVES.setValue(33);
         ConnectionSettings.NUM_CONNECTIONS.setValue(33);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);

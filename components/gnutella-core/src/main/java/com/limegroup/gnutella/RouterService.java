@@ -45,7 +45,6 @@ import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -539,8 +538,6 @@ public class RouterService {
     		nodeAssigner.start();
     		LOG.trace("STOP NodeAssigner");
 			
-            // THIS MUST BE BEFORE THE CONNECT (below)
-            // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
             LOG.trace("START HostCatcher.initialize");
             callback.componentLoading("HOST_CATCHER");
     		catcher.initialize();
@@ -1669,16 +1666,6 @@ public class RouterService {
 	public static boolean isConnecting() {
 	    return manager.isConnecting();
 	}
-	
-	/**
-	 * Returns whether or not this client is currently fetching
-	 * endpoints from a GWebCache.
-	 *
-	 * @return <tt>true</tt> if the client is fetching endpoints.
-	 */
-	public static boolean isFetchingEndpoints() {
-	    return BootstrapServerManager.instance().isEndpointFetchInProgress();
-    }
 
     /**
      * Returns the number of files being shared locally.

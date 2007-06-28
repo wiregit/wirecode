@@ -78,7 +78,6 @@ public class MulticastTest extends LimeTestCase {
 		UltrapeerSettings.MAX_LEAVES.setValue(1);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 
         ConnectionSettings.MULTICAST_PORT.setValue(9021);

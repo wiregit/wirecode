@@ -57,8 +57,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {"127.*.*.*", localIP});
         ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
     }
     

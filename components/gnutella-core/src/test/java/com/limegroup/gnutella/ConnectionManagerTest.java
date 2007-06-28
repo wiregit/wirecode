@@ -89,7 +89,6 @@ public class ConnectionManagerTest extends LimeTestCase {
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);

@@ -24,7 +24,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *
  *  Standard setup has the following settings:
  *  * Blocks all addresses, whitelists 127.*.*.* and your local IP .
- *  * Node is in Ultrapeer mode with GWebCache and Watchdog off.
+ *  * Node is in Ultrapeer mode with Watchdog off.
  *  * Sharing 2 files - berkeley.txt and susheel.txt
  *  * Max number of leaf connections is 4, max number of UP connections is 3.
  *
@@ -103,8 +103,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.MAX_LEAVES.setValue(33);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(33);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);

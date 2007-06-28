@@ -69,8 +69,7 @@ public abstract class DHTTestCase extends LimeTestCase {
                 ConnectionSettings.PORT.getValue());
                 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);

@@ -14,15 +14,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.FixedsizePriorityQueue;
-import org.limewire.util.ByteOrder;
-import org.limewire.util.CommonUtils;
-import org.limewire.io.IpPortImpl;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.io.IpPortImpl;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
@@ -156,79 +155,35 @@ public class HostCatcherTest extends LimeTestCase {
         }
     }
     
-    
     /**
-     * Test to make sure we hit the GWebCache if hosts fail.
+     * Tests to make sure that the UDP Host Cache is used  
+     * if we know of any host caches.
      */
-    public void testHitsGWebCacheIfHostsFail() throws Exception {
-        HostCatcher.DEBUG = false;
-        PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);
-        StubGWebBootstrapper stub = new StubGWebBootstrapper();
-        PrivilegedAccessor.setValue(hc, "gWebCache", stub);
-        
-        String startAddress = "30.4.5.";
-        for(int i=0; i<250; i++) {
-            Endpoint curHost = new Endpoint(startAddress+i, 6346);
-            hc.add(curHost, true);
-        }
-        
- 
-        for(int i=0; i<250; i++) {
-            Endpoint host = hc.getAnEndpoint();
-            assertTrue("unexpected address", 
-                host.getAddress().startsWith(startAddress));
-        }
-        
-        
-        for(int i=0; i<250; i++) {
-            Endpoint curHost = new ExtendedEndpoint(startAddress+i, 6346);
-            hc.doneWithConnect(curHost, false);
-        }
-        
-        assertFalse(stub.fetched);
-        Endpoint gWebCacheHost = hc.getAnEndpoint();
-        assertTrue(stub.fetched);
-        assertEquals(stub.host, gWebCacheHost.getAddress());
-        
-        HostCatcher.DEBUG = true;
-    }
-    
-    /**
-     * Tests to make sure that the UDP Host Cache is used before 
-     * GWebCaches are used, if we know of any host caches.
-     */
-    public void testUDPCachesUsedBeforeGWebCaches() throws Exception {
+    public void testUDPCachesUsed() throws Exception {
         assertEquals(0, hc.getNumHosts());
         PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
         
-        StubGWebBootstrapper gw = new StubGWebBootstrapper();
         StubUDPBootstrapper udp = new StubUDPBootstrapper();
-        PrivilegedAccessor.setValue(hc, "gWebCache", gw);
         PrivilegedAccessor.setValue(hc, "udpHostCache", udp);
         
         Endpoint firstHost = hc.getAnEndpoint();
         assertTrue(udp.fetched);
-        assertFalse(gw.fetched);
         assertEquals(udp.host, firstHost.getAddress());
         udp.fetched = false;
         
         // Since udp was done quickly and only gave us one host (and we
         // just used it), the next request will spark a GW request.
-        long timeBefore = System.currentTimeMillis();
-        Endpoint secondHost = hc.getAnEndpoint();
-        long timeAfter = System.currentTimeMillis();
+        Endpoint second = hc.getAnEndpointImmediate(null);
+        assertNull(second);
+        Thread.sleep(5000); // just to make sure it doesn't trigger a fetch later
         assertFalse(udp.fetched);
-        assertTrue(gw.fetched);
-        assertEquals(gw.host, secondHost.getAddress());
-        assertGreaterThan(15 * 1000, timeAfter - timeBefore);
-        gw.fetched = false;
+        
         udp.expired = false;
         
         // Now another fetch will wait until time passes enough to retry
         // udp (too long before retrying a GW)
         Endpoint thirdHost = hc.getAnEndpoint();
         assertTrue(udp.fetched);
-        assertFalse(gw.fetched);
         assertEquals(udp.host, thirdHost.getAddress());
     }
         
@@ -995,19 +950,6 @@ public class HostCatcherTest extends LimeTestCase {
         assertTrue(ep.isTLSCapable());
         
         assertNull(hc.getAnEndpointImmediate(null));
-    }
-   
-    private static class StubGWebBootstrapper extends BootstrapServerManager {
-        private boolean fetched = false;
-        private String host = "123.234.132.143";
-        
-        public int fetchEndpointsAsync() {
-            fetched = true;
-            Endpoint ep = new Endpoint(host, 6346);
-            RouterService.getHostCatcher().add(ep, false);
-            
-            return FETCH_IN_PROGRESS;
-        }
     }
     
     private static class StubUDPBootstrapper extends UDPHostCache {

@@ -39,11 +39,8 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
-import org.limewire.service.MessageService;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.bootstrap.BootstrapServer;
-import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -53,7 +50,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
-import com.limegroup.gnutella.util.DataUtils;
 
 
 /**
@@ -75,10 +71,6 @@ import com.limegroup.gnutella.util.DataUtils;
  *      addresses.        
  * </ol> 
  *
- * HostCatcher also manages the list of GWebCache servers.  YOU MUST CALL
- * EXPIRE() TO START THE GBWEBCACHE BOOTSTRAPING PROCESS.  This should be done
- * when calling RouterService.connect().<p>
- *
  * Finally, HostCatcher maintains a list of "permanent" locations, based on
  * average daily uptime.  These are stored in the gnutella.net file.  They
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
@@ -90,11 +82,6 @@ public class HostCatcher {
      * Log for logging this class.
      */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
-    
-    /**
-     * Size of the queue for hosts returned from the GWebCaches.
-     */
-    static final int CACHE_SIZE = 20;
     
     /**
      * The number of ultrapeer pongs to store.
@@ -121,11 +108,6 @@ public class HostCatcher {
      * 
      */
     static final int PERMANENT_SIZE = NORMAL_SIZE;
-    
-    /**
-     * Constant for the priority of hosts retrieved from GWebCaches.
-     */
-    public static final int CACHE_PRIORITY = 2;
 
     /**
      * Constant for the index of good priority hosts (Ultrapeers)
@@ -175,7 +157,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue<ExtendedEndpoint> ENDPOINT_QUEUE = 
-        new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
+        new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE,GOOD_SIZE});
     private final Map<ExtendedEndpoint, ExtendedEndpoint> ENDPOINT_SET = new HashMap<ExtendedEndpoint, ExtendedEndpoint>();
     
     /**
@@ -231,11 +213,6 @@ public class HostCatcher {
      */
     private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
         new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
-
-    
-    /** The GWebCache bootstrap system. */
-    private BootstrapServerManager gWebCache = 
-        BootstrapServerManager.instance();
     
     /**
      * The pinger that will send the messages
@@ -248,7 +225,7 @@ public class HostCatcher {
     /**
      * Count for the number of hosts that we have not been able to connect to.
      * This is used for degenerate cases where we ultimately have to hit the 
-     * GWebCaches.
+     * bootstrap hosts.
      */
     private int _failures;
     
@@ -295,7 +272,7 @@ public class HostCatcher {
     public static final int EXPIRED_HOSTS_SIZE = 500;
     
     /**
-     * The scheduled runnable that fetches GWebCache entries if we need them.
+     * The scheduled runnable that fetches hosts from bootstrappers if we need them.
      */
     public final Bootstrapper FETCHER = new Bootstrapper();
     
@@ -349,33 +326,7 @@ public class HostCatcher {
         scheduleServices();
     }
     
-    protected void scheduleServices() {
-        //Register to send updates every hour (starting in one hour) if we're a
-        //supernode and have accepted incoming connections.  I think we should
-        //only do this if we also have incoming slots, but John Marshall from
-        //Gnucleus says otherwise.
-        Runnable updater=new Runnable() {
-            public void run() {
-                if (RouterService.acceptedIncomingConnection() && 
-                    RouterService.isSupernode()) {
-                        byte[] addr = RouterService.getAddress();
-                        int port = RouterService.getPort();
-                        if(NetworkUtils.isValidAddress(addr) &&
-                           NetworkUtils.isValidPort(port) &&
-                           !NetworkUtils.isPrivateAddress(addr)) {
-                            Endpoint e=new Endpoint(addr, port);
-							// This spawns another thread, so blocking is  
-                            // not an issue.
-							gWebCache.sendUpdatesAsync(e);
-						}
-                    }
-            }
-        };
-        
-        RouterService.schedule(updater, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC);
-        
+    protected void scheduleServices() {        
         Runnable probationRestorer = new Runnable() {
             public void run() {
                 LOG.trace("restoring hosts on probation");
@@ -393,7 +344,7 @@ public class HostCatcher {
         RouterService.schedule(probationRestorer, 
             PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
             
-        // Try to fetch GWebCache's whenever we need them.
+        // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
         RouterService.schedule(FETCHER, 0, 2*1000);
@@ -524,13 +475,6 @@ public class HostCatcher {
 
                 if (line==null)
                     break;
-                    
-                //If endpoint a special GWebCache endpoint?  If so, add it to
-                //gWebCache but not this.
-                try {
-                    gWebCache.addBootstrapServer(new BootstrapServer(line));
-                    continue;
-                } catch (ParseException ignore) { }
     
                 try {
                     ExtendedEndpoint e = ExtendedEndpoint.read(line); 
@@ -548,7 +492,6 @@ public class HostCatcher {
                 }
             }
         } finally {
-            gWebCache.bootstrapServersAdded();
             udpHostCache.hostCachesAdded();
             try {
                 if( in != null )
@@ -571,17 +514,13 @@ public class HostCatcher {
      * @modifies the file named filename
      * @effects writes this to the given file.  The file
      *  is prioritized by rough probability of being good.
-     *  GWebCache entries are also included in this file.
      */
     synchronized void write(File hostFile) throws IOException {
         repOk();
         
-        if(dirty || gWebCache.isDirty() || udpHostCache.isWriteDirty()) {
+        if(dirty || udpHostCache.isWriteDirty()) {
             FileWriter out = new FileWriter(hostFile);
-            
-            //Write servers from GWebCache to output.
-            gWebCache.write(out);
-    
+                
             //Write udp hostcache endpoints.
             udpHostCache.write(out);
     
@@ -1344,22 +1283,7 @@ public class HostCatcher {
      * Notifies this that connect() has been called.  This may decide to give
      * out bootstrap pongs if necessary.
      */
-    public void expire() {
-
-        synchronized (this) {
-            // Fetch more GWebCache urls once per session.
-            // (Well, once per connect really--good enough.)
-            long now = System.currentTimeMillis();
-            long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
-            if (fetched + DataUtils.ONE_WEEK <= now) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Fetching more bootstrap servers. " + "Last fetch time: " + fetched);
-                gWebCache.fetchBootstrapServersAsync();
-            }
-
-            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
-        }
-        
+    public void expire() {        
         recoverHosts();
         
         // schedule new runnable to clear the set of endpoints that
@@ -1462,7 +1386,6 @@ public class HostCatcher {
             EXPIRED_HOSTS.clear();
             _failures = 0;
             FETCHER.resetFetchTime();
-            gWebCache.resetData();
             udpHostCache.resetData();
             restoredHosts.clear();
             pinger.resetData();
@@ -1502,11 +1425,10 @@ public class HostCatcher {
     }
     
     /**
-     * Runnable that looks for GWebCache, UDPHostCache or multicast hosts.
+     * Runnable that looks for UDPHostCache or multicast hosts.
      * This tries, in order:
      * 1) Multicasting a ping.
      * 2) Sending UDP pings to UDPHostCaches.
-     * 3) Connecting via TCP to GWebCaches.
      */
     private class Bootstrapper implements Runnable {
         
@@ -1516,21 +1438,13 @@ public class HostCatcher {
         private long nextAllowedMulticastTime = 0;
         
         /**
-         * The next time we're allowed to fetch via GWebCache.
+         * The next time we're allowed to fetch.
          * Incremented after each succesful fetch.
          */
         private long nextAllowedFetchTime = 0;
         
         /**
-        /**
-         * The delay to wait before the next time we contact a GWebCache.
-         * Upped after each attempt at fetching.
-         */
-        private int delay = 20 * 1000;
-        
-        /**
-         * How long we must wait after contacting UDP before we can contact
-         * GWebCaches.
+         * How long we must wait after contacting UDP before we can contact.
          */
         private static final int POST_UDP_DELAY = 30 * 1000;
         
@@ -1569,8 +1483,7 @@ public class HostCatcher {
         
         /**
          * Resets the nextAllowedFetchTime, so that after we regain a
-         * connection to the internet, we can fetch from gWebCaches
-         * if needed.
+         * connection to the internet, we can fetch if needed.
          */
         void resetFetchTime() {
             nextAllowedFetchTime = 0;
@@ -1596,10 +1509,6 @@ public class HostCatcher {
                 
             // then try udp host caches.
             if(udpHostCacheFetch(now))
-                return;
-                
-            // then try gwebcaches
-            if(gwebCacheFetch(now))
                 return;
                 
             // :-(
@@ -1633,43 +1542,6 @@ public class HostCatcher {
                 return true;
             }
             return false;
-        }
-        
-        /**
-         * Attempts to fetch via gwebcaches, returning true
-         * if it was able to.
-         */
-        private boolean gwebCacheFetch(long now) {
-            // if we aren't allowed to contact gwebcache's yet, exit.
-            if(now < nextAllowedFetchTime)
-                return false;
-            
-            int ret = gWebCache.fetchEndpointsAsync();
-            switch(ret) {
-            case BootstrapServerManager.FETCH_SCHEDULED:
-                delay *= 5;
-                nextAllowedFetchTime = now + delay;
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Fetching hosts.  Next allowed time: " +
-                              nextAllowedFetchTime);
-                return true;
-            case BootstrapServerManager.FETCH_IN_PROGRESS:
-                LOG.debug("Tried to fetch, but was already fetching.");
-                return true;
-            case BootstrapServerManager.CACHE_OFF:
-                LOG.debug("Didn't fetch, gWebCache's turned off.");
-                return false;
-            case BootstrapServerManager.FETCHED_TOO_MANY:
-                LOG.debug("We've received a bunch of endpoints already, didn't fetch.");
-                MessageService.showError("GWEBCACHE_FETCHED_TOO_MANY");
-                return false;
-            case BootstrapServerManager.NO_CACHES_LEFT:
-                LOG.debug("Already contacted each gWebCache, didn't fetch.");
-                MessageService.showError("GWEBCACHE_NO_CACHES_LEFT");
-                return false;
-            default:
-                throw new IllegalArgumentException("invalid value: " + ret);
-            }
         }
     }
     

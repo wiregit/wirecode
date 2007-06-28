@@ -144,7 +144,6 @@ public class SimppManagerTest extends LimeTestCase {
         UltrapeerSettings.MAX_LEAVES.setValue(5);
         ConnectionSettings.NUM_CONNECTIONS.setValue(5);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.PORT.setValue(PORT);

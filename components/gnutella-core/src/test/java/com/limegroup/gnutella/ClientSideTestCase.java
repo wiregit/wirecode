@@ -36,7 +36,7 @@ import com.limegroup.gnutella.util.Sockets.ConnectType;
  * 4, use alternate constructor to specify up to 4)
  * The leaf has the following settings (which you can override by implementing
  * your own doSettings()): runs on SERVER_PORT, is a Leaf, does not connect on
- * startup, GWebCaches and Watchdog are inactive, sharing only txt files, 
+ * startup, Watchdog are inactive, sharing only txt files, 
  * sharing two txt files (berkeley and susheel), and accepting all search
  * results.
  * You must also implement getActivityCallback() (for custom callbacks) 
@@ -84,7 +84,6 @@ public abstract class ClientSideTestCase
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 

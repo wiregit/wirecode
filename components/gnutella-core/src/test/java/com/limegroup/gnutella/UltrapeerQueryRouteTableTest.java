@@ -63,8 +63,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     private static void setSettings() throws Exception {
         setStandardSettings();
         //SearchSettings.PROBE_TTL.setValue((byte)1);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PORT.setValue(6332);

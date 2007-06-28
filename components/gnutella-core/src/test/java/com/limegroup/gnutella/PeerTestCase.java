@@ -67,7 +67,6 @@ public abstract class PeerTestCase extends LimeTestCase {
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
