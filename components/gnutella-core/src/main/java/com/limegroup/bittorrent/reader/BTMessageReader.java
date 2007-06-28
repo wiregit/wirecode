@@ -1,9 +1,6 @@
 package com.limegroup.bittorrent.reader;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.nio.ByteBufferCache;
