@@ -108,4 +108,11 @@ public final class UISettings extends LimeProps {
      */
     public static final IntSetting UI_OPTIONS_DIALOG_HEIGHT= 
         FACTORY.createIntSetting("UI_OPTIONS_DIALOG_HEIGHT", 460);
+    
+    /**
+     * Setting that globally enables or disables notifications.
+     */
+    public static final BooleanSetting SHOW_NOTIFICATIONS = 
+        FACTORY.createBooleanSetting("SHOW_NOTIFICATIONS", true);
+
 }
