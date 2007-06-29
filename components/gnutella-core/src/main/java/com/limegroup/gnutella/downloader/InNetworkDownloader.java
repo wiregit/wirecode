@@ -45,6 +45,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
                                long startTime) throws SaveLocationException {
         super( new RemoteFileDesc[0], incompleteFileManager,
                null, dir, info.getUpdateFileName(), true);
+        // note: even though we support bigger files, this is a good sanity check
         if(info.getSize() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("size too big for now.");
 

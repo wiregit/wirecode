@@ -34,6 +34,7 @@ import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -1507,8 +1508,7 @@ public class ManagedDownloader extends AbstractDownloader
                         }
                         contentLength = fileSize;
                         
-                        // TODO: Gnutella is not 64bit compatible
-                        if (contentLength <= Integer.MAX_VALUE) {
+                        if (contentLength <= MAX_FILE_SIZE) {
                             propertiesMap.put(FILE_SIZE, contentLength);
                         }
                     }
@@ -1533,8 +1533,7 @@ public class ManagedDownloader extends AbstractDownloader
             return;
         }
         
-        // TODO: Gnutella is not 64bit compatible
-        if (contentLength > Integer.MAX_VALUE) {
+        if (contentLength > MAX_FILE_SIZE) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Content length is too big: " + contentLength);
             }
