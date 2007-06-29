@@ -38,6 +38,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 @SuppressWarnings("unchecked")
 public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -338,15 +339,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         f2 = createNewTestFile(3);
         
         //Try to add a huge file.  (It will be ignored.)
-        f4 = createFakeTestFile(Integer.MAX_VALUE+1l);
+        f4 = createFakeTestFile(MAX_FILE_SIZE+1l);
         FileManagerEvent result = addIfShared(f4);
         assertTrue(result.toString(), result.isFailedEvent());
         assertEquals(f4, result.getFiles()[0]);
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
-        f5=createFakeTestFile(Integer.MAX_VALUE-1);
-        f6=createFakeTestFile(Integer.MAX_VALUE);
+        f5=createFakeTestFile(MAX_FILE_SIZE-1);
+        f6=createFakeTestFile(MAX_FILE_SIZE);
         result = addIfShared(f5);
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(f5, result.getFileDescs()[0].getFile());
@@ -354,7 +355,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
-        assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
+        assertEquals("unexpected fman size", MAX_FILE_SIZE, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
@@ -756,7 +757,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 	    assertTrue(fman.isLoadFinished());
 	    
 		// test if too large files are not shared
-		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
+		File tooLarge = createFakeTestFile(MAX_FILE_SIZE+1l);
 		FileManagerEvent result = addAlways(tooLarge);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(tooLarge, result.getFiles()[0]);
