@@ -1611,5 +1611,41 @@ public class HostCatcher {
                 return ret;
             }
         };
+        
+        /** Inspectable with some tls stats */
+        public final Inspectable tlsStats = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                ret.put("ver",1);
+                int perm, permtls, rest,resttls,fl, fltls, fu,futls;
+                synchronized(HostCatcher.this) {
+                    perm = permanentHostsSet.size();
+                    rest = restoredHosts.size();
+                    fl = FREE_LEAF_SLOTS_SET.size();
+                    fu = FREE_ULTRAPEER_SLOTS_SET.size();
+                    permtls = 0;
+                    for (ExtendedEndpoint e : permanentHostsSet)
+                        permtls += e.isTLSCapable() ? 1 : 0;
+                    resttls = 0;
+                    for (ExtendedEndpoint e : restoredHosts)
+                        resttls += e.isTLSCapable() ? 1 : 0;
+                    fltls = 0;
+                    for (ExtendedEndpoint e : FREE_LEAF_SLOTS_SET.keySet())
+                        fltls += e.isTLSCapable() ? 1 : 0;
+                    futls = 0;
+                    for (ExtendedEndpoint e : FREE_ULTRAPEER_SLOTS_SET.keySet())
+                        futls += e.isTLSCapable() ? 1 : 0;
+                }
+                ret.put("perm",perm);
+                ret.put("permtls",permtls);
+                ret.put("rest",rest);
+                ret.put("resttls",resttls);
+                ret.put("fl",fl);
+                ret.put("fltls",fltls);
+                ret.put("fu",fu);
+                ret.put("futls",futls);
+                return ret;
+            }
+        };
     }
 }

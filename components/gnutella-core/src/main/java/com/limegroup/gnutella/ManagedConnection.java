@@ -1618,6 +1618,8 @@ public class ManagedConnection extends Connection
         data.put("k", isKillable());
         data.put("pp",isPushProxyFor());
         data.put("rhsi", remoteHostSupportsInspections());
+        data.put("tlsc", isTLSCapable());
+        data.put("tlse", isTLSEncoded());
         return data;
     }
 }
