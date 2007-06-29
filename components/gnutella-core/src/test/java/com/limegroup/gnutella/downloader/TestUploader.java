@@ -1048,7 +1048,7 @@ public class TestUploader extends AssertComparisons {
                 
                 return null;
             }
-        });
+        }, true);
 	}
 
 	/**

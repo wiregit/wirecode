@@ -25,7 +25,11 @@ public class AltLocUtils {
      * @param function The closure-like function that each location is passed to.
      */
     public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, 
-                                               Function<AlternateLocation, Void> function) {
+            Function<AlternateLocation, Void> function) {
+        parseAlternateLocations(sha1, locations, allowTLS, function, false);
+    }
+    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, 
+                                               Function<AlternateLocation, Void> function, boolean allowMe) {
         if(locations == null)
             return;
         if(sha1 == null)
@@ -59,7 +63,7 @@ public class AltLocUtils {
                 idx++;
                 
                 assert al.getSHA1Urn().equals(sha1) : "sha1 mismatch!";
-                if (al.isMe())
+                if (al.isMe() && !allowMe) 
                     continue;
                 
                 function.apply(al);
