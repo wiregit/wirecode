@@ -71,7 +71,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      */
     public static IntervalSet createSingletonSet(long lowBound, long highBound) {
         IntervalSet ret = new IntervalSet();
-        ret.add(new Interval(lowBound, highBound));
+        ret.add(Range.createRange(lowBound, highBound));
         return ret;
     }
     
