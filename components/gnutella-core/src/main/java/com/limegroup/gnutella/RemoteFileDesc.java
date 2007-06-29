@@ -506,6 +506,9 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             // erase the map so it's reconstructed with the most recent
             // values upon the first write.
             propertiesMap = null;
+        } else {
+            // very old format, make sure we get the size right
+            longSize = _size;
         }
     }
     
