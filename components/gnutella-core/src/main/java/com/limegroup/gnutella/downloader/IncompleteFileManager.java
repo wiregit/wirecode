@@ -452,7 +452,7 @@ public class IncompleteFileManager implements Serializable {
                 }
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile((int) getCompletedSize(f));
+                    vf = new VerifyingFile(getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                 	continue;
                 }
