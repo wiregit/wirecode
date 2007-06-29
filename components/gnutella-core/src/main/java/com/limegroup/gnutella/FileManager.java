@@ -1513,7 +1513,7 @@ public abstract class FileManager {
     public synchronized void addIncompleteFile(File incompleteFile,
                                                Set<? extends URN> urns,
                                                String name,
-                                               int size,
+                                               long size,
                                                VerifyingFile vf) {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);

@@ -435,7 +435,7 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * Same as connectHTTP(start, stop, supportQueueing, -1)
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing, IOStateObserver observer) {
+    public void connectHTTP(long start, long stop, boolean supportQueueing, IOStateObserver observer) {
         connectHTTP(start, stop, supportQueueing, -1, observer);
     }
     
@@ -1497,7 +1497,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 }
                 
                 // Account for data already in the buffer.
-                long preread = Math.min(left, buffer.position());
+                int preread = (int)Math.min(left, buffer.position());
                 if(preread != 0 && LOG.isDebugEnabled())
                     LOG.debug("Using preread data of: " + preread);
                 

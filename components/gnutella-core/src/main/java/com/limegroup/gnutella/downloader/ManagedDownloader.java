@@ -392,7 +392,7 @@ public class ManagedDownloader extends AbstractDownloader
 
     /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
      *  this is less than corruptFile.length() if there are holes. */
-    private volatile int corruptFileBytes;
+    private volatile long corruptFileBytes;
     /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
      *  no corrupt file. */
     private volatile File corruptFile;
@@ -1180,7 +1180,7 @@ public class ManagedDownloader extends AbstractDownloader
 		// get VerifyingFile
 		commonOutFile = incompleteFileManager.getEntry(incompleteFile);
 		if (commonOutFile == null) {// no entry in incompleteFM
-			int completedSize = (int) IncompleteFileManager.getCompletedSize(incompleteFile);
+			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
 			commonOutFile = new VerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
@@ -1197,7 +1197,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, (int)getContentLength());
+                                               downloadSHA1, getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -1209,7 +1209,7 @@ public class ManagedDownloader extends AbstractDownloader
      * given name, URN & content-length.
      */
     protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
+                                     URN urn, long length) throws IOException {
         return ifm.getFile(name, urn, length);
     }
     
@@ -1246,7 +1246,7 @@ public class ManagedDownloader extends AbstractDownloader
             addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
                     RouterService.getAltlocManager().getPushNoFWT(hash),
                     RouterService.getAltlocManager().getPushFWT(hash),
-                    (int)size);
+                    size);
         }
     }
     
@@ -1257,7 +1257,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void addLocationsToDownload(AlternateLocationCollection<? extends AlternateLocation> direct,
                                         AlternateLocationCollection<? extends AlternateLocation>  push,
                                         AlternateLocationCollection<? extends AlternateLocation>  fwt,
-                                        int size) {
+                                        long size) {
         List<RemoteFileDesc> locs =
             new ArrayList<RemoteFileDesc>(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
 
@@ -1433,7 +1433,7 @@ public class ManagedDownloader extends AbstractDownloader
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            int ourLength = (int)getContentLength();
+            long ourLength = getContentLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
@@ -1540,7 +1540,7 @@ public class ManagedDownloader extends AbstractDownloader
             return;
         }
         
-        addDownload(loc.createRemoteFileDesc((int)contentLength), false);
+        addDownload(loc.createRemoteFileDesc(contentLength), false);
     }
     
     /** 
@@ -2372,7 +2372,7 @@ public class ManagedDownloader extends AbstractDownloader
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incFile, String name) {
-        corruptFileBytes= (int) getAmountRead();        
+        corruptFileBytes= getAmountRead();        
         incompleteFileManager.removeEntry(incFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same

@@ -206,7 +206,7 @@ public class VerifyingFile {
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    public VerifyingFile(int completedSize) {
+    public VerifyingFile(long completedSize) {
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();

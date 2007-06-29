@@ -592,7 +592,7 @@ public class IncompleteFileManager implements Serializable {
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),
-            (int)getCompletedSize(incompleteFile),
+            getCompletedSize(incompleteFile),
             getEntry(incompleteFile)
         );
     }
