@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.limewire.util.FileUtils;
-
 /**
  * Rebuilds the language files, based on the English one.
  */
@@ -111,7 +109,7 @@ class LanguageUpdater {
         BufferedReader reader;
         PrintWriter printer;
         try {
-            temp = FileUtils.createTempFile("TEMP", info.getCode(), lib);
+            temp = File.createTempFile("TEMP", info.getCode(), lib);
             reader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(f), info.isUTF8() ? "UTF-8"
                             : "ISO-8859-1"));
