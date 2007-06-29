@@ -149,20 +149,20 @@ public class IntervalSet implements Iterable<Range>, Serializable{
                 if (interval.getHigh() <= high) {
                     if (interval.getLow() < low)
                         // interval.low < low <= interval.high <= high
-                        lower = new Interval(interval.getLow(), low - 1);
+                        lower = Range.createRange(interval.getLow(), low - 1);
                     // else 
                     // low <= interval.low <= interval.high <= high
                     // do nothing, the interval has already been removed
                         
                 } else if (interval.getLow() >= low) {
                     // low <= interval.low <= high < interval.high
-                    higher = new Interval(high + 1, interval.getHigh());
+                    higher = Range.createRange(high + 1, interval.getHigh());
                     // safe to break here because intervals is sorted.
                     break;
                 } else {
                     // interval.low < low <= high < interval.high
-                    lower = new Interval(interval.getLow(), low - 1);
-                    higher = new Interval(high + 1, interval.getHigh());
+                    lower = Range.createRange(interval.getLow(), low - 1);
+                    higher = Range.createRange(high + 1, interval.getHigh());
                     // we can break here because no other intervals will
                     // overlap with deleteMe
                     break;
@@ -325,7 +325,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             }
             //case c:
             if(interval.getLow() <= high && interval.getHigh() > high) {
-                overlapBlocks.add(new Interval(Math.max(interval.getLow(),low),
+                overlapBlocks.add(Range.createRange(Math.max(interval.getLow(),low),
                                                high));
             }
             //Note: There is one condition under which case b and c are both
