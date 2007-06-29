@@ -970,12 +970,12 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * Reads the Content-Length.  Invalid Content-Lengths are set to 0.
      */
-    public static int readContentLength(final String value) {
+    public static long readContentLength(final String value) {
         if(value == null)
             return 0;
         else {
             try {
-                return Integer.parseInt(value.trim());
+                return Long.parseLong(value.trim());
             } catch(NumberFormatException nfe) {
                 return 0;
             }
