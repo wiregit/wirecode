@@ -380,8 +380,8 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
 	    try {
             return (String)PrivilegedAccessor.invokeMethod(
                 IncompleteFileManager.class, "tempName", 
-                new Object[] {s, new Integer(one), new Integer(two)},
-                new Class[] {String.class, Integer.TYPE, Integer.TYPE});
+                new Object[] {s, new Long(one), new Integer(two)},
+                new Class[] {String.class, Long.TYPE, Integer.TYPE});
         } catch(Exception e) {
             if ( e.getCause() != null ) 
                 throw e.getCause();
