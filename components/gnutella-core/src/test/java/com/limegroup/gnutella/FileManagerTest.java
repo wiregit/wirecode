@@ -355,7 +355,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
-        assertEquals("unexpected fman size", MAX_FILE_SIZE, fman.getSize());
+        assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
