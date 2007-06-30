@@ -519,16 +519,18 @@ public class ManagedConnection extends Connection
         return (byte)hopsFlowMax;
     }
     
-    /** Returns true iff this connection is a shielded leaf connection, and has 
-     * signalled that he is currently busy (full on upload slots).  If so, we will 
-     * not include his QRT table in last hop QRT tables we send out (if we are an 
-     * Ultrapeer) 
+    /** 
+     * Returns true iff this connection is a shielded leaf connection, and has 
+     * signalled that it does not want to receive routed queries (no upload slots or some other reason).  
+     * If so, we will not include its QRT table in last hop QRT tables we send out 
+     * (if we are an Ultrapeer) 
      * @return true iff this connection is a busy leaf (don't include his QRT table)
      */
     public boolean isBusyLeaf(){
-        boolean busy=isSupernodeClientConnection() && (getHopsFlowMax()==0);
-        
-        return busy;
+        if (!isSupernodeClientConnection())
+            return false;
+        int hfm = getHopsFlowMax();
+        return hfm >=0 && hfm < 3;
     }
     
     /**
