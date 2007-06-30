@@ -1176,6 +1176,8 @@ PLAYLIST_DELETE_BUTTON_TIP=從播放清單中刪除選取的檔案
 #### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
 ###$ PLAYLIST_FILE_DESCRIPTION=播放列表 文件 (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=播放清單檔案 (*.m3u)
+#### PLAYLIST_OVERWRITE_QUESTION=You have some songs in the playlist.  Would you like to clear them and start a new playlist?
+#? PLAYLIST_OVERWRITE_QUESTION=
 
 ################################################################################
 # Key/value pairs for the integrated media player.
@@ -2868,6 +2870,8 @@ ERROR_INTERNAL_SERVLET_FAILED=LimeWire 無法連線到錯誤回報伺服器，�
 ################################################################################
 # Key/Value pairs for error messages.
 ################################################################################
+#### ERROR_PREFERENCES_PERMISSIONS_FAILED=LimeWire could not create a temporary preferences directory.\n\nThis is generally caused by a lack of permissions.  Please make sure that LimeWire (and you) have access to create files/folders on your computer.  If the problem persists, please visit www.limewire.com and click the 'Support' link.\n\nLimeWire will now exit.  Thank You.
+#? ERROR_PREFERENCES_PERMISSIONS_FAILED=
 #### ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=LimeWire was unable to create your settings directory and is using a temporary directory.  Your settings may be deleted when you close LimeWire.
 #? ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
@@ -3734,6 +3738,16 @@ OPTIONS_POPUPS_TITLE=彈出視窗
 OPTIONS_POPUPS_LABEL=如果選擇「不再顯示這個訊息」或「總是這樣回答」，則重新顯示這個訊息。
 #### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=還原預設值:
+
+################################################################################
+# Key/value pairs for asking whether or not to display notifications.
+################################################################################
+#### OPTIONS_NOTIFICATIONS_TITLE=Notifications
+#? OPTIONS_NOTIFICATIONS_TITLE=
+#### OPTIONS_NOTIFICATIONS_LABEL=LimeWire can display popups to notify you when certain things happen, such as a download completing.
+#? OPTIONS_NOTIFICATIONS_LABEL=
+#### OPTIONS_SHOW_NOTIFICATIONS_LABEL=Show Notifications:
+#? OPTIONS_SHOW_NOTIFICATIONS_LABEL=
 
 ################################################################################
 # Key/value pairs for default action when trying to download existing file.
