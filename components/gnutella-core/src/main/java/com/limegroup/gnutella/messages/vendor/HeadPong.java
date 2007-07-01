@@ -493,7 +493,7 @@ public class HeadPong extends VendorMessage {
                 // more ranges available. (but don't increment size, since that
                 // was already done above.)
                 ggep.put(QUEUE, BUSY);
-            } else if(size + ranges.length() + 6 <= PACKET_SIZE) {
+            } else if(size + ranges.length() + 7 <= PACKET_SIZE) { //3 for "R" and 4 for "R5"
                 if (ranges.ints.length > 0) {
                     ggep.put(RANGES, ranges.ints);
                     size += ggep.getHeaderOverhead(RANGES);
