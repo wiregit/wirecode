@@ -48,11 +48,11 @@ public class BTRequest extends BTMessage {
 			throw new BadBTMessageException(
 					"invalid piece number in request message: " + pieceNum);
 
-		int offset = payload.getInt();
+		long offset = payload.getInt();
 		if (offset < 0)
 			throw new BadBTMessageException("negative offset in mesage");
 
-		int length = payload.getInt();
+		long length = payload.getInt(); 
 		if (length <= 0 || length > MAX_REQUEST_SIZE)
 			throw new BadBTMessageException(
 					"invalid requested length in request message: " + length);

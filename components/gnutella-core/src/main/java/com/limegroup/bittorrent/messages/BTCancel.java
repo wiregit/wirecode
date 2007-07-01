@@ -44,9 +44,9 @@ public class BTCancel extends BTMessage {
 			throw new BadBTMessageException(
 					"invalid piece number in cancel message: " + pieceNum);
 
-		int offset = payload.getInt();
+		long offset = payload.getInt();
 
-		int length = payload.getInt();
+		long length = payload.getInt();
 		
 		if (length == 0)
 			throw new BadBTMessageException("0 length in cancel message " + pieceNum);
