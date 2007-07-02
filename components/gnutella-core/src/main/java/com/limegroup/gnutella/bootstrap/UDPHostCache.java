@@ -170,7 +170,8 @@ public class UDPHostCache {
                 continue;
                 
             // if it was private (couldn't look up too) drop it.
-            if(NetworkUtils.isPrivateAddress(next.getAddress())) {
+            if(!NetworkUtils.isValidExternalIpPort(next) || 
+                    NetworkUtils.isPrivateAddress(next.getAddress())) {
                 invalidHosts.add(next);
                 continue;
             }
