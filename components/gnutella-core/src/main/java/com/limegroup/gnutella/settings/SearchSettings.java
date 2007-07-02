@@ -373,4 +373,12 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createRemoteStringArraySetting("LIME_QRP_ENTRIES", 
                 new String[]{"limewire", "pro", "limewirepro"}, "SearchSettings.limeQRPEntries");
     
+    public static final StringArraySetting SEARCH_WARNING = 
+        FACTORY.createRemoteStringArraySetting("SEARCH_BANNER",
+                new String[]{
+                "Only search results with a {0} are official LimeWire communications.",
+                "http://results.limewire.com/officialresults",
+                "0.1f"},
+        "ResultPanel.SearchBanner");
+    
 }
