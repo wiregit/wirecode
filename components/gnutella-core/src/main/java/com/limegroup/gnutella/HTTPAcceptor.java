@@ -30,6 +30,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -120,6 +121,8 @@ public class HTTPAcceptor {
         this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 50);
         this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
                 LimeWireUtils.getHttpServer());
+        this.params.setParameter(HttpProtocolParams.HTTP_ELEMENT_CHARSET,
+                HTTP.ISO_8859_1);
         
         this.connectionListener = new ConnectionEventListener();
 
