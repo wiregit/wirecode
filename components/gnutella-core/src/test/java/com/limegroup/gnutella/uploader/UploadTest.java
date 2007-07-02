@@ -313,6 +313,22 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
+    
+    public void testHTTP10DownloadHead() throws Exception {
+        HeadMethod method = new HeadMethod(fileNameUrl);
+        method.setHttp11(false);
+        method.addRequestHeader("Range", "bytes 2-5");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
+            assertNotNull(method.getResponseHeader("Content-range"));
+            assertEquals("bytes 2-5/26", method.getResponseHeader(
+                    "Content-range").getValue());
+            assertEquals(null, method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
 
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
