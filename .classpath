@@ -33,7 +33,7 @@
 	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar" sourcepath="lib/sources/commons-httpclient-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-pool.jar"/>
