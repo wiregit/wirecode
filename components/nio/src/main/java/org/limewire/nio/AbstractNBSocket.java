@@ -491,12 +491,16 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             });
             
-            try {
-                future.get(); // Wait for the future to complete.
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            } catch (ExecutionException e) {
-                throw new IllegalStateException(e);
+            // Make sure that an interruption doesn't stop this from waiting to complete.
+            while(true) {
+                try {
+                    future.get(); // Wait for the future to complete.
+                    break;
+                } catch (InterruptedException e) {
+                    continue;
+                } catch (ExecutionException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
         
