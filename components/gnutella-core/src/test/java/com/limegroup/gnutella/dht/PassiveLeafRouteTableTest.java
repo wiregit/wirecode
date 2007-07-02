@@ -15,6 +15,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
 
+@SuppressWarnings("null")
 public class PassiveLeafRouteTableTest extends DHTTestCase {
     
     public PassiveLeafRouteTableTest(String name) {

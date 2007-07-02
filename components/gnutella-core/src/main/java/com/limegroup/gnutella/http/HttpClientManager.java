@@ -106,6 +106,7 @@ public class HttpClientManager {
         if(!"http".equals(scheme.toLowerCase()))
             throw new IOException("only support no NIO with http");
         Protocol http = new Protocol("http", new DefaultProtocolSocketFactory(), 80);
+        assert hc != null;
         hc.setHost(hc.getHost(), hc.getPort(), http);
         client.executeMethod(method);
     }

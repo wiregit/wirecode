@@ -209,8 +209,8 @@ public final class RouteTable  {
 													  ReplyHandler replyHandler) {
         repOk();
         purge();
-        Assert.that(replyHandler != null);
-        Assert.that(guid!=null, "Null GUID in tryToRouteReply");
+        assert replyHandler != null;
+        assert guid!=null : "Null GUID in tryToRouteReply";
 
         if (! replyHandler.isOpen())
             return null;

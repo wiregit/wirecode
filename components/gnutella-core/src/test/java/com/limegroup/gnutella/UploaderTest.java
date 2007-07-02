@@ -39,6 +39,7 @@ import com.limegroup.gnutella.util.PipedSocketFactory;
 /*
  * TODO rename this class to HTTPUploadManagerQueueingTest
  */
+@SuppressWarnings("null")
 public class UploaderTest extends BaseTestCase {
 
     //private static RouterService rs;

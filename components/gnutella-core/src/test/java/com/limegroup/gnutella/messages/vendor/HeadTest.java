@@ -49,7 +49,7 @@ import de.vdheide.mp3.ByteOrder;
 /**
  * this class tests the handling of udp head requests and responses.
  */
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "null"})
 public class HeadTest extends LimeTestCase {
 
 	/**

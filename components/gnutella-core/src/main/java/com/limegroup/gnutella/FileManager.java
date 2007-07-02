@@ -1461,10 +1461,9 @@ public abstract class FileManager {
         //Remove references to this from directory listing
         File parent = f.getParentFile();
         IntSet siblings = _sharedDirectories.get(parent);
-        Assert.that(siblings != null,
-            "Removed file's directory \""+parent+"\" not in "+_sharedDirectories);
+        assert siblings != null : "Removed file's directory \""+parent+"\" not in "+_sharedDirectories;
         boolean removed = siblings.remove(i);
-        Assert.that(removed, "File "+i+" not found in "+siblings);
+        assert removed : "File "+i+" not found in "+siblings;
 
         // files that are forcibly shared over the network aren't counted
         if(isForcedShareDirectory(parent)) {
@@ -1623,7 +1622,7 @@ public abstract class FileManager {
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
             IntSet indices=_urnMap.get(urn);
-            Assert.that(indices!=null, "Invariant broken");
+            assert indices!=null : "Invariant broken";
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
@@ -2119,10 +2118,7 @@ public abstract class FileManager {
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
             FileDesc desc = _files.get(i);
-            if(desc == null)
-                Assert.that(false, 
-                            "unexpected null in FileManager for query:\n"+
-                            request);
+            assert desc != null : "unexpected null in FileManager for query:\n"+ request;
 
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;

@@ -58,7 +58,7 @@ public class OGGMetaData extends AudioMetaData{
 				try{vfile.close();}catch(IOException ignored){}
 		}
 		
-		
+		assert vfile != null;
 		setBitrate(vfile.bitrate(-1)/1024);
 		setLength((int)vfile.time_total(-1));
 		

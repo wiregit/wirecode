@@ -239,6 +239,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
 
+        assert fd != null;
+        
         response
                 .addHeader(HTTPHeaderName.DATE.create(HTTPUtils.getDateValue()));
         response.addHeader(HTTPHeaderName.CONTENT_DISPOSITION
@@ -259,19 +261,17 @@ public class FileRequestHandler implements HttpRequestHandler {
         HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
         HTTPHeaderUtils.addProxyHeader(response);
 
-        if (fd != null) {
-            URN urn = fd.getSHA1Urn();
-            if (uploader.isFirstReply()) {
-                // write the creation time if this is the first reply.
-                // if this is just a continuation, we don't need to send
-                // this information again.
-                // it's possible t do that because we don't use the same
-                // uploader for different files
-                CreationTimeCache cache = CreationTimeCache.instance();
-                if (cache.getCreationTime(urn) != null) {
-                    response.addHeader(HTTPHeaderName.CREATION_TIME
-                            .create(cache.getCreationTime(urn).toString()));
-                }
+        URN urn = fd.getSHA1Urn();
+        if (uploader.isFirstReply()) {
+            // write the creation time if this is the first reply.
+            // if this is just a continuation, we don't need to send
+            // this information again.
+            // it's possible t do that because we don't use the same
+            // uploader for different files
+            CreationTimeCache cache = CreationTimeCache.instance();
+            if (cache.getCreationTime(urn) != null) {
+                response.addHeader(HTTPHeaderName.CREATION_TIME
+                        .create(cache.getCreationTime(urn).toString()));
             }
         }
 

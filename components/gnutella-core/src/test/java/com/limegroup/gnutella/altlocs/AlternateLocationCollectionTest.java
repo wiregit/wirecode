@@ -18,7 +18,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "null"})
 public final class AlternateLocationCollectionTest extends LimeTestCase {
 
 	private Set _alternateLocations;

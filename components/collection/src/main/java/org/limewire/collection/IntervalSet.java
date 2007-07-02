@@ -118,6 +118,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             removeImpl(higher);
             addImpl(Range.createRange(low, higher.getHigh()));
         } else /*if (lower!=null)*/ {
+            assert lower != null;
             //d) Join with lower
             removeImpl(lower);
             addImpl(Range.createRange(lower.getLow(), high));

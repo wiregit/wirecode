@@ -13,6 +13,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.security.TigerTree;
 
+@SuppressWarnings("null")
 public class AltLocValueTest extends DHTTestCase {
     
     public AltLocValueTest(String name) {

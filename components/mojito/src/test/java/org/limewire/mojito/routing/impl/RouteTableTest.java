@@ -34,6 +34,7 @@ import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.CommonUtils;
 
+@SuppressWarnings("null")
 public class RouteTableTest extends MojitoTestCase {
     
     /*static {

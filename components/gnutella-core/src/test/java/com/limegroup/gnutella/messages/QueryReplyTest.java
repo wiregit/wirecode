@@ -60,7 +60,7 @@ import com.limegroup.gnutella.stubs.SimpleFileManager;
 /**
  * This class tests the QueryReply class.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "null"})
 public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static final byte[] IP = new byte[] {1, 1, 1, 1};

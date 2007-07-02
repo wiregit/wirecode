@@ -51,7 +51,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
 
-
+@SuppressWarnings("null")
 public class CacheForwardTest extends MojitoTestCase {
     
     private static final int PORT = 3000;

@@ -1033,9 +1033,9 @@ public class QueryReply extends Message implements SecureMessage {
                 //Must use ISO encoding since characters are more than two
                 //bytes on other platforms.
                 vendorT=new String(_payload, i, 4, "ISO-8859-1");
-                Assert.that(vendorT.length()==4, "Vendor length wrong.  Wrong character encoding?");
+                assert vendorT.length()==4 : "Vendor length wrong.  Wrong character encoding?";
             } catch (UnsupportedEncodingException e) {
-                Assert.that(false, "No support for ISO-8859-1 encoding");
+                throw new IllegalStateException("No support for ISO-8859-1 encoding");
             }
             i+=4;
 

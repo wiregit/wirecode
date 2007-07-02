@@ -193,7 +193,7 @@ public class Response {
 		else 
 			this.name = name;
 		
-		isMetaFile = name.toLowerCase().endsWith(".torrent");
+		isMetaFile = this.name.toLowerCase().endsWith(".torrent");
 
         byte[] temp = null;
         try {
@@ -321,10 +321,10 @@ public class Response {
 		
 		String first  = tok.nextToken();
 		String second = tok.nextToken();
-		if (first != null)
-		    first = first.toLowerCase();
-		if (second != null)
-		    second = second.toLowerCase();
+		assert first != null;
+		assert second != null;
+	    first = first.toLowerCase();
+	    second = second.toLowerCase();
 		String length="";
 		String bitrate="";
 		boolean bearShare1 = false;        
@@ -394,7 +394,7 @@ public class Response {
                 // Add the extension for URNs, if any.
                 for(Iterator<? extends URN> iter = urns.iterator(); iter.hasNext(); ) {
     				URN urn = iter.next();
-                    Assert.that(urn!=null, "Null URN");
+                    assert urn!=null : "Null URN";
     				baos.write(urn.toString().getBytes());
     				// If there's another URN, add the separator.
     				if (iter.hasNext()) {

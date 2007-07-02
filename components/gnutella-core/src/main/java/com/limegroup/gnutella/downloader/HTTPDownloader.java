@@ -601,8 +601,10 @@ public class HTTPDownloader implements BandwidthTracker {
                         }
                     } else if(loc instanceof DirectAltLoc) {
                         IpPort host = ((DirectAltLoc)loc).getHost();
-                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable())
+                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable()) {
+                            assert bn != null;
                             bn.set(valuesToWrite.size());
+                        }
                     }
                     valuesToWrite.add(loc);
                     stored.add(loc);

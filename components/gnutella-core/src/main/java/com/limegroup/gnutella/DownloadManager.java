@@ -768,6 +768,9 @@ public class DownloadManager implements BandwidthTracker {
     	}
     	
     	String name = IncompleteFileManager.getCompletedName(torrentFolder);
+        if(infohash == null)
+            throw new CantResumeException(name);
+    	
     	BTMetaInfo info = null;
     	try {
     		Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());

@@ -55,6 +55,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
+@SuppressWarnings("null")
 public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;

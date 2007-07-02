@@ -380,10 +380,10 @@ public class GUID implements Comparable<GUID> {
         if(o == this) {
             return true;
         } else if(o instanceof GUID) {
-            Assert.that(o!=null, "Null o in GUID.equals");
+            assert o != null : "Null o in GUID.equals";
             byte[] bytes2=((GUID)o).bytes();
-            Assert.that(bytes!=null, "Null bytes in GUID.equals");
-            Assert.that(bytes2!=null, "Null bytes2 in GUID.equals");
+            assert bytes!=null : "Null bytes in GUID.equals";
+            assert bytes2!=null : "Null bytes2 in GUID.equals";
             for (int i=0; i<SZ; i++)
                 if (bytes[i]!=bytes2[i])
                     return false;

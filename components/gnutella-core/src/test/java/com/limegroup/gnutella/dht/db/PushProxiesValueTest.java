@@ -16,6 +16,7 @@ import org.limewire.mojito.routing.Version;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.dht.DHTTestCase;
 
+@SuppressWarnings("null")
 public class PushProxiesValueTest extends DHTTestCase {
     
     public PushProxiesValueTest(String name) {

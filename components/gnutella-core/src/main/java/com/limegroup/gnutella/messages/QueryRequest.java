@@ -1241,6 +1241,7 @@ public class QueryRequest extends Message implements Serializable{
 			
             byte[] richQueryBytes = null;
             if(XML_DOC != null) {
+                assert richQuery != null;
                 richQueryBytes = richQuery.getBytes("UTF-8");
 			}
             

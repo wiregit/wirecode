@@ -1940,7 +1940,7 @@ public abstract class MessageRouter {
             List<ManagedConnection> list=_manager.getInitializedClientConnections();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = list.get(i);
-                Assert.that(c != null, "null c.");
+                assert c != null : "null c.";
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
                     c.handlePingReply(reply, handler);
                 }

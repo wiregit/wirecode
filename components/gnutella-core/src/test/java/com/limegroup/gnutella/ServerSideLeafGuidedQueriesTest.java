@@ -26,6 +26,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  *                              |
  *                             LEAF
  */
+@SuppressWarnings("null")
 public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
 
     private static int TIMEOUT = 300;

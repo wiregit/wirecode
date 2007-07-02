@@ -212,7 +212,7 @@ public class LimeXMLUtils {
         for(Map.Entry<String, String> entry : queryNameValues) {
             String currFieldName = entry.getKey();
             String queryValue = entry.getValue();
-            Assert.that(queryValue != null, "null value");
+            assert queryValue != null : "null value";
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
@@ -878,7 +878,7 @@ public class LimeXMLUtils {
             try {
                 md = MessageDigest.getInstance("SHA");
             } catch(NoSuchAlgorithmException nsae) {
-                Assert.that(false, "no sha algorithm.");
+                throw new IllegalStateException(nsae);
             }
 
             long fileLength = toHash.length();            
