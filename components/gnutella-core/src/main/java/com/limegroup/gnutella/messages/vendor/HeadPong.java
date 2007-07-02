@@ -523,7 +523,7 @@ public class HeadPong extends VendorMessage {
         }
         
         // If it went over, we screwed up somewhere.
-        assert size <= PACKET_SIZE;
+        assert size <= PACKET_SIZE : "size is too big "+size+" vs "+PACKET_SIZE;
         
         // Here we fudge a bit -- possibly going over PACKET_SIZE.
         BitNumbers bn = bnRef.get();
@@ -871,7 +871,7 @@ public class HeadPong extends VendorMessage {
 		IntervalSet.ByteIntervals ranges = deriveRanges(desc);
 
         // this is a non-ggep pong so we should not be serving long files.
-        assert  ranges.longs.length == 0;
+        assert  ranges.longs.length == 0 : "long ranges in legacy pong";
         
 		//write the ranges only if they will fit in the packet
 		if (caos.getAmountWritten()+2 + ranges.ints.length <= PACKET_SIZE) {
