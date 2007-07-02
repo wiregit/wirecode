@@ -2470,11 +2470,6 @@ public abstract class MessageRouter {
 				if(!c.isUltrapeerQueryRoutingConnection()) { 
 					continue;
 				}
-                // if the connection has low hops flow, it won't get any routed
-                // queries anyway
-                int chm = c.getHopsFlowMax();
-                if (c.isSupernodeClientConnection() && chm >= 0 && chm < 3)
-                    continue;
 			} 				
 			// otherwise, I'm a leaf, and don't send routing
 			// tables if it's not a connection to an Ultrapeer

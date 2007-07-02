@@ -1682,7 +1682,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         public void writeScheduled() {
             LOG.debug("Delayed write scheduled");
-            NIODispatcher.instance().invokeLater(this);
+            NIODispatcher.instance().invokeReallyLater(this);
         }
         
         public void run() {
