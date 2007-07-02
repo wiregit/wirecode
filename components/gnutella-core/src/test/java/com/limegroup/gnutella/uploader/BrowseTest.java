@@ -113,6 +113,18 @@ public class BrowseTest extends LimeTestCase {
     }
 
     public void testBrowse() throws Exception {
+        browse();
+    }
+    
+    public void testBrowseWithTLS() throws Exception {
+        hostConfig = new HostConfiguration();
+        hostConfig.setHost("localhost", PORT, "tls");
+        client.setHostConfiguration(hostConfig);
+        
+        browse();
+    }
+
+    private void browse() throws Exception {
         GetMethod method = new GetMethod("/");
         method.addRequestHeader("Accept", "application/x-gnutella-packets");
         try {
@@ -204,6 +216,22 @@ public class BrowseTest extends LimeTestCase {
         try {
             int response = client.executeMethod(method);
             assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+            assertNull(method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testBrowseHeadWithTLS() throws Exception {
+        hostConfig = new HostConfiguration();
+        hostConfig.setHost("localhost", PORT, "tls");
+        client.setHostConfiguration(hostConfig);
+
+        HeadMethod method = new HeadMethod("/");
+        method.addRequestHeader("Accept", "application/x-gnutella-packets");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
             assertNull(method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
