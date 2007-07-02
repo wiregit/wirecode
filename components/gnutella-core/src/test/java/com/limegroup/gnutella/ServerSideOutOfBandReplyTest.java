@@ -130,7 +130,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         if (UDP_ACCESS == null)
             UDP_ACCESS = new DatagramSocket(10000);
             
-        drainAll();
+        drain();
 
         QueryRequest query = 
             QueryRequest.createOutOfBandQuery("txt",
@@ -361,6 +361,16 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setValue(0);
         v2disabled = false;
     }
+    private static void drain() throws Exception {
+        drainAll();
+        try {
+            UDP_ACCESS.setSoTimeout(10);
+            while(true) {
+                DatagramPacket pack = new DatagramPacket(new byte[1000],1000);
+                UDP_ACCESS.receive(pack);
+            }
+        } catch (IOException iox){}
+    }
     /**
      * Test server still handles OOB protocol version 2 for old clients.
      * 
@@ -370,8 +380,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
      */
     public void testServerHandlesOOBVersion2() throws Exception {
         
-        drainAll();
-        
+        drain();
         DatagramPacket pack = null;
 
         // install extra message parse since old reply number messages are discarded
@@ -463,7 +472,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
      *  the OOB mask in the minspeed field and the "SO" key in the GGEP.
      */
     public void testSORequestAndMinSpeedOOBMask() throws Exception {
-        drainAll();
+        drain();
         
         byte[] rawMessage = FileUtils.readFileFully(_fileWithSOFlag);
         // encode this host's address into message payload
@@ -545,7 +554,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
      * messages with that version. 
      */
     public void testSORequestNoMinSpeedOOBMask() throws Exception {
-        drainAll();
+        drain();
         
         byte[] rawMessage = FileUtils.readFileFully(_fileWithSO);
         // enocode
@@ -628,7 +637,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     public void testPiecemealOutOfBandResults() throws Exception {
         DatagramPacket pack = null;
 
-        drainAll();
+        drain();
 
         QueryRequest query = 
             QueryRequest.createOutOfBandQuery("txt",
@@ -732,7 +741,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     public void testSimpleACKOutOfBandResults() throws Exception {
         DatagramPacket pack = null;
 
-        drainAll();
+        drain();
 
         QueryRequest query = 
             QueryRequest.createOutOfBandQuery("txt",
@@ -803,7 +812,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     // tests that MessageRouter expires GUIDBundles/Replies in a timely fashion
     // this test requires solicited support
     public void testExpirer() throws Exception {
-        drainAll();
+        drain();
         DatagramPacket pack = null;
 
         // THIS TESTS ASSUMES SOLICITED SUPPORT - set up in a previous test
@@ -878,7 +887,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
      */
     public void testMaximumOutOfBandResultsBeingStored() throws Exception {
         DatagramPacket pack = null;
-        drainAll();
+        drain();
         
         // now lets test that if we send a LOT of out-of-band queries,
         // we get a lot of ReplyNumberVMs but at the 251st we don't get a
@@ -967,7 +976,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     // make sure that the Ultrapeer discards out-of-band query requests that
     // have an improper address associated with it
     public void testIdentity() throws Exception {
-        drainAll();
+        drain();
 
         byte[] crapIP = {(byte)192,(byte)168,(byte)1,(byte)1};
         QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
@@ -1003,7 +1012,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     // a node should NOT send a reply out of band via UDP if it is not
     // far away (low hop)
     public void testLowHopOutOfBandRequest() throws Exception {
-        drainAll();
+        drain();
 
         byte[] meIP = {(byte)127,(byte)0,(byte)0,(byte)1};
         QueryRequest query = 
