@@ -14,7 +14,9 @@ import junit.framework.Test;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
 import org.limewire.util.CommonUtils;
 
@@ -151,6 +153,58 @@ public class BrowseTest extends LimeTestCase {
             }
             assertTrue("Browse returned more results than shared: " + files,
                     files.isEmpty());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testBrowseHead() throws Exception {
+        HeadMethod method = new HeadMethod("/");
+        method.addRequestHeader("Accept", "application/x-gnutella-packets");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+            assertNull(method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testBrowseNoAcceptHeader() throws Exception {
+        HttpMethodBase method = new GetMethod("/");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+        } finally {
+            method.releaseConnection();
+        }
+        
+        method = new HeadMethod("/");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+            assertNull(method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testBrowseNoAcceptHeaderHttp10() throws Exception {
+        HttpMethodBase method = new GetMethod("/");
+        method.setHttp11(false);
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+        } finally {
+            method.releaseConnection();
+        }
+        
+        method = new HeadMethod("/");
+        method.setHttp11(false);
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+            assertNull(method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
         }
