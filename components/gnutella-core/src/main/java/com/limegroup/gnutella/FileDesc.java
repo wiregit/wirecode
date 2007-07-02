@@ -18,6 +18,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 
 /**
@@ -132,6 +133,7 @@ public class FileDesc implements FileDetails, StringLookup {
         _name = I18NConvert.instance().compose(FILE.getName());
         _path = FILE.getAbsolutePath();
         _size = FILE.length();
+        assert _size >= 0 && _size <= MAX_FILE_SIZE : "invalid size "+_size+" of file "+FILE;
         _modTime = FILE.lastModified();
         URNS = Collections.unmodifiableSet(urns);
 		SHA1_URN = extractSHA1();
