@@ -114,21 +114,24 @@ public class NIOSocket extends AbstractNBSocket {
         return remoteSocketAddress;
     }
     
-    /**
-     * Retrieves the host this is connected to. The separate variable for storage is necessary because Sockets created
-     * with SocketChannel.open() return null when there's no connection.
-     */
     @Override
     public InetAddress getInetAddress() {
-        return ((InetSocketAddress)remoteSocketAddress).getAddress();
+        //The separate variable for storage is necessary because Sockets created
+        //with SocketChannel.open() return null when there's no connection.
+        if(remoteSocketAddress != null)
+            return ((InetSocketAddress)remoteSocketAddress).getAddress();
+        else
+            return null;
     }
     
-    /**
-     * Returns the port this socket is connecting or connected to.
-     */
     @Override
     public int getPort() {
-        return ((InetSocketAddress)remoteSocketAddress).getPort();
+        //The separate variable for storage is necessary because Sockets created
+        //with SocketChannel.open() return null when there's no connection.
+        if(remoteSocketAddress != null)
+            return ((InetSocketAddress)remoteSocketAddress).getPort();
+        else
+            return 0;
     }
 
     /** Constructs an InterestReadChannel adapter around the SocketChannel. */
