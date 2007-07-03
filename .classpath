@@ -54,7 +54,6 @@
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
 	<classpathentry kind="lib" path="tests/lib/junit.jar"/>
@@ -66,5 +65,7 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jakarta-httpcore.jar"/>
+	<classpathentry kind="var" path="JRE_LIB" sourcepath="/JDK_SRC"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JDK"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

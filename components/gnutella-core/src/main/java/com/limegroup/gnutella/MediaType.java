@@ -36,6 +36,7 @@ public class MediaType implements Serializable {
     public static final String SCHEMA_AUDIO = "audio";
     public static final String SCHEMA_VIDEO = "video";
     public static final String SCHEMA_IMAGES = "image";
+    public static final String SCHEMA_STORE = "store";
     
     // These are used as resource keys to retreive descriptions in the GUI
     public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
@@ -44,6 +45,7 @@ public class MediaType implements Serializable {
     public static final String AUDIO = "MEDIA_AUDIO";
     public static final String VIDEO = "MEDIA_VIDEO";
     public static final String IMAGES = "MEDIA_IMAGES";
+    public static final String STORE = "MEDIA_STORE";
 
     /**
      * Type for 'any file'
@@ -161,6 +163,17 @@ public class MediaType implements Serializable {
                 "pbm", "pnm", "ppm", "xbm", "xpm", "xwd",
                 "sgi", "fax", "rgb", "ras"
             });
+    
+    /**
+     * Type for 'store'
+     */
+    private static final MediaType TYPE_STORE =
+        new MediaType(SCHEMA_STORE, STORE,
+            new String[] {
+                "mp3",
+            });
+    
+    
         
     /**
      * All media types.
@@ -391,6 +404,13 @@ public class MediaType implements Serializable {
      */
     public static MediaType getProgramMediaType() {
         return TYPE_PROGRAMS;
+    }
+    
+    /**
+     * Retrieves the store  media type.
+     */
+    public static MediaType getStoreType() {
+        return TYPE_STORE;
     }
 
     /** @return a MediaType.Aggregator to use for your query.  Null is a
