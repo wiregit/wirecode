@@ -136,6 +136,11 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * Disk controller for performing the reads and writes.
 	 */
 	private final DiskController<TorrentFile> diskController;
+    
+    /** 
+     * the last continuous offset in the torrent file that has been verified.
+     */
+    private volatile long lastVerifiedOffset;
 
 	/**
 	 * constructs instance of this
@@ -278,6 +283,15 @@ class VerifyingFolder implements TorrentDiskManager {
 			verified = context.getFullBitField();
 			missing = new NotView(verified);
 		}
+        
+        // calculate the last verified offset here rather than on the
+        // gui thread if single-file torrent.
+        if (context.getFileSystem().getFiles().size() != 1)
+            return;
+        int i = 0;
+        while(verifiedBlocks.get(i)) 
+            i++;
+        lastVerifiedOffset = Math.min(context.getFileSystem().getTotalSize(), i * getPieceSize(0));
 	}
 	
 	private boolean verifyQuick(int pieceNum) throws IOException {
@@ -883,6 +897,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		return interesting.nextSetBit(0) > -1;
 	}
 	
+    public long getLastVerifiedOffset() {
+        return lastVerifiedOffset;
+    }
+    
 	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
 		
 		private static final long serialVersionUID = 4006274480019024111L;

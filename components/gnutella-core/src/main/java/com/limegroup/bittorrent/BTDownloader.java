@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -126,7 +127,8 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public boolean isLaunchable() {
-		return fileSystem.getFiles().size() == 1 && _torrent.isComplete();
+		return fileSystem.getFiles().size() == 1 && 
+        context.getDiskManager().getLastVerifiedOffset() > 0;
 	}
 	
     public boolean isResumable() {
@@ -151,7 +153,18 @@ public class BTDownloader extends AbstractDownloader
 	public File getDownloadFragment() {
 		if (!isLaunchable())
 			return null;
-		return getFile();
+        if (_torrent.isComplete())
+            return getFile();
+		long size = context.getDiskManager().getLastVerifiedOffset();
+        if (size <= 0)
+            return null;
+        File file=new File(fileSystem.getBaseFile().getParent(),
+                IncompleteFileManager.PREVIEW_PREFIX
+                    +fileSystem.getBaseFile().getName());
+        // Copy first block, returning if nothing was copied.
+        if (FileUtils.copy(fileSystem.getBaseFile(), size, file) <=0 ) 
+            return null;
+        return file;
 	}
 
 	/*
