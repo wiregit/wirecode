@@ -56,6 +56,10 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
         long end = uploader.getUploadEnd();
         length = end - begin;
         remaining = length;
+        
+        if (length < 0) {
+            throw new IllegalStateException("upload end must be >= upload begin");
+        }
     }
     
     @Override
@@ -68,6 +72,11 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
         if (LOG.isDebugEnabled())
             LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
 
+        if (length == 0) {
+            // handle special case of empty file upload
+            return;
+        }
+        
         watchdog = new StalledUploadWatchdog();
         
         uploader.getSession().getIOSession().setThrottle(RouterService
@@ -100,8 +109,11 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
                 reader.release(piece);
                 return false;
             }
+        } else if (remaining == 0) {
+            // handle special case of empty file upload
+            return false;            
         }
-
+        
         int written;
         do {
             if (buffer == null || !buffer.hasRemaining()) {

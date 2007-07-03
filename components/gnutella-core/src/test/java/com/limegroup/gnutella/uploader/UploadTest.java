@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashSet;
@@ -76,7 +77,7 @@ public class UploadTest extends LimeTestCase {
     private static final String badHash = "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2SAM";
 
     private static final String incompleteHash = "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
-
+    
     private static final String incompleteHashUrl = "/uri-res/N2R?"
             + incompleteHash;
 
@@ -362,6 +363,17 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertEquals("cdefghijklmnopqrstuvwxyz", method
                     .getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testHTTP11DownloadInvalidRange() throws Exception {
+        GetMethod method = new GetMethod(fileNameUrl);
+        method.addRequestHeader("Range", "bytes=-0");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE, response);
         } finally {
             method.releaseConnection();
         }
@@ -1018,6 +1030,22 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
+    public void testDownloadEmptyFile() throws Exception {
+        // clear update file
+        File file = new File(CommonUtils.getUserSettingsDir(), "update.xml");
+        FileOutputStream out = new FileOutputStream(file);
+        out.close();
+        
+        GetMethod method = new GetMethod("/update.xml");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+            assertEquals("", method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+    
     public void testThexHeader() throws Exception {
         initThexTree();
 
