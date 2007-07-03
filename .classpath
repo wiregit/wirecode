@@ -65,6 +65,7 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jakarta-httpcore.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
