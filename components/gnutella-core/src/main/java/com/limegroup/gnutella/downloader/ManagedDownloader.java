@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
-import org.limewire.collection.Range;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
@@ -2027,13 +2026,8 @@ public class ManagedDownloader extends AbstractDownloader
         //And find the first block.
         if (commonOutFile == null)
             return 0; // trying to preview before incomplete file created
-        synchronized (commonOutFile) {
-            for(Range interval : commonOutFile.getBlocks()) {
-                if (interval.getLow()==0)
-                    return interval.getHigh();
-            }
-        }
-        return 0;//Nothing to preview!
+        
+        return commonOutFile.getOffsetForPreview();
     }
 
     /** 

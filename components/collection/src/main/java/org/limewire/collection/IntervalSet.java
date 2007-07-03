@@ -76,6 +76,11 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     public void add(Range addInterval) {
+        // trivial case.
+        if (intervals.isEmpty()) {
+            intervals.add(addInterval);
+            return;
+        }
         final long low = addInterval.getLow();
         final long high = addInterval.getHigh();
         Range lower=null;

@@ -495,6 +495,39 @@ public class VerifyingFile {
     }
     
     /**
+     * @return the offset of the first contiguous downloaded
+     * region of the file 
+     */
+    public synchronized long getOffsetForPreview() {
+        // if we have any savedCorrupt intervals, we need to lump everything
+        // together to get the longest continuous interval
+        if (!savedCorruptBlocks.isEmpty()) {
+            IntervalSet lump = new IntervalSet();
+            lump.add(savedCorruptBlocks);
+            lump.add(verifiedBlocks);
+            lump.add(partialBlocks);
+            if (lump.getFirst().getLow() != 0)
+                return 0;
+            return lump.getFirst().getHigh();
+        }
+        
+        /*
+         * we know that the intervals are contiguous, mutually exclusive
+         * and sorted.  Also, we know that a partial interval must be smaller
+         * than a full chunk.  So all we need to look at are the 
+         * first verified & first partial intervals.
+         */
+        IntervalSet firsts = new IntervalSet();
+        if (!verifiedBlocks.isEmpty())
+            firsts.add(verifiedBlocks.getFirst());
+        if (!partialBlocks.isEmpty())
+            firsts.add(partialBlocks.getFirst());
+        if (firsts.isEmpty() || firsts.getFirst().getLow() != 0)
+            return 0;
+        return firsts.getFirst().getHigh();
+    }
+    
+    /**
      * Returns all verified blocks as a List.
      */ 
     public synchronized List<Range> getVerifiedBlocksAsList() {
