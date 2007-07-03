@@ -72,6 +72,8 @@ public class VerifyingFileTest extends LimeTestCase {
         vf.close();
     }
 
+    
+        
     /**
      * tests that sequential chunks are leased.
      */
@@ -570,4 +572,49 @@ public class VerifyingFileTest extends LimeTestCase {
         Thread.sleep(1000);
         assertEquals(wrote, vf.getVerifiedBlockSize());
     }
+
+    public void testGetOffsetForPreview() throws Exception {
+        // at first we have nothing for preview.
+        assertEquals(0,vf.getOffsetForPreview());
+        
+        // one verified chunk - preview that.
+        vf.leaseWhite((int) completeFile.length());
+
+        vf.setDiscardUnverified(false);
+        byte[] chunk = new byte[hashTree.getNodeSize()];
+        raf.readFully(chunk);
+        writeImpl(0, chunk);
+
+        vf.waitForPending(1000);
+        assertEquals(chunk.length, vf.getVerifiedBlockSize());
+        
+        assertEquals(chunk.length - 1, vf.getOffsetForPreview());
+        
+        // some partial bytes at the end of that chunk
+        writeImpl(chunk.length, new byte[10000]);
+        vf.waitForPending(100);
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
+        // another full verified chunk at position 3
+        // but the amount for preview should not change
+        raf.seek(chunk.length * 2);
+        raf.readFully(chunk);
+        writeImpl(chunk.length * 2, chunk);
+        vf.waitForPending(1000);
+        assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
+        // fill up the space between the two good chunks with junk. 
+        byte []junk = new byte[chunk.length - 10000];
+        writeImpl(chunk.length+10000, junk);
+        vf.waitForPending(1000);
+        assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
+        assertEquals(chunk.length, vf.getAmountLost());
+        
+        // since we're not discarding, that should be added to the
+        // previewable offset that will also take the second
+        // verifyiable chunk
+        assertEquals(chunk.length * 3 - 1, vf.getOffsetForPreview());
+    }
+
 }
