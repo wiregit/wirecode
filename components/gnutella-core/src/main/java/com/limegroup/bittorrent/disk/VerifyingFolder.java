@@ -288,10 +288,13 @@ class VerifyingFolder implements TorrentDiskManager {
         // gui thread if single-file torrent.
         if (context.getFileSystem().getFiles().size() != 1)
             return;
-        int i = 0;
-        while(verifiedBlocks.get(i)) 
+        
+        // this is a little roundabout to make iteration shorter 
+        long length = context.getMetaInfo().getPieceLength();
+        int i = (int) (lastVerifiedOffset / length);
+        while(i < verified.maxSize() && verified.get(i))
             i++;
-        lastVerifiedOffset = Math.min(context.getFileSystem().getTotalSize(), i * getPieceSize(0));
+        lastVerifiedOffset = Math.min(context.getFileSystem().getTotalSize(), i * length);
 	}
 	
 	private boolean verifyQuick(int pieceNum) throws IOException {
