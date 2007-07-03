@@ -133,6 +133,11 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
             LOG.debug("Initializing upload of " + file.getName() + " [begin="
                     + begin + ",length=" + length + "]");
 
+        if (length == 0) {
+            // handle special case of empty file
+            return;
+        }
+
         transfer.start();
 
         this.watchdog = new NIOWatchdog(NIODispatcher.instance(), transfer, getTimeout());
@@ -184,6 +189,10 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
                 encoder.complete();
                 return;
             }
+        } else if (remaining == 0) {
+            // handle special case of empty file
+            encoder.complete();
+            return;            
         }
 
         int written;
@@ -225,11 +234,15 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
     }
 
     protected void activateWatchdog() {
-        this.watchdog.activate();
+        if (this.watchdog != null) {
+            this.watchdog.activate();
+        }
     }
 
     protected void deactivateWatchdog() {
-        this.watchdog.deactivate();
+        if (this.watchdog != null) {
+            this.watchdog.deactivate();
+        }
     }
 
     public int consumeContent(ContentDecoder decoder, IOControl ioctrl)
