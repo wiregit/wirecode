@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.5 $
- * $Date: 2007-07-03 20:46:47 $
+ * $Revision: 1.6 $
+ * $Date: 2007-07-05 17:26:18 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -212,6 +212,9 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
 
     public void closed(final NHttpServerConnection conn) {
         // LW
+        ServerConnState connState = (ServerConnState) conn.getContext().getAttribute(CONN_STATE);
+        connState.resetOutput();
+        
         notifyResponseSent(conn);
         
         if (this.eventListener != null) {

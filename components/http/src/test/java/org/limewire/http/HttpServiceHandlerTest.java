@@ -146,6 +146,22 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         assertTrue(listener.connectionClosed);
     }
 
+    public void testEventListenerTimeout() throws Exception {
+        MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
+        serviceHandler.setEventListener(listener);
+
+        MockSocket socket = new MockSocket();
+        MockIOSession session = new MockIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+        serviceHandler.closed(conn);
+        assertTrue(listener.connectionClosed);
+    }
+
     public void testGetRequestNIOEntity() throws Exception {
         MockSocket socket = new MockSocket();
         MockIOSession session = new MockIOSession(socket);
@@ -194,6 +210,25 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
         assertTrue(session.closed);
+        assertTrue(nioEntity.finished);
+    }
+
+    public void testGetRequestNIOEntityTimeout() throws Exception {
+        MockSocket socket = new MockSocket();
+        MockIOSession session = new MockIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/nio");
+        conn.setHttpRequest(request);
+        serviceHandler.requestReceived(conn);
+        
+        assertFalse(nioEntity.finished);
+        serviceHandler.closed(conn);
         assertTrue(nioEntity.finished);
     }
 
