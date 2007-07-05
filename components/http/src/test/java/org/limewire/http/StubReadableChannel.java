@@ -6,21 +6,21 @@ import java.nio.ByteBuffer;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BufferUtils;
 
-public class MockChannel implements InterestReadableByteChannel {
+public class StubReadableChannel implements InterestReadableByteChannel {
 
     private ByteBuffer source;
 
     private boolean closed;
 
-    public MockChannel(ByteBuffer source) {
+    public StubReadableChannel(ByteBuffer source) {
         this.source = source;
     }
 
-    public MockChannel(byte[] data) {
+    public StubReadableChannel(byte[] data) {
         this.source = ByteBuffer.wrap(data);
     }
 
-    public MockChannel(String data) {
+    public StubReadableChannel(String data) {
         this(data.getBytes());
     }
 

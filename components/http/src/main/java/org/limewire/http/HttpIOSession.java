@@ -41,7 +41,7 @@ public class HttpIOSession implements IOSession {
     private ThrottleWriter throttleWriter;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    
+
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
             throw new IllegalArgumentException();
@@ -58,14 +58,14 @@ public class HttpIOSession implements IOSession {
     }
 
     public ByteChannel channel() {
-        return (channel != null) ? channel : channel;
+        return channel;
     }
 
     public void close() {
         if (this.closed.getAndSet(true)) {
             return;
         }
-        socket.close();
+        channel.closeWhenBufferedOutputHasBeenFlushed();
     }
 
     public Object getAttribute(String name) {
@@ -194,7 +194,8 @@ public class HttpIOSession implements IOSession {
     }
 
     public void shutdown() {
-        close();
+        closed.set(true);
+        socket.close();
     }
 
 }

@@ -150,4 +150,9 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     public boolean isShutdown() {
         return shutdown;
     }
+
+    public boolean hasBufferedOutput() {
+        return buffer.hasRemaining() || channel.hasBufferedOutput();
+    }   
+    
 }

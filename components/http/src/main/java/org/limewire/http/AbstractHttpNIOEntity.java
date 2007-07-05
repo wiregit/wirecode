@@ -152,4 +152,11 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
         throw new UnsupportedOperationException();
     }
 
+    /** 
+     * Returns false.
+     */
+    public boolean hasBufferedOutput() {
+        return false;
+    }
+    
 }

@@ -222,4 +222,9 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     public void handleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
+
+    public boolean hasBufferedOutput() {
+        return incoming.position() > 0 || outgoing.hasRemaining() || channel.hasBufferedOutput();
+    }
+    
 }

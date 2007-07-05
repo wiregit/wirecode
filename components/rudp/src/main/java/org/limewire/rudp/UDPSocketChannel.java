@@ -376,4 +376,9 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     void eventPending() {
     	context.getTransportListener().eventPending();
     }
+
+    public boolean hasBufferedOutput() {
+        return getNumberOfPendingChunks() > 0;
+    }
+    
 }

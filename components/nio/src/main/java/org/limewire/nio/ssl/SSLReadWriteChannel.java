@@ -566,4 +566,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         return !firstReadDone.get() || engine.getHandshakeStatus() != HandshakeStatus.NOT_HANDSHAKING;
         
     }
+
+    public boolean hasBufferedOutput() {
+        return writeOutgoing.position() > 0 || writeSink.hasBufferedOutput();
+    }
 }

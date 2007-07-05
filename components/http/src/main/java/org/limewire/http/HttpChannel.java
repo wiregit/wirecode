@@ -25,7 +25,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     private final IOEventDispatch eventDispatch;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-
+    
     private InterestReadableByteChannel readSource;
 
     private InterestWritableByteChannel writeSource;
@@ -36,6 +36,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private ByteBuffer methodBuffer;
 
+    private volatile boolean pendingClose = false;
+    
     /**
      * Constructs a channel optionally pushing back a string that will be read
      * first. LimeWire's acceptor eats the first word of a connection to
@@ -86,6 +88,15 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void close() throws IOException {
         shutdown();
+    }
+
+    public void closeWhenBufferedOutputHasBeenFlushed() {
+        if (!writeSource.hasBufferedOutput()) {
+            session.shutdown();
+        } else {
+            pendingClose = true;        
+            requestWrite(true);
+        }
     }
 
     public boolean isOpen() {
@@ -147,6 +158,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public boolean handleWrite() throws IOException {
+        if (pendingClose) {
+            if (!writeSource.hasBufferedOutput()) {
+                session.shutdown();
+            }
+            return false;
+        }
+        
         if (!writeInterest) {
             return false;
         }
@@ -157,6 +175,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void requestRead(boolean status) {
+        if (pendingClose)
+            return;
+
         this.readInterest = status;
         if (readSource != null) {
             readSource.interestRead(status);
@@ -164,6 +185,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void requestWrite(boolean status) {
+        if (pendingClose) {
+            status = true;
+        }
+        
         this.writeInterest = status;
         if (writeSource != null) {
             writeSource.interestWrite(this, status);

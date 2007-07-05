@@ -25,7 +25,6 @@ import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.limewire.nio.AbstractNBSocket;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
 
@@ -89,8 +88,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -120,8 +119,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -140,7 +139,7 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
         assertNotNull(listener.exception);
-        assertTrue(session.closed);
+        assertTrue(session.isClosed());
         
         serviceHandler.closed(conn);
         assertTrue(listener.connectionClosed);
@@ -150,8 +149,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -163,8 +162,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
     }
 
     public void testGetRequestNIOEntity() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -192,8 +191,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
     }
 
     public void testGetRequestNIOEntityThrowingException() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -209,13 +208,13 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         nioEntity.exception = new IOException();
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
-        assertTrue(session.closed);
+        assertTrue(session.isClosed());
         assertTrue(nioEntity.finished);
     }
 
     public void testGetRequestNIOEntityTimeout() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -233,8 +232,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
     }
 
     public void testGetRequestStringEntity() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -258,8 +257,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -288,21 +287,6 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         @Override
         public int write(ByteBuffer buffer) throws IOException {
             return BufferUtils.transfer(buffer, out);
-        }
-        
-    }
-    
-    public static class MockIOSession extends HttpIOSession {
-
-        boolean closed;
-
-        public MockIOSession(AbstractNBSocket socket) {
-            super(socket);
-        }
-
-        @Override
-        public void close() {
-            this.closed = true;
         }
         
     }

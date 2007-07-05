@@ -191,4 +191,9 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     public void handleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
+
+    public boolean hasBufferedOutput() {
+        return channel.hasBufferedOutput();
+    }
+    
 }

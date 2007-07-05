@@ -417,7 +417,24 @@ public class UDPSocketChannelTest extends BaseTestCase {
             fail("should have failed");
         } catch(ClosedChannelException expected) {}
     }
-    
+
+    public void testHasBufferedOutput() throws Exception {
+        StubProcessor stub = new StubProcessor();
+        DataWindow window = new DataWindow(8, 1);
+        stub.setReadWindow(window);
+        
+        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        
+        assertFalse(channel.hasBufferedOutput());
+        channel.write(ByteBuffer.allocate(1000));
+        assertTrue(channel.hasBufferedOutput());
+        channel.handleWrite();
+        assertTrue(channel.hasBufferedOutput());
+        while (channel.getNextChunk() != null);
+        assertFalse(channel.hasBufferedOutput());
+        channel.write(ByteBuffer.allocate(0));
+        assertFalse(channel.hasBufferedOutput());
+    }
     
     private static class StubProcessor extends UDPConnectionProcessor {
         private boolean closed;
