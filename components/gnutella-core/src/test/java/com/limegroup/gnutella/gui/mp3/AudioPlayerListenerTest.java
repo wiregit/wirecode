@@ -28,13 +28,13 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     public void testStateUpdated(){
-        player.fireStateUpdated( new AudioPlayerEvent(null, AudioPlayerEvent.PlayerState.OPENED, 0) );
+        player.fireStateUpdated( new AudioPlayerEvent(null, PlayerState.OPENED, 0) );
     
         assertEquals(1, listener.recievedEvents.size());
 
         player.removeAudioPlayerListener(listener);
         
-        player.fireStateUpdated(new AudioPlayerEvent(null, AudioPlayerEvent.PlayerState.OPENED, 0) );
+        player.fireStateUpdated(new AudioPlayerEvent(null, PlayerState.OPENED, 0) );
         
         assertEquals(1, listener.recievedEvents.size());
     }

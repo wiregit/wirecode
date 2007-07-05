@@ -3,7 +3,6 @@ package com.limegroup.gnutella.gui.mp3;
 import junit.framework.Test;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.gui.mp3.AudioPlayerEvent.PlayerState;
 
 public class AudioPlayerEventTest extends BaseTestCase {
 

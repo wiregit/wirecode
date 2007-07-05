@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
@@ -33,6 +36,10 @@ public class AudioPlayerTest extends BaseTestCase {
             player.loadSong( new File(""));
         } catch (IOException e) {
             return;
+        } catch (UnsupportedAudioFileException e) {
+            return;
+        } catch (LineUnavailableException e) {
+            return;
         }
         fail("Excepted IOException");
     }
@@ -52,23 +59,9 @@ public class AudioPlayerTest extends BaseTestCase {
             player.loadSong( stream);
         } catch (IOException e) {
             return;
-        }
-        
-        fail("Expected IOException");
-    }
-    
-    public void testSeekException(){
-       
-        try {
-            File f=  new File("com\\limegroup\\gnutella\\metadata\\oggAll.ogg");
-            player.loadSong( f);
-        } catch (IOException e1) {
-            fail("Failed to load song for test");
-        }
-        
-        try {
-            player.seekLocation(-1);
-        } catch (IOException e) {
+        } catch (UnsupportedAudioFileException e) {
+            return;
+        } catch (LineUnavailableException e) {
             return;
         }
         
