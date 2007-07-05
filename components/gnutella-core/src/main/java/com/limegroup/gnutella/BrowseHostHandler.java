@@ -271,8 +271,7 @@ public class BrowseHostHandler {
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
         oStream.write(str.getBytes());
-        str = "Host: " + NetworkUtils.ip2string(RouterService.getAddress()) + 
-              ":" + RouterService.getPort() + LF;
+        str = "Host: " + NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort() + LF;
         oStream.write(str.getBytes());
         str = "User-Agent: " + LimeWireUtils.getVendor() + LF;
         oStream.write(str.getBytes());
