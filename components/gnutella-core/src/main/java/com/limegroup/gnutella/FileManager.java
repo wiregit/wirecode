@@ -898,18 +898,9 @@ public abstract class FileManager {
             return;
         
         // STEP 0:
-		// Do not share certain directories, directories on the
-		// do not share list, or sensitive directories.
-        if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+		// Do not share unsharable directories.
+        if(!isFolderShareable(directory, true))
             return;
-        
-        if (isApplicationSpecialShareDirectory(directory)) {
-            return;
-        }
-        
-		// Do not share directories on the do not share list
-		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
-			return;
         
         // Do not share sensitive directories
         if (isSensitiveDirectory(directory)) {
@@ -1065,13 +1056,16 @@ public abstract class FileManager {
     /**
      * Adds a given folder to be shared.
      */
-    public void addSharedFolder(File folder) {
+    public boolean addSharedFolder(File folder) {
 		if (!folder.isDirectory())
 			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-		
+	
         try {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
+        
+        if(!isFolderShareable(folder, false))
+            return false;
         
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
 		if (!isCompletelySharedDirectory(folder.getParentFile()))
@@ -1079,6 +1073,8 @@ public abstract class FileManager {
         _isUpdating = true;
         updateSharedDirectories(folder, null, _revision);
         _isUpdating = false;
+        
+        return true;
     }
     
 	/**
@@ -1881,144 +1877,180 @@ public abstract class FileManager {
         
         return true;
     }
-	
+    
     /**
-     * Returns true iff <tt>file</tt> is a sensitive directory.
+     * Returns true if this folder is sharable.
+     * <p>
+     * Unsharable folders include:
+     * <ul>
+     * <li>A non-directory or unreadable folder</li>
+     * <li>The incomplete directory</li>
+     * <li>The 'application special share directory'</li>
+     * <li>Any root directory</li>
+     * <li>Any directory listed in 'directories not to share' (<i>Only if
+     * includeExcludedDirectories is true</i>)</li>
+     * </ul>
+     * 
+     * @param folder The folder to check for sharability
+     * @param includeExcludedDirectories True if this should exclude the folder
+     *        from sharability if it is listed in DIRECTORIES_NOT_TO_SHARE
+     * @return true if the folder can be shared
      */
-    public static boolean isSensitiveDirectory(File file) {
-        if (file == null)
+    public boolean isFolderShareable(File folder, boolean includeExcludedDirectories) {
+        if(!folder.isDirectory() || !folder.canRead())
+            return false;
+        
+        if (folder.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+            return false;
+        
+        if (isApplicationSpecialShareDirectory(folder)) {
+            return false;
+        }
+        
+        // Do not share directories on the do not share list
+        if (includeExcludedDirectories && _data.DIRECTORIES_NOT_TO_SHARE.contains(folder))
             return false;
         
         //  check for system roots
         File[] faRoots = File.listRoots();
         if (faRoots != null && faRoots.length > 0) {
             for (int i = 0; i < faRoots.length; i++) {
-                if (file.equals(faRoots[i]))
-                    return true;
+                if (folder.equals(faRoots[i]))
+                    return false;
             }
         }
         
+        return true;
+    }
+	
+    /**
+     * Returns true iff <tt>file</tt> is a sensitive directory.
+     */
+    public static boolean isSensitiveDirectory(File folder) {
+        if (folder == null)
+            return false;
+        
         //  check for user home directory
         String userHome = System.getProperty("user.home");
-        if (file.equals(new File(userHome)))
+        if (folder.equals(new File(userHome)))
             return true;
         
         //  check for OS-specific directories:
         if (OSUtils.isWindows()) {
             //  check for "Documents and Settings"
-            if (file.getName().equals("Documents and Settings"))
+            if (folder.getName().equals("Documents and Settings"))
                 return true;
             
             //  check for "My Documents"
-            if (file.getName().equals("My Documents"))
+            if (folder.getName().equals("My Documents"))
                 return true;
             
             //  check for "Desktop"
-            if (file.getName().equals("Desktop"))
+            if (folder.getName().equals("Desktop"))
                 return true;
             
             //  check for "Program Files"
-            if (file.getName().equals("Program Files"))
+            if (folder.getName().equals("Program Files"))
                 return true;
             
             //  check for "Windows"
-            if (file.getName().equals("Windows"))
+            if (folder.getName().equals("Windows"))
                 return true;
             
             //  check for "WINNT"
-            if (file.getName().equals("WINNT"))
+            if (folder.getName().equals("WINNT"))
                 return true;
         }
         
         if (OSUtils.isMacOSX()) {
             //  check for /Users
-            if (file.getName().equals("Users"))
+            if (folder.getName().equals("Users"))
                 return true;
             
             //  check for /System
-            if (file.getName().equals("System"))
+            if (folder.getName().equals("System"))
                 return true;
             
             //  check for /System Folder
-            if (file.getName().equals("System Folder"))
+            if (folder.getName().equals("System Folder"))
                 return true;
             
             //  check for /Previous Systems
-            if (file.getName().equals("Previous Systems"))
+            if (folder.getName().equals("Previous Systems"))
                 return true;
             
             //  check for /private
-            if (file.getName().equals("private"))
+            if (folder.getName().equals("private"))
                 return true;
             
             //  check for /Volumes
-            if (file.getName().equals("Volumes"))
+            if (folder.getName().equals("Volumes"))
                 return true;
             
             //  check for /Desktop
-            if (file.getName().equals("Desktop"))
+            if (folder.getName().equals("Desktop"))
                 return true;
             
             //  check for /Applications
-            if (file.getName().equals("Applications"))
+            if (folder.getName().equals("Applications"))
                 return true;
             
             //  check for /Applications (Mac OS 9)
-            if (file.getName().equals("Applications (Mac OS 9)"))
+            if (folder.getName().equals("Applications (Mac OS 9)"))
                 return true;
             
             //  check for /Network            
-            if (file.getName().equals("Network"))
+            if (folder.getName().equals("Network"))
                 return true;
         }
         
         if (OSUtils.isPOSIX()) {
             //  check for /bin
-            if (file.getName().equals("bin"))
+            if (folder.getName().equals("bin"))
                 return true;
             
             //  check for /boot
-            if (file.getName().equals("boot"))
+            if (folder.getName().equals("boot"))
                 return true;
             
             //  check for /dev
-            if (file.getName().equals("dev"))
+            if (folder.getName().equals("dev"))
                 return true;
             
             //  check for /etc
-            if (file.getName().equals("etc"))
+            if (folder.getName().equals("etc"))
                 return true;
             
             //  check for /home
-            if (file.getName().equals("home"))
+            if (folder.getName().equals("home"))
                 return true;
             
             //  check for /mnt
-            if (file.getName().equals("mnt"))
+            if (folder.getName().equals("mnt"))
                 return true;
             
             //  check for /opt
-            if (file.getName().equals("opt"))
+            if (folder.getName().equals("opt"))
                 return true;
             
             //  check for /proc
-            if (file.getName().equals("proc"))
+            if (folder.getName().equals("proc"))
                 return true;
             
             //  check for /root
-            if (file.getName().equals("root"))
+            if (folder.getName().equals("root"))
                 return true;
             
             //  check for /sbin
-            if (file.getName().equals("sbin"))
+            if (folder.getName().equals("sbin"))
                 return true;
             
             //  check for /usr
-            if (file.getName().equals("usr"))
+            if (folder.getName().equals("usr"))
                 return true;
             
             //  check for /var
-            if (file.getName().equals("var"))
+            if (folder.getName().equals("var"))
                 return true;
         }
         
