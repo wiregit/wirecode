@@ -284,8 +284,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * uploaders).
      */
     private boolean shouldBypassQueue(HttpRequest request, HTTPUploader uploader) {
-        assert started;
-        
         assert uploader.getState() == UploadStatus.CONNECTING;
         return "HEAD".equals(request.getRequestLine().getMethod())
             || uploader.isForcedShare();
@@ -387,14 +385,18 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized boolean isServiceable() {
-        assert started;
+        if (!started) {
+            return false;
+        }
         
         return slotManager.hasHTTPSlot(uploadsInProgress()
                 + getNumQueuedUploads());
     }
 
     public synchronized boolean mayBeServiceable() {
-        assert started;
+        if (!started) {
+            return false;
+        }
         
         if (fileManager.hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
@@ -403,14 +405,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized int uploadsInProgress() {
-        assert started;
-        
         return activeUploadList.size() - forcedUploads;
     }
 
     public synchronized int getNumQueuedUploads() {
-        assert started;
-        
         return slotManager.getNumQueued();
     }
 
@@ -419,8 +417,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized boolean isConnectedTo(InetAddress addr) {
-        assert started;
-        
         if (slotManager.getNumUsersForHost(addr.getHostAddress()) > 0)
             return true;
 
@@ -443,8 +439,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized boolean killUploadsForFileDesc(FileDesc fd) {
-        assert started;
-        
         boolean ret = false;
         for (HTTPUploader uploader : activeUploadList) {
             FileDesc upFD = uploader.getFileDesc();
@@ -574,8 +568,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      *         as quickly as possible.
      */
     public int calculateBandwidth() {
-        assert started;
-        
         // public int calculateBurstSize() {
         float totalBandwith = getTotalBandwith();
         float burstSize = totalBandwith / uploadsInProgress();
@@ -640,8 +632,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public void measureBandwidth() {
-        assert started;
-        
         slotManager.measureBandwidth();
         for (HTTPUploader active : localUploads) {
             active.measureBandwidth();
@@ -649,8 +639,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public float getMeasuredBandwidth() {
-        assert started;
-        
         float bw = 0;
         try {
             bw += slotManager.getMeasuredBandwidth();
@@ -673,20 +661,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized float getAverageBandwidth() {
-        assert started;
-        
         return averageBandwidth;
     }
 
     public float getLastMeasuredBandwidth() {
-        assert started;
-        
         return lastMeasuredBandwidth;
     }
 
     public UploadSlotManager getSlotManager() {
-        assert started;
-        
         return slotManager;
     }
 
