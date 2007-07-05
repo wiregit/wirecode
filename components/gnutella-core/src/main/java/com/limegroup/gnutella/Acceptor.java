@@ -339,7 +339,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
             try {
                 InetAddress ia = InetAddress.getByName(address);
-                return ia.getAddress();
+                byte[] addr = ia.getAddress();
+                if(addr != null)
+                    return addr;
             } catch (UnknownHostException err) {
                 // ignore and return _address
             }
