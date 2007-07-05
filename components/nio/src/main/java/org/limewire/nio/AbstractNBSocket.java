@@ -169,6 +169,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
+
+                    source.interestRead(true);
                     
                     // If the socket is still connected, read up any buffered data from the current chain.
                     // This is only done if we know the dispatcher is not going to immediately call
@@ -176,8 +178,6 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     // would not be read until future incoming data triggered another handleRead.
                     if(isConnected() && !NIODispatcher.instance().isReadReadyThisIteration(getChannel()))
                         reader.handleRead();
-                        
-                    source.interestRead(true);
                 } catch(IOException iox) {
                     shutdown();
                     oldReader.shutdown(); // in case we lost it.
