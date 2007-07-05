@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.2 $
- * $Date: 2007-05-31 18:27:17 $
+ * $Revision: 1.3 $
+ * $Date: 2007-07-05 17:27:47 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -40,9 +40,7 @@ import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
 import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
@@ -60,14 +58,8 @@ public class HttpTestServer {
 
     private HttpParams params = new BasicHttpParams();
 
-    public HttpTestServer() throws IOException {
-        this.params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2000)
-           .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 2000)
-           .setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE, 8 * 1024)
-           .setBooleanParameter(HttpConnectionParams.STALE_CONNECTION_CHECK, false)
-           .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
-           .setParameter(HttpProtocolParams.USER_AGENT, "TEST-SERVER/1.1");
-
+    public HttpTestServer(HttpParams params) throws IOException {
+        this.params = params;
         this.registry = new HttpRequestHandlerRegistry();
     }
 

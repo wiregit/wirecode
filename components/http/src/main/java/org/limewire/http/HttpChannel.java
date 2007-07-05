@@ -107,10 +107,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         eventDispatch.inputReady(session);
     }
 
-    public void handleIOException(IOException iox) {
-        HttpIOReactor.LOG.error("Unexpected exception");
+    public void handleIOException(IOException e) {
+        HttpIOReactor.LOG.error("Unexpected exception", e);
     }
 
+    /**
+     * Invoked in case of a read timeout or when the socket is closed.
+     */
     public void shutdown() {
         if (!closed.getAndSet(true)) {
             NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {

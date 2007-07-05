@@ -123,20 +123,20 @@ public class HttpIOSession implements IOSession {
 
     public void setEvent(int op) {
 //        if ((op & EventMask.READ) != 0) {
-//            System.out.println("read on");
+//            System.err.println("read on");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
-//            System.out.println("write on");
+//            System.err.println("write on");
 //        }
         updateEventMask(eventMask | op);
     }
 
     public void clearEvent(int op) {
 //        if ((op & EventMask.READ) != 0) {
-//            System.out.println("read off");
+//            System.err.println("read off");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
-//            System.out.println("write off");
+//            System.err.println("write off");
 //        }
         updateEventMask(eventMask & ~op);
     }

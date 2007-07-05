@@ -75,8 +75,8 @@ public class HttpIOReactorTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         params = new BasicHttpParams();
-        params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2000)
-               .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 2000)
+        params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2222)
+               .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 1111)
                .setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE, 8 * 1024)
                .setBooleanParameter(HttpConnectionParams.STALE_CONNECTION_CHECK, false)
                .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
@@ -85,7 +85,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
     
     public void testAcceptConnection() throws Exception {
-        HttpTestServer server = new HttpTestServer();
+        HttpTestServer server = new HttpTestServer(params);
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
@@ -93,6 +93,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
+            assertEquals(2222, socket.getSoTimeout());
         } finally {
             socket.close();
         }
@@ -100,7 +101,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     
     // disabled, see {@link HttpIOReactor#connect}
     public void disabledTestGetFromAcceptor() throws Exception {
-        final HttpTestServer server = new HttpTestServer();
+        final HttpTestServer server = new HttpTestServer(params);
         server.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
