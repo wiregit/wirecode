@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
@@ -18,7 +17,7 @@ import com.limegroup.gnutella.RouterService;
  * An event based {@link HttpEntity} that uploads a {@link File}. A
  * corresponding {@link HTTPUploader} is updated with progress.
  */
-public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdownable {
+public class FileResponseEntity extends AbstractHttpNIOEntity {
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
@@ -43,9 +42,6 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     /** Piece that is currently transferred. */
     private Piece piece;
 
-    /** Cancels the transfer if inactivity for too long. */  
-    private StalledUploadWatchdog watchdog;
-    
     public FileResponseEntity(HTTPUploader uploader, File file) {
         this.uploader = uploader;
         this.file = file;
@@ -77,8 +73,6 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             return;
         }
         
-        watchdog = new StalledUploadWatchdog();
-        
         uploader.getSession().getIOSession().setThrottle(RouterService
                 .getBandwidthManager().getWriteThrottle(uploader.getSession().getIOSession().getSocket()));
 
@@ -88,9 +82,10 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     
     @Override
     public void finished() {
-        if (watchdog != null) {
-            watchdog.deactivate();
-        }
+        if (LOG.isDebugEnabled())
+            LOG.debug("Finished upload of " + file.getName() + " [begin=" + begin + ",length=" + length + ",remaining=" + remaining + "]");
+
+        deactivateTimeout();
         if (reader != null) {
             reader.shutdown();
         }
@@ -103,7 +98,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             int written = write(buffer);
             uploader.addAmountUploaded(written);
             if (buffer.hasRemaining()) {
-                watchdog.activate(this);
+                activateTimeout();
                 return true;
             } else if (remaining == 0) {
                 reader.release(piece);
@@ -129,7 +124,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
                         // interest back on when the next piece is available
                         buffer = null;
                         interestWrite(false);
-                        watchdog.activate(this);
+                        activateTimeout();
                         return true;
                     }
                     buffer = piece.getBuffer();
@@ -138,13 +133,13 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
             }
             
             if (LOG.isTraceEnabled())
-                LOG.trace("Uploading " + file.getName() + " [read=" + buffer.remaining() + ",remaining=" + remaining + "]");
+                LOG.trace("Uploading " + file.getName() + " [remaining=" + remaining + "+" + buffer.remaining() + "]");
 
             written = write(buffer);
             uploader.addAmountUploaded(written);
         } while (written > 0 && remaining > 0);
 
-        watchdog.activate(this);
+        activateTimeout();
         return remaining > 0 || buffer.hasRemaining();
     }
 
@@ -153,7 +148,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity implements Shutdow
     }
 
     @Override
-    public void shutdown() {
+    public void timeout() {
         if (LOG.isWarnEnabled())
             LOG.warn("File transfer timed out: " + uploader);
         uploader.stop();

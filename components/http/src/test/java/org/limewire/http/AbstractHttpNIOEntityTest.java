@@ -70,6 +70,10 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         @Override
         public void initialize() throws IOException {
         }
+
+        @Override
+        public void timeout() {
+        }
         
     }
     

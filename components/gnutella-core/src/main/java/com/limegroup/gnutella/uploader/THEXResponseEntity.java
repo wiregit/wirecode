@@ -59,12 +59,19 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
     public boolean handleWrite() throws IOException {
         boolean more = writer.process(this, null);
         uploader.setAmountUploaded(writer.getAmountProcessed());
+        activateTimeout();
         return more;
     }
 
     @Override
     public void finished() {
+        deactivateTimeout();
         this.writer = null;
+    }
+
+    @Override
+    public void timeout() {
+        uploader.stop();
     }
 
 }

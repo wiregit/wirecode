@@ -13,6 +13,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.nio.timeout.NIOWatchdog;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -32,7 +33,6 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
@@ -51,7 +51,6 @@ public class UploaderTest extends BaseTestCase {
     private RemoteFileDesc rfd4;
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
-    private long savedDelayTime;
     
     public UploaderTest(String name) {
         super(name);
@@ -69,13 +68,6 @@ public class UploaderTest extends BaseTestCase {
     public void setUp() throws Exception {
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         
-        // we don't want the tests confused by the stalled
-        // watchdog killing stuff.
-        // note that the testStalledUploads sets this to the
-        // correct time.
-        savedDelayTime = StalledUploadWatchdog.DELAY_TIME;
-        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
-
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         List<FileDesc> descs = new ArrayList<FileDesc>();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
@@ -129,6 +121,7 @@ public class UploaderTest extends BaseTestCase {
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
         fm.get(0);
 
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         upManager = (HTTPUploadManager) RouterService.getUploadManager();
         upManager.start(RouterService.getHTTPUploadAcceptor(), fm, RouterService.getCallback());
 
@@ -140,12 +133,10 @@ public class UploaderTest extends BaseTestCase {
     
     @Override
     public void tearDown() {
-        StalledUploadWatchdog.DELAY_TIME = savedDelayTime;
-        
         RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
         
-        upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager.cleanup();
+        upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager = null;
 
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
@@ -677,58 +668,63 @@ public class UploaderTest extends BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
-        StalledUploadWatchdog.DELAY_TIME = 1000 * 30; // 30 seconds.
-        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
-        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
-        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
-        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
-       
-        HTTPDownloader d1, d2, d3, d4;
-        d1 = addUploader(upManager, rfd1, "1.1.1.1", true);
-        connectDloader(d1,true,rfd1,true);
-        d2 = addUploader(upManager, rfd2, "1.1.1.2", true);
-        connectDloader(d2,true,rfd2,true);
-        
-        assertEquals("should have 2 active uploaders",
-            2, upManager.uploadsInProgress() );
-       
-        // assert that we can reach the limit
-        d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
+        int savedDelay = NIOWatchdog.DEFAULT_DELAY_TIME; 
+        NIOWatchdog.DEFAULT_DELAY_TIME = 1000 * 10; // 10 seconds.
         try {
-            connectDloader(d3,true,rfd3,true);
-            fail("expected queued later.");
-        } catch(QueuedException e) {
-            assertEquals(1, e.getQueuePosition());
+            UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+            UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+            UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
+            UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
+
+            HTTPDownloader d1, d2, d3, d4;
+            d1 = addUploader(upManager, rfd1, "1.1.1.1", true);
+            connectDloader(d1,true,rfd1,true);
+            d2 = addUploader(upManager, rfd2, "1.1.1.2", true);
+            connectDloader(d2,true,rfd2,true);
+
+            assertEquals("should have 2 active uploaders",
+                    2, upManager.uploadsInProgress() );
+
+            // assert that we can reach the limit
+            d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
+            try {
+                connectDloader(d3,true,rfd3,true);
+                fail("expected queued later.");
+            } catch(QueuedException e) {
+                assertEquals(1, e.getQueuePosition());
+            }
+
+            assertEquals("should have 1 queued uploader",
+                    1, upManager.getNumQueuedUploads());
+
+            // okay, we know its full, now drop the guy from the queue.
+            try {
+                connectDloader(d3, false, rfd3, true);
+                fail("should have thrown ioexception");
+            } catch(IOException e) {
+                // expected behavior.
+            }
+
+            assertEquals("should have no queued uploaders",
+                    0, upManager.getNumQueuedUploads());
+
+            //sleep a little more than needed for the stall to die.
+            Thread.sleep(NIOWatchdog.DEFAULT_DELAY_TIME + 5 * 1000);
+
+            assertEquals("should have no active uploaders",
+                    0, upManager.uploadsInProgress());
+
+            // should be able to connect now.
+            d3 = addUploader(upManager, rfd3, "1.1.1.3", false);
+            connectDloader(d3, true, rfd3, true);        
+            d4 = addUploader(upManager, rfd4, "1.1.1.4", false);
+            connectDloader(d4,true,rfd4,true);
+
+            kill(d3);
+            kill(d4);
+        } finally {
+            NIOWatchdog.DEFAULT_DELAY_TIME = savedDelay;
         }
-        
-        assertEquals("should have 1 queued uploader",
-            1, upManager.getNumQueuedUploads());
-        
-        // okay, we know its full, now drop the guy from the queue.
-        try {
-            connectDloader(d3, false, rfd3, true);
-            fail("should have thrown ioexception");
-        } catch(IOException e) {
-            // expected behaviour.
-        }
-        
-        assertEquals("should have no queued uploaders",
-            0, upManager.getNumQueuedUploads());
-        
-        //sleep a little more than needed for the stall to die.
-        Thread.sleep(StalledUploadWatchdog.DELAY_TIME+5*1000);
-        
-        assertEquals("should have no active uploaders",
-            0, upManager.uploadsInProgress());
-        
-        // should be able to connect now.
-        d3 = addUploader(upManager, rfd3, "1.1.1.3", false);
-        connectDloader(d3, true, rfd3, true);        
-        d4 = addUploader(upManager, rfd4, "1.1.1.4", false);
-        connectDloader(d4,true,rfd4,true);
-        
-        kill(d3);
-        kill(d4);
     }
 
 

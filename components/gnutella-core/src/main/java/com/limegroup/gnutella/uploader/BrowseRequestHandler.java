@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -35,6 +37,8 @@ import com.limegroup.gnutella.statistics.UploadStat;
  */
 public class BrowseRequestHandler implements HttpRequestHandler {
 
+    private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
+    
     private HTTPUploadSessionManager sessionManager;
 
     public BrowseRequestHandler(HTTPUploadSessionManager sessionManager) {
@@ -51,6 +55,9 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         
         if (!HttpCoreUtils.hasHeader(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Browse request is missing Accept header");
+            
             response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
         } else {
             response.setEntity(new BrowseResponseEntity(uploader));
@@ -118,6 +125,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             
             boolean more = sender.handleWrite();
             assert more || pendingMessageCount == 0;
+            
+            activateTimeout();
             return more || iterable.hasNext();
         }
         
@@ -145,9 +154,18 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
         @Override
         public void finished() {
+            deactivateTimeout();
             sender = null;
         }
 
+        @Override
+        public void timeout() {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Browse request timed out");
+
+            uploader.stop();
+        }
+        
     }
 
 }

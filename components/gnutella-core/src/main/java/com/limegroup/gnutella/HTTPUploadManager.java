@@ -786,6 +786,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     /** For testing: removes all uploaders and clears the request cache. */
     public void cleanup() {
+        assert started;
+        
         for (HTTPUploader uploader : activeUploadList
                 .toArray(new HTTPUploader[0])) {
             uploader.stop();
