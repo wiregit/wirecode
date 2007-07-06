@@ -3,36 +3,18 @@ package org.limewire.statistic;
 
 /**
  * Specialized subclass for recording advanced statistics.
- * Advanced statistics are only recorded if the Singleton record advanced 
- * statistics flag (within {@link StatisticsManager}) is on. For example, to 
- * check and turn on the flag if off:
-<pre>
-   if(! StatisticsManager.instance().getRecordAdvancedStats())
-        StatisticsManager.instance().setRecordAdvancedStats(true);
-</pre>
+ * Advanced statistics are only recorded if 
+ * {@link StatisticsManager StatisticsManager.instance().setRecordAdvancedStats(true)}
+ * is called. 
  * <p>
- * {@link #getMax()} and {@link #getAverage()} are effected by 
+ * A sample, aka a cycle of data, is all the data collected between calls to 
  * {@link #storeCurrentStat()}. 
+ * Therefore, the {@link #getMax()} is the largest sample and the 
+ * {@link #getAverage()} is the total size / the number of samples.
  * <p>
- * For example, if you make four calls of <code>addData(1)</code> but only 
- * make one call to <code>storeCurrentStat</code>, then: <br>
-<pre>
-       average = total (4) / storeCurrentStat calls (1) = 4,
-       max = 1 + 1 + 1 + 1 = 4. 
-</pre>
- * <p>
- * However if you make three <code>addData(1)</code> calls, a call to
- * <code>storeCurrentStat</code>, and then another <code>addData(1)</code> followed
- * by <code>storeCurrentStat</code>, the total is still 4, but the average 
- * and max is different: <br>
-<pre>
-       average = total (4) / storeCurrentStat calls (2) = 2,
-       max = 1 + 1 + 1 = 3.
- </pre>
  * An example of using <code>AdvancedStatistic</code>:
 <pre>
-    if(! StatisticsManager.instance().getRecordAdvancedStats())
-        StatisticsManager.instance().setRecordAdvancedStats(true);
+    StatisticsManager.instance().setRecordAdvancedStats(true);
     Statistic s = new AdvancedStatistic();
 
     s.addData(1);
@@ -106,6 +88,7 @@ public class AdvancedStatistic extends AbstractStatistic {
 		super.addData(data);
 	}
     //override to only store if advanced stats
+    @Override
     public void storeCurrentStat() {
         if(!STATS_MANAGER.getRecordAdvancedStats()) return;
         super.storeCurrentStat();

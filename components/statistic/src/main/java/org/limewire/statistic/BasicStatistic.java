@@ -4,24 +4,11 @@ package org.limewire.statistic;
 /**
  * Abstract base class that records basic statistics. 
  * <p>
- * {@link #getMax()} and {@link #getAverage()} are effected by 
+ * A sample, aka a cycle of data, is all the data collected between calls to 
  * {@link #storeCurrentStat()}. 
+ * Therefore, the {@link #getMax()} is the largest sample and the 
+ * {@link #getAverage()} is the total size / the number of samples.
  * <p>
- * For example, if you make four calls of <code>addData(1024)</code> but only 
- * make one call to <code>storeCurrentStat</code>, then: <br>
-<pre>
-       average = total (4 K) / storeCurrentStat calls (1) = 4 K,
-       max = 1024 * 4 = 4 K. 
-</pre>
- * <p>
- * However if you make three <code>addData(1024)</code> calls, a call to
- * <code>storeCurrentStat</code>, and then another <code>addData(1024)</code> followed
- * by <code>storeCurrentStat</code>, the total is still 4 K, but the average 
- * and max is different: <br>
-<pre>
-       average = total (4 K) / storeCurrentStat calls (2) = 2 K,
-       max = 1 + 1 + 1 = 3 K.
- </pre>
  * An example of using <code>BasicStatistic</code>:
  * <pre>
     class Stats extends BasicStatistic{}       

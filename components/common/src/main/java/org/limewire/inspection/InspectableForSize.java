@@ -4,9 +4,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation for objects that have a <code>size</code> method and
- * wish to be inspected by {@link InspectionUtils} with the value
- * of that method.
+ * Defines the interface for an annotation of an object which wants to be 
+ * inspected via {@link InspectionUtils#inspectValue(String)}. The object must 
+ * have a <code>size</code> method with the return value the size of the object.
+ * <p>
+ * See the Lime Wire Wiki for sample code using the <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.inspection%3B">
+ * org.limewire.inspection</a> package.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InspectableForSize {}

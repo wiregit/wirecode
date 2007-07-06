@@ -8,7 +8,7 @@ import org.limewire.concurrent.SimpleTimer;
 
 /**
  * Manages recording {@link Statistic Statistics}. When a <code>Statistic</code>s
- * is instantiated, the <code>Statistic</code> is managed by this Singleton 
+ * is instantiated, the <code>Statistic</code> is managed by this singleton 
  * <code>StatisticsManager</code>.
  * <p> 
  * Additionally, <code>StatisticsManager</code> includes methods to set and get 
