@@ -2,6 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetSetting;
 
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -59,4 +60,39 @@ public class UpdateSettings extends LimeProps {
      */
     public static final StringSetSetting FAILED_UPDATES = 
         FACTORY.createStringSetSetting("FAILED_UPDATES","");
+    
+    /**
+     * Pro ads.
+     */
+    public static final StringArraySetting PRO_ADS =
+        FACTORY.createRemoteStringArraySetting("PRO_ADS",
+                new String[] {
+                "SUPPORT_LIMEWIRE_01",
+                "http://www.limewire.com/index.jsp/pro&21",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_02",
+                "http://www.limewire.com/index.jsp/pro&22",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_03",
+                "http://www.limewire.com/index.jsp/pro&23",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_04",
+                "http://www.limewire.com/index.jsp/pro&24",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_05",
+                "http://www.limewire.com/index.jsp/pro&25",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_06",
+                "http://www.limewire.com/index.jsp/pro&26",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_07",
+                "http://www.limewire.com/index.jsp/pro&27",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_08",
+                "http://www.limewire.com/index.jsp/pro&28",
+                "0.111111",
+                "SUPPORT_LIMEWIRE_09",
+                "http://www.limewire.com/index.jsp/pro&29",
+                "0.111111"},
+                "UpdateSettings.proAds");
 }
