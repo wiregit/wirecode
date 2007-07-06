@@ -36,7 +36,6 @@ import com.limegroup.gnutella.uploader.FreeLoaderRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
-import com.limegroup.gnutella.uploader.UpdateFileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
@@ -220,9 +219,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         // browse
         acceptor.registerHandler("/", new BrowseRequestHandler(this));
-
-        // update
-        acceptor.registerHandler("/update.xml", new UpdateFileRequestHandler(this));
 
         // push-proxy requests
         HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this);
