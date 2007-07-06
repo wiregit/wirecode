@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.SearchSettings;
 
@@ -44,19 +43,16 @@ public class QueryUtils {
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
-        sb.append(illegal).append(FileManager.DELIMITERS);
+        sb.append(illegal).append(delim);
     
         StringTokenizer st = new StringTokenizer(fileName, sb.toString());
         while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
-            try {                
-                //Ignore if a number
-                //(will trigger NumberFormatException if not)
-                Double.valueOf(currToken);
-    			if (!allowNumbers) {
-    				continue;
-    			}
-            } catch (NumberFormatException normalWord) {
+            String currToken = st.nextToken().toLowerCase();
+            if(!allowNumbers) {
+                try {                
+                    Double.valueOf(currToken); //NFE if number
+                    continue;
+                } catch (NumberFormatException normalWord) {}
             }
     		if (!TRIVIAL_WORDS.contains(currToken))
                 ret.add(currToken);
@@ -83,7 +79,7 @@ public class QueryUtils {
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
-        sb.append(illegal).append(FileManager.DELIMITERS);
+        sb.append(illegal).append(delim);
         StringTokenizer st = new StringTokenizer(name, sb.toString());        
         while(st.hasMoreTokens())
             ret += st.nextToken().trim() + " ";
@@ -117,27 +113,24 @@ public class QueryUtils {
             throw new NullPointerException("null name");
         
         String retString = null;
-        
-        // normalize the name.
         name = I18NConvert.instance().getNorm(name);
-    
-        final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
+        int maxLen = SearchSettings.MAX_QUERY_LENGTH.getValue();
     
         //Get the set of keywords within the name.
-        Set<String> intersection = keywords(name, allowNumbers);
+        Set<String> keywords = keywords(name, allowNumbers);
     
-        if (intersection.size() < 1) { // nothing to extract!
+        if (keywords.isEmpty()) { // no suitable non-number words
             retString = removeIllegalChars(name);
-            retString = StringUtils.truncate(retString, MAX_LEN);
+            retString = StringUtils.truncate(retString, maxLen);
         } else {
             StringBuilder sb = new StringBuilder();
             int numWritten = 0;
-            for(String currKey : intersection) {
-                if(numWritten >= MAX_LEN)
+            for(String currKey : keywords) {
+                if(numWritten >= maxLen)
                     break;
                 
                 // if we have space to add the keyword
-                if ((numWritten + currKey.length()) < MAX_LEN) {
+                if ((numWritten + currKey.length()) < maxLen) {
                     if (numWritten > 0) { // add a space if we've written before
                         sb.append(" ");
                         numWritten++;
@@ -151,22 +144,18 @@ public class QueryUtils {
     
             //one small problem - if every keyword in the filename is
             //greater than MAX_LEN, then the string returned will be empty.
-            //if this happens just truncate the first word....
-            if (retString.equals(""))
-                retString = StringUtils.truncate(name, MAX_LEN);
+            //if this happens just truncate the first keyword....
+            if (retString.equals("")) {
+                retString = StringUtils.truncate(keywords.iterator().next(), maxLen);
+            }
         }
     
         // Added a bunch of asserts to catch bugs.  There is some form of
         // input we are not considering in our algorithms....
-        Assert.that(retString.length() <= MAX_LEN, 
-                    "Original filename: " + name +
-                    ", converted: " + retString);
-        
-        if(!intersection.isEmpty())
-            Assert.that(!retString.equals(""), "Original filename: " + name);
-            
-        Assert.that(retString != null, 
-                    "Original filename: " + name);
+        assert retString.length() <= maxLen : "Original filename: " + name + ", converted: " + retString;
+        if(!keywords.isEmpty())
+            assert !retString.equals("") : "Original filename: " + name;
+        assert retString != null : "Original filename: " + name;
     
         return retString;
     }

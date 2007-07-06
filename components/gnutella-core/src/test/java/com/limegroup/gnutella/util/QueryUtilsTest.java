@@ -56,6 +56,11 @@ public class QueryUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("500 jpg", QueryUtils.createQueryString("500 jpg", true));
         assertEquals("file 42 name minus numbers",
                 QueryUtils.createQueryString("file and 42-name_minus #numbers", true));
+        
+        // test that string with a number + illegal characters + keyword too long
+        // is truncating the keyword, not the whole string.
+        query = QueryUtils.createQueryString("1920936_thisisaverylongkeywordwithanumbernadillegalcharacterthatwillbetruncated");
+        assertEquals("thisisaverylongkeywordwithanum", query);
     }
 
     
