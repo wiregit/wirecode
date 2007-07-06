@@ -2479,7 +2479,7 @@ ERROR_INVALID_SAVE_DIRECTORY=المجلد غير صالح لحفظ الملفا�
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=مجلد الحفظ لديك غير صالح. ربما تم إلغائه، أو أنه غير مسموح بالكتابة فيه، أو أن هناك مشكلة أخرى. من فضلك اختر مجلداً آخر.
 #### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save folder is invalid. You may not have permissions to write to the selected folder. LimeWire will revert to your previously selected folder.
 ERROR_INVALID_SAVE_DIRECTORY_SELECTION=مجلد الحفظ المحدد غير صالح. ربما غير مسموح لك بالكتابة للمجلد المحدد.سيعود LimeWire للمجلد الذي سبق تحديده.
-#### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files. Please use another folder or revert to the default.
+#### ERROR_INVALID_SHARED_DIRECTORY=The selected folder cannot be shared.  Please select another folder to share.
 ERROR_INVALID_SHARED_DIRECTORY=المجلد غير صالح لمشاركة الملفات. من فضلك استخدم مجلداً آخر أو استخدم الافتراضي.
 #### WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=Saving downloads to {0} may not function correctly.  To be sure downloads are saved properly you should save them to a sub-directory of {1}.  Would you like to choose another location?
 WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=حفظ التنزيلات إلى {0} ربما لم يؤدى بشكل صحيح.  لكي تتأكد أن التنزيلات تم حفظها بشكل تام يجب عليك حفظها إلى دليل فرعي لـ {1}.  هل تود اختيار موقع آخر?
