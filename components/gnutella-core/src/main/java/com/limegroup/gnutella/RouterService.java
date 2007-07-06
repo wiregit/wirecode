@@ -85,7 +85,6 @@ import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -575,7 +574,6 @@ public class RouterService {
             
             LOG.trace("START UpdateManager.instance");
             callback.componentLoading("UPDATE_MANAGER");
-            UpdateManager.instance();
             UpdateHandler.instance();
             LOG.trace("STOP UpdateManager.instance");
 

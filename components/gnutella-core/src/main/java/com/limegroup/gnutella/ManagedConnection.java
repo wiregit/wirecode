@@ -83,7 +83,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -457,7 +456,6 @@ public class ManagedConnection extends Connection
         // Start our OutputRunner.
         startOutput();
         // See if this connection had an old-style update msg.
-        UpdateManager.instance().checkAndUpdate(this);
     }
 
     /**

@@ -7,7 +7,6 @@ import org.limewire.io.NetworkUtils;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -68,12 +67,6 @@ public abstract class DefaultHeaders extends Properties {
             props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
         
         props.put(HeaderNames.X_PONG_CACHING, "0.1");
-        
-        UpdateManager updateManager = UpdateManager.instance();
-        String latestVersion = updateManager.getVersion();
-        // only send if we had a valid file on disk & its not @version@.
-        if(updateManager.isValid() && !latestVersion.equals("@version@"))
-            props.put(HeaderNames.X_VERSION, latestVersion);
     }
     
 }
