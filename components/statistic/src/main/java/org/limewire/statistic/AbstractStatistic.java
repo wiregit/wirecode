@@ -25,7 +25,7 @@ import org.limewire.service.ErrorService;
  * statistics.
  * <p>
  *See the Lime Wire Wiki for sample code using the 
- *<a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.org.limewire.statistic%3B">org.limewire.statistic</a>
+ *<a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.statistic">org.limewire.statistic</a>
  *package.
  */
 public abstract class AbstractStatistic implements Statistic, Inspectable {

@@ -6,7 +6,7 @@ package org.limewire.inspection;
  * {@link InspectionUtils}. When you implement this interface, you decided what
  * is returned as an <code>Object</code> via the <code>inspect</code> method.
  * <p>
- * See the Lime Wire Wiki for sample code using the <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.inspection%3B">
+ * See the Lime Wire Wiki for sample code using the <a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.inspection">
  * org.limewire.inspection</a> package.
  */
 public interface Inspectable {

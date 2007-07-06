@@ -13,7 +13,7 @@ package org.limewire.inspection;
  * inspect is not annotated with {@link InspectablePrimitive @InspectablePrimitive},
  * and is not annotated with {@link InspectableForSize @InspectableForSize}.
  * <p>
- * See the Lime Wire Wiki for sample code using the <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.inspection%3B">
+ * See the Lime Wire Wiki for sample code using the <a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.inspection">
  * org.limewire.inspection</a> package.
  * 
  */

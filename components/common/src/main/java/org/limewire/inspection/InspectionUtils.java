@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
  * with an annotation of {@link InspectableForSize @InspectableForSize} or 
  * {@link InspectablePrimitive @InspectablePrimitive}. 
  * <p>
- * See the Lime Wire Wiki for sample code using the <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.inspection%3B">
+ * See the Lime Wire Wiki for sample code using the <a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.inspection">
  * org.limewire.inspection</a> package.
  * 
  */

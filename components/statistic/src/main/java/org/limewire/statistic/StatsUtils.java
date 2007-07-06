@@ -18,7 +18,7 @@ import java.util.Map;
  * one data value in the first segment and five data values in the third segment.
  *<p>
  *See the Lime Wire Wiki for sample code using the 
- *<a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.org.limewire.statistic%3B">org.limewire.statistic</a>
+ *<a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.statistic">org.limewire.statistic</a>
  *package.
  */
 public class StatsUtils {
@@ -252,9 +252,9 @@ public class StatsUtils {
      * average, quartiles one and three, and second, third and fourth <a href=
      * "http://en.wikipedia.org/wiki/Central_moment">central moments</a>.
      * <p>
-     * See the Lime Wire Wiki for sample code using the 
-     * <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.org.limewire.statistic%3B">org.limewire.statistic</a>
-     * package.
+     *See the Lime Wire Wiki for sample code using the 
+     *<a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.statistic">org.limewire.statistic</a>
+     *package.
      * 
      * <table cellpadding="5">
      * <tr>
@@ -349,7 +349,7 @@ public class StatsUtils {
      * Extension of <code>Stats</code> using the double primitive.
      * <p>
      * See the Lime Wire Wiki for sample code using the 
-     * <a href="https://www.limewire.org/wiki/index.php?title=Package_org.limewire.org.limewire.statistic%3B">org.limewire.statistic</a>
+     * <a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.statistic">org.limewire.statistic</a>
      * package.
      */
     public static class DoubleStats extends Stats {
