@@ -275,11 +275,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.
 
-        // Expand the update.ver file.
-        File updateVer = new File(f, "gui/update.ver");
-        assertTrue(updateVer.exists());
-        Expand.expandFile(updateVer, _settingsDir);
-
         _baseDir.deleteOnExit();
     }
     
