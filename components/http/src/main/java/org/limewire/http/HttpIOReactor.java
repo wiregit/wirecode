@@ -28,7 +28,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
 
     public static final String IO_SESSION_KEY = "org.limewire.iosession";
 
-    static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
+    private static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
     
     private final HttpParams params;
     

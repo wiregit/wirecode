@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
@@ -20,6 +22,8 @@ import org.limewire.util.BufferUtils;
 public class HttpChannel implements ByteChannel, ChannelReadObserver,
         ChannelWriter {
 
+    private static final Log LOG = LogFactory.getLog(HttpChannel.class);
+    
     private final HttpIOSession session;
 
     private final IOEventDispatch eventDispatch;
@@ -109,17 +113,16 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void handleRead() throws IOException {
         if (!readInterest) {
-            // HttpIOSession turns off read interest before switching channels
-            // using AbstractNBSocket#setReadObserver(), do not delegate to http
-            // core in this case
+            LOG.error("Unexpected call to HttpChannel.handleRead(), turning read interest back off");
+            readSource.interestRead(false);
             return;
         }
-
+        
         eventDispatch.inputReady(session);
     }
 
     public void handleIOException(IOException e) {
-        HttpIOReactor.LOG.error("Unexpected exception", e);
+        LOG.error("Unexpected exception", e);
     }
 
     /**
@@ -166,6 +169,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         }
         
         if (!writeInterest) {
+            // HttpIOSession turns off read interest before switching channels
+            // using AbstractNBSocket#setWriteObserver(), do not delegate to
+            // httpcore in this case
             return false;
         }
 

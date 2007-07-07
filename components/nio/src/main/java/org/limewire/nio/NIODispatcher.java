@@ -962,6 +962,8 @@ public class NIODispatcher implements Runnable {
                 
                 // must do cancel & IOException outside of the lock.
                 if(cancel) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("Closing due to read timeout: " + attachment); 
                     cancel(key, attachment);
                     attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
                 }
