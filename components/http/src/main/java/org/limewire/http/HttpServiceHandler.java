@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.6 $
- * $Date: 2007-07-05 17:26:18 $
+ * $Revision: 1.7 $
+ * $Date: 2007-07-07 23:03:05 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpConnection;
 import org.apache.http.HttpEntity;
@@ -99,7 +101,9 @@ import org.limewire.nio.NIODispatcher;
  * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
  */
 public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttpServiceHandler {
-       
+
+    private static final Log LOG = LogFactory.getLog(HttpServiceHandler.class);
+    
     private ExecutorService executor = ExecutorsHelper.newProcessingQueue("HttpServiceHandler");
     
     public HttpServiceHandler(
@@ -140,7 +144,10 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         
         HttpRequest request = conn.getHttpRequest();
         HttpParamsLinker.link(request, this.params);
-        
+
+        if (LOG.isDebugEnabled()) 
+            LOG.debug("Received request: " + request.getRequestLine());
+
         ServerConnState connState = (ServerConnState) context.getAttribute(CONN_STATE);
 
         // Update connection state
@@ -283,9 +290,11 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         notifyResponseSent(conn);
 
         if (conn.isOpen()) {
+            LOG.debug("Response sent, ready to receive next request");
             conn.requestInput();
             // make sure any buffered requests are processed
             if (((DefaultNHttpServerConnection)conn).hasBufferedInput()) {
+                LOG.debug("Handling buffered requests");
                 ((DefaultNHttpServerConnection)conn).consumeInput(this);
             }
         }
@@ -481,6 +490,8 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         // LW
         connState.setResponse(response);
         
+        if (LOG.isDebugEnabled()) 
+            LOG.debug("Sending response: " + response.getStatusLine());
         conn.submitResponse(response);
 
         HttpEntity entity = response.getEntity();
