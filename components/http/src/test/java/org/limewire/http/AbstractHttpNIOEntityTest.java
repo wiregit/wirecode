@@ -29,11 +29,6 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         } catch (UnsupportedOperationException e) {
         }
         try {
-            entity.shutdown();
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException e) {
-        }
-        try {
             entity.writeTo(null);
             fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
