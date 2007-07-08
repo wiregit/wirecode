@@ -104,41 +104,77 @@ public class HttpIOSession implements IOSession {
         this.bufferStatus = status;
     }
 
-    public int getEventMask() {
+    public synchronized int getEventMask() {
         return eventMask;
     }
 
-    public void setEventMask(int ops) {
-        updateEventMask(ops);
-    }
-
-    private void updateEventMask(int ops) {
+    public synchronized void setEventMask(int ops) {
         if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + ops + " on closed session: " + this);
             return;
         }
+        
         this.eventMask = ops;
         channel.requestRead((ops & EventMask.READ) != 0);
         channel.requestWrite((ops & EventMask.WRITE) != 0);
+
+//        if ((ops & EventMask.READ) != 0) {
+//            System.err.println("read on");
+//        } else {
+//            System.err.println("read off");            
+//        }
+//        if ((ops & EventMask.WRITE) != 0) {
+//            System.err.println("write on");
+//        } else {
+//            System.err.println("write off");            
+//        }
     }
 
-    public void setEvent(int op) {
+    public synchronized void setEvent(int op) {
+        if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + op + " on closed session: " + this);
+            return;
+        }
+
+        this.eventMask |= op;
+        if ((op & EventMask.READ) != 0) {
+            channel.requestRead(true);
+        }
+        if ((op & EventMask.WRITE) != 0) {
+            channel.requestWrite(true);
+        }        
+        
 //        if ((op & EventMask.READ) != 0) {
 //            System.err.println("read on");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
 //            System.err.println("write on");
 //        }
-        updateEventMask(eventMask | op);
     }
 
-    public void clearEvent(int op) {
+    public synchronized void clearEvent(int op) {
+        if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + op + " on closed session: " + this);
+            return;
+        }
+
+        this.eventMask &= ~op;
+        if ((op & EventMask.READ) != 0) {
+            channel.requestRead(false);
+        }
+        if ((op & EventMask.WRITE) != 0) {
+            channel.requestWrite(false);
+        }
+
 //        if ((op & EventMask.READ) != 0) {
 //            System.err.println("read off");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
 //            System.err.println("write off");
 //        }
-        updateEventMask(eventMask & ~op);
     }
 
     public void setSocketTimeout(int timeout) {
