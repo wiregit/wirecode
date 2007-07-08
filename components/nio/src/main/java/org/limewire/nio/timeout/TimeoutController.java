@@ -68,12 +68,15 @@ public class TimeoutController {
     
     /** Keep an expireTime & timeoutable together as one happy couple. */
     private static class Timeout implements Comparable<Timeout> {
-        private long expireTime;
-        private Timeoutable timeoutable;
-        private long timeoutLength;
+        private final long expireTime;
+        private final Timeoutable timeoutable;
+        private final long timeoutLength;
         
         Timeout(Timeoutable timeoutable, long now, long timeout) {
-            this.expireTime = now + timeout;
+            if (timeout > 0 && Long.MAX_VALUE - timeout < now)
+                this.expireTime = Long.MAX_VALUE;
+            else
+                this.expireTime = now + timeout;
             this.timeoutLength = timeout;
             this.timeoutable = timeoutable;
         }
