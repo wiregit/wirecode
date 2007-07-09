@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.uploader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,6 +17,15 @@ import org.limewire.nio.timeout.NIOWatchdog;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RequestCache;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -32,15 +41,14 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
 /*
- * TODO rename this class to HTTPUploadManagerQueueingTest
+ * Tests queuing and stalled upload timeouts.
  */
 @SuppressWarnings("null")
-public class UploaderTest extends BaseTestCase {
+public class UploadQueueingTest extends BaseTestCase {
 
     //private static RouterService rs;
     private static HTTPUploadManager upManager;
@@ -52,12 +60,12 @@ public class UploaderTest extends BaseTestCase {
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
     
-    public UploaderTest(String name) {
+    public UploadQueueingTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(UploaderTest.class);
+        return buildTestSuite(UploadQueueingTest.class);
     }
 
     public static void main(String argv[]) {
