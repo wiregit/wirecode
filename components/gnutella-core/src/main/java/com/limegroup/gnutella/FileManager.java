@@ -1017,8 +1017,12 @@ public abstract class FileManager {
                 // to remove any of its children, so we return immediately.
                 return;
             } else if(parent == null) {
-                if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
+                // Add the directory in the exclude list if it wasn't in the DIRECTORIES_NOT_TO_SHARE,
+                // or if it was *and* a parent folder of it is fully shared.
+                boolean explicitlyShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
+                if(!explicitlyShared || isCompletelySharedDirectory(folder.getParentFile()))
                     _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
+                
             }
             
             // note that if(parent != null && not a root share)

@@ -1,5 +1,7 @@
  package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
@@ -13,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -39,7 +42,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 public class FileManagerTest extends LimeTestCase {
 
@@ -85,7 +87,7 @@ public class FileManagerTest extends LimeTestCase {
 		
         // ensure each test gets a brand new content manager.
         PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
-	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 	}
 	
 	public void tearDown() {
@@ -921,6 +923,77 @@ public class FileManagerTest extends LimeTestCase {
 			assertEquals(1, fman.getSharedFileDescriptors(dir).length);
 		}
 	}
+	
+    public void testExplicitlySharedSubfolderUnsharedDoesntStayShared() throws Exception {
+        File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+                "recursive1",
+                "recursive1/sub1");
+        
+        assertEquals(2, dirs.length);
+        assertEquals("sub1", dirs[1].getName()); // make sure sub1 is second!
+        
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+        }
+        
+        fman.removeFolderIfShared(_sharedDir);
+        fman.addSharedFolder(dirs[1]);
+        fman.addSharedFolder(dirs[0]);
+        
+        waitForLoad();
+        
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        
+        // Now unshare sub1
+        fman.removeFolderIfShared(dirs[1]);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[1]).length);
+        
+        // Now reload fman and make sure it's still not shared!
+        fman.loadSettingsAndWait(10000);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[1]).length);
+    }
+    
+    public void testExplicitlySharedSubSubfolderUnsharedDoesntStayShared() throws Exception {
+        File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+                "recursive1",
+                "recursive1/sub1",
+                "recursive1/sub1/sub2");
+        
+        assertEquals(3, dirs.length);
+        assertEquals("sub2", dirs[2].getName()); // make sure sub2 is third!
+        
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+        }
+        
+        fman.removeFolderIfShared(_sharedDir);
+        fman.addSharedFolder(dirs[2]);
+        fman.addSharedFolder(dirs[0]);
+        
+        waitForLoad();
+        
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[2]).length);
+        
+        // Now unshare sub2
+        fman.removeFolderIfShared(dirs[2]);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[2]).length);
+        
+        // Now reload fman and make sure it's still not shared!
+        fman.loadSettingsAndWait(10000);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[2]).length);
+    }
+
     
     /**
      * Tests whether the FileManager.isSensitiveDirectory(File) function is functioning properly. 
@@ -1153,23 +1226,14 @@ public class FileManagerTest extends LimeTestCase {
             return this;
         }
     }
-    
-    public class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized(loaded) {
-                loaded.notify();
-            }
-        }
-    }       
 
     protected void waitForLoad() {
-        synchronized(loaded) {
-            try {
-                fman.loadSettings();
-                loaded.wait(10000);
-            } catch (InterruptedException e) {
-                //good.
-            }
+        try {
+            fman.loadSettingsAndWait(10000);
+        } catch(InterruptedException e) {
+            fail(e);
+        } catch(TimeoutException te) {
+            fail(te);
         }
     }    
     

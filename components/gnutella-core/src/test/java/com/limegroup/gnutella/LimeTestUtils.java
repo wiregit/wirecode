@@ -122,7 +122,9 @@ public class LimeTestUtils {
 		List<File> list = new ArrayList<File>(dirs.length);
 		for (String name : dirs) {
 			File dir = new File(parent, name);
-			AssertComparisons.assertTrue(dir.mkdirs());
+			AssertComparisons.assertTrue(dir.mkdirs() || dir.exists());
+			// Make sure it's clean!
+			deleteFiles(dir.listFiles());
 			list.add(dir);
 			while (!dir.equals(parent)) {
 				dir.deleteOnExit();
@@ -130,5 +132,11 @@ public class LimeTestUtils {
 			}
 		}
 		return list.toArray(new File[list.size()]);
+	}
+	
+	/** Deletes all files listed. */
+	public static void deleteFiles(File...files) {
+	    for(int i = 0; i < files.length; i++)
+	        files[i].delete();
 	}
 }
