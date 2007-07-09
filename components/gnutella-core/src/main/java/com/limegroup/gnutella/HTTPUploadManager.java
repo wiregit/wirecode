@@ -592,8 +592,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public int measuredUploadSpeed() {
-        assert started;
-        
         // Note that no lock is needed.
         return highestSpeed;
     }
