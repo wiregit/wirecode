@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -29,7 +32,9 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RouterService;
@@ -146,21 +151,22 @@ public class UploadTest extends LimeTestCase {
         File testDir = CommonUtils.getResourceFile(testDirName);
         // we must use a separate copy method
         // because the filename has a # in it which can't be a resource.
-        LimeTestUtils.copyFile(new File(testDir, fileName), new File(
-                _sharedDir, fileName));
-        LimeTestUtils.copyFile(new File(testDir, otherFileName), new File(
-                _sharedDir, otherFileName));
-        assertTrue("Copying resources failed", new File(_sharedDir, fileName)
-                .exists());
-        assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
-                .length());
+        File target = new File(_sharedDir, fileName);
+        LimeTestUtils.copyFile(new File(testDir, fileName), target);
+        target = new File(_sharedDir, otherFileName);
+        LimeTestUtils.copyFile(new File(testDir, otherFileName), target);
+        assertTrue("Copying resources failed", target.exists());
+        assertGreaterThan("Expected file to contain data", 0, target.length());
 
         if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
             // Thread.sleep(2000);
         }
 
+        // make sure the FileDesc objects in file manager are up-to-date 
         FileManager fm = RouterService.getFileManager();
+        fm.loadSettingsAndWait(2000);
+        
         File incFile = new File(_incompleteDir, incName);
         fm.removeFileIfShared(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
@@ -1030,22 +1036,6 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
-    public void testDownloadEmptyFile() throws Exception {
-        // clear update file
-        File file = new File(CommonUtils.getUserSettingsDir(), "update.xml");
-        FileOutputStream out = new FileOutputStream(file);
-        out.close();
-        
-        GetMethod method = new GetMethod("/update.xml");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertEquals("", method.getResponseBodyAsString());
-        } finally {
-            method.releaseConnection();
-        }
-    }
-    
     public void testThexHeader() throws Exception {
         initThexTree();
 
@@ -1108,7 +1098,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-
+    
     public void testBadGetTreeRequest() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2X?" + badHash);
         try {
@@ -1172,6 +1162,57 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
+    public void testDownloadChangedFile() throws Exception {
+        // modify shared file and make sure it gets new timestamp
+        Thread.sleep(1000);
+        File file = new File(_sharedDir, fileName);
+        FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);        
+        FileOutputStream out = new FileOutputStream(file);
+        try {
+            out.write("abc".getBytes());
+        } finally {
+            out.close();
+        }
+        assertNotEquals(file.lastModified(), fd.lastModified());
+
+        // catch notification when file is reshared
+        final CountDownLatch latch = new CountDownLatch(1);
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent event) {
+                if (event.isAddEvent()) {
+                    latch.countDown();
+                }
+            }            
+        };
+        try {
+            RouterService.getFileManager().addFileEventListener(listener);
+
+            GetMethod method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
+            try {
+                int response = client.executeMethod(method);
+                assertEquals(HttpStatus.SC_NOT_FOUND, response);
+            } finally {
+                method.releaseConnection();
+            }
+
+            latch.await(500, TimeUnit.MILLISECONDS);
+
+            fd = RouterService.getFileManager().getFileDescForFile(file);
+            assertNotNull(fd);
+            method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
+            try {
+                int response = client.executeMethod(method);
+                assertEquals(HttpStatus.SC_OK, response);
+                assertEquals("abc", method.getResponseBodyAsString());
+            } finally {
+                method.releaseConnection();
+            }
+        } finally {
+            RouterService.getFileManager().removeFileEventListener(listener);
+        }
+        
+    }
+    
     private static class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized (loaded) {

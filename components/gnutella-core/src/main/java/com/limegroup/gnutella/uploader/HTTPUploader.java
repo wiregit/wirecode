@@ -126,7 +126,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
                 setUploadBegin(request.getLow());
                 setUploadEnd(request.getHigh() + 1);
             } else {
-                if (!ifd.isRangeSatisfiable((int) first, (int) last - 1)) {
+                if (!ifd.isRangeSatisfiable(first, last - 1)) {
                     return false;
                 } 
             }

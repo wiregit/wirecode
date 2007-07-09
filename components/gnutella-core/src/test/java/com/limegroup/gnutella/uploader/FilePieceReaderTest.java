@@ -164,6 +164,17 @@ public class FilePieceReaderTest extends BaseTestCase {
         assertEquals(0, cache.buffers);
     }
 
+    public void testInvalidSize() throws Exception {
+        createFile(0);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        try {
+            reader = new FilePieceReader(cache, file, 0, 10, listener);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+    
     public void testMultipleConcurrentReads() throws Exception {
         MockByteBufferCache cache = new MockByteBufferCache();
         class Runner implements Runnable {

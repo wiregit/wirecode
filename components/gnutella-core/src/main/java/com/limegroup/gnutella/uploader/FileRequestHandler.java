@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -159,7 +160,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return uploader;
         }
-
+        
         if (!fileRequest.isThexRequest()) {
             if (rangeHeaderInterceptor.hasRequestedRanges()) {
                 Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
@@ -423,30 +424,41 @@ public class FileRequestHandler implements HttpRequestHandler {
     }
 
     private boolean validateHeaders(HTTPUploader uploader, boolean thexRequest) {
-        FileDesc fd = uploader.getFileDesc();
-
+        final FileDesc fd = uploader.getFileDesc();
+        assert fd != null;
+        
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
-        if (fd != null && urn != null && !fd.containsUrn(urn)) {
+        if (urn != null && !fd.containsUrn(urn)) {
             if (LOG.isDebugEnabled())
                 LOG.debug(uploader + " wrong content urn");
             return false;
         }
 
         // handling THEX Requests
-        if (thexRequest && uploader.getFileDesc().getHashTree() == null) {
+        if (thexRequest && fd.getHashTree() == null) {
             return false;
         }
 
-        // Special handling for incomplete files...
+        // special handling for incomplete files
         if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
                 return false;
             }
 
-            // cannot service THEXRequests for partial files
+            // cannot service THEX requests for partial files
             if (thexRequest) {
+                return false;
+            }
+        } else {
+            // check if fd is up-to-date
+            if (fd.getFile().lastModified() != fd.lastModified()) {
+                File file = fd.getFile();
+                if (LOG.isDebugEnabled())
+                    LOG.debug("File has changed on disk, resharing: " + file);
+                fileManager.removeFileIfShared(file);
+                fileManager.addFileIfShared(file);
                 return false;
             }
         }
