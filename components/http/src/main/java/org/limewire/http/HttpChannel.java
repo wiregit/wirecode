@@ -32,7 +32,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     
     private InterestReadableByteChannel readSource;
 
-    private InterestWritableByteChannel writeSource;
+    private volatile InterestWritableByteChannel writeSource;
 
     private boolean writeInterest;
 
@@ -95,11 +95,16 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void closeWhenBufferedOutputHasBeenFlushed() {
-        if (!writeSource.hasBufferedOutput()) {
-            session.shutdown();
+        InterestWritableByteChannel source = writeSource;
+        if (source != null) {
+            if (!source.hasBufferedOutput()) {
+                session.shutdown();
+            } else {
+                pendingClose = true;        
+                requestWrite(true);
+            }
         } else {
-            pendingClose = true;        
-            requestWrite(true);
+            session.shutdown();
         }
     }
 
