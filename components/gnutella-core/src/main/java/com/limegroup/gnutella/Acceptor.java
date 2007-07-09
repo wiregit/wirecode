@@ -581,7 +581,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             }
 
             // Dispatch asynchronously if possible.
-            if (client instanceof NIOMultiplexor) // supports non-blocking reads
+            if (client instanceof NIOMultiplexor) {// supports non-blocking reads
                 ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(RouterService.getConnectionDispatcher(), client, allowedProtocol) {
                     @Override
                     public void shutdown() {
@@ -589,7 +589,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                         HTTPStat.CLOSED_REQUESTS.incrementStat();
                     }
                 });
-            else
+            } else {
                 HTTPStat.CLOSED_REQUESTS.incrementStat();
                 ThreadExecutor.startThread(new BlockingConnectionDispatcher(RouterService.getConnectionDispatcher(), client, allowedProtocol) {
                     @Override
@@ -598,6 +598,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                         HTTPStat.CLOSED_REQUESTS.incrementStat();
                     }                    
                 }, "ConnectionDispatchRunner");
+            }
         }
     }
     

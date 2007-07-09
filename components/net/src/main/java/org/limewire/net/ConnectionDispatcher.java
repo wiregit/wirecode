@@ -20,7 +20,7 @@ public class ConnectionDispatcher {
     /**
      * Mapping of first protocol word -> SocketAcceptor
      */
-    private static final Map<String, Delegator> protocols = 
+    private final Map<String, Delegator> protocols = 
     	Collections.synchronizedMap(new HashMap<String, Delegator>());
     
     /** 
@@ -28,6 +28,9 @@ public class ConnectionDispatcher {
      * LOCKING: protocols.
      */
     private int longestWordSize = 0;
+    
+    public ConnectionDispatcher() {
+    }
     
     /**
      * Retrieves the maximum size a word can have.
