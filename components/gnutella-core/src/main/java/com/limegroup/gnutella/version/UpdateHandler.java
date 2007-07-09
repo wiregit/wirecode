@@ -11,11 +11,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.Connectable;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.util.CommonUtils;
@@ -40,6 +44,8 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
@@ -51,11 +57,17 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Handles queueing new data for parsing and keeping track of which current
  * version is stored in memory & on disk.
  */
-public class UpdateHandler {
+public class UpdateHandler implements HttpClientListener {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
     
     private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    
+    /** If we haven't had new updates in this long, schedule http failover */
+    private static final long ONE_MONTH = 10L * THREE_DAYS;
+    
+    /** URL to get the new version message from */
+    private static final String HTTP_FAILOVER = "http://update.limewire.com/version.def";
     
     /**
      * The filename on disk where data is stored.
@@ -128,6 +140,9 @@ public class UpdateHandler {
     private long _nextDownloadTime;
     
     private boolean _killingObsoleteNecessary;
+    
+    /** If an HTTP failover update is in progress */
+    private final AtomicBoolean httpUpdate = new AtomicBoolean(false);
     
     /**
      * The time we'll notify the gui about an update with URL
@@ -226,18 +241,20 @@ public class UpdateHandler {
         if(data != null) {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
-                if(!fromDisk)
+                if(!fromDisk && handler != null)
                     RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
+                if (fromDisk || uc.getId() <= _lastId)
+                    doHttpFailover(uc);
                 if(uc.getId() > _lastId)
                     storeAndUpdate(data, uc, fromDisk);
             } else {
-                if(!fromDisk)
+                if(!fromDisk && handler != null)
                     RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
-            if(!fromDisk)
+            if(!fromDisk && handler != null)
                 RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
         }
@@ -252,6 +269,8 @@ public class UpdateHandler {
         _lastId = uc.getId();
         
         _lastTimestamp = uc.getTimestamp();
+        UpdateSettings.LAST_UPDATE_TIMESTAMP.setValue(_lastTimestamp);
+        
         long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
         long random = Math.abs(RANDOM.nextLong() % delay);
         _nextDownloadTime = _lastTimestamp + random;
@@ -259,6 +278,10 @@ public class UpdateHandler {
         _lastBytes = data;
         
         if(!fromDisk) {
+            // cancel any http and pretend we just updated.
+            httpUpdate.set(false);
+            UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
+            
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
             CapabilitiesVM.reconstructInstance();
             RouterService.getConnectionManager().sendUpdatedCapabilities();
@@ -323,6 +346,79 @@ public class UpdateHandler {
             RouterService.getCallback().updateAvailable(updateInfo);
         } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
+    }
+
+    /**
+     * begins an http failover.
+     */
+    private void doHttpFailover(UpdateCollection uc) {
+        LOG.debug("checking for http failover");
+        long monthAgo = clock.now() - ONE_MONTH;
+        if (UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue() < monthAgo && // more than a month ago
+                UpdateSettings.LAST_HTTP_FAILOVER.getValue() < monthAgo &&  // and last failover too
+                !httpUpdate.getAndSet(true)) { // and we're not already doing a failover
+            
+            long when = (RouterService.isConnected() ? 1 : 5 ) * 60 * 1000;
+            if (LOG.isDebugEnabled())
+                LOG.debug("scheduling http failover in "+when);
+            
+            RouterService.schedule(new Runnable() {
+                public void run() {
+                    launchHTTPUpdate();
+                }
+            }, when, 0);
+        }
+    }
+
+    /**
+     * Launches an http update to the failover url.
+     */
+    private void launchHTTPUpdate() {
+        if (!httpUpdate.get())
+            return;
+        LOG.debug("about to issue http request method");
+        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(HTTP_FAILOVER));
+        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
+        get.setFollowRedirects(true);
+        RouterService.getHttpExecutor().execute(get,this, 10000);
+    }
+
+    public boolean requestComplete(HttpMethod method) {
+        httpUpdate.set(false);
+        LOG.debug("http request method succeeded");
+        
+        // remember we made an attempt even if it didn't succeed
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
+        byte [] inflated = null;
+        try {
+            if (method.getStatusCode() < 200 || method.getStatusCode() >= 300) 
+                throw new IOException("bad code "+method.getStatusCode());
+
+            byte [] resp = method.getResponseBody();
+            if (resp == null || resp.length == 0)
+                throw new IOException("bad body");
+
+            // inflate the response and process.
+            inflated = IOUtils.inflate(resp);
+        } catch (IOException failed) {
+            LOG.warn("couldn't fetch data ",failed);
+            return false;
+        } finally {
+            RouterService.getHttpExecutor().releaseResources(method);
+        }
+        
+        handleNewData(inflated, null);
+        // no more requests
+        return false;
+    }
+    
+    public boolean requestFailed(HttpMethod m, IOException exc) {
+        LOG.warn("http failover failed",exc);
+        httpUpdate.set(false);
+        RouterService.getHttpExecutor().releaseResources(m);
+        // nothing we can do.
+        return false;
     }
     
     /**

@@ -95,4 +95,16 @@ public class UpdateSettings extends LimeProps {
                 "http://www.limewire.com/index.jsp/pro&29",
                 "0.111111"},
                 "UpdateSettings.proAds");
+    
+    /**
+     * The timestamp of the last update message we've received.
+     */
+    public static final LongSetting LAST_UPDATE_TIMESTAMP = 
+        FACTORY.createLongSetting("LAST_UPDATE_TIMESTAMP", -1L);
+    
+    /**
+     * The last time we checked the failover url for updates.
+     */
+    public static final LongSetting LAST_HTTP_FAILOVER = 
+        FACTORY.createLongSetting("LAST_HTTP_FAILOVER", -1L);
 }
