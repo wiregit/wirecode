@@ -37,11 +37,11 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
-@SuppressWarnings("unchecked")
-public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class FileManagerTest extends LimeTestCase {
 
     protected static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
@@ -372,7 +372,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());    
         
         // add one incomplete file and make sure the numbers go up.
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
         fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
 
@@ -389,7 +389,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with another hash, it should be added.
-        urns = new HashSet();
+        urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
         fman.addIncompleteFile(new File("c"), urns, "c", 0, new VerifyingFile(0));
 
@@ -406,10 +406,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
         fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
-        urns = new HashSet();
+        urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
         fman.addIncompleteFile(new File("b"), urns, "b", 0, new VerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
@@ -432,7 +432,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
@@ -455,7 +455,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected pending",
             0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
@@ -504,16 +504,16 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 			
 			// first set does not include any requested types
 			// third includes both
-			Set requestedUrnSet1 = new HashSet();
-			Set requestedUrnSet2 = new HashSet();
-			Set requestedUrnSet3 = new HashSet();
+			Set<URN.Type> requestedUrnSet1 = new HashSet<URN.Type>();
+			Set<URN.Type> requestedUrnSet2 = new HashSet<URN.Type>();
+			Set<URN.Type> requestedUrnSet3 = new HashSet<URN.Type>();
 			requestedUrnSet1.add(URN.Type.ANY_TYPE);
 			requestedUrnSet2.add(URN.Type.SHA1);
 			requestedUrnSet3.add(URN.Type.ANY_TYPE);
 			requestedUrnSet3.add(URN.Type.SHA1);
 			Set[] requestedUrnSets = {URN.Type.NO_TYPE_SET, requestedUrnSet1, 
 									  requestedUrnSet2, requestedUrnSet3};
-			Set queryUrnSet = new HashSet();
+			Set<URN> queryUrnSet = new UrnSet();
 			queryUrnSet.add(urn);
 			for(int j = 0; j < requestedUrnSets.length; j++) {
 				QueryRequest qr = QueryRequest.createQuery(queryUrnSet);
@@ -554,8 +554,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 			if ( hits.length != 1 ) continue;
 			checked = true;
 			assertEquals("responses should be equal", testResponse, hits[0]);
-			Set urnSet = hits[0].getUrns();
-			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
+			Set<URN> urnSet = hits[0].getUrns();
+			URN[] responseUrns = urnSet.toArray(new URN[0]);
 			// this is just a sanity check
 			assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);		
 		}
