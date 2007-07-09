@@ -1053,6 +1053,24 @@ public abstract class FileManager {
         }
     }
     
+	/**
+	 * Adds a set of folders to be shared and a black list of subfolders that should
+	 * not be shared.
+	 * 
+	 * @param folders set of folders to  be shared
+	 * @param blackListedSet the subfolders or subsubfolders that are not to be
+	 * shared
+	 */
+	public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
+		if (folders.isEmpty()) {
+			throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
+		}
+	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListedSet);
+	    for (File folder : folders) {
+	    	addSharedFolder(folder);
+	    }
+	}
+	
     /**
      * Adds a given folder to be shared.
      */

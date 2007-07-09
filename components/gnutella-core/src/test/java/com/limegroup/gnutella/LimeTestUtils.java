@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.limewire.nio.NIODispatcher;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
 
 public class LimeTestUtils {
@@ -100,4 +103,32 @@ public class LimeTestUtils {
         }
     }
 
+    
+    /**
+     * Creates subdirs in tmp dir and ensures that they are deleted on JVM
+     * exit. 
+     */
+    public static File[] createTmpDirs(String... dirs) {
+		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+		AssertComparisons.assertTrue(tmpDir.isDirectory());
+		return createDirs(tmpDir, dirs);
+	}
+	
+    /**
+     * Creates <code>dirs</code> as subdirs of <code>parent</code> and ensures
+     * that they are deleted on JVM exit. 
+     */
+	public static File[] createDirs(File parent, String... dirs) {
+		List<File> list = new ArrayList<File>(dirs.length);
+		for (String name : dirs) {
+			File dir = new File(parent, name);
+			AssertComparisons.assertTrue(dir.mkdirs());
+			list.add(dir);
+			while (!dir.equals(parent)) {
+				dir.deleteOnExit();
+				dir = dir.getParentFile();
+			}
+		}
+		return list.toArray(new File[list.size()]);
+	}
 }

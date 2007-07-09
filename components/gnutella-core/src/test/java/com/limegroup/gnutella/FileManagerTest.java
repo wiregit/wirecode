@@ -892,6 +892,35 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 		assertEquals(3, fman.getNumFiles());
 		assertEquals(result.getFileDescs()[0], fman.get(2));
 	}
+	
+	public void testAddSharedFoldersWithBlackList() throws Exception {
+		File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+				"recursive1",
+				"recursive1/sub1",
+				"recursive1/sub1/subsub",
+				"recursive1/sub2",
+				"recursive2");
+		
+		// create files in all folders, so we can see if they were shared
+		for (int i = 0; i < dirs.length; i++) {
+			createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+		}
+		
+		List<File> whiteList = Arrays.asList(dirs[0], dirs[1], dirs[4]);
+		List<File> blackList = Arrays.asList(dirs[2], dirs[3]);
+		fman.addSharedFolders(new HashSet<File>(whiteList), new HashSet<File>(blackList));
+		waitForLoad();
+		
+		// assert blacklist worked
+		for (File dir : blackList) {
+			assertEquals(0, fman.getSharedFileDescriptors(dir).length);
+		}
+		
+		// assert others were shared
+		for (File dir : whiteList) {
+			assertEquals(1, fman.getSharedFileDescriptors(dir).length);
+		}
+	}
     
     /**
      * Tests whether the FileManager.isSensitiveDirectory(File) function is functioning properly. 
