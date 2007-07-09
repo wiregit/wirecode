@@ -113,17 +113,6 @@ public class AudioPlayerEventTest extends BaseTestCase {
         assertEquals(event.getValue(), 1.0);
     }
     
-    public void testPan() {
-        AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.PAN, -1, 1.0, "description");
-        
-        assertEquals(event.getDescription(), "description");
-        assertEquals(event.getSource(), "object");
-        assertEquals(event.getState(), PlayerState.PAN);
-        assertEquals(event.getPosition(), -1);
-        assertEquals(event.getValue(), 1.0);
-    }
-    
     public void testGain() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
                 PlayerState.GAIN, -1, 1.0, "description");

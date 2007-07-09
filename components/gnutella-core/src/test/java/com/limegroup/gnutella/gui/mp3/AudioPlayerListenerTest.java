@@ -52,13 +52,13 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     public void testProgress(){
-        player.fireProgress(-1, -1, null, null);
+        player.fireProgress(-1, -1);
         
         assertEquals(1, listener.recievedEvents.size());
         
         player.removeAudioPlayerListener(listener);
         
-        player.fireProgress(-1, -1, null, null);
+        player.fireProgress(-1, -1);
         
         assertEquals(1, listener.recievedEvents.size());
     }
@@ -71,8 +71,8 @@ public class AudioPlayerListenerTest extends BaseTestCase {
             recievedEvents.add(new opened(audioSource,properties));
         }
 
-        public void progress(int bytesread, long microseconds, AudioBuffer buffer, Map<String, Object> properties) {
-            recievedEvents.add(new progress(bytesread,microseconds,buffer,properties));
+        public void progress(int bytesread, long microseconds) {
+            recievedEvents.add(new progress(bytesread,microseconds));
         }
 
         public void stateChange(AudioPlayerEvent event) {
@@ -86,11 +86,9 @@ public class AudioPlayerListenerTest extends BaseTestCase {
         AudioBuffer buff;
         Map<String,Object>m;
         
-        public progress(int bytes, long sec, AudioBuffer  buffer, Map<String,Object> props){
+        public progress(int bytes, long sec){
             b = bytes;
             s = sec;
-            buff = buffer;
-            m = props;
         }
     }
     
