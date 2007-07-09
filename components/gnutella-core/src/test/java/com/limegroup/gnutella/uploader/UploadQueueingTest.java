@@ -59,6 +59,7 @@ public class UploadQueueingTest extends BaseTestCase {
     private RemoteFileDesc rfd4;
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
+    private int savedNIOWatchdogDelay;
     
     public UploadQueueingTest(String name) {
         super(name);
@@ -75,6 +76,11 @@ public class UploadQueueingTest extends BaseTestCase {
     @Override
     public void setUp() throws Exception {
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+        
+        // make sure uploads are not killed because they stall
+        // this is explicitly tested by testStalledUploader()
+        savedNIOWatchdogDelay = NIOWatchdog.DEFAULT_DELAY_TIME; 
+        NIOWatchdog.DEFAULT_DELAY_TIME = Integer.MAX_VALUE;
         
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         List<FileDesc> descs = new ArrayList<FileDesc>();
@@ -141,6 +147,8 @@ public class UploadQueueingTest extends BaseTestCase {
     
     @Override
     public void tearDown() {
+        NIOWatchdog.DEFAULT_DELAY_TIME = savedNIOWatchdogDelay;
+        
         RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
         
         upManager.cleanup();
