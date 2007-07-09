@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.apache.http.nio.reactor.SessionBufferStatus;
 
 public class HttpIOSessionTest extends TestCase {
 
@@ -77,6 +78,76 @@ public class HttpIOSessionTest extends TestCase {
         assertTrue(channel.isWriteInterest());
     }
 
+    public void testConstructor() {
+        try {
+            new HttpIOSession(null);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+        
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        assertSame(socket, session.getSocket());
+    }
+    
+    public void testAttributes() {
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        
+        assertNull(session.getAttribute("foo"));
+        session.setAttribute("foo", "bar");
+        assertEquals("bar", session.getAttribute("foo"));
+        session.setAttribute("foo", "baz");
+        assertEquals("baz", session.getAttribute("foo"));
+        assertNull(session.getAttribute("baz"));
+        session.removeAttribute("bar");
+        assertNull(session.getAttribute("bar"));
+    }
+
+    public void testSocketTimeout() throws Exception {
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        
+        assertEquals(0, session.getSocketTimeout());
+        session.setSocketTimeout(100);
+        assertEquals(100, session.getSocketTimeout());
+        assertEquals(100, socket.getSoTimeout());
+    }
+
+    public void testBufferStatus() throws Exception {
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        
+        assertFalse(session.hasBufferedInput());
+        assertFalse(session.hasBufferedOutput());
+        
+        StubSessionBufferStatus status = new StubSessionBufferStatus();
+        session.setBufferStatus(status);
+        assertFalse(session.hasBufferedInput());
+        assertFalse(session.hasBufferedOutput());
+        status.bufferedInput = true;
+        assertTrue(session.hasBufferedInput());
+        assertFalse(session.hasBufferedOutput());
+        status.bufferedInput = false;
+        assertFalse(session.hasBufferedInput());
+        assertFalse(session.hasBufferedOutput());
+        status.bufferedOutput = true;
+        assertFalse(session.hasBufferedInput());
+        assertTrue(session.hasBufferedOutput());
+        status.bufferedOutput = false;
+        assertFalse(session.hasBufferedInput());
+        assertFalse(session.hasBufferedOutput());
+
+    }
+
+    public void testShutdown() {        
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        assertFalse(session.isClosed());
+        session.shutdown();
+        assertTrue(session.isClosed());
+    }
+
     private static class StubHttpChannel extends HttpChannel {
 
         public StubHttpChannel(HttpIOSession session,
@@ -86,4 +157,19 @@ public class HttpIOSessionTest extends TestCase {
         
     }
 
+    private static class StubSessionBufferStatus implements SessionBufferStatus {
+
+        private boolean bufferedOutput;
+        private boolean bufferedInput;
+
+        public boolean hasBufferedInput() {
+            return bufferedInput;
+        }
+
+        public boolean hasBufferedOutput() {
+            return bufferedOutput;
+        }
+        
+    }
+    
 }

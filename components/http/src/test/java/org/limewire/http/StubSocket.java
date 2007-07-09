@@ -14,6 +14,9 @@ public class StubSocket extends AbstractNBSocket {
 
     public StubSocket() {
         channel = new StubChannel();
+        
+        setInitialReader();
+        setInitialWriter();
     }
     
     @Override
@@ -28,12 +31,12 @@ public class StubSocket extends AbstractNBSocket {
 
     @Override
     protected InterestReadableByteChannel getBaseReadChannel() {
-        return null;
+        return new StubReadableChannel();
     }
 
     @Override
     protected InterestWritableByteChannel getBaseWriteChannel() {
-        return null;
+        return new StubWriteableChannel();
     }
 
     @Override

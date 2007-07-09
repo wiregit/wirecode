@@ -14,7 +14,10 @@ public class StubWriteableChannel implements InterestWritableByteChannel {
     public StubWriteableChannel(int size) {
         resize(size);
     }
-    
+
+    public StubWriteableChannel() {
+    }
+
     public ByteBuffer getBuffer() {
         return buffer;
     }

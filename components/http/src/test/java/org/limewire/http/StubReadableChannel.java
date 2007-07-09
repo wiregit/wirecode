@@ -24,6 +24,9 @@ public class StubReadableChannel implements InterestReadableByteChannel {
         this(data.getBytes());
     }
 
+    public StubReadableChannel() {
+    }
+
     public void interestRead(boolean status) {
     }
 
