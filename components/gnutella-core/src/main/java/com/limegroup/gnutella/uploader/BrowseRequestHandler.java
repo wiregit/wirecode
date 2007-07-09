@@ -53,7 +53,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
                 context, UploadType.BROWSE_HOST, "Browse-File");
         uploader.setState(UploadStatus.BROWSE_HOST);
         
-        if (!HttpCoreUtils.hasHeader(request, "Accept",
+        if (!HttpCoreUtils.hasHeaderListValue(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {
             if (LOG.isDebugEnabled())
                 LOG.debug("Browse request is missing Accept header");
