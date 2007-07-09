@@ -903,14 +903,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         file = new File("lksfjlsakjfsldfjak.slfkjs");
         assertFalse("random file should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
         
-        //  check that system roots are sensitive directories
-        File[] faRoots = File.listRoots();
-        if(faRoots != null && faRoots.length > 0) {
-            for(int i = 0; i < faRoots.length; i++) {
-                assertTrue("root directory "+faRoots[i]+ " should be a sensitive directory", FileManager.isSensitiveDirectory(faRoots[i]));
-            }
-        }
-        
         //  check that the user's home dir is a sensitive directory
         String userHome = System.getProperty("user.home");
         assertTrue("user's home directory should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome)));
@@ -957,6 +949,19 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         } finally {
             //  revert the os.name system property back to normal 
             setOSName(realOS);
+        }
+    }
+    
+    public void testIsSharableFolder() throws Exception {
+        //  check that system roots are sensitive directories
+        File[] faRoots = File.listRoots();
+        if(faRoots != null && faRoots.length > 0) {
+            for(int i = 0; i < faRoots.length; i++) {
+                assertFalse("root directory "+faRoots[i]+ " should not be sharable", 
+                           fman.isFolderShareable(faRoots[i], false));
+                assertFalse("root directory "+faRoots[i]+ " should not be sharable", 
+                        fman.isFolderShareable(faRoots[i], true));
+            }
         }
     }
     
