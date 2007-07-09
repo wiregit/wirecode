@@ -48,17 +48,13 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     }
     
     public IncompleteFileDescStub(String name) {
-        super(new File(name), set, 0,name,size,null);
+        super(FileDescStub.createStubFile(new File(name)), set, 0,name,size,null);
         localSet=new HashSet();
-        
-        FileDescStub.createStubFile(this);
     }
     
     public IncompleteFileDescStub(String name, URN urn, int index) {
-    	super(new File(name), createUrnSet(urn),index,name,size,null);
+    	super(FileDescStub.createStubFile(new File(name)), createUrnSet(urn),index,name,size,null);
     	localSet=localSet2;
-    	
-    	FileDescStub.createStubFile(this);
     }
     
     private static Set createUrnSet(URN urn) {

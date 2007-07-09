@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
-import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileDesc;
@@ -34,8 +32,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class HTTPUploaderTest extends LimeTestCase {
 
     private static final int PORT = 6668;
-
-    private static final String testDirName = "com/limegroup/gnutella/data";
 
     private static MyActivityCallback cb;
 
@@ -86,10 +82,6 @@ public class HTTPUploaderTest extends LimeTestCase {
         doSettings();
 
         cb.uploads.clear();
-
-        // copy resources
-        File targetFile = new File(_settingsDir, "update.xml");
-        CommonUtils.copyResourceFile(testDirName + "/update.xml", targetFile);
 
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         Vector<FileDesc> descs = new Vector<FileDesc>();
@@ -205,30 +197,6 @@ public class HTTPUploaderTest extends LimeTestCase {
             method.releaseConnection();
         }
         LimeTestUtils.waitForNIO();
-        assertEquals(UploadStatus.COMPLETE, uploader.getState());
-    }
-
-    public void testDownloadUpdateXML() throws Exception {
-        HTTPUploader uploader;
-        GetMethod method = new GetMethod("/update.xml");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertEquals(1, cb.uploads.size());
-
-            uploader = (HTTPUploader) cb.uploads.get(0);
-            assertEquals(UploadType.UPDATE_FILE, uploader.getUploadType());
-
-            InputStream in = method.getResponseBodyAsStream();
-
-            LimeTestUtils.readBytes(in, 26);
-            // make sure the NIO thread is finished processing and uploader has
-            // been updated
-            LimeTestUtils.waitForNIO();
-            assertGreaterThanOrEquals(26, uploader.amountUploaded());
-        } finally {
-            method.releaseConnection();
-        }
         assertEquals(UploadStatus.COMPLETE, uploader.getState());
     }
 

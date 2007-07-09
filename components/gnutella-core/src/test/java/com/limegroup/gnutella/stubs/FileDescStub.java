@@ -42,20 +42,17 @@ public class FileDescStub extends FileDesc {
     }
     
     public FileDescStub(String name, URN urn, int index) {
-    	super(new File(name), createUrnSet(urn), index);
-    	
-        FileDescStub.createStubFile(this);
+    	super(createStubFile(new File(name)), createUrnSet(urn), index);
     }
 
-    static void createStubFile(FileDesc fd) {
-        File file = fd.getFile();
+    static File createStubFile(File file) {
         if (!file.exists()) {
             try {
                 OutputStream out = new BufferedOutputStream(
                         new FileOutputStream(file));
                 file.deleteOnExit();
                 try {
-                    int length = (int) fd.getFileSize();
+                    int length = DEFAULT_SIZE;
                     for (int i = 0; i < length; i++) {
                         out.write('a');
                     }
@@ -66,6 +63,7 @@ public class FileDescStub extends FileDesc {
                 throw new RuntimeException(e);
             }
         }
+        return file;
     }
     
     private static Set createUrnSet(URN urn) {
