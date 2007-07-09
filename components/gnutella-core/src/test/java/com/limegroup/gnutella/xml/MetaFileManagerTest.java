@@ -7,12 +7,13 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.util.I18NConvert;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that
@@ -53,7 +55,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 	    cleanFiles(_sharedDir, false);
         fman = new MetaFileManager();
         PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
-        PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         PrivilegedAccessor.setValue(RouterService.class,  "fileManager", fman);
 	    
 	}
