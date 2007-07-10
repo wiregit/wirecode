@@ -15,14 +15,18 @@ class OS {
     
     /** any version */
     private static final Version STAR;
+    /** bad version */
+    private static final Version BAD;
     static {
-        Version star;
+        Version star,b;
         try {
             star = new Version("0");
+            b = new Version("0");
         } catch (VersionFormatException bad) {
             throw new RuntimeException(bad);
         }
         STAR = star;
+        BAD = b;
     }
     
     /**
@@ -71,7 +75,7 @@ class OS {
         StringTokenizer st = new StringTokenizer(oses, ",");
         Version[] versionsFrom = new Version[st.countTokens()];
         Version[] versionsTo = new Version[st.countTokens()];
-        if (versions != null) {
+        if (versions != null && versions.length() > 0) {
             StringTokenizer v = new StringTokenizer(versions,",");
             if (v.countTokens() == st.countTokens() * 2) {
                 try {
@@ -88,9 +92,13 @@ class OS {
                             versionsTo[i] = new Version(s);
                     }
                 } catch (VersionFormatException bad) {
-                    Arrays.fill(versionsFrom, null);
-                    Arrays.fill(versionsTo, null);
+                    Arrays.fill(versionsFrom, BAD);
+                    Arrays.fill(versionsTo, BAD);
                 }
+            } else {
+                // non empty versions element, but weird size? bad.
+                Arrays.fill(versionsFrom, BAD);
+                Arrays.fill(versionsTo, BAD);
             }
         }
         OS[] all = new OS[st.countTokens()];
@@ -138,6 +146,8 @@ class OS {
     private boolean accept(String s) {
         
         if (fromVersion != null && toVersion != null) {
+            if (fromVersion == BAD || toVersion == BAD)
+                return false;
             try {
                 Version ours = new Version(OSUtils.getOSVersion());
                 if (fromVersion != STAR && ours.compareTo(fromVersion) < 0) // inclusive

@@ -265,6 +265,12 @@ public final class UpdateCollectionTest extends LimeTestCase {
                     "</msg>" +
                     "<msg from='4.10.0' for='4.10.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,2.0,*'>" +
                     "<lang id='en'>only Linux version</lang>" +
+                    "</msg>" +
+                    "<msg from='4.11.0' for='4.11.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,*'>" +
+                    "<lang id='en'>wrong number of versions</lang>" +
+                    "</msg>" +
+                    "<msg from='4.12.0' for='4.12.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,asdf,*'>" +
+                    "<lang id='en'>malformed version</lang>" +
                 "</msg>" +
     	        "</update>");
     	        
@@ -331,6 +337,9 @@ public final class UpdateCollectionTest extends LimeTestCase {
                 assertEquals(currentOS, "only Linux version", data.getUpdateText());
             else
                 assertNull(currentOS,data);
+            
+            assertNull(uc.getUpdateDataFor(new Version("4.11.0"), "en", false, UpdateInformation.STYLE_BETA, null));
+            assertNull(uc.getUpdateDataFor(new Version("4.12.0"), "en", false, UpdateInformation.STYLE_BETA, null));
                 
         } 
         
