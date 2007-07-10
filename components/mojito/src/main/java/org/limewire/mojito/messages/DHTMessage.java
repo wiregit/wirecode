@@ -54,7 +54,7 @@ public interface DHTMessage {
         STATS_REQUEST(0x09),
         STATS_RESPONSE(0x0A);
         
-        private int opcode;
+        private final int opcode;
             
         private OpCode(int opcode) {
             this.opcode = opcode;
