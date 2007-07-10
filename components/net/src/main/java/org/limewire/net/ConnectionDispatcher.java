@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.net;
 
 import java.net.Socket;
 import java.net.SocketException;
@@ -13,17 +13,14 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.HTTPStat;
-
 public class ConnectionDispatcher {
     
     private static final Log LOG = LogFactory.getLog(ConnectionDispatcher.class);
     
     /**
-     * Mapping of first protocol word -> ConnectionAcceptor
+     * Mapping of first protocol word -> SocketAcceptor
      */
-    private static final Map<String, Delegator> protocols = 
+    private final Map<String, Delegator> protocols = 
     	Collections.synchronizedMap(new HashMap<String, Delegator>());
     
     /** 
@@ -31,6 +28,9 @@ public class ConnectionDispatcher {
      * LOCKING: protocols.
      */
     private int longestWordSize = 0;
+    
+    public ConnectionDispatcher() {
+    }
     
     /**
      * Retrieves the maximum size a word can have.
@@ -42,17 +42,17 @@ public class ConnectionDispatcher {
     }
 
     /**
-     * Associates the given ConnectionAcceptor with the given words.
+     * Associates the given SocketAcceptor with the given words.
      * If localOnly is true, non-local-host sockets will be closed
      * when using the word.  Otherwise, localhost sockets will be
      * forbidden from using the word.
      * If blocking is true, a new thread will be spawned when calling
      * acceptor.acceptConnection.
      * 
-     * @param acceptor The ConnectionAcceptor to call acceptConnection on
+     * @param acceptor The SocketAcceptor to call acceptConnection on
      * @param localOnly True if localhost connections are required, false if none allowed
      * @param blocking True if the acceptor may block on I/O after acceptConnection is called
-     * @param words The list of words to associate with this ConnectionAcceptor
+     * @param words The list of words to associate with this SocketAcceptor
      */
     public void addConnectionAcceptor(ConnectionAcceptor acceptor,
     		boolean localOnly,
@@ -109,7 +109,8 @@ public class ConnectionDispatcher {
        
         // no protocol available to handle this word 
         if (delegator == null) {
-        	HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+            // FIXME notify some listener
+//            HTTPStat.UNKNOWN_REQUESTS.incrementStat();
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);
@@ -144,7 +145,7 @@ public class ConnectionDispatcher {
     			drop = true;
             }
             
-    		if (!localOnly && localHost && ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+    		if (!localOnly && localHost && NetworkUtils.isPrivateAddress(sock.getLocalAddress())) {
                 LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
             }

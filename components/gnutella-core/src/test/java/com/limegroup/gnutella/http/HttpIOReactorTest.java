@@ -27,10 +27,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.SessionRequestCallbackAdapter;
+import org.limewire.net.ConnectionAcceptor;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.Sockets;

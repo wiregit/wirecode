@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.http;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -6,9 +6,9 @@ import org.apache.http.nio.NHttpConnection;
 
 /**
  * Defines the requirements for classes that listen to events sent by
- * {@link HTTPAcceptor}.
+ * {@link BasicHttpAcceptor}.
  */
-public interface HTTPAcceptorListener {
+public interface HttpAcceptorListener {
 
     /**
      * Invoked when a new HTTP connection has been established before the first

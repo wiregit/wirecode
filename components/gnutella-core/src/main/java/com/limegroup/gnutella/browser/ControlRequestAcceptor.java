@@ -2,8 +2,9 @@ package com.limegroup.gnutella.browser;
 
 import java.net.Socket;
 
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
+
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**

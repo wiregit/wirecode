@@ -109,7 +109,7 @@ public class HTTPUploaderTest extends LimeTestCase {
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testChatAndBrowseEnabled() throws Exception {

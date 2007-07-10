@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.7 $
- * $Date: 2007-07-07 23:03:05 $
+ * $Revision: 1.7.4.1 $
+ * $Date: 2007-07-10 21:11:51 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -367,8 +367,8 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
     }
     
     private void processRequest(
-            final NHttpServerConnection conn,
-            final HttpRequest request) throws IOException, HttpException {
+            NHttpServerConnection conn,
+            HttpRequest request) throws IOException, HttpException {
         
         HttpContext context = conn.getContext();
         HttpVersion ver = request.getRequestLine().getHttpVersion();

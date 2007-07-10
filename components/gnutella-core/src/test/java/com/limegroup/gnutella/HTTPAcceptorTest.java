@@ -15,6 +15,7 @@ import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
+import org.limewire.http.HttpAcceptorListener;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -72,7 +73,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testGetRequest() throws Exception {
@@ -167,7 +168,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
         }
     }
 
-    private class MyHTTPAcceptorListener implements HTTPAcceptorListener {
+    private class MyHTTPAcceptorListener implements HttpAcceptorListener {
 
         boolean closed;
 

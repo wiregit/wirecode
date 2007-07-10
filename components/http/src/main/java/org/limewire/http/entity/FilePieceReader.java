@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.uploader;
+package org.limewire.http.entity;
 
 import java.io.EOFException;
 import java.io.File;
@@ -127,9 +127,6 @@ public class FilePieceReader implements PieceReader {
         }
         if (length <= 0) {
             throw new IllegalArgumentException("length must be > 0");
-        }
-        if (offset + length > file.length()) {
-            throw new IllegalArgumentException("offset + length must be <= file.lenghth");
         }
         
         this.bufferCache = bufferCache;

@@ -170,7 +170,7 @@ public class PushUploadTest extends LimeTestCase {
         closeConnection();
 
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testDownloadHTTP10() throws Exception {

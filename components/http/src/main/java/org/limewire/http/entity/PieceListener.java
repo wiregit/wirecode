@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.uploader;
+package org.limewire.http.entity;
 
 import java.io.IOException;
 

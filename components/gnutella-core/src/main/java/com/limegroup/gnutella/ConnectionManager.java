@@ -26,6 +26,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.ConnectionAcceptor;
 import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.connection.ConnectionChecker;

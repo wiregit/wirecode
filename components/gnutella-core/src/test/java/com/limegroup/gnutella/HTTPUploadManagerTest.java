@@ -74,7 +74,7 @@ public class HTTPUploadManagerTest extends BaseTestCase {
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testIsConnectedTo() throws Exception {

@@ -149,7 +149,7 @@ public class UploadQueueingTest extends BaseTestCase {
     public void tearDown() {
         NIOWatchdog.DEFAULT_DELAY_TIME = savedNIOWatchdogDelay;
         
-        RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
+        RouterService.getHTTPUploadAcceptor().stop();
         
         upManager.cleanup();
         upManager.stop(RouterService.getHTTPUploadAcceptor());
