@@ -16,12 +16,10 @@ public class AudioPlayerEventTest extends BaseTestCase {
     
     public void testUnknown() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.UNKNOWN, -1, 1.0, "description");
+                PlayerState.UNKNOWN, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.UNKNOWN);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
@@ -29,109 +27,89 @@ public class AudioPlayerEventTest extends BaseTestCase {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
                 PlayerState.OPENING, -1);
         
-        assertEquals(event.getDescription(), null);
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.OPENING);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), -1.0);
     }
     
     public void testOpened() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.OPENED, -1, 1.0, "description");
+                PlayerState.OPENED, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.OPENED);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testPlaying() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.PLAYING, -1, 1.0, "description");
+                PlayerState.PLAYING, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.PLAYING);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testStopped() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.STOPPED, -1, 1.0, "description");
+                PlayerState.STOPPED, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.STOPPED);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testPaused() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.PAUSED, -1, 1.0, "description");
+                PlayerState.PAUSED, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.PAUSED);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testResumed() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.RESUMED, -1, 1.0, "description");
+                PlayerState.RESUMED,1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.RESUMED);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testSeeking() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.SEEKING, -1, 1.0, "description");
+                PlayerState.SEEKING, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.SEEKING);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testEOM() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.EOM, -1, 1.0, "description");
+                PlayerState.EOM, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.EOM);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testGain() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.GAIN, -1, 1.0, "description");
+                PlayerState.GAIN, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.GAIN);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
     
     public void testSeeked() {
         AudioPlayerEvent event = new AudioPlayerEvent("object", 
-                PlayerState.SEEKED, -1, 1.0, "description");
+                PlayerState.SEEKED, 1.0);
         
-        assertEquals(event.getDescription(), "description");
         assertEquals(event.getSource(), "object");
         assertEquals(event.getState(), PlayerState.SEEKED);
-        assertEquals(event.getPosition(), -1);
         assertEquals(event.getValue(), 1.0);
     }
 }
