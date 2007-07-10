@@ -17,10 +17,12 @@ import junit.framework.Test;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnection;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpRecoverableException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -940,6 +942,39 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
+        assertConnectionIsOpen(false);
+    }
+
+    public void testHTTP11Post() throws Exception {
+        PostMethod method = new PostMethod("/uri-res/N2R?" + hash);
+        try {
+            int response = client.executeMethod(method);
+            fail("Expected HttpConnection due to connection close, got: " + response);
+        } catch (HttpException expected) {
+        } finally {
+            method.releaseConnection();
+        }
+        assertConnectionIsOpen(false);
+    }
+
+    public void testHTTP11ExpectContinue() throws Exception {
+        PostMethod method = new PostMethod("/uri-res/N2R?" + hash) {
+            @Override
+            public String getName() {
+                return "GET";
+            }
+        };
+        method.setUseExpectHeader(true);
+        method.setRequestBody("Foo");
+        try {
+            int response = client.executeMethod(method);
+            // since this is actually a GET request and not a POST 
+            // the Expect header should be ignored
+            assertEquals(HttpStatus.SC_OK, response);
+        } catch (HttpException expected) {
+        } finally {
+            method.releaseConnection();
+        }
         assertConnectionIsOpen(false);
     }
 

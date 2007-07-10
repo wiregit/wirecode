@@ -36,6 +36,8 @@ public class MockHttpServerConnection extends DefaultNHttpServerConnection {
     public void consumeInput(NHttpServiceHandler handler) {
         if (this.request != null) {
             handler.requestReceived(this);
+        } else {
+            super.consumeInput(handler);
         }
     }
  
@@ -49,6 +51,10 @@ public class MockHttpServerConnection extends DefaultNHttpServerConnection {
 
     public void setHasBufferedOutput(boolean hasBufferedOutput) {
         this.hasBufferedOutput = hasBufferedOutput;
+    }
+
+    public void setContentDecoder(MockContentDecoder contentDecoder) {
+        this.contentDecoder = contentDecoder;
     }
 
 }
