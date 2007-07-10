@@ -123,6 +123,7 @@ public class HttpIOSessionTest extends TestCase {
         
         StubSessionBufferStatus status = new StubSessionBufferStatus();
         session.setBufferStatus(status);
+        assertSame(status, session.getBufferStatus());
         assertFalse(session.hasBufferedInput());
         assertFalse(session.hasBufferedOutput());
         status.bufferedInput = true;
@@ -137,7 +138,6 @@ public class HttpIOSessionTest extends TestCase {
         status.bufferedOutput = false;
         assertFalse(session.hasBufferedInput());
         assertFalse(session.hasBufferedOutput());
-
     }
 
     public void testShutdown() {        
@@ -146,13 +146,34 @@ public class HttpIOSessionTest extends TestCase {
         assertFalse(session.isClosed());
         session.shutdown();
         assertTrue(session.isClosed());
+        session.shutdown();
+        assertTrue(session.isClosed());
+    }
+
+    public void testClose() {        
+        StubSocket socket = new StubSocket();
+        HttpIOSession session = new HttpIOSession(socket);
+        StubHttpChannel channel = new StubHttpChannel(session, new MockIOEventDispatch());
+        session.setHttpChannel(channel);
+        
+        assertFalse(session.isClosed());
+        session.close();
+        assertTrue(session.isClosed());
+        assertTrue(channel.pendingClose);
     }
 
     private static class StubHttpChannel extends HttpChannel {
 
+        boolean pendingClose;
+
         public StubHttpChannel(HttpIOSession session,
                 IOEventDispatch eventDispatch) {
             super(session, eventDispatch);
+        }
+
+        @Override
+        public void closeWhenBufferedOutputHasBeenFlushed() {
+            this.pendingClose = true;
         }
         
     }

@@ -179,12 +179,10 @@ public class HttpIOSession implements IOSession {
 
     public void setSocketTimeout(int timeout) {
         this.socketTimeout = timeout;
-        if (socket != null) {
-            try {
-                socket.setSoTimeout(timeout);
-            } catch (SocketException e) {
-                LOG.warn("Could not set socket timeout", e);
-            }
+        try {
+            socket.setSoTimeout(timeout);
+        } catch (SocketException e) {
+            LOG.warn("Could not set socket timeout", e);
         }
     }
 
