@@ -228,15 +228,14 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
         for(int i = 0; i < 5; i++) {
             switch(i) {
-            case 0: setOSName("Windows"); setOsVersion("1");break;
-            case 1: setOSName("Mac OS X"); setOsVersion("2");break;
-            case 2: setOSName("Linux"); setOsVersion("3");break;
-            case 3: setOSName("Solaris"); setOsVersion("4");break;
-            case 4: setOSName("OS/2"); setOsVersion("5");break;
+            case 0: setOSName("Windows");  setOsVersion("1"); break;
+            case 1: setOSName("Mac OS X"); setOsVersion("2"); break;
+            case 2: setOSName("Linux");    setOsVersion("3"); break;
+            case 3: setOSName("Solaris");  setOsVersion("4"); break;
+            case 4: setOSName("OS/2");     setOsVersion("5"); break;
             }
             
-            String currentOS = OSUtils.getOS() + " (on iteration: " + i + ")";
-        
+            String currentOS = OSUtils.getOS() + " (on iteration: " + i + ")";        
         
             UpdateCollection uc = UpdateCollection.create(
     	        "<update id='42'>" +
@@ -320,15 +319,16 @@ public final class UpdateCollectionTest extends LimeTestCase {
             if(unix || other)
                 assertEquals(currentOS, "Other, Unix Text", data.getUpdateText());
             
+            // Check the osv limits things
             data = uc.getUpdateDataFor(new Version("4.9.0"), "en", false, UpdateInformation.STYLE_BETA, null);
             if (windows)
-                assertNotNull(currentOS,data);
+                assertEquals(currentOS, "only Windows version", data.getUpdateText());
             else
-                assertNull(currentOS,data);
+                assertNull(currentOS, data);
             
             data = uc.getUpdateDataFor(new Version("4.10.0"), "en", false, UpdateInformation.STYLE_BETA, null);
             if (linux)
-                assertNotNull(currentOS,data);
+                assertEquals(currentOS, "only Linux version", data.getUpdateText());
             else
                 assertNull(currentOS,data);
                 
