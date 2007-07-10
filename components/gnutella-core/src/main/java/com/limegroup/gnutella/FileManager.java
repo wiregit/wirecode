@@ -729,7 +729,7 @@ public abstract class FileManager {
     public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) {
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
-            _data.DIRECTORIES_NOT_TO_SHARE.clear();
+            _data.DIRECTORIES_NOT_TO_SHARE.removeAll(shared);
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListSet);
         }
 	    RouterService.getFileManager().loadSettings();
