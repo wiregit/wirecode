@@ -136,29 +136,7 @@ class OS {
      * "*" is also allowed, representing all OSes.
      */
     private boolean accept(String s) {
-        String os = OSUtils.getOS().toLowerCase();
         
-        if(s.equals(os))
-            return checkVersion();
-        
-        if("windows".equals(s))
-            return OSUtils.isWindows() && checkVersion();
-        else if("mac".equals(s))
-            return OSUtils.isAnyMac() && checkVersion();
-        else if("linux".equals(s))
-            return OSUtils.isLinux() && checkVersion();
-        else if("unix".equals(s))
-            return OSUtils.isUnix() && !OSUtils.isLinux() && checkVersion();
-        else if("other".equals(s))
-            return !OSUtils.isWindows() && !OSUtils.isAnyMac() &&
-                   !OSUtils.isUnix() && !OSUtils.isLinux() && checkVersion();
-        else if("*".equals(s))
-            return true;
-        
-        return false;
-    }
-    
-    private boolean checkVersion() {
         if (fromVersion != null && toVersion != null) {
             try {
                 Version ours = new Version(OSUtils.getOSVersion());
@@ -168,6 +146,26 @@ class OS {
                     return false;
             } catch (VersionFormatException ignore) {}
         }
-        return true;
+        
+        String os = OSUtils.getOS().toLowerCase();
+        
+        if(s.equals(os))
+            return true;
+        
+        if("windows".equals(s))
+            return OSUtils.isWindows();
+        else if("mac".equals(s))
+            return OSUtils.isAnyMac();
+        else if("linux".equals(s))
+            return OSUtils.isLinux();
+        else if("unix".equals(s))
+            return OSUtils.isUnix() && !OSUtils.isLinux();
+        else if("other".equals(s))
+            return !OSUtils.isWindows() && !OSUtils.isAnyMac() &&
+                   !OSUtils.isUnix() && !OSUtils.isLinux();
+        else if("*".equals(s))
+            return true;
+        
+        return false;
     }
 }
