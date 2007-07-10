@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.MultiCollection;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Storable;
@@ -50,7 +51,8 @@ public class AltLocModel implements StorableModel {
         FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
         
         // List of Storables we're going to publish
-        List<Storable> publish = new ArrayList<Storable>();
+        List<Storable> toRemove = new ArrayList<Storable>();
+        List<Storable> toPublish = new ArrayList<Storable>();
         
         synchronized (values) {
             
@@ -92,18 +94,24 @@ public class AltLocModel implements StorableModel {
                 if (fd == null) {
                     storable = new Storable(primaryKey, DHTValue.EMPTY_VALUE);
                     it.remove();
-                }
-                
-                // Publish only rare FileDescs and removed entities
-                // respectively
-                if (fd == null || (fileManager.isRareFile(fd) 
-                        && DatabaseUtils.isPublishingRequired(storable))) {
-                    publish.add(storable);
+                    
+                    toRemove.add(storable);
+                    
+                // And if it does then check if it is rare and needs
+                // publishing.
+                } else if (fileManager.isRareFile(fd) 
+                        && DatabaseUtils.isPublishingRequired(storable)) {
+                    toPublish.add(storable);
                 }
             }
         }
         
-        return publish;
+        // Publish things always in a different order
+        Collections.shuffle(toPublish);
+        
+        // Delete the things we want to remove from the DHT
+        // first and continue with the things we want to publish
+        return new MultiCollection<Storable>(toRemove, toPublish);
     }
     
     /*
