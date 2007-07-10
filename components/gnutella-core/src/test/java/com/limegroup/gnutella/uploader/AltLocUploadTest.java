@@ -26,6 +26,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -169,13 +170,14 @@ public class AltLocUploadTest extends LimeTestCase {
 
         if (!RouterService.isLoaded()) {
             startAndWaitForLoad();
-            //Thread.sleep(2000);
         }
+
+        // make sure the FileDesc objects in file manager are up-to-date 
+        FileManager fm = RouterService.getFileManager();
+        fm.loadSettingsAndWait(2000);
 
         FD = RouterService.getFileManager().getFileDescForFile(
                 new File(_sharedDir, fileName));
-        while (FD.getHashTree() == null)
-            Thread.sleep(300);
 
         RouterService.getAltlocManager().purge();
 
