@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.version;
 
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.limewire.util.OSUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 
 /**
@@ -10,10 +13,25 @@ import org.limewire.util.OSUtils;
  */
 class OS {
     
+    /** any version */
+    private static final Version STAR;
+    static {
+        Version star;
+        try {
+            star = new Version("0");
+        } catch (VersionFormatException bad) {
+            throw new RuntimeException(bad);
+        }
+        STAR = star;
+    }
+    
     /**
      * The string representation of the OS.
      */
     private final String os;
+    
+    /** Min inclusive - max exclusive versions of this os */
+    private final Version fromVersion, toVersion;
     
     /**
      * Whether or not the OS of this machine is a match.
@@ -23,8 +41,10 @@ class OS {
     /**
      * Constructs a new OS based on the given string representation.
      */
-    OS(String s) {
+    OS(String s, Version fromVersion, Version toVersion) {
         this.os = s;
+        this.fromVersion = fromVersion;
+        this.toVersion = toVersion;
         this.acceptable = accept(s.toLowerCase());
     }
     
@@ -47,11 +67,35 @@ class OS {
      * Creates an array of OSes from a comma delimited list of strings.
      * Whitespace is ignored.
      */
-    static OS[] createFromList(String oses) {
+    static OS[] createFromList(String oses, String versions) {
         StringTokenizer st = new StringTokenizer(oses, ",");
+        Version[] versionsFrom = new Version[st.countTokens()];
+        Version[] versionsTo = new Version[st.countTokens()];
+        if (versions != null) {
+            StringTokenizer v = new StringTokenizer(versions,",");
+            if (v.countTokens() == st.countTokens() * 2) {
+                try {
+                    for (int i = 0; i < versionsFrom.length; i++) {
+                        String s = v.nextToken().trim();
+                        if (s.equals("*"))
+                            versionsFrom[i] = STAR;
+                        else 
+                            versionsFrom[i] = new Version(s);
+                        s = v.nextToken().trim();
+                        if (s.equals("*"))
+                            versionsTo[i] = STAR;
+                        else 
+                            versionsTo[i] = new Version(s);
+                    }
+                } catch (VersionFormatException bad) {
+                    Arrays.fill(versionsFrom, null);
+                    Arrays.fill(versionsTo, null);
+                }
+            }
+        }
         OS[] all = new OS[st.countTokens()];
         for(int i = 0; st.hasMoreTokens(); i++) {
-            all[i] = new OS(st.nextToken().trim());
+            all[i] = new OS(st.nextToken().trim(), versionsFrom[i], versionsTo[i]);
         }
         return all;
     }
@@ -93,23 +137,37 @@ class OS {
      */
     private boolean accept(String s) {
         String os = OSUtils.getOS().toLowerCase();
+        
         if(s.equals(os))
-            return true;
+            return checkVersion();
         
         if("windows".equals(s))
-            return OSUtils.isWindows();
+            return OSUtils.isWindows() && checkVersion();
         else if("mac".equals(s))
-            return OSUtils.isAnyMac();
+            return OSUtils.isAnyMac() && checkVersion();
         else if("linux".equals(s))
-            return OSUtils.isLinux();
+            return OSUtils.isLinux() && checkVersion();
         else if("unix".equals(s))
-            return OSUtils.isUnix() && !OSUtils.isLinux();
+            return OSUtils.isUnix() && !OSUtils.isLinux() && checkVersion();
         else if("other".equals(s))
             return !OSUtils.isWindows() && !OSUtils.isAnyMac() &&
-                   !OSUtils.isUnix() && !OSUtils.isLinux();
+                   !OSUtils.isUnix() && !OSUtils.isLinux() && checkVersion();
         else if("*".equals(s))
             return true;
         
         return false;
+    }
+    
+    private boolean checkVersion() {
+        if (fromVersion != null && toVersion != null) {
+            try {
+                Version ours = new Version(OSUtils.getOSVersion());
+                if (fromVersion != STAR && ours.compareTo(fromVersion) < 0) // inclusive
+                    return false;
+                if (toVersion != STAR && ours.compareTo(toVersion) >= 0) //exclusive
+                    return false;
+            } catch (VersionFormatException ignore) {}
+        }
+        return true;
     }
 }

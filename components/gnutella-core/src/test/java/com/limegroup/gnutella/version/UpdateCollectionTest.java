@@ -220,6 +220,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     public void testOSRange() throws Exception {
         String defaultOS = OSUtils.getOS();
+        String OSVersion = OSUtils.getOSVersion();
         
         try {
             
@@ -227,11 +228,11 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
         for(int i = 0; i < 5; i++) {
             switch(i) {
-            case 0: setOSName("Windows"); break;
-            case 1: setOSName("Mac OS X"); break;
-            case 2: setOSName("Linux"); break;
-            case 3: setOSName("Solaris"); break;
-            case 4: setOSName("OS/2"); break;
+            case 0: setOSName("Windows"); setOsVersion("1");break;
+            case 1: setOSName("Mac OS X"); setOsVersion("2");break;
+            case 2: setOSName("Linux"); setOsVersion("3");break;
+            case 3: setOSName("Solaris"); setOsVersion("4");break;
+            case 4: setOSName("OS/2"); setOsVersion("5");break;
             }
             
             String currentOS = OSUtils.getOS() + " (on iteration: " + i + ")";
@@ -260,6 +261,12 @@ public final class UpdateCollectionTest extends LimeTestCase {
     	            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='0' os='Other, Unix'>" +
     	                "<lang id='en'>Other, Unix Text</lang>" +
     	            "</msg>" +
+                    "<msg from='4.9.0' for='4.9.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,4.0,5.0,0.5,2.0'>" +
+                    "<lang id='en'>only Windows version</lang>" +
+                    "</msg>" +
+                    "<msg from='4.10.0' for='4.10.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,2.0,*'>" +
+                    "<lang id='en'>only Linux version</lang>" +
+                "</msg>" +
     	        "</update>");
     	        
             boolean windows = OSUtils.isWindows();
@@ -312,6 +319,18 @@ public final class UpdateCollectionTest extends LimeTestCase {
                 assertEquals(currentOS, "Windows, Mac, Linux Text", data.getUpdateText());
             if(unix || other)
                 assertEquals(currentOS, "Other, Unix Text", data.getUpdateText());
+            
+            data = uc.getUpdateDataFor(new Version("4.9.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+            if (windows)
+                assertNotNull(currentOS,data);
+            else
+                assertNull(currentOS,data);
+            
+            data = uc.getUpdateDataFor(new Version("4.10.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+            if (linux)
+                assertNotNull(currentOS,data);
+            else
+                assertNull(currentOS,data);
                 
         } 
         
@@ -323,6 +342,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
 
         } finally {
             setOSName(defaultOS);
+            setOsVersion(OSVersion);
         }
     }
     
@@ -363,6 +383,10 @@ public final class UpdateCollectionTest extends LimeTestCase {
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
         PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems");
+    }
+    
+    private static void setOsVersion(String version) {
+        System.setProperty("os.version",version);
     }
             
 }
