@@ -26,6 +26,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RequestCache;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -60,7 +61,9 @@ public class UploadQueueingTest extends BaseTestCase {
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
     private int savedNIOWatchdogDelay;
-    
+
+    private List<Uploader> uploaders = new ArrayList<Uploader>();
+
     public UploadQueueingTest(String name) {
         super(name);
     }
@@ -75,7 +78,12 @@ public class UploadQueueingTest extends BaseTestCase {
     
     @Override
     public void setUp() throws Exception {
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub() {
+            @Override
+            public void addUpload(Uploader u) {
+                uploaders.add(u);
+            }
+        });
         
         // make sure uploads are not killed because they stall
         // this is explicitly tested by testStalledUploader()
@@ -146,8 +154,12 @@ public class UploadQueueingTest extends BaseTestCase {
     }
     
     @Override
-    public void tearDown() {
+    public void tearDown() throws Exception {
         NIOWatchdog.DEFAULT_DELAY_TIME = savedNIOWatchdogDelay;
+        
+        for (Uploader uploader : uploaders) {
+            uploader.stop();
+        }
         
         RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
         
@@ -155,6 +167,8 @@ public class UploadQueueingTest extends BaseTestCase {
         upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager = null;
 
+        LimeTestUtils.waitForNIO();
+        
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
 
