@@ -17,6 +17,7 @@ import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.http.HttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.timeout.NIOWatchdog;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
