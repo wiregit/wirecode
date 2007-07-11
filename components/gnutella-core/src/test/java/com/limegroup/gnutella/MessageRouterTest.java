@@ -984,5 +984,12 @@ public final class MessageRouterTest extends LimeTestCase {
 
         public void handleDHTContactsMessage(DHTContactsMessage msg) {
         }
+
+        public boolean isEnabled() {
+            return true;
+        }
+
+        public void setEnabled(boolean enabled) {
+        }
     }
 }

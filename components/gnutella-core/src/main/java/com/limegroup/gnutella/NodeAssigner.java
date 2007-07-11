@@ -9,6 +9,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -367,7 +368,8 @@ public class NodeAssigner {
         
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
-        final DHTMode current = RouterService.getDHTManager().getDHTMode();
+        DHTManager manager = RouterService.getDHTManager();
+        final DHTMode current = manager.getDHTMode();
         assert (current != null) : "Current DHTMode is null, fix your DHTManager-Stub!";
         
         // Initial mode is to turn off the DHT
@@ -375,8 +377,7 @@ public class NodeAssigner {
         
         // Check if the DHT was disabled by somebody. If so shut it
         // down and return
-        if (DHTSettings.DISABLE_DHT_USER.getValue() 
-                || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
+        if (!manager.isEnabled()) {
             if (current != mode) {
                 switchDHTMode(current, mode);
             }

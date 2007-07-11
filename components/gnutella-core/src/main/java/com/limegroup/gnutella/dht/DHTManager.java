@@ -119,6 +119,16 @@ public interface DHTManager extends ConnectionLifecycleListener,
     }
     
     /**
+     * Sets whether or not the DHT is enabled
+     */
+    public void setEnabled(boolean enabled);
+    
+    /**
+     * Returns whether or not the DHT is enabled
+     */
+    public boolean isEnabled();
+    
+    /**
      * Starts the DHT Node either in active or passive mode.
      */
     public void start(DHTMode mode);

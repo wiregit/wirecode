@@ -74,6 +74,8 @@ public class DHTManagerImpl implements DHTManager {
     
     private boolean stopped = false;
     
+    private volatile boolean enabled = true;
+    
     /** reference to a bunch of inspectables */
     public final DHTInspectables inspectables = new DHTInspectables();
     
@@ -86,6 +88,27 @@ public class DHTManagerImpl implements DHTManager {
      */
     public DHTManagerImpl(Executor service) {
         this.executor = service;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#setEnabled(boolean)
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#isEnabled()
+     */
+    public boolean isEnabled() {
+        if (!DHTSettings.DISABLE_DHT_NETWORK.getValue() 
+                && !DHTSettings.DISABLE_DHT_USER.getValue()
+                && enabled) {
+            return true;
+        }
+        return false;
     }
     
     public synchronized void start(final DHTMode mode) {
@@ -121,6 +144,16 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         executor.execute(task);
+    }
+    
+    /**
+     * This method has to be synchronized to make sure the
+     * DHT actually gets stopped and persisted when it is called.
+     */
+    public synchronized void stop() {
+        stopped = true;
+        controller.stop();
+        controller = new NullDHTController();
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
@@ -165,16 +198,6 @@ public class DHTManagerImpl implements DHTManager {
     
     public synchronized DHTMode getDHTMode() {
         return controller.getDHTMode();
-    }
-    
-    /**
-     * This method has to be synchronized to make sure the
-     * DHT actually gets stopped and persisted when it is called.
-     */
-    public synchronized void stop() {
-        stopped = true;
-        controller.stop();
-        controller = new NullDHTController();
     }
     
     public synchronized boolean isRunning() {
