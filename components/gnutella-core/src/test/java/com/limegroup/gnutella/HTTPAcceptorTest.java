@@ -104,7 +104,9 @@ public class HTTPAcceptorTest extends BaseTestCase {
         
         GetMethod method = new GetMethod("/");
         try{ 
-            client.executeMethod(method);
+            int response = client.executeMethod(method);
+            assertEquals(HTTPStatus.BAD_REQUEST, response);
+            LimeTestUtils.waitForNIO();
             assertTrue(listener.opened);
             // bad request, so connection should have been closed
             assertTrue(listener.closed);
