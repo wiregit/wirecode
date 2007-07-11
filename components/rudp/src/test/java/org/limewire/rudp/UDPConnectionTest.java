@@ -368,6 +368,47 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     /**
+     * Test that data can be written, echoed and read through 
+     * UDPConnections.
+     */
+    public void testConnection() throws Exception {
+        final int NUM_BYTES = 10000000;
+
+        // Clear out my standard setup
+        stubService.clearReceivers();
+
+        // Add some simulated connections to the UDPServiceStub
+        // Make the connections 5% flaky
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+
+        // start the first connection in another thread
+        class Inner extends ManagedThread {
+            public void run() {
+                try {
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
+                    uconn1.setSoTimeout(TIMEOUT);
+                    UStandalone.echoServer(uconn1, NUM_BYTES);                   
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        Inner t = new Inner();
+        t.setDaemon(true);
+        try {
+            t.start();
+
+            // start the second connection
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
+            uconn2.setSoTimeout(TIMEOUT);
+            UStandalone.echoClient(uconn2, NUM_BYTES);
+        } finally {
+            t.join();
+        }
+    }
+
+    /**
      * Test that data can be written, echoed and read through flaky
      * UDPConnections.
      * 
