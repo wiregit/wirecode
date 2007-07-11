@@ -378,7 +378,7 @@ public class MulticastTest extends LimeTestCase {
                                new GUID(guid));
         
         // sleep to make sure the download starts & push goes through.
-        sleep(1000);
+        sleep(3000);
         
         assertEquals("should have sent & received push", 1,
                 M_HANDLER.multicasted.size());
