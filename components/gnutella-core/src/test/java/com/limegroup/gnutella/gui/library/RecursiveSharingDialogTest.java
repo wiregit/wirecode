@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.gui.library;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.io.File;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class RecursiveSharingDialogTest extends GUIBaseTestCase {
 	public void testShowRecursiveDialogWithEmptyDirs() {
 		File[] dirs = LimeTestUtils.createTmpDirs("emptydir");
 		RecursiveSharingDialog dialog = new RecursiveSharingDialog((Frame)null, dirs);
-		assertEquals(State.OK, dialog.showChooseDialog(null));
+		assertEquals(State.OK, dialog.showChooseDialog((Component)null));
 		assertTrue(dialog.getRootsToShare().containsAll(Arrays.asList(dirs)));
 		assertTrue(dialog.getFoldersToExclude().isEmpty());
 	}
