@@ -289,7 +289,7 @@ public class UDPService implements ReadWriteObserver {
                     break;
 
                 if (!(from instanceof InetSocketAddress)) {
-                    Assert.silent(false, "non-inet SocketAddress: " + from);
+                    ErrorService.error(new RuntimeException("non-inet SocketAddress: " + from));
                     continue;
                 }
 

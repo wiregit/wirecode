@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -289,7 +288,7 @@ public class MessageFactory {
                     && (func != Message.F_PING_REPLY)) {
                 ttl = (byte) (softMax - hops); // overzealous client;
                 // readjust accordingly
-                Assert.that(ttl >= 0); // should hold since hops<=softMax ==>
+                assert(ttl >= 0); // should hold since hops<=softMax ==>
                 // new ttl>=0
             }
 

@@ -623,7 +623,7 @@ public abstract class FileManager {
         IntSet.IntSetIterator iter = _incompletesShared.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = _files.get(iter.next());
-            Assert.that(fd != null, "Directory has null entry");
+            assert fd != null : "Directory has null entry";
             ret[i]=fd;
         }
         
@@ -670,7 +670,7 @@ public abstract class FileManager {
         IntSet.IntSetIterator iter = indices.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = _files.get(iter.next());
-            Assert.that(fd != null, "Directory has null entry");
+            assert fd != null : "Directory has null entry";
             fds[i] = fd;
         }
         
@@ -1332,7 +1332,7 @@ public abstract class FileManager {
 	
         //Register this file with its parent directory.
         File parent = file.getParentFile();
-        Assert.that(parent != null, "Null parent to \""+file+"\"");
+        assert parent != null : "Null parent to \""+file+"\"";
         
         // Check if file is a specially shared file.  If not, ensure that
         // it is located in a shared directory.
@@ -1343,7 +1343,7 @@ public abstract class FileManager {
 		}
 		
 		boolean added = siblings.add(fileIndex);
-        Assert.that(added, "File "+fileIndex+" already found in "+siblings);
+		assert added : "File "+fileIndex+" already found in "+siblings;
         
         // files that are forcibly shared over the network
         // aren't counted or shown.
@@ -1452,8 +1452,7 @@ public abstract class FileManager {
             return null;
 
         int i = fd.getIndex();
-        Assert.that(_files.get(i).getFile().equals(f),
-                    "invariant broken!");
+        assert _files.get(i).getFile().equals(f) : "invariant broken!";
         
         _files.set(i, null);
         _fileToFileDescMap.remove(f);
@@ -1467,8 +1466,7 @@ public abstract class FileManager {
             this.removeUrnIndex(fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
-            Assert.that(removed,
-                "File "+i+" not found in " + _incompletesShared);
+            assert removed : "File "+i+" not found in " + _incompletesShared;
 
 			// Notify the GUI...
 	        if (notify) {
@@ -1687,7 +1685,7 @@ public abstract class FileManager {
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
 		final FileDesc removed = removeFileIfShared(oldName, false);
-        Assert.that(removed == toRemove, "invariant broken.");
+        assert removed == toRemove : "invariant broken.";
 		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
@@ -2157,13 +2155,13 @@ public abstract class FileManager {
             if (desc==null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                 continue;
         
-            Assert.that(j<ret.length, "_numFiles is too small");
+            assert j<ret.length : "_numFiles is too small";
             ret[j] = new Response(desc);
             if(includeXML)
                 addXMLToResponse(ret[j], desc);
             j++;
         }
-        Assert.that(j==ret.length, "_numFiles is too large");
+        assert j==ret.length : "_numFiles is too large";
         return ret;
     }
 

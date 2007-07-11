@@ -16,7 +16,6 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
@@ -96,7 +95,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     
     public void initialize(DownloadManager manager, FileManager fileManager, 
             DownloadCallback callback) {
-		Assert.that(getMagnet() != null);
+		assert(getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
         super.initialize(manager, fileManager, callback);
     }

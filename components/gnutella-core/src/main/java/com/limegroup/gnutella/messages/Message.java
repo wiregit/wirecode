@@ -5,7 +5,6 @@ import java.io.OutputStream;
 
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.GUID;
 
 /**
@@ -64,19 +63,18 @@ public abstract class Message implements Comparable<Message> {
    
     /** Rep. invariant */
     protected void repOk() {
-        Assert.that(guid.length==16);
-        Assert.that(func==F_PING || func==F_PING_REPLY
+        assert(guid.length==16);
+        assert func==F_PING || func==F_PING_REPLY
                     || func==F_PUSH
                     || func==F_QUERY || func==F_QUERY_REPLY
                     || func==F_VENDOR_MESSAGE 
                     || func == F_VENDOR_MESSAGE_STABLE
-                    || func == F_UDP_CONNECTION,
-                    "Bad function code");
+                    || func == F_UDP_CONNECTION
+                    : "Bad function code";
 
-        if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
-        Assert.that(ttl>=0, "Negative TTL: "+ttl);
-        Assert.that(hops>=0, "Negative hops: "+hops);
-        Assert.that(length>=0, "Negative length: "+length);
+        assert ttl>=0 : "Negative TTL: "+ttl;
+        assert hops>=0 : "Negative hops: "+hops;
+        assert length>=0 : "Negative length: "+length;
     }
 
     ////////////////////// Constructors and Producers /////////////////

@@ -399,8 +399,7 @@ public final class RouteTable  {
         //no purge
         repOk();
         //The aggressive asserts below are to make sure bug X75 has been fixed.
-        Assert.that(replyHandler!=null,
-                    "Null replyHandler in removeReplyHandler");
+        assert replyHandler!=null : "Null replyHandler in removeReplyHandler";
 
         //Note that _map is not modified.  See overview of class for rationale.
         //Also, handler2id may actually allocate a new ID for replyHandler, when

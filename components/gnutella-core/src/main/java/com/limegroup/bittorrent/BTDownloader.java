@@ -15,7 +15,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -29,8 +29,6 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-
-import com.limegroup.bittorrent.Torrent.TorrentState;
 
 /**
  * This class enables the rest of LW to treat this as a regular download.
@@ -411,8 +409,9 @@ public class BTDownloader extends AbstractDownloader
 			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();
 			manager.remove(this, !resumable);
-		} // otherwise torrent was already completed.
-		else Assert.that(_torrent instanceof FinishedTorrentDownload);
+		} else { // otherwise torrent was already completed.
+		    assert(_torrent instanceof FinishedTorrentDownload);
+		}
 	}
 	
 	private void writeObject(ObjectOutputStream out) 
@@ -423,7 +422,7 @@ public class BTDownloader extends AbstractDownloader
                 return;
 			m.putAll(propertiesMap);
 		}
-		Assert.that(m.containsKey(METAINFO));
+		assert(m.containsKey(METAINFO));
 		out.writeObject(m);
 	}
 	

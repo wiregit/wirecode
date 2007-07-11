@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 
@@ -19,6 +18,6 @@ public class RequeryDownloader extends ManagedDownloader {
     public RequeryDownloader(IncompleteFileManager incompleteFileManager,
                              AutoDownloadDetails add, GUID queryGUID) {
         super(new RemoteFileDesc[0], incompleteFileManager, queryGUID);
-        Assert.that(false, "deprecated");
+        throw new UnsupportedOperationException("deprecated");
     }
 }

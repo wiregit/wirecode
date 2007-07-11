@@ -17,7 +17,6 @@ import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -364,7 +363,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             throws IOException, HttpException {
         // if not queued, this should never be the state
         int position = uploader.getSession().positionInQueue();
-        Assert.that(position != -1);
+        assert(position != -1);
 
         String value = "position=" + (position + 1) + ", pollMin="
                 + (HTTPUploadSession.MIN_POLL_TIME / 1000) + /* mS to S */

@@ -33,8 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * Contains utility methods
  * @author  asingla
@@ -712,7 +710,7 @@ public class LimeXMLUtils {
         } catch (IOException e) {
             //This should REALLY never happen because no devices are involved.
             //But could we propogate it up.
-            Assert.that(false, "Couldn't write to byte stream");
+            assert false : "Couldn't write to byte stream";
             return null;
         } finally {
             IOUtils.close(gos);

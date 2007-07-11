@@ -7,7 +7,6 @@ import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
-import com.limegroup.gnutella.Assert;
 
 /**
  * State that parses the Piece message. 
@@ -105,7 +104,7 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 	
 	public BTPiece call() {
 		synchronized(readerState) {
-			Assert.that(writeExpected);
+			assert(writeExpected);
 			writeExpected = false;
 			int toRead = getAmountLeft();
 			

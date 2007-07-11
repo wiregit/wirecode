@@ -32,7 +32,6 @@ import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
@@ -694,8 +693,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for push flag: " + _data.getPushFlag());
-            return false;
+            throw new IllegalStateException("Bad value for push flag: " + _data.getPushFlag());
         }
     }
 
@@ -715,8 +713,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for busy flag: " + _data.getBusyFlag());
-            return false;
+            throw new IllegalStateException("Bad value for busy flag: " + _data.getBusyFlag());
         }
     }
 
@@ -736,8 +733,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for uploaded flag: " + _data.getUploadedFlag());
-            return false;
+            throw new IllegalStateException("Bad value for uploaded flag: " + _data.getUploadedFlag());
         }
     }
 
@@ -758,8 +754,7 @@ public class QueryReply extends Message implements SecureMessage {
         case FALSE:
             return false;
         default:
-            Assert.that(false, "Bad value for measured speed flag: " + _data.getMeasuredSpeedFlag());
-            return false;
+            throw new IllegalStateException("Bad value for measured speed flag: " + _data.getMeasuredSpeedFlag());
         }
     }
     
@@ -1129,7 +1124,7 @@ public class QueryReply extends Message implements SecureMessage {
                     "Common payload length too large.");
             
             //All set.  Accept parsed values.
-            Assert.that(vendorT!=null);
+            assert(vendorT!=null);
             _data.setVendor(vendorT.toUpperCase(Locale.US));
             _data.setPushFlag(pushFlagT);
             _data.setBusyFlag(busyFlagT);
@@ -1242,19 +1237,19 @@ public class QueryReply extends Message implements SecureMessage {
         } else if (busy==MAYBE || heFirewalled==MAYBE) {
             return 0;       //*    older client; can't tell
         } else if (busy==YES) {
-            Assert.that(heFirewalled==NO || !iFirewalled);
+            assert heFirewalled==NO || !iFirewalled;
             if (heFirewalled==YES)
                 return 0;   //*    busy, push
             else
                 return 1;   //**   busy, direct connect
         } else if (busy==NO) {
-            Assert.that(heFirewalled==NO || !iFirewalled);
+            assert heFirewalled==NO || !iFirewalled;
             if (heFirewalled==YES && !hasPushProxies)
                 return 2;   //***  not busy, no/not many proxies, old push
             else
                 return 3;   //**** not busy, has proxies or direct connect
         } else {
-            Assert.that(false, "Unexpected case!");
+            assert false : "Unexpected case!";
             return -1;
         }
 	}

@@ -23,7 +23,6 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.DiskException;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.tigertree.HashTree;
 
@@ -317,8 +316,8 @@ public class VerifyingFile {
         
         request.setDone();
         
-        if(temp.length < request.length)
-            Assert.that(false, "bad length: " + request.length + ", needed <= " + temp.length);
+        assert temp.length >= request.length :
+                "bad length: " + request.length + ", needed <= " + temp.length;
         System.arraycopy(request.buf, request.start, temp, 0, request.length);
         
         synchronized (this) {
@@ -333,15 +332,11 @@ public class VerifyingFile {
     
     private synchronized void updateState(Range intvl) {
 		/// some stuff to help debugging ///
-		if (!leasedBlocks.contains(intvl)) {
-            Assert.that(false, "trying to write an interval "+intvl+
-                    " that wasn't leased.\n"+dumpState());
-        }
+        assert leasedBlocks.contains(intvl) :
+                "trying to write an interval "+intvl+" that wasn't leased.\n"+dumpState();
 		
-		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-            Assert.that(false,"trying to write an interval "+intvl+
-                    " that was already written"+dumpState());
-		}
+        assert !(partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) :
+            "trying to write an interval "+intvl+ " that was already written"+dumpState();
             
         leasedBlocks.delete(intvl);
         
@@ -445,10 +440,9 @@ public class VerifyingFile {
      * Removes the specified internal from the set of leased intervals.
      */
     public synchronized void releaseBlock(Range in) {
-        if (!leasedBlocks.contains(in)) {
-            Assert.that(false, "trying to release an interval "+in+
-                    " that wasn't leased "+dumpState());
-        }
+        assert leasedBlocks.contains(in) :
+            "trying to release an interval " + in + " that wasn't leased " + dumpState();
+        
         if(LOG.isInfoEnabled())
             LOG.info("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);

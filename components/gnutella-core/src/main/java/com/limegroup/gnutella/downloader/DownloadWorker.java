@@ -19,7 +19,6 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -418,7 +417,7 @@ public class DownloadWorker {
                 _currentState.setState(DownloadState.BEGIN);
                 incrementState(null);
             } else {
-                Assert.that( status.isQueued() || status.isConnected() );
+                assert( status.isQueued() || status.isConnected() );
                 boolean queued = _manager.killQueuedIfNecessary(this, !status.isQueued() ? -1 : status.getQueuePosition());
                 
                 if(status.isConnected()) {

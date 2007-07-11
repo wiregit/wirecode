@@ -19,7 +19,6 @@ import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -115,8 +114,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         FILE_SIZE = fileSize;
         ROOT_HASH = allNodes.get(0).get(0);
         DEPTH = allNodes.size()-1;
-        Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
-        Assert.that(NODES.size() * (long)nodeSize >= fileSize);
+        assert(TigerTree.log2Ceil(NODES.size()) == DEPTH);
+        assert(NODES.size() * (long)nodeSize >= fileSize);
         HashTreeNodeManager.instance().register(this, allNodes);
         _nodeSize = nodeSize;
     }
@@ -168,14 +167,14 @@ public class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize * maxNodes >= fileSize,
+        assert nodeSize * maxNodes >= fileSize :
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", maxNode: " + maxNodes);
-        Assert.that(nodeSize * maxNodes <= fileSize * 2,
+                    ", maxNode: " + maxNodes;
+        assert nodeSize * maxNodes <= fileSize * 2 :
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", maxNode: " + maxNodes);
+                    ", maxNode: " + maxNodes;
  
         return nodeSize;
     }
@@ -240,7 +239,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Checks whether the specific area of the file matches the hash tree.
      */
     public boolean isCorrupt(Range in, byte[] data, int length) {
-        Assert.that(in.getHigh() <= FILE_SIZE);
+        assert(in.getHigh() <= FILE_SIZE);
         
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 

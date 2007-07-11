@@ -24,7 +24,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.Sockets;
@@ -216,7 +215,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerDone(com.limegroup.bittorrent.handshaking.BTHandshaker)
 	 */
 	public void handshakerDone(BTHandshaker shaker) {
-		Assert.that(shutdown || handshaking.contains(shaker));
+		assert(shutdown || handshaking.contains(shaker));
 		handshaking.remove(shaker);
 	}
 	

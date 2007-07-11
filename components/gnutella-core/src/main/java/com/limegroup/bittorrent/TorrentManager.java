@@ -18,7 +18,6 @@ import org.limewire.util.OSUtils;
 
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
@@ -189,7 +188,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 
 	private synchronized void torrentComplete(ManagedTorrent t) {
-		Assert.that(_active.contains(t));
+	    assert(_active.contains(t));
 		_seeding.add(t);
 	}
 	
@@ -198,7 +197,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 
 	private synchronized void torrentStarted(ManagedTorrent t) {
-		Assert.that(_starting.contains(t));
+	    assert(_starting.contains(t));
 		_starting.remove(t);
 		// if the user is adding a seeding torrent.. 
 		// effectively restart it

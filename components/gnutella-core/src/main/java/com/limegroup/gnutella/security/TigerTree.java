@@ -2,15 +2,13 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.10 2007-06-22 17:28:43 rkapsi Exp $
+ * $Id: TigerTree.java,v 1.11 2007-07-11 20:53:51 sberlin Exp $
  */
 package com.limegroup.gnutella.security;
 
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-
-import com.limegroup.gnutella.Assert;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
@@ -112,7 +110,7 @@ public class TigerTree extends MessageDigest {
 
         byte[] ret = collapse();
 
-        Assert.that(ret != MARKER);
+        assert(ret != MARKER);
 
         System.arraycopy(ret, 0, buf, offset, HASHSIZE);
         engineReset();
@@ -141,7 +139,7 @@ public class TigerTree extends MessageDigest {
 
             nodes.set(i, MARKER);
         }
-        Assert.that(last != null);
+        assert(last != null);
         return last;
     }
 

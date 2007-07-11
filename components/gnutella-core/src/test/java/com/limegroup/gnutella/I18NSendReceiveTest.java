@@ -285,8 +285,7 @@ public class I18NSendReceiveTest
         String uri = newDoc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
         
-        Assert.that(collection != null, 
-                    "Cant add doc to nonexistent collection");
+        assert collection != null : "Cant add doc to nonexistent collection";
 
         collection.addReply(fd, newDoc);
         assertTrue("error commiting xml", collection.writeMapToDisk());

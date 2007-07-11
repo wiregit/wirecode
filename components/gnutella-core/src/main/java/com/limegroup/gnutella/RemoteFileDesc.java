@@ -26,6 +26,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -492,7 +493,8 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 try {
                     _pushAddr = new PushEndpoint(http);
                     if (!_firewalled) {
-                        Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr);
+                        ErrorService.error(new IllegalStateException(
+                                "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));
                         _firewalled = true;
                     }
                 } catch (IOException iox) {}

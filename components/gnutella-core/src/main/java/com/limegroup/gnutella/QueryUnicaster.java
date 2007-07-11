@@ -450,7 +450,7 @@ public final class QueryUnicaster {
         }
         InetAddress address = pr.getInetAddress();
 
-        Assert.that(qk != null);
+        assert(qk != null);
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         _queryKeys.put(endpoint, new QueryKeyBundle(qk));

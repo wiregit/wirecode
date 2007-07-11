@@ -5,7 +5,6 @@ import java.io.OutputStream;
 
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -101,7 +100,7 @@ public class PatchTableMessage extends RouteTableMessage {
         //TODO: maybe we shouldn't enforce this
         //if (payload.length<5)
         //    throw new BadPacketException("Extra arguments in reset message.");
-        Assert.that(payload[0]==PATCH_VARIANT);
+        assert(payload[0]==PATCH_VARIANT);
         this.sequenceNumber=(short)ByteOrder.ubyte2int(payload[1]);
         this.sequenceSize=(short)ByteOrder.ubyte2int(payload[2]);
         if (sequenceNumber<1 || sequenceSize<1 || sequenceNumber>sequenceSize) 

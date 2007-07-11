@@ -85,7 +85,7 @@ public class Main implements ActivityCallback, ErrorCallback {
                 } else if (commands.length>=2 && commands[0].equals("query")) {
                     //Get query string from command (possibly multiple words)
                     int i=command.indexOf(' ');
-                    Assert.that(i!=-1 && i<command.length());
+                    assert(i!=-1 && i<command.length());
                     String query=command.substring(i+1);
                     RouterService.query(RouterService.newQueryGUID(), query);
                 } else if (commands.length==2 && commands[0].equals("listen")) {
@@ -188,7 +188,7 @@ public class Main implements ActivityCallback, ErrorCallback {
         //s[i] is the start of the word to add to buf
         //s[j] is just past the end of the word
         for (int i=0; i<n; ) {
-            Assert.that(s.charAt(i)!=' ');
+            assert(s.charAt(i)!=' ');
             int j=s.indexOf(' ',i+1);
             if (j==-1)
                 j=n;

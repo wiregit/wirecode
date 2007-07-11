@@ -2,7 +2,6 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Arrays;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RouterService;
 
 /**
@@ -44,7 +43,7 @@ public class AddressToken extends AbstractToken {
     private final int _hashCode;
 
 	public AddressToken(byte[] address, int port) {
-		Assert.that(address.length == 4);
+		assert address.length == 4;
 		_address = address;
 		_port = (short) port;
         _hashCode = getHashCode();

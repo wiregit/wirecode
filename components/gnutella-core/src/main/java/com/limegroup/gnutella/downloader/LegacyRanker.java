@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 /**
@@ -50,7 +49,7 @@ public class LegacyRanker extends SourceRanker {
         RemoteFileDesc ret = getBest(rfds.iterator());
         //The best rfd found so far
         boolean removed = rfds.remove(ret);
-        Assert.that(removed == true, "unable to remove RFD.");
+        assert removed : "unable to remove RFD.";
         
         if (LOG.isDebugEnabled())
             LOG.debug("the best we came with is "+ret);

@@ -1098,8 +1098,7 @@ public class DownloadManager implements BandwidthTracker {
         //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
         if(LOG.isTraceEnabled())
             LOG.trace("DM.sendQuery():" + query.getQuery());
-        Assert.that(waiting.contains(requerier),
-                    "Unknown or non-waiting MD trying to send requery.");
+        assert waiting.contains(requerier) : "Unknown or non-waiting MD trying to send requery.";
 
         //Disallow if global time limits exceeded.  These limits don't apply to
         //queries that are requeries.

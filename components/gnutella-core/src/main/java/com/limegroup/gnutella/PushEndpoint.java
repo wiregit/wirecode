@@ -414,7 +414,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    if (ret == null || !NetworkUtils.isValidExternalIpPort(ret))
 	        return null;
         
-        Assert.that(!ret.getAddress().equals(RemoteFileDesc.BOGUS_IP),"bogus ip address leaked");
+        assert !ret.getAddress().equals(RemoteFileDesc.BOGUS_IP) : "bogus ip address leaked";
 	    return ret;
 	}
 	

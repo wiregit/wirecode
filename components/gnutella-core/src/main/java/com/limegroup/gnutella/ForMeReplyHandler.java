@@ -393,7 +393,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     }
     
     public void handleSimppVM(SimppVM simppVM) {
-        Assert.that(false, "ForMeReplyHandler asked to send vendor message");
+        throw new IllegalStateException("ForMeReplyHandler asked to send vendor message");
     }
 
     /**

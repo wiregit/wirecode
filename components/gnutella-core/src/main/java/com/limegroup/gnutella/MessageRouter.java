@@ -2249,7 +2249,7 @@ public abstract class MessageRouter {
         }
         
         // must have a TTL of 1
-        Assert.that(push.getTTL() == 1, "multicast push ttl not 1");
+        assert push.getTTL() == 1 : "multicast push ttl not 1";
         
         MulticastService.instance().send(push);
         SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);

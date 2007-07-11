@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NameValue;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
@@ -141,9 +140,8 @@ public class MetaFileManager extends FileManager {
             }
         }
 
-        final FileDesc removed = removeFileIfShared(f, false);        
-        if(fd != removed)
-            Assert.that(false, "wanted to remove: " + fd + "\ndid remove: " + removed);
+        final FileDesc removed = removeFileIfShared(f, false);
+        assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
             
         synchronized(this) {
             _needRebuild = true;

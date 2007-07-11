@@ -11,7 +11,6 @@ import java.util.Map;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -244,10 +243,8 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 */
     protected synchronized String getDefaultFileName() {       
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
-         if (fileName == null) {
-             Assert.that(false,"defaultFileName is null, "+
-                         "subclass may have not overridden getDefaultFileName");
-         }
-		 return CommonUtils.convertFileName(fileName);
+        assert fileName != null : "defaultFileName is null, "+
+                         "subclass may have not overridden getDefaultFileName";
+		return CommonUtils.convertFileName(fileName);
     }
 }

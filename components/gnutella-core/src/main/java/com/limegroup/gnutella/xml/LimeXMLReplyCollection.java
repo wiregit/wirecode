@@ -27,7 +27,6 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -488,8 +487,7 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             dirty = true;
             oldDoc = mainMap.put(hash,newDoc);
-            if(oldDoc == null) 
-                Assert.that(false, "attempted to replace doc that did not exist!!");
+            assert oldDoc != null : "attempted to replace doc that did not exist!!";
             removeKeywords(oldDoc);
             addKeywords(newDoc);
         }
@@ -548,7 +546,7 @@ public class LimeXMLReplyCollection {
         	}
         }
         
-        Assert.that(writeState != INCORRECT_FILETYPE, "trying to write data to unwritable file");
+        assert writeState != INCORRECT_FILETYPE : "trying to write data to unwritable file";
 
         return writeState;
     }

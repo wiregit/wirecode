@@ -29,7 +29,6 @@ import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.VersionUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
@@ -603,7 +602,7 @@ public class UpdateHandler implements HttpClientListener {
             return;
         
         UpdateInformation update = _updateInfo;
-        Assert.that(update != null);
+        assert(update != null);
         
         RouterService.getCallback().updateAvailable(update);
     }

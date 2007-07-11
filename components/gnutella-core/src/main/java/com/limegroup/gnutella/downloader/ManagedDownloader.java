@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,9 +33,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -753,7 +753,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Starts the download.
      */
     public synchronized void startDownload() {
-        Assert.that(dloaderManagerThread == null, "already started" );
+        assert dloaderManagerThread == null : "already started";
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 try {
@@ -817,7 +817,7 @@ public class ManagedDownloader extends AbstractDownloader
                 }
                 break;
             default:
-                Assert.that(false, "Bad status from tad2: "+status);
+                assert false : "Bad status from tad2: "+status;
             }
             
             complete = isCompleted();
@@ -1048,10 +1048,10 @@ public class ManagedDownloader extends AbstractDownloader
             // have given up, or are queued, there's nothing to do.
             break;
         default:
-            Assert.that(false, "invalid state: " + getState() +
-                             ", workers: " + _workers.size() + 
-                             ", _activeWorkers: " + _activeWorkers.size() +
-                             ", _queuedWorkers: " + _queuedWorkers.size());
+            throw new IllegalStateException("invalid state: " + getState() +
+                                            ", workers: " + _workers.size() + 
+                                            ", _activeWorkers: " + _activeWorkers.size() +
+                                            ", _queuedWorkers: " + _queuedWorkers.size());
         }
     }   
     
@@ -1223,15 +1223,16 @@ public class ManagedDownloader extends AbstractDownloader
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            // Assert that the SHA1 of the IFD and our sha1 match.
             if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
-                // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.silent(false, "wrong IFD." +
+                ErrorService.error(new IllegalStateException(
+                           "wrong IFD." +
                            "\nclass: " + getClass().getName() +
                            "\nours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
                            "\ntheir hashes: " + ifd.getUrns()+
-                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                           "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
                 fileManager.removeFileIfShared(incompleteFile);
             }
         }
@@ -1487,7 +1488,7 @@ public class ManagedDownloader extends AbstractDownloader
      * notifies this downloader that an alternate location has been added.
      */
     public synchronized void locationAdded(AlternateLocation loc) {
-        Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
+        assert(loc.getSHA1Urn().equals(getSHA1Urn()));
         
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
@@ -1837,9 +1838,9 @@ public class ManagedDownloader extends AbstractDownloader
         
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        Assert.that(downloadSHA1 != null, "null hash.");
+        assert downloadSHA1 != null : "null hash.";
         
-        Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        assert downloadSHA1.equals(rfd.getSHA1Urn()) : "wrong loc SHA1";
         
         AlternateLocation loc;
         try {

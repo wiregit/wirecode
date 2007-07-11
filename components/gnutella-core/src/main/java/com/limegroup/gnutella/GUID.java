@@ -87,7 +87,7 @@ public class GUID implements Comparable<GUID> {
      * @param bytes the array of unique bytes
      */
     public GUID(byte[] bytes) {
-        Assert.that(bytes.length==SZ);
+        assert(bytes.length==SZ);
         this.bytes=bytes;
     }
 

@@ -17,7 +17,6 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
@@ -232,8 +231,7 @@ public class UDPHostCache {
             LOG.trace("Removing endpoint: " + e);
         boolean removed1=udpHosts.remove(e);
         boolean removed2=udpHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Set "+removed1+" but queue "+removed2);
+        assert removed1==removed2 : "Set "+removed1+" but queue "+removed2;
         if(removed1)
             writeDirty = true;
         return removed1;
@@ -243,7 +241,7 @@ public class UDPHostCache {
      * Adds a new udp hostcache to this.
      */
     public synchronized boolean add(ExtendedEndpoint e) {
-        Assert.that(e.isUDPHostCache());
+        assert e.isUDPHostCache();
         
         if (udpHostsSet.contains(e))
             return false;

@@ -71,7 +71,7 @@ public class UnicastSimulator {
                 PingReply.createExternal(GUID.makeGuid(), (byte)5,
                                          PORT_RANGE_BEGIN+i, _localAddress, 
                                          true);                                         
-            Assert.that(_pongs[i].isUltrapeer());
+            assert(_pongs[i].isUltrapeer());
         }
     }
 

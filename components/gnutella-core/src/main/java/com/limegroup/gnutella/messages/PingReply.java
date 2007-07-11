@@ -26,7 +26,6 @@ import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
@@ -1020,9 +1019,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
 
             return ggep;
         } catch (IOException e) {
-            //See above.
-            Assert.that(false, "Couldn't encode AddressSecurityToken" + addressSecurityToken);
-            return null;
+            throw new IllegalStateException("Couldn't encode AddressSecurityToken" + addressSecurityToken, e);
         }
     }
 

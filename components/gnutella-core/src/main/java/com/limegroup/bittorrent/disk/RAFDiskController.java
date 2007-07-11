@@ -11,8 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * implementation of the DiskController interface using
  * <tt>RandomAccessFile</tt> for io.
@@ -183,7 +181,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 		for (int i = 0; i < _files.size() && read < length; i++) {
 			File f = _files.get(i);
 			while (position < f.length() && read < length) {
-				Assert.that(_fos[i] != null, "file being read & verified at the same time");
+				assert _fos[i] != null : "file being read & verified at the same time";
 				
 				long currentLength = _fos[i].length();
 				if (currentLength < f.length() && position >= currentLength)
