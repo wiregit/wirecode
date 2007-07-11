@@ -1140,8 +1140,10 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setReplyToMulticast(replyToMulticastT);
             _data.setProxies(proxies);
             _data.setSecurityToken(securityToken);
-            _data.setHostData(new HostData(this));
             _data.setTLSCapable(supportsTLST);
+            
+            // MUST BE LAST -- This accesses everything set above
+            _data.setHostData(new HostData(this));
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {

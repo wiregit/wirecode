@@ -156,8 +156,9 @@ public class BrowseHostHandler {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
-                LOG.trace("Attempting direct connection");
                 ConnectType type = host.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Attempting direct connection with type: " + type);
                 Socket socket = Sockets.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
