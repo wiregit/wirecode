@@ -975,7 +975,6 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-        assertConnectionIsOpen(false);
     }
 
     /**
