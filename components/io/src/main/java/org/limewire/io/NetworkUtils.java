@@ -155,7 +155,8 @@ public final class NetworkUtils {
      */
     public static boolean isValidExternalIpPort(IpPort addr) {
         InetAddress address = addr.getInetAddress();
-        return isValidAddress(address) 
+        return address != null 
+            && isValidAddress(address) 
             && isValidPort(addr.getPort())
             && !isPrivateAddress(address);
     }
