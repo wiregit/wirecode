@@ -142,20 +142,4 @@ public class FilteredTreeModelTest extends GUIBaseTestCase {
         assertFalse(filteredModel.isVisible(a));
 	}
 
-	public void testStripping() {
-	    DefaultMutableTreeNode node = addNode(root, "node", ";123", "\"abc");
-        assertTrue(filteredModel.isVisible(a));
-        filteredModel.filterByText("abc");
-        assertTrue(filteredModel.isVisible(node));
-        assertFalse(filteredModel.isVisible(a));
-        
-        filteredModel.filterByText("123");
-        assertTrue(filteredModel.isVisible(node));
-        assertFalse(filteredModel.isVisible(a));
-        
-        filteredModel.filterByText("notfound");
-        assertFalse(filteredModel.isVisible(node));
-        assertFalse(filteredModel.isVisible(a));
-	}
-
 }
