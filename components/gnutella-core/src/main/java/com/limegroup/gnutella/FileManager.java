@@ -1951,138 +1951,39 @@ public abstract class FileManager {
     public static boolean isSensitiveDirectory(File folder) {
         if (folder == null)
             return false;
-        
-        //  check for user home directory
+
         String userHome = System.getProperty("user.home");
         if (folder.equals(new File(userHome)))
             return true;
-        
-        //  check for OS-specific directories:
+
+        String[] sensitive;
         if (OSUtils.isWindows()) {
-            //  check for "Documents and Settings"
-            if (folder.getName().equals("Documents and Settings"))
-                return true;
-            
-            //  check for "My Documents"
-            if (folder.getName().equals("My Documents"))
-                return true;
-            
-            //  check for "Desktop"
-            if (folder.getName().equals("Desktop"))
-                return true;
-            
-            //  check for "Program Files"
-            if (folder.getName().equals("Program Files"))
-                return true;
-            
-            //  check for "Windows"
-            if (folder.getName().equals("Windows"))
-                return true;
-            
-            //  check for "WINNT"
-            if (folder.getName().equals("WINNT"))
+            sensitive = new String[] { "Documents and Settings",
+                    "My Documents", "Desktop", "Program Files", "Windows",
+                    "WINNT" };
+        } else if (OSUtils.isMacOSX()) {
+            sensitive = new String[] { "Users", "System", "System Folder",
+                    "Previous Systems", "private", "Volumes", "Desktop",
+                    "Applications", "Applications (Mac OS 9)", "Network" };
+        } else if (OSUtils.isPOSIX()) {
+            sensitive = new String[] { "bin", "boot", "dev", "etc", "home",
+                    "mnt", "opt", "proc", "root", "sbin", "usr", "var" };
+        } else {
+            sensitive = new String[0];
+        }
+
+        String folderName = folder.getName();
+        for (String name : sensitive) {
+            if (folderName.equals(name))
                 return true;
         }
-        
-        if (OSUtils.isMacOSX()) {
-            //  check for /Users
-            if (folder.getName().equals("Users"))
-                return true;
-            
-            //  check for /System
-            if (folder.getName().equals("System"))
-                return true;
-            
-            //  check for /System Folder
-            if (folder.getName().equals("System Folder"))
-                return true;
-            
-            //  check for /Previous Systems
-            if (folder.getName().equals("Previous Systems"))
-                return true;
-            
-            //  check for /private
-            if (folder.getName().equals("private"))
-                return true;
-            
-            //  check for /Volumes
-            if (folder.getName().equals("Volumes"))
-                return true;
-            
-            //  check for /Desktop
-            if (folder.getName().equals("Desktop"))
-                return true;
-            
-            //  check for /Applications
-            if (folder.getName().equals("Applications"))
-                return true;
-            
-            //  check for /Applications (Mac OS 9)
-            if (folder.getName().equals("Applications (Mac OS 9)"))
-                return true;
-            
-            //  check for /Network            
-            if (folder.getName().equals("Network"))
-                return true;
-        }
-        
-        if (OSUtils.isPOSIX()) {
-            //  check for /bin
-            if (folder.getName().equals("bin"))
-                return true;
-            
-            //  check for /boot
-            if (folder.getName().equals("boot"))
-                return true;
-            
-            //  check for /dev
-            if (folder.getName().equals("dev"))
-                return true;
-            
-            //  check for /etc
-            if (folder.getName().equals("etc"))
-                return true;
-            
-            //  check for /home
-            if (folder.getName().equals("home"))
-                return true;
-            
-            //  check for /mnt
-            if (folder.getName().equals("mnt"))
-                return true;
-            
-            //  check for /opt
-            if (folder.getName().equals("opt"))
-                return true;
-            
-            //  check for /proc
-            if (folder.getName().equals("proc"))
-                return true;
-            
-            //  check for /root
-            if (folder.getName().equals("root"))
-                return true;
-            
-            //  check for /sbin
-            if (folder.getName().equals("sbin"))
-                return true;
-            
-            //  check for /usr
-            if (folder.getName().equals("usr"))
-                return true;
-            
-            //  check for /var
-            if (folder.getName().equals("var"))
-                return true;
-        }
-        
+
         return false;
     }
     
     /**
-     * Returns the QRTable.
-     * If the shared files have changed, then it will rebuild the QRT.
-     * A copy is returned so that FileManager does not expose
+     * Returns the QRTable. If the shared files have changed, then it will
+     * rebuild the QRT. A copy is returned so that FileManager does not expose
      * its internal data structure.
      */
     public synchronized QueryRouteTable getQRT() {
