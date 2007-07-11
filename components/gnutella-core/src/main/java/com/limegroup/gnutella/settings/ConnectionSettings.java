@@ -220,7 +220,7 @@ public final class ConnectionSettings extends LimeProps {
     
     /** Whether or not we want to make outgoing connections with TLS. */
     public static final BooleanSetting TLS_OUTGOING =
-        FACTORY.createBooleanSetting("TLS_OUTGOING", false);
+        FACTORY.createBooleanSetting("TLS_OUTGOING", true);
     
     public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     

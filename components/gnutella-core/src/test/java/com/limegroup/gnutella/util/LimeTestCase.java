@@ -210,6 +210,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
+        ConnectionSettings.TLS_OUTGOING.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
