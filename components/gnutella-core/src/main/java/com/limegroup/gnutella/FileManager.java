@@ -726,11 +726,11 @@ public abstract class FileManager {
     /**
      * Loads the FileManager with a new list of directories.
      */
-    public void loadWithNewDirectories(Set<? extends File> shared) {
+    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) {
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
-            for(File file : shared)
-                _data.DIRECTORIES_NOT_TO_SHARE.remove(file);
+            _data.DIRECTORIES_NOT_TO_SHARE.clear();
+            _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListSet);
         }
 	    RouterService.getFileManager().loadSettings();
     }
@@ -1072,6 +1072,12 @@ public abstract class FileManager {
 	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListedSet);
 	    for (File folder : folders) {
 	    	addSharedFolder(folder);
+	    }
+	}
+	
+	public Set<File> getFolderNotToShare() {
+	    synchronized (_data.DIRECTORIES_NOT_TO_SHARE) {
+	        return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
 	    }
 	}
 	
