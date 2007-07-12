@@ -74,6 +74,9 @@ public class HttpClientManager {
         p = new Protocol("https", new LimeSocketFactory(ConnectType.TLS),80);
         Protocol.registerProtocol("https", p);
     }
+    
+    /** Ensures this is initialized. */
+    public static void initialize() {}
             
     /** Returns a new HttpClient with the appropriate manager. */
     public static HttpClient getNewClient() {

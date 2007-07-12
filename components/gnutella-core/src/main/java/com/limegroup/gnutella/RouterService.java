@@ -63,6 +63,7 @@ import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HTTPConnectionData;
+import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -496,6 +497,8 @@ public class RouterService {
             LimeCoreGlue.install();
             preGuiInit();
             _state = StartStatus.STARTING;
+            
+            HttpClientManager.initialize();
     
     		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");
