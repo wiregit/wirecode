@@ -1,13 +1,11 @@
 package org.limewire.nio.timeout;
 
 
-import java.io.OutputStream;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
-import org.limewire.io.IOUtils;
 import org.limewire.nio.observer.Shutdownable;
 
 
@@ -51,8 +49,6 @@ public final class StalledUploadWatchdog extends Periodic {
     
     private final long delayTime;
     
-    private OStreamWrap osWrap;
-    
     
     public StalledUploadWatchdog(long delayTime, ScheduledExecutorService service) {
     	super(new Closer(), service);
@@ -82,13 +78,6 @@ public final class StalledUploadWatchdog extends Periodic {
         closer.shutdownable = shutdownable;
     }
     
-    public synchronized void activate(OutputStream os) {
-    	if (osWrap == null)
-    		osWrap = new OStreamWrap();
-    	osWrap.setOstream(os);
-    	activate(osWrap);
-    }
-    
     /**
      * Kills the upload if we're active, and tells the state
      * to close the connection.
@@ -108,18 +97,6 @@ public final class StalledUploadWatchdog extends Periodic {
     			toShut.shutdown();
     			shutdownable = null;
     		}
-    	}
-    }
-    private static class OStreamWrap implements Shutdownable {
-    	private OutputStream ostream;
-    	void setOstream(OutputStream ostream) {
-    		this.ostream = ostream;
-    	}
-    	public void shutdown() {
-    		IOUtils.close(ostream);
-    		ostream = null; 
-            //exceptions can be ignored because we're going to close
-            //the connection anyway.
     	}
     }
 }
