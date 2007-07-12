@@ -2118,7 +2118,7 @@ INTERNETARCHIVE_IDRETRIEVER_TITLE=Identifikačná požiadavka...
 ################################################################################
 #### RECURSIVE_SHARING_DIALOG_TITLE=Folders to share
 #? RECURSIVE_SHARING_DIALOG_TITLE=
-#### RECURSIVE_SHARING_DIALOG_DESCRIPTION=The following folders and subfolders will be shared. You can disable the ones that you would not like to share.
+#### RECURSIVE_SHARING_DIALOG_DESCRIPTION=The following folders and subfolders will be shared.  You can uncheck any folders you do not want to share.  (You can change your shared folders at any time in LimeWire's options.)
 #? RECURSIVE_SHARING_DIALOG_DESCRIPTION=
 #### RECURSIVE_SHARING_LEGEND=Legend
 #? RECURSIVE_SHARING_LEGEND=
@@ -2687,6 +2687,10 @@ OPTIONS_SAVE_BASIC_MAIN_TITLE=Základné
 OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Rozšírené
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=Zdieľanie
+#### OPTIONS_SHARED_BASIC_TITLE=Basic
+#? OPTIONS_SHARED_BASIC_TITLE=
+#### OPTIONS_SHARED_ADVANCED_MAIN_TITLE=Advanced
+#? OPTIONS_SHARED_ADVANCED_MAIN_TITLE=
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
 OPTIONS_SPEED_MAIN_TITLE=Rýchlosť
 #### OPTIONS_PERFORMANCE_MAIN_TITLE=Performance
@@ -2820,7 +2824,7 @@ OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Zdieľanie stiahnutých súborov:
 OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Zdieľanie sťahovaných súborov
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Môžete zdieľať samotné súbory, ktoré uložíte do nezdieľaného piečinka.
-#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
+#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=Chcete zdieľať vaše nové ukladacie periečinky? Nasledovné nové priečinky budú zdieľané:\n\n
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
@@ -2828,6 +2832,15 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Chcete zdieľať vaše nové ukladacie periečin
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
+
+################################################################################
+# Key/value pairs for the advanced shared directories options window item
+# in the options window.
+################################################################################
+#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
+OPTIONS_SHARED_DIRS_TITLE=Zdieľané priečinky
+#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
+OPTIONS_SHARED_DIRS_LABEL=Môžete vybrať priečinky na zdieľanie súborov. Súbory v týchto priečinkoch budú zobrazené v Knižnici.
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2860,12 +2873,14 @@ OPTIONS_SPEED_BOX_LABEL=Rýchlosť:
 ################################################################################
 #### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
 #? OPTIONS_DISABLE_CAPABILITIES_TITLE=
-#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
+#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" and/or connect to the Mojito DHT.  LimeWire can also use a secure communications mode called TLS, which may use more CPU resources.  You can disable these if needed.
 #? OPTIONS_DISABLE_CAPABILITIES_LABEL=
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 #? OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=
 #### OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Disable Mojito DHT Capabilities:
 #? OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=
+#### OPTIONS_DISABLE_TLS_BOX_LABEL=Disable TLS Capabilities:
+#? OPTIONS_DISABLE_TLS_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for disabling OOB support.

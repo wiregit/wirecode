@@ -2116,7 +2116,7 @@ INTERNETARCHIVE_IDRETRIEVER_TITLE=Azonos�t� k�r�se...
 ################################################################################
 #### RECURSIVE_SHARING_DIALOG_TITLE=Folders to share
 #? RECURSIVE_SHARING_DIALOG_TITLE=
-#### RECURSIVE_SHARING_DIALOG_DESCRIPTION=The following folders and subfolders will be shared. You can disable the ones that you would not like to share.
+#### RECURSIVE_SHARING_DIALOG_DESCRIPTION=The following folders and subfolders will be shared.  You can uncheck any folders you do not want to share.  (You can change your shared folders at any time in LimeWire's options.)
 #? RECURSIVE_SHARING_DIALOG_DESCRIPTION=
 #### RECURSIVE_SHARING_LEGEND=Legend
 #? RECURSIVE_SHARING_LEGEND=
@@ -2685,6 +2685,10 @@ OPTIONS_SAVE_BASIC_MAIN_TITLE=Alap
 OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Halad�
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=Megoszt�
+#### OPTIONS_SHARED_BASIC_TITLE=Basic
+#? OPTIONS_SHARED_BASIC_TITLE=
+#### OPTIONS_SHARED_ADVANCED_MAIN_TITLE=Advanced
+#? OPTIONS_SHARED_ADVANCED_MAIN_TITLE=
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
 OPTIONS_SPEED_MAIN_TITLE=Sebess�
 #### OPTIONS_PERFORMANCE_MAIN_TITLE=Performance
@@ -2818,7 +2822,7 @@ OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=K�sz let�lt�sek megoszt�sa:
 OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Let�lt�smegoszt�
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Megoszthatod azokat a f�jlokat is, amelyek nem megosztott mapp�ban vannak.
-#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
+#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=Szeretn�d megosztani az �j ment�si mapp�idat? A k�vetkez� �j mapp�k meg lesznek osztva:\n\n
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
 OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrentmegoszt�
@@ -2826,6 +2830,15 @@ OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrentmegoszt�
 OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=Automatikusan megoszthatod a .torrent f�jlokat.
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
 OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=.torrent f�jlok megoszt�sa
+
+################################################################################
+# Key/value pairs for the advanced shared directories options window item
+# in the options window.
+################################################################################
+#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
+OPTIONS_SHARED_DIRS_TITLE=Megosztott mapp�
+#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
+OPTIONS_SHARED_DIRS_LABEL=Kijel�lheted a megosztott f�ljok mapp�it. Az itt l�v� f�jlok megjelennek a K�nyvt�rban.
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2858,12 +2871,14 @@ OPTIONS_SPEED_BOX_LABEL=Sebess�g:
 ################################################################################
 #### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
 OPTIONS_DISABLE_CAPABILITIES_TITLE=K�pess�gek
-#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
+#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" and/or connect to the Mojito DHT.  LimeWire can also use a secure communications mode called TLS, which may use more CPU resources.  You can disable these if needed.
 OPTIONS_DISABLE_CAPABILITIES_LABEL=Ha az internethozz�f�r�sed gyorsnak mondhat�, a LimeWire a lassabb felhaszn�l�k sz�m�ra �s a Mojito DHT-hez val� kapcsol�d�shoz "Ultrapartner"-k�nt szolg�lhat. Ha kell, ez kikapcsolhat�
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapartner k�pess�g tilt�sa:
 #### OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Disable Mojito DHT Capabilities:
 OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Mojito DHT k�pess�gek tilt�sa:
+#### OPTIONS_DISABLE_TLS_BOX_LABEL=Disable TLS Capabilities:
+#? OPTIONS_DISABLE_TLS_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for disabling OOB support.
