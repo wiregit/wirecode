@@ -129,8 +129,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     }
 
     public void testPushProxyRequest() throws Exception {
-        // FIXME why is that sleep required?
-        //Thread.sleep(6000);
+        // wait for connections to process any messages
+        Thread.sleep(6000);
         
         callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
