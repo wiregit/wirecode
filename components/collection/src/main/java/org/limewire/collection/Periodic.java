@@ -29,12 +29,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class Periodic {
 
+    private static final long NANO_ORIGIN = System.nanoTime();
+    
 	private final ScheduledExecutorService scheduler;
 	private final Delegate d;
 	
 	private long nextExecuteTime;
 	private Future future;
 	
+    private static long now() {
+        return System.nanoTime() - NANO_ORIGIN;
+    }
+    
 	/**
 	 * Creates a periodic task 
 	 * @param r the <tt>Runnable</tt> to execute
@@ -59,11 +65,11 @@ public class Periodic {
 	 * @return true if the execution time changed
 	 */
 	public synchronized boolean rescheduleIfLater(long newDelay) {
-		long newTime = System.currentTimeMillis() + newDelay;
+		long newTime = now() + TimeUnit.MILLISECONDS.toNanos(newDelay);
 		if (future == null) { 
 			nextExecuteTime = newTime;
 			if (newDelay > 0) 
-				future = scheduler.schedule(d, newDelay, TimeUnit.MILLISECONDS);
+				future = scheduler.schedule(d, newDelay, TimeUnit.NANOSECONDS);
 			else
 				scheduler.execute(d);
 			return true;
@@ -85,12 +91,13 @@ public class Periodic {
 		if (future == null) 
 			return rescheduleIfLater(newDelay);
 		
-		long newTime = System.currentTimeMillis() + newDelay;
+        newDelay = TimeUnit.MILLISECONDS.toNanos(newDelay);
+		long newTime = now() + newDelay;
 		if (newTime < nextExecuteTime) {
 			future.cancel(false);
 			nextExecuteTime = newTime;
 			if (newDelay > 0)
-				future = scheduler.schedule(d, newDelay, TimeUnit.MILLISECONDS);
+				future = scheduler.schedule(d, newDelay, TimeUnit.NANOSECONDS);
 			else { 
 				future = null;
 				scheduler.execute(d);
@@ -121,9 +128,9 @@ public class Periodic {
 			synchronized(Periodic.this) {
 				future = null;
 				
-				long now = System.currentTimeMillis();
+				long now = now();
 				if (now < nextExecuteTime) {
-					future = scheduler.schedule(this, nextExecuteTime - now, TimeUnit.MILLISECONDS);
+					future = scheduler.schedule(this, nextExecuteTime - now, TimeUnit.NANOSECONDS);
 					return;
 				}
 			}

@@ -1,5 +1,7 @@
 package org.limewire.nio.timeout;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.NIOTestUtils;
 import org.limewire.nio.observer.Shutdownable;
@@ -11,23 +13,23 @@ public class NIOWatchdogTest extends BaseTestCase {
         super(name);
     }
 
+    private static ScheduledExecutorService executor = NIODispatcher.instance().getScheduledExecutorService();
     public void testActivate() throws Exception {
         MyShutdownable shutdownable = new MyShutdownable();
-        NIOWatchdog watchdog = new NIOWatchdog(NIODispatcher.instance(), shutdownable , 50);
+        StalledUploadWatchdog watchdog = new StalledUploadWatchdog(50, executor);
         assertFalse(shutdownable.shutdown);
         
         Thread.sleep(50);
         NIOTestUtils.waitForNIO();
         assertFalse(shutdownable.shutdown);
         
-        watchdog.activate();
+        watchdog.activate(shutdownable);
         Thread.sleep(50);
         NIOTestUtils.waitForNIO();
         assertTrue(shutdownable.shutdown);
-        
         // reactivate
         shutdownable.shutdown = false;
-        watchdog.activate();
+        watchdog.activate(shutdownable);
         Thread.sleep(50);
         NIOTestUtils.waitForNIO();
         assertTrue(shutdownable.shutdown);
@@ -35,9 +37,9 @@ public class NIOWatchdogTest extends BaseTestCase {
     
     public void testDeactivate() throws Exception {
         MyShutdownable shutdownable = new MyShutdownable();
-        NIOWatchdog watchdog = new NIOWatchdog(NIODispatcher.instance(), shutdownable, 50);
+        StalledUploadWatchdog watchdog = new StalledUploadWatchdog(50, executor);
 
-        watchdog.activate();
+        watchdog.activate(shutdownable);
         watchdog.deactivate();
         Thread.sleep(50);
         NIOTestUtils.waitForNIO();
@@ -49,11 +51,11 @@ public class NIOWatchdogTest extends BaseTestCase {
 
     public void testActivateOnNIOThread() throws Exception {
         final MyShutdownable shutdownable = new MyShutdownable();
-        final NIOWatchdog watchdog = new NIOWatchdog(NIODispatcher.instance(), shutdownable, 1000);
+        final StalledUploadWatchdog watchdog = new StalledUploadWatchdog(1000, executor);
 
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
-                watchdog.activate();
+                watchdog.activate(shutdownable);
             }            
         });
         NIOTestUtils.waitForNIO();

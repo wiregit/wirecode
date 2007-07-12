@@ -11,8 +11,9 @@ import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
-import org.limewire.nio.timeout.NIOWatchdog;
+import org.limewire.nio.timeout.StalledUploadWatchdog;
 
 /**
  * Provides a default implementation of an event based HTTP entity that
@@ -29,19 +30,22 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
     private IOControl ioctrl;
 
     /** Cancels the transfer if inactivity for too long. */
-    private NIOWatchdog watchdog;
+    private StalledUploadWatchdog watchdog;
 
-    private long timeout = NIOWatchdog.DEFAULT_DELAY_TIME;
+    private long timeout = StalledUploadWatchdog.DELAY_TIME;
+    
+    /** shutdownable to shut off in case of a timeout */
+    private final Shutdownable timeoutable = new Shutdownable() {
+        public void shutdown() {
+            timeout();
+        }
+    };
     
     protected void activateTimeout() {
         if (this.watchdog == null) {
-            this.watchdog = new NIOWatchdog(NIODispatcher.instance(), new Runnable() {
-                public void run() {
-                    timeout();
-                }                
-            }, timeout);
+            this.watchdog = new StalledUploadWatchdog(timeout, NIODispatcher.instance().getScheduledExecutorService());
         }
-        this.watchdog.activate();
+        this.watchdog.activate(timeoutable);
     }
 
     protected void deactivateTimeout() {

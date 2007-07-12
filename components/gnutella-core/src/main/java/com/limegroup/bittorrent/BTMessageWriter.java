@@ -13,6 +13,7 @@ import org.limewire.nio.channel.DelayedBufferWriter;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.IOErrorObserver;
+import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.BufferUtils;
 
 import com.limegroup.bittorrent.messages.BTMessage;
@@ -20,7 +21,6 @@ import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 
 public class BTMessageWriter implements BTChannelWriter {
 
@@ -83,6 +83,9 @@ public class BTMessageWriter implements BTChannelWriter {
 	
 	/** How often to send a keepalive if there is no other traffic */
 	private int keepAliveInterval;
+    
+    /** scheduler to use */
+    private volatile ScheduledExecutorService scheduler;
 	
 	/**
 	 * Constructor
@@ -109,6 +112,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		}, scheduler);
 		this.keepAliveInterval = keepAliveInterval;
 		keepAliveSender.rescheduleIfLater(keepAliveInterval);
+        this.scheduler = scheduler;
 	}
 	
 	/**
@@ -198,8 +202,10 @@ public class BTMessageWriter implements BTChannelWriter {
 	
 	private void messageArrived(BTMessage m) {
 		if (isPiece(m)) {
-			if (watchdog == null)
-				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
+			if (watchdog == null) {
+                assert scheduler != null : "message arrived before writer inited";
+				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME, scheduler);
+            }
 			watchdog.activate(this);
 		}
 	}

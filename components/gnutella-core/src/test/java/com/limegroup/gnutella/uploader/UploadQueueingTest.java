@@ -13,7 +13,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.nio.timeout.NIOWatchdog;
+import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -87,8 +87,8 @@ public class UploadQueueingTest extends BaseTestCase {
         
         // make sure uploads are not killed because they stall
         // this is explicitly tested by testStalledUploader()
-        savedNIOWatchdogDelay = NIOWatchdog.DEFAULT_DELAY_TIME; 
-        NIOWatchdog.DEFAULT_DELAY_TIME = Integer.MAX_VALUE;
+        savedNIOWatchdogDelay = (int) StalledUploadWatchdog.DELAY_TIME; 
+        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
         
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         List<FileDesc> descs = new ArrayList<FileDesc>();
@@ -155,7 +155,7 @@ public class UploadQueueingTest extends BaseTestCase {
     
     @Override
     public void tearDown() throws Exception {
-        NIOWatchdog.DEFAULT_DELAY_TIME = savedNIOWatchdogDelay;
+        StalledUploadWatchdog.DELAY_TIME = savedNIOWatchdogDelay;
         
         for (Uploader uploader : uploaders) {
             uploader.stop();
@@ -698,8 +698,8 @@ public class UploadQueueingTest extends BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
-        int savedDelay = NIOWatchdog.DEFAULT_DELAY_TIME; 
-        NIOWatchdog.DEFAULT_DELAY_TIME = 1000 * 10; // 10 seconds.
+        int savedDelay = (int)StalledUploadWatchdog.DELAY_TIME; 
+        StalledUploadWatchdog.DELAY_TIME = 1000 * 10; // 10 seconds.
         try {
             UploadSettings.HARD_MAX_UPLOADS.setValue(2);
             UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
@@ -739,7 +739,7 @@ public class UploadQueueingTest extends BaseTestCase {
                     0, upManager.getNumQueuedUploads());
 
             //sleep a little more than needed for the stall to die.
-            Thread.sleep(NIOWatchdog.DEFAULT_DELAY_TIME + 5 * 1000);
+            Thread.sleep(StalledUploadWatchdog.DELAY_TIME + 5 * 1000);
 
             assertEquals("should have no active uploaders",
                     0, upManager.uploadsInProgress());
@@ -753,7 +753,7 @@ public class UploadQueueingTest extends BaseTestCase {
             kill(d3);
             kill(d4);
         } finally {
-            NIOWatchdog.DEFAULT_DELAY_TIME = savedDelay;
+            StalledUploadWatchdog.DELAY_TIME = savedDelay;
         }
     }
 

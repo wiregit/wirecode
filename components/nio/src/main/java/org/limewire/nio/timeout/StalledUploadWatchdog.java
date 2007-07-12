@@ -1,6 +1,8 @@
-package com.limegroup.gnutella.uploader;
+package org.limewire.nio.timeout;
+
 
 import java.io.OutputStream;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,8 +10,6 @@ import org.limewire.collection.Periodic;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.observer.Shutdownable;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>
@@ -53,12 +53,9 @@ public final class StalledUploadWatchdog extends Periodic {
     
     private OStreamWrap osWrap;
     
-    public StalledUploadWatchdog() {
-    	this(DELAY_TIME);
-    }
     
-    public StalledUploadWatchdog(long delayTime) {
-    	super(new Closer(), RouterService.getScheduledExecutorService());
+    public StalledUploadWatchdog(long delayTime, ScheduledExecutorService service) {
+    	super(new Closer(), service);
     	this.closer = (Closer)getRunnable();
     	this.delayTime = delayTime;
     }
@@ -77,7 +74,7 @@ public final class StalledUploadWatchdog extends Periodic {
     /**
      * Activates the checking.
      */
-    public void activate(Shutdownable shutdownable) {
+    public synchronized void activate(Shutdownable shutdownable) {
         if(LOG.isDebugEnabled())
             LOG.debug("Activated on: " + shutdownable);
         rescheduleIfLater(delayTime);
@@ -108,7 +105,6 @@ public final class StalledUploadWatchdog extends Periodic {
     		if( toShut != null ) {
     			if(LOG.isDebugEnabled())
     				LOG.debug("STALLED!  Killing: " + toShut);                    
-    			UploadStat.STALLED.incrementStat();
     			toShut.shutdown();
     			shutdownable = null;
     		}
