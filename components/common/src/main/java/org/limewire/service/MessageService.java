@@ -12,7 +12,7 @@ public class MessageService {
      * Variable for the <tt>MessageCallback</tt> implementation to use for 
      * displaying messages.
      */
-    private static MessageCallback _callback = new ShellMessageService();
+    private volatile static MessageCallback _callback = new ShellMessageService();
     
     /**
      * Private constructor to ensure that this class cannot be instantiated.
