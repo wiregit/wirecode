@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
@@ -46,6 +48,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private static transient final long  MB                   = 1024 * KB;
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
+
+    /** How much to verify at a time */
+    private static final int VERIFYABLE_CHUNK = 64 * 1024; // 64k
     
     /** An invalid HashTree. */
     public static final HashTree INVALID = new HashTree();
@@ -259,6 +264,51 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     }
 
     /**
+     * Checks whether the specified range in the provided file matches
+     * the hash tree.
+     * @param in the Range 
+     * @param raf the RandomAccessFile to read from
+     * @param cache the cache to use for creating temporary buffers
+     * @return true if the data in the range is corrupt.
+     */
+    public boolean isCorrupt(Range in, RandomAccessFile raf, PowerOf2ByteArrayCache cache) {
+        assert(in.getHigh() <= FILE_SIZE);
+        
+        // if the interval is not a fixed chunk, we cannot verify it.
+        // (actually we can but its more complicated) 
+        if (in.getLow() % _nodeSize == 0 && 
+                in.getHigh() - in.getLow() +1 <= _nodeSize &&
+                (in.getHigh() == in.getLow()+_nodeSize-1 || in.getHigh() == FILE_SIZE -1)) {
+            try {
+                int nodeSize = Math.min(VERIFYABLE_CHUNK, _nodeSize);
+                TigerTree digest = new TigerTree();
+                byte [] b = cache.get(nodeSize);
+                long read = in.getLow();
+                while(read <= in.getHigh()) {
+                    int size = (int)Math.min(nodeSize, in.getHigh() - read + 1);
+                    synchronized(raf) {
+                        raf.seek(read);
+                        raf.readFully(b, 0, size);
+                    }
+                    digest.update(b,0,size);
+                    read += size;
+                }
+                byte [] hash = digest.digest();
+                byte [] treeHash = NODES.get((int)(in.getLow() / _nodeSize));
+                boolean ok = Arrays.equals(treeHash, hash);
+                if (LOG.isDebugEnabled())
+                    LOG.debug("interval "+in+" verified "+ok);
+                return !ok;
+            } catch (IOException assumeCorrupt) {
+                LOG.debug("exception ",assumeCorrupt);
+                return true;
+            }
+        } 
+        
+        return true;
+    }
+    
+    /**
      * @return Thex URI for this HashTree
      * @see com.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
      */
@@ -438,8 +488,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             return 9;
         else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
             return 10;
-        else if (size < 4096 * MB) 
-            return 11; // 2MB chunks, 49128B tree
+        else if (size < 4096 * MB) // 2MB chunks, 49128B tree 
+            return 11; 
         else if (size < 64 * 1024 * MB) 
             return 12; // 80kb tree
         else 

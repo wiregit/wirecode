@@ -801,7 +801,7 @@ public class VerifyingFile {
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {
-                boolean good = verifyChunk(i, tree);
+                boolean good = !tree.isCorrupt(i, fos, CHUNK_CACHE);
                 synchronized (this) {
                     partialBlocks.delete(i);
                     if (good)
@@ -818,39 +818,6 @@ public class VerifyingFile {
         }
     }
         
-    /**
-     * @return whether this chunk is corrupt according to the given hash tree
-     */
-    private boolean verifyChunk(Range i, HashTree tree) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("verifying interval "+i);
-        
-        long length64 = i.getHigh() - i.getLow() + 1;
-        assert length64 <= Integer.MAX_VALUE;
-        int length = (int)(length64);
-        byte[] b = CHUNK_CACHE.get(length);
-        // read the interval from the file
-        try {
-			synchronized(fos) {
-				fos.seek(i.getLow());
-				fos.readFully(b, 0, length);
-			}
-        } catch (IOException bad) {
-            // we failed reading back from the file - assume block is corrupt
-            // and it will have to be re-downloaded
-            return false;
-        } catch(OutOfMemoryError oom) {
-            return false;
-        }
-        
-        boolean corrupt = tree.isCorrupt(i, b, length);
-        
-        if (LOG.isDebugEnabled() && corrupt)
-            LOG.debug("block corrupt!");
-        
-        return !corrupt;
-    }
-	
     /**
      * iterates through the pending blocks and checks if the recent write has created
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
