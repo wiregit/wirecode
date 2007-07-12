@@ -297,13 +297,12 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     private void assertIsBrowse(Socket httpSock, int port) throws IOException {
         // start reading and confirming the HTTP request
         String currLine = null;
-        BufferedReader reader = 
-            new BufferedReader(new
-                    InputStreamReader(httpSock.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                httpSock.getInputStream()));
 
         // confirm a GET/HEAD push proxy request
         currLine = reader.readLine();
-        assertTrue(currLine.startsWith("GET / HTTP/1.1"));
+        assertEquals("GET / HTTP/1.1", currLine);
 
         // make sure the node sends the correct Host val
         currLine = reader.readLine();
@@ -311,26 +310,25 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "Host");
         // this assertion fails when localhost is bound to multiple IP addresses
-        // since the client might connect to a different address than the server 
+        // since the client might connect to a different address than the server
         // socket is listening on
         InetAddress.getByName(st.nextToken().trim());
-//                assertEquals(InetAddress.getByName(st.nextToken().trim()), addr);
+        // assertEquals(InetAddress.getByName(st.nextToken().trim()), addr);
         assertEquals(port, Integer.parseInt(st.nextToken()));
 
         // send back a 200 and make sure no PushRequest is sent via the normal
         // way
-        BufferedWriter writer = 
-            new BufferedWriter(new
-                    OutputStreamWriter(httpSock.getOutputStream()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                httpSock.getOutputStream()));
 
         writer.write("HTTP/1.1 200 OK\r\n");
         writer.flush();
         writer.write("\r\n");
         writer.flush();
-        //TODO: should i send some Query Hits?  Might be a good test.
+        // TODO: should i send some Query Hits? Might be a good test.
     }
 
-    //////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////
     public static Integer numUPs() {
         return new Integer(1);
     }
@@ -349,6 +347,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                                       HostData data,
                                       Set locs) {
             _rfd = rfd;
+            // make sure the browse is not attempted as a TLS connection
+            _rfd.setTLSCapable(false);
         }
     }
 }
