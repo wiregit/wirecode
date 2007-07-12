@@ -483,7 +483,10 @@ public class HeadPong extends VendorMessage {
         byte code = calculateCode(desc);
         ggep.put(CODE, code); size += ggep.getHeaderOverhead(CODE);
         ggep.put(VENDOR, F_LIME_VENDOR_ID); size += ggep.getHeaderOverhead(VENDOR);
-        ggep.put(QUEUE, calculateQueueStatus()); size += ggep.getHeaderOverhead(QUEUE);        
+        ggep.put(QUEUE, calculateQueueStatus()); size += ggep.getHeaderOverhead(QUEUE);
+        
+        // NOTE: All insertion checks assume that the header is going to take up
+        //       the maximum amount of bytes possible for a GGEP header + overhead.
         
         if((code & PARTIAL_FILE) == PARTIAL_FILE && ping.requestsRanges()) {
             IntervalSet.ByteIntervals ranges = deriveRanges(desc);
@@ -493,7 +496,7 @@ public class HeadPong extends VendorMessage {
                 // more ranges available. (but don't increment size, since that
                 // was already done above.)
                 ggep.put(QUEUE, BUSY);
-            } else if(size + ranges.length() + 7 <= PACKET_SIZE) { //3 for "R" and 4 for "R5"
+            } else if(size + ranges.length() + 11 <= PACKET_SIZE) { //5 for "R" and 6 for "R5"
                 if (ranges.ints.length > 0) {
                     ggep.put(RANGES, ranges.ints);
                     size += ggep.getHeaderOverhead(RANGES);
@@ -506,7 +509,7 @@ public class HeadPong extends VendorMessage {
         }
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        addPushLocations(ping, urn, out, true, size+3, false);
+        addPushLocations(ping, urn, out, true, size+5, false);
         if(out.size() > 0) {
             byte[] pushLocs = out.toByteArray();
             ggep.put(PUSH_LOCS, pushLocs);
@@ -515,7 +518,7 @@ public class HeadPong extends VendorMessage {
         
         out.reset();
         AtomicReference<BitNumbers> bnRef = new AtomicReference<BitNumbers>();
-        addLocations(ping, urn, out, bnRef, size+3, false);
+        addLocations(ping, urn, out, bnRef, size+5, false);
         if(out.size() > 0) {
             byte[] altLocs = out.toByteArray();
             ggep.put(LOCS, altLocs);
