@@ -64,7 +64,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public void initialize() throws IOException {
+    public void initialize() {
         if (LOG.isDebugEnabled())
             LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
 

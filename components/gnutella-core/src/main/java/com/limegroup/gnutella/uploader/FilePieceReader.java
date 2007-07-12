@@ -68,9 +68,9 @@ public class FilePieceReader implements PieceReader {
 
     private final PieceListener listener;
 
-    private final FileChannel channel;
+    private volatile FileChannel channel;
 
-    private final RandomAccessFile raf;
+    private volatile RandomAccessFile raf;
 
     /**
      * Guards access to the buffer pool and offsets.
@@ -121,15 +121,12 @@ public class FilePieceReader implements PieceReader {
     private final AtomicInteger jobCount = new AtomicInteger();
 
     public FilePieceReader(ByteBufferCache bufferCache, File file, long offset,
-            long length, PieceListener listener) throws IOException {
+            long length, PieceListener listener) {
         if (bufferCache == null || file == null || listener == null) {
             throw new IllegalArgumentException();
         }
         if (length <= 0) {
             throw new IllegalArgumentException("length must be > 0");
-        }
-        if (offset + length > file.length()) {
-            throw new IllegalArgumentException("offset + length must be <= file.lenghth");
         }
         
         this.bufferCache = bufferCache;
@@ -138,9 +135,6 @@ public class FilePieceReader implements PieceReader {
         this.processingOffset = offset;
         this.remaining = length;
         this.listener = listener;
-        
-        raf = new RandomAccessFile(file, "r");
-        channel = raf.getChannel();
     }
 
     /**
@@ -328,6 +322,17 @@ public class FilePieceReader implements PieceReader {
             }
         }
     }
+    
+    private void initChannel() throws IOException {
+        if (channel != null) 
+            return;
+        synchronized(this) {
+            if (channel != null)
+                return;
+            raf = new RandomAccessFile(file, "r");
+            channel = raf.getChannel();
+        }
+    }
 
     /**
      * A simple job that reads a chunk of data form a file channel.
@@ -352,12 +357,14 @@ public class FilePieceReader implements PieceReader {
                     release(buffer);
                     return;
                 }
+                
 
                 buffer.clear();
                 buffer.limit(length);
 
                 IOException exception = null;
                 try {
+                    initChannel();
                     while (buffer.hasRemaining()) {
                         channel.read(buffer, offset + buffer.position());
                     }
