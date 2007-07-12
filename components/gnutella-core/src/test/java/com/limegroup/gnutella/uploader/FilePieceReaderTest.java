@@ -164,17 +164,93 @@ public class FilePieceReaderTest extends BaseTestCase {
         assertEquals(0, cache.buffers);
     }
 
-    public void testInvalidSize() throws Exception {
+    public void testInvalidLengthWithEmptyFile() throws Exception {
         createFile(0);
 
         MockByteBufferCache cache = new MockByteBufferCache();
+        reader = new FilePieceReader(cache, file, 0, 10, listener);
+        reader.start();
         try {
-            reader = new FilePieceReader(cache, file, 0, 10, listener);
+            listener.waitForNotification();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        try {
+            reader.next();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        reader.shutdown();
+    }
+
+    public void testInvalidLength() throws Exception {
+        createFile(10);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        reader = new FilePieceReader(cache, file, 5, 20, listener);
+        reader.start();
+        try {
+            listener.waitForNotification();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        try {
+            reader.next();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        reader.shutdown();
+    }
+
+    public void testInvalidOffsetEmtpyFile() throws Exception {
+        createFile(0);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        reader = new FilePieceReader(cache, file, 5, 20, listener);
+        reader.start();
+        try {
+            listener.waitForNotification();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        try {
+            reader.next();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        reader.shutdown();
+    }
+
+    public void testInvalidOffset() throws Exception {
+        createFile(10);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        reader = new FilePieceReader(cache, file, 20, 10, listener);
+        reader.start();
+        try {
+            listener.waitForNotification();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        try {
+            reader.next();
+            fail("Expected EOFException");
+        } catch (EOFException expected) {
+        }
+        reader.shutdown();
+    }
+
+    public void testNegativeOffset() throws Exception {
+        createFile(10);
+
+        MockByteBufferCache cache = new MockByteBufferCache();
+        try {
+            reader = new FilePieceReader(cache, file, -1, 10, listener);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
     }
-    
+
     public void testMultipleConcurrentReads() throws Exception {
         MockByteBufferCache cache = new MockByteBufferCache();
         class Runner implements Runnable {
@@ -324,9 +400,13 @@ public class FilePieceReaderTest extends BaseTestCase {
 
         public synchronized int waitForNotification()
                 throws InterruptedException, IOException {
-            while (notificationCount == 0 && exception == null) {
-                this.wait();
+            if (notificationCount == 0 && exception == null) {
+                this.wait(100000);
             }
+            if (notificationCount == 0 && exception == null) {
+                throw new InterruptedException("Timeout waiting for event");
+            }
+            
             if (exception != null) {
                 throw exception;
             }

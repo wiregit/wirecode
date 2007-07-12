@@ -125,6 +125,9 @@ public class FilePieceReader implements PieceReader {
         if (bufferCache == null || file == null || listener == null) {
             throw new IllegalArgumentException();
         }
+        if (offset < 0) {
+            throw new IllegalArgumentException("offset must be >= 0");
+        }
         if (length <= 0) {
             throw new IllegalArgumentException("length must be > 0");
         }
@@ -253,17 +256,21 @@ public class FilePieceReader implements PieceReader {
             for (Piece piece : pieceQueue) {
                 release(piece);
             }
-        }
         
-        try {
-            channel.close();
-        } catch (IOException e) {
-            LOG.warn("Error closing channel for file: " + file, e);
-        }
-        try {
-            raf.close();
-        } catch (IOException e) {
-            LOG.warn("Error closing file: " + file, e);
+            if (channel != null) {
+                try {
+                    channel.close();
+                } catch (IOException e) {
+                    LOG.warn("Error closing channel for file: " + file, e);
+                }
+            }
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    LOG.warn("Error closing file: " + file, e);
+                }
+            }
         }
         
         return true;
@@ -366,7 +373,10 @@ public class FilePieceReader implements PieceReader {
                 try {
                     initChannel();
                     while (buffer.hasRemaining()) {
-                        channel.read(buffer, offset + buffer.position());
+                        int read = channel.read(buffer, offset + buffer.position());
+                        if (read == -1 || (read == 0 && raf.length() <= offset + buffer.position())) {
+                            throw new EOFException("Attempt to read beyond end of file");
+                        }
                     }
                 } catch (IOException e) {
                     exception = e;
