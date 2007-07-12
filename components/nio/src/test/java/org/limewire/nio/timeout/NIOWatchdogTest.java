@@ -24,15 +24,27 @@ public class NIOWatchdogTest extends BaseTestCase {
         assertFalse(shutdownable.shutdown);
         
         watchdog.activate(shutdownable);
-        Thread.sleep(50);
+        Thread.sleep(30);
+        assertFalse(shutdownable.shutdown);
+        Thread.sleep(20);
         NIOTestUtils.waitForNIO();
         assertTrue(shutdownable.shutdown);
+        
         // reactivate
         shutdownable.shutdown = false;
         watchdog.activate(shutdownable);
         Thread.sleep(50);
         NIOTestUtils.waitForNIO();
         assertTrue(shutdownable.shutdown);
+        
+        // activate for never
+        watchdog = new StalledUploadWatchdog(Long.MAX_VALUE, executor);
+        shutdownable.shutdown = false;
+        watchdog.activate(shutdownable);
+        Thread.sleep(100); // if it were broken would overflow and execute right away
+        NIOTestUtils.waitForNIO();
+        assertFalse(shutdownable.shutdown);
+        watchdog.deactivate();
     }
     
     public void testDeactivate() throws Exception {

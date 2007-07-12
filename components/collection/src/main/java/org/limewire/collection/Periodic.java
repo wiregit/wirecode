@@ -65,7 +65,11 @@ public class Periodic {
 	 * @return true if the execution time changed
 	 */
 	public synchronized boolean rescheduleIfLater(long newDelay) {
-		long newTime = now() + TimeUnit.MILLISECONDS.toNanos(newDelay);
+        newDelay = TimeUnit.MILLISECONDS.toNanos(newDelay);
+        long now = now();
+        if (Long.MAX_VALUE - now < newDelay)
+            newDelay = Long.MAX_VALUE - now;
+		long newTime = now + newDelay;
 		if (future == null) { 
 			nextExecuteTime = newTime;
 			if (newDelay > 0) 
@@ -92,7 +96,10 @@ public class Periodic {
 			return rescheduleIfLater(newDelay);
 		
         newDelay = TimeUnit.MILLISECONDS.toNanos(newDelay);
-		long newTime = now() + newDelay;
+        long now = now();
+        if (Long.MAX_VALUE - now < newDelay)
+            newDelay = Long.MAX_VALUE - now;
+        long newTime = now + newDelay;
 		if (newTime < nextExecuteTime) {
 			future.cancel(false);
 			nextExecuteTime = newTime;
