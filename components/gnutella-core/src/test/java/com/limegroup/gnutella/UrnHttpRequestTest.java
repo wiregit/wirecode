@@ -76,7 +76,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
                 .getNumFiles());
-        uploadManager.start(acceptor, fm, RouterService.getCallback());
+        uploadManager.start(acceptor, fm, RouterService.getCallback(), RouterService.getMessageRouter());
         acceptor.start(connectionDispatcher);
     }
 

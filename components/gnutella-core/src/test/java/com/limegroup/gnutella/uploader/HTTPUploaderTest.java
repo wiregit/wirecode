@@ -20,6 +20,7 @@ import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -98,7 +99,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         upMan = new HTTPUploadManager(new UploadSlotManager());
 
         httpAcceptor.start(RouterService.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, cb);
+        upMan.start(httpAcceptor, fm, cb, new StandardMessageRouter());
 
         client = new HttpClient();
         HostConfiguration config = new HostConfiguration();

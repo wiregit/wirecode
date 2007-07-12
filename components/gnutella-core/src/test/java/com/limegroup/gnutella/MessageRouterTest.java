@@ -154,7 +154,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
         // MessageRouter.responsesToQueryReplies()
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        RouterService.getUploadManager().start(RouterService.getHTTPUploadAcceptor(), RouterService.getFileManager(), RouterService.getCallback());
+        RouterService.getUploadManager().start(RouterService.getHTTPUploadAcceptor(), RouterService.getFileManager(), RouterService.getCallback(), RouterService.getMessageRouter());
         try {
             Class[] paramTypes = new Class[] {
                     Response[].class, 

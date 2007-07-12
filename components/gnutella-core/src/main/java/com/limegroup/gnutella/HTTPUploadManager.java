@@ -196,7 +196,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * @throws IllegalStateException if uploadmanager was already started
      * @see #stop(HTTPAcceptor)
      */
-    public void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback) {
+    public void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback, MessageRouter messageRouter) {
         if (acceptor == null) {
             throw new IllegalArgumentException("acceptor may not be null");
         }
@@ -205,7 +205,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }        
         if (fileManager == null) {
             throw new IllegalArgumentException("fileManager may not be null");
+        }
+        if (messageRouter == null) {
+            throw new IllegalArgumentException("messageRouter may not be null");
         }        
+
         if (started) {
             throw new IllegalStateException();
         }
@@ -221,7 +225,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/", new BrowseRequestHandler(this));
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this);
+        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this, messageRouter);
         acceptor.registerHandler("/gnutella/push-proxy", pushProxyHandler);
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
