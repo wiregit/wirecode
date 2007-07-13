@@ -76,6 +76,9 @@ public class VerifyingFile {
      */
     static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
+    /** How much to verify at a time */
+    private static final int VERIFYABLE_CHUNK = 64 * 1024; // 64k
+    
     /**
      * A list of DelayedWrites that will write when space becomes available in the cache.
      */
@@ -801,7 +804,8 @@ public class VerifyingFile {
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {
-                boolean good = !tree.isCorrupt(i, fos, CHUNK_CACHE);
+                byte []tmp = CHUNK_CACHE.get(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
+                boolean good = !tree.isCorrupt(i, fos, tmp);
                 synchronized (this) {
                     partialBlocks.delete(i);
                     if (good)

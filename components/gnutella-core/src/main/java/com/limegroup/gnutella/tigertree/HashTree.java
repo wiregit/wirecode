@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
@@ -49,9 +48,6 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
 
-    /** How much to verify at a time */
-    private static final int VERIFYABLE_CHUNK = 64 * 1024; // 64k
-    
     /** An invalid HashTree. */
     public static final HashTree INVALID = new HashTree();
 
@@ -268,11 +264,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * the hash tree.
      * @param in the Range 
      * @param raf the RandomAccessFile to read from
-     * @param cache the cache to use for creating temporary buffers
+     * @param tmp a byte [] to use as temp buffer
      * @return true if the data in the range is corrupt.
      */
-    public boolean isCorrupt(Range in, RandomAccessFile raf, PowerOf2ByteArrayCache cache) {
-        assert(in.getHigh() <= FILE_SIZE);
+    public boolean isCorrupt(Range in, RandomAccessFile raf, byte [] tmp) {
+        assert in.getHigh() <= FILE_SIZE : "invalid range "+in+" vs "+FILE_SIZE;
         
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
@@ -280,17 +276,15 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                 in.getHigh() - in.getLow() +1 <= _nodeSize &&
                 (in.getHigh() == in.getLow()+_nodeSize-1 || in.getHigh() == FILE_SIZE -1)) {
             try {
-                int nodeSize = Math.min(VERIFYABLE_CHUNK, _nodeSize);
                 TigerTree digest = new TigerTree();
-                byte [] b = cache.get(nodeSize);
                 long read = in.getLow();
                 while(read <= in.getHigh()) {
-                    int size = (int)Math.min(nodeSize, in.getHigh() - read + 1);
+                    int size = (int)Math.min(tmp.length, in.getHigh() - read + 1);
                     synchronized(raf) {
                         raf.seek(read);
-                        raf.readFully(b, 0, size);
+                        raf.readFully(tmp, 0, size);
                     }
-                    digest.update(b,0,size);
+                    digest.update(tmp,0,size);
                     read += size;
                 }
                 byte [] hash = digest.digest();
@@ -300,7 +294,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                     LOG.debug("interval "+in+" verified "+ok);
                 return !ok;
             } catch (IOException assumeCorrupt) {
-                LOG.debug("exception ",assumeCorrupt);
+                LOG.debug("iox while verifying ",assumeCorrupt);
                 return true;
             }
         } 
