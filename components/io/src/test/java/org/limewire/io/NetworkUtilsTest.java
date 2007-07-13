@@ -745,6 +745,20 @@ public class NetworkUtilsTest extends BaseTestCase {
         }
     }
     
+    public void testIsAddress() {
+        assertTrue(NetworkUtils.isAddress("host"));
+        assertTrue(NetworkUtils.isAddress("123.456"));
+        assertTrue(NetworkUtils.isAddress("host:123"));
+        assertTrue(NetworkUtils.isAddress("host:1"));
+        assertTrue(NetworkUtils.isAddress("host:65535"));
+        assertFalse(NetworkUtils.isAddress("host:65536"));
+        assertFalse(NetworkUtils.isAddress("host:0"));
+        assertFalse(NetworkUtils.isAddress("host:abc"));
+        assertFalse(NetworkUtils.isAddress("host::"));
+        assertFalse(NetworkUtils.isAddress(""));
+        assertFalse(NetworkUtils.isAddress(":123"));
+    }
+    
     private static void assertNotTLS(IpPort ipp) {
         if(ipp instanceof Connectable)
             assertFalse(((Connectable)ipp).isTLSCapable());

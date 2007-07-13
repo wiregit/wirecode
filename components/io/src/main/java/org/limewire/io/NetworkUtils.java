@@ -151,6 +151,26 @@ public final class NetworkUtils {
     }
     
     /**
+     * Determines if <code>hostAndPort</code> is either "host" or in
+     * "host:port" format in which case the port is checked if it is within a
+     * valid range.
+     */
+    public static boolean isAddress(String hostAndPort) {
+        hostAndPort = hostAndPort.trim();
+        int i = hostAndPort.indexOf(":");
+        if (i == -1) {
+            return hostAndPort.length() > 0;
+        } else if (i > 0){
+            try {
+                final int port = Integer.parseInt(hostAndPort.substring(i + 1));
+                return isValidPort(port);
+            } catch(NumberFormatException e) {
+            }            
+        }
+        return false;
+    }
+
+    /**
      * @return whether the IpPort is a valid external address.
      */
     public static boolean isValidExternalIpPort(IpPort addr) {
