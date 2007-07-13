@@ -595,7 +595,7 @@ public class ManagedDownloader extends AbstractDownloader
         // old format
         if (next instanceof RemoteFileDesc[]) {
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
-            if (rfds != null && rfds.length > 0) 
+            if (rfds.length > 0) 
                 defaultRFD = rfds[0];
             cachedRFDs = new HashSet<RemoteFileDesc>(Arrays.asList(rfds));
         } else if(next instanceof Set) {

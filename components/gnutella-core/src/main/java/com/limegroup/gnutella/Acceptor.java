@@ -432,7 +432,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 LOG.trace("multicast service setup");
             } catch(IOException e) {
                 LOG.warn("can't create multicast socket", e);
-                mcastServiceSocket = null;
             }
             
         

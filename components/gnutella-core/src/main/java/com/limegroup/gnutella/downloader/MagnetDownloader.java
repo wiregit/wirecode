@@ -241,8 +241,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 throw new IOException("No content length");
             return length;
         } finally {
-            if(head != null)
-                head.releaseConnection();
+            head.releaseConnection();
         }
     }
 

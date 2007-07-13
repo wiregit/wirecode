@@ -855,7 +855,7 @@ public class UDPConnectionProcessor {
                 }
 
                 // The assumption is that this record has not been acked
-                if ( drec == null || drec.acks > 0) 
+                if ( drec.acks > 0) 
                 	break resend;
                 
 

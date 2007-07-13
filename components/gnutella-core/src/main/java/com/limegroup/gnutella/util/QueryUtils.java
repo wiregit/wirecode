@@ -155,7 +155,6 @@ public class QueryUtils {
         assert retString.length() <= maxLen : "Original filename: " + name + ", converted: " + retString;
         if(!keywords.isEmpty())
             assert !retString.equals("") : "Original filename: " + name;
-        assert retString != null : "Original filename: " + name;
     
         return retString;
     }

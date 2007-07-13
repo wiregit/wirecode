@@ -15,7 +15,6 @@ class StubCCLicense extends CCLicense {
         try {
             uri = new URI("http://1.2.3.4/page".toCharArray());
         } catch(URIException muri) {
-            uri = null;
         }
         LICENSE_URI = uri;
     }    

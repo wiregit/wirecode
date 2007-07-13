@@ -23,7 +23,6 @@ public class LimeUDPService implements org.limewire.rudp.UDPService {
             try {
                 lip = InetAddress.getLocalHost();
             } catch (UnknownHostException uhe2) {
-                lip = null;
             }
         }
         return lip;

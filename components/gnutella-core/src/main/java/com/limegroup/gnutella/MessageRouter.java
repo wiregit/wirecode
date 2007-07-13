@@ -835,7 +835,6 @@ public abstract class MessageRouter {
 											 receivingConnection);
 
 		if(counter != null) {  // query is new (probe or normal)
-
             // 1a: set the TTL of the query so it can be potentially extended  
             if (isProbeQuery) 
                 _queryRouteTable.setTTL(counter, (byte)1);
@@ -844,21 +843,17 @@ public abstract class MessageRouter {
             // if a new probe or a new request, do everything (so input true
             // below)
             handleQueryRequest(request, receivingConnection, counter, true);
-		}
-        // if (counter == null) the query has been seen before, few subcases... 
-        else if ((counter == null) && !isProbeQuery) {// probe extension?
-
-            if (wasProbeQuery(request))
+		} else if (!isProbeQuery) {// probe extension?
+            if (wasProbeQuery(request)) {
                 // rebroadcast out but don't locally evaluate....
                 handleQueryRequest(request, receivingConnection, counter, 
                                    false);
-            else  // 2b1: not a correct extension, so call it a duplicate....
+            } else { // 2b1: not a correct extension, so call it a duplicate....
                 tallyDupQuery(request);
+            }
+        } else if (isProbeQuery) { // 1b: duplicate probe
+            tallyDupQuery(request);
         }
-        else if ((counter == null) && isProbeQuery) // 1b: duplicate probe
-            tallyDupQuery(request);
-        else // 2b1: duplicate normal query
-            tallyDupQuery(request);
     }
 	
     private boolean wasProbeQuery(QueryRequest request) {

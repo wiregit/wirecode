@@ -1336,9 +1336,6 @@ public class QueryRequest extends Message implements Serializable{
       byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
 		throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
-		if(payload == null) {
-			throw new BadPacketException("no payload");
-		}
 		PAYLOAD=payload;
 		
         QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);

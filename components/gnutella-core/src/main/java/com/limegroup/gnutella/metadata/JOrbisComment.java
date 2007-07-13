@@ -82,8 +82,6 @@ public class JOrbisComment {
     	state.vc=comment;
     
     	//copy the newly created file in a temp folder
-    	tempFile=null;
-    
     	try {
     		tempFile = FileUtils.createTempFile(file.getName(),"tmp");
     	}catch(IOException e) {

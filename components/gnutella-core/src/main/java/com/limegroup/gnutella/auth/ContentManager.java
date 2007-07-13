@@ -339,18 +339,16 @@ public class ContentManager {
             // set the authority (so newly requested ones will immediately send to it),
             // and then send off those requested.
             // note that the timeouts on processing older requests will be lagging slightly.
-            if (auth != null) {
-                Set<URN> alreadyReq = new HashSet<URN>();
-                synchronized(REQUESTED) {
-                    alreadyReq.addAll(REQUESTED);
-                    setContentAuthority(auth);
-                }
-                
-                for(URN urn : alreadyReq) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
-                    auth.send(new ContentRequest(urn));
-                }
+            Set<URN> alreadyReq = new HashSet<URN>();
+            synchronized(REQUESTED) {
+                alreadyReq.addAll(REQUESTED);
+                setContentAuthority(auth);
+            }
+            
+            for(URN urn : alreadyReq) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
+                auth.send(new ContentRequest(urn));
             }
         }
     }

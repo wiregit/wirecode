@@ -207,8 +207,7 @@ class Tracker {
 		} catch (IOException e) {
 			return null;
 		} finally {
-			if (get != null)
-				get.releaseConnection();
+			get.releaseConnection();
 		}
 	}
 

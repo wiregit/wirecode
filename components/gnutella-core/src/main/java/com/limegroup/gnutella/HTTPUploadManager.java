@@ -537,8 +537,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             RequestCache rcq = REQUESTS.get(uploader.getHost());
 
             // check for nulls so that unit tests pass
-            if (rcq != null && uploader != null
-                    && uploader.getFileDesc() != null)
+            if (rcq != null && uploader.getFileDesc() != null)
                 rcq.transferDone(uploader.getFileDesc().getSHA1Urn());
         }
 

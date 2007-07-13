@@ -669,10 +669,9 @@ public class GGEP {
 
     private void validateKey(String key) throws IllegalArgumentException {
         byte[] bytes=key.getBytes();
-        if ((key == null)
-                || key.equals("")
-                || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
-                || containsNull(bytes))
+        if ( key.equals("")
+            || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
+            || containsNull(bytes))
             throw new IllegalArgumentException();
     }
 

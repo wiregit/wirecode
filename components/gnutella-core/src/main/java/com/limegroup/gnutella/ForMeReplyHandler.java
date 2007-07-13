@@ -157,8 +157,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
                 xmlCollectionString = new String(xmlUncompressed,"UTF-8");
             }
-        }
-        catch (UnsupportedEncodingException use) {
+        } catch (UnsupportedEncodingException use) {
             //b/c this should never happen, we will show and error
             //if it ever does for some reason.
             //we won't throw a BadPacketException here but we will show it.
@@ -166,11 +165,11 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             //still show the reply so there shouldn't be any ill effect if
             //xmlCollectionString is ""
             ErrorService.error(use);
+        } catch (IOException ignored) {
         }
-        catch (IOException ignored) {}
         
         // valid response, no XML in EQHD.
-        if(xmlCollectionString == null || xmlCollectionString.equals(""))
+        if(xmlCollectionString.equals(""))
             return true;
         
         Response[] responses;

@@ -436,7 +436,7 @@ public class StandardMessageRouter extends MessageRouter {
                 else {
                     // create xml bytes if possible...
                     byte[] xmlCompressed = null;
-                    if ((currXML != null) && (!currXML.equals("")))
+                    if (!currXML.equals(""))
                         xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
                     else //there is no XML
                         xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
@@ -458,7 +458,7 @@ public class StandardMessageRouter extends MessageRouter {
         else {  // xml is small enough, no problem.....
             // get xml bytes if possible....
             byte[] xmlCompressed = null;
-            if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
+            if (!xmlCollectionString.equals(""))
                 xmlCompressed = 
                     LimeXMLUtils.compress(xmlBytes);
             else //there is no XML

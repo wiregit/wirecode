@@ -1124,7 +1124,6 @@ public class QueryReply extends Message implements SecureMessage {
                     "Common payload length too large.");
             
             //All set.  Accept parsed values.
-            assert(vendorT!=null);
             _data.setVendor(vendorT.toUpperCase(Locale.US));
             _data.setPushFlag(pushFlagT);
             _data.setBusyFlag(busyFlagT);
@@ -1365,7 +1364,7 @@ public class QueryReply extends Message implements SecureMessage {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
                 BitNumbers bn = new BitNumbers(Math.min(MAX_PROXIES, proxies.size()));
-                if (proxies != null && !proxies.isEmpty()) {
+                if (!proxies.isEmpty()) {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();

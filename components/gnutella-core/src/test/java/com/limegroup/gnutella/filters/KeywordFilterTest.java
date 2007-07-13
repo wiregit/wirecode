@@ -99,9 +99,8 @@ public class KeywordFilterTest extends LimeTestCase {
         } catch(UnsupportedEncodingException ueex) {//no support for utf-8?? 
         }
         byte[] xmlCompressed = null;
-        if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
-            xmlCompressed = 
-                LimeXMLUtils.compress(xmlBytes);
+        if (!xmlCollectionString.equals(""))
+            xmlCompressed = LimeXMLUtils.compress(xmlBytes);
         else //there is no XML
             xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         

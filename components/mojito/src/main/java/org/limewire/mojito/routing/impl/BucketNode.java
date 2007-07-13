@@ -122,13 +122,7 @@ class BucketNode implements Bucket {
             touch();
         }
         
-        // There's an assert above but if assertions are
-        // not enabled it'd pass and calling increment 
-        // in that case would be fatal! So make explicitly
-        // sure it's null!
-        if (existing == null) {
-            counter.incrementAndGet(node);
-        }
+        counter.incrementAndGet(node);
     }
     
     public Contact addCachedContact(Contact node) {

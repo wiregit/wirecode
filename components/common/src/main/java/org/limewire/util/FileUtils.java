@@ -237,7 +237,7 @@ public class FileUtils {
         if( OSUtils.isWindows() || OSUtils.isMacOSX() )
             SystemUtils.setWriteable(fName);
         else if ( OSUtils.isOS2() )
-            cmds = null; // Find the right command for OS/2 and fill in
+            ;//cmds = null; // Find the right command for OS/2 and fill in
         else {
             if(f.isDirectory())
                 cmds = new String[] { "chmod", "u+w+x", fName };
