@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -183,6 +184,8 @@ public class InstantMessenger implements Chatter {
 
         try {
             sender.sendMessage(message + "\n");
+        } catch (BufferOverflowException e) {
+            return false;
         } catch (IOException e) {
             stop();
             return false;

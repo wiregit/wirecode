@@ -1,7 +1,11 @@
 package com.limegroup.gnutella.chat;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import junit.framework.Test;
 
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
@@ -13,6 +17,7 @@ public class InstantMessengerTest extends BaseTestCase {
 
     private static final int CHAT_PORT = 9999;
     private static Acceptor acceptThread;
+    private static MyActivityCallback receiver;
     private MyActivityCallback callback;
     private InstantMessenger messenger;
     
@@ -31,23 +36,20 @@ public class InstantMessengerTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         doSettings();
         
-        new RouterService(new MyActivityCallback());
+        receiver = new MyActivityCallback();
+        new RouterService(receiver);
         //RouterService.getConnectionManager().initialize();
         ChatManager.instance().initialize();
         
         // start it up!
         acceptThread = new Acceptor();
         acceptThread.start();
-        
-        // Give thread time to find and open it's sockets.   This race condition
-        // is tolerated in order to speed up LimeWire startup
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {}                
     }
 
     public static void globealTearDown() throws Exception {
         acceptThread.setListeningPort(0);
+        receiver = null;
+        acceptThread = null;
     }
     
     private static void doSettings() {
@@ -79,42 +81,50 @@ public class InstantMessengerTest extends BaseTestCase {
         callback = new MyActivityCallback();
         messenger = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), callback);
         messenger.start();
-        Thread.sleep(500);
-        assertTrue("Could not establish connection", callback.acceptChat); 
-        sendMessage("foo", messenger, (MyActivityCallback) RouterService.getCallback());
-        sendMessage("bar", messenger, (MyActivityCallback) RouterService.getCallback());
+        callback.waitForConnect(1000);
+        assertTrue(messenger.isConnected());
+        assertTrue(messenger.send("foo"));
+        receiver.assertMessageReceived("foo", 1000);
+        assertTrue(messenger.send("bar"));
+        receiver.assertMessageReceived("bar", 1000);
     }
     
-    private void sendMessage(String message, InstantMessenger sender, MyActivityCallback receiver) {
-        sender.send(message);
-        synchronized (receiver) {
-            if (receiver.message == null) {
-                try {
-                    receiver.wait(1000);
-                } catch (InterruptedException e) {
-                    fail("Message not received");
-                }
-            }
-        }
-        assertEquals(message, receiver.message);
-        receiver.message = null;
+    public void testSendHugeMessage() throws Exception {
+        callback = new MyActivityCallback();
+        messenger = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), callback);
+        messenger.start();
+        callback.waitForConnect(1000);
+        assertFalse(messenger.send(new String(new char[10000])));
     }
     
     private static class MyActivityCallback extends ActivityCallbackStub {
         
-        private String message;
-        private boolean acceptChat;
+        private volatile String message;
+        private volatile CountDownLatch connectLatch = new CountDownLatch(1);
 
         @Override
-        public synchronized void acceptChat(Chatter chatter) {
-            acceptChat = true;
-            notify();
+        public void acceptChat(Chatter chatter) {
+            connectLatch.countDown();
         }
         
         @Override
         public synchronized void receiveMessage(Chatter chatter, String message) {
             this.message = message;
             notify();
+        }
+
+        public void waitForConnect(long timeout) throws Exception {
+            AssertComparisons.assertTrue("Timeout while waiting for connect", connectLatch.await(timeout, TimeUnit.MILLISECONDS));
+        }
+        
+        public void assertMessageReceived(String message, long timeout) throws Exception {
+            synchronized (this) {
+                if (this.message == null) {
+                    this.wait(1000);
+                }
+            }
+            assertEquals("Message not received", message, this.message);
+            this.message = null;
         }
         
     }
