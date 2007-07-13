@@ -352,6 +352,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 // Make sure connecting callbacks are always on the NIO thread.
                 NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
+                        // ensure it's registered in the selector, so it can be notified
+                        // for reading|writing, and polled for readiness
+                        NIODispatcher.instance().register(getChannel(), AbstractNBSocket.this);
                         try {
                             observer.handleConnect(AbstractNBSocket.this);
                         } catch(IOException iox) {
