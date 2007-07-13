@@ -2832,15 +2832,6 @@ OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=يمكنك مشاركة ملفات .ت�
 OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=مشاركة ملفات .تورنت
 
 ################################################################################
-# Key/value pairs for the advanced shared directories options window item
-# in the options window.
-################################################################################
-#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
-OPTIONS_SHARED_DIRS_TITLE=المجلدات المشاركة
-#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
-OPTIONS_SHARED_DIRS_LABEL=يمكنك اختيار مجلدات لمشاركة الملفات. المجلدات الموجودة في هذه الملفات يتم عرضها في المكتبة.
-
-################################################################################
 # Key/value pairs for the shared extension options window item
 # in the options window.
 ################################################################################

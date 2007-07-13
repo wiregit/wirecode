@@ -2832,15 +2832,6 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Вы хотите открыть доступ к
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
-# Key/value pairs for the advanced shared directories options window item
-# in the options window.
-################################################################################
-#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
-OPTIONS_SHARED_DIRS_TITLE=Папки переданные в общий доступ
-#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
-OPTIONS_SHARED_DIRS_LABEL=Вы можете выбрать папки, доступ к которым будет открыт. Файлы из этих папок отображаются в библиотеке.
-
-################################################################################
 # Key/value pairs for the shared extension options window item
 # in the options window.
 ################################################################################

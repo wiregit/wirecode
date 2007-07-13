@@ -3315,17 +3315,6 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=您想要共享您的新儲存資料夾嗎? 以�
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
-# Key/value pairs for the advanced shared directories options window item
-# in the options window.
-################################################################################
-#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
-###$ OPTIONS_SHARED_DIRS_TITLE=共享 文件夹
-OPTIONS_SHARED_DIRS_TITLE=共享資料夾
-#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
-###$ OPTIONS_SHARED_DIRS_LABEL=你 可以 选择 共享 文件夹 共享 文件. 在这些 文件夹 种的 文件 是显示在 收藏 夹中.
-OPTIONS_SHARED_DIRS_LABEL=您可以選擇共享檔案的資料夾。在這些資料夾中的檔案將顯示在檔案資料庫中。
-
-################################################################################
 # Key/value pairs for the shared extension options window item
 # in the options window.
 ################################################################################

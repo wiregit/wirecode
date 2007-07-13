@@ -2832,15 +2832,6 @@ OPTIONS_SHARED_DIRS_LABEL=आप फाइलों को बांटने �
 #? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
-# Key/value pairs for the advanced shared directories options window item
-# in the options window.
-################################################################################
-#### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
-OPTIONS_SHARED_DIRS_TITLE=बटी हुई डायरैक्टरियॉ
-#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
-OPTIONS_SHARED_DIRS_LABEL=आप फाइलों को बांटने के लिये डारैक्टरी का चयन कर सकते है।
-
-################################################################################
 # Key/value pairs for the shared extension options window item
 # in the options window.
 ################################################################################
