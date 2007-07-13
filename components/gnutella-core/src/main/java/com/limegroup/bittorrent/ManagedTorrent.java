@@ -568,9 +568,10 @@ BTLinkListener {
 			return false;
 		
 		// provision some slots for incoming connections unless we're firewalled
+        // https://hal.inria.fr/inria-00162088/en/  recommends 1/2, we'll do 3/5
 		int limit = TorrentManager.getMaxTorrentConnections();
 		if (RouterService.acceptedIncomingConnection())
-			limit = limit * 4 / 5;
+			limit = limit * 3 / 5;
 		return linkManager.getNumConnections() < limit;
 	}
 
