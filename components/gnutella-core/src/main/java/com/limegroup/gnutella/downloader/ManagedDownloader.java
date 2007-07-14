@@ -1180,6 +1180,8 @@ public class ManagedDownloader extends AbstractDownloader
 		commonOutFile = incompleteFileManager.getEntry(incompleteFile);
 		if (commonOutFile == null) {// no entry in incompleteFM
 			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
+            if (completedSize > MAX_FILE_SIZE)
+                throw new IOException("invalid incomplete file "+completedSize);
 			commonOutFile = new VerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
