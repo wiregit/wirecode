@@ -113,7 +113,10 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     	
     	synchronized (getLock()) {
             if (isDone() || isCancelled()) {
-                throw new IllegalStateException("Cannot start: " + this);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Cannot start " + this + " because it's already done");
+                }
+                return;
             }
 
             try {
