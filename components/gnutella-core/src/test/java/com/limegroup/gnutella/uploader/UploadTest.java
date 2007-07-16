@@ -101,12 +101,16 @@ public class UploadTest extends LimeTestCase {
 
     private HostConfiguration hostConfig;
 
+    protected String protocol;
+
     private static RouterService ROUTER_SERVICE;
 
     private static final Object loaded = new Object();
 
     public UploadTest(String name) {
         super(name);
+        
+        this.protocol = "http";
     }
 
     public static Test suite() {
@@ -187,7 +191,7 @@ public class UploadTest extends LimeTestCase {
 
         client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
-        hostConfig.setHost("localhost", PORT);
+        hostConfig.setHost("localhost", PORT, protocol);
         client.setHostConfiguration(hostConfig);
     }
 
