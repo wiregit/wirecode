@@ -224,7 +224,8 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     }
 
     public boolean hasBufferedOutput() {
-        return incoming.position() > 0 || outgoing.hasRemaining() || channel.hasBufferedOutput();
+        InterestWritableByteChannel channel = this.channel;
+        return incoming.position() > 0 || outgoing.hasRemaining() || (channel != null && channel.hasBufferedOutput());
     }
     
 }

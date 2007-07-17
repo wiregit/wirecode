@@ -152,7 +152,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     }
 
     public boolean hasBufferedOutput() {
-        return buffer.hasRemaining() || channel.hasBufferedOutput();
+        return buffer.hasRemaining() || (channel != null && channel.hasBufferedOutput());
     }   
     
 }

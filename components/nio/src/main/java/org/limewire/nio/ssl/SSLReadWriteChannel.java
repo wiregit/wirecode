@@ -568,6 +568,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
 
     public boolean hasBufferedOutput() {
-        return writeOutgoing.position() > 0 || writeSink.hasBufferedOutput();
+        InterestWritableByteChannel channel = this.writeSink;
+        return writeOutgoing.position() > 0 || (channel != null && channel.hasBufferedOutput());
     }
 }

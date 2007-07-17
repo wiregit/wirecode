@@ -216,7 +216,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
 
     public boolean hasBufferedOutput() {
-        return channel.hasBufferedOutput();
+        InterestWritableByteChannel channel = this.channel;
+        return channel != null && channel.hasBufferedOutput();
     }
  
     public void setThrottle(final Throttle throttle) {
