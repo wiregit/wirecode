@@ -202,7 +202,8 @@ public class HttpIOSession implements IOSession {
      * <code>throttle</code> is null, throtteling is disabled.
      */
     public void setThrottle(final Throttle throttle) {
-        assert NIODispatcher.instance().isDispatchThread();
+        assert NIODispatcher.instance().isDispatchThread() :
+            "wrong thread: "+Thread.currentThread().getName();
     
         this.throttleWriter.setThrottle(throttle);
     }
