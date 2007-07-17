@@ -183,39 +183,16 @@ public class CommonUtils {
      *
      * @param fileName the name of the file to copy, relative to the jar 
      *  file -- such as "org/limewire/gui/images/image.gif"
-     */
-    public static void copyResourceFile(final String fileName) {
-        copyResourceFile(fileName, null);
-    }
-
-    /**
-     * Copies the specified resource file into the current directory from
-     * the jar file. If the file already exists, no copy is performed.
-     *
-     * @param fileName the name of the file to copy, relative to the jar
-     *  file -- such as "org/limewire/gui/images/image.gif"
-     * @param newFile the new <tt>File</tt> instance where the resource file
-     *  will be copied to
-     */
-    public static void copyResourceFile(final String fileName, File newFile) {
-        copyResourceFile(fileName, newFile, false);		
-    }
-
-    /**
-     * Copies the specified resource file into the current directory from
-     * the jar file. If the file already exists, no copy is performed.
-     *
-     * @param fileName the name of the file to copy, relative to the jar 
-     *  file -- such as "org/limewire/gui/images/image.gif"
      * @param newFile the new <tt>File</tt> instance where the resource file
      *  will be copied to -- if this argument is null, the file will be
      *  copied to the current directory
      * @param forceOverwrite specifies whether or not to overwrite the 
      *  file if it already exists
      */
-    public static void copyResourceFile(final String fileName, File newFile, 
-    									final boolean forceOverwrite) {
-    	if(newFile == null) newFile = new File(".", fileName);
+    public static void copyResourceFile(String fileName, File newFile,
+            boolean forceOverwrite) throws IOException {
+        if (newFile == null)
+    	    newFile = new File(".", fileName);
     
     	// return quickly if the file is already there, no copy necessary
     	if( !forceOverwrite && newFile.exists() )
@@ -241,8 +218,7 @@ public class CommonUtils {
     			:  ClassLoader.getSystemResource(fileName);
                 
             if(resource == null)
-                throw new NullPointerException("resource: " + fileName +
-                                               " doesn't exist.");
+                throw new IOException("resource: " + fileName + " doesn't exist.");
             
             InputStream is = resource.openStream();
     		
