@@ -15,6 +15,7 @@ import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionBufferStatus;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.channel.ThrottleWriter;
 
@@ -200,27 +201,10 @@ public class HttpIOSession implements IOSession {
      * Throttles the underlying connection using <code>throttle</code>. If
      * <code>throttle</code> is null, throtteling is disabled.
      */
-    public synchronized void setThrottle(Throttle throttle) {
-        boolean enable = (throttle != null);
-        if (enable == (this.throttleWriter != null)) {
-            return;
-        }
-
-        if (enable) {
-            this.throttleWriter = new ThrottleWriter(throttle);
-            boolean interest = channel.isWriteInterest();
-            channel.requestWrite(false);
-            channel.setWriteChannel(this.throttleWriter);
-            socket.setWriteObserver(channel);
-            channel.requestWrite(interest);
-        } else {
-            this.throttleWriter = null;
-            boolean interest = channel.isWriteInterest();
-            channel.requestWrite(false);
-            channel.setWriteChannel(null);
-            socket.setWriteObserver(channel);
-            channel.requestWrite(interest);
-        }
+    public void setThrottle(final Throttle throttle) {
+        assert NIODispatcher.instance().isDispatchThread();
+    
+        this.throttleWriter.setThrottle(throttle);
     }
 
     public Socket getSocket() {
@@ -232,4 +216,8 @@ public class HttpIOSession implements IOSession {
         socket.close();
     }
 
+    public void setThrottleChannel(final ThrottleWriter throttleWriter) {
+        this.throttleWriter = throttleWriter;
+    }
+    
 }

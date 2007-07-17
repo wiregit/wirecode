@@ -19,6 +19,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.channel.ThrottleWriter;
 
 /**
  * An implementation of the {@link ConnectingIOReactor} interface that
@@ -124,6 +125,10 @@ public class HttpIOReactor implements ConnectingIOReactor {
         
         HttpChannel channel = new HttpChannel(session, eventDispatch, word);
         session.setHttpChannel(channel);
+
+        ThrottleWriter throttleWriter = new ThrottleWriter(null);
+        session.setThrottleChannel(throttleWriter);
+        channel.setWriteChannel(throttleWriter);
         
         this.eventDispatch.connected(session);
         
