@@ -177,7 +177,7 @@ public class UploadTest extends LimeTestCase {
         
         File incFile = new File(_incompleteDir, incName);
         fm.removeFileIfShared(incFile);
-        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
+        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
