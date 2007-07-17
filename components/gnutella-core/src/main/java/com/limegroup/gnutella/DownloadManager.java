@@ -476,19 +476,20 @@ public class DownloadManager implements BandwidthTracker {
         }
         
         File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        File backupFile = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
+        
         //must delete in order for renameTo to work.
-        SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue().delete();
-        outFile.renameTo(
-            SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue());
+        backupFile.delete();
+        outFile.renameTo(backupFile);
         
         // Write list of active and waiting downloaders, then block list in
         //   IncompleteFileManager.
         ObjectOutputStream out = null;
         try {
             out=new ObjectOutputStream(
-                new BufferedOutputStream(
-                        new FileOutputStream(
-                                SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue())));
+                    new BufferedOutputStream(
+                        new FileOutputStream(outFile)));
+            
             out.writeObject(buf);
             //Blocks can be written to incompleteFileManager from other threads
             //while this downloader is being serialized, so lock is needed.
@@ -513,8 +514,9 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized boolean readSnapshot(File file) {
         //Read downloaders from disk.
         List<AbstractDownloader> buf=null;
+        ObjectInputStream in = null;
         try {
-            ObjectInputStream in = new ConverterObjectInputStream(
+            in = new ConverterObjectInputStream(
                                     new BufferedInputStream(
                                         new FileInputStream(file)));
             //This does not try to maintain backwards compatibility with older
@@ -528,6 +530,8 @@ public class DownloadManager implements BandwidthTracker {
         } catch(Throwable t) {
             LOG.error("Unable to read download file", t);
             return false;
+        } finally {
+            IOUtils.close(in);
         }
         
         // Pump the downloaders through a set, to remove duplicate values.
