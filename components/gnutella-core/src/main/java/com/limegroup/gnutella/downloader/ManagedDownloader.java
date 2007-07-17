@@ -670,8 +670,13 @@ public class ManagedDownloader extends AbstractDownloader
         // get the SHA1 if we can.
         
         synchronized(this) {
-            if (downloadSHA1 == null)
-                downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
+            if (downloadSHA1 == null) {
+                Object value = propertiesMap.get(SHA1_URN);
+                if (value instanceof URN) {
+                    downloadSHA1 = (URN)value;
+                }
+            }
+            
             for(RemoteFileDesc rfd : cachedRFDs) {
                 if(downloadSHA1 != null)
                     break;
