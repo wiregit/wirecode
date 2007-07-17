@@ -1006,7 +1006,8 @@ public class UploadTest extends LimeTestCase {
             int response = client.executeMethod(method);
             fail("Expected HttpConnection due to connection close, got: " + response);
         } catch (HttpException expected) {
-            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
+            // the connection was either closed or timedout due to a failed TLS
+            // handshake
         } finally {
             method.releaseConnection();
         }
