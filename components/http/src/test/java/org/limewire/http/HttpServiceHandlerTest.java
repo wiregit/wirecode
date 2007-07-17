@@ -512,6 +512,9 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         conn.setHttpRequest(new BasicHttpRequest("GET", "/get/async"));
         conn.consumeInput(serviceHandler);
         assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
+
+        // make sure the request has been fully processed
+        HttpTestUtils.waitForNIO();
         
         assertNotNull(conn.getHttpResponse());
         assertEquals(stringEntity, conn.getHttpResponse().getEntity());        
