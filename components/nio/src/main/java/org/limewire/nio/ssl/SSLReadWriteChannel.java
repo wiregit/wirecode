@@ -227,7 +227,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 readConsumed += result.bytesConsumed();
                 status = result.getStatus();
                 if(status == Status.BUFFER_OVERFLOW)
-                    throw new IllegalStateException("not enough room in fallback TLS buffer!");
+                    throw new IllegalStateException("not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming);
                 transferred += BufferUtils.transfer(readOutgoing, dst);
             }
             
