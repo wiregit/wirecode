@@ -603,7 +603,7 @@ public class UploadTest extends LimeTestCase {
     public void testLongHeader() throws Exception {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            sb.append("123456890");
+            sb.append("1234567890");
         }
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -631,9 +631,9 @@ public class UploadTest extends LimeTestCase {
 
     public void testLongFoldedHeader() throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("123456890");
+        sb.append("1234567890");
         for (int i = 0; i < 1000; i++) {
-            sb.append("\n 123456890");
+            sb.append("\n 1234567890");
         }
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -663,6 +663,49 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
+    public void test10KBRequest() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 100; i++) {
+            sb.append("1234567890");
+        }
+
+        GetMethod method = new GetMethod(fileNameUrl);
+        // add headers with a size of 1000 byte each
+        for (int i = 0; i < 10; i++) {
+            method.addRequestHeader("Header", sb.toString());
+        }
+
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+    
+    public void test200KBRequest() throws Exception {
+        // 4088 byte, leave some space for "Header: "
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 511; i++) {
+            sb.append("1234578");
+        }
+        
+        GetMethod method = new GetMethod(fileNameUrl);
+        // add headers with a size of 4 kb each
+        // HttpClient will add a few standard headers, so we can't add the full 50 headers
+        for (int i = 0; i < 40; i++) {
+            method.addRequestHeader("Header", sb.toString());
+        }
+
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+        } finally {
+            method.releaseConnection();
+        }
+
+    }
+    
     public void testHeaderLengthThatMatchesCharacterBufferLength()
             throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
