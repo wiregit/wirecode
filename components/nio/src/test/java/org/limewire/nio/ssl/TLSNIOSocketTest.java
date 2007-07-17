@@ -143,6 +143,47 @@ public class TLSNIOSocketTest extends BaseTestCase {
         server.close();       
     }
     
+    public void testRead10KBNonBlocking() throws Exception {
+        // 10 kb
+        final byte[] serverBuffer = new byte[10 * 1024];
+
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        SSLServerSocketFactory factory = context.getServerSocketFactory();
+        SSLServerSocket acceptor = (SSLServerSocket)factory.createServerSocket(9999);
+        try {
+            acceptor.setNeedClientAuth(false);
+            acceptor.setWantClientAuth(false);
+            acceptor.setEnabledCipherSuites(new String[] {"TLS_DH_anon_WITH_AES_128_CBC_SHA"});
+
+            TLSNIOSocket client = new TLSNIOSocket("127.0.0.1", 9999);
+            client.setSoTimeout(500);
+            try {
+                final Socket server = acceptor.accept();
+                try {
+                    // if the server is 
+                    client.getOutputStream().write(1);
+                    server.getOutputStream().write(serverBuffer);
+                    
+                    InputStream in = client.getInputStream();
+                    byte[] buffer = new byte[512];
+                    int total = 0;
+                    while (total < serverBuffer.length) {
+                        int read = in.read(buffer);
+                        assertNotEquals(-1, read);
+                        total += read;
+                    }
+                    assertEquals(serverBuffer.length, total);
+                } finally {
+                    server.close();
+                }
+            } finally {
+                client.close();
+            }
+        } finally {
+            acceptor.close();
+        }
+    }
     
    private static class ReadTester implements ChannelReadObserver {        
         private InterestReadableByteChannel source;
