@@ -2,20 +2,20 @@ package com.limegroup.gnutella.uploader;
 
 import junit.framework.Test;
 
-public class TLSUploadTest extends UploadTest {
-
-    public TLSUploadTest(String name) {
+public class TLSBrowseTest extends BrowseTest {
+    
+    public TLSBrowseTest(String name) {
         super(name);
         
-        this.protocol = "tls";
+        protocol = "tls";
     }
-    
+
     public static Test suite() {
-        return buildTestSuite(TLSUploadTest.class);
+        return buildTestSuite(TLSBrowseTest.class);
     }
 
     public static void main(String args[]) {
         junit.textui.TestRunner.run(suite());
     }
-    
+
 }
