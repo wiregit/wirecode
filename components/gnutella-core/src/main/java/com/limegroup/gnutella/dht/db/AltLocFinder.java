@@ -120,8 +120,10 @@ public class AltLocFinder {
         @Override
         public void handleFutureSuccess(FindValueResult result) {
             if (result.isSuccess()) {
+                boolean anyEntities = false;
                 for (DHTValueEntity entity : result.getEntities()) {
                     handleDHTValueEntity(entity);
+                    anyEntities = true;
                 }
                 
                 for (EntityKey entityKey : result.getEntityKeys()) {
@@ -131,9 +133,14 @@ public class AltLocFinder {
                         
                     try {
                         DHTFuture<FindValueResult> future = dht.get(entityKey);
-                        result = future.get();
-                        for (DHTValueEntity entity : result.getEntities()) {
-                            handleDHTValueEntity(entity);
+                        FindValueResult resultFromKeys = future.get();
+                        
+                        if (resultFromKeys.isSuccess()) {
+                            for (DHTValueEntity entity : resultFromKeys.getEntities()) {
+                                handleDHTValueEntity(entity);
+                            }
+                        } else if (!anyEntities) {
+                            handleDHTQueryFailed();
                         }
                     } catch (ExecutionException e) {
                         LOG.error("ExecutionException", e);
@@ -142,14 +149,18 @@ public class AltLocFinder {
                     } 
                 }
             } else {
-                DownloadManager dm = RouterService.getDownloadManager();
-                ManagedDownloader downloader = (ManagedDownloader)dm.getDownloaderForURN(urn);
-                if (downloader != null) {
-                    downloader.handleDHTQueryFailed();
-                }
+                handleDHTQueryFailed();
             }
         }
 
+        private void handleDHTQueryFailed() {
+            DownloadManager dm = RouterService.getDownloadManager();
+            ManagedDownloader downloader = (ManagedDownloader)dm.getDownloaderForURN(urn);
+            if (downloader != null) {
+                downloader.handleDHTQueryFailed();
+            }
+        }
+        
         private void handleDHTValueEntity(DHTValueEntity entity) {
             DHTValue value = entity.getValue();
             if (!(value instanceof AltLocValue)) {
