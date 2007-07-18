@@ -38,6 +38,11 @@ public class SSLUtils {
         }        
     };
     
+    /** Returns the TLS cipher suites this generally supports. */
+    public static String[] getTLSCipherSuites() {
+        return new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" };
+    }
+    
     /** Returns the shared Executor for processing tasks from the SSLEngine. */
     public static Executor getExecutor() {
         return TLS_PROCESSOR;

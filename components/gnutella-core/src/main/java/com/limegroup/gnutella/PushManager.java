@@ -15,7 +15,7 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
 import com.limegroup.gnutella.http.HTTPConnectionData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.Sockets.ConnectType;
@@ -98,7 +98,7 @@ public final class PushManager {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                ConnectType type = tlsCapable && ConnectionSettings.TLS_OUTGOING.getValue() ? ConnectType.TLS : ConnectType.PLAIN;
+                ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
                 Sockets.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false), type);
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();

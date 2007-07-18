@@ -20,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -241,7 +242,7 @@ public class MulticastTest extends LimeTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         RouterService.getDownloadManager().getPushManager().sendPush(rfd);
         
         
@@ -307,7 +308,7 @@ public class MulticastTest extends LimeTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         RouterService.getDownloadManager().getPushManager().sendPush(rfd);
         
         

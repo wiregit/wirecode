@@ -44,6 +44,7 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -2368,7 +2369,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 LOG.debug("Starting fetch for connectable host: " + incoming);
 
             this.endpoint = incoming;
-            ConnectType type = endpoint.isTLSCapable() && ConnectionSettings.TLS_OUTGOING.getValue() ? 
+            ConnectType type = endpoint.isTLSCapable() && SSLSettings.isOutgoingTLSEnabled() ? 
                                         ConnectType.TLS : ConnectType.PLAIN;
             connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);

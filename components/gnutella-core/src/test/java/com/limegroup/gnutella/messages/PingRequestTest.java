@@ -14,6 +14,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 @SuppressWarnings("unchecked")
@@ -204,7 +205,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         assertTrue(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -213,7 +214,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0x2, data[0] & 0x2);
         
         // +UP -TLS
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         assertTrue(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -224,7 +225,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         // Test -UP +TLS
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         assertFalse(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -233,7 +234,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0x2, data[0] & 0x2);
         
         // Test -UP -TLS
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         assertFalse(RouterService.isSupernode());
         pr = PingRequest.createUDPPing();
         assertFalse(pr.requestsIP());

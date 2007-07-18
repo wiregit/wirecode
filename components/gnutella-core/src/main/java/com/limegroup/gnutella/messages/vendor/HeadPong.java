@@ -50,7 +50,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -475,7 +475,7 @@ public class HeadPong extends VendorMessage {
         // If we're not firewalled and support TLS,
         // spread word about our TLS status.
         if(RouterService.acceptedIncomingConnection() && 
-           ConnectionSettings.TLS_INCOMING.getValue() ) {
+                SSLSettings.isIncomingTLSEnabled() ) {
             ggep.put(FEATURES, TLS_CAPABLE);
             size += 4;
         }

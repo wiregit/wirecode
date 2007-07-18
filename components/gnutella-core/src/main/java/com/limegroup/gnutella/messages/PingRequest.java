@@ -14,6 +14,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
@@ -168,7 +169,7 @@ public class PingRequest extends Message {
         else
             data[0] = SCP_LEAF;
         
-        if(ConnectionSettings.TLS_INCOMING.getValue())
+        if(SSLSettings.isIncomingTLSEnabled())
             data[0] |= SCP_TLS; // add our support for TLS.
         
         return data;

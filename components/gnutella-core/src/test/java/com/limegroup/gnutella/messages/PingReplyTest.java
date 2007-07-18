@@ -23,7 +23,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -323,7 +323,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
     public void testBasicGGEP() throws Exception {
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         
         // create a pong
         PingReply pr = 
@@ -345,7 +345,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(7, pong.getVendorMinorVersion());
         assertTrue(pong.isTLSCapable());
         // make sure it's still capable if we turn our settings off.
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         assertTrue(pong.isTLSCapable());
         
         // And try creating a new pong w/o TLS.
@@ -358,7 +358,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pong=(PingReply)m;
         assertFalse(pong.isTLSCapable());
         // make sure it's still off if we turn our settings on.
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         assertFalse(pong.isTLSCapable());
     }
 
@@ -523,7 +523,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoTLS() throws Exception {
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
                                       0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();

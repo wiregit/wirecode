@@ -35,7 +35,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -999,7 +999,7 @@ public class PingReply extends Message implements Serializable, IpPort, Connecta
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
         
         // add our support of TLS
-        if(ConnectionSettings.TLS_INCOMING.getValue())
+        if(SSLSettings.isIncomingTLSEnabled())
             ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;

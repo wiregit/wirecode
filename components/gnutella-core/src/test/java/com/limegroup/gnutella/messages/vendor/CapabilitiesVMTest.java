@@ -14,7 +14,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -72,12 +72,12 @@ public class CapabilitiesVMTest  extends LimeTestCase {
     }
     
     public void testTLSCapability() throws Exception {
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         CapabilitiesVM vmp = CapabilitiesVM.instance();
         assertEquals(-1, vmp.supportsTLS());
         assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
         
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         CapabilitiesVM.reconstructInstance();
         vmp = CapabilitiesVM.instance();
         assertEquals(1, vmp.supportsTLS());

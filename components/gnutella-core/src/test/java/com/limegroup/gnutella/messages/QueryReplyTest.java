@@ -52,6 +52,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -469,7 +470,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     
     public void testCreateQHDFromScratchOtherBits() throws Exception {
         //Create extended QHD from scratch with different bits set
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
@@ -516,7 +517,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     
     public void testCreateQHDWithTLS() throws Exception {
         //Create extended QHD from scratch with different bits set
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
@@ -565,7 +566,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         //Create extended QHD from scratch with different bits set
         // Do not set multicast, as that will unset pushing, busy, etc..
         // and generally confuse the test.
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
@@ -626,7 +627,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid, new byte[0],

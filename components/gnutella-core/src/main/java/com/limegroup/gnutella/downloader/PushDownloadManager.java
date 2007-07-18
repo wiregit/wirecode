@@ -47,6 +47,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.MultiShutdownable;
@@ -218,7 +219,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                          addr,
                                          port,
                                          Network.MULTICAST,
-                                         ConnectionSettings.TLS_INCOMING.getValue());
+                                         SSLSettings.isIncomingTLSEnabled());
                 router.sendMulticastPushRequest(pr);
                 if (LOG.isInfoEnabled())
                     LOG.info("Sending push request through multicast " + pr);
@@ -242,7 +243,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                 RouterService.getAddress(),
                                 RouterService.getPort(),
                                 Network.UDP,
-                                ConnectionSettings.TLS_INCOMING.getValue());
+                                SSLSettings.isIncomingTLSEnabled());
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
@@ -325,7 +326,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                          addr,
                                          port,
                                          Network.TCP,
-                                         ConnectionSettings.TLS_INCOMING.getValue());
+                                         SSLSettings.isIncomingTLSEnabled());
         
         if (LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
@@ -362,7 +363,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         final String request = "/gnutella/push-proxy?ServerID=" + 
                                Base32.encode(data.getFile().getClientGUID()) +
           (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
-          (ConnectionSettings.TLS_INCOMING.getValue() ? "&tls=true" : "");
+          (SSLSettings.isIncomingTLSEnabled() ? "&tls=true" : "");
             
         final String nodeString = "X-Node";
         final String nodeValue =

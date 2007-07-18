@@ -25,6 +25,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -447,7 +448,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testGoodTLSHost() throws Exception {
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
         RouterService.connect();
@@ -463,7 +464,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testGoodTLSHostNotUsedIfNoSetting() throws Exception {
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
         RouterService.connect();

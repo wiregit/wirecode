@@ -65,6 +65,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -193,8 +194,8 @@ public class DownloadTest extends LimeTestCase {
         dm.clearAllDownloads();
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(true);
         
         // Don't wait for network connections for testing
         ManagedDownloader.NO_DELAY = true;
@@ -334,7 +335,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload10() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFD(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -342,7 +343,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload11() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFDWithURN(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -350,7 +351,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload10OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         RemoteFileDesc rfd=newRFD(PORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -358,7 +359,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload11OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         RemoteFileDesc rfd=newRFDWithURN(PORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -520,7 +521,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSSwarm() throws Exception {
         LOG.info("-Testing swarming from two sources...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -1194,7 +1195,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testTwoTLSAlternateLocations() throws Exception {
         LOG.info("-Testing Two AlternateLocations w/ TLS...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         final int RATE = 50;
         tlsUploader1.setRate(RATE);
@@ -1286,7 +1287,7 @@ public class DownloadTest extends LimeTestCase {
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
         LOG.info("-Testing swarming from two sources one based on alt w/ TLS...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -2101,7 +2102,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleDownloadWithInitialTLSAlts() throws Exception {
         LOG.info("-Testing download with initial TLS alts");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;

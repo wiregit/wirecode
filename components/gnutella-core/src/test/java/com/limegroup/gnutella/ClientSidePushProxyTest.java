@@ -40,6 +40,7 @@ import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -71,8 +72,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         RouterService.getDownloadManager().clearAllDownloads();        
         
         //      Turn off by default, explicitly test elsewhere.
-        ConnectionSettings.TLS_INCOMING.setValue(false);
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         // duplicate queries are sent out each time, so avoid the DuplicateFilter
         Thread.sleep(2000);        
 
@@ -116,7 +117,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doQRPCGTest(boolean sendTLS, boolean settingOn, boolean listenTLS) throws Exception {
         if(settingOn)
-            ConnectionSettings.TLS_OUTGOING.setValue(true);
+            SSLSettings.TLS_OUTGOING.setValue(true);
         
     	setAccepted(false);
         drain(testUP[0]);
@@ -214,7 +215,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doHTTPRequestTest(boolean settingOn, boolean expectTLS) throws Exception {
         if(settingOn)
-            ConnectionSettings.TLS_INCOMING.setValue(true);
+            SSLSettings.TLS_INCOMING.setValue(true);
         
     	setAccepted(true);
         drain(testUP[0]);
@@ -360,7 +361,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doNormalTest(boolean settingOn, boolean expectTLS) throws Exception {
         if(settingOn)
-            ConnectionSettings.TLS_INCOMING.setValue(true);
+            SSLSettings.TLS_INCOMING.setValue(true);
         
         drain(testUP[0]);
         // some setup

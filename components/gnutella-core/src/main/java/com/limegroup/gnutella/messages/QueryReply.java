@@ -38,7 +38,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -435,7 +435,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
-        boolean supportsTLS = ConnectionSettings.TLS_INCOMING.getValue();
+        boolean supportsTLS = SSLSettings.isIncomingTLSEnabled();
         _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -35,7 +35,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
@@ -75,7 +75,7 @@ public class HeadPongTest extends LimeTestCase {
         uploadManager = new UploadManagerStub();
         PrivilegedAccessor.setValue(HeadPong.class, "_fileManager", fileManager);
         PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager", uploadManager);
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
         AltLocManager.instance().purge();
     }
@@ -83,7 +83,7 @@ public class HeadPongTest extends LimeTestCase {
     public void tearDown() throws Exception {
         PrivilegedAccessor.setValue(HeadPong.class, "_fileManager", oldFM);
         PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager", oldUM);
-        ConnectionSettings.TLS_INCOMING.revertToDefault();
+        SSLSettings.TLS_INCOMING.revertToDefault();
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", oldAccepted);
         AltLocManager.instance().purge();
     }
@@ -488,7 +488,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(HugeTestUtils.SHA1);
         req.setGuid(guid);
         
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
         FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
@@ -525,7 +525,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(HugeTestUtils.SHA1);
         req.setGuid(guid);
         
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
         FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
@@ -563,7 +563,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(HugeTestUtils.SHA1);
         req.setGuid(guid);
         
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.FALSE);
         FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        

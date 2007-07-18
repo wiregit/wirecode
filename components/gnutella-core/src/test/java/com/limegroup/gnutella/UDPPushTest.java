@@ -24,6 +24,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -331,9 +332,9 @@ public class UDPPushTest extends LimeTestCase {
      * for different files and both succeed.
      */
     public void testPushContainsTLS() throws Exception{
-        ConnectionSettings.TLS_INCOMING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(false);
         requestPush(rfd1);
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_INCOMING.setValue(true);
         requestPush(rfd2);
         
         try {

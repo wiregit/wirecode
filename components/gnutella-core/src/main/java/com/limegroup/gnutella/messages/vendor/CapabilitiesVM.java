@@ -17,7 +17,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -145,7 +145,7 @@ public final class CapabilitiesVM extends VendorMessage {
             supported.add(smb);
         }
         
-        if(ConnectionSettings.TLS_INCOMING.getValue()) {
+        if(SSLSettings.isIncomingTLSEnabled()) {
             smb = new SupportedMessageBlock(TLS_SUPPORT_BYTES, 1);
             supported.add(smb);
         }

@@ -19,7 +19,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -68,7 +68,7 @@ public class DirectAltLoc extends AlternateLocation {
 	    this(new ConnectableImpl(
 		        NetworkUtils.ip2string(RouterService.getAddress()),
 		        RouterService.getPort(),
-                ConnectionSettings.TLS_INCOMING.getValue())
+                SSLSettings.isIncomingTLSEnabled())
 		    ,sha1);
 	}
 	

@@ -12,6 +12,7 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -106,7 +107,7 @@ public class LimeCoreGlue {
             }
             
             public boolean isTLSCapable() {
-                return ConnectionSettings.TLS_INCOMING.getValue();
+                return SSLSettings.isIncomingTLSEnabled();
             }
         });
         

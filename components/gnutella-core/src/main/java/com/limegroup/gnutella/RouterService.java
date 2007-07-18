@@ -32,6 +32,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.ssl.SSLEngineTest;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -77,6 +79,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -499,6 +502,12 @@ public class RouterService {
             _state = StartStatus.STARTING;
             
             HttpClientManager.initialize();
+            
+            LOG.trace("START SSL Test");
+            SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), NIODispatcher.instance().getBufferCache());
+            if(!sslTester.go()) {
+                SSLSettings.disableTLS(sslTester.getLastFailureCause());
+            }
     
     		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");

@@ -30,6 +30,7 @@ import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 
@@ -762,7 +763,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
          * @throws IOException if there was an error starting TLS
          */
         private void startTLS() throws IOException {
-            if(ConnectionSettings.TLS_INCOMING.getValue() &&
+            if(SSLSettings.isIncomingTLSEnabled() &&
                !SSLUtils.isTLSEnabled(client) && SSLUtils.isStartTLSCapable(client)) {
                 LOG.debug("Attempting to start TLS");
                 buffer.flip();
