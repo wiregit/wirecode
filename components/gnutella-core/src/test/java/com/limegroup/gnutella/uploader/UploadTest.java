@@ -195,7 +195,7 @@ public class UploadTest extends LimeTestCase {
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT, protocol);
         client.setConnectionTimeout(500);
-        client.setTimeout(500);
+        client.setTimeout(1000);
         client.setHostConfiguration(hostConfig);
     }
 
@@ -1006,7 +1006,7 @@ public class UploadTest extends LimeTestCase {
             int response = client.executeMethod(method);
             fail("Expected HttpConnection due to connection close, got: " + response);
         } catch (HttpException expected) {
-            // the connection was either closed or timedout due to a failed TLS
+            // the connection was either closed or timed out due to a failed TLS
             // handshake
         } finally {
             method.releaseConnection();
