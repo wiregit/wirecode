@@ -47,6 +47,20 @@ public class FixedSizeArrayHashMapTest extends BaseTestCase {
             out += o + ", ";
         assertEquals("33, 22, ", out);
     }
+    
+    public void testFixedSizeWithExistingValue() throws Exception {
+        int size = 200;
+        Map<Integer, Integer> m = new FixedSizeArrayHashMap<Integer, Integer>(size);
+        for (int i = 1; i <= size + 2; i++) {
+            m.put(i, i);
+            assertLessThanOrEquals(size, m.size());
+        }
+        for (int i = 1; i <= size + 2; i++) {
+            m.put(i, i);
+            assertLessThanOrEquals(size, m.size());
+            m.put(i, i);
+        }
+    }
 
     /**
      * tests that re-adding an existing element will postpone
