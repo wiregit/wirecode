@@ -77,7 +77,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         // for testing: if the uploader was not initialized from a real
         // connection it does not have an IO session
         if (getSession().getIOSession() != null) {
-            getSession().getIOSession().close();
+            getSession().getIOSession().shutdown();
         }
 	}
 	
