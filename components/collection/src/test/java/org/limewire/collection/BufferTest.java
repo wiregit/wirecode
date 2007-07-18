@@ -301,6 +301,31 @@ public class BufferTest extends BaseTestCase {
         buf.add(2);
         buf.add(3);
         assertTrue(buf.remove(Integer.valueOf(1)));
+        
+        // first from over full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        buf.add(3);
+        buf.add(4);
+        assertTrue(buf.remove(Integer.valueOf(4)));
+        
+        // middle one from full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        buf.add(3);
+        assertTrue(buf.remove(Integer.valueOf(2)));
+        
+        // middle one from full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        buf.add(3);
+        buf.add(4);
+        assertTrue(buf.remove(Integer.valueOf(2)));
+        
+        
     }
 
 }
