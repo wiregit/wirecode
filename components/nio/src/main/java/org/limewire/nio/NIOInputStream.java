@@ -35,6 +35,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     private volatile Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
+    private boolean lastFilled = false;
     
  
     /**
@@ -63,7 +64,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
             throw new IOException("Already closed!");
         
         buffer = NIODispatcher.instance().getBufferCache().getHeap(); 
-        source = new BufferInputStream(buffer, this, shutdownHandler, channel);
+        source = new BufferInputStream(buffer, this, shutdownHandler, channel, this);
         bufferLock = source.getBufferLock();
         
         return this;
@@ -118,9 +119,38 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
                     bufferLock.notify();
         
                 // if there's room in the buffer, we're interested in more reading ...
-                // if not, we're not interested in more reading.
-                if(!buffer.hasRemaining() || read == -1)
+                // if not, we're not interested in more reading, but we should remember
+                // that we just filled it up, so if someone notifies us they want to read,
+                // we can immediately trigger a read.
+                if(!buffer.hasRemaining()) {
+                    lastFilled = true;
                     channel.interestRead(false);
+                } else {
+                    lastFilled = false;
+                }
+                
+                // if we read EOF, no more stuff to read.
+                if(read == -1) {
+                    channel.interestRead(false);
+                }
+            }
+        }
+    }
+    
+    /** Notification from BufferInputStream that we want to try to read. */
+    void readHappening() {
+        synchronized(bufferLock) {
+            if(lastFilled) {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+                    public void run() {
+                        try {
+                            handleRead();
+                        } catch(IOException iox) {
+                            channel.interestRead(true);
+                            shutdownHandler.shutdown();
+                        }
+                    }
+                });
             }
         }
     }

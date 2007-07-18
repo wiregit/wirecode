@@ -32,6 +32,9 @@ class BufferInputStream extends InputStream implements Shutdownable {
     /** the buffer that has data for reading */
     private final ByteBuffer buffer;
     
+    /** The NIOInputStream to notify when we're about to read. */
+    private final NIOInputStream nioStream;    
+    
     /** the SelectableChannel that the buffer is read from. */
     private InterestReadableByteChannel channel;
     
@@ -40,17 +43,19 @@ class BufferInputStream extends InputStream implements Shutdownable {
     
     /** whether or not there's no data left to read on this stream. */
     private boolean finished = false;
-    
+   
     /**
      * Constructs a new BufferInputStream that reads from the given buffer,
      * using the given socket to retrieve the soTimeouts.
      */
-    BufferInputStream(ByteBuffer buffer, ReadTimeout timeout, 
-                             Shutdownable shutdown, InterestReadableByteChannel channel) {
+    BufferInputStream(ByteBuffer buffer, ReadTimeout timeout,
+            Shutdownable shutdown, InterestReadableByteChannel channel,
+            NIOInputStream stream) {
         this.readTimeoutHandler = timeout;
         this.shutdownHandler = shutdown;
         this.buffer = buffer;
         this.channel = channel;
+        this.nioStream = stream;
     }
     
     void setReadChannel(InterestReadableByteChannel newChannel) {
@@ -137,7 +142,9 @@ class BufferInputStream extends InputStream implements Shutdownable {
                 
             if(looped && timeout != 0)
                 throw new java.io.InterruptedIOException("read timed out (" + timeout + ")");
-                
+            
+            nioStream.readHappening();
+            
             try {
                 LOCK.wait(timeout);
             } catch(InterruptedException ix) {
