@@ -136,6 +136,7 @@ public abstract class ClientSideTestCase
         // calls all doSettings() for me and my parents
         PrivilegedAccessor.invokeAllStaticMethods(this.getClass(), "doSettings",
                                                   null);
+        RouterService.getFileManager().loadSettingsAndWait(2000);
     }
     
      ////////////////////////// Initialization ////////////////////////
