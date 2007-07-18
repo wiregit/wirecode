@@ -863,9 +863,11 @@ public abstract class FileManager {
         if(LOG.isDebugEnabled())
             LOG.debug("Finished queueing shared files for revision: " + revision);
             
-        _updatingFinished = revision;
-        if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
-            _pendingFinished = revision;
+        synchronized (this) {
+            _updatingFinished = revision;
+            if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
+                _pendingFinished = revision;
+        }
         tryToFinish();
     }
     
@@ -1284,8 +1286,15 @@ public abstract class FileManager {
                     callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ADD_FAILED_FILE, file));
                 }
                 
-                if(_numPendingFiles == 0) {
-                    _pendingFinished = revision;
+                boolean finished = false;
+                synchronized (this) {
+                    if(_numPendingFiles == 0) {
+                        _pendingFinished = revision;
+                        finished = true;
+                    }
+                }
+                
+                if (finished) {
                     tryToFinish();
                 }
             }
