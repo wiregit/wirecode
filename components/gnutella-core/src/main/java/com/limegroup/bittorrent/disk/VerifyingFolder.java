@@ -217,10 +217,8 @@ class VerifyingFolder implements TorrentDiskManager {
 			BTPiece piece = factory.call();
 			
 			BTInterval in = piece.getInterval();
-            if (in.getId() >=  verified.maxSize()) {
-                System.out.println("evil piece "+in.getId());
+            if (in.getId() >=  verified.maxSize()) 
                 return; // bad piece.
-            }
 			byte [] data = piece.getData();
 			
 			synchronized(VerifyingFolder.this) {
