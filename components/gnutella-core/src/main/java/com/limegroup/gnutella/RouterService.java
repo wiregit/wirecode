@@ -504,13 +504,16 @@ public class RouterService {
             HttpClientManager.initialize();
             
             LOG.trace("START SSL Test");
+            callback.componentLoading("SSL_TEST");
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), NIODispatcher.instance().getBufferCache());
             if(!sslTester.go()) {
                 SSLSettings.disableTLS(sslTester.getLastFailureCause());
             }
+            LOG.trace("END SSL Test");
     
     		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");
+            callback.componentLoading("CONTENT_MANAGER");
             contentManager.initialize();
             LOG.trace("STOP ContentManager");
 
@@ -520,6 +523,7 @@ public class RouterService {
     		LOG.trace("STOPMessageRouter");
 
             LOG.trace("START HTTPUploadManager");
+            callback.componentLoading("UPLOAD_MANAGER");
             uploadManager.start(httpUploadAcceptor, fileManager, callback, messageRouter); 
             LOG.trace("STOP HTTPUploadManager");
 
@@ -542,10 +546,12 @@ public class RouterService {
     		LOG.trace("STOP ConnectionManager");
     		
     		LOG.trace("START DownloadManager");
+    		callback.componentLoading("DOWNLOAD_MANAGER");
     		downloadManager.initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
     		LOG.trace("START NodeAssigner");
+    		callback.componentLoading("NODE_ASSIGNER");
     		nodeAssigner.start();
     		LOG.trace("STOP NodeAssigner");
 			
@@ -571,10 +577,12 @@ public class RouterService {
             LOG.trace("STOP FileManager");
     
             LOG.trace("START TorrentManager");
+            callback.componentLoading("TORRENT_MANAGER");
 			torrentManager.initialize(fileManager, dispatcher, SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
             
             LOG.trace("START ControlRequestAcceptor");
+            callback.componentLoading("CONTROL_REQUEST_ACCEPTOR");
 			(new ControlRequestAcceptor()).register(getConnectionDispatcher());
 			LOG.trace("STOP ControlRequestAcceptor");
 			
@@ -616,6 +624,7 @@ public class RouterService {
             LOG.trace("STOP SavedFileManager");
 			
 			LOG.trace("START loading spam data");
+			callback.componentLoading("SPAM");
 			RatingTable.instance();
 			LOG.trace("START loading spam data");
             
