@@ -271,5 +271,36 @@ public class BufferTest extends BaseTestCase {
         assertTrue(!buf.contains("d"));
     }
 
+    public void testRemove() {
+        // last from full buffer, then first, already removed one, and last remaining one
+        Buffer<Integer> buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        buf.add(3);
+        buf.add(4);
+        assertTrue(buf.remove(Integer.valueOf(3)));
+        assertTrue(buf.remove(Integer.valueOf(4)));
+        assertFalse(buf.remove(Integer.valueOf(1)));
+        assertTrue(buf.remove(Integer.valueOf(2)));
+        
+        // last from non-full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        assertTrue(buf.remove(Integer.valueOf(2)));
+
+        // first from non-full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        assertTrue(buf.remove(Integer.valueOf(1)));
+        
+        // first from full buffer
+        buf = new Buffer<Integer>(3);
+        buf.add(1);
+        buf.add(2);
+        buf.add(3);
+        assertTrue(buf.remove(Integer.valueOf(1)));
+    }
 
 }
