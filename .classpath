@@ -69,5 +69,6 @@
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
