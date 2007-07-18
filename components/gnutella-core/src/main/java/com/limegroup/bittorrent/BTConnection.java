@@ -765,6 +765,11 @@ PieceSendListener, PieceReadListener {
 	 */
 	private void handleHave(BTHave message) {
 		int pieceNum = message.getPieceNum();
+        if (pieceNum >= _available.maxSize()) {
+            shutdown();
+            return;
+        }
+        
 		if (_available.get(pieceNum))
 			return; // dublicate Have, ignore.
 		
