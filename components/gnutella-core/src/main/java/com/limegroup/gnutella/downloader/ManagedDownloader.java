@@ -986,6 +986,14 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     /**
+     * A callback method that is being called if no sources 
+     * were found in the DHT
+     */
+    public void handleDHTQueryFailed() {
+        
+    }
+    
+    /**
      * Sends a Gnutella Query
      */
     private boolean sendGnutellaQuery() {

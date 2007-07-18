@@ -22,13 +22,16 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -116,26 +119,34 @@ public class AltLocFinder {
         
         @Override
         public void handleFutureSuccess(FindValueResult result) {
-            for (DHTValueEntity entity : result.getEntities()) {
-                handleDHTValueEntity(entity);
-            }
-            
-            for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.equals(AltLocValue.ALT_LOC)) {
-                    continue;
+            if (result.isSuccess()) {
+                for (DHTValueEntity entity : result.getEntities()) {
+                    handleDHTValueEntity(entity);
                 }
-                    
-                try {
-                    DHTFuture<FindValueResult> future = dht.get(entityKey);
-                    result = future.get();
-                    for (DHTValueEntity entity : result.getEntities()) {
-                        handleDHTValueEntity(entity);
+                
+                for (EntityKey entityKey : result.getEntityKeys()) {
+                    if (!entityKey.equals(AltLocValue.ALT_LOC)) {
+                        continue;
                     }
-                } catch (ExecutionException e) {
-                    LOG.error("ExecutionException", e);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException", e);
-                } 
+                        
+                    try {
+                        DHTFuture<FindValueResult> future = dht.get(entityKey);
+                        result = future.get();
+                        for (DHTValueEntity entity : result.getEntities()) {
+                            handleDHTValueEntity(entity);
+                        }
+                    } catch (ExecutionException e) {
+                        LOG.error("ExecutionException", e);
+                    } catch (InterruptedException e) {
+                        LOG.error("InterruptedException", e);
+                    } 
+                }
+            } else {
+                DownloadManager dm = RouterService.getDownloadManager();
+                ManagedDownloader downloader = (ManagedDownloader)dm.getDownloaderForURN(urn);
+                if (downloader != null) {
+                    downloader.handleDHTQueryFailed();
+                }
             }
         }
 
@@ -179,15 +190,15 @@ public class AltLocFinder {
         }
         
         @Override
-        public void handleCancellationException(CancellationException e) {
-            LOG.error("CancellationException", e);
-        }
-
-        @Override
         public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
         }
-
+        
+        @Override
+        public void handleCancellationException(CancellationException e) {
+            LOG.error("CancellationException", e);
+        }
+        
         @Override
         public void handleInterruptedException(InterruptedException e) {
             LOG.error("InterruptedException", e);
