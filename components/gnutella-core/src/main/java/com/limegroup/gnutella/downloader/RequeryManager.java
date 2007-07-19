@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.mojito.settings.LookupSettings;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.RouterService;
@@ -184,7 +185,10 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         lastQuerySent = System.currentTimeMillis();
         dhtQueryInProgress = true;
         numDHTQueries++;
-        downloader.setState(DownloadStatus.QUERYING_DHT, TIME_BETWEEN_REQUERIES);
+        downloader.setState(DownloadStatus.QUERYING_DHT, 
+                Math.max(TIME_BETWEEN_REQUERIES, 
+                        LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
+        
         switch(requeryStatus.get()) { 
         case INITIAL :
             requeryStatus.set(RequeryStatus.FIRST_DHT); break;
