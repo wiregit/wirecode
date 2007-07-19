@@ -127,7 +127,8 @@ public class AltLocFinder {
                 }
                 
                 for (EntityKey entityKey : result.getEntityKeys()) {
-                    if (!entityKey.equals(AltLocValue.ALT_LOC)) {
+                    if (!entityKey.getDHTValueType()
+                            .equals(AltLocValue.ALT_LOC)) {
                         continue;
                     }
                         
@@ -263,14 +264,15 @@ public class AltLocFinder {
             }
             
             for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.equals(PushProxiesValue.PUSH_PROXIES)) {
+                if (!entityKey.getDHTValueType()
+                        .equals(PushProxiesValue.PUSH_PROXIES)) {
                     continue;
                 }
                     
                 try {
                     DHTFuture<FindValueResult> future = dht.get(entityKey);
-                    result = future.get();
-                    for (DHTValueEntity entity : result.getEntities()) {
+                    FindValueResult resultFromKey = future.get();
+                    for (DHTValueEntity entity : resultFromKey.getEntities()) {
                         handleDHTValueEntity(entity);
                     }
                 } catch (ExecutionException e) {
