@@ -206,12 +206,12 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         assertFalse(e.isUDPHostCache());
         try {
             e.recordUDPHostCacheFailure();
-            fail("recorded failure");
-        } catch(AssertFailure expected) {}
+            fail("expected AssertionError");
+        } catch(AssertionError expected) {}
         try {
             e.recordUDPHostCacheSuccess();
-            fail("recorded success");
-        } catch(AssertFailure expected) {}
+            fail("expected AssertionError");
+        } catch(AssertionError expected) {}
         writer = new StringWriter();
         e.write(writer);
         assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,,,\n", writer.toString());
