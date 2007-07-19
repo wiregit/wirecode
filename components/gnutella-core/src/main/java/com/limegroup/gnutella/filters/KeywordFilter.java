@@ -113,7 +113,7 @@ public class KeywordFilter extends SpamFilter {
     protected boolean allow(QueryRequest qr) {
         //return false iff any of the words in query are in ban
         String query=qr.getQuery();
-        return !matches(query, false);
+        return !matches(query);
     }
 
     boolean allow(QueryReply qr) {
@@ -121,7 +121,7 @@ public class KeywordFilter extends SpamFilter {
         //thing is disallowed
         try {
             for(Response response : qr.getResultsAsList()) {
-                if (matches(response.getName(), true))
+                if (matches(response.getName()))
                     return false;
             }
         } catch (BadPacketException e) {
@@ -133,14 +133,13 @@ public class KeywordFilter extends SpamFilter {
     /** 
      * Returns true if phrase matches any of the entries in ban.
      */
-    protected boolean matches(String phrase, boolean reply) {
+    protected boolean matches(String phrase) {
         String canonical=phrase.toLowerCase(Locale.US);
         for (int i=0; i<ban.size(); i++) {
             String badWord = ban.get(i);
             if (canonical.indexOf(badWord)!=-1)
                 return true;
         }
-        
         return false;
     }
     
