@@ -198,7 +198,7 @@ public class DownloadTest extends LimeTestCase {
         SSLSettings.TLS_INCOMING.setValue(true);
         
         // Don't wait for network connections for testing
-        ManagedDownloader.NO_DELAY = true;
+        RequeryManager.NO_DELAY = true;
         
         uploader1=new TestUploader("PORT_1", PORT_1, false);
         uploader2=new TestUploader("PORT_2", PORT_2, false);

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
@@ -64,7 +65,6 @@ import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -253,31 +253,10 @@ public class ManagedDownloader extends AbstractDownloader
 	private SourceRanker ranker;
 
     /**
-     * The time to wait between requeries, in milliseconds.  This time can
-     * safely be quite small because it is overridden by the global limit in
-     * DownloadManager.  Package-access and non-final for testing.
-     * 
-     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_GNUTELLA_REQUERIES 
-     */
-    static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
-    
-    /**
      * How long we'll wait after sending a GUESS query before we try something
      * else.
      */
     private static final int GUESS_WAIT_TIME = 5000;
-    
-    /**
-     * How long we'll wait before attempting to download again after checking
-     * for stable connections (and not seeing any)
-     */
-    private static final int CONNECTING_WAIT_TIME = 750;
-    
-    /**
-     * The number of times to requery the network. All requeries are
-     * user-driven.
-     */
-    private static final int GNUTELLA_REQUERY_ATTEMPTS = 1;
     
 
     /** The size of the approx matcher 2d buffer... */
@@ -450,28 +429,6 @@ public class ManagedDownloader extends AbstractDownloader
     protected boolean deserializedFromDisk;
     
     /**
-     * The number of Gnutella queries already done for this downloader.
-     * Influenced by the type of downloader & whether or not it was started
-     * from disk or from scratch.
-     */
-    private volatile int numGnutellaQueries;
-    
-    /**
-     * The number of DHT queries already done for this downloader.
-     */
-    private volatile int numDHTQueries;
-    
-    /**
-     * Flag for whether or not this is the first query attempt
-     */
-    private volatile boolean firstQueryAttempt = true;
-    
-    /**
-     * Flag for whether or not we've already tried to query Gnutella
-     */
-    private volatile boolean alreadyTriedGnutella = false;
-    
-    /**
      * Whether or not we've sent a GUESS query.
      */
     private boolean triedLocatingSources;
@@ -482,11 +439,6 @@ public class ManagedDownloader extends AbstractDownloader
      */
     private volatile boolean receivedNewSources;
     
-    /**
-     * The time the last query was sent out.
-     */
-    private long lastQuerySent;
-    
     /** The key under which the URN is stored in the attribute map */
     protected static final String SHA1_URN = "sha1Urn";
 	
@@ -495,7 +447,9 @@ public class ManagedDownloader extends AbstractDownloader
 	 * in {@link #startDownload()};
 	 */
     private volatile int triedHosts;
-
+    
+    private volatile RequeryManager requeryManager;
+    
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
@@ -646,6 +600,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
+        this.requeryManager = new RequeryManager(this, manager);
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -715,10 +670,6 @@ public class ManagedDownloader extends AbstractDownloader
             reportDiskProblem(bad);
             return;
         }
-        
-        // Initial re-query state
-        firstQueryAttempt = true;
-        alreadyTriedGnutella = false;
         
         setState(DownloadStatus.QUEUED);
     }
@@ -833,8 +784,6 @@ public class ManagedDownloader extends AbstractDownloader
                 ranker = null;
         }
         
-        long now = System.currentTimeMillis();
-
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
@@ -855,10 +804,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         if(LOG.isTraceEnabled()) {
             LOG.trace("MD completing <" + getSaveFile().getName() 
-                    + "> completed download, state: " + getState() 
-                    + ", numGnutellaQueries: " + numGnutellaQueries 
-                    + ", numDHTQueries: " + numDHTQueries
-                    + ", lastQuerySent: " + lastQuerySent);
+                    + "> completed download, state: " + getState());
         }
         
         VerifyingFile.clearCaches();
@@ -883,17 +829,21 @@ public class ManagedDownloader extends AbstractDownloader
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
         // from that query.
-        } else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
-            setState(DownloadStatus.WAITING_FOR_RESULTS,
-                     TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
+        } else if(requeryManager.isWaitingForGnutellaResults()) {
+            setState(DownloadStatus.WAITING_FOR_GNET_RESULTS,
+                     requeryManager.getTimeLeftInQuery());
         
-        // If we're at our requery limit, give up.
-        } else if(shouldGiveUp()) {
+        } else if (requeryManager.isWaitingForDHTResults()) {
+            setState(DownloadStatus.QUERYING_DHT, 
+                    requeryManager.getTimeLeftInQuery());
+            
+        } else if(requeryManager.shouldGiveUp()) {
+            // If we're at our requery limit, give up.
             setState(DownloadStatus.GAVE_UP);
             
         // If we want to send the requery immediately, do so.
-        } else if(shouldSendRequeryImmediately(numGnutellaQueries)) {
-            sendRequery();
+        } else if(shouldSendRequeryImmediately(requeryManager.getNumGnutellaQueries())) {
+            requeryManager.sendRequery();
             
         // Otherwise, wait for the user to initiate the query.            
         } else {
@@ -902,36 +852,8 @@ public class ManagedDownloader extends AbstractDownloader
         
         if(LOG.isTraceEnabled()) {
             LOG.trace("MD completed <" + getSaveFile().getName() 
-                    + "> completed download, state: " + getState() 
-                    + ", numGnutellaQueries: " + numGnutellaQueries
-                    + ", numDHTQueries: " + numDHTQueries);
+                    + "> completed download, state: " + getState()); 
         }
-    }
-    
-    /**
-     * Returns whether or not we should give up 
-     */
-    private boolean shouldGiveUp() {
-    	return shouldGiveUpGnutellaQueries() && shouldGiveUpDHTQueries();
-    }
-    
-    /**
-     * Returns whether or not we should give up Gnutella queries
-     */
-    private boolean shouldGiveUpGnutellaQueries() {
-    	return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS;
-    }
-    
-    /**
-     * Returns whether or not we should give up DHT queries
-     */
-    private boolean shouldGiveUpDHTQueries() {
-    	if (!DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-    	        || !RouterService.getDHTManager().isMemberOfDHT()) {
-    	    return true;
-    	}
-    	
-    	return numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue();
     }
     
     /**
@@ -942,83 +864,19 @@ public class ManagedDownloader extends AbstractDownloader
      * clicked resume, so we do want to send immediately.
      */
     protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        return (lastQuerySent == -1 || !firstQueryAttempt);
-    }
-    
-    /**
-     * Attempts to send a requery.
-     * 
-     * Try in this order:
-     * 
-     *     1) DHT
-     *     2) Gnutella
-     *  -->3) DHT
-     *  |__|
-     */
-    private void sendRequery() {
-        if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-                && RouterService.getDHTManager().isMemberOfDHT() 
-                && (firstQueryAttempt || alreadyTriedGnutella)) {
-            
-            if (sendDHTQuery()) {
-                firstQueryAttempt = false;
-            }
-        } else if (!alreadyTriedGnutella) {
-            if (sendGnutellaQuery()) {
-                alreadyTriedGnutella = true;
-            }
-        }
+        return requeryManager.shouldSendRequeryImmediately();
     }
     
     /**
      * Sends a DHT Query
      */
-    private boolean sendDHTQuery() {
-        if (manager.sendDHTQuery(getSHA1Urn())) {
-            lastQuerySent = System.currentTimeMillis();
-            numDHTQueries++;
-            setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
-            return true;
-        } else {
-            lastQuerySent = -1;
-            return false;
-        }
-    }
+    
     
     /**
      * A callback method that is being called if no sources 
      * were found in the DHT
      */
     public void handleDHTQueryFailed() {
-        
-    }
-    
-    /**
-     * Sends a Gnutella Query
-     */
-    private boolean sendGnutellaQuery() {
-        // If we don't have stable connections, wait until we do.
-        if (hasStableConnections()) {
-            try {
-                QueryRequest qr = newRequery(numGnutellaQueries);
-                if(manager.sendQuery(this, qr)) {
-                    lastQuerySent = System.currentTimeMillis();
-                    numGnutellaQueries++;
-                    setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
-                    return true;
-                } else {
-                    lastQuerySent = -1; // mark as wanting to requery.
-                    return false;
-                }
-            } catch(CantResumeException cre) {
-                LOG.debug("CantResumeException", cre);
-                return false;
-            }
-        } else {
-            lastQuerySent = -1; // mark as wanting to requery.
-            setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
-            return false;
-        }
     }
     
     /**
@@ -1029,10 +887,10 @@ public class ManagedDownloader extends AbstractDownloader
             //LOG.trace("handling inactivity. state: " + 
                       //getState() + ", hasnew: " + hasNewSources() + 
                       //", left: " + getRemainingStateTime());
-        
         switch(getState()) {
         case BUSY:
         case WAITING_FOR_CONNECTIONS:
+        case QUERYING_DHT:
         case ITERATIVE_GUESSING:
             // If we're finished waiting on busy hosts,
             // stable connections, or GUESSing,
@@ -1041,7 +899,7 @@ public class ManagedDownloader extends AbstractDownloader
             if(getRemainingStateTime() <= 0 || hasNewSources())
                 setState(DownloadStatus.QUEUED);
             break;
-        case WAITING_FOR_RESULTS:
+        case WAITING_FOR_GNET_RESULTS:
             // If we have new sources but are still inactive,
             // then queue ourselves and wait to restart.
             if(hasNewSources())
@@ -1053,8 +911,10 @@ public class ManagedDownloader extends AbstractDownloader
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
-        	if (hasNewSources())
+        	if (hasNewSources()) 
         		setState(DownloadStatus.QUEUED);
+            else 
+                requeryManager.handleGaveUpState();
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -1162,10 +1022,11 @@ public class ManagedDownloader extends AbstractDownloader
         case INITIALIZING:
         case QUEUED:
         case GAVE_UP:
-        case WAITING_FOR_RESULTS:
+        case WAITING_FOR_GNET_RESULTS:
         case WAITING_FOR_USER:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
+        case QUERYING_DHT:
         case BUSY:
         case PAUSED:
             return true;
@@ -1956,9 +1817,7 @@ public class ManagedDownloader extends AbstractDownloader
         // if we were waiting for the user to start us,
         // then try to send the requery.
         if(getState() == DownloadStatus.WAITING_FOR_USER) {
-            lastQuerySent = -1; // inform requerying that we wanna go.
-            firstQueryAttempt = true;
-            alreadyTriedGnutella = false;
+            requeryManager.resetState();
         }
         
         // if any guys were busy, reduce their retry time to 0,
@@ -2069,7 +1928,7 @@ public class ManagedDownloader extends AbstractDownloader
     public synchronized void finish() {
         if (downloadSHA1 != null)
             RouterService.getAltlocManager().removeListener(downloadSHA1, this);
-        
+        requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
 				rfd.setDownloading(false);
@@ -2129,28 +1988,6 @@ public class ManagedDownloader extends AbstractDownloader
             LOG.debug("MANAGER: TAD2 returned: " + status);
                    
         return status;
-    }
-
-	private static final int MIN_NUM_CONNECTIONS      = 2;
-	private static final int MIN_CONNECTION_MESSAGES  = 6;
-	private static final int MIN_TOTAL_MESSAGES       = 45;
-    static boolean   NO_DELAY				  = false; // For testing
-
-    /**
-     *  Determines if we have any stable connections to send a requery down.
-     */
-    private boolean hasStableConnections() {
-		if ( NO_DELAY )
-		    return true;  // For Testing without network connection
-
-		// TODO: Note that on a private network, these conditions might
-		//       be too strict.
-		
-		// Wait till your connections are stable enough to get the minimum 
-		// number of messages
-		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
-			        >= MIN_NUM_CONNECTIONS &&
-               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
     /**
@@ -2856,7 +2693,7 @@ public class ManagedDownloader extends AbstractDownloader
         switch (state) {
         case CONNECTING:
         case BUSY:
-        case WAITING_FOR_RESULTS:
+        case WAITING_FOR_GNET_RESULTS:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();

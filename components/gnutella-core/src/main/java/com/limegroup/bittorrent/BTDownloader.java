@@ -179,7 +179,7 @@ public class BTDownloader extends AbstractDownloader
 			return DownloadStatus.COMPLETE;
 		switch(_torrent.getState()) {
 		case WAITING_FOR_TRACKER :
-			return DownloadStatus.WAITING_FOR_RESULTS;
+			return DownloadStatus.WAITING_FOR_GNET_RESULTS;
 		case VERIFYING:
 			return DownloadStatus.RESUMING;
 		case CONNECTING:
@@ -217,7 +217,7 @@ public class BTDownloader extends AbstractDownloader
 	 * tracker requests.
 	 */
 	public int getRemainingStateTime() {
-		if (getState() != DownloadStatus.WAITING_FOR_RESULTS)
+		if (getState() != DownloadStatus.WAITING_FOR_GNET_RESULTS)
 			return 0;
 		return Math.max(0,(int)(_torrent.getNextTrackerRequestTime() - 
 				System.currentTimeMillis()) / 1000);

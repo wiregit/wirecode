@@ -56,7 +56,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 		// Make sure that we don't wait for network on requery
-		ManagedDownloader.NO_DELAY = true;
+		RequeryManager.NO_DELAY = true;
     }
 
     public ResumeDownloaderTest(String name) {
@@ -117,7 +117,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader=newResumeDownloader();
-        while (downloader.getState()!=DownloadStatus.WAITING_FOR_RESULTS) {         
+        while (downloader.getState()!=DownloadStatus.WAITING_FOR_GNET_RESULTS) {         
 			if ( downloader.getState() != DownloadStatus.QUEUED )
                 assertEquals(DownloadStatus.GAVE_UP, 
 				  downloader.getState());
@@ -125,7 +125,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
 		}
         // give the downloader time to change its state
         Thread.sleep(1000);
-        assertEquals(DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
         //Serialize it!

@@ -51,7 +51,7 @@ public class AltLocFinder {
     /**
      * Finds AlternateLocations for the given URN
      */
-    public boolean findAltLocs(URN urn) {
+    public boolean findAltLocs(URN urn, AltLocSearchListener listener) {
         if (urn == null) {
             return false;
         }
@@ -65,7 +65,7 @@ public class AltLocFinder {
             KUID key = KUIDUtils.toKUID(urn);
             EntityKey lookupKey = EntityKey.createEntityKey(key, AltLocValue.ALT_LOC);
             DHTFuture<FindValueResult> future = dht.get(lookupKey);
-            future.addDHTFutureListener(new AltLocsHandler(dht, urn, key));
+            future.addDHTFutureListener(new AltLocsHandler(dht, urn, key, listener));
             return true;
         }
     }
@@ -74,13 +74,15 @@ public class AltLocFinder {
      * Finds push AlternateLocations for the given GUID and URN
      */
     public boolean findPushAltLocs(GUID guid, URN urn) {
-        return findPushAltLocs(guid, urn, null);
+        return findPushAltLocs(guid, urn, null, null);
     }
     
     /**
      * 
      */
-    private boolean findPushAltLocs(GUID guid, URN urn, DHTValueEntity altLocEntity) {
+    private boolean findPushAltLocs(GUID guid, URN urn, 
+            DHTValueEntity altLocEntity, AltLocSearchListener listener) {
+        
         if (guid == null || urn == null) {
             return false;
         }
@@ -94,7 +96,7 @@ public class AltLocFinder {
             KUID key = KUIDUtils.toKUID(guid);
             EntityKey lookupKey = EntityKey.createEntityKey(key, PushProxiesValue.PUSH_PROXIES);
             DHTFuture<FindValueResult> future = dht.get(lookupKey);
-            future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key, altLocEntity));
+            future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key, altLocEntity, listener));
             return true;
         }
     }
@@ -111,14 +113,18 @@ public class AltLocFinder {
         
         protected final KUID key;
         
+        protected final AltLocSearchListener listener;
+        
         protected final DHTValueType valueType;
         
         private AbstractResultHandler(MojitoDHT dht, URN urn, 
-                KUID key, DHTValueType valueType) {
+                KUID key, AltLocSearchListener listener, 
+                DHTValueType valueType) {
             
             this.dht = dht;
             this.urn = urn;
             this.key = key;
+            this.listener = listener;
             this.valueType = valueType;
         }
         
@@ -157,8 +163,8 @@ public class AltLocFinder {
                 }
             }
             
-            if (!success) {
-                handleDHTQueryFailed();
+            if (listener != null) {
+                listener.handleAltLocSearchDone(success);
             }
         }
         
@@ -168,33 +174,31 @@ public class AltLocFinder {
          */
         protected abstract boolean handleDHTValueEntity(DHTValueEntity entity);
         
-        /**
-         * Notifies the associated ManagedDownloader that the DHT lookup failed
-         */
-        protected void handleDHTQueryFailed() {
-            DownloadManager dm = RouterService.getDownloadManager();
-            ManagedDownloader downloader = (ManagedDownloader)dm.getDownloaderForURN(urn);
-            if (downloader != null) {
-                downloader.handleDHTQueryFailed();
-            }
-        }
-        
         @Override
         public void handleCancellationException(CancellationException e) {
             LOG.error("CancellationException", e);
-            handleDHTQueryFailed();
+            
+            if (listener != null) {
+                listener.handleAltLocSearchDone(false);
+            }
         }
 
         @Override
         public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
-            handleDHTQueryFailed();
+            
+            if (listener != null) {
+                listener.handleAltLocSearchDone(false);
+            }
         }
 
         @Override
         public void handleInterruptedException(InterruptedException e) {
             LOG.error("InterruptedException", e);
-            handleDHTQueryFailed();
+            
+            if (listener != null) {
+                listener.handleAltLocSearchDone(false);
+            }
         }
         
         public int hashCode() {
@@ -221,8 +225,9 @@ public class AltLocFinder {
      */
     private class AltLocsHandler extends AbstractResultHandler {
         
-        private AltLocsHandler(MojitoDHT dht, URN urn, KUID key) {
-            super(dht, urn, key, AltLocValue.ALT_LOC);
+        private AltLocsHandler(MojitoDHT dht, URN urn, KUID key, 
+                AltLocSearchListener listener) {
+            super(dht, urn, key, listener, AltLocValue.ALT_LOC);
         }
         
         @Override
@@ -239,7 +244,9 @@ public class AltLocFinder {
             if (altLoc.isFirewalled()) {
                 if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
                     GUID guid = new GUID(altLoc.getGUID());
-                    return findPushAltLocs(guid, urn, entity);
+                    
+                    // TODO: Return false?
+                    return findPushAltLocs(guid, urn, entity, listener);
                 }
                 
             // If it's not then create just an AlternateLocation
@@ -280,8 +287,8 @@ public class AltLocFinder {
         private final DHTValueEntity altLocEntity;
         
         private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, 
-                KUID key, DHTValueEntity altLocEntity) {
-            super(dht, urn, key, PushProxiesValue.PUSH_PROXIES);
+                KUID key, DHTValueEntity altLocEntity, AltLocSearchListener listener) {
+            super(dht, urn, key, listener, PushProxiesValue.PUSH_PROXIES);
             
             this.guid = guid;
             this.altLocEntity = altLocEntity;

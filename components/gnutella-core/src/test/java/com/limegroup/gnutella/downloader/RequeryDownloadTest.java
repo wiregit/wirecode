@@ -123,7 +123,7 @@ public class RequeryDownloadTest
     }    
     
     private static void setSettings() {
-        ManagedDownloader.NO_DELAY = true;
+        RequeryManager.NO_DELAY = true;
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -245,7 +245,7 @@ public class RequeryDownloadTest
         Thread.sleep(1000);
         
         assertEquals("downloader isn't waiting for results", 
-                DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
+                DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
 
         // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
         // automatically
@@ -306,7 +306,7 @@ public class RequeryDownloadTest
         else {
             //b) No match: keep waiting for results
             assertEquals("downloader should wait for user", 
-                    DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
+                    DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
             downloader.stop();
         }
     }
