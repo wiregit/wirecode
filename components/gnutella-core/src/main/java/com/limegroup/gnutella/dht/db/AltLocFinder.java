@@ -19,6 +19,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 
@@ -99,49 +100,54 @@ public class AltLocFinder {
     }
     
     /**
-     * The AltLocsHandler listens for the FindValueResult, constructs 
-     * AlternateLocations from the results and passes them to AltLocManager 
-     * which in turn notifies every Downloader about the new locations.
+     * An abstract implementation of DHTFutureAdapter to handle AltLocValues
+     * and PushAltLocValues.
      */
-    private class AltLocsHandler extends DHTFutureAdapter<FindValueResult> {
+    private abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         
-        private final MojitoDHT dht;
+        protected final MojitoDHT dht;
         
-        private final URN urn;
+        protected final URN urn;
         
-        private final KUID key;
+        protected final KUID key;
         
-        private AltLocsHandler(MojitoDHT dht, URN urn, KUID key) {
+        protected final DHTValueType valueType;
+        
+        private AbstractResultHandler(MojitoDHT dht, URN urn, 
+                KUID key, DHTValueType valueType) {
+            
             this.dht = dht;
             this.urn = urn;
             this.key = key;
+            this.valueType = valueType;
         }
         
         @Override
         public void handleFutureSuccess(FindValueResult result) {
+            boolean success = false;
+            
             if (result.isSuccess()) {
-                boolean anyEntities = false;
                 for (DHTValueEntity entity : result.getEntities()) {
-                    handleDHTValueEntity(entity);
-                    anyEntities = true;
+                    if (handleDHTValueEntity(entity)) {
+                        success = true;
+                    }
                 }
                 
                 for (EntityKey entityKey : result.getEntityKeys()) {
-                    if (!entityKey.getDHTValueType()
-                            .equals(AltLocValue.ALT_LOC)) {
+                    if (!entityKey.getDHTValueType().equals(valueType)) {
                         continue;
                     }
                         
                     try {
                         DHTFuture<FindValueResult> future = dht.get(entityKey);
-                        FindValueResult resultFromKeys = future.get();
+                        FindValueResult resultFromKey = future.get();
                         
-                        if (resultFromKeys.isSuccess()) {
-                            for (DHTValueEntity entity : resultFromKeys.getEntities()) {
-                                handleDHTValueEntity(entity);
+                        if (resultFromKey.isSuccess()) {
+                            for (DHTValueEntity entity : resultFromKey.getEntities()) {
+                                if (handleDHTValueEntity(entity)) {
+                                    success = true;
+                                }
                             }
-                        } else if (!anyEntities) {
-                            handleDHTQueryFailed();
                         }
                     } catch (ExecutionException e) {
                         LOG.error("ExecutionException", e);
@@ -149,12 +155,23 @@ public class AltLocFinder {
                         LOG.error("InterruptedException", e);
                     } 
                 }
-            } else {
+            }
+            
+            if (!success) {
                 handleDHTQueryFailed();
             }
         }
-
-        private void handleDHTQueryFailed() {
+        
+        /**
+         * Handles a DHTValueEntity (turns it into some Gnutella Object)
+         * and returns true on success
+         */
+        protected abstract boolean handleDHTValueEntity(DHTValueEntity entity);
+        
+        /**
+         * Notifies the associated ManagedDownloader that the DHT lookup failed
+         */
+        protected void handleDHTQueryFailed() {
             DownloadManager dm = RouterService.getDownloadManager();
             ManagedDownloader downloader = (ManagedDownloader)dm.getDownloaderForURN(urn);
             if (downloader != null) {
@@ -162,10 +179,57 @@ public class AltLocFinder {
             }
         }
         
-        private void handleDHTValueEntity(DHTValueEntity entity) {
+        @Override
+        public void handleCancellationException(CancellationException e) {
+            LOG.error("CancellationException", e);
+            handleDHTQueryFailed();
+        }
+
+        @Override
+        public void handleExecutionException(ExecutionException e) {
+            LOG.error("ExecutionException", e);
+            handleDHTQueryFailed();
+        }
+
+        @Override
+        public void handleInterruptedException(InterruptedException e) {
+            LOG.error("InterruptedException", e);
+            handleDHTQueryFailed();
+        }
+        
+        public int hashCode() {
+            return key.hashCode();
+        }
+        
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            } else if (!(o instanceof AbstractResultHandler)) {
+                return false;
+            }
+            
+            AbstractResultHandler other = (AbstractResultHandler)o;
+            return key.equals(other.key)
+                    && valueType.equals(other.valueType);
+        }
+    }
+    
+    /**
+     * The AltLocsHandler listens for the FindValueResult, constructs 
+     * AlternateLocations from the results and passes them to AltLocManager 
+     * which in turn notifies every Downloader about the new locations.
+     */
+    private class AltLocsHandler extends AbstractResultHandler {
+        
+        private AltLocsHandler(MojitoDHT dht, URN urn, KUID key) {
+            super(dht, urn, key, AltLocValue.ALT_LOC);
+        }
+        
+        @Override
+        protected boolean handleDHTValueEntity(DHTValueEntity entity) {
             DHTValue value = entity.getValue();
             if (!(value instanceof AltLocValue)) {
-                return;
+                return false;
             }
             
             AltLocValue altLoc = (AltLocValue)value;
@@ -175,7 +239,7 @@ public class AltLocFinder {
             if (altLoc.isFirewalled()) {
                 if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
                     GUID guid = new GUID(altLoc.getGUID());
-                    findPushAltLocs(guid, urn, entity);
+                    return findPushAltLocs(guid, urn, entity);
                 }
                 
             // If it's not then create just an AlternateLocation
@@ -193,41 +257,14 @@ public class AltLocFinder {
                     AlternateLocation location 
                         = AlternateLocation.createDirectDHTAltLoc(ipp, urn, fileSize, ttroot);
                     AltLocManager.instance().add(location, this);
+                    return true;
                 } catch (IOException e) {
-                    // As above but possible if IpPort is not a 
-                    // valid external address
+                    // Thrown if IpPort is an invalid address
                     LOG.error("IOException", e);
                 }
             }
-        }
-        
-        @Override
-        public void handleExecutionException(ExecutionException e) {
-            LOG.error("ExecutionException", e);
-        }
-        
-        @Override
-        public void handleCancellationException(CancellationException e) {
-            LOG.error("CancellationException", e);
-        }
-        
-        @Override
-        public void handleInterruptedException(InterruptedException e) {
-            LOG.error("InterruptedException", e);
-        }
-
-        public int hashCode() {
-            return key.hashCode();
-        }
-        
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            } else if (!(o instanceof AltLocsHandler)) {
-                return false;
-            }
             
-            return key.equals(((AltLocsHandler)o).key);
+            return false;
         }
     }
     
@@ -236,58 +273,26 @@ public class AltLocFinder {
      * from the results and passes them to AltLocManager which in turn notifies all
      * Downloads about the new alternate locations.
      */
-    private class PushAltLocsHandler extends DHTFutureAdapter<FindValueResult> {
-        
-        private final MojitoDHT dht;
+    private class PushAltLocsHandler extends AbstractResultHandler {
         
         private final GUID guid;
-        
-        private final URN urn;
-        
-        private final KUID key;
         
         private final DHTValueEntity altLocEntity;
         
         private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, 
                 KUID key, DHTValueEntity altLocEntity) {
-            this.dht = dht;
+            super(dht, urn, key, PushProxiesValue.PUSH_PROXIES);
+            
             this.guid = guid;
-            this.urn = urn;
-            this.key = key;
             this.altLocEntity = altLocEntity;
         }
         
         @Override
-        public void handleFutureSuccess(FindValueResult result) {
-            for (DHTValueEntity entity : result.getEntities()) {
-                handleDHTValueEntity(entity);
-            }
-            
-            for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.getDHTValueType()
-                        .equals(PushProxiesValue.PUSH_PROXIES)) {
-                    continue;
-                }
-                    
-                try {
-                    DHTFuture<FindValueResult> future = dht.get(entityKey);
-                    FindValueResult resultFromKey = future.get();
-                    for (DHTValueEntity entity : resultFromKey.getEntities()) {
-                        handleDHTValueEntity(entity);
-                    }
-                } catch (ExecutionException e) {
-                    LOG.error("ExecutionException", e);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException", e);
-                } 
-            }
-        }
-        
-        private void handleDHTValueEntity(DHTValueEntity entity) {
+        protected boolean handleDHTValueEntity(DHTValueEntity entity) {
 
             DHTValue value = entity.getValue();
             if (!(value instanceof PushProxiesValue)) {
-                return;
+                return false;
             }
             
             Contact creator = entity.getCreator();
@@ -307,7 +312,7 @@ public class AltLocFinder {
                         LOG.warn("Creator of " + altLocEntity 
                                 + " and found " + entity + " do not match!");
                     }
-                    return;
+                    return false;
                 }
             }
 
@@ -318,7 +323,7 @@ public class AltLocFinder {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("The AltLoc and PushProxy GUIDs do not match!");
                 }
-                return;
+                return false;
             }
             
             Set<? extends IpPort> proxies = pushProxies.getPushProxies();
@@ -332,39 +337,13 @@ public class AltLocFinder {
                 AlternateLocation location 
                     = AlternateLocation.createPushAltLoc(pe, urn);
                 AltLocManager.instance().add(location, this);
+                return true;
             } catch (IOException e) {
                 // Impossible. Thrown if URN or PushEndpoint is null
                 LOG.error("IOException", e);
             }
-        }
-        
-        @Override
-        public void handleCancellationException(CancellationException e) {
-            LOG.error("CancellationException", e);
-        }
-
-        @Override
-        public void handleExecutionException(ExecutionException e) {
-            LOG.error("ExecutionException", e);
-        }
-
-        @Override
-        public void handleInterruptedException(InterruptedException e) {
-            LOG.error("InterruptedException", e);
-        }
-        
-        public int hashCode() {
-            return key.hashCode();
-        }
-        
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            } else if (!(o instanceof PushAltLocsHandler)) {
-                return false;
-            }
             
-            return key.equals(((PushAltLocsHandler)o).key);
+            return false;
         }
     }
 }
