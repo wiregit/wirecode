@@ -15,6 +15,8 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
@@ -44,6 +46,8 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  */
 public class DHTManagerImpl implements DHTManager {
     
+    private static final Log LOG = LogFactory.getLog(DHTManagerImpl.class);
+    
     /**
      * The Vendor code of this DHT Node
      */
@@ -71,8 +75,6 @@ public class DHTManagerImpl implements DHTManager {
      * network and disk I/O). 
      * */
     private final Executor executor;
-    
-    private boolean stopped = false;
     
     private volatile boolean enabled = true;
     
@@ -111,19 +113,53 @@ public class DHTManagerImpl implements DHTManager {
         return false;
     }
     
-    public synchronized void start(final DHTMode mode) {
-        stopped = false;
-        Runnable task = new Runnable() {
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#start(com.limegroup.gnutella.dht.DHTManager.DHTMode)
+     */
+    public synchronized void start(DHTMode mode) {
+        executor.execute(createSwitchModeCommand(mode));
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#stop()
+     */
+    public synchronized void stop() {
+        Runnable command = new Runnable() {
             public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    //could have been stopped before this gets executed
-                    if(stopped) {
-                        return;
+                synchronized (DHTManagerImpl.this) {
+                    try {
+                        createSwitchModeCommand(DHTMode.INACTIVE).run();
+                    } finally {
+                        DHTManagerImpl.this.notifyAll();
                     }
-                    
-                    //controller already running in the correct mode?
-                    if(controller.isRunning() 
-                            && (controller.getDHTMode() == mode)) {
+                }
+            }
+        };
+        
+        executor.execute(command);
+        
+        try {
+            this.wait(10000);
+        } catch (InterruptedException err) {
+            LOG.error("InterruptedException", err);
+        }
+    }
+    
+    /**
+     * Creates and returns a Runnable that switches the DHT from
+     * the current DHTMode to the given DHTMode.
+     * 
+     * @param mode The new Mode of the DHT
+     * @return Runnable that switches the Mode
+     */
+    private Runnable createSwitchModeCommand(final DHTMode mode) {
+        Runnable command = new Runnable() {
+            public void run() {
+                synchronized (DHTManagerImpl.this) {
+                    // Controller already running in the current mode?
+                    if (controller.getDHTMode() == mode) {
                         return;
                     }
                     
@@ -143,17 +179,8 @@ public class DHTManagerImpl implements DHTManager {
                 }
             }
         };
-        executor.execute(task);
-    }
-    
-    /**
-     * This method has to be synchronized to make sure the
-     * DHT actually gets stopped and persisted when it is called.
-     */
-    public synchronized void stop() {
-        stopped = true;
-        controller.stop();
-        controller = new NullDHTController();
+        
+        return command;
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
@@ -182,11 +209,10 @@ public class DHTManagerImpl implements DHTManager {
         executor.execute(new Runnable() {
             public void run() {
                 synchronized(DHTManagerImpl.this) {
-                    if(!controller.isRunning()) {
-                        return;
+                    if (controller.isRunning()) {
+                        controller.stop();
+                        controller.start();
                     }
-                    controller.stop();
-                    controller.start();
                 }
             }
         });
@@ -249,15 +275,14 @@ public class DHTManagerImpl implements DHTManager {
      * 
      * If this event is not related to disconnection from the network, it
      * is forwarded to the controller for proper handling.
-     * 
      */
     public void handleConnectionLifecycleEvent(final ConnectionLifecycleEvent evt) {
-        Runnable r;
-        if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            r = new Runnable() {
+        Runnable command = null;
+        if (evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
+            command = new Runnable() {
                 public void run() {
                     synchronized(DHTManagerImpl.this) {
-                        if(controller.isRunning() 
+                        if (controller.isRunning() 
                                 && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                             controller.stop();
                             controller = new NullDHTController();
@@ -266,7 +291,7 @@ public class DHTManagerImpl implements DHTManager {
                 }
             };
         } else {
-            r = new Runnable() {
+            command = new Runnable() {
                 public void run() {
                     synchronized(DHTManagerImpl.this) {
                         controller.handleConnectionLifecycleEvent(evt);
@@ -274,7 +299,7 @@ public class DHTManagerImpl implements DHTManager {
                 }
             };
         }
-        executor.execute(r);
+        executor.execute(command);
     }
     
     public Vendor getVendor() {

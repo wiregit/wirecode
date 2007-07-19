@@ -17,45 +17,48 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
  */
 class NullDHTController implements DHTController {
 
-	public void addActiveDHTNode(SocketAddress hostAddress) {
+    public void addActiveDHTNode(SocketAddress hostAddress) {
     }
 
-	public void addPassiveDHTNode(SocketAddress hostAddress) {
+    public void addPassiveDHTNode(SocketAddress hostAddress) {
     }
 
     public void addContact(Contact node) {
     }
-    
-	public List<IpPort> getActiveDHTNodes(int maxNodes) {
-		return Collections.emptyList();
-	}
 
-	public MojitoDHT getMojitoDHT() {
-		return null;
-	}
+    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+        return Collections.emptyList();
+    }
 
-	public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
+    public MojitoDHT getMojitoDHT() {
+        return null;
+    }
+
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
 
     public DHTMode getDHTMode() {
         return DHTMode.INACTIVE;
     }
-    
+
     public boolean isRunning() {
-		return false;
-	}
+        return false;
+    }
 
-	public boolean isWaitingForNodes() {
-		return false;
-	}
-	
-	public boolean isBootstrapped() {
-		return false;
-	}
+    public boolean isWaitingForNodes() {
+        return false;
+    }
 
-	public void sendUpdatedCapabilities() {}
+    public boolean isBootstrapped() {
+        return false;
+    }
 
-	public void start() {}
+    public void sendUpdatedCapabilities() {
+    }
 
-	public void stop() {}
+    public void start() {
+    }
 
+    public void stop() {
+    }
 }
