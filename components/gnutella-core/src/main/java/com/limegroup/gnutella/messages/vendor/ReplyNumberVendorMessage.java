@@ -153,4 +153,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         return getVersion() == VERSION;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(super.toString());
+        builder.append(", num results: ").append(getNumResults());
+        builder.append(", canReceiveUnsolicited:").append(canReceiveUnsolicited());
+        return builder.toString();
+    }
 }

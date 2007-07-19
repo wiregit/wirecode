@@ -184,6 +184,14 @@ public final class LimeACKVendorMessage extends VendorMessage {
     public void recordDrop() {
         super.recordDrop();
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(super.toString());
+        builder.append(", num results: ").append(getNumResults());
+        builder.append(", security token: ").append(getSecurityToken());
+        return builder.toString();
+    }
 
     private class UnknownSecurityToken implements SecurityToken {
 

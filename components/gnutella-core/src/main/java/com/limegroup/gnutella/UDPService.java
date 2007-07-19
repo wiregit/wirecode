@@ -453,6 +453,10 @@ public class UDPService implements ReadWriteObserver {
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending message: " + msg + "to " + addr);
+        }
+        
         int length = msg.getTotalLength();
         ByteBuffer buffer = NIODispatcher.instance().getBufferCache().getHeap(length);
         if(buffer.remaining() != length)
