@@ -1,7 +1,9 @@
 package org.limewire.inspection;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Defines the interface for an annotation of an object which wants to be 
@@ -12,4 +14,5 @@ import java.lang.annotation.RetentionPolicy;
  * org.limewire.inspection</a> package.
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface InspectableForSize {}
