@@ -77,6 +77,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
     }   
     
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        RouterService.getFileManager().loadSettingsAndWait(2000);        
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
 
     // MUST RUN THIS TEST FIRST
