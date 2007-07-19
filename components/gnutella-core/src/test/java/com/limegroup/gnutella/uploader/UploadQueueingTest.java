@@ -160,16 +160,15 @@ public class UploadQueueingTest extends BaseTestCase {
         for (Uploader uploader : uploaders) {
             uploader.stop();
         }
-
         LimeTestUtils.waitForNIO();
         
         RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
         
         upManager.cleanup();
+        LimeTestUtils.waitForNIO();
+        
         upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager = null;
-
-        LimeTestUtils.waitForNIO();
         
         assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
         assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
