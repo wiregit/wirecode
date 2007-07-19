@@ -181,7 +181,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         return requeryStatus.get().canSendDHT();
     }
     
-    void sendDHTQuery() {
+    private void sendDHTQuery() {
         lastQuerySent = System.currentTimeMillis();
         dhtQueryInProgress = true;
         numDHTQueries++;
@@ -206,7 +206,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     /**
      * Sends a Gnutella Query
      */
-    boolean sendGnutellaQuery() {
+    private boolean sendGnutellaQuery() {
         // If we don't have stable connections, wait until we do.
         if (hasStableConnections()) {
             try {

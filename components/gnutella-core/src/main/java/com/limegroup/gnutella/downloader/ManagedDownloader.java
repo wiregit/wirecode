@@ -871,18 +871,6 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     /**
-     * Sends a DHT Query
-     */
-    
-    
-    /**
-     * A callback method that is being called if no sources 
-     * were found in the DHT
-     */
-    public void handleDHTQueryFailed() {
-    }
-    
-    /**
      * Handles state changes when inactive.
      */
     public synchronized void handleInactivity() {
