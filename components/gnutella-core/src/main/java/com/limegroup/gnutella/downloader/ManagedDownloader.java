@@ -600,7 +600,10 @@ public class ManagedDownloader extends AbstractDownloader
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        this.requeryManager = new RequeryManager(this, manager);
+        this.requeryManager = new RequeryManager(this, 
+                manager,
+                RouterService.getAltLocFinder(),
+                RouterService.getDHTManager());
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();

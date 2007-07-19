@@ -23,16 +23,13 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
