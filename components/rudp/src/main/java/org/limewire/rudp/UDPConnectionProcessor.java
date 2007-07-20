@@ -1195,8 +1195,11 @@ public class UDPConnectionProcessor {
         // Note, you could get here preinitialization - in which case,
         // do nothing.
         if ( _sendWindow != null ) {  
-            _sendWindow.pseudoAckToReceiverWindow(wStart);
+            _sendWindow.pseudoAckToReceiverWindow(wStart);            
             
+            // Update the chunk limit for fast (nonlocking) access
+            _chunkLimit = _sendWindow.getWindowSpace();
+
             // Reactivate writing if required
             if ( (priorR == 0 || _waitingForDataSpace) && 
                  _receiverWindowSpace > 0 ) {
