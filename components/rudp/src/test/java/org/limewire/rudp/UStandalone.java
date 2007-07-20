@@ -189,34 +189,4 @@ public class UStandalone {
         LOG.debug("Done echoServerBlock test");
 	}
 
-    public static void unidirectionalClient(UDPConnection usock, int numBytes)
-            throws IOException {
-        OutputStream ostream = usock.getOutputStream();
-
-        int i = 0;
-        for (i = 0; i < numBytes; i++) {
-            ostream.write(i % 256);
-            if ((i % 1000) == 0)
-                LOG.debug("Write status: " + i);
-        }
-        //try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        LOG.debug("Done unidirectionalClient test");
-    }
-
-    public static void unidirectionalServer(UDPConnection usock, int numBytes)
-            throws IOException {
-        InputStream istream = usock.getInputStream();
-
-        int rval;
-        int i = 0;
-        for (i = 0; i < numBytes; i++) {
-            rval = istream.read();
-            AssertComparisons.assertEquals(i % 256, rval);
-            if ((i % 1000) == 0)
-                LOG.debug("Read Properly received: " + i);
-        }
-        //try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        LOG.debug("Done unidirectionalServer test");
-    }
-
 }

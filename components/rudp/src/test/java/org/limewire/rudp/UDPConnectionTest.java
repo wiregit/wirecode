@@ -14,13 +14,14 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteOrder;
 
 /**
  * Put full UDPConnection system through various tests.
  */
 @SuppressWarnings( { "unchecked", "cast" } )
 public final class UDPConnectionTest extends BaseTestCase {
-    
+
     private static final int TIMEOUT = 10 * 1000;
 
     private static UDPSelectorProviderFactory defaultFactory = null;
@@ -161,19 +162,33 @@ public final class UDPConnectionTest extends BaseTestCase {
         }
     }
 
-    public void testOneWayTransfers() throws Exception {
-        final int NUM_BYTES = 20000;
+    /**
+     * Test that transfers data from a sender to a receiver, comparing 4 bytes at a time.
+     */
+    public void testOneWayTransfer() throws Exception {
+        final int MAX_VALUE = 1 * 1000 * 1000;
 
-        // Start the second connection in another thread
-        // and run it to completion.
+        // Clear out my standard setup
+        stubService.clearReceivers();
+
+        // Add some simulated connections to the UDPServiceStub
+        // Make the connections 5% flaky
+        stubService.addReceiver(6346, 6348, 1, 0);
+        stubService.addReceiver(6348, 6346, 1, 0);
+
+        // start the first connection in another thread
         class Inner extends ManagedThread {
             public void run() {
                 try {
-                    uconn2 = new UDPConnection("127.0.0.1", 6348);
-                    UStandalone.unidirectionalServer(uconn2,
-                            NUM_BYTES);
-                } catch (IOException ioe) {
-                    throw new RuntimeException(ioe);
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
+                    uconn1.setSoTimeout(TIMEOUT);
+                    InputStream  istream = uconn1.getInputStream();
+                    for (int i = 0; i < MAX_VALUE; i++) {
+                        int rval = ByteOrder.beb2int(istream);
+                        assertEquals("Unexpected data at offset: " + rval, Integer.toHexString(i), Integer.toHexString(rval));
+                    }                 
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -182,13 +197,14 @@ public final class UDPConnectionTest extends BaseTestCase {
         try {
             t.start();
 
-            // Init the first connection
-            uconn1 = new UDPConnection("127.0.0.1",6346);
-
-            // Run the first connection
-            UStandalone.unidirectionalClient(uconn1, NUM_BYTES);
+            // start the second connection
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
+            uconn2.setSoTimeout(TIMEOUT);
+            OutputStream ostream = uconn2.getOutputStream();
+            for (int i = 0; i < MAX_VALUE; i++) {
+                ByteOrder.int2beb(i, ostream);
+            }
         } finally {
-            // Wait for the second to finish
             t.join();
         }
     }

@@ -107,7 +107,11 @@ public class UDPServiceStub implements UDPService {
                     return;
             }
         	
-			_timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+            if (_delay > 0) {
+                _timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+            } else {
+                receive(new MessageWrapper(dp, _delay, this));   
+            }
 		}
         
         public void stop() {
