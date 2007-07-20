@@ -855,6 +855,7 @@ public class UDPConnectionProcessor {
                 }
 
                 // The assumption is that this record has not been acked
+                // FIXME this condition is never true
                 if ( drec.acks > 0) 
                 	break resend;
                 
@@ -1099,11 +1100,10 @@ public class UDPConnectionProcessor {
         }
         
         // Make sure the data is not before the window start
+        DataRecord drec = null;
         if ( seqNo >= baseSeqNo ) {
             // Record the receipt of the data in the receive window
-            DataRecord drec = _receiveWindow.addData(dmsg);  
-            drec.ackTime = System.currentTimeMillis();
-            drec.acks++;
+            drec = _receiveWindow.addData(dmsg);  
         } else {
             if(LOG.isDebugEnabled())  
                 LOG.debug("Received duplicate block num: "+ 
@@ -1117,22 +1117,11 @@ public class UDPConnectionProcessor {
         _packetsThisPeriod++;
         _totalDataPackets++;
         
-        //if we have enough history, see if we should skip an ack
-        if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
-            float average = 0;
-            for (int i = 0;i < _periodHistory;i++)
-                average+=_periods[i];
-            
-            average /= _periodHistory;
-            
-            // skip an ack if the rate at which we receive data has not dropped sharply
-            if (_periods[_currentPeriodId] > average / _deviation) {
-                _skippedAcks++;
-                _skippedAcksTotal++;
-            } else {
-                safeSendAck(dmsg);
+        if (shouldSendAck()) {
+            if (drec != null) {
+                drec.ackTime = System.currentTimeMillis();
+                drec.acks++;
             }
-        } else {
             safeSendAck(dmsg);
         }
         
@@ -1147,6 +1136,26 @@ public class UDPConnectionProcessor {
             _periods[_currentPeriodId]=_packetsThisPeriod;
             _packetsThisPeriod=0;
         }
+    }
+
+    private boolean shouldSendAck() {
+        //if we have enough history, see if we should skip an ack
+        if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
+            float average = 0;
+            for (int i = 0;i < _periodHistory;i++)
+                average+=_periods[i];
+            
+            average /= _periodHistory;
+            
+            // skip an ack if the rate at which we receive data has not dropped sharply
+            if (_periods[_currentPeriodId] > average / _deviation) {
+                _skippedAcks++;
+                _skippedAcksTotal++;
+                return false;
+            }
+        }
+         
+        return true;
     }
     
     /**
