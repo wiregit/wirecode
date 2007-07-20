@@ -21,12 +21,6 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     private static final Log LOG = LogFactory.getLog(RequeryManager.class);
     
     /**
-     * The number of times to requery the network. All requeries are
-     * user-driven.
-     */
-    private static final int GNUTELLA_REQUERY_ATTEMPTS = 1;
-    
-    /**
      * The time to wait between requeries, in milliseconds.  This time can
      * safely be quite small because it is overridden by the global limit in
      * DownloadManager.  Package-access and non-final for testing.
@@ -80,7 +74,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     private volatile int numDHTQueries;
     
     /**
-     * The time the last query was sent out.
+     * The time the last query of either type was sent out.
      */
     private volatile long lastQuerySent;
     
@@ -106,8 +100,9 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     public void handleAltLocSearchDone(boolean success){
         dhtQueryInProgress = false;
-        if (!success && downloader.getState() == DownloadStatus.QUERYING_DHT) 
-            downloader.setState(DownloadStatus.QUEUED);
+        if (!success && downloader.getState() == DownloadStatus.QUERYING_DHT)  
+            downloader.setState(requeryStatus.get().canSendGnet() ? 
+                    DownloadStatus.QUEUED : DownloadStatus.GAVE_UP);
     }
  
     /**
@@ -147,7 +142,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      * Returns whether or not we should give up Gnutella queries
      */
     private boolean shouldGiveUpGnutellaQueries() {
-        return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS;
+        return !requeryStatus.get().canSendGnet();
     }
     
     /**
@@ -218,7 +213,6 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                     downloader.setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, TIME_BETWEEN_REQUERIES);
                     return true;
                 } else {
-                    lastQuerySent = -1; // mark as wanting to requery.
                     return false;
                 }
             } catch(CantResumeException cre) {
@@ -226,7 +220,6 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 return false;
             }
         } else {
-            lastQuerySent = -1; // mark as wanting to requery.
             downloader.setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
             return false;
         }
@@ -272,11 +265,10 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         return TIME_BETWEEN_REQUERIES - (System.currentTimeMillis() - lastQuerySent);
     }
     boolean shouldSendRequeryImmediately() {
-        return lastQuerySent == -1;
+        return !isWaitingForDHTResults() && !shouldGiveUpGnutellaQueries();
     }
     
     void resetState() {
-        lastQuerySent = -1; // inform requerying that we wanna go.
         requeryStatus.set(RequeryStatus.INITIAL);
     }
 }
