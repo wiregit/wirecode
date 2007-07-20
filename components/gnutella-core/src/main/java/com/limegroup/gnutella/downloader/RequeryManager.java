@@ -164,7 +164,7 @@ public abstract class RequeryManager implements DHTEventListener, AltLocSearchLi
                 Math.max(TIME_BETWEEN_REQUERIES, 
                         LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
         
-        
+        updateStateForDHTQuery();
         finder.findAltLocs(downloader.getSHA1Urn(), this);
     }
     
