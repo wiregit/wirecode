@@ -44,11 +44,11 @@ public class RequeryManagerTest extends LimeTestCase {
         setPro(false);
     }
     
-    static RequeryManager createRM () {
+    private static RequeryManager createRM () {
         return RequeryManager.getManager(mmd, mdm, malf, mdht);
     }
     
-    static void setPro(boolean pro) throws Exception {
+    private static void setPro(boolean pro) throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", pro);
         assertEquals(pro, LimeWireUtils.isPro());
     }
@@ -193,6 +193,83 @@ public class RequeryManagerTest extends LimeTestCase {
         // and we should start a lookup
         rm.handleGaveUpState();
         assertSame(rm, malf.listener);
+    }
+    
+    public void testGnetFollowsDHTBasic() throws Exception {
+        mdht.on = true;
+        RequeryManager rm = createRM();
+        rm.init();
+        assertFalse(rm.shouldGiveUp());
+        assertTrue(rm.shouldSendRequeryImmediately());
+        
+        // with dht on, start a requery
+        rm.sendRequery();
+        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
+        assertNull(mdm.requirier);
+        assertSame(rm, malf.listener);
+        assertTrue(rm.isWaitingForDHTResults());
+        
+        // pretend the dht lookup fails
+        rm.handleAltLocSearchDone(false);
+        assertFalse(rm.isWaitingForDHTResults());
+        // should be queued
+        assertSame(DownloadStatus.QUEUED, mmd.getState());
+        // not giving up
+        assertFalse(rm.shouldGiveUp());
+        // and still ready to send a requery
+        assertTrue(rm.shouldSendRequeryImmediately());
+        
+        // the next requery should be gnet
+        malf.listener = null;
+        mdm.queryWorked = true;
+        rm.sendRequery();
+        assertTrue(rm.isWaitingForGnutellaResults());
+        assertFalse(rm.isWaitingForDHTResults());
+        assertSame(mmd, mdm.requirier);
+        assertNull(malf.listener);
+        
+        // from now on we should give up & no more requeries
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+    }
+    
+    public void testOnlyGnetPro() throws Exception {
+        mdht.on = true;
+        setPro(true);
+        RequeryManager rm = createRM();
+        rm.init();
+        assertFalse(rm.shouldGiveUp());
+        assertTrue(rm.shouldSendRequeryImmediately());
+        assertFalse(rm.isWaitingForDHTResults());
+        assertFalse(rm.isWaitingForGnutellaResults());
+        
+        // request a requery
+        mdm.queryWorked = true;
+        rm.sendRequery();
+        assertTrue(rm.isWaitingForGnutellaResults());
+        assertFalse(rm.isWaitingForDHTResults());
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, mmd.getState());
+        assertSame(mmd, mdm.requirier);
+        assertNull(malf.listener);
+        
+        // from now on we should give up & no more requeries
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        // but the dht queries go on independently through handleInactivity
+        mdm.requirier = null;
+        rm.handleGaveUpState();
+        assertNull(mdm.requirier);
+        assertSame(rm, malf.listener);
+        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
+        assertTrue(rm.isWaitingForDHTResults());
+        // still waiting for gnet results because of requery limit
+        assertTrue(rm.isWaitingForGnutellaResults());
+        
+        // not anymore
+        RequeryManager.TIME_BETWEEN_REQUERIES = 1L;
+        Thread.sleep(10);
+        assertFalse(rm.isWaitingForGnutellaResults());
     }
     
     private class MyDHTManager extends DHTManagerStub {
