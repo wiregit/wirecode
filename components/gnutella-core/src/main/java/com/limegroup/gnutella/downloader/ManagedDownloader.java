@@ -448,7 +448,7 @@ public class ManagedDownloader extends AbstractDownloader
 	 */
     private volatile int triedHosts;
     
-    private volatile RequeryManager requeryManager;
+    protected volatile RequeryManager requeryManager;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download

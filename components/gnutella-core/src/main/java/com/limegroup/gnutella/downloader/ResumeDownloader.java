@@ -91,6 +91,7 @@ public class ResumeDownloader extends ManagedDownloader
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
         super.initialize(manager, fileManager, callback);
+        requeryManager.init();
     }
 
     /**

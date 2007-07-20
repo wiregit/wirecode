@@ -35,6 +35,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -209,6 +210,22 @@ public class RequeryDownloadTest
     /** Gets a response that doesn't match--can't download. */
     public void testNoMatch() throws Exception {
         doTest("some other file.txt", null, false);
+    }
+    
+    /** Runs the tests again with pro set */
+    public void testProExact() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testExactMatch();
+    }
+    
+    public void testProHash() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testHashMatch();
+    }
+    
+    public void testProNo() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testNoMatch();
     }
 
 
