@@ -7,6 +7,8 @@ import org.limewire.rudp.messages.RUDPMessage;
 
 public class StubRUDPMessage implements RUDPMessage {
 
+    private long sequenceNumber;
+
     public void extendSequenceNumber(long seqNo) {
     }
 
@@ -23,7 +25,7 @@ public class StubRUDPMessage implements RUDPMessage {
     }
 
     public long getSequenceNumber() {
-        return 0;
+        return sequenceNumber;
     }
 
     public void write(OutputStream out) throws IOException {
@@ -33,4 +35,8 @@ public class StubRUDPMessage implements RUDPMessage {
         return 0;
     }
 
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+    
 }
