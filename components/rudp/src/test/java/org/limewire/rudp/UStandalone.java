@@ -60,7 +60,6 @@ public class UStandalone {
 				for (; i < numBytes; i++) {
 					rval = istream.read();
 					AssertComparisons.assertEquals("Read unexpected value at offset " + i, i % 256, rval);
-					LOG.trace("Properly received: "+i);
 					if ( (i % 1000) == 0 ) 
 						LOG.debug("Read status: "+i);
 				}
