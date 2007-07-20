@@ -14,11 +14,24 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.util.SyncWrapper;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
-public class RequeryManager implements DHTEventListener, AltLocSearchListener {
+public abstract class RequeryManager implements DHTEventListener, AltLocSearchListener {
 
     private static final Log LOG = LogFactory.getLog(RequeryManager.class);
+    
+    /** 
+     * @return an appropriate RequeryManager for this LimeWire.
+     */
+    public static RequeryManager getManager(ManagedDownloader dm,
+            DownloadManager md,
+            AltLocFinder alf,
+            DHTManager dhm) {
+        if (LimeWireUtils.isPro())
+            return new ProRequeryManager(dm,md, alf, dhm);
+        else
+            return new BasicRequeryManager(dm,md,alf,dhm);
+    }
     
     /**
      * The time to wait between requeries, in milliseconds.  This time can
@@ -29,28 +42,8 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      */
     static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
     
-    private static enum RequeryStatus {
-        OFF(false, false), // user hasn't clicked
-        INITIAL(true, true),  // idle  
-        FIRST_DHT(true, false),  // first dht request triggered by user.
-        GNUTELLA(false, true),  // gnutella request
-        AUTO_DHT(false, true); // querying dht continuously. 
-        
-        private final boolean canSendGnet, canSendDHT;
-        RequeryStatus(boolean canSendGnet, boolean canSendDHT) {
-            this.canSendGnet = canSendGnet;
-            this.canSendDHT = canSendDHT;
-        }
-        boolean canSendGnet() {
-            return canSendGnet;
-        }
-        boolean canSendDHT() {
-            return canSendDHT;
-        }
-    }
     
-    private final SyncWrapper<RequeryStatus> requeryStatus = 
-        new SyncWrapper<RequeryStatus>(RequeryStatus.OFF);
+    
     
     private final ManagedDownloader downloader;
     
@@ -104,32 +97,17 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     public void handleAltLocSearchDone(boolean success){
         dhtQueryInProgress = false;
         if (!success && downloader.getState() == DownloadStatus.QUERYING_DHT)  
-            downloader.setState(requeryStatus.get().canSendGnet() ? 
-                    DownloadStatus.QUEUED : DownloadStatus.GAVE_UP);
+            downloader.setState(getDownloadStateForDHTFailure());
     }
- 
-    /**
-     * Attempts to send a requery.
-     * 
-     * Try in this order:
-     * 
-     *     1) DHT
-     *     2) Gnutella
-     *  -->3) DHT
-     *  |__|
-     */
-    void sendRequery() {
-        RequeryStatus status = requeryStatus.get();
-        if (isDHTUp() && status.canSendDHT()) 
-            sendDHTQuery();
-        else if (status.canSendGnet())  
-            sendGnutellaQuery();
-    }
+    
+    protected abstract DownloadStatus getDownloadStateForDHTFailure();
+    
+    abstract void sendRequery();
     
     /**
      * @return true if the dht is up and can be used for altloc queries.
      */
-    private boolean isDHTUp() {
+    protected boolean isDHTUp() {
         return DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
         && dhtManager.isMemberOfDHT();
     }
@@ -137,36 +115,32 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     /**
      * Returns whether or not we should give up 
      */
-    boolean shouldGiveUp() {
-        return isInited() && shouldGiveUpGnutellaQueries();
-    }
+    abstract boolean shouldGiveUp();
     
     /**
      * Returns whether or not we should give up Gnutella queries
      */
-    private boolean shouldGiveUpGnutellaQueries() {
-        return !requeryStatus.get().canSendGnet();
-    }
+    protected abstract boolean shouldGiveUpGnutellaQueries();
+    
     
     /**
      * Returns whether or not we should give up DHT queries
      */
-    private boolean shouldGiveUpDHTQueries() {
+    protected boolean shouldGiveUpDHTQueries() {
         return !isDHTUp() || numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue();
     }
+    
     
     /**
      * Notification that the download is in GAVE_UP state and inactive.
      */
-    void handleGaveUpState() {
-        if (isInited() && canSendDHTQueryNow()) 
-            sendDHTQuery();
-    }
+    abstract void handleGaveUpState();
+    
     
     /**
      * @return true if we can send a dht query right now.
      */
-    private boolean canSendDHTQueryNow() {
+    protected final boolean canSendDHTQueryNow() {
         // dht on & can we do more requeries?
         if (shouldGiveUpDHTQueries()) 
             return false;
@@ -177,10 +151,12 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue())
             return false;
         
-        return requeryStatus.get().canSendDHT();
+        return canSendDHTQueryNowImpl();
     }
     
-    private void sendDHTQuery() {
+    protected abstract boolean canSendDHTQueryNowImpl();
+    
+    protected final void sendDHTQuery() {
         lastQuerySent = System.currentTimeMillis();
         dhtQueryInProgress = true;
         numDHTQueries++;
@@ -188,15 +164,11 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 Math.max(TIME_BETWEEN_REQUERIES, 
                         LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
         
-        switch(requeryStatus.get()) { 
-        case INITIAL :
-            requeryStatus.set(RequeryStatus.FIRST_DHT); break;
-        case GNUTELLA:
-        case AUTO_DHT:
-            requeryStatus.set(RequeryStatus.AUTO_DHT); break;
-        }
+        
         finder.findAltLocs(downloader.getSHA1Urn(), this);
     }
+    
+    protected abstract void updateStateForDHTQuery();
     
     int getNumGnutellaQueries() {
         return numGnutellaQueries;
@@ -205,7 +177,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     /**
      * Sends a Gnutella Query
      */
-    private boolean sendGnutellaQuery() {
+    protected final boolean sendGnutellaQuery() {
         // If we don't have stable connections, wait until we do.
         if (hasStableConnections()) {
             try {
@@ -213,7 +185,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 if(manager.sendQuery(downloader, qr)) {
                     lastQuerySent = System.currentTimeMillis();
                     numGnutellaQueries++;
-                    requeryStatus.set(RequeryStatus.GNUTELLA);
+                    updateStateForGnetQuery();
                     downloader.setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, TIME_BETWEEN_REQUERIES);
                     return true;
                 } else {
@@ -228,6 +200,8 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
             return false;
         }
     }
+    
+    protected abstract void updateStateForGnetQuery();
     
     /**
      * How long we'll wait before attempting to download again after checking
@@ -256,27 +230,23 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
  
-    boolean isWaitingForGnutellaResults() {
-        return requeryStatus.get() == RequeryStatus.GNUTELLA && 
-        System.currentTimeMillis() - lastQuerySent < TIME_BETWEEN_REQUERIES;
+    
+    final boolean isWaitingForGnutellaResults() {
+        return System.currentTimeMillis() - lastQuerySent <  TIME_BETWEEN_REQUERIES &&
+        isWaitingForGnetImpl();
     }
     
-    boolean isWaitingForDHTResults() {
+    protected abstract boolean isWaitingForGnetImpl();
+    
+    final boolean isWaitingForDHTResults() {
         return dhtQueryInProgress;
     }
     
     long getTimeLeftInQuery() {
         return TIME_BETWEEN_REQUERIES - (System.currentTimeMillis() - lastQuerySent);
     }
-    boolean shouldSendRequeryImmediately() {
-        return isInited() && !isWaitingForDHTResults() && !shouldGiveUpGnutellaQueries();
-    }
     
-    void init() {
-        requeryStatus.set(RequeryStatus.INITIAL);
-    }
+    abstract boolean shouldSendRequeryImmediately();
     
-    private boolean isInited() {
-        return requeryStatus.get() != RequeryStatus.OFF;
-    }
+    abstract void init();
 }

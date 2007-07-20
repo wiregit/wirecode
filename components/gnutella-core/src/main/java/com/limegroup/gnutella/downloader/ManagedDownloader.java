@@ -600,7 +600,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        this.requeryManager = new RequeryManager(this, 
+        this.requeryManager = RequeryManager.getManager(this, 
                 manager,
                 RouterService.getAltLocFinder(),
                 RouterService.getDHTManager());

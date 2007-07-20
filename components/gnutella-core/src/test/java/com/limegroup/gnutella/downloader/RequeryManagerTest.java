@@ -41,7 +41,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     RequeryManager createRM () {
-        return new RequeryManager(mmd, mdm, malf, mdht);
+        return new BasicRequeryManager(mmd, mdm, malf, mdht);
     }
     
     public void testRegistersWithDHTManager() throws Exception {
