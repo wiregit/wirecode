@@ -2685,6 +2685,7 @@ public class ManagedDownloader extends AbstractDownloader
         case CONNECTING:
         case BUSY:
         case WAITING_FOR_GNET_RESULTS:
+        case QUERYING_DHT:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();

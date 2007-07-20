@@ -239,7 +239,7 @@ public abstract class RequeryManager implements DHTEventListener, AltLocSearchLi
     protected abstract boolean isWaitingForGnetImpl();
     
     final boolean isWaitingForDHTResults() {
-        return dhtQueryInProgress;
+        return dhtQueryInProgress && getTimeLeftInQuery() > 0;
     }
     
     long getTimeLeftInQuery() {
