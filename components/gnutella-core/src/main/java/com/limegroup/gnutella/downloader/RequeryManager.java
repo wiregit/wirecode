@@ -30,6 +30,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
     
     private static enum RequeryStatus {
+        OFF(false, false), // user hasn't clicked
         INITIAL(true, true),  // idle  
         FIRST_DHT(true, false),  // first dht request triggered by user.
         GNUTELLA(false, true),  // gnutella request
@@ -49,7 +50,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     }
     
     private final SyncWrapper<RequeryStatus> requeryStatus = 
-        new SyncWrapper<RequeryStatus>(RequeryStatus.INITIAL);
+        new SyncWrapper<RequeryStatus>(RequeryStatus.OFF);
     
     private final ManagedDownloader downloader;
     
@@ -94,8 +95,10 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     }
     
     public void handleDHTEvent(DHTEvent evt) {
-        if (evt.getType() == DHTEvent.Type.STOPPED)
+        if (evt.getType() == DHTEvent.Type.STOPPED) {
             handleAltLocSearchDone(false);
+            numDHTQueries = 0;
+        }
     }
     
     public void handleAltLocSearchDone(boolean success){
@@ -135,7 +138,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      * Returns whether or not we should give up 
      */
     boolean shouldGiveUp() {
-        return shouldGiveUpGnutellaQueries();
+        return isInited() && shouldGiveUpGnutellaQueries();
     }
     
     /**
@@ -156,7 +159,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      * Notification that the download is in GAVE_UP state and inactive.
      */
     void handleGaveUpState() {
-        if (canSendDHTQueryNow()) 
+        if (isInited() && canSendDHTQueryNow()) 
             sendDHTQuery();
     }
     
@@ -169,7 +172,8 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
             return false;
         
         // is it too soon?
-        if (System.currentTimeMillis() - lastQuerySent < 
+        if (numDHTQueries > 0 &&
+                System.currentTimeMillis() - lastQuerySent < 
                 DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue())
             return false;
         
@@ -265,10 +269,14 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         return TIME_BETWEEN_REQUERIES - (System.currentTimeMillis() - lastQuerySent);
     }
     boolean shouldSendRequeryImmediately() {
-        return !isWaitingForDHTResults() && !shouldGiveUpGnutellaQueries();
+        return isInited() && !isWaitingForDHTResults() && !shouldGiveUpGnutellaQueries();
     }
     
-    void resetState() {
+    void init() {
         requeryStatus.set(RequeryStatus.INITIAL);
+    }
+    
+    private boolean isInited() {
+        return requeryStatus.get() != RequeryStatus.OFF;
     }
 }

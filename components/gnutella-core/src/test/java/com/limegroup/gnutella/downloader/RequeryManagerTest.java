@@ -14,6 +14,7 @@ import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RequeryManagerTest extends LimeTestCase {
@@ -31,6 +32,7 @@ public class RequeryManagerTest extends LimeTestCase {
     static MyDownloadManager mdm;
     static MyAltLocFinder malf;
     public void setUp() throws Exception {
+        DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
         mdht = new MyDHTManager();
         mmd = new MyManagedDownloader();
@@ -50,6 +52,22 @@ public class RequeryManagerTest extends LimeTestCase {
         assertNull(mdht.listener);
     }
     
+    public void testNotInitedDoesNothing() throws Exception {
+        RequeryManager rm = createRM();
+        // shouldn't trigger any changes in download.complete
+        assertFalse(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        // shouldn't trigger any queries
+        mdht.on = true;
+        rm.sendRequery();
+        assertNull(malf.listener);
+        assertNull(mdm.requirier);
+        assertNull(mmd.getState());
+        rm.handleGaveUpState();
+        assertNull(malf.listener);
+        assertNull(mmd.getState());
+    }
     /**
      * tests that only a single gnet query is sent if dht is off. 
      */
@@ -59,12 +77,17 @@ public class RequeryManagerTest extends LimeTestCase {
         assertNull(mdm.requirier);
         assertNull(mmd.getState());
         RequeryManager rm = createRM();
+        rm.init();
+        assertFalse(rm.shouldGiveUp());
+        assertTrue(rm.shouldSendRequeryImmediately());
         
         // first try a requery that will not work
         rm.sendRequery();
         assertNull(malf.listener); // should not try dht
         assertSame(mmd, mdm.requirier); // should have tried gnet
         assertNull(mmd.getState()); // but not succeeded
+        assertFalse(rm.shouldGiveUp()); // can still try to send something
+        assertTrue(rm.shouldSendRequeryImmediately());
         
         // now a query that will work
         mdm.queryWorked = true;
@@ -75,6 +98,8 @@ public class RequeryManagerTest extends LimeTestCase {
         // and worked
         assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
         assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
         
         // but if we try again, nothing happens.
         mdm.requirier = null;
@@ -82,16 +107,55 @@ public class RequeryManagerTest extends LimeTestCase {
         rm.sendRequery();
         assertNull(mdm.requirier);
         assertNull(mmd.getState());
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
     }
     
     public void testWaitsForStableConns() throws Exception {
         // no DHT nor connections
         mdht.on = false;
+        mdm.queryWorked = true;
         RequeryManager.NO_DELAY = false;
         RequeryManager rm = createRM();
+        rm.init();
         rm.sendRequery();
         assertNull(mdm.requirier);
         assertSame(DownloadStatus.WAITING_FOR_CONNECTIONS, mmd.getState());
+        assertFalse(rm.shouldGiveUp());
+        assertTrue(rm.shouldSendRequeryImmediately());
+        
+        // now we get connected
+        RequeryManager.NO_DELAY = true;
+        rm.sendRequery();
+        // should be sent.
+        assertSame(mmd, mdm.requirier);
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
+        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+    }
+    
+    public void testDHTTurnsOnStartsAutoIfInited() throws Exception {
+        // with dht off, send a query
+        mdht.on = false;
+        mdm.queryWorked = true;
+        RequeryManager rm = createRM();
+        rm.init();
+        rm.sendRequery();
+        assertSame(mmd, mdm.requirier);
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
+        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
+        assertTrue(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        // query fails, dht still off
+        rm.handleGaveUpState();
+        assertNull(malf.listener);
+        // turn the dht on
+        mdht.on = true;
+        // and we should start a lookup
+        rm.handleGaveUpState();
+        assertSame(rm, malf.listener);
     }
     
     private class MyDHTManager extends DHTManagerStub {

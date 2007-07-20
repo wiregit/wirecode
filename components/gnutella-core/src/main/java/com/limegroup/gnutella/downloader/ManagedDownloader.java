@@ -1808,7 +1808,7 @@ public class ManagedDownloader extends AbstractDownloader
         // if we were waiting for the user to start us,
         // then try to send the requery.
         if(getState() == DownloadStatus.WAITING_FOR_USER) {
-            requeryManager.resetState();
+            requeryManager.init();
         }
         
         // if any guys were busy, reduce their retry time to 0,
