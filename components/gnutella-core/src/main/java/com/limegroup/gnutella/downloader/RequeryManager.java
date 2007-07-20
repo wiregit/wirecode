@@ -132,7 +132,7 @@ public abstract class RequeryManager implements DHTEventListener, AltLocSearchLi
     
     
     /**
-     * Notification that the download is in GAVE_UP state and inactive.
+     * Notification that the download is in GAVE_UP or WAITING_FOR_USER state and inactive.
      */
     abstract void handleGaveUpState();
     

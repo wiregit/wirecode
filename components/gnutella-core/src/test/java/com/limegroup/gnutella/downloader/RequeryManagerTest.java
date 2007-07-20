@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.DownloadManagerStub;
@@ -16,6 +18,7 @@ import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class RequeryManagerTest extends LimeTestCase {
 
@@ -38,10 +41,23 @@ public class RequeryManagerTest extends LimeTestCase {
         mmd = new MyManagedDownloader();
         mdm = new MyDownloadManager();
         malf = new MyAltLocFinder();
+        setPro(false);
     }
     
-    RequeryManager createRM () {
-        return new BasicRequeryManager(mmd, mdm, malf, mdht);
+    static RequeryManager createRM () {
+        return RequeryManager.getManager(mmd, mdm, malf, mdht);
+    }
+    
+    static void setPro(boolean pro) throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", pro);
+        assertEquals(pro, LimeWireUtils.isPro());
+    }
+    
+    public void testSelection() throws Exception {
+        setPro(false);
+        assertInstanceof(BasicRequeryManager.class, createRM());
+        setPro(true);
+        assertInstanceof(ProRequeryManager.class, createRM());
     }
     
     public void testRegistersWithDHTManager() throws Exception {
@@ -52,7 +68,7 @@ public class RequeryManagerTest extends LimeTestCase {
         assertNull(mdht.listener);
     }
     
-    public void testNotInitedDoesNothing() throws Exception {
+    public void testNotInitedDoesNothingBasic() throws Exception {
         RequeryManager rm = createRM();
         // shouldn't trigger any changes in download.complete
         assertFalse(rm.shouldGiveUp());
@@ -68,6 +84,27 @@ public class RequeryManagerTest extends LimeTestCase {
         assertNull(malf.listener);
         assertNull(mmd.getState());
     }
+    
+    public void testNotInitedAutoDHTPro() throws Exception {
+        setPro(true);
+        RequeryManager rm = createRM();
+        // shouldn't trigger any changes in download.complete
+        assertFalse(rm.shouldGiveUp());
+        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        // if dht is off do nothing
+        mdht.on = false;
+        rm.handleGaveUpState();
+        assertNull(malf.listener);
+        assertNull(mmd.getState());
+        
+        // if dht is on start querying
+        mdht.on = true;
+        rm.handleGaveUpState();
+        assertSame(rm, malf.listener);
+        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
+    }
+    
     /**
      * tests that only a single gnet query is sent if dht is off. 
      */

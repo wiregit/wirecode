@@ -18,11 +18,6 @@ public class ProRequeryManager extends RequeryManager {
     }
 
     @Override
-    public void handleAltLocSearchDone(boolean success) {
-        super.handleAltLocSearchDone(success);
-    }
-
-    @Override
     void handleGaveUpState() {
         // always sends a dht query if possible.
         if (canSendDHTQueryNow())
@@ -75,7 +70,7 @@ public class ProRequeryManager extends RequeryManager {
     
     @Override
     protected DownloadStatus getDownloadStateForDHTFailure() {
-        return DownloadStatus.GAVE_UP;
+        return DownloadStatus.QUEUED;
     }
 
 }
