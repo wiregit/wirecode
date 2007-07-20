@@ -2,8 +2,6 @@ package org.limewire.rudp;
 
 import junit.framework.TestCase;
 
-import com.limegroup.gnutella.rudp.messages.StubDataMessage;
-
 public class DataWindowTest extends TestCase {
 
     public void testAddData() {
