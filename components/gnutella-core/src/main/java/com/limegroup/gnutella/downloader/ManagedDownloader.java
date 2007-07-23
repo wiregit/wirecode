@@ -822,36 +822,49 @@ public class ManagedDownloader extends AbstractDownloader
             
         // Try iterative GUESSing...
         // If that sent some queries, don't do anything else.
+        // TODO: consider moving this inside the monitor
         } else if(tryGUESSing()) {
             ; // all done for now.
             
-            // If busy, try waiting for that busy host.
-        } else if (getState() == DownloadStatus.BUSY) {
-            setState(DownloadStatus.BUSY, waitTime);
-            
-        // If we sent a query recently, then we don't want to send another,
-        // nor do we want to give up.  Just continue waiting for results
-        // from that query.
-        } else if(requeryManager.isWaitingForResults()) {
-            switch(requeryManager.getLastQueryType()) {
-            case DHT: setState(DownloadStatus.QUERYING_DHT, requeryManager.getTimeLeftInQuery()); break;
-            case GNUTELLA: setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, requeryManager.getTimeLeftInQuery()); break;
-            default: 
-                throw new IllegalStateException("Not any query type!");
-            }
-            
-        // If we're allowed to immediately send a query, do it!
-        } else if(canSendRequeryNow()) {
-            requeryManager.sendQuery();
-            
-        // If we can send a query after we activate, wait for the user.
-        } else if(requeryManager.canSendQueryAfterActivate()) {
-            setState(DownloadStatus.WAITING_FOR_USER);
-            
-        // Otherwise, there's nothing we can do, give up.
         } else {
-            setState(DownloadStatus.GAVE_UP);
+            // the next few checks need to be atomic wrt dht callbacks to
+            // requeryManager.
+            
+            // do not issue actual requeries while holding this.
+            boolean requery = false;
+            synchronized(this) {
+                // If busy, try waiting for that busy host.
+                if (getState() == DownloadStatus.BUSY) {
+                    setState(DownloadStatus.BUSY, waitTime);
 
+                // If we sent a query recently, then we don't want to send another,
+                // nor do we want to give up.  Just continue waiting for results
+                // from that query.
+                } else if(requeryManager.isWaitingForResults()) {
+                    switch(requeryManager.getLastQueryType()) {
+                    case DHT: setState(DownloadStatus.QUERYING_DHT, requeryManager.getTimeLeftInQuery()); break;
+                    case GNUTELLA: setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, requeryManager.getTimeLeftInQuery()); break;
+                    default: 
+                        throw new IllegalStateException("Not any query type!");
+                    }
+
+                // If we're allowed to immediately send a query, do it!
+                } else if(canSendRequeryNow()) {
+                    requery = true;
+
+                // If we can send a query after we activate, wait for the user.
+                } else if(requeryManager.canSendQueryAfterActivate()) {
+                    setState(DownloadStatus.WAITING_FOR_USER);
+
+                // Otherwise, there's nothing we can do, give up.
+                } else {
+                    setState(DownloadStatus.GAVE_UP);
+
+                }
+            }
+
+            if (requery)
+                requeryManager.sendQuery();
         }
         
         if(LOG.isTraceEnabled()) {

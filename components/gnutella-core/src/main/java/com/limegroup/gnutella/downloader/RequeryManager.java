@@ -148,8 +148,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         // because even if this was a success (it found results),
         // it's possible the download isn't going to want to use
         // those results.
-        if (downloader.getState() == DownloadStatus.QUERYING_DHT)
-            downloader.setState(DownloadStatus.GAVE_UP);
+        downloader.setStateIfExistingStateIs(DownloadStatus.GAVE_UP, DownloadStatus.QUERYING_DHT);
     }
     
     /**
