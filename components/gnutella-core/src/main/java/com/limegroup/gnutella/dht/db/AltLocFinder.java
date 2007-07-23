@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +22,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -49,7 +49,7 @@ public class AltLocFinder {
     /**
      * Finds AlternateLocations for the given URN
      */
-    public Future<?> findAltLocs(URN urn, AltLocSearchListener listener) {
+    public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
         if (urn == null) {
             return null;
         }
@@ -62,9 +62,13 @@ public class AltLocFinder {
             
             KUID key = KUIDUtils.toKUID(urn);
             EntityKey lookupKey = EntityKey.createEntityKey(key, AltLocValue.ALT_LOC);
-            DHTFuture<FindValueResult> future = dht.get(lookupKey);
+            final DHTFuture<FindValueResult> future = dht.get(lookupKey);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key, listener));
-            return future;
+            return new Shutdownable() {
+                public void shutdown() {
+                    future.cancel(true);
+                }
+            };
         }
     }
     

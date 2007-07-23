@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
 import junit.framework.Test;
 
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManagerStub;
@@ -354,14 +352,11 @@ public class RequeryManagerTest extends LimeTestCase {
         
         
         @Override
-        public Future<?> findAltLocs(URN urn, AltLocSearchListener listener) {
+        public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
             this.listener = listener;
-            return new FutureTask<Object>(new Runnable(){
-                public void run(){}
-            }, null) {
-                public boolean cancel(boolean interrupt) {
+            return new Shutdownable() {
+                public void shutdown() {
                     cancelled = true;
-                    return true;
                 }
             };
         }
