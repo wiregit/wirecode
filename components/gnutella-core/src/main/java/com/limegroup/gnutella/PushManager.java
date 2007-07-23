@@ -160,6 +160,9 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
+            if (fwt) {
+                UploadStat.FW_FW_SUCCESS.incrementStat();
+            }
             ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt));
         }
     }    
