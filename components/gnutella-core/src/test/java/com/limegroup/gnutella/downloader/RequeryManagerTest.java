@@ -75,6 +75,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     public void testNotInitedAutoDHTPro() throws Exception {
+        DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
         RequeryManager rm = createRM();
         
         setPro(true);
@@ -96,6 +97,29 @@ public class RequeryManagerTest extends LimeTestCase {
         assertSame(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
         
         // But immediately after, requires an activate (for gnet query)
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // but if some time passes, a dht query will work again.
+        rm.handleAltLocSearchDone(false);
+        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        // and we should start a lookup
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener);
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // make sure after that lookup finishes, can still do gnet 
+        rm.handleAltLocSearchDone(false);
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // some time passes, but we've hit our dht queries limit
+        // can still send gnet though
+        rm.handleAltLocSearchDone(false);
+        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
         assertTrue(rm.canSendQueryAfterActivate());
         assertFalse(rm.canSendQueryNow());
     }
@@ -160,6 +184,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     public void testDHTTurnsOnStartsAutoIfInited() throws Exception {
+        DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
         // with dht off, send a query
         dhtManager.on = false;
         RequeryManager rm = createRM();
@@ -186,9 +211,32 @@ public class RequeryManagerTest extends LimeTestCase {
         // and we should start a lookup
         rm.sendQuery();
         assertSame(rm, altLocFinder.listener);
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // make sure after that lookup finishes, we still can't do gnet 
+        rm.handleAltLocSearchDone(false);
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // some time passes, can send one more dht query
+        altLocFinder.listener = null;
+        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener);
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // more time passes, but we hit our dht query limit so we can't do anything.
+        altLocFinder.listener = null;
+        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
-    public void testGnetFollowsDHTBasic() throws Exception {
+    public void testGnetFollowsDHT() throws Exception {
         RequeryManager rm = createRM();
         
         dhtManager.on = true;
@@ -221,6 +269,11 @@ public class RequeryManagerTest extends LimeTestCase {
         // from now on we should give up & no more requeries
         assertFalse(rm.canSendQueryAfterActivate());
         assertFalse(rm.canSendQueryNow());
+    }
+    
+    public void testGnetFollowsDHTPro() throws Exception {
+        setPro(true);
+        testGnetFollowsDHT();
     }
     
     public void testOnlyGnetPro() throws Exception {
