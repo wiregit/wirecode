@@ -322,9 +322,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /**
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.
      */
-	protected boolean shouldSendRequeryImmediately(int numRequeries) {
-		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
-				: false;
+	protected boolean canSendRequeryNow() {
+		return downloadSHA1 != null ? super.canSendRequeryNow() : false;
 	}
 
 	/**

@@ -600,7 +600,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        this.requeryManager = RequeryManager.getManager(this, 
+        this.requeryManager = new RequeryManager(this, 
                 manager,
                 RouterService.getAltLocFinder(),
                 RouterService.getDHTManager());
@@ -832,42 +832,32 @@ public class ManagedDownloader extends AbstractDownloader
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
         // from that query.
-        } else if(requeryManager.isWaitingForGnutellaResults()) {
-            setState(DownloadStatus.WAITING_FOR_GNET_RESULTS,
-                     requeryManager.getTimeLeftInQuery());
-        
-        } else if (requeryManager.isWaitingForDHTResults()) {
-            setState(DownloadStatus.QUERYING_DHT, 
-                    requeryManager.getTimeLeftInQuery());
+        } else if(requeryManager.isWaitingForResults()) {
+            switch(requeryManager.getLastQueryType()) {
+            case DHT: setState(DownloadStatus.QUERYING_DHT, requeryManager.getTimeLeftInQuery()); break;
+            case GNUTELLA: setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, requeryManager.getTimeLeftInQuery()); break;
+            default: 
+                throw new IllegalStateException("Not any query type!");
+            }
             
-        } else if(requeryManager.shouldGiveUp()) {
-            // If we're at our requery limit, give up.
-            setState(DownloadStatus.GAVE_UP);
+        // If we're allowed to immediately send a query, do it!
+        } else if(canSendRequeryNow()) {
+            requeryManager.sendQuery();
             
-        // If we want to send the requery immediately, do so.
-        } else if(shouldSendRequeryImmediately(requeryManager.getNumGnutellaQueries())) {
-            requeryManager.sendRequery();
-            
-        // Otherwise, wait for the user to initiate the query.            
-        } else {
+        // If we can send a query after we activate, wait for the user.
+        } else if(requeryManager.canSendQueryAfterActivate()) {
             setState(DownloadStatus.WAITING_FOR_USER);
+            
+        // Otherwise, there's nothing we can do, give up.
+        } else {
+            setState(DownloadStatus.GAVE_UP);
+
         }
         
         if(LOG.isTraceEnabled()) {
             LOG.trace("MD completed <" + getSaveFile().getName() 
                     + "> completed download, state: " + getState()); 
         }
-    }
-    
-    /**
-     * Determines if we should send a requery immediately, or wait for user
-     * input.
-     *
-     * 'lastQuerySent' being equal to -1 indicates that the user has already
-     * clicked resume, so we do want to send immediately.
-     */
-    protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        return requeryManager.shouldSendRequeryImmediately();
     }
     
     /**
@@ -881,7 +871,6 @@ public class ManagedDownloader extends AbstractDownloader
         switch(getState()) {
         case BUSY:
         case WAITING_FOR_CONNECTIONS:
-        case QUERYING_DHT:
         case ITERATIVE_GUESSING:
             // If we're finished waiting on busy hosts,
             // stable connections, or GUESSing,
@@ -890,22 +879,22 @@ public class ManagedDownloader extends AbstractDownloader
             if(getRemainingStateTime() <= 0 || hasNewSources())
                 setState(DownloadStatus.QUEUED);
             break;
+        case QUERYING_DHT:
         case WAITING_FOR_GNET_RESULTS:
             // If we have new sources but are still inactive,
             // then queue ourselves and wait to restart.
             if(hasNewSources())
                 setState(DownloadStatus.QUEUED);
-            // Otherwise, we've ran out of time waiting for results,
-            // so give up.
-            else if(getRemainingStateTime() <= 0)
+            // Otherwise, if we've ran out of time waiting for results,
+            // give up.  If another requery can be sent, the GAVE_UP
+            // pump will trigger it to start.
+            else if(requeryManager.getTimeLeftInQuery() <= 0)
                 setState(DownloadStatus.GAVE_UP);
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
-        	if (hasNewSources()) 
+        	if (hasNewSources() || requeryManager.canSendQueryAfterActivate()) 
         		setState(DownloadStatus.QUEUED);
-            else 
-                requeryManager.handleGaveUpState();
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -1794,6 +1783,11 @@ public class ManagedDownloader extends AbstractDownloader
         addDownload(c,false);
     }
     
+    /** Delegates requerying to the RequeryManager. */
+    protected boolean canSendRequeryNow() {
+        return requeryManager.canSendQueryNow();
+    }
+    
     /**
      * Requests this download to resume.
      *
@@ -1808,7 +1802,7 @@ public class ManagedDownloader extends AbstractDownloader
         // if we were waiting for the user to start us,
         // then try to send the requery.
         if(getState() == DownloadStatus.WAITING_FOR_USER) {
-            requeryManager.init();
+            requeryManager.activate();
         }
         
         // if any guys were busy, reduce their retry time to 0,
@@ -2653,8 +2647,7 @@ public class ManagedDownloader extends AbstractDownloader
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
     synchronized void setState(DownloadStatus newState) {
-        this.state=newState;
-        this.stateTime=Long.MAX_VALUE;
+        setState(newState, Long.MAX_VALUE);
     }
 
     /** 
@@ -2667,6 +2660,20 @@ public class ManagedDownloader extends AbstractDownloader
     synchronized void setState(DownloadStatus newState, long time) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
+    }
+    
+    /**
+     * Sets this' state to newState if the current state is 'oldState'.
+     * 
+     * @return true if the state changed, false otherwise
+     */
+    synchronized boolean setStateIfExistingStateIs(DownloadStatus newState, DownloadStatus oldState) {
+        if(this.state == oldState) {
+            setState(newState);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /** @return the GUID of the query that spawned this downloader.  may be null.

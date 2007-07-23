@@ -91,7 +91,11 @@ public class ResumeDownloader extends ManagedDownloader
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
         super.initialize(manager, fileManager, callback);
-        requeryManager.init();
+        // Auto-activate the requeryManager if this was created
+        // from clicking 'Resume' in the library (as opposed to
+        // from being deserialized from disk).
+        if(!deserializedFromDisk)
+            requeryManager.activate();
     }
 
     /**
@@ -137,21 +141,6 @@ public class ResumeDownloader extends ManagedDownloader
         if(ret)
             deserializedFromDisk = false;
         return ret;
-    }
-
-    /*
-     * @param numRequeries The number of requeries sent so far.
-     */
-    protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        // created from starting up LimeWire.
-        if(deserializedFromDisk)
-            return false;
-        // clicked Find More Sources?
-        else if(numRequeries > 0)
-            return super.shouldSendRequeryImmediately(numRequeries);
-        // created from clicking 'Resume' in the library
-        else
-            return true;
     }
  
     protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {

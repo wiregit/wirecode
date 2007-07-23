@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
+import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.GUID;
@@ -30,252 +29,236 @@ public class RequeryManagerTest extends LimeTestCase {
         return buildTestSuite(RequeryManagerTest.class);
     }
     
-    static MyDHTManager mdht;
-    static MyManagedDownloader mmd;
-    static MyDownloadManager mdm;
-    static MyAltLocFinder malf;
+    private MyDHTManager dhtManager;
+    private MyManagedDownloader managedDownloader;
+    private MyDownloadManager downloadManager;
+    private MyAltLocFinder altLocFinder;
+    
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
-        mdht = new MyDHTManager();
-        mmd = new MyManagedDownloader();
-        mdm = new MyDownloadManager();
-        malf = new MyAltLocFinder();
+        dhtManager = new MyDHTManager();
+        managedDownloader = new MyManagedDownloader();
+        downloadManager = new MyDownloadManager();
+        altLocFinder = new MyAltLocFinder();
         setPro(false);
     }
     
-    private static RequeryManager createRM () {
-        return RequeryManager.getManager(mmd, mdm, malf, mdht);
+    private RequeryManager createRM () {
+        return new RequeryManager(managedDownloader, downloadManager, altLocFinder, dhtManager);
     }
     
-    private static void setPro(boolean pro) throws Exception {
+    private void setPro(boolean pro) throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", pro);
         assertEquals(pro, LimeWireUtils.isPro());
     }
     
-    public void testSelection() throws Exception {
-        setPro(false);
-        assertInstanceof(BasicRequeryManager.class, createRM());
-        setPro(true);
-        assertInstanceof(ProRequeryManager.class, createRM());
-    }
-    
     public void testRegistersWithDHTManager() throws Exception {
-        assertNull(mdht.listener);
+        assertNull(dhtManager.listener);
         RequeryManager rm = createRM();
-        assertSame(rm, mdht.listener);
+        assertSame(rm, dhtManager.listener);
         rm.cleanUp();
-        assertNull(mdht.listener);
+        assertNull(dhtManager.listener);
     }
     
     public void testNotInitedDoesNothingBasic() throws Exception {
         RequeryManager rm = createRM();
-        // shouldn't trigger any changes in download.complete
-        assertFalse(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
         
         // shouldn't trigger any queries
-        mdht.on = true;
-        rm.sendRequery();
-        assertNull(malf.listener);
-        assertNull(mdm.requirier);
-        assertNull(mmd.getState());
-        rm.handleGaveUpState();
-        assertNull(malf.listener);
-        assertNull(mmd.getState());
+        dhtManager.on = true;
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertNull(altLocFinder.listener);
+        assertNull(downloadManager.requerier);
+        assertNull(managedDownloader.getState());
     }
     
     public void testNotInitedAutoDHTPro() throws Exception {
-        setPro(true);
         RequeryManager rm = createRM();
-        // shouldn't trigger any changes in download.complete
-        assertFalse(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        setPro(true);
         
         // if dht is off do nothing
-        mdht.on = false;
-        rm.handleGaveUpState();
-        assertNull(malf.listener);
-        assertNull(mmd.getState());
+        dhtManager.on = false;
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertNull(altLocFinder.listener);
+        assertNull(managedDownloader.getState());
         
         // if dht is on start querying
-        mdht.on = true;
-        rm.handleGaveUpState();
-        assertSame(rm, malf.listener);
-        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
+        dhtManager.on = true;
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener);
+        assertSame(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
+        
+        // But immediately after, requires an activate (for gnet query)
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
     /**
      * tests that only a single gnet query is sent if dht is off. 
      */
     public void testOnlyGnetIfNoDHT() throws Exception {
-        mdht.on = false;
-        assertNull(malf.listener);
-        assertNull(mdm.requirier);
-        assertNull(mmd.getState());
         RequeryManager rm = createRM();
-        rm.init();
-        assertFalse(rm.shouldGiveUp());
-        assertTrue(rm.shouldSendRequeryImmediately());
+
+        dhtManager.on = false;
+        assertNull(altLocFinder.listener);
+        assertNull(downloadManager.requerier);
+        assertNull(managedDownloader.getState());
+        
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        rm.activate();
+        assertTrue(rm.canSendQueryNow());
         
         // first try a requery that will not work
-        rm.sendRequery();
-        assertNull(malf.listener); // should not try dht
-        assertSame(mmd, mdm.requirier); // should have tried gnet
-        assertNull(mmd.getState()); // but not succeeded
-        assertFalse(rm.shouldGiveUp()); // can still try to send something
-        assertTrue(rm.shouldSendRequeryImmediately());
-        
-        // now a query that will work
-        mdm.queryWorked = true;
-        mdm.requirier = null;
-        rm.sendRequery();
-        assertNull(malf.listener); // should not try dht
-        assertSame(mmd, mdm.requirier); // should have tried gnet
-        // and worked
-        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
-        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        rm.sendQuery();
+        assertNull(altLocFinder.listener); // should not try dht
+        assertSame(managedDownloader, downloadManager.requerier); // should have tried gnet
+        assertEquals(DownloadStatus.WAITING_FOR_GNET_RESULTS, managedDownloader.getState());
+        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, managedDownloader.getRemainingStateTime());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
         
         // but if we try again, nothing happens.
-        mdm.requirier = null;
-        mmd.setState(null);
-        rm.sendRequery();
-        assertNull(mdm.requirier);
-        assertNull(mmd.getState());
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        downloadManager.requerier = null;
+        managedDownloader.setState(null);
+        rm.sendQuery();
+        assertNull(downloadManager.requerier);
+        assertNull(managedDownloader.getState());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
     public void testWaitsForStableConns() throws Exception {
         // no DHT nor connections
-        mdht.on = false;
-        mdm.queryWorked = true;
+        dhtManager.on = false;
         RequeryManager.NO_DELAY = false;
         RequeryManager rm = createRM();
-        rm.init();
-        rm.sendRequery();
-        assertNull(mdm.requirier);
-        assertSame(DownloadStatus.WAITING_FOR_CONNECTIONS, mmd.getState());
-        assertFalse(rm.shouldGiveUp());
-        assertTrue(rm.shouldSendRequeryImmediately());
+        
+        rm.activate();
+        rm.sendQuery();
+        assertNull(downloadManager.requerier);
+        assertSame(DownloadStatus.WAITING_FOR_CONNECTIONS, managedDownloader.getState());
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
         
         // now we get connected
         RequeryManager.NO_DELAY = true;
-        rm.sendRequery();
+        rm.sendQuery();
         // should be sent.
-        assertSame(mmd, mdm.requirier);
-        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
-        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        assertSame(managedDownloader, downloadManager.requerier);
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,managedDownloader.getState());
+        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, managedDownloader.getRemainingStateTime());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
     public void testDHTTurnsOnStartsAutoIfInited() throws Exception {
         // with dht off, send a query
-        mdht.on = false;
-        mdm.queryWorked = true;
+        dhtManager.on = false;
         RequeryManager rm = createRM();
-        rm.init();
-        rm.sendRequery();
-        assertSame(mmd, mdm.requirier);
-        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,mmd.getState());
-        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, mmd.getRemainingStateTime());
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        
+        rm.activate();
+        rm.sendQuery();
+        assertSame(managedDownloader, downloadManager.requerier);
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS,managedDownloader.getState());
+        assertEquals(RequeryManager.TIME_BETWEEN_REQUERIES, managedDownloader.getRemainingStateTime());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
         
         // query fails, dht still off
-        rm.handleGaveUpState();
-        assertNull(malf.listener);
-        // turn the dht on
-        mdht.on = true;
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertNull(altLocFinder.listener);
+        
+        // turn the dht on & reduce the lastQuerySent time
+        dhtManager.on = true;
+        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
         // and we should start a lookup
-        rm.handleGaveUpState();
-        assertSame(rm, malf.listener);
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener);
     }
     
     public void testGnetFollowsDHTBasic() throws Exception {
-        mdht.on = true;
         RequeryManager rm = createRM();
-        rm.init();
-        assertFalse(rm.shouldGiveUp());
-        assertTrue(rm.shouldSendRequeryImmediately());
+        
+        dhtManager.on = true;
+        rm.activate();
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
         
         // with dht on, start a requery
-        rm.sendRequery();
-        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
-        assertNull(mdm.requirier);
-        assertSame(rm, malf.listener);
-        assertTrue(rm.isWaitingForDHTResults());
+        rm.sendQuery();
+        assertSame(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
+        assertNull(downloadManager.requerier);
+        assertSame(rm, altLocFinder.listener);
+        assertTrue(rm.isWaitingForResults());
         
         // pretend the dht lookup fails
         rm.handleAltLocSearchDone(false);
-        assertFalse(rm.isWaitingForDHTResults());
-        // should be queued
-        assertSame(DownloadStatus.QUEUED, mmd.getState());
-        // not giving up
-        assertFalse(rm.shouldGiveUp());
-        // and still ready to send a requery
-        assertTrue(rm.shouldSendRequeryImmediately());
+        assertFalse(rm.isWaitingForResults());
+        assertSame(DownloadStatus.GAVE_UP, managedDownloader.getState());
+        
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
         
         // the next requery should be gnet
-        malf.listener = null;
-        mdm.queryWorked = true;
-        rm.sendRequery();
-        assertTrue(rm.isWaitingForGnutellaResults());
-        assertFalse(rm.isWaitingForDHTResults());
-        assertSame(mmd, mdm.requirier);
-        assertNull(malf.listener);
+        altLocFinder.listener = null;
+        rm.sendQuery();
+        assertTrue(rm.isWaitingForResults());
+        assertSame(managedDownloader, downloadManager.requerier);
+        assertNull(altLocFinder.listener);
         
         // from now on we should give up & no more requeries
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
     public void testOnlyGnetPro() throws Exception {
-        mdht.on = true;
-        setPro(true);
         RequeryManager rm = createRM();
-        rm.init();
-        assertFalse(rm.shouldGiveUp());
-        assertTrue(rm.shouldSendRequeryImmediately());
-        assertFalse(rm.isWaitingForDHTResults());
-        assertFalse(rm.isWaitingForGnutellaResults());
         
-        // request a requery
-        mdm.queryWorked = true;
-        rm.sendRequery();
-        assertTrue(rm.isWaitingForGnutellaResults());
-        assertFalse(rm.isWaitingForDHTResults());
-        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, mmd.getState());
-        assertSame(mmd, mdm.requirier);
-        assertNull(malf.listener);
+        dhtManager.on = true;
+        setPro(true);
         
-        // from now on we should give up & no more requeries
-        assertTrue(rm.shouldGiveUp());
-        assertFalse(rm.shouldSendRequeryImmediately());
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener); // sent a DHT query
+        assertEquals(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
+        assertTrue(rm.isWaitingForResults());
+        rm.handleAltLocSearchDone(false); // finish it
+        assertFalse(rm.isWaitingForResults());
         
-        // but the dht queries go on independently through handleInactivity
-        mdm.requirier = null;
-        rm.handleGaveUpState();
-        assertNull(mdm.requirier);
-        assertSame(rm, malf.listener);
-        assertSame(DownloadStatus.QUERYING_DHT, mmd.getState());
-        assertTrue(rm.isWaitingForDHTResults());
-        // still waiting for gnet results because of requery limit
-        assertTrue(rm.isWaitingForGnutellaResults());
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        rm.activate(); // now activate it.
+        altLocFinder.listener = null;
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();        
+        assertTrue(rm.isWaitingForResults());
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, managedDownloader.getState());
+        assertSame(managedDownloader, downloadManager.requerier);
+        assertNull(altLocFinder.listener);
         
-        // not anymore
-        RequeryManager.TIME_BETWEEN_REQUERIES = 1L;
-        Thread.sleep(10);
-        assertFalse(rm.isWaitingForGnutellaResults());
+        assertFalse(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
     }
     
     private class MyDHTManager extends DHTManagerStub {
 
-        volatile DHTEventListener listener;
-        volatile boolean on;
+        private volatile DHTEventListener listener;
+        private volatile boolean on;
+        
         public void addEventListener(DHTEventListener listener) {
             this.listener = listener;
         }
@@ -293,16 +276,15 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     private class MyAltLocFinder extends AltLocFinder {
-
+        private volatile AltLocSearchListener listener;
+        
         public MyAltLocFinder() {
             super(null);
         }
         
-        volatile URN urn;
-        volatile AltLocSearchListener listener;
+        
         @Override
         public boolean findAltLocs(URN urn, AltLocSearchListener listener) {
-            this.urn = urn;
             this.listener = listener;
             return true;
         }
@@ -316,22 +298,21 @@ public class RequeryManagerTest extends LimeTestCase {
     
     private class MyDownloadManager extends DownloadManagerStub {
 
-        volatile ManagedDownloader requirier;
-
-        volatile boolean queryWorked;
+        private volatile ManagedDownloader requerier;
+        
         @Override
         public boolean sendQuery(ManagedDownloader requerier, QueryRequest query) {
-            this.requirier = requerier;
-            return queryWorked;
+            this.requerier = requerier;
+            return true;
         }
     }
     
     
     private class MyManagedDownloader extends ManagedDownloader {
 
-        volatile DownloadStatus status;
-        volatile long stateTime;
-        volatile int numGnet;
+        private volatile DownloadStatus status;
+        private volatile long stateTime;
+                
         public MyManagedDownloader() throws SaveLocationException {
             super(new RemoteFileDesc[0], new IncompleteFileManager(), new GUID());
         }
@@ -359,7 +340,6 @@ public class RequeryManagerTest extends LimeTestCase {
         
         @Override
         public QueryRequest newRequery(int numGnutellaQueries) {
-            this.numGnet = numGnutellaQueries;
             return null;
         }
     }
