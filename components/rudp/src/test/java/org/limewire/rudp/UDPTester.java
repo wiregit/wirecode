@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.NumberFormat;
 
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.messages.RUDPMessageFactory;
@@ -12,6 +13,7 @@ import org.limewire.util.AssertComparisons;
 
 public class UDPTester {
 
+    private static final int TIMEOUT = 10 * 1000;
     private static final int BLOCK_SIZE = 512;
     private static long startTime;
     private static long lastTime;
@@ -66,7 +68,8 @@ public class UDPTester {
 
     public static void echoClient(String host, int port) throws IOException {
         UDPConnection usock = new UDPConnection(host, port);
-
+        usock.setSoTimeout(TIMEOUT);
+        
         OutputStream ostream = usock.getOutputStream();
         // InputStream istream = usock.getInputStream();
 
@@ -93,7 +96,8 @@ public class UDPTester {
 
     public static void echoServer(String host, int port) throws IOException {
         UDPConnection usock = new UDPConnection(host, port);
-
+        usock.setSoTimeout(TIMEOUT);
+        
         // OutputStream ostream = usock.getOutputStream();
         InputStream istream = usock.getInputStream();
 
@@ -134,8 +138,8 @@ public class UDPTester {
     private static void updateBandwidth(long total) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastTime > 1000) {
-            System.out.println("Average (bytes/s): " + total
-                    / (currentTime - startTime));
+            long bandwidth = total / ((currentTime - startTime) / 1000);
+            System.out.println("Average (bytes/s): " + NumberFormat.getInstance().format(bandwidth));
             lastTime = currentTime;
         }
     }
