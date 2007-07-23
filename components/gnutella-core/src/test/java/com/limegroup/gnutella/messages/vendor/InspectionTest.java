@@ -235,9 +235,7 @@ public class InspectionTest extends ServerSideTestCase {
         
         //not catching IOEx here because not replying is a valid scenario.
         
-        try {
         UDP_ACCESS.receive(pack);
-        } catch (IOException ex) {System.out.println(ex); throw ex;}
         byte [] data = pack.getData();
         byte [] guid = new byte[16];
         System.arraycopy(data,0,guid,0,16);

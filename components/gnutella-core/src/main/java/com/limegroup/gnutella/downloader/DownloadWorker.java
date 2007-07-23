@@ -156,10 +156,10 @@ public class DownloadWorker {
     
     /** The time to wait trying to establish each normal connection, in
      *  milliseconds.*/
-    private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
+    private static int NORMAL_CONNECT_TIME=10000; //10 seconds
     /** The time to wait trying to establish each push connection, in
      *  milliseconds.  This needs to be larger than the normal time. */
-    private static final int PUSH_CONNECT_TIME=20000;  //20 seconds
+    private static int PUSH_CONNECT_TIME=20000;  //20 seconds
     /** The time to wait trying to establish a push connection
      * if only a UDP push has been sent (as is in the case of altlocs) */
     private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds

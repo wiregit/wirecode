@@ -22,8 +22,10 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
+import org.limewire.concurrent.AtomicLazyReference;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -32,6 +34,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -45,14 +48,21 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 @SuppressWarnings("unchecked")
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -105,6 +115,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
         PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
         PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
+        RequeryManager.NO_DELAY = false;
     }
 
     
@@ -306,6 +317,155 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         Thread.sleep(1000); 
     }
 
+    /**
+     * Tests the following scenario:
+     * 1. a downloader starts and fails
+     * 2. dht is off, so downloader stays in NMS state 
+     * 3. dht comes on, downloader goes looking for sources
+     * 4. it doesn't find anything, goes back to NMS
+     * 5. user clicks FMS, downloader goes to WFS
+     * 6. FMS doesn't find anything, downloader goes to AWS
+     * 7. it stays there until the timeout for a dht query elapses
+     * 8. after that happens it does a dht query.
+     * 
+     * Prior to a dht or gnet query it goes to QUEUED and very quickly to CONNECTED.
+     */
+    public void testProRequeryBehavior() throws Exception {
+        TestFile.length();
+        RequeryManager.NO_DELAY = true;
+        final DHTManager originalManager = RouterService.getDHTManager();
+        final AltLocFinder originalFinder = RouterService.getAltLocFinder();
+        final MyDHTManager myManager = new MyDHTManager();
+        final MyAltLocFinder myFinder = new MyAltLocFinder();
+        DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
+        DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
+        DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
+        PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
+        assertTrue(LimeWireUtils.isPro());
+        Object NORMAL_CONNECT_TIME = PrivilegedAccessor.getValue(DownloadWorker.class,"NORMAL_CONNECT_TIME");
+        Object PUSH_CONNECT_TIME = PrivilegedAccessor.getValue(DownloadWorker.class,"PUSH_CONNECT_TIME");
+        long TIME_BETWEEN_REQUERIES = RequeryManager.TIME_BETWEEN_REQUERIES;
+        try {
+            setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
+            setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
+            assertSame(myManager,RouterService.getDHTManager());
+            assertSame(myFinder,RouterService.getAltLocFinder());
+            PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
+            PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
+            RequeryManager.TIME_BETWEEN_REQUERIES = 10000;
+
+            ManagedDownloader downloader = null;
+            try {
+                LOG.debug("starting downloader");
+                downloader=
+                    new ManagedDownloader(
+                            new RemoteFileDesc[] {fakeRFD()},
+                            new IncompleteFileManager(), null);
+                downloader.initialize(manager, 
+                                      fileman,
+                                      callback);
+                LOG.debug("starting downloader");
+                requestStart(downloader);
+                assertSame(DownloadStatus.QUEUED, downloader.getState());
+                Thread.sleep(2000); //2 pumps
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                Thread.sleep(2000); // 2 pumps should be enough
+                assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                
+                LOG.debug("waiting for a few handleInactivity() calls");
+                Thread.sleep(3000);
+                // should still be waiting for user
+                assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                
+                // now turn dht on 
+                myManager.on = true;
+                
+                // in another pump or two we should be looking for sources
+                Thread.sleep(2000);
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                Thread.sleep(2000); // 2 pumps should be enough
+                assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+                
+                // now tell them the dht query failed
+                assertNotNull(myFinder.listener);
+                myFinder.listener.handleAltLocSearchDone(false);
+                Thread.sleep(2000);
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                Thread.sleep(2000); // 2 pumps should be enough
+                // should still be waiting for user
+                assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                
+                Thread.sleep(3000); // few more pumps
+                // should still be waiting for user
+                assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                
+                // hit resume()
+                downloader.resume();
+                
+                assertSame(DownloadStatus.QUEUED, downloader.getState());
+                Thread.sleep(2000); //2 pumps
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                Thread.sleep(2000); 
+                assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+                
+                // if we find nothing, we give up
+                waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
+                Thread.sleep(2000); 
+                assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+                
+                // we stay given up for a while but eventually launch another DHT_QUERY
+                Thread.sleep(2000); 
+                assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+                waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+                waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+                waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+                
+                // we should be making another dht attempt now
+                Thread.sleep(1000);
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+                
+            } catch(Throwable x) {
+                fail(x);
+            } finally {
+                if (downloader != null)
+                    downloader.stop();
+            }
+        } finally {
+            setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
+            setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
+            assertSame(originalManager,RouterService.getDHTManager());
+            assertSame(originalFinder,RouterService.getAltLocFinder());
+            PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.FALSE);
+            assertFalse(LimeWireUtils.isPro());
+            PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
+            PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
+            RequeryManager.TIME_BETWEEN_REQUERIES = TIME_BETWEEN_REQUERIES;
+        }
+    }
+    
+    private void waitForStateToEnd(DownloadStatus status, Downloader downloader) throws Exception {
+        LOG.debug("waiting for "+status+" to end");
+        int tries = 0;
+        while(downloader.getState() == status && tries++ < 20)
+            Thread.sleep(1000);
+        LOG.debug("out of "+status+" now "+downloader.getState());
+    }
+    
+    private <T>void setLazyReference(String name, final T value) throws Exception{
+        PrivilegedAccessor.setValue(RouterService.class,name,
+                new AtomicLazyReference<T>() {
+            public T createObject() {
+                return value;
+            }
+        });
+    }
+    
     /** Tests that the progress is not 0% when resume button is hit while
      *  requerying.  This was caused by the call to cleanup() from
      *  tryAllDownloads3() and was reported by Sam Berlin. 
@@ -335,7 +495,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
             uploader.waitForUploaderToStop();
-            
+        
             try { Thread.sleep(65 * 1000); } catch (InterruptedException ie) { }
             // no more auto requeries - so the download should be waiting for
             // input from the user
@@ -569,6 +729,13 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
                                   false, false,"",null, -1, false);
     }
     
+    private static RemoteFileDesc fakeRFD() {
+        return new RemoteFileDesc("0.0.0.1", PORT, 13l,
+                "badger", 1024,
+                new byte[16], 56, false, 4, true, null, new HashSet(),
+                false, false,"",null, -1, false);
+    }
+    
     private void requestStart(ManagedDownloader dl) throws Exception {
         List waiting = (List)PrivilegedAccessor.getValue(manager, "waiting");
         List active = (List)PrivilegedAccessor.getValue(manager, "active");
@@ -697,5 +864,52 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         public HTTPDownloader getDownloader() {
             return alt;
         }
+    }
+    
+    private static class MyDHTManager extends DHTManagerStub {
+
+        private volatile DHTEventListener listener;
+        private volatile boolean on;
+        
+        public void addEventListener(DHTEventListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public boolean isMemberOfDHT() {
+            return on;
+        }
+
+        @Override
+        public void removeEventListener(DHTEventListener listener) {
+            if (this.listener == listener)
+                this.listener = null;
+        }
+    }
+    
+    private static class MyAltLocFinder extends AltLocFinder {
+        private volatile AltLocSearchListener listener;
+        
+        volatile boolean cancelled;
+        public MyAltLocFinder() {
+            super(null);
+        }
+        
+        
+        @Override
+        public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
+            this.listener = listener;
+            return new Shutdownable() {
+                public void shutdown() {
+                    cancelled = true;
+                }
+            };
+        }
+
+        @Override
+        public boolean findPushAltLocs(GUID guid, URN urn) {
+            return true;
+        }
+        
     }
 }

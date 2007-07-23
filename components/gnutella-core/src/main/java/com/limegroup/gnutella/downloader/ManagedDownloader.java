@@ -746,7 +746,6 @@ public class ManagedDownloader extends AbstractDownloader
      * areas, depending on what is required or what has already occurred.
      */
     private void completeDownload(DownloadStatus status) {
-    
         boolean complete;
         boolean clearingNeeded = false;
         int waitTime = 0;
@@ -905,6 +904,9 @@ public class ManagedDownloader extends AbstractDownloader
                 setState(DownloadStatus.GAVE_UP);
             break;
         case WAITING_FOR_USER:
+            if (hasNewSources() || requeryManager.canSendQueryNow())
+                setState(DownloadStatus.QUEUED);
+            break;
         case GAVE_UP:
         	if (hasNewSources() || requeryManager.canSendQueryAfterActivate()) 
         		setState(DownloadStatus.QUEUED);

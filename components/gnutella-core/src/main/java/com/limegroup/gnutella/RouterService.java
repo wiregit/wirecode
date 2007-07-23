@@ -289,7 +289,7 @@ public class RouterService {
     /**
      * The DHTManager that manages the DHT and its various modes
      */
-    private static final AtomicLazyReference<DHTManager> DHT_MANAGER_REFERENCE
+    private static AtomicLazyReference<DHTManager> DHT_MANAGER_REFERENCE
         = new AtomicLazyReference<DHTManager>() {
             @Override
             public DHTManager createObject() {
@@ -301,7 +301,7 @@ public class RouterService {
     /**
      * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
-    private static final AtomicLazyReference<AltLocFinder> ALT_LOC_FINDER_REFERENCE
+    private static AtomicLazyReference<AltLocFinder> ALT_LOC_FINDER_REFERENCE
         = new AtomicLazyReference<AltLocFinder>() {
             @Override
             public AltLocFinder createObject() {
