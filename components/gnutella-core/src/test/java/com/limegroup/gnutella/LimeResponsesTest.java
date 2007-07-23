@@ -84,7 +84,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
     public void testQRP() throws Exception {
         ManagedConnection c = RouterService.getConnectionManager().getInitializedConnections().get(0);
         c.incrementNextQRPForwardTime(0);
-        PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
+        PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 22000);
         assertNotNull(ptm);
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.patch(ptm);
