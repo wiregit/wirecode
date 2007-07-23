@@ -1,5 +1,6 @@
 package org.limewire.util;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +27,13 @@ public class ByteOrder {
         return x;
     }
 
+    private static int readByte(InputStream is) throws IOException{
+        int ret = is.read();
+        if (ret == -1)
+            throw new EOFException();
+        return ret;
+    }
+    
     /**
      * Little-endian bytes to short.
      *
@@ -58,16 +66,16 @@ public class ByteOrder {
      * Little-endian bytes to short - stream version.
      */
     public static short leb2short(final InputStream is) throws IOException {
-        return (short)((is.read() & 0xFF) |
-                       (is.read()  <<  8));
+        return (short)((readByte(is) & 0xFF) |
+                       (readByte(is)  <<  8));
     }
 
     /**
      * Big-endian bytes to short - stream version.
      */
     public static short beb2short(final InputStream is) throws IOException {
-        return (short)((is.read()  <<  8) |
-                       (is.read() & 0xFF));
+        return (short)((readByte(is)  <<  8) |
+                       (readByte(is) & 0xFF));
     }
 
     /**
@@ -106,20 +114,20 @@ public class ByteOrder {
      * Little-endian bytes to int - stream version.
      */
     public static int leb2int(final InputStream is) throws IOException{
-        return ( is.read() & 0xFF       ) |
-               ((is.read() & 0xFF) <<  8) |
-               ((is.read() & 0xFF) << 16) |
-               ( is.read()         << 24);
+        return ( readByte(is) & 0xFF       ) |
+               ((readByte(is) & 0xFF) <<  8) |
+               ((readByte(is) & 0xFF) << 16) |
+               ( readByte(is)         << 24);
     }
 
     /**
      * Big-endian bytes to int - stream version.
      */
     public static int beb2int(final InputStream is) throws IOException{
-        return ( is.read()         << 24) |
-               ((is.read() & 0xFF) << 16) |
-               ((is.read() & 0xFF) <<  8) |
-               ( is.read() & 0xFF       );
+        return ( readByte(is)         << 24) |
+               ((readByte(is) & 0xFF) << 16) |
+               ((readByte(is) & 0xFF) <<  8) |
+               ( readByte(is) & 0xFF       );
     }
 
     /**
@@ -228,14 +236,14 @@ public class ByteOrder {
      * Little-endian bytes to long.  Stream version.
      */
     public static long leb2long(InputStream is) throws IOException {
-        return ( is.read() & 0xFFL       ) |
-               ((is.read() & 0xFFL) <<  8) |
-               ((is.read() & 0xFFL) << 16) |
-               ((is.read() & 0xFFL) << 24) |
-               ((is.read() & 0xFFL) << 32) |
-               ((is.read() & 0xFFL) << 40) |
-               ((is.read() & 0xFFL) << 48) |
-               ( is.read()          << 56);
+        return ( readByte(is) & 0xFFL       ) |
+               ((readByte(is) & 0xFFL) <<  8) |
+               ((readByte(is) & 0xFFL) << 16) |
+               ((readByte(is) & 0xFFL) << 24) |
+               ((readByte(is) & 0xFFL) << 32) |
+               ((readByte(is) & 0xFFL) << 40) |
+               ((readByte(is) & 0xFFL) << 48) |
+               ( readByte(is)          << 56);
     }
 
     /**
