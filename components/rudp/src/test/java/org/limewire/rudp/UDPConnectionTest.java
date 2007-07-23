@@ -1,6 +1,7 @@
 package org.limewire.rudp;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +15,6 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
 
 /**
  * Put full UDPConnection system through various tests.
@@ -184,8 +184,8 @@ public final class UDPConnectionTest extends BaseTestCase {
                     uconn1.setSoTimeout(TIMEOUT);
                     InputStream  istream = uconn1.getInputStream();
                     for (int i = 0; i < MAX_VALUE; i++) {
-                        int rval = ByteOrder.beb2int(istream);
-                        assertEquals("Unexpected data at offset: " + rval, Integer.toHexString(i), Integer.toHexString(rval));
+                        int rval = readInt(istream);
+                        assertEquals("Unexpected data at offset: " + i, Integer.toHexString(i), Integer.toHexString(rval));
                     }                 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -202,7 +202,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             uconn2.setSoTimeout(TIMEOUT);
             OutputStream ostream = uconn2.getOutputStream();
             for (int i = 0; i < MAX_VALUE; i++) {
-                ByteOrder.int2beb(i, ostream);
+                writeInt(i, ostream);
             }
         } finally {
             t.join();
@@ -596,5 +596,30 @@ public final class UDPConnectionTest extends BaseTestCase {
         }
         
     }
-    
+
+    /**
+     * Reads an int from <code>is</code> in big-endian byte-order.
+     */
+    private int readInt(InputStream is) throws IOException {
+        int result = 0;
+        for (int i = 0; i < 4; i++) {
+            int read = is.read();  
+            if (read == -1) {
+                throw new EOFException();
+            }
+            result |= read << 8 * (3 - i); 
+        }
+        return result;
+    }
+
+    /**
+     * Writes an int to <code>os</code> in big-endian byte-order.
+     */
+    private void writeInt(int x, OutputStream os) throws IOException {
+        os.write((byte)(x >> 24));
+        os.write((byte)(x >> 16));
+        os.write((byte)(x >>  8));
+        os.write((byte) x       );
+    }
+
 }
