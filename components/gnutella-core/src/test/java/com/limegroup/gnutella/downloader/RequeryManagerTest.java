@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
@@ -59,6 +62,19 @@ public class RequeryManagerTest extends LimeTestCase {
         assertSame(rm, dhtManager.listener);
         rm.cleanUp();
         assertNull(dhtManager.listener);
+    }
+    
+    public void testCancelsQueries() throws Exception {
+        dhtManager.on = true;
+        RequeryManager rm = createRM();
+        rm.activate();
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener);
+        assertTrue(rm.isWaitingForResults());
+        assertFalse(altLocFinder.cancelled);
+        
+        rm.cleanUp();
+        assertTrue(altLocFinder.cancelled);
     }
     
     public void testNotInitedDoesNothingBasic() throws Exception {
@@ -331,15 +347,23 @@ public class RequeryManagerTest extends LimeTestCase {
     private class MyAltLocFinder extends AltLocFinder {
         private volatile AltLocSearchListener listener;
         
+        volatile boolean cancelled;
         public MyAltLocFinder() {
             super(null);
         }
         
         
         @Override
-        public boolean findAltLocs(URN urn, AltLocSearchListener listener) {
+        public Future<?> findAltLocs(URN urn, AltLocSearchListener listener) {
             this.listener = listener;
-            return true;
+            return new FutureTask<Object>(new Runnable(){
+                public void run(){}
+            }, null) {
+                public boolean cancel(boolean interrupt) {
+                    cancelled = true;
+                    return true;
+                }
+            };
         }
 
         @Override

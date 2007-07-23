@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.settings.LookupSettings;
@@ -48,9 +51,6 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     private final DHTManager dhtManager;
     
-    /** True if a DHT query is currently out (and not finished, success or failure) */
-    private volatile boolean dhtQueryInProgress;
-    
     /** The type of the last query this sent out. */
     private volatile QueryType lastQueryType;
     
@@ -65,6 +65,13 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     /** True if requerying has been activated by the user. */
     protected volatile boolean activated;
+    
+    /** 
+     * a dht lookup future to cancel if we get shut down 
+     * True if a DHT query is currently out (and not finished, success or failure)
+     * atomic because it needs getAndSet 
+     */
+    private final AtomicReference<Future<?>> dhtFuture = new AtomicReference<Future<?>>(null);
     
     RequeryManager(ManagedDownloader downloader, 
             DownloadManager manager,
@@ -83,7 +90,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
             return false;
         
         switch(lastQueryType) {
-        case DHT: return dhtQueryInProgress && getTimeLeftInQuery() > 0;
+        case DHT: return dhtFuture.get() != null && getTimeLeftInQuery() > 0;
         case GNUTELLA: return getTimeLeftInQuery() > 0;
         }
         
@@ -129,8 +136,11 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         activated = true;
     }
     
-   /** Removes all event listeners, and cleans up references. */
+   /** Removes all event listeners, cancels ongoing searches and cleans up references. */
     void cleanUp() {
+        Future<?> f = dhtFuture.getAndSet(null);
+        if (f != null)
+            f.cancel(true);
         dhtManager.removeEventListener(this);
     }
     
@@ -143,7 +153,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     }
     
     public void handleAltLocSearchDone(boolean success){
-        dhtQueryInProgress = false;
+        dhtFuture.set(null);
         // This changes the state to GAVE_UP regardless of success,
         // because even if this was a success (it found results),
         // it's possible the download isn't going to want to use
@@ -171,12 +181,11 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     private void sendDHTQuery() {
         lastQuerySent = System.currentTimeMillis();
         lastQueryType = QueryType.DHT;
-        dhtQueryInProgress = true;
         numDHTQueries++;
         downloader.setState(DownloadStatus.QUERYING_DHT, 
                 Math.max(TIME_BETWEEN_REQUERIES, 
                         LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
-        finder.findAltLocs(downloader.getSHA1Urn(), this);
+        dhtFuture.set(finder.findAltLocs(downloader.getSHA1Urn(), this));
     }
     
     /** Sends a Gnutella Query */

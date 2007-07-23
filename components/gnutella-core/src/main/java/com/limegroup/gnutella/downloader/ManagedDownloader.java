@@ -2681,7 +2681,7 @@ public class ManagedDownloader extends AbstractDownloader
      * @return true if the state changed, false otherwise
      */
     synchronized boolean setStateIfExistingStateIs(DownloadStatus newState, DownloadStatus oldState) {
-        if(this.state == oldState) {
+        if(getState() == oldState) {
             setState(newState);
             return true;
         } else {
