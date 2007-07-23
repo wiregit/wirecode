@@ -195,7 +195,7 @@ public class UploadTest extends LimeTestCase {
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT, protocol);
         client.setConnectionTimeout(500);
-        client.setTimeout(1000);
+        client.setTimeout(2000);
         client.setHostConfiguration(hostConfig);
     }
 
