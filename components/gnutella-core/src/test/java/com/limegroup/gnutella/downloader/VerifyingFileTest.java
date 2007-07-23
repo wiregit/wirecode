@@ -491,10 +491,8 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - data.length), data);
 
         // nothing should be verified
-        System.out.println("wait");
 
         vf.waitForPending(1000);
-        System.out.println("done");
         assertEquals(0, vf.getVerifiedBlockSize());
 
         // now add the second piece of the last chunk
@@ -503,9 +501,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - 2 * data.length), data);
 
         // the last chunk should be verified
-        System.out.println("wait");
         vf.waitForPending(1000);
-        System.out.println("done");
         assertEquals(exactTree.getNodeSize(), vf.getVerifiedBlockSize());
     }
 
