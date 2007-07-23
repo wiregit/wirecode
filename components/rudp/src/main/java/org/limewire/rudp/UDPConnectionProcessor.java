@@ -1179,6 +1179,8 @@ public class UDPConnectionProcessor {
         int              priorR = _receiverWindowSpace;
         _receiverWindowSpace    = kmsg.getWindowSpace();
 
+        //System.out.println("Keep alive: remote.windowStart=" + kmsg.getWindowStart() + ", remote.windowSpace=" + kmsg.getWindowSpace() + " local.sequenceNumber=" + _sequenceNumber + ", local.receiverWindowSpace=" + _receiverWindowSpace + ", local.chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
+        
         // Adjust the receivers window space with knowledge of
         // how many extra messages we have sent since this ack
         if ( _sequenceNumber > wStart ) 
@@ -1288,6 +1290,8 @@ public class UDPConnectionProcessor {
                     if(chunk != null)
                         sendData(chunk);
                 } else {
+                    //System.out.println("Waiting: sequenceNumber=" + _sequenceNumber + ", receiverWindowSpace=" + _receiverWindowSpace + ", chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
+
                     // if no room to send data then wait for the window to Open
                     // Don't wait more than 1 second for sanity checking 
                     scheduleWriteDataEvent(
@@ -1297,6 +1301,7 @@ public class UDPConnectionProcessor {
             		if(LOG.isDebugEnabled())  
                 		LOG.debug("Shutdown SendData cL:"+_chunkLimit+
 						  " rWS:"+ _receiverWindowSpace);
+            		return;
                 }
             }
 
@@ -1342,6 +1347,7 @@ public class UDPConnectionProcessor {
             // Only wait if the waitTime is more than zero
             if ( waitTime > 0 ) {
                 long time = System.currentTimeMillis() + waitTime;
+                //System.out.println("Write: sequenceNumber=" + _sequenceNumber + ", receiverWindowSpace=" + _receiverWindowSpace + ", chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
                 scheduleWriteDataEvent(time);
                 break;
             }
