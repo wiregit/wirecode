@@ -1536,7 +1536,11 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     public boolean shouldBeRestarted() {
-    	return hasNewSources() || getRemainingStateTime() <= 0;
+        DownloadStatus status = getState();
+        return hasNewSources() || 
+        (getRemainingStateTime() <= 0 
+                && status != DownloadStatus.WAITING_FOR_GNET_RESULTS &&
+                status != DownloadStatus.QUERYING_DHT);
     }
     
     public boolean shouldBeRemoved() {
@@ -2712,8 +2716,7 @@ public class ManagedDownloader extends AbstractDownloader
             return (int)Math.ceil(Math.max(remaining, 0)/1000f);
         case WAITING_FOR_GNET_RESULTS:
         case QUERYING_DHT:
-            // we must get launched from handleInactivity(), so we add 2 seconds
-            return (int)(requeryManager.getTimeLeftInQuery() / 1000) + 2; 
+            return (int)Math.ceil(Math.max(requeryManager.getTimeLeftInQuery(), 0)/1000f); 
         case QUEUED:
             return 0;
         default:
