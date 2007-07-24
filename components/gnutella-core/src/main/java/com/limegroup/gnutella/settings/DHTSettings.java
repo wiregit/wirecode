@@ -260,9 +260,11 @@ public class DHTSettings extends LimeProps {
      * Setting for whether or not the passive DHT mode should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
+    // Was DHT.EnablePassiveMode in 4.13.12 and prior. 
+    // Deadlock! Do not turn on! See MOJITO-119!
     public static final BooleanSetting ENABLE_PASSIVE_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_DHT_MODE", 
-                false, "DHT.EnablePassiveMode");
+                false, "DHT.EnablePassiveModeV2");
     
     /**
      * Setting for whether or not the passive leaf DHT mode should be active at all.
