@@ -111,7 +111,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             task.start(exchanger);
             
             synchronized (exchanger) {
-                if (!exchanger.isDone()) {
+                if (!isDone()) {
                     initWatchdog();
                 }
             }
@@ -129,7 +129,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             public void run() {
                 boolean timeout = false;
                 synchronized (exchanger) {
-                    if (!exchanger.isDone()) {
+                    if (!isDone()) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Watchdog is canceling " + task);
                         }
@@ -213,7 +213,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         
         boolean done = false;
         synchronized (exchanger) {
-            done = exchanger.isDone();
+            done = isDone();
             if (!done) {
                 listeners.add(listener);
             }
@@ -246,7 +246,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     public boolean cancel(boolean mayInterruptIfRunning) {
         boolean cancelTask = false;
         synchronized (exchanger) {
-            if (!exchanger.isDone()) {
+            if (!isDone()) {
                 if (!taskIsActive || mayInterruptIfRunning) {
                     exchanger.cancel();
                     cancelTask = taskIsActive;
@@ -265,7 +265,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * (non-Javadoc)
      * @see java.util.concurrent.Future#isCancelled()
      */
-    public boolean isCancelled() {
+    public final boolean isCancelled() {
         return exchanger.isCancelled();
     }
 
@@ -273,7 +273,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * (non-Javadoc)
      * @see java.util.concurrent.Future#isDone()
      */
-    public boolean isDone() {
+    public final boolean isDone() {
         return exchanger.isDone();
     }
     
