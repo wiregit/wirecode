@@ -57,7 +57,11 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     private final DHTTask<T> task;
     
-    private volatile boolean taskIsRunning = false;
+    /**
+     * true if starting or started.
+     * LOCKING: exchanger
+     */
+    private boolean taskIsActive;
     
     private ScheduledFuture<?> watchdog = null;
     
@@ -98,12 +102,13 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     public void run() {
         try {
-            if (isDone()) {
-                return;
+            synchronized(exchanger) {
+                if (isDone()) {
+                    return;
+                }
+                taskIsActive = true;
             }
-            
             task.start(exchanger);
-            taskIsRunning = true;
             
             synchronized (exchanger) {
                 if (!exchanger.isDone()) {
@@ -129,14 +134,14 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                             LOG.debug("Watchdog is canceling " + task);
                         }
                         
-                        timeout = true;
+                        timeout = taskIsActive;
                         exchanger.setException(
                                 new ExecutionException(
                                         new LockTimeoutException(task.toString())));
                     }
                 }
                 
-                if (timeout && taskIsRunning) {
+                if (timeout) {
                     task.cancel();
                 }
             }
@@ -239,21 +244,22 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * @see java.util.concurrent.Future#cancel(boolean)
      */
     public boolean cancel(boolean mayInterruptIfRunning) {
-        boolean canceled = false;
+        boolean cancelTask = false;
         synchronized (exchanger) {
             if (!exchanger.isDone()) {
-                if (!taskIsRunning || mayInterruptIfRunning) {
+                if (!taskIsActive || mayInterruptIfRunning) {
                     exchanger.cancel();
-                    canceled = true;
+                    if (taskIsActive)
+                        cancelTask = true;
                 }
             }
         }
         
-        if (canceled && taskIsRunning) {
+        if (cancelTask) {
             task.cancel();
         }
         
-        return canceled;
+        return cancelTask;
     }
 
     /*
