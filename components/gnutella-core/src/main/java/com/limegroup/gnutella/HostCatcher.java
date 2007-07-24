@@ -1647,5 +1647,43 @@ public class HostCatcher {
                 return ret;
             }
         };
+        
+        /** Inspectable with some dht stats */
+        public final Inspectable dhtStats = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> ret = new HashMap<String, Object>();
+                ret.put("ver",1);
+                int perm, permdht, rest,restdht,fl, fldht, fu,fudht;
+                synchronized(HostCatcher.this) {
+                    perm = permanentHostsSet.size();
+                    rest = restoredHosts.size();
+                    fl = FREE_LEAF_SLOTS_SET.size();
+                    fu = FREE_ULTRAPEER_SLOTS_SET.size();
+                    permdht = 0;
+                    
+                    for (ExtendedEndpoint e : permanentHostsSet) {
+                        permdht += e.supportsDHT() ? 1 : 0;
+                    }
+                    restdht = 0;
+                    for (ExtendedEndpoint e : restoredHosts)
+                        restdht += e.supportsDHT() ? 1 : 0;
+                    fldht = 0;
+                    for (ExtendedEndpoint e : FREE_LEAF_SLOTS_SET.keySet())
+                        fldht += e.supportsDHT() ? 1 : 0;
+                    fudht = 0;
+                    for (ExtendedEndpoint e : FREE_ULTRAPEER_SLOTS_SET.keySet())
+                        fudht += e.supportsDHT() ? 1 : 0;
+                }
+                ret.put("perm",perm);
+                ret.put("permdht",permdht);
+                ret.put("rest",rest);
+                ret.put("restdht",restdht);
+                ret.put("fl",fl);
+                ret.put("fldht",fldht);
+                ret.put("fu",fu);
+                ret.put("fudht",fudht);
+                return ret;
+            }
+        };
     }
 }

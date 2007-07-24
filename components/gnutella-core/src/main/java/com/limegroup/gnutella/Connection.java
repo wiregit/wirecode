@@ -1681,6 +1681,11 @@ public class Connection implements IpPort, Inspectable, Connectable {
         data.put("ubs",getUncompressedBytesSent());
         data.put("ua", getUserAgent());
         data.put("v",getVersion());
+        // only one should be true, but include all three
+        // to detect bugs
+        data.put("pln", remoteHostIsPassiveLeafNode());
+        data.put("pdn", remostHostIsPassiveDHTNode());
+        data.put("pan", remostHostIsActiveDHTNode());
         return data;
     }
     
