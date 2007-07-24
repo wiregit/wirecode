@@ -318,6 +318,110 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     }
 
     /**
+     * tests that if a result arrives and fails while we're
+     * waiting for results from a gnet or dht query, we'll
+     * fall back into the appropriate state.
+     */
+    public void testWaitingForResults() throws Exception {
+        TestFile.length();
+        RequeryManager.NO_DELAY = true;
+        final DHTManager originalManager = RouterService.getDHTManager();
+        final AltLocFinder originalFinder = RouterService.getAltLocFinder();
+        final MyDHTManager myManager = new MyDHTManager();
+        final MyAltLocFinder myFinder = new MyAltLocFinder();
+        DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
+        DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
+        DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
+        Object NORMAL_CONNECT_TIME = PrivilegedAccessor.getValue(DownloadWorker.class,"NORMAL_CONNECT_TIME");
+        Object PUSH_CONNECT_TIME = PrivilegedAccessor.getValue(DownloadWorker.class,"PUSH_CONNECT_TIME");
+        long TIME_BETWEEN_REQUERIES = RequeryManager.TIME_BETWEEN_REQUERIES;
+        try {
+            setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
+            setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
+            assertSame(myManager,RouterService.getDHTManager());
+            assertSame(myFinder,RouterService.getAltLocFinder());
+            PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
+            PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
+            RequeryManager.TIME_BETWEEN_REQUERIES = 10000;
+            ManagedDownloader downloader = null;
+            try {
+                downloader=
+                    new ManagedDownloader(
+                            new RemoteFileDesc[] {fakeRFD()},
+                            new IncompleteFileManager(), null);
+                downloader.initialize(manager, 
+                                      fileman,
+                                      callback);
+                LOG.debug("starting downloader");
+                requestStart(downloader);
+                assertSame(DownloadStatus.QUEUED, downloader.getState());
+                waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                
+                // click resume, launch a dht query
+                LOG.debug("clicking resume");
+                myManager.on = true;
+                downloader.resume();
+                assertSame(DownloadStatus.QUEUED, downloader.getState());
+                waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                waitForFullPump(1); // extra pump because finishDownload is not synced
+                assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+                
+                // while we're querying the dht, a search result arrives
+                LOG.debug("adding source");
+                downloader.addDownload(fakeRFD(), false);
+                waitForStateToEnd(DownloadStatus.QUERYING_DHT, downloader);
+                waitForFullPump(1); // an extra pump - somehow queued goes by too fast?
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                
+                // after the result fails, we should fall back in querying state
+                assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+                
+                LOG.debug("dht query fails");
+                myFinder.listener.handleAltLocSearchDone(false);
+                assertSame(DownloadStatus.GAVE_UP,downloader.getState());
+                waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+                assertSame(DownloadStatus.QUEUED,downloader.getState());
+                waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+                assertSame(DownloadStatus.CONNECTING,downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                 
+                // now we should try a gnet query
+                assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+                
+                // another result arrives
+                LOG.debug("adding another source");
+                downloader.addDownload(fakeRFD(), false);
+                waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
+                waitForFullPump(1); // an extra pump 
+                assertSame(DownloadStatus.CONNECTING, downloader.getState());
+                waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+                
+                // should be waiting for sources again
+                assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+            } catch(Throwable x) {
+                fail(x);
+            } finally {
+                if (downloader != null)
+                    downloader.stop();
+            }
+        } finally {
+            setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
+            setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
+            assertSame(originalManager,RouterService.getDHTManager());
+            assertSame(originalFinder,RouterService.getAltLocFinder());
+            PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
+            PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
+            RequeryManager.TIME_BETWEEN_REQUERIES = TIME_BETWEEN_REQUERIES;
+        }
+    }
+    
+    /**
      * Tests the following scenario:
      * 1. a downloader starts and fails
      * 2. dht is off, so downloader stays in NMS state 
@@ -594,11 +698,21 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         }
     }
     
-    private void waitForStateToEnd(DownloadStatus status, Downloader downloader) throws Exception {
+    /**
+     * @return the number of pumps it took to get out of the current state.
+     * Note: I'm not sure if this is a good additional check.  It may make the test
+     * much stricter than necessary
+     */
+    private int waitForStateToEnd(DownloadStatus status, Downloader downloader) throws Exception {
         LOG.debug("waiting for "+status+" to end");
-        while(downloader.getState() == status)
+        int pumps = 0;
+        while(downloader.getState() == status) {
             waitForFullPump(1);
+            pumps++;
+            LOG.debug("pump "+pumps);
+        }
         LOG.debug("out of "+status+" now "+downloader.getState());
+        return pumps;
     }
     
     private void waitForFullPump(int pumps) throws Exception {
@@ -606,7 +720,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             synchronized(manager.pump) {
                 manager.pump.wait();
             }
-            LOG.debug("pump");
         }
     }
     
@@ -883,7 +996,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     }
     
     private static RemoteFileDesc fakeRFD() {
-        return new RemoteFileDesc("0.0.0.1", PORT, 13l,
+        return new RemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l,
                 "badger", 1024,
                 new byte[16], 56, false, 4, true, null, new HashSet(),
                 false, false,"",null, -1, false);
