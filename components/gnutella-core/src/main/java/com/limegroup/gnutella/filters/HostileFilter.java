@@ -130,7 +130,13 @@ public class HostileFilter extends SpamFilter {
     }
     
     public boolean allow(InetAddress addr) {
-        return allowLogged(new IP(addr.getAddress()));
+        IP ip = null;
+        try {
+            ip = new IP(addr.getAddress());
+        } catch (IllegalArgumentException bad) {
+            return false;
+        }
+        return allowLogged(ip);
     }
     
     /** 
