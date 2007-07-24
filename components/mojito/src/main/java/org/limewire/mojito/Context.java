@@ -36,12 +36,14 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
@@ -97,6 +99,7 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.SecurityToken;
+import org.limewire.service.ErrorService;
 
 
 /**
@@ -980,6 +983,23 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTFuture<PingResult> ping(Contact node) {
         return pingManager.ping(node);
+    }
+    
+    public void ping(final Contact node, final DHTFutureListener<PingResult> listener) {
+        Runnable command = new Runnable() {
+            public void run() {
+                try {
+                    DHTFuture<PingResult> future = ping(node);
+                    if (listener != null) {
+                        future.addDHTFutureListener(listener);
+                    }
+                } catch (RejectedExecutionException err) {
+                    ErrorService.error(err);
+                }
+            }
+        };
+        
+        getDHTExecutorService().execute(command);
     }
     
     /** 

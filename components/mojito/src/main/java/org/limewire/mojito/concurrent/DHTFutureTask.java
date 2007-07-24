@@ -57,7 +57,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     private final DHTTask<T> task;
     
-    private boolean taskIsRunning = false;
+    private volatile boolean taskIsRunning = false;
     
     private ScheduledFuture<?> watchdog = null;
     
@@ -98,16 +98,19 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     public void run() {
         try {
+            if (isDone()) {
+                return;
+            }
+            
+            task.start(exchanger);
+            taskIsRunning = true;
+            
             synchronized (exchanger) {
                 if (!exchanger.isDone()) {
-                    task.start(exchanger);
-                    taskIsRunning = true;
-                    
-                    if (!exchanger.isDone()) {
-                        initWatchdog();
-                    }
+                    initWatchdog();
                 }
             }
+            
         } catch (Throwable t) {
             exchanger.setException(new ExecutionException(t));
         }

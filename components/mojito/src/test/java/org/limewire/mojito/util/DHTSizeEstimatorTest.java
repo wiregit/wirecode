@@ -8,7 +8,7 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -214,8 +214,8 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
         
     	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setContactPinger(new ContactPinger() {
-            public DHTFuture<PingResult> ping(Contact node) {
-                return null;
+            public void ping(Contact node,
+                    DHTFutureListener<PingResult> listener) {
             }
         });
         

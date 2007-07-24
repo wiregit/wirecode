@@ -17,7 +17,7 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.ClassfulNetworkCounter;
@@ -484,9 +484,8 @@ public class RouteTableTest extends MojitoTestCase {
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
         routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public DHTFuture<PingResult> ping(Contact node) {
+            public void ping(Contact node, DHTFutureListener<PingResult> listener) {
                 toPing.add(node);
-                return null;
             }
         });
         
@@ -677,8 +676,8 @@ public class RouteTableTest extends MojitoTestCase {
     public void testSelectLiveNodes() throws Exception { 
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public DHTFuture<PingResult> ping(Contact node) {
-                return null;
+            public void ping(Contact node,
+                    DHTFutureListener<PingResult> listener) {
             }
         });
         
@@ -730,8 +729,8 @@ public class RouteTableTest extends MojitoTestCase {
     public void testPurge() {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public DHTFuture<PingResult> ping(Contact node) {
-                return null;
+            public void ping(Contact node,
+                    DHTFutureListener<PingResult> listener) {
             }
         });
         

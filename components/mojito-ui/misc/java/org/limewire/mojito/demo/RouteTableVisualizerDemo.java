@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -213,8 +213,8 @@ public class RouteTableVisualizerDemo {
 
     public void populateRouteTable(RouteTableImpl rt) {
         rt.setContactPinger(new RouteTable.ContactPinger() {
-            public DHTFuture<PingResult> ping(Contact node) {
-                return null;
+            public void ping(Contact node,
+                    DHTFutureListener<PingResult> listener) {
             }
         });
         
