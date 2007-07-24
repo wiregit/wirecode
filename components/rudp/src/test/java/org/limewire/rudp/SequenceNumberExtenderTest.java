@@ -64,16 +64,10 @@ public final class SequenceNumberExtenderTest extends BaseTestCase {
             finalValue, iand);
     }
 
-    public void testOutOfOrderNumbers() {
+    public void testOutOfOrderNumber() {
 	SequenceNumberExtender extender = new SequenceNumberExtender();
-	int outOfOrderWindowSize = 20;
-	for (int i = 1; i < 0xFFFFFF; i++) {
-	    long extendedI = extender.extendSequenceNumber((i & 0xFFFF));
-	    long outOfOrder = (long)Math.max(i - Math.random() * 20, 1);
-	    long extendedOutOfOrder = extender.extendSequenceNumber((outOfOrder & 0xFFFF));
-	    assertEquals(i, extendedI);
-	    assertEquals(outOfOrder, extendedOutOfOrder);
-	    assertEquals(i, extender.extendSequenceNumber((i & 0xFFFF)));
-	}
+	assertEquals(0x3FFF, extender.extendSequenceNumber(0x3FFF));
+	assertEquals(0x7FFF, extender.extendSequenceNumber(0x7FFF));
+	assertEquals(0x7FFF - 3, extender.extendSequenceNumber(0x7FFF - 3));
     }
 }
