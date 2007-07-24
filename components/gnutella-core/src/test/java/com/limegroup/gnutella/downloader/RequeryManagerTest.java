@@ -11,8 +11,10 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManagerStub;
+import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -217,9 +219,9 @@ public class RequeryManagerTest extends LimeTestCase {
         rm.sendQuery();
         assertNull(altLocFinder.listener);
         
-        // turn the dht on & reduce the lastQuerySent time
+        // turn the dht on should immediately query
+        // even though the gnet query happened recently
         dhtManager.on = true;
-        PrivilegedAccessor.setValue(rm, "lastQuerySent", 1);
         assertTrue(rm.canSendQueryAfterActivate());
         assertTrue(rm.canSendQueryNow());
         // and we should start a lookup
@@ -321,6 +323,36 @@ public class RequeryManagerTest extends LimeTestCase {
         assertFalse(rm.canSendQueryNow());
     }
     
+    public void testDHTTurnsOff() throws Exception {
+        dhtManager.on = true;
+        RequeryManager rm = createRM();
+        setPro(true); // so we immediately launch a query
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener); // sent a DHT query
+        assertEquals(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
+        assertTrue(rm.isWaitingForResults());
+        
+        // now turn the dht off
+        dhtManager.on = false;
+        rm.handleDHTEvent(new DHTEvent(new NullDHTController(), DHTEvent.Type.STOPPED));
+        assertFalse(rm.isWaitingForResults());
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertFalse(rm.canSendQueryNow());
+        
+        // turn the dht on again, and even though no time has passed
+        // since the last query we can still do one
+        dhtManager.on = true;
+        
+        altLocFinder.listener = null;
+        assertTrue(rm.canSendQueryAfterActivate());
+        assertTrue(rm.canSendQueryNow());
+        rm.sendQuery();
+        assertSame(rm, altLocFinder.listener); // sent a DHT query
+        assertEquals(DownloadStatus.QUERYING_DHT, managedDownloader.getState());
+        assertTrue(rm.isWaitingForResults());
+    }
     private class MyDHTManager extends DHTManagerStub {
 
         private volatile DHTEventListener listener;

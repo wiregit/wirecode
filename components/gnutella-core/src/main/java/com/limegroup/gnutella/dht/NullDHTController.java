@@ -14,8 +14,10 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 /**
  * A class that uses the Null Object pattern to avoid
  * repetitive null checks in DHTManagers
+ * 
+ * or to be used as stub in tests
  */
-class NullDHTController implements DHTController {
+public class NullDHTController implements DHTController {
 
     public void addActiveDHTNode(SocketAddress hostAddress) {
     }

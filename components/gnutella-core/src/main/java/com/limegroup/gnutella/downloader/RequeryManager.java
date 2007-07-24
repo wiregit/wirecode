@@ -169,11 +169,13 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     /** True if another DHT query can be sent right now. */
     private boolean canSendDHTQueryNow() {
-        return isDHTUp()
-            && (numDHTQueries < DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
-                    && System.currentTimeMillis() - lastQuerySent >= 
-                            DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()
-               );
+        if (!isDHTUp())
+            return false;
+        return numDHTQueries == 0 || 
+        (numDHTQueries < DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
+                && System.currentTimeMillis() - lastQuerySent >= 
+                    DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()
+        );
     }
     
     private void sendDHTQuery() {
