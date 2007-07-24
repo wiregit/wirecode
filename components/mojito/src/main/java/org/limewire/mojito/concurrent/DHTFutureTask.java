@@ -249,8 +249,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             if (!exchanger.isDone()) {
                 if (!taskIsActive || mayInterruptIfRunning) {
                     exchanger.cancel();
-                    if (taskIsActive)
-                        cancelTask = true;
+                    cancelTask = taskIsActive;
                 }
             }
         }
