@@ -335,7 +335,7 @@ public class DownloadManager implements BandwidthTracker {
      * stopped, or adding it because there's an active slot and it requires
      * attention.
      */
-    private synchronized void pumpDownloads() {
+    protected synchronized void pumpDownloads() {
         int index = 1;
         for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
             AbstractDownloader md = i.next();

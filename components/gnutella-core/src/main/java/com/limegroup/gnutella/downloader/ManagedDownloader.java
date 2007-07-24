@@ -2706,12 +2706,14 @@ public class ManagedDownloader extends AbstractDownloader
         switch (state) {
         case CONNECTING:
         case BUSY:
-        case WAITING_FOR_GNET_RESULTS:
-        case QUERYING_DHT:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
-            return  (int)Math.ceil(Math.max(remaining, 0)/1000f);
+            return (int)Math.ceil(Math.max(remaining, 0)/1000f);
+        case WAITING_FOR_GNET_RESULTS:
+        case QUERYING_DHT:
+            // we must get launched from handleInactivity(), so we add 2 seconds
+            return (int)(requeryManager.getTimeLeftInQuery() / 1000) + 2; 
         case QUEUED:
             return 0;
         default:

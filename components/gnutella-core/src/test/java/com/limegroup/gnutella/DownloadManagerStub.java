@@ -74,4 +74,14 @@ public class DownloadManagerStub extends DownloadManager {
 		public void sendPush(RemoteFileDesc file) {}
     	
     }
+    
+    public final Object pump = new Object();
+    
+    @Override
+    protected void pumpDownloads() {
+        super.pumpDownloads();
+        synchronized(pump) {
+            pump.notifyAll();
+        }
+    }
 }
