@@ -1973,7 +1973,7 @@ public abstract class FileManager {
         if (OSUtils.isWindows()) {
             sensitive = new String[] { "Documents and Settings",
                     "My Documents", "Desktop", "Program Files", "Windows",
-                    "WINNT" };
+                    "WINNT", "Users" };
         } else if (OSUtils.isMacOSX()) {
             sensitive = new String[] { "Users", "System", "System Folder",
                     "Previous Systems", "private", "Volumes", "Desktop",
