@@ -64,6 +64,7 @@ public class ByteArrayCache {
     public ByteArrayCache(int maxSize, int length) {
         _maxSize = maxSize;
         _length = length;
+        assert _length > 0 : "constructing cache of emtpy arrays "+_length;
         CACHE.ensureCapacity(maxSize);
     }
     
