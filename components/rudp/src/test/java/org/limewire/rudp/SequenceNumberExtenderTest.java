@@ -53,18 +53,27 @@ public final class SequenceNumberExtenderTest extends BaseTestCase {
 
 			// Extend the sequenceNumber back to 8 bytes
 			iand = extender.extendSequenceNumber( ( iand) );
-
-			if ( (lastiand + 1) != iand ) {
-				fail("Error at count: "+i+" last: "+lasti+" seqNo: "+
-				  iand+" last seqNo: "+lastiand);
-			}
-			//if ( i % 5000000 == 0 )
-				//System.out.println("Progress: "+i);
+			
+			assertEquals("Previous sequence number plus 1 isn't current one", lastiand + 1, iand);
+			assertEquals(i, iand);
 			lasti = i;
 			lastiand = iand;
 		}
 
         assertEquals("final value should equal "+finalValue, 
             finalValue, iand);
+    }
+
+    public void testOutOfOrderNumbers() {
+	SequenceNumberExtender extender = new SequenceNumberExtender();
+	int outOfOrderWindowSize = 20;
+	for (int i = 1; i < 0xFFFFFF; i++) {
+	    long extendedI = extender.extendSequenceNumber((i & 0xFFFF));
+	    long outOfOrder = (long)Math.max(i - Math.random() * 20, 1);
+	    long extendedOutOfOrder = extender.extendSequenceNumber((outOfOrder & 0xFFFF));
+	    assertEquals(i, extendedI);
+	    assertEquals(outOfOrder, extendedOutOfOrder);
+	    assertEquals(i, extender.extendSequenceNumber((i & 0xFFFF)));
+	}
     }
 }
