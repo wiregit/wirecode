@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.filters;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -59,7 +60,12 @@ public class HostileFilter extends SpamFilter {
             return allow(push.getIP());
         } else if (m instanceof DHTMessage){
             DHTMessage message = (DHTMessage)m;
-            return allow(message.getContact().getContactAddress());
+            InetSocketAddress addr = 
+                (InetSocketAddress) message.getContact().getContactAddress();
+            if (addr != null && addr.getAddress() instanceof Inet4Address)
+                return allow(addr.getAddress());
+            // dht messages do not require contact address.
+            return true;
         } else {
             // we dont want to block other kinds of messages
             return true;
