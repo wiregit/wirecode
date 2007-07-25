@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
@@ -259,12 +261,13 @@ public class AltLocFinder {
                         creator.getContactAddress()).getAddress();
                 
                 IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
+                Connectable c = new ConnectableImpl(ipp, altLoc.supportsTLS());
                 
                 long fileSize = altLoc.getFileSize();
                 byte[] ttroot = altLoc.getRootHash();
                 try {
                     AlternateLocation location 
-                        = AlternateLocation.createDirectDHTAltLoc(ipp, urn, fileSize, ttroot);
+                        = AlternateLocation.createDirectDHTAltLoc(c, urn, fileSize, ttroot);
                     AltLocManager.instance().add(location, this);
                     return true;
                 } catch (IOException e) {
@@ -339,7 +342,6 @@ public class AltLocFinder {
             byte features = pushProxies.getFeatures();
             int fwtVersion = pushProxies.getFwtVersion();
             IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
-            
             PushEndpoint pe = new PushEndpoint(guid, proxies, features, fwtVersion, ipp);
             
             try {

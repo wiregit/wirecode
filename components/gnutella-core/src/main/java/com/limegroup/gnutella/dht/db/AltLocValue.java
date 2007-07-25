@@ -18,6 +18,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.settings.SSLSettings;
 
 /**
  * An implementation of DHTValue for for Gnutella Alternate Locations
@@ -40,6 +41,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      * Version 1:
      * File Length
      * TigerTree root hash (optional)
+     * Incoming TLS support (optional)
      */
     
     /**
@@ -62,6 +64,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
     
     private static final String TTROOT = "ttroot";
     
+    private static final String TLS = "tls";
+    
     protected final Version version;
     
     /**
@@ -76,7 +80,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      */
     static AltLocValue createAltLocValue(Version version, byte[] guid, int port, 
             long length, byte[] ttroot, boolean firewalled) {
-        return new AltLocValueImpl(version, guid, port, length, ttroot, firewalled);
+        return new AltLocValueImpl(version, guid, port, length, ttroot, firewalled, false);
     }
     
     /**
@@ -142,6 +146,11 @@ public abstract class AltLocValue implements DHTValue, Serializable {
      */
     public abstract boolean isFirewalled();
     
+    /**
+     * @return true if the altloc supports tls
+     */
+    public abstract boolean supportsTLS();
+    
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -151,6 +160,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         buffer.append("AltLoc: guid=").append(new GUID(getGUID()))
             .append(", port=").append(getPort())
             .append(", firewalled=").append(isFirewalled())
+            .append(", tls=").append(supportsTLS())
             .append(", fileSize=").append(getFileSize())
             .append(", ttroot=").append(getRootHash() != null 
                     ? ArrayUtils.toHexString(getRootHash()) : "null");
@@ -186,6 +196,9 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             if (ttroot != null) {
                 ggep.put(TTROOT, ttroot);
             }
+            
+            if (value.supportsTLS())
+                ggep.put(TLS);
         }
         
         return ggep.toByteArray();
@@ -210,11 +223,13 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         
         private final byte[] data;
         
+        private final boolean supportsTLS;
+        
         /**
          * Constructor for testing purposes
          */
         private AltLocValueImpl(Version version, byte[] guid, int port, 
-                long fileSize, byte[] ttroot, boolean firewalled) {
+                long fileSize, byte[] ttroot, boolean firewalled, boolean supportsTLS) {
             super(version);
             
             if (guid == null || guid.length != 16) {
@@ -240,6 +255,7 @@ public abstract class AltLocValue implements DHTValue, Serializable {
             this.fileSize = fileSize;
             this.ttroot = ttroot;
             this.firewalled = firewalled;
+            this.supportsTLS = supportsTLS;
             this.data = serialize(this);
         }
         
@@ -276,6 +292,8 @@ public abstract class AltLocValue implements DHTValue, Serializable {
                 }
                 
                 this.firewalled = (firewalled[0] != 0);
+                
+                this.supportsTLS = ggep.hasKey(TLS);
                 
                 if (version.compareTo(VERSION_ONE) >= 0) {
                     
@@ -317,6 +335,11 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         @Override
         public boolean isFirewalled() {
             return firewalled;
+        }
+        
+        @Override
+        public boolean supportsTLS() {
+            return supportsTLS;
         }
         
         @Override
@@ -413,6 +436,11 @@ public abstract class AltLocValue implements DHTValue, Serializable {
         @Override
         public byte[] getRootHash() {
             return ttroot;
+        }
+        
+        @Override
+        public boolean supportsTLS() {
+            return SSLSettings.isIncomingTLSEnabled();
         }
     }
 }
