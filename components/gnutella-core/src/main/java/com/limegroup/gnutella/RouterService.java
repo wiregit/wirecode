@@ -507,7 +507,10 @@ public class RouterService {
             callback.componentLoading("SSL_TEST");
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), NIODispatcher.instance().getBufferCache());
             if(!sslTester.go()) {
-                SSLSettings.disableTLS(sslTester.getLastFailureCause());
+                Throwable t = sslTester.getLastFailureCause();
+                SSLSettings.disableTLS(t);
+                if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
+                    ErrorService.error(t);
             }
             LOG.trace("END SSL Test");
     

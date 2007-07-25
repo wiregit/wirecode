@@ -3,8 +3,6 @@ package org.limewire.nio.ssl;
 import junit.framework.Test;
 
 import org.limewire.nio.ByteBufferCache;
-import org.limewire.service.ErrorCallback;
-import org.limewire.service.ErrorService;
 import org.limewire.util.BaseTestCase;
 
 public class SSLEngineTestTest extends BaseTestCase {
@@ -24,19 +22,10 @@ public class SSLEngineTestTest extends BaseTestCase {
     
     public void testGoFailsAndNotifiesErrorService() {
         SSLEngineTest test = new SSLEngineTest(SSLUtils.getTLSContext(), new String[] { "la de da" }, new ByteBufferCache());
-        ErrorCallback old = ErrorService.getErrorCallback();
-        ErrorCallbackStub stub = new ErrorCallbackStub();
-        try {
-            ErrorService.setErrorCallback(stub);
-            assertFalse(test.go());
-            Throwable cause = test.getLastFailureCause();
-            assertNotNull(cause);
-            assertSame(cause, stub.getLastCaught());
-            assertEquals(1, stub.getExceptionCount());
-            assertEquals("Unsupported ciphersuite la de da", cause.getMessage());
-        } finally {
-            ErrorService.setErrorCallback(old);
-        }
+        assertFalse(test.go());
+        Throwable cause = test.getLastFailureCause();
+        assertNotNull(cause);
+        assertEquals("Unsupported ciphersuite la de da", cause.getMessage());
     }
 
 }

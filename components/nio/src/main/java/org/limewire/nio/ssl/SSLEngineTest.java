@@ -1,6 +1,7 @@
 package org.limewire.nio.ssl;
 
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -13,7 +14,6 @@ import javax.net.ssl.SSLEngineResult.Status;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.ByteBufferCache;
-import org.limewire.service.ErrorService;
 import org.limewire.util.BufferUtils;
 
 /** A simple test that connects two SSLEngines and ensures SSL works. */
@@ -45,9 +45,6 @@ public class SSLEngineTest {
         } catch(Throwable t) {
             LOG.error("Error in TLS!", t);
             lastFailureCause = t;
-            
-            if(!isIgnorable(t))
-                ErrorService.error(t);
             
             return false;
         }
@@ -185,7 +182,15 @@ public class SSLEngineTest {
     /**
      * Determines if the error is ignorable.
      */
-    private boolean isIgnorable(Throwable t) {
+    public boolean isIgnorable(Throwable t) {
+        // See CORE-286
+        if(causeIs(t, NoSuchAlgorithmException.class))
+            return true;
+
+        // See CORE-286
+        if(t instanceof NoSuchMethodError)
+            return true;
+        
         // See CORE-253
         if(t instanceof NoClassDefFoundError)
             return true;
@@ -197,6 +202,15 @@ public class SSLEngineTest {
             return true;
         
         // We might make everything ignorable, but for now we want to see them.
+        return false;
+    }
+    
+    private boolean causeIs(Throwable t, Class<? extends Throwable> causeClass) {
+        while(t != null) {
+            if(causeClass.isAssignableFrom(t.getClass()))
+                return true;
+            t = t.getCause();
+        }
         return false;
     }
 
