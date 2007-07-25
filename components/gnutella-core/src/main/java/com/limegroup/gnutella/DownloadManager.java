@@ -116,17 +116,6 @@ public class DownloadManager implements BandwidthTracker {
      */
     private int innetworkCount = 0;
 
-    /** 
-     * The global minimum time between any two Gnutella requeries, in milliseconds.
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES
-     */
-    public static final long TIME_BETWEEN_GNUTELLA_REQUERIES = 45 * 60 * 1000; 
-    
-    /** 
-     * The last time that a Gnutella requery was sent.
-     */
-    private long lastGnutellaRequeryTime = 0L;
-
     /** This will hold the MDs that have sent requeries.
      *  When this size gets too big - meaning bigger than active.size(), then
      *  that means that all MDs have been serviced at least once, so you can
@@ -1059,7 +1048,9 @@ public class DownloadManager implements BandwidthTracker {
      * If ser is true, also writes a snapshot to the disk.
      */
     private void cleanupCompletedDownload(AbstractDownloader dl, boolean ser) {
-        querySentMDs.remove(dl);
+        synchronized(this) {
+            querySentMDs.remove(dl);
+        }
         dl.finish();
         if (dl.getQueryGUID() != null)
             router.downloadFinished(dl.getQueryGUID());
@@ -1099,11 +1090,12 @@ public class DownloadManager implements BandwidthTracker {
 
         //Disallow if global time limits exceeded.  These limits don't apply to
         //queries that are requeries.
-        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
-        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
-            return false;
-        }
+// Requeries are disabled elsewhere.  This code should be reworked when we reenable.
+//        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
+//        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
+//        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
+//            return false;
+//        }
 
         //Has everyone had a chance to send a query?  If so, clear the slate.
         if (querySentMDs.size() >= waiting.size()) {
@@ -1122,7 +1114,7 @@ public class DownloadManager implements BandwidthTracker {
         if(LOG.isTraceEnabled())
             LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
-        lastGnutellaRequeryTime = System.currentTimeMillis();
+//        lastGnutellaRequeryTime = System.currentTimeMillis();
         router.sendDynamicQuery(query);
         return true;
     }
