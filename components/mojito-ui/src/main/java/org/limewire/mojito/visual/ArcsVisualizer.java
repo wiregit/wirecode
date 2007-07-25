@@ -72,6 +72,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         painters.add(new SnowMan(nodeId));
         painters.add(new PlasmaLamp(nodeId));
+        painters.add(new DartBoard(nodeId));
         
         painter = painters.get(painterIndex);
         
