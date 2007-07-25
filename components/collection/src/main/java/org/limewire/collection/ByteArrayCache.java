@@ -65,7 +65,6 @@ public class ByteArrayCache {
         _maxSize = maxSize;
         _length = length;
         assert _length > 0 : "constructing cache of emtpy arrays "+_length;
-        CACHE.ensureCapacity(maxSize);
     }
     
     /** Returns the size of all cached bytes. */
@@ -116,6 +115,7 @@ public class ByteArrayCache {
      */
     public synchronized void release(byte[] data) {
         _totalSize += data.length;
+        CACHE.ensureCapacity(_maxSize);
         CACHE.push(data);
         notifyAll();
     }
