@@ -50,6 +50,10 @@ public class DataWindow
      *  or one.
      */
 	public DataWindow(int size, long start) {
+	    if (size < 1) {
+	        throw new IllegalArgumentException("size must be > 0");
+	    }
+	    
 		windowStart = start;
 		windowSize  = size;
 		window      = new LongHashMap<DataRecord>(size+2);
@@ -59,6 +63,10 @@ public class DataWindow
      * Adds a new message to the window.  
      */
 	public DataRecord addData(DataMessage msg) {
+	    if (windowStart > msg.getSequenceNumber()) {
+	        throw new IllegalStateException("message is not in current window: " + windowStart + " > " + msg.getSequenceNumber());
+	    }
+	    
 	    long seqNo = msg.getSequenceNumber();
         if (seqNo == windowStart)
             readableData = true;
@@ -488,11 +496,6 @@ public class DataWindow
 //		return count;
 //	}
 
-	public void printFinalStats() {
-		System.out.println(
-		  " avgRTT:"+averageRTT+
-		  " lowRTT:"+averageLowRTT);
-	}
 }
 
 	

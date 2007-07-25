@@ -6,23 +6,26 @@ import org.limewire.rudp.messages.DataMessage;
 
 public class StubDataMessage extends StubRUDPMessage implements DataMessage {
 
+    public StubDataMessage(int sequenceNumber) {
+        setSequenceNumber(sequenceNumber);
+    }
+
+    public StubDataMessage() {
+    }
+
     public ByteBuffer getChunk() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public ByteBuffer getData1Chunk() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public ByteBuffer getData2Chunk() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public byte getDataAt(int i) {
-        // TODO Auto-generated method stub
         return 0;
     }
 

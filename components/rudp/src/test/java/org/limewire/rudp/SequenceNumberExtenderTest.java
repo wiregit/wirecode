@@ -58,7 +58,7 @@ public final class SequenceNumberExtenderTest extends BaseTestCase {
             lastiand = iand;
         }
 
-        assertEquals("final value should equal " + finalValue, finalValue, iand);
+        assertEquals(finalValue, iand);
     }
 
     public void testOutOfOrderNumber() {
@@ -84,4 +84,13 @@ public final class SequenceNumberExtenderTest extends BaseTestCase {
             assertEquals(i, extender.extendSequenceNumber((i & 0xFFFF)));
         }
     }
+    
+    public void testLargeValues() {
+        SequenceNumberExtender extender = new SequenceNumberExtender();
+        assertEquals(0x3FFF, extender.extendSequenceNumber(0x3FFF));
+        assertEquals(0x3FFF, extender.extendSequenceNumber(0x3FFF));
+        assertEquals(0xFFFF, extender.extendSequenceNumber(0xFFFF));
+        assertEquals(0x10000, extender.extendSequenceNumber(0x0000));
+    }
+
 }

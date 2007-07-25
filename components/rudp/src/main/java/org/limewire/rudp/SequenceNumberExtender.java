@@ -47,13 +47,13 @@ public class SequenceNumberExtender {
 		When true, the incrementing of the lowBase is pending */
 	private boolean lowSwitchPending  = false;
 
-	public  SequenceNumberExtender() {
+	public SequenceNumberExtender() {
 	}
 
     /**
      *  For testing only
      */
-    public  SequenceNumberExtender(long base) {
+    SequenceNumberExtender(long base) {
         base     = base & 0xffffffffffff0000l;
         lowBase  = base;
         highBase = base;
