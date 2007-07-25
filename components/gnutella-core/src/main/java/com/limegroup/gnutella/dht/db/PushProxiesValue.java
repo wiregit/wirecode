@@ -10,6 +10,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
+import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -56,6 +59,8 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
     private static final String PORT = "port";
     
     private static final String PROXIES = "proxies";
+    
+    private static final String TLS = "tls";
     
     private final Version version;
     
@@ -130,6 +135,12 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
      */
     public abstract Set<? extends IpPort> getPushProxies();
     
+    /**
+     * @return BitNumbers for tls status of push proxies,
+     * null if none are tls-capable.
+     */
+    public abstract BitNumbers getTLSInfo();
+    
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -168,6 +179,9 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
             }
             baos.close();
             ggep.put(PROXIES, baos.toByteArray());
+            
+            if (!value.getTLSInfo().isEmpty())
+                ggep.put(TLS,value.getTLSInfo().toByteArray());
         } catch (IOException err) {
             // Impossible
             throw new RuntimeException(err);
@@ -212,6 +226,11 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
         private final byte[] data;
         
         /**
+         * tls info for the push proxies
+         */
+        private final BitNumbers tlsInfo;
+        
+        /**
          * Constructor for testing purposes
          */
         public PushProxiesValueImpl(Version version, byte[] guid, 
@@ -225,6 +244,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
             this.port = port;
             this.proxies = proxies;
             this.data = serialize(this);
+            this.tlsInfo = getNumbersFromProxies(proxies);
         }
         
         public PushProxiesValueImpl(Version version, byte[] data) throws DHTValueException {
@@ -260,11 +280,17 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
                     throw new DHTValueException("Illegal port: " + port);
                 }
                 
+                BitNumbers tlsInfo = BitNumbers.EMPTY_BN;
+                try {
+                    tlsInfo = new BitNumbers(ggep.getBytes(TLS));
+                } catch (BadGGEPPropertyException notThere){}
+                
                 byte[] proxiesBytes = ggep.getBytes(PROXIES);
                 ByteArrayInputStream bais = new ByteArrayInputStream(proxiesBytes);
                 DataInputStream in = new DataInputStream(bais);
                 
                 Set<IpPort> proxies = new IpPortSet();
+                int id = 0;
                 while(in.available() > 0) {
                     int length = in.readUnsignedByte();
                     
@@ -281,10 +307,14 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
                         throw new DHTValueException("Illegal port: " + port);
                     }
                     
-                    proxies.add(new IpPortImpl(InetAddress.getByAddress(addr), port));
+                    IpPort proxy = new IpPortImpl(InetAddress.getByAddress(addr), port);
+                    if (tlsInfo.isSet(id++))
+                        proxy = new ConnectableImpl(proxy, true);
+                    proxies.add(proxy);
                 }
                 
                 this.proxies = proxies;
+                this.tlsInfo = tlsInfo;
                 
             } catch (BadGGEPPropertyException err) {
                 throw new DHTValueException(err);
@@ -357,6 +387,10 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
         public Set<? extends IpPort> getPushProxies() {
             return proxies;
         }
+        
+        public BitNumbers getTLSInfo() {
+            return tlsInfo;
+        }
     }
     
     /**
@@ -409,5 +443,22 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
         public Set<? extends IpPort> getPushProxies() {
             return PushEndpointForSelf.instance().getProxies();
         }
+        
+        public BitNumbers getTLSInfo() {
+            return getNumbersFromProxies(getPushProxies());
+        }
+    }
+    
+    private static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
+        BitNumbers tlsInfo = new BitNumbers(proxies.size());
+        int i = 0;
+        for (IpPort proxy : proxies) {
+            if (proxy instanceof Connectable) {
+                if (((Connectable)proxy).isTLSCapable())
+                    tlsInfo.set(i);
+            }
+            i++;
+        }
+        return tlsInfo;
     }
 }
