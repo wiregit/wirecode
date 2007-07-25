@@ -888,7 +888,9 @@ public class VerifyingFile {
         public ChunkHandler(byte[] buf, Range intvl) {
             this.buf = buf;
             this.intvl = intvl;
-            assert Integer.MAX_VALUE >= (intvl.getHigh() - intvl.getLow() + 1);
+            long length = intvl.getHigh() - intvl.getLow() + 1;
+            assert length <= buf.length : 
+                "invalid length "+length+ " vs buf "+buf.length;
         }
         
         public void run() {
