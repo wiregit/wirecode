@@ -153,14 +153,14 @@ class BucketNode implements Bucket {
         
         KUID nodeId = node.getNodeID();
         if (containsActiveContact(nodeId)) {
-        	Contact current = nodeTrie.put(nodeId, node);
-        	assert  (current != null);
-        	
-        	// Remove the old Network
-        	counter.decrementAndGet(current);
-        	
-        	// And add the new Network
-        	counter.incrementAndGet(node);
+            Contact current = nodeTrie.put(nodeId, node);
+            assert (current != null);
+
+            // Remove the old Network
+            counter.decrementAndGet(current);
+
+            // And add the new Network
+            counter.incrementAndGet(node);
             return current;
         } else if (containsCachedContact(nodeId)) {
             return cache.put(nodeId, node);
@@ -219,7 +219,7 @@ class BucketNode implements Bucket {
     public boolean removeActiveContact(KUID nodeId) {
         Contact node = nodeTrie.remove(nodeId);
         if (node != null) {
-        	int old = counter.get(node);
+            int old = counter.get(node);
             int now = counter.decrementAndGet(node);
             assert (now < old) : now + " < " + old + ", " + nodeId + ", " + node + this;
             return true;

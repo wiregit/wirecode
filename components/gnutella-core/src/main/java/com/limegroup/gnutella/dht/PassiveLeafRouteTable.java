@@ -185,11 +185,22 @@ class PassiveLeafRouteTable implements RouteTable {
         }
         
         public void addActiveContact(Contact node) {
-            if (map.put(node.getNodeID(), node) == null) {
-                getClassfulNetworkCounter().incrementAndGet(node);
-            }
+            updateContact(node);
         }
 
+        public Contact updateContact(Contact node) {
+            Contact existing = map.remove(node.getNodeID());
+            if (existing != null) {
+                getClassfulNetworkCounter().decrementAndGet(existing);
+            }
+            
+            Contact previous = map.put(node.getNodeID(), node);
+            assert (previous == null);
+            getClassfulNetworkCounter().incrementAndGet(node);
+            
+            return existing;
+        }
+        
         public Contact addCachedContact(Contact node) {
             throw new UnsupportedOperationException();
         }
@@ -344,14 +355,6 @@ class PassiveLeafRouteTable implements RouteTable {
         public void touch() {
         }
 
-        public Contact updateContact(Contact node) {
-            Contact existing = map.put(node.getNodeID(), node);
-            if (existing == null) {
-                getClassfulNetworkCounter().incrementAndGet(node);
-            }
-            return existing;
-        }
-        
         public String toString() {
             return CollectionUtils.toString(map.values());
         }
