@@ -1296,7 +1296,7 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException(e);
         }
-        if (rfd.getSHA1Urn() != null) {
+        if (rfd.getSHA1Urn() != null && milliSeconds > 0) {
             CreationTimeCache ctCache = CreationTimeCache.instance();
             synchronized (ctCache) {
                 Long cTime = ctCache.getCreationTime(rfd.getSHA1Urn());
