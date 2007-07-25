@@ -308,10 +308,6 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
             shutdown = true;
         }
         
-        try {
-            close();
-        } catch(IOException ignored) {}
-        
         Shutdownable chain = writer;
         if(chain != null)
             chain.shutdown();
