@@ -811,8 +811,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 readAlternateLocations(value, true);
             else if(HTTPHeaderName.QUEUE.is(header)) 
                 parseQueueHeaders(value, refQueueInfo);
-            else if (HTTPHeaderName.SERVER.is(header)) 
+            else if (HTTPHeaderName.SERVER.is(header)) {
                 _server = value;
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Server is: " + value);
+                }
+            }
             else if (HTTPHeaderName.AVAILABLE_RANGES.is(header))
                 parseAvailableRangesHeader(value, _rfd);
             else if (HTTPHeaderName.RETRY_AFTER.is(header)) 
@@ -829,7 +833,6 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseProxiesHeader(value);
             else if (HTTPHeaderName.FWTPORT.is(header))
                 parseFWTPortHeader(value);
-            
         }
 
 		//Accept any 2xx's, but reject other codes.
