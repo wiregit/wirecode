@@ -308,7 +308,7 @@ public class AltLocFinder {
             }
             
             Contact creator = entity.getCreator();
-            InetAddress addr = ((InetSocketAddress)creator).getAddress();
+            InetAddress addr = ((InetSocketAddress)creator.getContactAddress()).getAddress();
             
             PushProxiesValue pushProxies = (PushProxiesValue)value;
             
