@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -66,8 +66,7 @@ public class DHTManagerImpl implements DHTManager {
     /**
      * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners 
-        = new CopyOnWriteArrayList<DHTEventListener>();
+    private final List<DHTEventListener> dhtEventListeners = new ArrayList<DHTEventListener>();
     
     /** 
      * The executor to use to execute blocking DHT methods, such
@@ -75,6 +74,11 @@ public class DHTManagerImpl implements DHTManager {
      * network and disk I/O). 
      * */
     private final Executor executor;
+    
+    /**
+     * The executor to use for dispatching events.
+     */
+    private final Executor dispatchExecutor;
     
     private volatile boolean enabled = true;
     
@@ -90,6 +94,7 @@ public class DHTManagerImpl implements DHTManager {
      */
     public DHTManagerImpl(Executor service) {
         this.executor = service;
+        this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
     }
     
     /*
@@ -242,19 +247,46 @@ public class DHTManagerImpl implements DHTManager {
         return controller.isWaitingForNodes();
     }
     
-    public void addEventListener(DHTEventListener listener) {
-        if(!dhtEventListeners.addIfAbsent(listener)) {
+    /**
+     * Adds a listener to DHT Events.
+     * 
+     * Be aware that listeners will receive events after
+     * after the DHT has dispatched them.  It is possible that
+     * the DHT's status may have changed between the time the 
+     * event was dispatched and the time the event is received
+     * by a listener.
+     */
+    public synchronized void addEventListener(DHTEventListener listener) {
+        if(dhtEventListeners.contains(listener))
             throw new IllegalArgumentException("Listener " + listener + " already registered");
+        
+        dhtEventListeners.add(listener);
+    }
+
+    /**
+     * Sends an event to all listeners.
+     * 
+     * Be aware that to prevent deadlock, listeners may receive
+     * the event long after the DHT's status has changed, and the
+     * current status may be very different.
+     * 
+     * No events will be received in a different order than they were
+     * dispatched, though.
+     */
+    public synchronized void dispatchEvent(final DHTEvent event) {
+        if(!dhtEventListeners.isEmpty()) {
+            final List<DHTEventListener> listeners = new ArrayList<DHTEventListener>(dhtEventListeners);
+            dispatchExecutor.execute(new Runnable() {
+                public void run() {
+                    for(DHTEventListener listener : listeners) {
+                        listener.handleDHTEvent(event);
+                    }        
+                }
+            });
         }
     }
 
-    public void dispatchEvent(DHTEvent event) {
-        for(DHTEventListener listener : dhtEventListeners) {
-            listener.handleDHTEvent(event);
-        }
-    }
-
-    public void removeEventListener(DHTEventListener listener) {
+    public synchronized void removeEventListener(DHTEventListener listener) {
         dhtEventListeners.remove(listener);
     }
 
