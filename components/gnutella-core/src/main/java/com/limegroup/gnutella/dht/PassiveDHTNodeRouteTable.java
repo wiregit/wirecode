@@ -146,8 +146,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
                 }
             }
         } else {
-            removed = bucket.removeCachedContact(nodeId);
-            assert (removed == true);
+            bucket.removeCachedContact(nodeId);
         }
     }
     
