@@ -730,7 +730,7 @@ public abstract class FileManager {
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
-            _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListSet);
+            _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
 	    RouterService.getFileManager().loadSettings();
     }
@@ -1071,10 +1071,28 @@ public abstract class FileManager {
 		if (folders.isEmpty()) {
 			throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
 		}
-	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(blackListedSet);
+	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
 	    for (File folder : folders) {
 	    	addSharedFolder(folder);
 	    }
+	}
+	
+	/**
+	 * Returns set of canonicalized files or the same set if there
+	 * was an IOException for one of the files while canconicalizing. 
+	 */
+	private static Set<File> canonicalize(Set<File> files) {
+	    // canonicalize blacklist
+        Set<File> canonical = new HashSet<File>(files.size());
+        try {
+            for (File excluded : files) {
+                canonical.add(FileUtils.getCanonicalFile(excluded));
+            }
+        } catch (IOException ie) {
+            // use original black list if we run into problems
+            canonical = files;
+        }
+        return canonical;
 	}
 	
 	public Set<File> getFolderNotToShare() {

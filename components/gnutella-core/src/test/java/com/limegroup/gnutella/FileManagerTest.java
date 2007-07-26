@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -924,6 +925,74 @@ public class FileManagerTest extends LimeTestCase {
 		}
 	}
 	
+
+    public void testSymlinksAreResolvedInBlacklist() throws Exception {
+        if (OSUtils.isWindows()) {
+            return;
+        }
+        
+        File[] dirs = LimeTestUtils.createTmpDirs(
+                "resolvedshare",
+                "resolvedshare/resolvedsub",
+                "resolvedshare/other/shared"
+        );
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "shared" + i, dirs[i]);
+        }
+        File[] pointedTo = LimeTestUtils.createTmpDirs(
+                "notshared",
+                "notshared/sub",
+                "notshared/other/sub"
+        );
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "linkshared" + i, pointedTo[i]);
+        }
+        // add symlinks in shared folders to pointedTo
+        for (int i = 0; i < dirs.length; i++) {
+            createSymLink(dirs[i], "link", pointedTo[i]);
+        }
+        // create blacklist set
+        Set<File> blackListSet = new HashSet<File>();
+        for (File dir : dirs) {
+            blackListSet.add(new File(dir, "link"));
+        }
+        fman.addSharedFolders(Collections.singleton(dirs[0]), blackListSet);
+        waitForLoad();
+        
+        // assert blacklisted were not shared
+        for (File excluded : blackListSet) {
+            assertEquals("excluded was shared: " + excluded, 0, fman.getSharedFileDescriptors(excluded).length);
+        }
+        // same for pointed to
+        for (File excluded : pointedTo) {
+            assertEquals(0, fman.getSharedFileDescriptors(excluded).length);
+        }
+        // ensure other files were shared
+        for (File shared: dirs) {
+            assertEquals(1, fman.getSharedFileDescriptors(shared).length);
+        }
+        
+        // clean up
+        for (File dir : dirs) {
+            cleanFiles(dir, true);
+        }
+        for (File dir : pointedTo) {
+            cleanFiles(dir, true);
+        }
+    }
+    
+    private static void createSymLink(File parentDir, String name, File pointedTo) throws Exception {
+        assertEquals(0, 
+                Runtime.getRuntime().exec(new String[] { 
+                        "ln", 
+                        "-s",
+                        pointedTo.getAbsolutePath(),
+                        parentDir.getAbsolutePath() + File.separator + name
+                }).waitFor());
+    }
+    	
     public void testExplicitlySharedSubfolderUnsharedDoesntStayShared() throws Exception {
         File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
                 "recursive1",
