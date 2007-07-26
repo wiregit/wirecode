@@ -12,7 +12,6 @@ import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
@@ -28,8 +27,11 @@ public class DartBoard extends Painter {
     
     private static final long DURATION = ATTACK + RELEASE;
     
-    private static final Random GENERATOR = new Random();
-
+    private static final int RESOLUTION = 16;
+    static {
+        assert RESOLUTION > 1 && RESOLUTION < 31;
+    }
+    
     private final List<Node> nodes = new LinkedList<Node>();
     
     private final Ellipse2D.Double ellipse = new Ellipse2D.Double();
@@ -65,6 +67,13 @@ public class DartBoard extends Painter {
         
         double dx = width/2d;
         double dy = height/2d;
+        for (int i = 0; i < RESOLUTION; i++) {
+            g.setColor(Color.green); // what else
+            g.setStroke(DEFAULT_STROKE);
+            int innerWidth = (int)(arc_width * i / RESOLUTION);
+            int innerHeight = (int)(arc_height *  i / RESOLUTION);
+            g.drawOval((int)dx - innerWidth / 2, (int)dy - innerHeight /2 , innerWidth, innerHeight);
+        }
         
         dot.setFrame(dx - DOT_SIZE/2d, dy - DOT_SIZE/2d, 
                 DOT_SIZE, DOT_SIZE);
@@ -102,13 +111,6 @@ public class DartBoard extends Painter {
         }
     }
     
-    static BigInteger mask144;
-    static {
-        mask144 = BigInteger.ZERO;
-        for (int i = 0; i < 144; i++)
-            mask144 = mask144.setBit(i);
-    }
-    
     private static class Node {
         
         private final long timeStamp = System.currentTimeMillis();
@@ -119,16 +121,12 @@ public class DartBoard extends Painter {
         
         private final boolean request;
         
-        private final double fi;
-        
         private final Stroke stroke;
         
         public Node(EventType type, KUID nodeId, OpCode opcode, boolean request) {
             this.type = type;
             this.nodeId = nodeId;
             this.request = request;
-            
-            this.fi = Math.random() * (2d*Math.PI);
             
             this.stroke = getStrokeForOpCode(opcode);
         }
@@ -147,25 +145,21 @@ public class DartBoard extends Painter {
                 double width, double height, double radius, Graphics2D g) {
             
             int power = 0;
-            BigInteger temp = nodeId.toBigInteger().abs();
-            while (temp.compareTo(BigInteger.ZERO) > 0) {
-                temp = temp.shiftRight(1);
+            byte []temp = nodeId.toBigInteger().toByteArray();
+            byte []small = new byte[4];
+            System.arraycopy(temp,0, small, 0, 4);
+            BigInteger smallBI = new BigInteger(small);
+            int intId = smallBI.intValue() >>> (31 - RESOLUTION);
+            assert intId >= 0;
+            while (intId > 0) {
+                intId >>= 1;
                 power++;
             }
-            power--;
-            BigInteger twoPower = BigInteger.ZERO.setBit(power);
-            int radiusPower = Math.max(0,power - 144);
-            double distance = radiusPower * radius / 16;
+            power = Math.max(0,power-1);
+            assert power <= RESOLUTION;
+            double distance = power * radius / RESOLUTION;
             
-            temp = nodeId.toBigInteger().abs().and(mask144);
-            power = 0;
-            while (temp.compareTo(BigInteger.ZERO) > 0) {
-                temp = temp.shiftRight(1);
-                power++;
-            }
-            power--;
-            int sizePower = Math.max(1,(power - 138) *2);
-            
+            BigInteger twoPower = BigInteger.ZERO.setBit(power + 160 - RESOLUTION);
             BigDecimal angleBD = new BigDecimal(nodeId.toBigInteger().subtract(twoPower));
             angleBD = angleBD.divide(new BigDecimal(twoPower));
             double angle = angleBD.doubleValue() * 360;
@@ -190,11 +184,13 @@ public class DartBoard extends Painter {
                     blue = 255;
                 }
             }
+
+            // this is pointless, but pretty
+            int size = (int)(Math.random() * RESOLUTION);
             
             g.setColor(new Color(red, green, blue, alpha()));
             g.setStroke(stroke);
-//            g.drawLine((int)x1, (int)y1, (int)x2, (int)y2);
-            g.drawOval((int)x2, (int)y2, sizePower, sizePower);
+            g.drawOval((int)x2 - size/2 , (int)y2 - size/2 , size, size);
             
             return System.currentTimeMillis() - timeStamp >= DURATION;
         }
