@@ -145,11 +145,12 @@ public class DartBoard extends Painter {
                 double width, double height, double radius, Graphics2D g) {
             
             int power = 0;
-            byte []temp = nodeId.toBigInteger().toByteArray();
-            byte []small = new byte[4];
-            System.arraycopy(temp,0, small, 0, 4);
-            BigInteger smallBI = new BigInteger(small);
-            int intId = smallBI.intValue() >>> (31 - RESOLUTION);
+            
+            int hexOffset = RESOLUTION / 4;
+            if (RESOLUTION % 4 !=0)
+                hexOffset++;
+            String hex = nodeId.toHexString().substring(0,hexOffset);
+            int intId = Integer.valueOf(hex,16);
             assert intId >= 0;
             while (intId > 0) {
                 intId >>= 1;
@@ -163,7 +164,7 @@ public class DartBoard extends Painter {
             BigDecimal angleBD = new BigDecimal(nodeId.toBigInteger().subtract(twoPower));
             angleBD = angleBD.divide(new BigDecimal(twoPower));
             double angle = angleBD.doubleValue() * 360;
-            
+            assert angle <= 360;
             double x1 = localhost.x;
             double y1 = localhost.y;
             double x2 = x1 + Math.cos(angle) * distance;
