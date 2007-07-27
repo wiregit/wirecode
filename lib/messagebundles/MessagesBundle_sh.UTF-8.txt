@@ -287,96 +287,78 @@ LOGGING_TIP=Pogledajte beleške o radu programa
 MENU_FILE_TITLE=Program
 #### MENU_FILE_TITLE_MNEMONIC=F
 MENU_FILE_TITLE_MNEMONIC=P
-
 #### MENU_FILE_CLOSE=Close
 MENU_FILE_CLOSE=Kraj rada
 #### MENU_FILE_CLOSE_MNEMONIC=C
 MENU_FILE_CLOSE_MNEMONIC=K
-
 #### MENU_FILE_CLOSE_ACCESSIBLE=Close the Program
 MENU_FILE_CLOSE_ACCESSIBLE=Kraj rada
-
 #### MENU_FILE_CONNECT=Connect
 MENU_FILE_CONNECT=Poveži
 #### MENU_FILE_CONNECT_MNEMONIC=O
 MENU_FILE_CONNECT_MNEMONIC=P
-
 #### MENU_FILE_CONNECT_ACCESSIBLE=Connect to the Network
 MENU_FILE_CONNECT_ACCESSIBLE=Priključi se na mrežu
-
 #### MENU_FILE_DISCONNECT=Disconnect
 MENU_FILE_DISCONNECT=Isključi s mreže
 #### MENU_FILE_DISCONNECT_MNEMONIC=I
 MENU_FILE_DISCONNECT_MNEMONIC=I
-
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
 MENU_FILE_DISCONNECT_ACCESSIBLE=Isključi sa mreže
-
 #### MENU_FILE_OPEN_TORRENT=Open .torrent
 MENU_FILE_OPEN_TORRENT=Otvori .torrent
 #### MENU_FILE_OPEN_TORRENT_MNEMONIC=T
 MENU_FILE_OPEN_TORRENT_MNEMONIC=T
-
 #### MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Opens a .torrent file from your hard drive
 MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Otvara .torrent fajl iz Vašeg komjutera
-
 #### MENU_FILE_DOWNLOAD_TORRENT=Download .torrent
 MENU_FILE_DOWNLOAD_TORRENT=Preuzmi .torrent
 #### MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=D
 MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=R
-
 #### MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Downloads a .torrent file from the WWW
 MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Preuzima .torrent fajl sa Interneta
-
 #### MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Download .torrent file from the web
 MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Preuzmi .torrent fajl sa Interneta
-
 #### MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL
 MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=Adresa
+#### MENU_FILE_OPEN_TORRENT_PASTE_URL=Paste from Clipboard
+#? MENU_FILE_OPEN_TORRENT_PASTE_URL=
 #### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
 MENU_FILE_LIBRARY_NEW_FOLDER=Nova fascikla
 #### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
 MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-
 #### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
 MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Dodaj fasciklu u obeleženu fasciklu
-
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
 MENU_FILE_LIBRARY_UNSHARE_FOLDER=Zaustavi razmenu fascikle
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=Z
-
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Zaustavi razmenu obeležene fascikle
-
 #### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
 MENU_FILE_LIBRARY_RENAME_FOLDER=Preimenuj fasciklu
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
 MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
 MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Preimenuj obeleženu fasciklu u razmeni
-
 #### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
 MENU_FILE_LIBRARY_LAUNCH_FILES=Pokreni fajl(ove)
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
 MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=F
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
 MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Pokreni obeleženi fajl(ove)
-
 #### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
 MENU_FILE_LIBRARY_DELETE_FILES=Izbriši fajl(ove)
 #### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
 MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=I
 #### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
 MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Izbriši obeleženi fajl(fajlove)
-
 #### MENU_FILE_LIBRARY_REFRESH=Refresh
 MENU_FILE_LIBRARY_REFRESH=Ažuriraj
 #### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 MENU_FILE_LIBRARY_REFRESH_MNEMONIC=A
 #### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
 MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Ponovo pročitaj spisak fajlova
-
 #### MENU_FILE_LIBRARY_EXPLORE=Explore
 MENU_FILE_LIBRARY_EXPLORE=Pretraži
 #### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
@@ -388,42 +370,36 @@ MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Otvori fasciklu sa fajlovima
 MENU_NAV_TITLE=Stranice
 #### MENU_NAV_TITLE_MNEMONIC=N
 MENU_NAV_TITLE_MNEMONIC=R
-
 #### MENU_NAV_SEARCH=Search
 MENU_NAV_SEARCH=Pretraživanje
 #### MENU_NAV_SEARCH_MNEMONIC=S
 MENU_NAV_SEARCH_MNEMONIC=T
 #### MENU_NAV_SEARCH_ACCESSIBLE=Display the Search Screen
 MENU_NAV_SEARCH_ACCESSIBLE=Prikaži stranicu za pretraživanje
-
 #### MENU_NAV_MONITOR=Monitor
 MENU_NAV_MONITOR=Nadgledanje
 #### MENU_NAV_MONITOR_MNEMONIC=M
 MENU_NAV_MONITOR_MNEMONIC=N
 #### MENU_NAV_MONITOR_ACCESSIBLE=Display the Monitor Screen
 MENU_NAV_MONITOR_ACCESSIBLE=Pogledajte sta drugi traže ili preuzimaju
-
 #### MENU_NAV_CONN=Connections
 MENU_NAV_CONN=Priključci
 #### MENU_NAV_CONN_MNEMONIC=C
 MENU_NAV_CONN_MNEMONIC=P
 #### MENU_NAV_CONN_ACCESSIBLE=Display the Connections Screen
 MENU_NAV_CONN_ACCESSIBLE=Pratite na koje kompjutere ste priključeni
-
 #### MENU_NAV_LIB=Library
 MENU_NAV_LIB=Fajlovi
 #### MENU_NAV_LIB_MNEMONIC=L
 MENU_NAV_LIB_MNEMONIC=F
 #### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
 MENU_NAV_LIB_ACCESSIBLE=Prikaži spisak fajlova za slanje i prijem
-
 #### MENU_NAV_CONSOLE=Console
 MENU_NAV_CONSOLE=Komandni režim
 #### MENU_NAV_CONSOLE_MNEMONIC=O
 MENU_NAV_CONSOLE_MNEMONIC=K
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 MENU_NAV_CONSOLE_ACCESSIBLE=Prikaz komandi programu, za napredne korisnike
-
 #### MENU_NAV_LOGGING=Logging
 MENU_NAV_LOGGING=Beležnica
 #### MENU_NAV_LOGGING_MNEMONIC=G
@@ -431,60 +407,53 @@ MENU_NAV_LOGGING_MNEMONIC=B
 #### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
 MENU_NAV_LOGGING_ACCESSIBLE=Prikaži beležnicu
 
+
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=Prikaži
 #### MENU_VIEW_TITLE_MNEMONIC=V
 MENU_VIEW_TITLE_MNEMONIC=P
-
 #### MENU_VIEW_SMALL_ICONS=Use Small Icons
 MENU_VIEW_SMALL_ICONS=Koristi male slike alata
 #### MENU_VIEW_SMALL_ICONS_MNEMONIC=S
 MENU_VIEW_SMALL_ICONS_MNEMONIC=M
 #### MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use Small Icons
 MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Koristi male slike u traci sa alatima
-
 #### MENU_VIEW_TEXT_WITH_ICONS=Show Icon Text
 MENU_VIEW_TEXT_WITH_ICONS=Prikaži opisni tekst uz sliku alata
 #### MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 #### MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show Text Below Icons
 MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Prikaži tekst ispod alata
-
 #### MENU_VIEW_SHOW_HIDE_TITLE=Show/Hide
 MENU_VIEW_SHOW_HIDE_TITLE=Prikaži/Sakrij
 #### MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
 MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=S
 #### MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or Hide individual tabs
 MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Prikaži ili sakrij određene stranice
-
 #### MENU_VIEW_MONITOR=Monitor
 MENU_VIEW_MONITOR=Nadgledanje
 #### MENU_VIEW_MONITOR_MNEMONIC=M
 MENU_VIEW_MONITOR_MNEMONIC=N
 #### MENU_VIEW_MONITOR_ACCESSIBLE=Show Monitor Window
 MENU_VIEW_MONITOR_ACCESSIBLE=Pokreni nadgledanje
-
 #### MENU_VIEW_CONNECTIONS=Connections
 MENU_VIEW_CONNECTIONS=Priključci
 #### MENU_VIEW_CONNECTIONS_MNEMONIC=C
 MENU_VIEW_CONNECTIONS_MNEMONIC=P
 #### MENU_VIEW_CONNECTIONS_ACCESSIBLE=Show Connections Window
 MENU_VIEW_CONNECTIONS_ACCESSIBLE=Prikaži priključke na druge računare
-
 #### MENU_VIEW_LIBRARY=Library
 MENU_VIEW_LIBRARY=Razmena fajlova
 #### MENU_VIEW_LIBRARY_MNEMONIC=L
 MENU_VIEW_LIBRARY_MNEMONIC=R
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
 MENU_VIEW_LIBRARY_ACCESSIBLE=Prikaži fajlove za razmenu
-
 #### MENU_VIEW_CONSOLE=Console
 MENU_VIEW_CONSOLE=Komandni režim
 #### MENU_VIEW_CONSOLE_MNEMONIC=O
 MENU_VIEW_CONSOLE_MNEMONIC=K
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
 MENU_VIEW_CONSOLE_ACCESSIBLE=Prikaži komandni režim
-
 #### MENU_VIEW_LOGGING=Logging
 MENU_VIEW_LOGGING=Beležnica
 #### MENU_VIEW_LOGGING_MNEMONIC=G
@@ -493,7 +462,7 @@ MENU_VIEW_LOGGING_MNEMONIC=B
 MENU_VIEW_LOGGING_ACCESSIBLE=Prikaži beležnicu
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=Primeni izabranu pozadinu programa
-#### MENU_VIEW_THEMES_TITLE_MNEMONIC=P
+#### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
 MENU_VIEW_THEMES_TITLE_MNEMONIC=D
 #### MENU_VIEW_THEMES_GET_MORE=Get More Skins
 MENU_VIEW_THEMES_GET_MORE=Preuzmite nove pozadine za program
@@ -513,7 +482,6 @@ MENU_VIEW_THEMES_USE_DEFAULT=Primeni standardnu pozadinu
 MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=S
 #### MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin
 MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Postavi standardnu pozadinu
-
 #### MENU_VIEW_LANGS_TITLE=Change Language
 MENU_VIEW_LANGS_TITLE=Promeni jezik
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
@@ -540,6 +508,18 @@ MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 #### MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
 MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Prikaži MagnetMix dugme
+#### MENU_VIEW_INCREASE_FONT_SIZE=Increase Font Size
+#? MENU_VIEW_INCREASE_FONT_SIZE=
+#### MENU_VIEW_INCREASE_FONT_SIZE_ACCESSIBLE=Increases the Font Size
+#? MENU_VIEW_INCREASE_FONT_SIZE_ACCESSIBLE=
+#### MENU_VIEW_INCREASE_FONT_SIZE_MNEMONIC=I
+#? MENU_VIEW_INCREASE_FONT_SIZE_MNEMONIC=
+#### MENU_VIEW_DECREASE_FONT_SIZE=Decrease Font Size
+#? MENU_VIEW_DECREASE_FONT_SIZE=
+#### MENU_VIEW_DECREASE_FONT_SIZE_ACCESSIBLE=Decreases the Font Size
+#? MENU_VIEW_DECREASE_FONT_SIZE_ACCESSIBLE=
+#### MENU_VIEW_DECREASE_FONT_SIZE_MNEMONIC=D
+#? MENU_VIEW_DECREASE_FONT_SIZE_MNEMONIC=
 
 #### MENU_RESOURCES_TITLE=Resources
 MENU_RESOURCES_TITLE=Nadogradnja
@@ -578,6 +558,12 @@ MENU_TOOLS_OPTIONS=Podešavanja
 MENU_TOOLS_OPTIONS_MNEMONIC=P
 #### MENU_TOOLS_OPTIONS_ACCESSIBLE=Display the Options Screen
 MENU_TOOLS_OPTIONS_ACCESSIBLE=Prikaži stranicu za podešavanje programa
+#### MENU_TOOLS_FEEDREADER=News Reader
+#? MENU_TOOLS_FEEDREADER=
+#### MENU_TOOLS_FEEDREADER_MNEMONIC=R
+#? MENU_TOOLS_FEEDREADER_MNEMONIC=
+#### MENU_TOOLS_FEEDREADER_ACCESSIBLE=Display the News Reader
+#? MENU_TOOLS_FEEDREADER_ACCESSIBLE=
 
 #### MENU_FILTERS_TITLE=Filters
 MENU_FILTERS_TITLE=Filteri
@@ -674,6 +660,8 @@ TABLES_DISPLAY_TOOLTIPS=Opširniji opis
 SEARCH_NOT_CONNECTED=Niste priključeni na Internet. Da bi ste se priključili, kliknite na 'Poveži se' u meniju 'Program'. Pretraživanje neće raditi dok se ne priključite.
 #### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
 SEARCH_STILL_CONNECTING=LimeWire se priključuje na mrežu. Vaše pretraživanje neće pokazati mnogo rezultata sve dok se potpuno ne priključite na mrežu.
+#### SEARCH_NOT_STARTED=Please wait, LimeWire must finish loading before a search can be started.
+#? SEARCH_NOT_STARTED=
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=Preuzimi
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
@@ -925,6 +913,11 @@ DOWNLOAD_POPUP_MENU_CLEAR=Ukloni fajlove koji se ne preuzimaju
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
 DOWNLOAD_EXPLORE_BUTTON_TIP=Otvori fasciklu u koju je smešten fajl
 
+#### DOWNLOAD_SHOW_BUTTON_LABEL=Show in Library
+#? DOWNLOAD_SHOW_BUTTON_LABEL=
+#### DOWNLOAD_SHOW_BUTTON_TIP=Show Download in Library
+#? DOWNLOAD_SHOW_BUTTON_TIP=
+
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Pokreni
 #### LIBRARY_LAUNCH_BUTTON_TIP=Launch Selected Files
@@ -965,6 +958,10 @@ LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=U podešavanjima možete odabrati koje fa
 LIBRARY_SHARED_FILES_CONFIGURE=Podesite...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Podesite razmenu fajlova
+#### LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=Move to Trash
+#? LIBRARY_MOVE_TO_TRASH_LABEL_OTHER=
+#### LIBRARY_MOVE_TO_TRASH_LABEL_WIN=Move to Recycle Bin
+#? LIBRARY_MOVE_TO_TRASH_LABEL_WIN=
 
 ################################################################################
 # Key/value pairs for the Library Search.
@@ -990,6 +987,8 @@ PLAYLIST_DELETE_BUTTON_LABEL=Ukloni
 PLAYLIST_DELETE_BUTTON_TIP=Ukloni obeleženu pesmu sa liste
 #### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=Lista pesama (*.m3u)
+#### PLAYLIST_OVERWRITE_QUESTION=You have some songs in the playlist.  Would you like to clear them and start a new playlist?
+#? PLAYLIST_OVERWRITE_QUESTION=
 
 ################################################################################
 # Key/value pairs for the integrated media player.
@@ -1077,7 +1076,7 @@ SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Greška u sistemu zapisa fajlova
 SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Isti fajl se već preuzima
 # {0} the full path name of the file
 #### SAVE_LOCATION_ALREADY_EXISTS_ERROR=A file already exists at {0}.
-SAVE_LOCATION_ALREADY_EXISTS_ERRORFajl već postoji u {0}.
+#? SAVE_LOCATION_ALREADY_EXISTS_ERROR=
 # {0} the full path name of the file
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Another download is already saving to {0}.
 SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Drugi fajl se već snima u {0}.
@@ -1102,6 +1101,8 @@ SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Nije moguće smestiti fajl u {0}, jer tip f
 SAVE_LOCATION_FILESYSTEM_ERROR=Nije moguće podesiti lokaciju fajla zbog greške u sistemu.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Isti fajl se već preuzima.
+#### SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=The path of the parent folder exceeds the maximum length of paths on the filesystem. {0}
+#? SAVE_LOCATION_PATH_NAME_TOO_LONG_ERROR=
 
 ################################################################################
 # Key/value pairs for DownloaderUtils.
@@ -1501,6 +1502,8 @@ CV_COLUMN_VENDOR=Program/verzija
 CV_COLUMN_TIME=Vreme
 #### CV_COLUMN_COMPRESSION=Compressed (I/O)
 CV_COLUMN_COMPRESSION=Sabijeno (I/O)
+#### CV_COLUMN_SSL=SSL Overhead (I/O)
+#? CV_COLUMN_SSL=
 #### CV_COLUMN_QRP_FULL=QRP (%)
 CV_COLUMN_QRP_FULL=QRP (%)
 #### CV_COLUMN_QRP_USED=QRP Empty
@@ -1549,6 +1552,8 @@ CV_STRING_STATUS=Stanje veze:
 CV_ADD_HOST_LABEL=Udaljeni računar:
 #### CV_ADD_PORT_LABEL=Port:
 CV_ADD_PORT_LABEL=Kanal:
+#### CV_ADD_TLS_LABEL=Use TLS:
+#? CV_ADD_TLS_LABEL=
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
 CV_ADD_DIALOG_TITLE=Dodaj Gnutella vezu
 
@@ -2109,6 +2114,22 @@ INTERNETARCHIVE_UPLOADER_CHECKIN=Provera...
 INTERNETARCHIVE_IDRETRIEVER_TITLE=Čekanje na proveru...
 
 ################################################################################
+# Key/Value pairs for the recursive sharing panel/dialog
+################################################################################
+#### RECURSIVE_SHARING_DIALOG_TITLE=Folders to share
+#? RECURSIVE_SHARING_DIALOG_TITLE=
+#### RECURSIVE_SHARING_DIALOG_DESCRIPTION=The following folders and subfolders will be shared.  You can uncheck any folders you do not want to share.  (You can change your shared folders at any time in LimeWire's options.)
+#? RECURSIVE_SHARING_DIALOG_DESCRIPTION=
+#### RECURSIVE_SHARING_LEGEND=Legend
+#? RECURSIVE_SHARING_LEGEND=
+#### RECURSIVE_SHARING_FOLDER_FULLY_SHARED=Folder is fully shared including all subfolders.
+#? RECURSIVE_SHARING_FOLDER_FULLY_SHARED=
+#### RECURSIVE_SHARING_FOLDER_NOT_SHARED=Folder is not shared and no subfolders are shared.
+#? RECURSIVE_SHARING_FOLDER_NOT_SHARED=
+#### RECURSIVE_SHARING_FOLDER_PARTIALLY_SHARED=Folder's files and some subfolders are shared.
+#? RECURSIVE_SHARING_FOLDER_PARTIALLY_SHARED=
+
+################################################################################
 # Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
@@ -2223,16 +2244,30 @@ SPLASH_STATUS_ICONS=Učitavanje sličica...
 SPLASH_STATUS_I18N=Učitavanje internacionalne podrške...
 #### SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
 SPLASH_STATUS_DAAP=Učitavanje Digital Audio Access protokola...
-#### SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading Connection Listener...
-SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Učitavanje funkcije za nadgledanje veza...
+#### SPLASH_STATUS_COMPONENT_LOADING_SSL_TEST=Loading TLS Encryption...
+#? SPLASH_STATUS_COMPONENT_LOADING_SSL_TEST=
+#### SPLASH_STATUS_COMPONENT_LOADING_CONTENT_MANAGER=Loading Safe Content Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_CONTENT_MANAGER=
 #### SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading Message Router...
 SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Učitavanje prosleđivanja poruka...
-#### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading Connection Manager...
+#### SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER=Loading Upload Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER=
+#### SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading Connection Listener...
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Učitavanje funkcije za nadgledanje veza...
+#### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading Connection Management...
 SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Učitavanje asistenta za veze...
+#### SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER=Loading Download Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER=
+#### SPLASH_STATUS_COMPONENT_LOADING_NODE_ASSIGNER=Loading Ultrapeer/DHT Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_NODE_ASSIGNER=
 #### SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating Peers...
 SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Traženje izvora fajlova...
-#### SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading Shared Siles...
+#### SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading Shared Files...
 SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Učitavanje fajlova za razmenu...
+#### SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER=Loading bittorrent Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER=
+#### SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR=Loading magnet Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR=
 #### SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading Old Downloads...
 SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Učitavanje ranije pokrenutih preuzimanja...
 #### SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for Updates...
@@ -2243,12 +2278,12 @@ SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Učitavanje usmerenog ispitivač
 SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Učitavanje Magnet praćenja fajlova...
 #### SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading Peer Listener...
 SPLASH_STATUS_COMPONENT_LOADING_PINGER=Učitavanje praćenja izvora fajlova...
-#### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading Stale Connection Manager...
+#### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading Stale Connection Management...
 SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Učitavanje asistenta za povezivanje...
 #### SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading Saved Files...
 SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Učitavanje snimljenih fajlova...
-#### SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading Secure Settings...
-SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Učitavanje sigurnosnih podešavanja...
+#### SPLASH_STATUS_COMPONENT_LOADING_SPAM=Loading Spam Management...
+#? SPLASH_STATUS_COMPONENT_LOADING_SPAM=
 
 ##################################################################
 # Key/value pairs for the shutdown window.
@@ -2445,6 +2480,8 @@ ERROR_INTERNAL_SERVLET_FAILED=LimeWire nije bio u mogućnosti da se priključi n
 ################################################################################
 # Key/Value pairs for error messages.
 ################################################################################
+#### ERROR_PREFERENCES_PERMISSIONS_FAILED=LimeWire could not create a temporary preferences directory.\n\nThis is generally caused by a lack of permissions.  Please make sure that LimeWire (and you) have access to create files/folders on your computer.  If the problem persists, please visit www.limewire.com and click the 'Support' link.\n\nLimeWire will now exit.  Thank You.
+#? ERROR_PREFERENCES_PERMISSIONS_FAILED=
 #### ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=LimeWire was unable to create your settings directory and is using a temporary directory.  Your settings may be deleted when you close LimeWire.
 ERROR_TEMPORARY_SETTINGS_DIRECTORY_USED=LimeWire ne može da napravi fasciklu za Vaša podešavanja pa koristi privremenu. Podešavanja mogu biti poništena kada zatvorite LimeWire.
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
@@ -2465,6 +2502,8 @@ ERROR_PORT_UNAVAILABLE=Kanal (port) nije na raspolaganju. Molimo Vas odaberite d
 ERROR_PORT=Nije pronađen kanal za dolazeću vezu.\nMolimo Vas odredite kanal u prozoru Podešavanja.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Vaša reč za pretraživanje mora imati najmanje tri slova da bi se sprečilo zagušenje mreže..
+#### ERROR_THREE_CHARACTER_SEARCH_LOCAL=Your search must be at least three characters long to avoid too many meaningless results.
+#? ERROR_THREE_CHARACTER_SEARCH_LOCAL=
 
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Pogrešna fascikla za snimanje fajlova. Molimo Vas koristite drugu fasciklu ili se vratite na standardno podešavanje.
@@ -2472,7 +2511,7 @@ ERROR_INVALID_SAVE_DIRECTORY=Pogrešna fascikla za snimanje fajlova. Molimo Vas 
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Odabrana fascikla za snimanje nije ispravna. Možda je izbrisana, možda nemate dozvolu za upisivanje ili je u pitanju neki drugi problem. Molimo Vas odaberite neku drugu fasciklu.
 #### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save folder is invalid. You may not have permissions to write to the selected folder. LimeWire will revert to your previously selected folder.
 ERROR_INVALID_SAVE_DIRECTORY_SELECTION=Odabrana fascikla za snimanje nije ispravna. Možda nemate dozvolu za upisivanje u odabranu fasciklu. LimeWire će vratiti fasciklu za snimanje na prethodno odabranu.
-#### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files. Please use another folder or revert to the default.
+#### ERROR_INVALID_SHARED_DIRECTORY=The selected folder cannot be shared.  Please select another folder to share.
 ERROR_INVALID_SHARED_DIRECTORY=Neispravna fascikla za razmenu fajlova. Molimo Vas koristite drugu fasciklu ili vratite standardnu vrednost.
 #### WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=Saving downloads to {0} may not function correctly.  To be sure downloads are saved properly you should save them to a sub-directory of {1}.  Would you like to choose another location?
 WARNING_UNSAFE_VISTA_SAVE_DIRECTORY=Snimanje preuzetih fajlova u {0} možda neće raditi kako treba. Da biste bili sigurni, snimite ih u podfasciklu {1}. Da li želite da odaberete neko drugo mesto?
@@ -2520,6 +2559,8 @@ ERROR_REMOVE_LAST_COL=Ne možete isključiti sve kolone.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Nije moguće pretražiti udaljeni računar
 #### ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
+#### ERROR_BROWSE_INVALID_HOST=The address format is incorrect, please use host:port.
+#? ERROR_BROWSE_INVALID_HOST=
 #### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
 ERROR_APPLYING_INVALID_THEME_FILE=Šablon koji ste odabrali nije ispravan. LimeWire će vratiti standardni šablon.
 #### ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid. Please choose another file, or use the default.
@@ -2542,7 +2583,7 @@ ERROR_PROPS_CORRUPTED=Fajl koji ste koristili za čuvanje podešavanja je ošte�
 ERROR_SEARCH_TOO_LARGE=Pretraživanje traje predugo. Pokušajte da izmenite pretraživanje i probate ponovo.
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 ERROR_XML_SEARCH_TOO_LARGE=Pretraživanje je previše specifično. Izmenite pretraživanje i pokušajte ponovo.
-#### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copyright year and title.
+#### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copright year and title.
 ERROR_CCPUBLISHER_MISSING_DETAIL=Molimo unesite vlasnika licence, godinu i datum.
 #### ERROR_CCPUBLISHER_MISSING_TITLE=Please enter the title of the file you want to publish.
 ERROR_CCPUBLISHER_MISSING_TITLE=Molimo Vas unesite naslov fajla koji želite da objavite.
@@ -2578,6 +2619,8 @@ ERROR_COULD_NOT_OPEN_TORRENT=LimeWire nije uspeo da učita izabrani torrent fajl
 ERROR_COULD_NOT_OPEN_TORRENT_URL=LimeWire nije mogao da preuzme torrent fajl sa sledeće adrese:
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 ERROR_BAD_TORRENT_URL=Navedena adresa nije ispravna, proverite šta ste upisali.
+#### ERROR_ALPHA_EXPIRED=This Alpha version has expired.  Press Ok to exit.
+#? ERROR_ALPHA_EXPIRED=
 
 ################################################################################
 # Messages for Licensing.
@@ -2660,6 +2703,10 @@ OPTIONS_SAVE_BASIC_MAIN_TITLE=Osnovno
 OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Napredno
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=Razmena
+#### OPTIONS_SHARED_BASIC_TITLE=Basic
+#? OPTIONS_SHARED_BASIC_TITLE=
+#### OPTIONS_SHARED_ADVANCED_MAIN_TITLE=Advanced
+#? OPTIONS_SHARED_ADVANCED_MAIN_TITLE=
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
 OPTIONS_SPEED_MAIN_TITLE=Brzina
 #### OPTIONS_PERFORMANCE_MAIN_TITLE=Performance
@@ -2793,7 +2840,7 @@ OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Razmena preuzetih fajlova:
 OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Razmena preuzetog
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Možete razmenjivati preuzeti fajlovi u fasciklama koje nisu deljene.
-#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
+#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=Da li želite da razmenjujete Vaše nove fascikle za čuvanje fajlova? Sledeće nove fascikle će biti razmenjivane:\n\n
 #### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
 OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent razmena
@@ -2833,12 +2880,14 @@ OPTIONS_SPEED_BOX_LABEL=Brzina:
 ################################################################################
 #### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
 OPTIONS_DISABLE_CAPABILITIES_TITLE=Mogućnosti
-#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
+#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" and/or connect to the Mojito DHT.  LimeWire can also use a secure communications mode called TLS, which may use more CPU resources.  You can disable these if needed.
 OPTIONS_DISABLE_CAPABILITIES_LABEL=Ako Vaš kompjuter ima brzu Internet vezu, LimeWire može raditi kao "Ultrapeer", odnosno server za korisnije sa slabijom vezom, i povezati se u Mojito DHT. Možete kasnije ovo isključiti.
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Isključite Ultrapeer mogućnost:
 #### OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Disable Mojito DHT Capabilities:
 OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Isključi Mojito DHT mogućnosti:
+#### OPTIONS_DISABLE_TLS_BOX_LABEL=Disable TLS Capabilities:
+#? OPTIONS_DISABLE_TLS_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for disabling OOB support.
@@ -3194,6 +3243,16 @@ OPTIONS_POPUPS_TITLE=Novi prozori
 OPTIONS_POPUPS_LABEL=Ponovno prikazivanje poruka za koje ste odabrali "Ne prikazuj više ovu poruku" ili "Uvek koristi ovaj odgovor".
 #### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Vrati na standardno podešavanje:
+
+################################################################################
+# Key/value pairs for asking whether or not to display notifications.
+################################################################################
+#### OPTIONS_NOTIFICATIONS_TITLE=Notifications
+#? OPTIONS_NOTIFICATIONS_TITLE=
+#### OPTIONS_NOTIFICATIONS_LABEL=LimeWire can display popups to notify you when certain things happen, such as a download completing.
+#? OPTIONS_NOTIFICATIONS_LABEL=
+#### OPTIONS_SHOW_NOTIFICATIONS_LABEL=Show Notifications:
+#? OPTIONS_SHOW_NOTIFICATIONS_LABEL=
 
 ################################################################################
 # Key/value pairs for default action when trying to download existing file.
@@ -4779,3 +4838,19 @@ ALL_OOB_BYPASSED=Mimoišli odgovori
 STATS_OOB_THROUGHPUT_TITLE=OOB uspešnost
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 STATS_OOB_THROUGHPUT_LABEL=Broj odgovora zatraženih i primljenih preko OOB protokola.
+
+###############################################################################
+# Key/value pairs for Java version upgrade notifications
+###############################################################################
+#### UPGRADE_JAVA=Upgrade Java
+#? UPGRADE_JAVA=
+#### UPGRADE_JAVA_16_BETA_MESSAGE=You are currently using a beta or pre-release version of Java 1.6.0. This version is known to have caused problems with LimeWire. Please upgrade to the final 1.6.0 release.\n
+#? UPGRADE_JAVA_16_BETA_MESSAGE=
+#### MORE_INFORMATION=More Information
+#? MORE_INFORMATION=
+#### VISIT_URL=Visit {0}
+#? VISIT_URL=
+#### REMIND_ME_LATER=Remind Me Later
+#? REMIND_ME_LATER=
+#### DO_NOT_SHOW_AGAIN=Do not Show Again
+#? DO_NOT_SHOW_AGAIN=
