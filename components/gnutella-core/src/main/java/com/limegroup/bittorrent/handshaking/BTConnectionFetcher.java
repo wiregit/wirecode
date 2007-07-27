@@ -215,7 +215,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerDone(com.limegroup.bittorrent.handshaking.BTHandshaker)
 	 */
 	public void handshakerDone(BTHandshaker shaker) {
-		assert(shutdown || handshaking.contains(shaker));
+		assert shutdown || handshaking.contains(shaker) : "unknown shaker "+shaker;
 		handshaking.remove(shaker);
 	}
 	

@@ -191,4 +191,11 @@ ChannelWriter, ChannelReadObserver, IpPort {
     public InetSocketAddress getInetSocketAddress() {
         return loc.getInetSocketAddress();
     }
+    
+    public String toString() {
+        return "shaker finishing handshakes "+finishingHandshakes+
+        " incoming done "+incomingDone+
+        " current buf "+currentBufIndex+
+        " shutdown "+shutdown;
+    }
 }
