@@ -20,9 +20,10 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.EvictorManager;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -273,6 +274,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         }
 
         public StorableModelManager getStorableModelManager() {
+            return null;
+        }
+
+        public EvictorManager getEvictorManager() {
             return null;
         }
     }

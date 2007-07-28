@@ -31,6 +31,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
@@ -232,6 +233,11 @@ public interface MojitoDHT extends Closeable {
      * Returns the StorableModelManager
      */
     public StorableModelManager getStorableModelManager();
+    
+    /**
+     * Returns the EvictorManager
+     */
+    public EvictorManager getEvictorManager();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use

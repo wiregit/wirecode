@@ -76,11 +76,12 @@ public class DatabaseCleaner implements Runnable {
      * Removes all expired DHTValueEntities from the Database
      */
     private void cleanupDatabase() {
+        EvictorManager evictorManager = context.getEvictorManager();
         RouteTable routeTable = context.getRouteTable();
         Database database = context.getDatabase();
         synchronized (database) {
             for (DHTValueEntity entity : database.values()) {
-                if (DatabaseUtils.isExpired(routeTable, entity)) {
+                if (evictorManager.isExpired(routeTable, entity)) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(entity + " is expired!");
                     }

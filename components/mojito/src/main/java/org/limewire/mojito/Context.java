@@ -51,6 +51,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseCleaner;
+import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.StorablePublisher;
@@ -151,6 +152,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private final DHTValueFactoryManager factoryManager = new DHTValueFactoryManager();
     
     private final StorableModelManager publisherManager = new StorableModelManager();
+    
+    private final EvictorManager evictorManager = new EvictorManager();
     
     private volatile HostFilter hostFilter = null;
     
@@ -686,6 +689,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public StorableModelManager getStorableModelManager() {
         return publisherManager;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getEvictorManager()
+     */
+    public EvictorManager getEvictorManager() {
+        return evictorManager;
     }
     
     /*
