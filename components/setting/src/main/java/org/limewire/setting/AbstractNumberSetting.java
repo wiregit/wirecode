@@ -41,7 +41,7 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
         }
         MAX_VALUE = max;
         MIN_VALUE = min;
-        setValue(defaultValue); // performs normalization
+        setValue(getValueAsString()); // performs normalization
     }
 
     /**
