@@ -5,6 +5,12 @@ import java.io.File;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.limewire.setting.SettingsFactory;
+import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
+import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -84,5 +90,24 @@ public class SharingSettingsTest extends LimeTestCase {
 	
 	public void testGetSaveDirectoryForNoFilenameLabel() {
 		assertEquals(SharingSettings.getSaveDirectory(null), SharingSettings.getSaveDirectory("No Filename"));
+	}
+	
+	public void testExtensionsToShareConversionToStringArraySetting() throws Exception {
+	    SettingsFactory factory = new SettingsFactory(new File(""));
+	    StringSetting oldExtensionsSetting = factory.createStringSetting("oldSetting", SharingSettings.DEFAULT_EXTENSIONS_TO_SHARE);
+	    
+	    // test conversion from default value
+	    StringArraySetting newExtensionsSetting = factory.createStringArraySetting("newSetting", StringUtils.split(SharingSettings.DEFAULT_EXTENSIONS_TO_SHARE, ';'));
+	    assertEquals(oldExtensionsSetting.getValue(), newExtensionsSetting.toString());
+	    
+	    // change old setting and create new setting from it with loadValue
+	    oldExtensionsSetting.setValue(oldExtensionsSetting.getValue() + ";hello");
+	    PrivilegedAccessor.invokeMethod(newExtensionsSetting, "loadValue", oldExtensionsSetting.getValue());
+	    assertEquals(oldExtensionsSetting.getValue(), newExtensionsSetting.toString());
+	    
+	    // set with trailing semicolon
+	    oldExtensionsSetting.setValue(oldExtensionsSetting.getValue() + ";test;");
+	    PrivilegedAccessor.invokeMethod(newExtensionsSetting, "loadValue", oldExtensionsSetting.getValue());
+	    assertEquals(StringUtils.split(oldExtensionsSetting.getValue(), ';'), newExtensionsSetting.getValue());
 	}
 }
