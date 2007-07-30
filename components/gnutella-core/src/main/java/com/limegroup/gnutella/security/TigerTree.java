@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.11 2007-07-11 20:53:51 sberlin Exp $
+ * $Id: TigerTree.java,v 1.12 2007-07-30 04:31:10 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -15,9 +15,8 @@ import java.util.ArrayList;
  * algorithm (using the approach as revised in December 2002, to add unique
  * prefixes to leaf and node operations)
  * 
- * For simplicity, calculates one entire generation before starting on the
- * next. A more space-efficient approach would use a stack, and calculate each
- * node as soon as its children ara available.
+ * This class calculates the root of a TigerTree, and keeps at most log(n) nodes
+ * (one for each tree level) in memory while doing so. 
  */
 public class TigerTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;

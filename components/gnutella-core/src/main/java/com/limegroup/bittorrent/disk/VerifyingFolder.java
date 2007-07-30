@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -327,12 +328,12 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (readNow == 0)
 				return false;
 			
-			long start = System.currentTimeMillis();
+			long start = System.nanoTime();
 			md.update(buf, 0, readNow);
 			
 			if (slow && SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
 					SharingSettings.FRIENDLY_HASHING.getValue()) {
-				long interval = System.currentTimeMillis() - start;
+				long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 				// go extra slow if there are active torrents
 				interval *= QUEUE.size() > 0 ? 5 : 3; 
 				if (interval > 0) 
