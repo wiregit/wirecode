@@ -378,7 +378,7 @@ public final class SearchSettings extends LimeProps {
                 new String[]{
                 "Only search results with a {0} are official LimeWire communications.",
                 "http://results.limewire.com/officialresults",
-                "0.1f"},
+                "1.0f"},
         "ResultPanel.SearchBanner");
     
 }
