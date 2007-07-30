@@ -809,7 +809,8 @@ public class ManagedDownloader extends AbstractDownloader
                     + "> completed download, state: " + getState());
         }
         
-        VerifyingFile.clearCaches();
+        // DPINJ: store the VFF we're using, or the DiskController it uses!!!
+        VerifyingFileFactory.getSharedFactory().getDiskController().clearCaches();
 
         // if this is all completed, nothing else to do.
         if(complete) {
@@ -1051,7 +1052,8 @@ public class ManagedDownloader extends AbstractDownloader
 			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
             if (completedSize > MAX_FILE_SIZE)
                 throw new IOException("invalid incomplete file "+completedSize);
-			commonOutFile = new VerifyingFile(completedSize);
+            // DPINJ:  Use a passed in VerifyingFileFactory!!!
+			commonOutFile = VerifyingFileFactory.getSharedFactory().createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
 			incompleteFileManager.addEntry(incompleteFile, commonOutFile);

@@ -24,7 +24,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Allows a testcase to easily interact with a fully running LimeWire.

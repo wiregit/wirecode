@@ -72,7 +72,7 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
@@ -1932,7 +1932,7 @@ public class DownloadTest extends LimeTestCase {
         File incFile = ifm.getFile(rfd1);
         incFile.createNewFile();
         // add the entry, so it's added to FileManager.
-        ifm.addEntry(incFile, new VerifyingFile(TestFile.length()));
+        ifm.addEntry(incFile, VerifyingFileFactory.getSharedFactory().createVerifyingFile(TestFile.length()));
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =
@@ -2848,7 +2848,7 @@ public class DownloadTest extends LimeTestCase {
                 
                 LOG.debug("received a push request");
                 
-                Socket s = Sockets.connect(new InetSocketAddress("127.0.0.1",_portC),500);
+                Socket s = SocketsManager.getSharedManager().connect(new InetSocketAddress("127.0.0.1",_portC),500);
                 
                 OutputStream os = s.getOutputStream();
                 

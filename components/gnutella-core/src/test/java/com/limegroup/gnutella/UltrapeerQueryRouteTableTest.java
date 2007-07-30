@@ -14,7 +14,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 /**

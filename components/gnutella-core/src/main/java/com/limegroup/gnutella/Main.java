@@ -14,7 +14,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**

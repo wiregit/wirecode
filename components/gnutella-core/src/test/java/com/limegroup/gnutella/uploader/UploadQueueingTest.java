@@ -34,6 +34,7 @@ import com.limegroup.gnutella.downloader.QueuedException;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -1145,7 +1146,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
-        VerifyingFile vf = new VerifyingFile(0);
+        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(0);
         vf.open(tmp);
         HTTPDownloader downloader = 
 			new HTTPDownloader(sb, rfd, vf,true);

@@ -28,7 +28,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.DatabaseUtils;
 
 /**
  * The DatabaseCleaner removes expired values from the local Database.

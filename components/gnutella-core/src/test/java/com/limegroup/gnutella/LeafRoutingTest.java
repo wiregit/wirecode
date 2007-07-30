@@ -36,7 +36,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

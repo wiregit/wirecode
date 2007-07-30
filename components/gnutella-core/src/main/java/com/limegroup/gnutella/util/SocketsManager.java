@@ -14,13 +14,8 @@ import org.limewire.util.OSUtils;
 
 
 /** Factory for creating Sockets. */
-public class Sockets {
+public class SocketsManager {
     
-    private final static SocketController CONTROLLER =
-        OSUtils.isSocketChallengedWindows() ?
-                new LimitedSocketController(4) :
-                new SimpleSocketController();
-                
     /** The different ways a connection can be attempted. */
     public static enum ConnectType {    
         PLAIN(new NIOSocketFactory()), TLS(new TLSSocketFactory());
@@ -34,12 +29,17 @@ public class Sockets {
         private NBSocketFactory getFactory() {
             return factory;
         }
-    }
+    }    
+    
+    private final SocketController CONTROLLER =
+        OSUtils.isSocketChallengedWindows() ?
+                new LimitedSocketController(4) :
+                new SimpleSocketController();
         
 	/**
 	 * Ensure this cannot be constructed.
 	 */
-	private Sockets() {}
+	private SocketsManager() {}
     
     /**
      * Connects and returns a socket to the given host, with a timeout.
@@ -55,7 +55,7 @@ public class Sockets {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(InetSocketAddress addr, int timeout) throws IOException {
+    public Socket connect(InetSocketAddress addr, int timeout) throws IOException {
         return connect(addr, timeout, ConnectType.PLAIN);
     }
     
@@ -78,7 +78,7 @@ public class Sockets {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
         return connect(addr, timeout, null, type);
     }
     
@@ -106,7 +106,7 @@ public class Sockets {
      * @throws IOException see above
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
         return connect(addr, timeout, observer, ConnectType.PLAIN);
     }
     
@@ -139,7 +139,7 @@ public class Sockets {
      * @throws IOException see above
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
         if(!NetworkUtils.isValidPort(addr.getPort()))  
             throw new IllegalArgumentException("port out of range: "+addr.getPort());
         if(addr.isUnresolved())
@@ -155,17 +155,23 @@ public class Sockets {
      * Otherwise it returns false, and the ConnectObserver should expect some sort of callback
      * indicating whether or not the connect succeeded.
      */
-    public static boolean removeConnectObserver(ConnectObserver observer) {
+    public boolean removeConnectObserver(ConnectObserver observer) {
         return CONTROLLER.removeConnectObserver(observer);
     }	
 
     /** Returns the number of Sockets allowed to be created concurrently. */
-	public static int getNumAllowedSockets() {
+	public int getNumAllowedSockets() {
         return CONTROLLER.getNumAllowedSockets();
 	}
     
     /** Returns the number of Sockets that are waiting for the controller to process them. */
-    public static int getNumWaitingSockets() {
+    public int getNumWaitingSockets() {
         return CONTROLLER.getNumWaitingSockets();
+    }
+    
+    // DPINJ: HACK --- for easily getting a single shared SocketsManager instance.  REMOVE ME!
+    private static SocketsManager sharedManager = new SocketsManager();
+    public static SocketsManager getSharedManager() {
+        return sharedManager;
     }
 }

@@ -26,7 +26,7 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -301,7 +301,8 @@ public final class ConnectionChecker implements Runnable {
         	InetAddress.getByName(host); // die fast if unresolvable
             Observer observer = new Observer();
             synchronized(observer) {
-                Socket s = Sockets.connect(new InetSocketAddress(host, 80), 6000, observer);
+                // DPINJ: Change to using passed-in SocketsManager!!!
+                Socket s = SocketsManager.getSharedManager().connect(new InetSocketAddress(host, 80), 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {
                     observer.wait(12000);
@@ -310,7 +311,7 @@ public final class ConnectionChecker implements Runnable {
                     LOG.debug("No response!");
                     // only consider unsuccesful if we were able to remove it
                     // 'cause if it couldn't be removed, a response is still pending...
-                    if(Sockets.removeConnectObserver(observer)) {
+                    if(SocketsManager.getSharedManager().removeConnectObserver(observer)) {
                         LOG.debug("Removed observer");
                         _unsuccessfulAttempts++;
                         IOUtils.close(s);

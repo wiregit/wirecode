@@ -31,8 +31,8 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -159,7 +159,8 @@ public class BrowseHostHandler {
                 ConnectType type = host.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
                 if(LOG.isDebugEnabled())
                     LOG.debug("Attempting direct connection with type: " + type);
-                Socket socket = Sockets.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
+                // DPINJ: Change to using passed-in SocketsManager!!!
+                Socket socket = SocketsManager.getSharedManager().connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
                 browseExchange(socket);

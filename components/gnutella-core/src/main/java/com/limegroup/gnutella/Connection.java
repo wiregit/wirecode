@@ -53,8 +53,8 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -411,11 +411,13 @@ public class Connection implements IpPort, Inspectable, Connectable {
     }
     
     protected Socket connect(String addr, int port, int timeout) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout, _connectType);
+        // DPINJ: Change to using passed-in SocketsManager!!!
+        return SocketsManager.getSharedManager().connect(new InetSocketAddress(addr, port), timeout, _connectType);
     }
 
     protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
+        // DPINJ: Change to using passed-in SocketsManager!!!
+        return SocketsManager.getSharedManager().connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
     }
 
     /**

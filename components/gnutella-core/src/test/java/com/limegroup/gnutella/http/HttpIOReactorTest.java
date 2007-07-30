@@ -33,7 +33,7 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -89,7 +89,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
-        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
+        Socket socket = SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));

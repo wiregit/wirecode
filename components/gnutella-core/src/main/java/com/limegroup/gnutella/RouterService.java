@@ -11,7 +11,6 @@ import java.nio.channels.SelectableChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -57,7 +56,6 @@ import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
@@ -91,8 +89,7 @@ import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -180,7 +177,7 @@ public class RouterService {
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    private static DownloadManager downloadManager = new DownloadManager();
+    static DownloadManager downloadManager = new DownloadManager();
     
     /**
      * Acceptor for HTTP connections.
@@ -207,7 +204,8 @@ public class RouterService {
 	/**
 	 * <tt>Statistics</tt> class for managing statistics.
 	 */
-	private static final Statistics STATISTICS = Statistics.instance();
+	@SuppressWarnings("unused") //DPINJ: touched to ensure it initializes, fix!
+    private static final Statistics STATISTICS = Statistics.instance();
 
 	/**
 	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
@@ -669,6 +667,25 @@ public class RouterService {
     }
 	                
     /**
+     *  Returns the number of initialized messaging connections.
+     */
+    public static int getNumInitializedConnections() {
+    	return getConnectionManager().getNumInitializedConnections();
+    }
+
+    public static boolean canReceiveSolicited() {
+    	return getUdpService().canReceiveSolicited();
+    }
+
+    public static boolean canReceiveUnsolicited() {
+    	return getUdpService().canReceiveUnsolicited();
+    }
+
+    public static boolean canDoFWT() {
+        return getUdpService().canDoFWT();
+    }
+
+    /**
      * Returns whether there are any active internet (non-multicast) transfers
      * going at speed greater than 0.
      */
@@ -1069,14 +1086,6 @@ public class RouterService {
     }
 
     /**
-     * Returns the number of pongs in the host catcher.  <i>This method is
-     * poorly named, but it's obsolescent, so I won't bother to rename it.</i>
-     */
-    public static int getRealNumHosts() {
-        return(catcher.getNumHosts());
-    }
-
-    /**
      * Returns the number of downloads in progress.
      */
     public static int getNumDownloads() {
@@ -1091,20 +1100,6 @@ public class RouterService {
     }
     
     /**
-     * Returns the number of downloads waiting to be started.
-     */
-    public static int getNumWaitingDownloads() {
-        return downloadManager.getNumWaitingDownloads();
-    }
-    
-    /**
-     * Returns the number of individual downloaders.
-     */
-    public static int getNumIndividualDownloaders() {
-        return downloadManager.getNumIndividualDownloaders();
-    }
-    
-    /**
      * Returns the number of uploads in progress.
      */
     public static int getNumUploads() {
@@ -1116,13 +1111,6 @@ public class RouterService {
      */
     public static int getNumQueuedUploads() {
         return uploadManager.getNumQueuedUploads();
-    }
-    
-    /**
-     * Returns the current uptime.
-     */
-    public static long getCurrentUptime() {
-        return STATISTICS.getUptime();
     }
     
     /**
@@ -1362,44 +1350,6 @@ public class RouterService {
     public static int countConnectionsWithNMessages(int messageThreshold) {
 		return manager.countConnectionsWithNMessages(messageThreshold);
     }
-
-    /**
-     * Prints out the information about current initialied connections
-     */
-    public static void dumpConnections() {
-        //dump ultrapeer connections
-        System.out.println("UltraPeer connections");
-        dumpConnections(manager.getInitializedConnections());
-        //dump leaf connections
-        System.out.println("Leaf connections");
-        dumpConnections(manager.getInitializedClientConnections());
-    }
-    
-    public static void dumpConnections(StringBuffer buf) {
-        buf.append("UltraPeer connections").append("\n");
-        dumpConnections(manager.getInitializedConnections(), buf);
-        buf.append("Leaf connections").append("\n");
-        dumpConnections(manager.getInitializedClientConnections(), buf);
-    }
-    
-    /**
-     * Prints out the passed collection of connections
-     * @param connections The collection(of Connection) 
-     * of connections to be printed
-     */
-    private static void dumpConnections(Collection<?> connections)
-    {
-        for(Iterator<?> iterator = connections.iterator(); iterator.hasNext();) {
-            System.out.println(iterator.next().toString());
-        }
-    }
-    
-    private static void dumpConnections(Collection<?> connections, StringBuffer buf) {
-        for(Iterator<?> iterator = connections.iterator(); iterator.hasNext();) {
-            buf.append(iterator.next().toString()).append("\n");
-        }
-    }
-    
     
     /** 
      * Returns a new GUID for passing to query.
@@ -1617,50 +1567,8 @@ public class RouterService {
         
         return hosts;
     }
-    
-    /**
-     *  Returns the number of messaging connections.
-     */
-    public static int getNumConnections() {
-		return manager.getNumConnections();
-    }
 
     /**
-     *  Returns the number of initialized messaging connections.
-     */
-    public static int getNumInitializedConnections() {
-		return manager.getNumInitializedConnections();
-    }
-    
-    /**
-     * Returns the number of active ultrapeer -> leaf connections.
-     */
-    public static int getNumUltrapeerToLeafConnections() {
-        return manager.getNumInitializedClientConnections();
-    }
-    
-    /**
-     * Returns the number of leaf -> ultrapeer connections.
-     */
-    public static int getNumLeafToUltrapeerConnections() {
-        return manager.getNumClientSupernodeConnections();
-    }
-    
-    /**
-     * Returns the number of ultrapeer -> ultrapeer connections.
-     */
-    public static int getNumUltrapeerToUltrapeerConnections() {
-        return manager.getNumUltrapeerConnections();
-    }
-    
-    /**
-     * Returns the number of old unrouted connections.
-     */
-    public static int getNumOldConnections() {
-        return manager.getNumOldConnections();
-    }
-    
-	/**
 	 * Returns whether or not this client currently has any initialized 
 	 * connections.
 	 *
@@ -2129,49 +2037,5 @@ public class RouterService {
     public static boolean isIpPortValid() {
         return (NetworkUtils.isValidAddress(getAddress()) &&
                 NetworkUtils.isValidPort(getPort()));
-    }
-    
-    public static boolean canReceiveSolicited() {
-    	return UDPSERVICE.canReceiveSolicited();
-    }
-    
-    public static boolean canReceiveUnsolicited() {
-    	return UDPSERVICE.canReceiveUnsolicited();
-    }
-    
-    public static boolean canDoFWT() {
-        return UDPSERVICE.canDoFWT();
-    }
-    
-    public static long getContentResponsesSize() {
-        return contentManager.getCacheSize();
-    }
-    
-    public static long getCreationCacheSize() {
-        return CreationTimeCache.instance().getSize();
-    }
-    
-    public static long getVerifyingFileByteCacheSize() {
-        return VerifyingFile.getSizeOfByteCache();
-    }
-    
-    public static long getVerifyingFileVerifyingCacheSize() {
-        return VerifyingFile.getSizeOfVerifyingCache();
-    }
-    
-    public static int getVerifyingFileQueueSize() {
-        return VerifyingFile.getNumPendingItems();
-    }
-    
-    public static long getByteBufferCacheSize() {
-        return NIODispatcher.instance().getBufferCache().getHeapCacheSize();
-    }
-    
-    public static int getNumberOfWaitingSockets() {
-        return Sockets.getNumWaitingSockets();
-    }
-    
-    public static int getNumberOfPendingTimeouts() {
-        return NIODispatcher.instance().getNumPendingTimeouts();
     }
 }

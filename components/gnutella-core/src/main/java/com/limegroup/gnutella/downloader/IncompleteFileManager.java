@@ -452,7 +452,8 @@ public class IncompleteFileManager implements Serializable {
                 }
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile(getCompletedSize(f));
+                    // DPINJ: use a passed-in VerifyingFileFactory!!!
+                    vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                 	continue;
                 }

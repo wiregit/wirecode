@@ -71,7 +71,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         File file=new File(getSaveDirectory(), "T-748-test.txt");
         IncompleteFileManager ifm=new IncompleteFileManager();
         Iterator iter=null;
-        VerifyingFile vf = new VerifyingFile(748);
+        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(748);
         //0 blocks
         assertNull(ifm.getEntry(file));
         assertEquals(0, ifm.getBlockSize(file));
@@ -161,7 +161,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
         File tmp1=ifm.getFile(rfd1);
-        VerifyingFile vf=new VerifyingFile(1839);
+        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(1839);
         ifm.addEntry(tmp1, vf);
 
         //After deleting entry there should be no more blocks...
@@ -187,7 +187,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File tmp1=ifm.getFile(rfd1);
-        VerifyingFile vf=new VerifyingFile(1839);
+        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(1839);
         ifm.addEntry(tmp1, vf);
         
         assertEquals(1, fm.getNumIncompleteFiles()); // 1 added.
@@ -332,7 +332,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
             RemoteFileDesc rfd=newRFD("file name.txt", 1839, 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             File incomplete=ifm1.getFile(rfd);
-            VerifyingFile vf=new VerifyingFile(1839);
+            VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(1839);
             vf.addInterval(Range.createRange(10, 100));  //inclusive
             ifm1.addEntry(incomplete, vf);
 

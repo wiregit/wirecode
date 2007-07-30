@@ -5,25 +5,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.ByteArrayCache;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
-import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.DiskException;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.tigertree.HashTree;
 
 
@@ -48,20 +40,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
  */
 public class VerifyingFile {
     
-    private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
-    
-    /**
-     * The thread that does the actual verification & writing
-     */
-    private static final ThreadPoolExecutor QUEUE = ExecutorsHelper.newSingleThreadExecutor(
-            new ThreadFactory() {
-                public Thread newThread(Runnable r) {
-                    Thread t = new ManagedThread(r, "BlockingVF");
-                    t.setDaemon(true);
-                    t.setPriority(Thread.NORM_PRIORITY+1);
-                    return t;
-                }
-            });
+    static final Log LOG = LogFactory.getLog(VerifyingFile.class);
     
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
@@ -78,20 +57,6 @@ public class VerifyingFile {
     
     /** How much to verify at a time */
     private static final int VERIFYABLE_CHUNK = 64 * 1024; // 64k
-    
-    /**
-     * A list of DelayedWrites that will write when space becomes available in the cache.
-     */
-    private static final List<DelayedWrite> DELAYED = new LinkedList<DelayedWrite>();
-    
-    /**  A cache for byte[]s. */
-    private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
-    static {
-        RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
-    }
-    
-    /** a bunch of cached byte[]s for verifyable chunks */
-    private static final PowerOf2ByteArrayCache CHUNK_CACHE = new PowerOf2ByteArrayCache();
     
     /**
      * The file we're writing to / reading from.
@@ -180,9 +145,6 @@ public class VerifyingFile {
      */
     private long existingFileSize = -1;
     
-    /** The number of chunks scheduled to be written. */
-    private static int chunksScheduled = 0;
-    
     /**
      * Additional counter to keep track of scheduled chunks in each single file.
      * Needed to prevent premature closing of underlying RandomAccessFile.
@@ -195,26 +157,21 @@ public class VerifyingFile {
      */
     private MultiIterable<Range> allBlocksIterable = null;
     
-    /**
-     * Constructs a new VerifyingFile, without a given completion size.
-     *
-     * Useful for tests.
-     */
-    public VerifyingFile() {
-        this(-1);
-    }
-    
+    /** The controller for doing disk reads/writes. */
+    private final DiskController diskController;
+        
     /**
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    public VerifyingFile(long completedSize) {
+    VerifyingFile(long completedSize, DiskController diskController) {
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
         savedCorruptBlocks = new IntervalSet();
+        this.diskController = diskController;
     }
     
     /**
@@ -264,9 +221,7 @@ public class VerifyingFile {
         if (writeBlockImpl(request)) {
             callback.writeScheduled();
         } else {
-            synchronized (CACHE) {
-                DELAYED.add(new DelayedWrite(request, callback, this));
-            }
+            diskController.addDelayedWrite(new VerifyingFileDelayedWrite(request, callback, this));
         }
     }
 
@@ -286,10 +241,7 @@ public class VerifyingFile {
         
         request.startProcessing();
         updateState(request.in);
-        boolean canWrite;
-        synchronized(CACHE) {
-            canWrite = DELAYED.isEmpty();
-        }
+        boolean canWrite = diskController.canWriteNow();
         
         if(canWrite)
         	return writeBlockImpl(request);
@@ -313,7 +265,7 @@ public class VerifyingFile {
         if (!validateState(request))
         	return true;
         
-        byte[] temp = CACHE.getQuick();
+        byte[] temp = diskController.getWriteChunk();
         if(temp == null)
             return false;
         
@@ -326,10 +278,8 @@ public class VerifyingFile {
         synchronized (this) {
             chunksScheduledPerFile++;
         }
-        synchronized(VerifyingFile.class) {
-            chunksScheduled++;
-            QUEUE.execute(new ChunkHandler(temp, request.in));
-        }
+        
+        diskController.addDiskJob(new ChunkHandler(temp, request.in));
         return true;
     }
     
@@ -545,10 +495,6 @@ public class VerifyingFile {
         return pendingBlocks.getSize();
     }
     
-    public static int getNumPendingItems() {
-        return QUEUE.getQueue().size();
-    }
-    
     /**
      * Returns the total number of verified bytes written to disk.
      */
@@ -747,7 +693,7 @@ public class VerifyingFile {
         if (previous == null && tree != null && (existingFileSize != -1 ||
                 (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
            ) {
-            QUEUE.execute(new EmptyVerifier(existingFileSize));
+            diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
             existingFileSize = -1;
         }
     }
@@ -771,22 +717,6 @@ public class VerifyingFile {
         return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
     }
     
-    /** Returns the number of bytes cached in the verifying cache. */
-    public static int getSizeOfVerifyingCache() {
-        return CHUNK_CACHE.getCacheSize();
-    }
-    
-    /** Returns the number of bytes cached in the byte cache. */
-    public static int getSizeOfByteCache() {
-        return CACHE.getCacheSize();
-    }
-    
-    /** Cleans the caches. */
-    public static void clearCaches() {
-        Runnable runner = new CacheCleaner();
-        runner.run();
-    }
-
     /**
      * Stub for calling verifyChunks(-1).
      */
@@ -804,7 +734,7 @@ public class VerifyingFile {
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {
-                byte []tmp = CHUNK_CACHE.get(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
+                byte[] tmp = diskController.getPowerOf2Chunk(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
                 boolean good = !tree.isCorrupt(i, fos, tmp);
                 synchronized (this) {
                     partialBlocks.delete(i);
@@ -878,23 +808,23 @@ public class VerifyingFile {
     /**
      * Runnable that writes chunks to disk & verifies partial blocks.
      */
-    private class ChunkHandler implements Runnable {
-        /** The buffer we are about to write to the file */
-        private final byte[] buf;
+    private class ChunkHandler extends ChunkDiskJob {
         
         /** The interval that we are about to write */
         private final Range intvl;
         
+        /** Whether or not running the job freed a pending block. */
+        private boolean freedPending = false;
+        
         public ChunkHandler(byte[] buf, Range intvl) {
-            this.buf = buf;
+            super(buf);
             this.intvl = intvl;
             long length = intvl.getHigh() - intvl.getLow() + 1;
             assert length <= buf.length : 
                 "invalid length "+length+ " vs buf "+buf.length;
         }
         
-        public void run() {
-            boolean freedPending = false;
+        public void runChunkJob(byte[] buf) {
     		try {
     		    if(LOG.isTraceEnabled())
     		        LOG.trace("Writing intvl: " + intvl);
@@ -916,74 +846,22 @@ public class VerifyingFile {
                     pendingBlocks.delete(intvl);
                     storedException = diskIO;
                 }
-            } finally {
-                synchronized(VerifyingFile.class) {
-                    chunksScheduled--;
-                }
+            }
+        }
+        
+        public void finish() {
+            synchronized(VerifyingFile.this) {
+                try {
+                    if (!freedPending)
+                        pendingBlocks.delete(intvl);
                 
-            	try {
-            		releaseChunk(buf, true);
-            	} catch (IllegalStateException bad) {
-            		// would like to know pending 
-            		throw new IllegalStateException(bad.getMessage()+"\n"+dumpState());
-            	}
-                
-                synchronized(VerifyingFile.this) {
-                    try {
-                        if (!freedPending)
-                            pendingBlocks.delete(intvl);
-                    
-                    } finally {
-                        --chunksScheduledPerFile;
-                        VerifyingFile.this.notifyAll();
-                    }
+                } finally {
+                    --chunksScheduledPerFile;
+                    VerifyingFile.this.notifyAll();
                 }
             }
         }
 	}
-    
-    private static void runDelayedWrites() {
-        synchronized(VerifyingFile.class) {
-            if(chunksScheduled > 0)
-                return;
-        }
-        
-        while(CACHE.isBufferAvailable()) {
-            DelayedWrite dw;
-            
-            synchronized(CACHE) {
-                if(DELAYED.isEmpty()) {
-                    LOG.debug("Nothing delayed to run.");
-                    return;
-                }
-                dw = DELAYED.get(0);
-            }
-
-            // write & notify outside of lock
-            if(dw.write()) {
-                // if we wrote succesfully, remove the item from the cache.
-                synchronized(CACHE) {
-                    DELAYED.remove(0);
-                }
-            } else {
-                // otherwise, something went wrong, so reschedule another
-                // delayed write later on.
-                // NOTE: this should be impossible to happen, but it's happening,
-                //       and its no huge deal, so we're preparing for it.
-                QUEUE.execute(new Runnable() {
-                    public void run() {
-                        runDelayedWrites();
-                    }
-                });
-            }
-        }
-    }
-    
-    private static void releaseChunk(byte[] buf, boolean runDelayed) {
-        CACHE.release(buf);
-        if(runDelayed)
-            runDelayedWrites();
-    }
     
     /**  A simple Runnable that schedules a verification of the file. */
     private class EmptyVerifier implements Runnable {
@@ -1001,42 +879,24 @@ public class VerifyingFile {
         }
     }
     
-    /**
-     * A Runnable that clears the cache used for storing byte[]s used for
-     * writing data read from network to disk, and schedules a ChunkCacheCleaner.
-     */
-    private static class CacheCleaner implements Runnable {
-        public void run() {
-            LOG.info("clearing cache");
-            CACHE.clear();
-            QUEUE.execute(new ChunkCacheCleaner());
-        }
-    }
-    
-    /** A Runnable that clears the cache storing byte[]s used for verifying. */
-    private static class ChunkCacheCleaner implements Runnable {
-    	public void run() {
-    		CHUNK_CACHE.clear();
-    	}
-    }
-    
+
     static interface WriteCallback {
         public void writeScheduled();
     }
     
-    private static class DelayedWrite {
+    private static class VerifyingFileDelayedWrite implements DelayedWrite {
         
     	private final WriteRequest request;
         private final WriteCallback callback;
         private final VerifyingFile vf;
         
-        DelayedWrite(WriteRequest request, WriteCallback callback, VerifyingFile vf) {
+        VerifyingFileDelayedWrite(WriteRequest request, WriteCallback callback, VerifyingFile vf) {
             this.request = request;
             this.callback = callback;
             this.vf = vf;
         }
         
-        private boolean write() {
+        public boolean write() {
             if(vf.writeBlockImpl(request)) {
                 callback.writeScheduled();
                 return true;

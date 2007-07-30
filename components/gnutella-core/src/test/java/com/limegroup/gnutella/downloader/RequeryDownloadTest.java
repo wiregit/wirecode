@@ -178,7 +178,7 @@ public class RequeryDownloadTest
        }
 
        //Record information in IncompleteFileManager.
-       VerifyingFile vf=new VerifyingFile(TestFile.length());
+       VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;

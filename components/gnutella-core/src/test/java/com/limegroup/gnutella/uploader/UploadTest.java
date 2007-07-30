@@ -44,6 +44,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -181,7 +182,7 @@ public class UploadTest extends LimeTestCase {
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        vf = new VerifyingFile(252450);
+        vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(252450);
         fm.addIncompleteFile(incFile, urns, incName, 1981, vf);
         assertEquals(1, fm.getNumIncompleteFiles());
         assertEquals(2, fm.getNumFiles());

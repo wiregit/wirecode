@@ -28,7 +28,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Checks whether a leaf node handles GUESS queries correctly.  Tests the
@@ -90,7 +90,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock = Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock = SocketsManager.getSharedManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                        SERVER_PORT), 1200);
                 os = sock.getOutputStream();
                 os.write("CONNECT BACK\r\n\r\n".getBytes());

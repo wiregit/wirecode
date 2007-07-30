@@ -15,7 +15,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class TLSConnectionTest extends LimeTestCase {
     

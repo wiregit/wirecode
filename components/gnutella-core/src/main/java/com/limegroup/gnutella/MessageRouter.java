@@ -90,7 +90,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 
@@ -1363,7 +1363,8 @@ public abstract class MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
-                    sock = Sockets.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
+                    // DPINJ: Change to using passed-in SocketsManager!!!
+                    sock = SocketsManager.getSharedManager().connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();

@@ -277,7 +277,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
-        VerifyingFile vf=new VerifyingFile(1024);
+        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(1024);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 

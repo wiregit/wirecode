@@ -52,7 +52,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
         incompleteFile=ifm.getFile(rfd);
-        VerifyingFile vf=new VerifyingFile(size);
+        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(size);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 		// Make sure that we don't wait for network on requery

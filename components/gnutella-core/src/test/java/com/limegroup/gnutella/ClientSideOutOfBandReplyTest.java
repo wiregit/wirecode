@@ -32,7 +32,7 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -432,7 +432,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock=Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock=SocketsManager.getSharedManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());

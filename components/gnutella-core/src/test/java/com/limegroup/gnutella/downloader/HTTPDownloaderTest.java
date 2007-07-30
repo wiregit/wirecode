@@ -185,7 +185,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                             null, false, false, "LIME",
                                             null, -1, false);
         File f = new File("sam");
-        VerifyingFile vf = new VerifyingFile(length);
+        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(length);
         vf.open(f);
         HTTPDownloader dl = new HTTPDownloader(rfd, vf, false);
         
@@ -363,7 +363,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 0,
                                                 false);
                                                 
-        VerifyingFile vf = new VerifyingFile(1000);
+        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(1000);
         
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();

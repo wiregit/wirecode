@@ -30,7 +30,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 public class ExternalControl {
     
@@ -265,7 +265,8 @@ public class ExternalControl {
 		    port = ConnectionSettings.PORT.getValue();
         }   
 		try {
-			socket = Sockets.connect(new InetSocketAddress(LOCALHOST, port), 500);
+            // DPINJ: Change to using passed-in SocketsManager!!!
+			socket = SocketsManager.getSharedManager().connect(new InetSocketAddress(LOCALHOST, port), 500);
 			InputStream istream = socket.getInputStream(); 
 			socket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);

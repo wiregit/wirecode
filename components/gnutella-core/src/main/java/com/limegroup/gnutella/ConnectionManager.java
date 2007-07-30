@@ -50,9 +50,9 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -1782,7 +1782,8 @@ public class ConnectionManager implements ConnectionAcceptor,
                  - _initializingFetchedConnections.size();
 
         // do not open more sockets than we can
-        need = Math.min(need, Sockets.getNumAllowedSockets());
+        // DPINJ: Change to using passed-in SocketsManager!!!
+        need = Math.min(need, SocketsManager.getSharedManager().getNumAllowedSockets());
         
         // Build up lists of what we need to connect to & remove from connecting.
         
