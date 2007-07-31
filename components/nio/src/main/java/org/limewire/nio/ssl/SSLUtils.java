@@ -9,12 +9,14 @@ import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.BufferReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BufferUtils;
+
+import com.google.inject.Provider;
 
 /** Contains a collection of SSL-related utilites. */
 public class SSLUtils {
@@ -22,7 +24,7 @@ public class SSLUtils {
     private SSLUtils() {}
         
     private static final Executor TLS_PROCESSOR = ExecutorsHelper.newProcessingQueue("TLSProcessor");
-    private static final AtomicLazyReference<SSLContext> TLS_CONTEXT = new AtomicLazyReference<SSLContext>() {
+    private static final Provider<SSLContext> TLS_CONTEXT = new AbstractLazySingletonProvider<SSLContext>() {
         @Override
         protected SSLContext createObject() {
                 try {

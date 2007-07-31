@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
@@ -710,7 +710,7 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         RouterService rs = new RouterService(new ActivityCallbackStub());
-        AtomicLazyReference ref = (AtomicLazyReference)PrivilegedAccessor.getValue(
+        AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
                 rs, "DHT_MANAGER_REFERENCE");
         PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
         RouterService.preGuiInit();

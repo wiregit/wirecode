@@ -18,7 +18,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
     }
     
     public void testSingleton() {
-        AtomicLazyReference<Object> o = new AtomicLazyReference<Object>() {
+        AbstractLazySingletonProvider<Object> o = new AbstractLazySingletonProvider<Object>() {
             @Override
             protected Object createObject() {
                 return new Object();
@@ -66,7 +66,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
         
     }
     
-    private static class StubAtomicLazyReference extends AtomicLazyReference<Object> {
+    private static class StubAtomicLazyReference extends AbstractLazySingletonProvider<Object> {
         Object obj;
 
         @Override

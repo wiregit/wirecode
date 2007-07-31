@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
@@ -42,6 +42,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -287,8 +288,8 @@ public class RouterService {
     /**
      * The DHTManager that manages the DHT and its various modes
      */
-    private static AtomicLazyReference<DHTManager> DHT_MANAGER_REFERENCE
-        = new AtomicLazyReference<DHTManager>() {
+    private static Provider<DHTManager> DHT_MANAGER_REFERENCE
+        = new AbstractLazySingletonProvider<DHTManager>() {
             @Override
             public DHTManager createObject() {
                 return new DHTManagerImpl(
@@ -299,8 +300,8 @@ public class RouterService {
     /**
      * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
-    private static AtomicLazyReference<AltLocFinder> ALT_LOC_FINDER_REFERENCE
-        = new AtomicLazyReference<AltLocFinder>() {
+    private static Provider<AltLocFinder> ALT_LOC_FINDER_REFERENCE
+        = new AbstractLazySingletonProvider<AltLocFinder>() {
             @Override
             public AltLocFinder createObject() {
                 return new AltLocFinder(DHT_MANAGER_REFERENCE.get());

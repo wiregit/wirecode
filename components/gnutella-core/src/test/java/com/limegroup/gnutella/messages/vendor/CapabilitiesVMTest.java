@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -62,7 +62,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
         
         RouterService rs = new RouterService(new ActivityCallbackStub());
-        AtomicLazyReference ref = (AtomicLazyReference)PrivilegedAccessor.getValue(
+        AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
                 rs, "DHT_MANAGER_REFERENCE");
         PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
         

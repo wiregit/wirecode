@@ -22,7 +22,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.observer.Shutdownable;
@@ -725,7 +725,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     
     private <T>void setLazyReference(String name, final T value) throws Exception{
         PrivilegedAccessor.setValue(RouterService.class,name,
-                new AtomicLazyReference<T>() {
+                new AbstractLazySingletonProvider<T>() {
             public T createObject() {
                 return value;
             }

@@ -67,5 +67,7 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore.jar" sourcepath="lib/sources/httpcore-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar" sourcepath="lib/sources/httpcore-nio-src.jar"/>
+	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
+	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
