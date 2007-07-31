@@ -545,15 +545,17 @@ BTLinkListener {
 	 * Stops the torrent because of tracker failure.
 	 */
 	public synchronized void stopVoluntarily() {
+        boolean stop = false;
 		synchronized(state.getLock()) {
 			if (!isActive())
 				return;
-			if (state.get() == TorrentState.SEEDING) 
-				state.set(TorrentState.STOPPED);
-			else
+			if (state.get() != TorrentState.SEEDING) { 
 				state.set(TorrentState.TRACKER_FAILURE);
+                stop = true;
+            }
 		}
-		stopImpl();
+        if (stop)
+            stopImpl();
 	}
 	
 	/**
@@ -899,9 +901,11 @@ BTLinkListener {
 	
 	/**
 	 * @return true if continuing is hopeless
+     * seeding is never hopeless
 	 */
 	public boolean shouldStop() {
-		return linkManager.getNumConnections() == 0 && _peers.size() == 0;
+		return linkManager.getNumConnections() == 0 && _peers.size() == 0 && 
+        state.get() != TorrentState.SEEDING;
 	}
 	
 	/**

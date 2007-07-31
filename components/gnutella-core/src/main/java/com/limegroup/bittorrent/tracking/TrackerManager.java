@@ -182,8 +182,6 @@ public class TrackerManager {
 					if (trackers.size() == 1) {
                         MessageService.showFormattedError("TORRENTS_TRACKER_FAILURE",
                                 torrent.getMetaInfo().getName(), response.FAILURE_REASON);
-						torrent.stopVoluntarily();
-						return;
 					}
 				} else
 					t.recordSuccess();
