@@ -586,65 +586,67 @@ public class ConnectionManagerTest extends LimeTestCase {
     
     public void testClassCFiltering() throws Exception {
         ServerSocket s = new ServerSocket(10000);
-        ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        TestHostCatcher2 catcher = new TestHostCatcher2();
-        TestConnectionObserver observer = new TestConnectionObserver();
-        ConnectionManager cm = RouterService.getConnectionManager();
-        PrivilegedAccessor.setValue(cm,"_catcher",catcher);
-        cm.addEventListener(observer);
-        cm.connect();
-        EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        
-        // a connection should be initialized.
-        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
-        ConnectionLifecycleEvent event;
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        // we should be still looking for more connections
-        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        // adding a new endpoint from the same class C network should not trigger a connection
-        Endpoint e2 = new Endpoint("127.0.0.2", 10000);
-        eo.handleEndpoint(e2);
-        assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
-        // we should be still looking for more connections
-        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        // this is a different class C - it should trigger an event.
-        eo.handleEndpoint(new Endpoint("127.0.1.1", 20000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        
-        // after the connection gets closed we should get the endpoint back to 
-        // hostcatcher
-        s.accept().close();
-        assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
-        // two closed events - one for .1 and one for 1.1
-        do {
-            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionClosedEvent());
-        do {
-            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionClosedEvent());
-        
-        // now we should be able to establish a second connection
-        eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        
-        // if we allow more than one connection per class C, we'll be able to
-        // add a second connection to the same class
-        ConnectionSettings.FILTER_CLASS_C.setValue(false);
-        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        assertEquals(2,cm.getNumConnections());
-        
-        s.close();
-        Thread.sleep(10);
-        cm.removeEventListener(observer);
+        try {
+            ConnectionSettings.FILTER_CLASS_C.setValue(true);
+            TestHostCatcher2 catcher = new TestHostCatcher2();
+            TestConnectionObserver observer = new TestConnectionObserver();
+            ConnectionManager cm = RouterService.getConnectionManager();
+            PrivilegedAccessor.setValue(cm,"_catcher",catcher);
+            cm.addEventListener(observer);
+            cm.connect();
+            EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+
+            // a connection should be initialized.
+            eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+            ConnectionLifecycleEvent event;
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+            // we should be still looking for more connections
+            eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+            // adding a new endpoint from the same class C network should not trigger a connection
+            Endpoint e2 = new Endpoint("127.0.0.2", 10000);
+            eo.handleEndpoint(e2);
+            assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
+            // we should be still looking for more connections
+            eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+            // this is a different class C - it should trigger an event.
+            eo.handleEndpoint(new Endpoint("127.0.1.1", 20000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+
+            // after the connection gets closed we should get the endpoint back to 
+            // hostcatcher
+            s.accept().close();
+            assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
+            // two closed events - one for .1 and one for 1.1
+            do {
+                event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionClosedEvent());
+            do {
+                event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionClosedEvent());
+
+            // now we should be able to establish a second connection
+            eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+
+            // if we allow more than one connection per class C, we'll be able to
+            // add a second connection to the same class
+            ConnectionSettings.FILTER_CLASS_C.setValue(false);
+            eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+            assertEquals(2,cm.getNumConnections());
+
+            cm.removeEventListener(observer);
+        } finally {
+            s.close();
+        }
     }
 
     private void sleep() {
