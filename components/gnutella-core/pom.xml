@@ -13,13 +13,13 @@
   <version>${limewire.version}</version>
   <name>LimeWire Core</name>
 
-  <repositories>
-    <repository>
+  <pluginRepositories>
+    <pluginRepository>
       <id>xnap-commons</id>
       <name>XNap Commons Repository</name>
       <url>http://xnap-commons.sourceforge.net/repository</url>
-    </repository>
-  </repositories>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies> 
 	<!-- LimeWire Components -->
