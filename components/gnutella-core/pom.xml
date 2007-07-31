@@ -129,12 +129,14 @@
 	  <scope>compile</scope>
     </dependency>
 	<!-- Maven Plugins -->
+<!--
     <dependency>
 	  <groupId>org.xnap.commons</groupId>
 	  <artifactId>maven-gettext-plugin</artifactId>
       <version>1.0</version>
 	  <scope>plugin</scope>
     </dependency>
+-->
   </dependencies>
 
   <reporting>
@@ -142,7 +144,7 @@
 	  <plugin>
 	    <groupId>org.xnap.commons</groupId>
 	    <artifactId>maven-gettext-plugin</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
 	    <configuration>
           <targetBundle>com.limegroup.gnutella.Messages</targetBundle>
           <keysFile>limewire.pot</keysFile>
@@ -150,6 +152,7 @@
           <poDirectory>../lib/po</poDirectory>
 		  <sourceDirectory>../</sourceDirectory>
 		  <outputDirectory>.</outputDirectory>
+		  <keywords>-ktrc -ktr -kmarktr -ktrn:1,2 -kgetStringResource -kgetFormattedStringResource</keywords>		  
         </configuration>
       </plugin>
 	</plugins>
