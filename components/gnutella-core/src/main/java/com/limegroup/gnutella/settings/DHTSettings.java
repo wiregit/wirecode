@@ -108,7 +108,8 @@ public class DHTSettings extends LimeProps {
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting EXCLUDE_ULTRAPEERS 
-        = FACTORY.createBooleanSetting("EXCLUDE_ULTRAPEERS", true);
+        = FACTORY.createRemoteBooleanSetting("EXCLUDE_ULTRAPEERS", 
+                true, "DHT.ExcludeUltrapeers");
     
     /**
      * Setting for the probability to switch from DHT node to Ultrapeer node
