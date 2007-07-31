@@ -7,7 +7,7 @@ import org.xnap.commons.i18n.I18nFactory;
 
 public class I18n {
 
-    private static final org.xnap.commons.i18n.I18n i18n = I18nFactory.getI18n(I18n.class, "MessagesBundle");
+    private static final org.xnap.commons.i18n.I18n i18n = I18nFactory.getI18n(I18n.class, "Messages");
     
     public static final String tr(String text) {
         return i18n.tr(text);

@@ -13,6 +13,14 @@
   <version>${limewire.version}</version>
   <name>LimeWire Core</name>
 
+  <repositories>
+    <repository>
+      <id>xnap-commons</id>
+      <name>XNap Commons Repository</name>
+      <url>http://xnap-commons.sourceforge.net/repository</url>
+    </repository>
+  </repositories>
+
   <dependencies> 
 	<!-- LimeWire Components -->
     <dependency>
@@ -97,17 +105,17 @@
       <artifactId>jorbis</artifactId>
       <version>0.0.15</version>
     </dependency>
+    <dependency>
+      <groupId>org.xnap.commons</groupId>
+      <artifactId>gettext-commons</artifactId>
+      <version>0.9</version>
+    </dependency>
 	<!-- Ibiblio Jars -->
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
       <version>1.4.1</version>
     </dependency>
-<!--     <dependency> -->
-<!--       <groupId>com.jcraft</groupId> -->
-<!--       <artifactId>jsch</artifactId> -->
-<!--       <version>0.1.23</version> -->
-<!--     </dependency> -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
@@ -120,7 +128,32 @@
       <version>1</version>
 	  <scope>compile</scope>
     </dependency>
+	<!-- Maven Plugins -->
+    <dependency>
+	  <groupId>org.xnap.commons</groupId>
+	  <artifactId>maven-gettext-plugin</artifactId>
+      <version>1.0</version>
+	  <scope>plugin</scope>
+    </dependency>
   </dependencies>
+
+  <reporting>
+    <plugins>
+	  <plugin>
+	    <groupId>org.xnap.commons</groupId>
+	    <artifactId>maven-gettext-plugin</artifactId>
+        <version>1.0</version>
+	    <configuration>
+          <targetBundle>com.limegroup.gnutella.Messages</targetBundle>
+          <keysFile>limewire.pot</keysFile>
+          <outputFormat>properties</outputFormat>
+          <poDirectory>../lib/po</poDirectory>
+		  <sourceDirectory>../</sourceDirectory>
+		  <outputDirectory>.</outputDirectory>
+        </configuration>
+      </plugin>
+	</plugins>
+  </reporting>
 
   <build>
     <sourceDirectory>${basedir}</sourceDirectory>
