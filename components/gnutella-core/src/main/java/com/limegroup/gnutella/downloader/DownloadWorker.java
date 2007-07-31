@@ -197,7 +197,7 @@ public class DownloadWorker {
     /**
      * Whether I was interrupted before starting
      */
-    private volatile boolean _interrupted;
+    private final AtomicBoolean _interrupted = new AtomicBoolean(false);
 
     /**
      * The downloader that will do the actual downloading TODO: un-volatilize
@@ -292,7 +292,7 @@ public class DownloadWorker {
             LOG.trace("WORKER: " + this + ", State Changed, Current: "
                     + _currentState + ", status: " + status);
 
-        if (_interrupted) {
+        if (_interrupted.get()) {
             finishHttpLoop();
             return;
         }
@@ -617,7 +617,7 @@ public class DownloadWorker {
         _manager.removeActiveWorker(this);
 
         synchronized (_currentState) {
-            if (_interrupted) {
+            if (_interrupted.get()) {
                 LOG.debug("Exiting from queueing");
                 return;
             }
@@ -631,7 +631,7 @@ public class DownloadWorker {
                 LOG.debug("Queue time up");
 
                 synchronized (_currentState) {
-                    if (_interrupted) {
+                    if (_interrupted.get()) {
                         LOG.warn("WORKER: interrupted while waiting in queue "
                                 + _downloader);
                         return;
@@ -661,7 +661,7 @@ public class DownloadWorker {
             LOG.trace("establishConnection(" + _rfd + ")");
 
         // this rfd may still be useful remember it
-        if (_manager.isCancelled() || _manager.isPaused() || _interrupted) {
+        if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
             _manager.addRFD(_rfd);
             finishWorker();
             return;
@@ -682,7 +682,7 @@ public class DownloadWorker {
                     && state != DownloadStatus.CORRUPT_FILE
                     && state != DownloadStatus.HASHING
                     && state != DownloadStatus.SAVING) {
-                if (_interrupted)
+                if (_interrupted.get())
                     return; // we were signalled to stop.
                 _manager.setState(DownloadStatus.CONNECTING);
             }
@@ -721,7 +721,7 @@ public class DownloadWorker {
         if (_downloader == null) {
             _manager.informMesh(_rfd, false);
             return false;
-        } else if (_interrupted) {
+        } else if (_interrupted.get()) {
             // if the worker got killed, make sure the downloader is stopped.
             _downloader.stop();
             _downloader = null;
@@ -736,7 +736,7 @@ public class DownloadWorker {
      * success or failure.
      */
     private void connectDirectly(DirectConnector observer) {
-        if (!_interrupted) {
+        if (!_interrupted.get()) {
             ConnectType type = _rfd.isTLSCapable()
                     && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS
                     : ConnectType.PLAIN;
@@ -765,7 +765,7 @@ public class DownloadWorker {
      * failure.
      */
     private void connectWithPush(PushConnector observer) {
-        if (!_interrupted) {
+        if (!_interrupted.get()) {
             if (LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt push connection to: " + _rfd);
             _connectObserver = null;
@@ -795,7 +795,7 @@ public class DownloadWorker {
                 return this + "hashcode "
                         + System.identityHashCode(_downloader)
                         + " will release? " + _shouldRelease + " interrupted? "
-                        + _interrupted + " active? " + _downloader.isActive()
+                        + _interrupted.get() + " active? " + _downloader.isActive()
                         + " victim? " + _downloader.isVictim()
                         + " initial reading "
                         + _downloader.getInitialReadingPoint()
@@ -966,7 +966,7 @@ public class DownloadWorker {
         _rfd.resetFailedCount();
 
         synchronized (_manager) {
-            if (_manager.isCancelled() || _manager.isPaused() || _interrupted) {
+            if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
                 LOG.trace("Stopped in assignAndRequest");
                 _manager.addRFD(_rfd);
                 return ConnectionStatus.getNoData();
@@ -1422,7 +1422,7 @@ public class DownloadWorker {
         synchronized (_manager) {
             if (_manager.getActiveWorkers().isEmpty()) {
                 if (_manager.isCancelled() || _manager.isPaused()
-                        || _interrupted)
+                        || _interrupted.get())
                     return ConnectionStatus.getNoData(); // we were signalled
                                                             // to stop.
                 _manager.setState(DownloadStatus.REMOTE_QUEUED);
@@ -1452,12 +1452,15 @@ public class DownloadWorker {
      * interrupts this downloader.
      */
     void interrupt() {
-        _interrupted = true;
+        if (_interrupted.getAndSet(true))
+            return;
 
+        boolean finishLoop;
         synchronized (_currentState) {
-            if (_currentState.getCurrentState() == DownloadState.QUEUED)
-                finishHttpLoop();
+            finishLoop = _currentState.getCurrentState() == DownloadState.QUEUED;
         }
+        if (finishLoop)
+            finishHttpLoop();
 
         if (LOG.isDebugEnabled())
             LOG.debug("Stopping while state is: " + _currentState + ", this: "
@@ -1493,7 +1496,7 @@ public class DownloadWorker {
 
     /** Ensures this worker is finished and doesn't start again. */
     private void finishWorker() {
-        _interrupted = true;
+        _interrupted.set(true);
         _manager.workerFinished(this);
     }
 
