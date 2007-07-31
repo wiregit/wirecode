@@ -83,7 +83,7 @@ public abstract class ClientSideTestCase
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue(new String[] { "txt" });
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 

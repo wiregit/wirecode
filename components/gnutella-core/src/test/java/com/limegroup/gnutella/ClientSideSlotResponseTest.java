@@ -43,7 +43,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     
     @SuppressWarnings("unused")
     private static void doSettings() throws Exception {
-    	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
+    	SharingSettings.EXTENSIONS_TO_SHARE.setValue(new String [] { "torrent", "txt" });
     	File textFile = new File(_sharedDir,TEXT_FILE);
     	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
     	File userTorrentFile = new File(_sharedDir,USER_TORRENT);

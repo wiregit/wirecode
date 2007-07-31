@@ -11,9 +11,11 @@ import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.Setting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.MediaType;
 
@@ -238,8 +240,8 @@ public class SharingSettings extends LimeProps {
     /**
 	 * File extensions that are shared.
 	 */
-    public static final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
+    public static final StringArraySetting EXTENSIONS_TO_SHARE =
+        FACTORY.createStringArraySetting("EXTENSIONS_TO_SEARCH_FOR", StringUtils.split(DEFAULT_EXTENSIONS_TO_SHARE, ';'));
                                             
     /**
      * Sets the probability (expressed as a percentage) that an incoming

@@ -45,7 +45,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 
     /** Extensions of files that the backend automatically shares */
-    public static final String SHARED_EXTENSION = "tmp";
+    public static final String[] SHARED_EXTENSION = { "tmp" };
 
     /** Port that normal backend will listen on */
     public static final int BACKEND_PORT = 6300;
@@ -406,7 +406,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
     		for(int i=0; i<files.length; i++) {
     			if(!files[i].isFile()) continue;
     			copyResourceFile(files[i], files[i].getName() + "."+
-                                 SHARED_EXTENSION);
+                                 SHARED_EXTENSION[0]);
     		}		
         }
 	}

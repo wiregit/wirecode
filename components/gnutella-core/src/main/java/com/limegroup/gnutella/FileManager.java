@@ -808,7 +808,7 @@ public abstract class FileManager {
             resetVariables();
 
             // Load the extensions.
-            String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
+            String[] extensions = SharingSettings.EXTENSIONS_TO_SHARE.getValue();
             for(int i = 0; i < extensions.length; i++)
                 _extensions.add(extensions[i].toLowerCase());
 

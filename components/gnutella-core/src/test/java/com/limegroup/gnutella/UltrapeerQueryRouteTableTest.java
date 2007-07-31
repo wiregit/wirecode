@@ -128,7 +128,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         assertTrue("should be connected", RouterService.isConnected());
                 
         QueryRequest qr = QueryRequest.createQuery(
-            "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
+            "FileManagerTest.class." + Backend.SHARED_EXTENSION[0], (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
         assertTrue("should have sent query", !SENT.isEmpty());

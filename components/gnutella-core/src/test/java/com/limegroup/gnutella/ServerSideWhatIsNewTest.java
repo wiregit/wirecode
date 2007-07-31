@@ -10,6 +10,7 @@ import java.util.Set;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import junit.framework.Test;
 
@@ -86,7 +87,7 @@ public class ServerSideWhatIsNewTest
         
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue(StringUtils.split("txt;exe;bin;dmg", ';'));
         setSharedDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
         berkeley = 
