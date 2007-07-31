@@ -9,7 +9,6 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.service.MessageService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
@@ -43,6 +42,8 @@ public class TrackerManager {
 	private final ManagedTorrent torrent;
 	
 	private volatile ScheduledFuture<?> scheduledAnnounce;
+    
+    private volatile String lastFailureReason;
 	
 	TrackerManager(ManagedTorrent torrent) {
 		this.torrent = torrent;
@@ -160,6 +161,10 @@ public class TrackerManager {
 		return _nextTrackerRequestTime;
 	}
 	
+    public String getLastFailureReason() {
+        return lastFailureReason;
+    }
+    
 	/**
 	 * This method handles the response from a tracker
 	 */
@@ -177,14 +182,7 @@ public class TrackerManager {
 				
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
-					// if we have only one tracker and it gave a reason,
-					// inform the user on first failure.
-					if (trackers.size() == 1) {
-                        MessageService.showFormattedError("TORRENTS_TRACKER_FAILURE",
-                                torrent.getMetaInfo().getName(), response.FAILURE_REASON);
-						torrent.stopVoluntarily();
-						return;
-					}
+                    lastFailureReason = response.FAILURE_REASON;
 				} else
 					t.recordSuccess();
 		} else 

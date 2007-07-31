@@ -43,6 +43,11 @@ public interface Downloader extends BandwidthTracker {
      */
     public static final String BITTORRENT_DOWNLOAD = "";
     
+    /**
+     * Key for custom description of the inactivity state.
+     */
+    public static final String CUSTOM_INACTIVITY_KEY = "CIK";
+    
     
     /**
      * Stops this.  If the download is already stopped, does nothing.

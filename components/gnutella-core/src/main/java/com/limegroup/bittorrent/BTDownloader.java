@@ -382,7 +382,7 @@ public class BTDownloader extends AbstractDownloader
 		switch(evt.getType()) {
 		case STARTED : torrentStarted(); break;
 		case COMPLETE : torrentComplete(); break;
-		case STOPPED : torrentStopped(); break;
+		case STOPPED : torrentStopped(evt.getDescription()); break;
         
         // the below aren't handled...
         case STARTING:
@@ -403,8 +403,10 @@ public class BTDownloader extends AbstractDownloader
 		stopTime = 0;
 	}
 
-	private void torrentStopped() {
+	private void torrentStopped(String description) {
 		if (stopTime == 0) {
+            if (description != null)
+                setAttribute(CUSTOM_INACTIVITY_KEY, description);
 			averagedBandwidth.clear();
 			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();

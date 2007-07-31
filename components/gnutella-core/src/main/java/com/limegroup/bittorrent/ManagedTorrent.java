@@ -310,8 +310,11 @@ BTLinkListener {
 		
 		// fire off an announcement to the tracker
 		// unless we're stopping because of a tracker failure
+        String description = null;
 		if (state.get() != TorrentState.TRACKER_FAILURE)
 			trackerManager.announceStop();
+        else
+            description = trackerManager.getLastFailureReason();
 		
 		// write the snapshot if not complete
 		if (!_folder.isComplete()) {
@@ -335,7 +338,7 @@ BTLinkListener {
 		};
 		networkInvoker.execute(closer);
 		
-		dispatchEvent(TorrentEvent.Type.STOPPED); 
+		dispatchEvent(TorrentEvent.Type.STOPPED, description); 
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -346,9 +349,13 @@ BTLinkListener {
 		FileUtils.writeObject(path, context.getMetaInfo());
 	}
 	
+    private void dispatchEvent(TorrentEvent.Type type, String description) {
+        TorrentEvent evt = new TorrentEvent(this, type, this, description);
+        dispatcher.dispatchEvent(evt);
+    }
+    
 	private void dispatchEvent(TorrentEvent.Type type) {
-		TorrentEvent evt = new TorrentEvent(this, type, this);
-		dispatcher.dispatchEvent(evt);
+        dispatchEvent(type, null);
 	}
 	
 	/**
@@ -545,15 +552,17 @@ BTLinkListener {
 	 * Stops the torrent because of tracker failure.
 	 */
 	public synchronized void stopVoluntarily() {
+        boolean stop = false;
 		synchronized(state.getLock()) {
 			if (!isActive())
 				return;
-			if (state.get() == TorrentState.SEEDING) 
-				state.set(TorrentState.STOPPED);
-			else
+			if (state.get() != TorrentState.SEEDING) { 
 				state.set(TorrentState.TRACKER_FAILURE);
+                stop = true;
+            }
 		}
-		stopImpl();
+        if (stop)
+            stopImpl();
 	}
 	
 	/**
@@ -901,7 +910,8 @@ BTLinkListener {
 	 * @return true if continuing is hopeless
 	 */
 	public boolean shouldStop() {
-		return linkManager.getNumConnections() == 0 && _peers.size() == 0;
+		return linkManager.getNumConnections() == 0 && _peers.size() == 0 &&
+        state.getLock() != TorrentState.SEEDING;
 	}
 	
 	/**
