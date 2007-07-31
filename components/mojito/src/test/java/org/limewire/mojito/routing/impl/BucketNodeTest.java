@@ -16,6 +16,8 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 
 
 public class BucketNodeTest extends MojitoTestCase {
@@ -139,5 +141,77 @@ public class BucketNodeTest extends MojitoTestCase {
     	bucket.addActiveContact(node);
     	assertEquals(4, bucket.size());
     	assertEquals(2, counter.size());
+    }
+    
+    public void testLeastAndMostRecentlySeenActiveContact() {
+        RouteTableImpl routeTable = new RouteTableImpl();
+        Bucket bucket = routeTable.getBucket(KUID.MINIMUM);
+        bucket.clear();
+        
+        assertEquals(0, bucket.getActiveSize());
+        
+        Contact leastRecentlySeen = null;
+        Contact mostRecentlySeen = null;
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        for (int i = 0; i < k; i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 6000 + i));
+            node.setTimeStamp(/* fake time */ i);
+            
+            if (leastRecentlySeen == null) {
+                leastRecentlySeen = node;
+            }
+            
+            mostRecentlySeen = node;
+            bucket.addActiveContact(node);
+        }
+        assertEquals(k, bucket.getActiveSize());
+        
+        // Test initial State
+        assertSame(leastRecentlySeen, bucket.getLeastRecentlySeenActiveContact());
+        assertSame(mostRecentlySeen, bucket.getMostRecentlySeenActiveContact());
+        
+        // Touch the least recently seen Node which makes it the 
+        // most recently seen Node
+        leastRecentlySeen.setTimeStamp(/* fake time */ Integer.MAX_VALUE);
+        assertSame(leastRecentlySeen, bucket.getMostRecentlySeenActiveContact());
+        assertNotSame(mostRecentlySeen, bucket.getMostRecentlySeenActiveContact());
+    }
+    
+    public void testLeastAndMostRecentlySeenCachedContact() {
+        RouteTableImpl routeTable = new RouteTableImpl();
+        Bucket bucket = routeTable.getBucket(KUID.MINIMUM);
+        
+        Contact leastRecentlySeen = null;
+        Contact mostRecentlySeen = null;
+        int maxCacheSize = RouteTableSettings.MAX_CACHE_SIZE.getValue();
+        for (int i = 0; i < maxCacheSize; i++) {
+            Contact node = ContactFactory.createUnknownContact(
+                    Vendor.UNKNOWN, 
+                    Version.ZERO, 
+                    KUID.createRandomID(), 
+                    new InetSocketAddress("localhost", 6000 + i));
+            
+            if (leastRecentlySeen == null) {
+                leastRecentlySeen = node;
+            }
+            
+            mostRecentlySeen = node;
+            bucket.addCachedContact(node);
+        }
+        assertEquals(maxCacheSize, bucket.getCacheSize());
+        
+        // Test initial State
+        assertSame(leastRecentlySeen, bucket.getLeastRecentlySeenCachedContact());
+        assertSame(mostRecentlySeen, bucket.getMostRecentlySeenCachedContact());
+        
+        // Touch the least recently seen Node which makes it the 
+        // most recently seen Node
+        bucket.addCachedContact(leastRecentlySeen);
+        assertSame(leastRecentlySeen, bucket.getMostRecentlySeenCachedContact());
+        assertNotSame(mostRecentlySeen, bucket.getMostRecentlySeenCachedContact());
     }
 }
