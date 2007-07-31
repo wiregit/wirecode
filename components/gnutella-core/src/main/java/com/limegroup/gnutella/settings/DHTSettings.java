@@ -107,6 +107,7 @@ public class DHTSettings extends LimeProps {
      * Setting for whether or not an Ultrapeer can join the DHT in active mode.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
+    // Was NOT SIMPP-able in 4.14.0 and prior!
     public static final BooleanSetting EXCLUDE_ULTRAPEERS 
         = FACTORY.createRemoteBooleanSetting("EXCLUDE_ULTRAPEERS", 
                 true, "DHT.ExcludeUltrapeers");
