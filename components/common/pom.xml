@@ -43,6 +43,11 @@
       <version>3.4.4</version>
     </dependency>
     <dependency>
+      <groupId>com.google.code.guice</groupId>
+      <artifactId>guice</artifactId>
+      <version>1.0</version>
+    </dependency>    
+    <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
