@@ -1351,7 +1351,7 @@ DOWNLOAD_SERACH_ORGINAL_TIP=Κάνε την ίδια έρευνα σαν αυτ�
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 TORRENTS_COULD_NOT_READ_SNAPSHOT=Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας torrent.
-#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
+#### TORRENTS_TRACKER_FAILURE=LimeWire cannot download this torrent.  The tracker responded
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################

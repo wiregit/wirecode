@@ -1353,7 +1353,7 @@ DOWNLOAD_SERACH_ORGINAL_LABEL=원래 쿼리
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 TORRENTS_COULD_NOT_READ_SNAPSHOT=죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다.
-#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
+#### TORRENTS_TRACKER_FAILURE=LimeWire cannot download this torrent.  The tracker responded
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
