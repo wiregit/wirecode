@@ -117,6 +117,12 @@ public class DownloadManager implements BandwidthTracker {
      * determing how many downloaders are active.
      */
     private int innetworkCount = 0;
+    
+    /**
+     * The number of active store downloads. These are counted when determining
+     * how many downloaders are active
+     */
+    private int storeDownloadCount = 0;
 
     /** This will hold the MDs that have sent requeries.
      *  When this size gets too big - meaning bigger than active.size(), then
@@ -249,6 +255,19 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Determines if any store download exists in either active or waiting
+     */
+    public synchronized boolean hasStoreDownload() {
+        if(storeDownloadCount > 0)
+            return true;
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            if( i.next() instanceof StoreDownloader)
+                return true;
+        }
+        return false;
+    }
+    
+    /**
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
@@ -339,6 +358,8 @@ public class DownloadManager implements BandwidthTracker {
                 i.remove();
                 if(md instanceof InNetworkDownloader)
                     innetworkCount++;
+                if(md instanceof StoreDownloader)
+                    storeDownloadCount++;
                 active.add(md);
                 md.startDownload();
             } else {
@@ -392,7 +413,7 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     public synchronized int getNumActiveDownloads() {
-        return active.size() - innetworkCount;
+        return active.size() - innetworkCount - storeDownloadCount;
     }
    
     public synchronized int getNumWaitingDownloads() {
@@ -1030,7 +1051,8 @@ public class DownloadManager implements BandwidthTracker {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount - storeDownloadCount
+            < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**
@@ -1045,6 +1067,8 @@ public class DownloadManager implements BandwidthTracker {
         active.remove(downloader);
         if(downloader instanceof InNetworkDownloader)
             innetworkCount--;
+        if(downloader instanceof StoreDownloader)
+            storeDownloadCount--;
         
         waiting.remove(downloader);
         if(completed)
