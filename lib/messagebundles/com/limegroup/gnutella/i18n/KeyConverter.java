@@ -24,7 +24,7 @@ public class KeyConverter {
         Rule[] rules = new Rule[] {
 			new ConcatenateAndInsertRule("DOWNLOAD_APPLY_NEW_THEME_START",
 										 "DOWNLOAD_APPLY_NEW_THEME_END",
-										 " {0} ",
+										 "{0}",
 										 "DOWNLOAD_APPLY_NEW_THEME"),
 			new ConcatenateAndInsertRule("ERROR_BROWSE_HOST_FAILED_BEGIN_KEY",
 										 "ERROR_BROWSE_HOST_FAILED_END_KEY",
