@@ -73,10 +73,12 @@ public class KeyConverter {
         }
         
         public void apply(Properties props) {
-            String firstValue = props.getProperty(firstKey, "");
-            String secondValue = props.getProperty(secondKey, "");
-            System.out.println(newKey + "=" + firstValue + insert + secondValue);
-            props.setProperty(newKey, firstValue + insert + secondValue);
+            String firstValue = props.getProperty(firstKey, null);
+            String secondValue = props.getProperty(secondKey, null);
+            if (firstValue != null && secondValue != null) {
+                System.out.println(newKey + "=" + firstValue + insert + secondValue);
+                props.setProperty(newKey, firstValue + insert + secondValue);
+            }
         }
         
     }
@@ -94,7 +96,11 @@ public class KeyConverter {
         public void apply(Properties props) {
             StringBuilder builder = new StringBuilder();
             for (String key : keys) {
-                builder.append(props.getProperty(key, ""));
+                String value = props.getProperty(key, null);
+                if (value == null) {
+                    return;
+                }
+                builder.append(value);
             }
             System.out.println(newKey + "=" + builder.toString());
             props.setProperty(newKey, builder.toString());
