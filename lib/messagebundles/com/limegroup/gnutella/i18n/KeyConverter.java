@@ -11,13 +11,16 @@ public class KeyConverter {
         LanguageLoader loader = new LanguageLoader(dir);
         Map<String, LanguageInfo> languages = loader.loadLanguages();
         
-        // apply conversions
-        for (LanguageInfo language : languages.values()) {
-            applyRules(language.getProperties());
-        }
+//        // apply conversions
+//        for (LanguageInfo language : languages.values()) {
+//            applyRules(language.getProperties());
+//        }
+        LanguageInfo de = languages.get("de");
+        applyRules(de.getProperties());
         
         LanguageUpdater updater = new LanguageUpdater(dir, languages, loader.getEnglishLines());
-        updater.updateAllLanguages();
+        updater.updateLanguage(de);
+//        updater.updateAllLanguages();
     }
     
     private static void applyRules(Properties props) {
@@ -42,12 +45,12 @@ public class KeyConverter {
 										 "MESSAGE_CONTINUE_DOWNLOAD",
 										 " {0} ",
 										 "MESSAGE_FILE_CORRUPT"),
-			new ConcatenateAndInsertRule("MESSAGE_SENSITIVE_SHARE_TO",
+			new ConcatenateAndInsertRule("MESSAGE_SENSITIVE_SHARE_TOP",
 										 "MESSAGE_SENSITIVE_SHARE_BOTTOM",
 										 "\n\n{0}\n\n",
 										 "MESSAGE_SENSITIVE_SHARE"),
 			new ConcatenateRule("SEARCH_VIRUS_MSG", "SEARCH_VIRUS_MSG_ONE",
-								"SEARCH_VIRUS_MSG_TWO", "SEARCH_VIRUSMSG_THREE")
+								"SEARCH_VIRUS_MSG_TWO", "SEARCH_VIRUS_MSG_THREE")
         };
         for (Rule rule : rules) {
             rule.apply(props);
