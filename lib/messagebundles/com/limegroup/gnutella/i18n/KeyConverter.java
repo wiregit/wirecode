@@ -26,18 +26,18 @@ public class KeyConverter {
 										 "DOWNLOAD_APPLY_NEW_THEME_END",
 										 "{0}",
 										 "DOWNLOAD_APPLY_NEW_THEME"),
-			new ConcatenateAndInsertRule("ERROR_BROWSE_HOST_FAILED_BEGIN_KE",
+			new ConcatenateAndInsertRule("ERROR_BROWSE_HOST_FAILED_BEGIN_KEY",
 										 "ERROR_BROWSE_HOST_FAILED_END_KEY",
 										 "{0}",
-										 "ERROR_BROWSE_HOST_FAILE"),
-			new ConcatenateAndInsertRule("ERROR_CANT_RESUME_STAR",
+										 "ERROR_BROWSE_HOST_FAILED"),
+			new ConcatenateAndInsertRule("ERROR_CANT_RESUME_START",
 										 "ERROR_CANT_RESUME_END",
 										 "{0}",
 										 "ERROR_CANT_RESUME"),
-			new ConcatenateAndInsertRule("MESSAGE_UNABLE_TO_RENAME_FILE_STAR",
+			new ConcatenateAndInsertRule("MESSAGE_UNABLE_TO_RENAME_FILE_START",
 										 "MESSAGE_UNABLE_TO_RENAME_FILE_END",
 										 "{0}",
-										 "MESSAGE_UNABLE_TO_RENAME_FIL"),
+										 "MESSAGE_UNABLE_TO_RENAME_FILE"),
 			new ConcatenateAndInsertRule("MESSAGE_FILE_CORRUPT",
 										 "MESSAGE_CONTINUE_DOWNLOAD",
 										 "{0}",
@@ -75,6 +75,7 @@ public class KeyConverter {
         public void apply(Properties props) {
             String firstValue = props.getProperty(firstKey, "");
             String secondValue = props.getProperty(secondKey, "");
+            System.out.println(newKey + "=" + firstValue + insert + secondValue);
             props.setProperty(newKey, firstValue + insert + secondValue);
         }
         
@@ -95,6 +96,7 @@ public class KeyConverter {
             for (String key : keys) {
                 builder.append(props.getProperty(key, ""));
             }
+            System.out.println(newKey + "=" + builder.toString());
             props.setProperty(newKey, builder.toString());
         }
     }
