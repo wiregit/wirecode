@@ -37,6 +37,13 @@ public class SharingSettings extends LimeProps {
         new File(CommonUtils.getUserHomeDir(), "Shared");
     
     /**
+     * Default directory for songs purchased from LWS, this should always
+     * be different than the shared folder.
+     */
+    public static final File DEFAULT_SAVE_LWS_DIR = 
+        new File(CommonUtils.getUserHomeDir(), "LimeWire Store");
+    
+    /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
      */
@@ -49,6 +56,13 @@ public class SharingSettings extends LimeProps {
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = 
         FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
+    
+    /**
+     * Directory for saving songs purchased from LimeWire Store
+     */
+    public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = 
+        FACTORY.createFileSetting("DIRETORY_FOR_SAVING_LWS_FILES",
+                DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
     
     /**
      * The directory where incomplete files are stored (downloads in progress).
@@ -113,17 +127,23 @@ public class SharingSettings extends LimeProps {
 	 * @throws  <tt>NullPointerException</tt>
 	 *          If the "dir" parameter is null.
 	 */
-    public static final void setSaveDirectory(File saveDir) throws IOException {
+    public static final void setSaveDirectory(File saveDir) throws IOException { 
 		if(saveDir == null) throw new NullPointerException();
 		if(!saveDir.isDirectory()) {
 			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
 		}
         
+                
 		String parentDir = saveDir.getParent();
 		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
+        
+        File storeDir = new File(parentDir, "LimeWire Store");
+        if(!storeDir.isDirectory()) {
+            if(!storeDir.mkdirs()) throw new IOException("could not create store dir");
+        }
         
         FileUtils.setWriteable(saveDir);
         FileUtils.setWriteable(incDir);
@@ -151,6 +171,7 @@ public class SharingSettings extends LimeProps {
 		
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
         INCOMPLETE_DIRECTORY.setValue(incDir);
+        DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
         DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
         DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
     }
@@ -194,6 +215,13 @@ public class SharingSettings extends LimeProps {
         }  
         return set;  
     }  
+    
+    /**
+     * @return directory of where to save songs purchased from LimeWireStore
+     */
+    public static final File getSaveLWSDirectory() {
+        return DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+    }
 
     
     /*********************************************************************/
@@ -216,7 +244,7 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final FileSetSetting DIRECTORIES_TO_SHARE =
         FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
-
+   
     /**
      * Whether or not to auto-share files when using 'Download As'.
      */

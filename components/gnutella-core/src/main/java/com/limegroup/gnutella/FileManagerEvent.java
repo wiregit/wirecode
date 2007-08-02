@@ -22,7 +22,14 @@ public class FileManagerEvent extends EventObject {
         ADD_FOLDER,
         REMOVE_FOLDER,
         FILEMANAGER_LOADING,
-        FILEMANAGER_LOADED;
+        FILEMANAGER_LOADED,
+        ADD_STORE_FILE,
+        REMOVE_STORE_FILE,
+        RENAME_STORE_FILE,
+        CHANGE_STORE_FILE,
+        ADD_STORE_FOLDER,
+        REMOVE_STORE_FOLDER;
+        //TODO: might not need most of these updates
     }
     
     private final Type type;

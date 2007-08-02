@@ -95,6 +95,7 @@ import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.store.StoreDescriptor;
 
 
 /**
@@ -1839,6 +1840,21 @@ public class RouterService {
 			File saveDir, String fileName) throws SaveLocationException {
 		return downloadManager.download(magnet, overwrite, saveDir, fileName);
 	}
+    
+    /**
+     * Creates a downloader for a purchased song from the LWS.
+     * 
+     * @param store - 
+     * @param overwrite
+     * @param saveDir
+     * @param fileName
+     * @return
+     * @throws SaveLocationException
+     */
+    public static Downloader download(StoreDescriptor store, boolean overwrite,
+            File saveDir, String fileName) throws SaveLocationException {
+        return downloadManager.download(store, overwrite, saveDir, fileName);
+    }
 
    /**
      * Starts a resume download for the given incomplete file.

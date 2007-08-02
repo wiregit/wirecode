@@ -45,6 +45,7 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
+import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -54,6 +55,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.store.StoreDescriptor;
 
 
 /** 
@@ -680,6 +682,47 @@ public class DownloadManager implements BandwidthTracker {
             new MagnetDownloader(incompleteFileManager, magnet, 
 					overwrite, saveDir, fileName);
         initializeDownload(downloader);
+        return downloader;
+    }
+    
+    
+    /**
+     * 
+     * 
+     * @param store
+     * @param overwrite
+     * @param saveDir
+     * @param fileName
+     * @return
+     * @throws IllegalArgumentException
+     * @throws SaveLocationException
+     */
+    public synchronized Downloader download(StoreDescriptor store, 
+            boolean overwrite,
+            File saveDir,
+            String fileName)
+    throws IllegalArgumentException, SaveLocationException {
+        
+        if (fileName == null) {
+            fileName = store.getFileName();
+        }
+        
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge();
+        
+        //Start download asynchronously.  This automatically moves downloader to
+        //active if it can.
+        StoreDownloader downloader =
+            new StoreDownloader(store, incompleteFileManager, 
+                                  saveDir, fileName, overwrite);
+
+        initializeDownload(downloader);
+        
         return downloader;
     }
 

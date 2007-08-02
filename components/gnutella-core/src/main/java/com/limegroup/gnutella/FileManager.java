@@ -726,7 +726,7 @@ public abstract class FileManager {
     /**
      * Loads the FileManager with a new list of directories.
      */
-    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) {
+    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) { 
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
@@ -840,6 +840,9 @@ public abstract class FileManager {
         _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
             updateSharedDirectories(directories[i], null, revision);
+        
+        File storeDir = SharingSettings.getSaveLWSDirectory();
+        updateStoreDirectories(storeDir.getAbsoluteFile(), null, revision);
             
 
         // Add specially shared files
@@ -967,6 +970,65 @@ public abstract class FileManager {
         if(dir_list != null) {
             for(int i = 0; i < dir_list.length && _revision == revision; i++)
                 updateSharedDirectories(dir_list[i], directory, revision);
+        }
+            
+    }
+    
+    private void updateStoreDirectories(File directory, File parent, int revision) {
+        //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
+        //are the same on Windows but different on Unix.
+        try {
+            directory = FileUtils.getCanonicalFile(directory);
+        } catch (IOException e) {
+            return;
+        }
+        
+        if(!directory.exists())
+            return;
+        
+        
+        // Exit quickly (without doing the dir lookup) if revisions changed.
+        if(_revision != revision)
+            return;
+
+        
+        synchronized (this) {
+//            // if it was already added, ignore.
+//            if (_completelySharedDirectories.contains(directory))
+//                return;
+
+//            if(LOG.isDebugEnabled())
+//                LOG.debug("Adding completely shared directory: " + directory);
+
+//            _completelySharedDirectories.add(directory);
+//            if (!isForcedShare) {
+                dispatchFileEvent(
+                    new FileManagerEvent(this, Type.ADD_STORE_FOLDER, directory, parent));
+//            }
+        }
+        
+        // STEP 2:
+        // Scan subdirectory for the amount of shared files.
+        File[] file_list = directory.listFiles();
+        if (file_list == null)
+            return;
+//        for(int i = 0; i < file_list.length && _revision == revision; i++)
+//            addFileIfShared(file_list[i], EMPTY_DOCUMENTS, true, revision, null);
+            
+        // Exit quickly (without doing the dir lookup) if revisions changed.
+        if(_revision != revision)
+            return;
+
+        // STEP 3:
+        // Recursively add subdirectories.
+        // This has the effect of ensuring that the number of pending files
+        // is closer to correct number.
+        
+        // Do not share subdirectories of the forcibly shared dir.
+        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
+        if(dir_list != null) {
+            for(int i = 0; i < dir_list.length && _revision == revision; i++)
+                updateStoreDirectories(dir_list[i], directory, revision);
         }
             
     }
@@ -1956,6 +2018,21 @@ public abstract class FileManager {
         if (folder.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return false;
         
+        //TODO: 
+        // don't share the location we download purchased songs from the LWS
+        if( folder.equals(SharingSettings.DIRECTORY_FOR_SAVING_LWS_FILES.getValue()))
+            return false;
+        else {
+            File parent = folder;
+            // if the parent is the LimeWire Store directory, don't share it
+            while( parent.getParentFile() != null ) {
+                parent = parent.getParentFile();
+                if( parent.equals(SharingSettings.DIRECTORY_FOR_SAVING_LWS_FILES.getValue()))
+                    return false;
+            }
+        }
+            
+        
         if (isApplicationSpecialShareDirectory(folder)) {
             return false;
         }
@@ -1972,7 +2049,6 @@ public abstract class FileManager {
                     return false;
             }
         }
-        
         return true;
     }
 	
@@ -2324,7 +2400,7 @@ public abstract class FileManager {
         File parent = file.getParentFile();
         return parent != null && isApplicationSpecialShareDirectory(parent);
     }
-    
+        
     /**
      * @return true if there exists an application-shared file with the
      * provided name.
