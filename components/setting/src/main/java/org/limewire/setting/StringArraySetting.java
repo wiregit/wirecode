@@ -29,8 +29,8 @@ public class StringArraySetting extends Setting {
 	 * @param defaultValue the default value to use for the setting
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
-                                                       String[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue));
+                                                       String... defaultValues) {
+		super(defaultProps, props, key, decode(defaultValues));
 	}
         
 	/**
@@ -47,8 +47,8 @@ public class StringArraySetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	public void setValue(String[] value) {
-		super.setValue(decode(value));
+	public void setValue(String... values) {
+		super.setValue(decode(values));
 	}
     
     /** Load value from property string value
