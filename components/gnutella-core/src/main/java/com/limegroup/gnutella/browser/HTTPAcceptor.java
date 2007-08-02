@@ -16,6 +16,7 @@ import org.limewire.service.MessageService;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -75,7 +76,7 @@ public class HTTPAcceptor {
             }
             // no luck setting up? show user error message
             if(error) 
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageService.showError(I18n.marktr("ERROR_NO_PORTS_AVAILABLE"));
         }
     }
 

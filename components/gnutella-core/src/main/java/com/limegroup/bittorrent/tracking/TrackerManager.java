@@ -15,6 +15,7 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.RouterService;
 
 public class TrackerManager {
@@ -180,7 +181,7 @@ public class TrackerManager {
 					// if we have only one tracker and it gave a reason,
 					// inform the user on first failure.
 					if (trackers.size() == 1) {
-                        MessageService.showFormattedError("TORRENTS_TRACKER_FAILURE",
+                        MessageService.showFormattedError(I18n.marktr("TORRENTS_TRACKER_FAILURE"),
                                 torrent.getMetaInfo().getName(), response.FAILURE_REASON);
 						torrent.stopVoluntarily();
 						return;
