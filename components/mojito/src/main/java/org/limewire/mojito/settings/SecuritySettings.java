@@ -19,33 +19,26 @@
 
 package org.limewire.mojito.settings;
 
-import org.limewire.setting.IntSetting;
+import org.limewire.mojito.security.SecurityTokenHelper;
+import org.limewire.security.SecurityToken;
+import org.limewire.security.SecurityToken.TokenData;
+import org.limewire.setting.BooleanSetting;
 
 /**
- * Settings for Mojito PINGs
+ * Various Mojito security Settings
  */
-public class PingSettings extends MojitoProps {
+public class SecuritySettings extends MojitoProps {
 
-    private PingSettings() {}
+    private SecuritySettings() {}
     
     /**
-     * The number of pings to send in parallel
+     * Settings for whether not the Port number should be substituted
+     * in the {@link SecurityToken} and {@link TokenData} if a Node
+     * says it's firewalled. Some NAT boxes keep changing the Port
+     * number with each outgoing UDP packet and break therefore the
+     * whole thing. See {@link SecurityTokenHelper} for more info!
      */
-    public static final IntSetting PARALLEL_PINGS
-        = FACTORY.createRemoteIntSetting("PARALLEL_PINGS", 15, 
-                "Mojito.ParallelPings", 1, 30);
-    /**
-     * The maximum number of ping failures before pinging is
-     * given up
-     */
-    public static final IntSetting MAX_PARALLEL_PING_FAILURES
-        = FACTORY.createIntSetting("MAX_PARALLEL_PING_FAILURES", 40);
-    
-    /**
-     * Returns the lock timeout for pings
-     */
-    public static long getWaitOnLock() {
-        return ContextSettings.getWaitOnLock(
-                NetworkSettings.DEFAULT_TIMEOUT.getValue());
-    }
+    public static final BooleanSetting SUBSTITUTE_TOKEN_PORT
+        = FACTORY.createRemoteBooleanSetting("SUBSTITUTE_TOKEN_PORT", 
+                false, "Mojito.SubstituteTokenPort");
 }

@@ -87,6 +87,7 @@ import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
+import org.limewire.mojito.security.SecurityTokenHelper;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DHTStats;
@@ -149,6 +150,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The provider interface to create SecurityTokens */
     private volatile SecurityToken.TokenProvider tokenProvider;
     
+    private final SecurityTokenHelper tokenHelper;
+    
     private final DHTValueFactoryManager factoryManager = new DHTValueFactoryManager();
     
     private final StorableModelManager publisherManager = new StorableModelManager();
@@ -180,6 +183,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.AddressSecurityTokenProvider();
+        tokenHelper = new SecurityTokenHelper(this);
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -577,6 +581,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public SecurityToken.TokenProvider getSecurityTokenProvider() {
         return tokenProvider;
+    }
+    
+    /**
+     * 
+     */
+    public SecurityTokenHelper getSecurityTokenHelper() {
+        return tokenHelper;
     }
     
     /*
