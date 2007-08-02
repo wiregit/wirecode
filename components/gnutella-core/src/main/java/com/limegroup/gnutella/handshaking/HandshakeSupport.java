@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.limewire.io.NetworkUtils;
 import org.limewire.setting.StringSetting;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HeaderSupport;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -140,6 +141,7 @@ class HandshakeSupport extends HeaderSupport {
      * Determines if the address should be changed and changes it if
      * necessary.
      */
+    // DPINJ: Get this out of here into somewhere more appropriate
     private void changeAddress(final String v) {
         InetAddress ia = null;
         try {
@@ -158,11 +160,11 @@ class HandshakeSupport extends HeaderSupport {
             StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
             if(!v.equals(addr.getValue())) {
                 addr.setValue(v);
-                RouterService.addressChanged();
+                ProviderHacks.getNetworkManager().addressChanged();
             }
         }
         // Otherwise, if our current address is invalid, change.
-        else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
+        else if(!NetworkUtils.isValidAddress(ProviderHacks.getNetworkManager().getAddress())) {
             // will auto-call addressChanged.
             RouterService.getAcceptor().setAddress(ia);
         }

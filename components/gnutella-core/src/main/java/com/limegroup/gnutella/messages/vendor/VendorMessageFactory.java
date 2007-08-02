@@ -12,6 +12,7 @@ import org.limewire.collection.IntHashMap;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -195,7 +196,9 @@ public class VendorMessageFactory {
     private static class ReplyNumberVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
-            return new ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
+            // DPINJ: Use a passed in RPVMF !!!
+            return new ReplyNumberVendorMessageFactory().createFromNetwork(guid, ttl,
+                    hops, version, restOf);
         }
     }
 
@@ -307,7 +310,9 @@ public class VendorMessageFactory {
     private static class HeadPongParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
-            return new HeadPong(guid, ttl, hops, version, restOf);
+            // DPINJ: BAD!
+            return ProviderHacks.getHeadPongFactory().createFromNetwork(guid,
+                    ttl, hops, version, restOf);
         }
     }
     

@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
 
 /** A ContentAuthority that sends to a single IpPort. */
@@ -36,7 +36,7 @@ public class IpPortContentAuthority implements ContentAuthority {
 
     /** Sends a message to the authority. */
     public void send(Message m) {
-        UDPService.instance().send(m, authority);
+        ProviderHacks.getUdpService().send(m, authority);
     }
 
     /** Constructs the authority from the host/port if necessary */

@@ -87,7 +87,7 @@ public class MulticastTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
-        ROUTER_SERVICE = new RouterService(CALLBACK, new StandardMessageRouter());
+        ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getNewStandardMessageRouter());
         FMAN = RouterService.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
@@ -197,8 +197,8 @@ public class MulticastTest extends LimeTestCase {
         
         // wipe out the address so the first addr == my addr check isn't used
         wipeAddress(qr);
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false));
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true));
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
 	}
     
     /**
@@ -414,7 +414,7 @@ public class MulticastTest extends LimeTestCase {
     private static void reroutePush(byte[] guid) throws Exception {
         RouteTable rt = (RouteTable)PrivilegedAccessor.getValue(
             RouterService.getMessageRouter(), "_pushRouteTable");
-        rt.routeReply(guid, ForMeReplyHandler.instance());
+        rt.routeReply(guid, ProviderHacks.getForMeReplyHandler());
     }
     
     private static class MulticastHandler implements MessageHandler {

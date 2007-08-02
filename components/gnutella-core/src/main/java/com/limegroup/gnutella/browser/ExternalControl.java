@@ -26,11 +26,11 @@ import org.limewire.util.OSUtils;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.SocketsManager;
 
 public class ExternalControl {
     
@@ -266,7 +266,7 @@ public class ExternalControl {
         }   
 		try {
             // DPINJ: Change to using passed-in SocketsManager!!!
-			socket = SocketsManager.getSharedManager().connect(new InetSocketAddress(LOCALHOST, port), 500);
+			socket = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(LOCALHOST, port), 500);
 			InputStream istream = socket.getInputStream(); 
 			socket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);

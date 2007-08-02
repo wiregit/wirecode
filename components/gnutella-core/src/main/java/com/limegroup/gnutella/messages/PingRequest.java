@@ -10,8 +10,8 @@ import org.limewire.collection.NameValue;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -155,7 +155,7 @@ public class PingRequest extends Message {
             guid = UDP_GUID;
         } else {
             l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
-            guid = UDPService.instance().getSolicitedGUID();
+            guid = ProviderHacks.getUdpService().getSolicitedGUID();
         }        
         l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
         

@@ -149,7 +149,7 @@ public class UDPPinger {
      */
     private boolean waitForListening(Cancellable canceller) {
         int waits = 0;
-        while(!UDPService.instance().isListening() && waits < 10 &&
+        while(!ProviderHacks.getUdpService().isListening() && waits < 10 &&
               !canceller.isCancelled()) {
             try {
                 Thread.sleep(600);
@@ -221,7 +221,7 @@ public class UDPPinger {
         
         if(LOG.isTraceEnabled())
             LOG.trace("Sending to " + host + ": " + message.getClass()+" "+message);
-        UDPService.instance().send(message, host);
+        ProviderHacks.getUdpService().send(message, host);
         _sentAmount++;
         _lastSentTime = now;
     }

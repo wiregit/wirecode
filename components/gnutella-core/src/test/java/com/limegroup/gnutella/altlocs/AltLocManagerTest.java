@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocManagerTest extends LimeTestCase {
@@ -23,11 +24,11 @@ public class AltLocManagerTest extends LimeTestCase {
     }
     
     public void testStorage() throws Exception {
-        AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",HugeTestUtils.SHA1);
+        AlternateLocation direct = ProviderHacks.getAlternateLocationFactory().create("1.2.3.4:5",HugeTestUtils.SHA1);
         GUID g = new GUID(GUID.makeGuid());
         GUID g2 = new GUID(GUID.makeGuid());
-        AlternateLocation push = AlternateLocation.create(g.toHexString()+";1.1.1.1:1",HugeTestUtils.SHA1);
-        AlternateLocation pushFWT = AlternateLocation.create(g2.toHexString()+";fwt/1.0;2:2.2.2.2;3.3.3.3:3",HugeTestUtils.SHA1);
+        AlternateLocation push = ProviderHacks.getAlternateLocationFactory().create(g.toHexString()+";1.1.1.1:1",HugeTestUtils.SHA1);
+        AlternateLocation pushFWT = ProviderHacks.getAlternateLocationFactory().create(g2.toHexString()+";fwt/1.0;2:2.2.2.2;3.3.3.3:3",HugeTestUtils.SHA1);
         
         manager.add(direct, null);
         manager.add(push, null);
@@ -54,7 +55,7 @@ public class AltLocManagerTest extends LimeTestCase {
     
     
     public void testPromotionDemotion() throws Exception {
-        AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",HugeTestUtils.SHA1);
+        AlternateLocation direct = ProviderHacks.getAlternateLocationFactory().create("1.2.3.4:5",HugeTestUtils.SHA1);
         manager.add(direct, null);
         manager.remove(direct, null);
         AlternateLocationCollection c = manager.getDirect(HugeTestUtils.SHA1);
@@ -72,7 +73,7 @@ public class AltLocManagerTest extends LimeTestCase {
     public void testNotification() throws Exception {
         // test that a registered listener receives notification of an altloc
         Listener l = new Listener();
-        AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",HugeTestUtils.SHA1);
+        AlternateLocation direct = ProviderHacks.getAlternateLocationFactory().create("1.2.3.4:5",HugeTestUtils.SHA1);
         manager.addListener(HugeTestUtils.SHA1,l);
         manager.add(direct, null);
         assertEquals(direct,l.loc);

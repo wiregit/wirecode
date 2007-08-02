@@ -107,7 +107,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // stop.
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -145,7 +145,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -196,7 +196,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -252,7 +252,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 

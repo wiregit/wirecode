@@ -50,7 +50,6 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -297,11 +296,15 @@ public class ConnectionManager implements ConnectionAcceptor,
     private final CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
         new CopyOnWriteArrayList<ConnectionLifecycleListener>();
 
+    private final NetworkManager networkManager;
+    
     /**
      * Constructs a ConnectionManager.  Must call initialize before using
      * other methods of this class.
      */
-    public ConnectionManager() { }
+    public ConnectionManager(NetworkManager networkManager) { 
+        this.networkManager = networkManager;
+    }
 
     /**
      * Links the ConnectionManager up with the other back end pieces and
@@ -360,7 +363,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * a new thread to do the message loop.
      */
     public ManagedConnection createConnectionBlocking(String hostname, int portnum, ConnectType type) throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum, type);
+        // DPINJ: Use passed in factory!
+        ManagedConnection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection(hostname, portnum,
+                type);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c, null);
@@ -373,7 +378,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
     public void createConnectionAsynchronously(String hostname, int portnum, ConnectType type) {
-        ManagedConnection mc = new ManagedConnection(hostname, portnum, type);
+        // DPINJ: Use passed in factory!
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection(hostname, portnum,
+                type);
         try {
             initializeExternallyGeneratedConnection(mc, new IncomingGNetObserver(mc));
         } catch(IOException iox) {
@@ -402,7 +409,8 @@ public class ConnectionManager implements ConnectionAcceptor,
      * and then loops for messages (it will return when the connection dies).
      */
      void acceptConnection(Socket socket) {
-         ManagedConnection connection = new ManagedConnection(socket);
+         // DPINJ: Use passed in factory!
+         ManagedConnection connection = ProviderHacks.getManagedConnectionFactory().createManagedConnection(socket);
          
          GnetConnectObserver listener = null;
          
@@ -1237,12 +1245,12 @@ public class ConnectionManager implements ConnectionAcceptor,
             ManagedConnection myConn = peers.get(0);
             for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
                 // This is inside to generate a different GUID for each request.
-                Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+                Message cb = new TCPConnectBackVendorMessage(networkManager.getPort());
                 myConn.send(cb);
                 sent++;
             }
         } else {
-            final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+            final Message cb = new TCPConnectBackVendorMessage(networkManager.getPort());
             for(ManagedConnection currMC : peers) {
                 if(sent >= 5)
                     break;
@@ -1260,7 +1268,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     public boolean sendUDPConnectBackRequests(GUID cbGuid) {
         int sent =  0;
-        final Message cb = new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
+        final Message cb = new UDPConnectBackVendorMessage(networkManager.getPort(), cbGuid);
         List<ManagedConnection> peers = new ArrayList<ManagedConnection>(getInitializedConnections());
         Collections.shuffle(peers);
         for(ManagedConnection currMC : peers) {
@@ -1672,7 +1680,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 c));
 
         // 5) Clean up Unicaster
-        QueryUnicaster.instance().purgeQuery(c);
+        RouterService.getQueryUnicaster().purgeQuery(c);
     }
     
     /**
@@ -1746,7 +1754,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         // We must also check if we're actively being a Ultrapeer because
         // it's possible we may have turned off acceptedIncoming while
         // being an Ultrapeer.
-        if( !RouterService.acceptedIncomingConnection() && !isActiveSupernode() ) {
+        if( !networkManager.acceptedIncomingConnection() && !isActiveSupernode() ) {
             multiple = 3;
         }
         // Otherwise, if we're not ultrapeer capable,
@@ -1783,7 +1791,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         // do not open more sockets than we can
         // DPINJ: Change to using passed-in SocketsManager!!!
-        need = Math.min(need, SocketsManager.getSharedManager().getNumAllowedSockets());
+        need = Math.min(need, ProviderHacks.getSocketsManager().getNumAllowedSockets());
         
         // Build up lists of what we need to connect to & remove from connecting.
         
@@ -1984,7 +1992,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-        else if(NodeAssigner.isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
+        else if(RouterService.getNodeAssigner().isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
 			return false;
         else
 		    return true;
@@ -2242,7 +2250,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
 		if(conn.isGUESSUltrapeer())
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
+			RouterService.getQueryUnicaster().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Looping for messages with conn: " + conn);
@@ -2372,7 +2380,9 @@ public class ConnectionManager implements ConnectionAcceptor,
             this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() && SSLSettings.isOutgoingTLSEnabled() ? 
                                         ConnectType.TLS : ConnectType.PLAIN;
-            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
+            // DPINJ: Use passed in factory!
+            connection = ProviderHacks.getManagedConnectionFactory().createManagedConnection(endpoint.getAddress(),
+                    endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();
             _connectionAttempts++;

@@ -33,9 +33,10 @@ import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManagerImpl;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
@@ -222,12 +223,12 @@ public class InspectionTest extends ServerSideTestCase {
     }
     
     private Map tryMessage(Message m) throws Exception {
-        assertTrue(UDPService.instance().isListening());
+        assertTrue(ProviderHacks.getUdpService().isListening());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] b = baos.toByteArray();
         DatagramPacket pack = new DatagramPacket(b,
-                b.length,InetAddress.getByName("127.0.0.1"),RouterService.getPort());
+                b.length,InetAddress.getByName("127.0.0.1"),ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
         
         //now read the response       

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.stubs;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 
@@ -17,6 +18,7 @@ public class ConnectionManagerStub extends ConnectionManager {
     /** @param enableRemove true if remove(c) should do work
      *  @see remove */
     public ConnectionManagerStub(boolean enableRemove) {
+        super(ProviderHacks.getNetworkManager());
         this.enableRemove=enableRemove;
     }
 

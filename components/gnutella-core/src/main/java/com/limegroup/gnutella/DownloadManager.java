@@ -37,6 +37,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.DownloadReferences;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -148,6 +149,12 @@ public class DownloadManager implements BandwidthTracker {
      * Only valid pushes will be sent back here.
      */
     private PushDownloadManager pushManager;
+    
+    private final NetworkManager networkManager;
+    
+    public DownloadManager(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -183,7 +190,8 @@ public class DownloadManager implements BandwidthTracker {
     		router,
     		RouterService.getHttpExecutor(),
     		RouterService.getScheduledExecutorService(),
-    		RouterService.getAcceptor());
+    		RouterService.getAcceptor(),
+    		ProviderHacks.getNetworkManager()); // DPINJ: use passed-in version!
         pushManager.initialize(RouterService.getConnectionDispatcher());
     }
 
@@ -533,9 +541,9 @@ public class DownloadManager implements BandwidthTracker {
                 if(downloader instanceof RequeryDownloader)
                     continue;
                 
-                waiting.add(downloader);                                 //1
-                downloader.initialize(this, this.fileManager, callback(downloader));       //2
-                callback(downloader).addDownload(downloader);                        //3
+                waiting.add(downloader);
+                downloader.initialize(createReferences(downloader));
+                callback(downloader).addDownload(downloader);
             }
             return true;
         } finally {
@@ -544,6 +552,17 @@ public class DownloadManager implements BandwidthTracker {
             if (incompleteFileManager.initialPurge(getActiveDownloadFiles(buf)))
                 writeSnapshot();
         }
+    }
+    
+    // DPINJ:  Remove!  See CORE-306
+    private DownloadReferences createReferences(Downloader downloader) {
+        return new DownloadReferences(this, this.fileManager,
+                callback(downloader), ProviderHacks.getNetworkManager(),
+                ProviderHacks.getAlternateLocationFactory(),
+                ProviderHacks.getQueryRequestFactory(),
+                ProviderHacks.onDemandUnicaster,
+                ProviderHacks.getDownloadWorkerFactory(),
+                ProviderHacks.getManagedTorrentFactory());
     }
      
     private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
@@ -836,7 +855,8 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(AbstractDownloader md) {
-        md.initialize(this, fileManager, callback(md));
+        // remove providerHacks!
+        md.initialize(createReferences(md));
 		waiting.add(md);
         callback(md).addDownload(md);
         RouterService.schedule(new Runnable() {
@@ -920,7 +940,7 @@ public class DownloadManager implements BandwidthTracker {
         // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
         if (qr.calculateQualityOfService(
-                !RouterService.acceptedIncomingConnection()) < 1)
+                !networkManager.acceptedIncomingConnection(), networkManager) < 1)
             return;
 
         List<Response> responses;

@@ -39,7 +39,7 @@ public class SocketsManager {
 	/**
 	 * Ensure this cannot be constructed.
 	 */
-	private SocketsManager() {}
+	public SocketsManager() {}
     
     /**
      * Connects and returns a socket to the given host, with a timeout.
@@ -167,11 +167,5 @@ public class SocketsManager {
     /** Returns the number of Sockets that are waiting for the controller to process them. */
     public int getNumWaitingSockets() {
         return CONTROLLER.getNumWaitingSockets();
-    }
-    
-    // DPINJ: HACK --- for easily getting a single shared SocketsManager instance.  REMOVE ME!
-    private static SocketsManager sharedManager = new SocketsManager();
-    public static SocketsManager getSharedManager() {
-        return sharedManager;
     }
 }

@@ -22,7 +22,7 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
@@ -233,17 +233,17 @@ public class HttpClientManager {
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
             // DPINJ: Change to using passed-in SocketsManager!!!
-            return SocketsManager.getSharedManager().connect(new InetSocketAddress(host,port),0, type);
+            return ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host,port),0, type);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
             // DPINJ: Change to using passed-in SocketsManager!!!
-            return SocketsManager.getSharedManager().connect(new InetSocketAddress(host,port),0, type);
+            return ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host,port),0, type);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
             // DPINJ: Change to using passed-in SocketsManager!!!
-            return SocketsManager.getSharedManager().connect(new InetSocketAddress(host,port), timeout, type);
+            return ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host,port), timeout, type);
         }
         
     }

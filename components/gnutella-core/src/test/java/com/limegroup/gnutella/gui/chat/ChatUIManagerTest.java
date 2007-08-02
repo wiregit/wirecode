@@ -6,6 +6,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessenger;
@@ -45,7 +46,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         ChatManager.instance().initialize();
 
         // start it up!
-        acceptThread = new Acceptor();
+        acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
         acceptThread.start();
         acceptThread.setListeningPort(CHAT_PORT);
     }

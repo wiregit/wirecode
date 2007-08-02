@@ -7,8 +7,6 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -185,23 +183,23 @@ public final class PongCachingTest extends LimeTestCase {
     private void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_2.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_2.isOpen());
         assertTrue("should be up", ULTRAPEER_2.isSupernodeSupernodeConnection());
-        ULTRAPEER_3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_3.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_3.isOpen());
         assertTrue("should be up", ULTRAPEER_3.isSupernodeSupernodeConnection());
 
-        ULTRAPEER_4.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_4.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_4.isOpen());
         assertTrue("should be up", ULTRAPEER_4.isSupernodeSupernodeConnection());
 
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_1.isOpen());
         assertTrue("should be up", ULTRAPEER_1.isSupernodeSupernodeConnection());        
         //3. routed leaf, with route table for "test"
-        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", LEAF.isOpen());
         assertTrue("should be up", LEAF.isClientSupernodeConnection());        
         QueryRouteTable qrt = new QueryRouteTable();
@@ -239,7 +237,7 @@ public final class PongCachingTest extends LimeTestCase {
 
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip, 0, 0, 
+                ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)3, 13232, ip, 0, 0, 
                     true, -1, false);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
@@ -277,7 +275,7 @@ public final class PongCachingTest extends LimeTestCase {
         //add english locale pongs
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip, 0, 0, 
+                ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)3, 13232, ip, 0, 0, 
                     true, -1, false, "en", 1);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
@@ -291,7 +289,7 @@ public final class PongCachingTest extends LimeTestCase {
         //add ja locale pongs
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip2, 
+                ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)3, 13232, ip2, 
                                  0, 0, true, -1, false, "ja", 1);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
@@ -340,7 +338,7 @@ public final class PongCachingTest extends LimeTestCase {
         //add sv locale pongs
         for(int i=0; i< 2; i++) {
             PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip3, 
+                ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)3, 13232, ip3, 
                                  0, 0, true, -1, false, "sv", 1);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {

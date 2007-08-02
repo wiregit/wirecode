@@ -2,10 +2,10 @@ package com.limegroup.gnutella;
 
 import java.io.InterruptedIOException;
 
+import junit.framework.Test;
+
 import org.limewire.collection.BitSet;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -65,8 +65,8 @@ public class LeafQRPTest extends ClientSideTestCase {
         }
 
         // send a query that should hit in the qrt
-        QueryRequest query = QueryRequest.createQuery("berkeley");
-        QueryRequest query2 = QueryRequest.createQuery("susheel");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest query2 = ProviderHacks.getQueryRequestFactory().createQuery("susheel");
 
         assertTrue("qrt did not contain: " + query, qrt.contains(query));
         assertTrue("qrt did not contain: " + query2, qrt.contains(query2));

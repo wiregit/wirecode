@@ -22,6 +22,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -158,7 +159,7 @@ public class UDPCrawlerPong extends VendorMessage {
         
         if(request.hasDHTStatus()) {
             byte dhtStatus = 0x00;
-            DHTManager manager = RouterService.getDHTManager();
+            DHTManager manager = ProviderHacks.getDHTManager();
             if(manager.isRunning()) {
                 switch (manager.getDHTMode()) {
                     case ACTIVE:

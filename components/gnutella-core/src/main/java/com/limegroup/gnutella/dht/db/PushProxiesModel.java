@@ -10,6 +10,7 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.DatabaseUtils;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -22,8 +23,16 @@ public class PushProxiesModel implements StorableModel {
     
     private Storable localhost = null;
     
+    private final NetworkManager networkManager;
+    private final PushProxiesValueFactory pushProxiesValueFactory;
+    
+    public PushProxiesModel(NetworkManager networkManager, PushProxiesValueFactory pushProxiesValueFactory) {
+        this.networkManager = networkManager;
+        this.pushProxiesValueFactory = pushProxiesValueFactory;
+    }
+    
     private synchronized Storable getPushProxyForSelf() {
-        if (RouterService.acceptedIncomingConnection()) {
+        if (networkManager.acceptedIncomingConnection()) {
             return null;
         }
         
@@ -32,7 +41,7 @@ public class PushProxiesModel implements StorableModel {
             KUID primaryKey = KUIDUtils.toKUID(guid);
             
             localhost = new Storable(
-                    primaryKey, PushProxiesValue.FOR_SELF);
+                    primaryKey, pushProxiesValueFactory.createDHTValueForSelf());
         }
         
         return localhost;

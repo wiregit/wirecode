@@ -1,9 +1,8 @@
 package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +17,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 
 /**
@@ -26,7 +24,7 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
  * various utility methods for checking against the encapsulated data.<p>
  */
 
-public class FileDesc implements FileDetails, StringLookup {
+public class FileDesc implements StringLookup {
 
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
@@ -99,7 +97,7 @@ public class FileDesc implements FileDetails, StringLookup {
 	 * The number of times this file has had completed uploads
 	 */
 	private int _completedUploads;
-    
+	    
     /** A simple constructor, for easier testing. */
     protected FileDesc() {
         SHA1_URN = null;
@@ -413,21 +411,6 @@ public class FileDesc implements FileDetails, StringLookup {
 				"urns:     "+URNS+"\r\n"+
 				"docs:     "+ _limeXMLDocs);
 	}
-	
-	public InetSocketAddress getInetSocketAddress() {
-		// TODO maybe cache this, even statically
-		try {
-			return new InetSocketAddress(InetAddress.getByAddress
-										 (RouterService.getAcceptor().getAddress(true)), 
-										 RouterService.getAcceptor().getPort(true));
-		} catch (UnknownHostException e) {
-		}
-		return null;
-	}
-	
-	public boolean isFirewalled() {
-		return !RouterService.acceptedIncomingConnection();
-	}
     
     /**
      * Determines if this FileDesc has been validated.
@@ -445,8 +428,6 @@ public class FileDesc implements FileDetails, StringLookup {
             return null;
         if ("verified".equals(key))
             return String.valueOf(isVerified());
-        else if ("firewalled".equals(key))
-            return String.valueOf(isFirewalled());
         else if ("hits".equals(key))
             return String.valueOf(getHitCount());
         else if ("ups".equals(key))
@@ -476,6 +457,7 @@ public class FileDesc implements FileDetails, StringLookup {
         else if (key.startsWith("xml_") && getXMLDocument() != null) {
             key = key.substring(4,key.length());
             return getXMLDocument().lookup(key);
+        // DPINJ: Removed 'firewalled' check -- might not be necessary, but should see if other ways to re-add can be done.
         }
         return null;
     }

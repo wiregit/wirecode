@@ -6,12 +6,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -194,7 +195,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, snakeRating);
         
         // make the user send a query with a badger and a mushroom
-        QueryRequest qr = QueryRequest.createQuery(mushroom);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(mushroom);
         manager.startedQuery(qr);
         
         // if we receive results containing badgers and snakes their rating

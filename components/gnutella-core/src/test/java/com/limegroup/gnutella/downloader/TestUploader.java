@@ -27,6 +27,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
@@ -833,15 +834,15 @@ public class TestUploader extends AssertComparisons {
         }
         if(interestedInFalts) {
             if (!isFirewalled) 
-                HTTPUtils.writeFeatures(out);
+                ProviderHacks.getFeaturesWriter().writeFeatures(out);
             else {
-                boolean previous = RouterService.acceptedIncomingConnection();
+                boolean previous = ProviderHacks.getNetworkManager().acceptedIncomingConnection();
                 
                 try{
                     PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                         "_acceptedIncoming",new Boolean(false));
                     
-                    HTTPUtils.writeFeatures(out);
+                    ProviderHacks.getFeaturesWriter().writeFeatures(out);
                     
                     PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                             "_acceptedIncoming",new Boolean(previous));

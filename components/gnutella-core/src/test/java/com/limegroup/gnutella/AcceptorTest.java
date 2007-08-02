@@ -51,7 +51,7 @@ public class AcceptorTest extends LimeTestCase {
         RouterService.getConnectionManager().initialize();
         
         // start it up!
-        acceptThread = new Acceptor();
+        acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
         acceptThread.start();
         
         // Give thread time to find and open it's sockets.   This race condition

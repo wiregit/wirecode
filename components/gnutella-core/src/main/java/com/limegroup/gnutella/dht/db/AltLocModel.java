@@ -40,6 +40,12 @@ public class AltLocModel implements StorableModel {
     private final Map<KUID, Storable> values 
         = Collections.synchronizedMap(new HashMap<KUID, Storable>());
     
+    private final AltLocValueFactory altLocValueFactory;
+    
+    public AltLocModel(AltLocValueFactory altLocValueFactory) {
+        this.altLocValueFactory = altLocValueFactory;
+    }
+    
     public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
             // Clear the mappings as they're no longer needed
@@ -69,7 +75,7 @@ public class AltLocModel implements StorableModel {
                             ttroot = hashTree.getRootHashBytes();
                         }
                         
-                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot);
+                        AltLocValue value = altLocValueFactory.createAltLocValueForSelf(fileSize, ttroot);
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }

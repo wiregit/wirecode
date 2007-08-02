@@ -23,8 +23,8 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -78,7 +78,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         sessionManager = new MockHTTPUploadSessionManager();
         fileManager = new FileManagerStub(urns, descs);        
-        requestHandler = new FileRequestHandler(sessionManager, fileManager);        
+        requestHandler = new FileRequestHandler(sessionManager, fileManager, ProviderHacks.getHTTPHeaderUtils());        
     }
     
     public void testHandleAccept() throws Exception {
@@ -88,21 +88,21 @@ public class FileRequestHandlerTest extends LimeTestCase {
         HTTPUploader uploader = new HTTPUploader("filename", null);
         uploader.setFileDesc(fd);
 
-        assertFalse(UDPService.instance().canDoFWT());
+        assertFalse(ProviderHacks.getUdpService().canDoFWT());
 
-        boolean acceptsSolicited = UDPService.instance().canReceiveSolicited();
+        boolean acceptsSolicited = ProviderHacks.getUdpService().canReceiveSolicited();
         boolean lastFWTState = ConnectionSettings.LAST_FWT_STATE.getValue();
         ConnectionManager manager = RouterService.getConnectionManager();
 
         PrivilegedAccessor.setValue(RouterService.class, "manager",
                 proxyManager);
-        PrivilegedAccessor.setValue(UDPService.instance(),
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),
                 "_acceptedSolicitedIncoming", true);
         ConnectionSettings.LAST_FWT_STATE.setValue(false);
 
         try {
             assertFalse(RouterService.isConnected());
-            assertTrue(UDPService.instance().canDoFWT());
+            assertTrue(ProviderHacks.getUdpService().canDoFWT());
 
             requestHandler.handleAccept(new HttpExecutionContext(null),
                     request, response, uploader, fd);
@@ -110,13 +110,13 @@ public class FileRequestHandlerTest extends LimeTestCase {
                     .httpStringValue());
             assertNotNull("expected header: "
                     + HTTPHeaderName.FWTPORT.httpStringValue(), header);
-            assertEquals(header.getValue(), UDPService.instance()
+            assertEquals(header.getValue(), ProviderHacks.getUdpService()
                     .getStableUDPPort()
                     + "");
         } finally {
             PrivilegedAccessor
                     .setValue(RouterService.class, "manager", manager);
-            PrivilegedAccessor.setValue(UDPService.instance(),
+            PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),
                     "_acceptedSolicitedIncoming", acceptsSolicited);
             ConnectionSettings.LAST_FWT_STATE.setValue(lastFWTState);
         }

@@ -14,6 +14,12 @@ import com.limegroup.gnutella.util.MultiShutdownable;
 
 public class DownloadManagerStub extends DownloadManager {
 	private final PushDownloadManager pdManager = new PushDownloadManagerStub();
+	
+	public DownloadManagerStub() {
+	    super(ProviderHacks.getNetworkManager());
+	}
+	
+	
     @Override
     public void initialize(DownloadCallback callback, MessageRouter router,
                            FileManager fileManager) {
@@ -59,7 +65,7 @@ public class DownloadManagerStub extends DownloadManager {
     
     private static class PushDownloadManagerStub extends PushDownloadManager {
     	PushDownloadManagerStub() {
-    		super(null, null, null, null, null);
+    		super(null, null, null, null, null, null);
     	}
 		@Override
 		public void acceptConnection(String word, Socket socket) {}

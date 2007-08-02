@@ -8,14 +8,12 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  *  Common code to test an Ultrapeer.  Allows you to control how many 
@@ -194,9 +192,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		buildConnections();
         // init connections
         for (int i = ULTRAPEER.length-1; i > -1; i--)
-            ULTRAPEER[i].initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+            ULTRAPEER[i].initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         for (int i = 0; i < LEAF.length; i++)
-            LEAF[i].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+            LEAF[i].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 
         for (int i = 0; i < ULTRAPEER.length; i++)
             assertTrue(ULTRAPEER[i].isOpen());
@@ -210,12 +208,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     /** Builds a conenction with default headers */
     protected Connection createLeafConnection() throws Exception {
-        return createConnection(new LeafHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
     }
     
     /** Builds an ultrapeer connection with default headers */
     protected Connection createUltrapeerConnection() throws Exception {
-        return createConnection(new UltrapeerHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */

@@ -5,6 +5,7 @@ import org.limewire.util.PrivilegedAccessor;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -83,7 +84,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
         private boolean _receivedCallback;
 
         public TestManager() {
-            super();
+            super(ProviderHacks.getNetworkManager());
         }
         
         public void noInternetConnection() {

@@ -551,7 +551,7 @@ public class HostCatcher {
         if (pr.isUDP()) {
             GUID g = new GUID(pr.getGUID());
             if (!g.equals(PingRequest.UDP_GUID) && 
-                    !g.equals(UDPService.instance().getSolicitedGUID())) 
+                    !g.equals(ProviderHacks.getUdpService().getSolicitedGUID())) 
                 return false;
         } 
         
@@ -584,7 +584,7 @@ public class HostCatcher {
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(mode);
             
-            DHTManager dhtManager = RouterService.getDHTManager();
+            DHTManager dhtManager = ProviderHacks.getDHTManager();
             if (dhtManager.isRunning()) {
                 // If active DHT endpoint, immediately send to dht manager
                 if(mode.equals(DHTMode.ACTIVE)) {
@@ -600,7 +600,7 @@ public class HostCatcher {
         }
         
         if(pr.supportsUnicast()) {
-            QueryUnicaster.instance().
+            RouterService.getQueryUnicaster().
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         

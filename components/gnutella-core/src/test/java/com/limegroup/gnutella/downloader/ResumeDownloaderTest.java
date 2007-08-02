@@ -21,6 +21,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -52,7 +53,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
         incompleteFile=ifm.getFile(rfd);
-        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(size);
+        VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(size);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 		// Make sure that we don't wait for network on requery
@@ -75,9 +76,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
         DownloadManagerStub dm = new DownloadManagerStub();
         dm.initialize();
         dm.scheduleWaitingPump();
-        ret.initialize(dm, 
-                       new FileManagerStub(), 
-                       new ActivityCallbackStub());
+        ret.initialize(DownloadProviderHacks.createDownloadReferences(dm, new FileManagerStub(), new ActivityCallbackStub()));
         ret.startDownload();
         return ret;
     }
@@ -143,12 +142,11 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
         DownloadManager dm = new DownloadManagerStub();
         dm.initialize();
         dm.scheduleWaitingPump();
-        downloader.initialize(dm,
-                              new FileManagerStub(),
-                              new ActivityCallbackStub());
+        downloader.initialize(DownloadProviderHacks.createDownloadReferences(dm, new FileManagerStub(),
+                new ActivityCallbackStub()));
         downloader.startDownload();
 
-        //Check same state as before serialization.
+        // Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         assertEquals(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());

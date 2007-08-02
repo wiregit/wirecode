@@ -1,12 +1,15 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Helper class that overrides getNumIntraUltrapeerConnections for
@@ -32,7 +35,7 @@ public abstract class TestConnection extends ManagedConnection {
     protected QueryRouteTable QRT;
     
     TestConnection(int connections) {
-        super("60.76.5.3", 4444);
+        super("60.76.5.3", 4444, ConnectType.PLAIN, RouterService.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory());
         CONNECTIONS = connections;
     }
     

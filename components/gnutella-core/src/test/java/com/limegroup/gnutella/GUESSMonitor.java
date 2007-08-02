@@ -102,7 +102,7 @@ public class GUESSMonitor extends LimeTestCase {
     }
 
     
-    private class MyMessageRouter extends StandardMessageRouter {
+    private class MyMessageRouter extends HackMessageRouter {
 
         private List _guessPongs = new Vector();
         private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
@@ -124,7 +124,6 @@ public class GUESSMonitor extends LimeTestCase {
         }
 
         public MyMessageRouter() {
-            super();
             _pongLoop = new Thread() {
                     public void run() {
                         guessPongLoop();
@@ -253,9 +252,9 @@ public class GUESSMonitor extends LimeTestCase {
     private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
 
-        if ((port == RouterService.getPort()) &&
+        if ((port == ProviderHacks.getNetworkManager().getPort()) &&
 				 Arrays.equals(address.getAddress(), 
-							   RouterService.getAddress())) {			
+				         ProviderHacks.getNetworkManager().getAddress())) {			
 			retVal = false;
 		}
 

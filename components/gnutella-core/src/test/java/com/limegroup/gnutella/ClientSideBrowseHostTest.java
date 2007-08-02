@@ -212,7 +212,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                 StringTokenizer st = new StringTokenizer(currLine, ":");
                 assertEquals(st.nextToken(), "X-Node");
                 InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-                Arrays.equals(addr.getAddress(), RouterService.getAddress());
+                Arrays.equals(addr.getAddress(), ProviderHacks.getNetworkManager().getAddress());
                 assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
 
                 // now we need to GIV

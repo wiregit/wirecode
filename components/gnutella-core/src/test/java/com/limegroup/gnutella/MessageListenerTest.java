@@ -2,9 +2,9 @@ package com.limegroup.gnutella;
 
 import java.util.Map;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -33,7 +33,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         final GUID guid = new GUID(GUID.makeGuid());
         final MLImpl ml = new MLImpl();
 
-        PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
+        PingReply pong = ProviderHacks.getPingReplyFactory().create(guid.bytes(), (byte) 2);
 
         RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml);
         Map map = getMap();
@@ -58,7 +58,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
+        PingReply pong = ProviderHacks.getPingReplyFactory().create(guid.bytes(), (byte) 2);
 
         RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml1);
         RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml2);
@@ -103,8 +103,8 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong1 = PingReply.create(guid1.bytes(), (byte) 2);
-        PingReply pong2 = PingReply.create(guid2.bytes(), (byte) 2);
+        PingReply pong1 = ProviderHacks.getPingReplyFactory().create(guid1.bytes(), (byte) 2);
+        PingReply pong2 = ProviderHacks.getPingReplyFactory().create(guid2.bytes(), (byte) 2);
 
         RouterService.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
         RouterService.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
@@ -157,8 +157,8 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong1 = PingReply.create(guid1.bytes(), (byte) 2);
-        PingReply pong2 = PingReply.create(guid2.bytes(), (byte) 2);
+        PingReply pong1 = ProviderHacks.getPingReplyFactory().create(guid1.bytes(), (byte) 2);
+        PingReply pong2 = ProviderHacks.getPingReplyFactory().create(guid2.bytes(), (byte) 2);
 
         RouterService.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
         RouterService.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);

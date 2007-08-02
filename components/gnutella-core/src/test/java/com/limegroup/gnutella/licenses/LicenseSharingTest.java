@@ -4,18 +4,18 @@ import java.io.File;
 import java.io.InterruptedIOException;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ClientSideTestCase;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
@@ -125,13 +125,13 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         // Check CC
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
         new LimeXMLDocument(richQuery); // make sure it can be constructed.
-        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         assertTrue(qrt.contains(query));
         
         // Check Weed
         richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
         new LimeXMLDocument(richQuery); // make sure it can be constructed.
-        query = QueryRequest.createQuery("", richQuery);
+        query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         assertTrue(qrt.contains(query));
     }
     
@@ -142,7 +142,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
         new LimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
-        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -170,7 +170,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
         new LimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
-        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -203,7 +203,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         new LimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
-        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -236,7 +236,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         new LimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
-        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -264,7 +264,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     
     private boolean addXMLToResponses(QueryReply qr) throws Exception {
         return ((Boolean)PrivilegedAccessor.invokeMethod(
-                    ForMeReplyHandler.instance(), "addXMLToResponses", qr)).booleanValue();
+                    ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", qr)).booleanValue();
     }
 }
             

@@ -27,6 +27,7 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData;
@@ -114,6 +115,8 @@ BTLinkListener {
 	
 	private final TorrentContext context;
 	
+	private final NetworkManager networkManager;
+	
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -124,17 +127,20 @@ BTLinkListener {
 	 * @param diskInvoker a <tt>SchedulingThreadPool</tt> to execute
 	 * disk tasks on
 	 */
-	public ManagedTorrent(TorrentContext context, 
+	ManagedTorrent(TorrentContext context, 
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher,
-			ScheduledExecutorService networkInvoker) {
+			ScheduledExecutorService networkInvoker,
+			NetworkManager networkManager,
+			TrackerManagerFactory trackerManagerFactory) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
+		this.networkManager = networkManager;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
 		linkManager = BTLinkManagerFactory.instance().getLinkManager();
-		trackerManager = TrackerManagerFactory.instance().getTrackerManager(this);
+		trackerManager = trackerManagerFactory.getTrackerManager(this);
 	}
 
 	/**
@@ -579,7 +585,7 @@ BTLinkListener {
 		// provision some slots for incoming connections unless we're firewalled
         // https://hal.inria.fr/inria-00162088/en/  recommends 1/2, we'll do 3/5
 		int limit = TorrentManager.getMaxTorrentConnections();
-		if (RouterService.acceptedIncomingConnection())
+		if (networkManager.acceptedIncomingConnection())
 			limit = limit * 3 / 5;
 		return linkManager.getNumConnections() < limit;
 	}

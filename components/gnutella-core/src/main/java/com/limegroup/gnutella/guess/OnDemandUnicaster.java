@@ -16,12 +16,14 @@ import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 /** Utility class for sending GUESS queries.
@@ -37,26 +39,30 @@ public class OnDemandUnicaster {
     private static final int QUERIED_HOSTS_CLEAR_TIME = 30 * 1000; // 30 seconds
     
     /** IpPorts that we've queried for this GUID. */
-    private static final Map<GUID.TimedGUID, Set<IpPort>> _queriedHosts;
+    private final Map<GUID.TimedGUID, Set<IpPort>> _queriedHosts;
 
     /** GUESSEndpoints => AddressSecurityToken. */
-    private static final Map<GUESSEndpoint, AddressSecurityToken> _queryKeys;
+    private final Map<GUESSEndpoint, AddressSecurityToken> _queryKeys;
 
     /** Access to UDP traffic. */
-    private static final UDPService _udp;
+    private final UDPService _udp;
     
     /**
      * Short term store for queries waiting for query keys.
      * GUESSEndpoints => URNs
      */
-    private static final Map<GUESSEndpoint, SendLaterBundle> _bufferedURNs;
+    private final Map<GUESSEndpoint, SendLaterBundle> _bufferedURNs;
+    
+    private final QueryRequestFactory queryRequestFactory;
 
-    static {
+    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory) {
+        this.queryRequestFactory = queryRequestFactory;
+        
         // static initializers are only called once, right?
         _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
         _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _queriedHosts = new HashMap<GUID.TimedGUID, Set<IpPort>>();
-        _udp = UDPService.instance();
+        _udp = ProviderHacks.getUdpService();
         // schedule a runner to clear various data structures
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
         RouterService.schedule(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME);
@@ -65,7 +71,7 @@ public class OnDemandUnicaster {
     /** Feed me AddressSecurityToken pongs so I can query people....
      *  pre: pr.getQueryKey() != null
      */
-    public static void handleQueryKeyPong(PingReply pr) 
+    public void handleQueryKeyPong(PingReply pr) 
         throws NullPointerException, IllegalArgumentException {
 
 
@@ -102,7 +108,7 @@ public class OnDemandUnicaster {
      *  @param ep the location you want to query.
      *  @param queryURN the URN you are querying for.
      */
-    public static void query(GUESSEndpoint ep, URN queryURN) 
+    public void query(GUESSEndpoint ep, URN queryURN) 
         throws IllegalArgumentException {
 
         // validity checks
@@ -141,15 +147,15 @@ public class OnDemandUnicaster {
      * @param host
      * @return
      */
-    public static boolean isHostQueriedForGUID(GUID guid, IpPort host) {
+    public boolean isHostQueriedForGUID(GUID guid, IpPort host) {
         synchronized(_queriedHosts) {
             Set<IpPort> hosts = _queriedHosts.get(new GUID.TimedGUID(guid));
             return hosts != null ? hosts.contains(host) : false;
         }
     }
     
-    private static void sendQuery(URN urn, AddressSecurityToken qk, IpPort ipp) {
-        QueryRequest query = QueryRequest.createQueryKeyQuery(urn, qk);
+    private void sendQuery(URN urn, AddressSecurityToken qk, IpPort ipp) {
+        QueryRequest query = queryRequestFactory.createQueryKeyQuery(urn, qk);
         // store the query's GUID -> IPP so that when we get replies over
         // UDP we can allow them without requiring the whole ReplyNumber/ACK
         // thing.
@@ -171,7 +177,7 @@ public class OnDemandUnicaster {
         _udp.send(query, ipp.getInetAddress(), ipp.getPort());
     }
 
-    private static class SendLaterBundle {
+    private class SendLaterBundle {
 
         private static final int MAX_LIFETIME = 60 * 1000;
 
@@ -196,7 +202,7 @@ public class OnDemandUnicaster {
      *  This method has been disaggregated from the Expirer class for ease of
      *  testing.
      */ 
-    private static boolean clearDataStructures(long lastQueryKeyClearTime,
+    private boolean clearDataStructures(long lastQueryKeyClearTime,
                                                long queryKeyClearInterval) {
         boolean clearedQueryKeys = false;
 
@@ -229,7 +235,7 @@ public class OnDemandUnicaster {
     /** This is run to clear various data structures used.
      *  Made package access for easy test access.
      */
-    private static class Expirer implements Runnable {
+    private class Expirer implements Runnable {
 
         // 24 hours
         private static final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
@@ -250,7 +256,7 @@ public class OnDemandUnicaster {
     /** This is run to clear various data structures used.
      *  Made package access for easy test access.
      */
-    private static class QueriedHostsExpirer implements Runnable {
+    private class QueriedHostsExpirer implements Runnable {
         public void run() {
             synchronized(_queriedHosts) {
                 long now = System.currentTimeMillis();
@@ -264,7 +270,7 @@ public class OnDemandUnicaster {
     }
     
     /** inspectable for the class C distribution of the queried addresses */
-    public static final Inspectable classCQueried = new Inspectable() {
+    public final Inspectable classCQueried = new Inspectable() {
         public Object inspect() {
             ClassCNetworks cnc = new ClassCNetworks();
             synchronized(_queriedHosts) {

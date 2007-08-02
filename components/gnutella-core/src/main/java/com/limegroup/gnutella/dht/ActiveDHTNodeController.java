@@ -25,6 +25,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -44,9 +45,9 @@ public class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
-    public ActiveDHTNodeController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher, DHTMode.ACTIVE);
+    ActiveDHTNodeController(Vendor vendor, Version version, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher, NetworkManager networkManager) {
+        super(vendor, version, dispatcher, DHTMode.ACTIVE, networkManager);
     }
     
     @Override

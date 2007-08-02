@@ -16,11 +16,13 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -223,7 +225,7 @@ public abstract class ClientSideTestCase
         
         Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
         PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
+        ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
                                  socket.getLocalPort(), 
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
@@ -267,7 +269,7 @@ public abstract class ClientSideTestCase
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
+            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }

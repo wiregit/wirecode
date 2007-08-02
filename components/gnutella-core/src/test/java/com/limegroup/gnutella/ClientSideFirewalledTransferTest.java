@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -25,8 +27,6 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -84,8 +84,8 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         //      testing can procede as normal...
         doSettings();
         
-        PrivilegedAccessor.setValue( UDPService.instance(), "_acceptedSolicitedIncoming", new Boolean(true) );
-        PrivilegedAccessor.setValue( UDPService.instance(), "_acceptedUnsolicitedIncoming", new Boolean(true) );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true) );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true) );
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -112,7 +112,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         // client side seems to follow the setup process A-OK
         // set up solicted support (see note in setUp())
         Thread.sleep(1000);
-        assertTrue(UDPService.instance().canReceiveSolicited());
+        assertTrue(ProviderHacks.getUdpService().canReceiveSolicited());
     }
 
     public void testStartsUDPTransfer() throws Exception {
@@ -129,13 +129,11 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // send a query that should be answered
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)2, 
-                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
-                                 QueryRequest.SPECIAL_FIREWALL_MASK |
-                                 QueryRequest.SPECIAL_FWTRANS_MASK,
-                                 "berkeley", "", null, 
-                                 null, false, Network.UNKNOWN, false, 
-                                 0, false, 0);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                 QueryRequest.SPECIAL_FIREWALL_MASK |
+                 QueryRequest.SPECIAL_FWTRANS_MASK, "berkeley", "", null, null, false, Network.UNKNOWN,
+                false, 0, false, 0);
         testUP[0].send(query);
         testUP[0].flush();
 
@@ -293,7 +291,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        assertEquals(addr.getAddress(), RouterService.getExternalAddress());
+        assertEquals(addr.getAddress(), ProviderHacks.getNetworkManager().getExternalAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // send back a 202 and make sure no PushRequest is sent via the normal

@@ -19,6 +19,7 @@ import org.limewire.nio.statemachine.IOStateObserver;
 
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -227,9 +227,12 @@ public class DownloadWorker {
      * a thief or victim).
      */
     private volatile boolean _stealing;
+    
+    private final HTTPDownloaderFactory httpDownloaderFactory;
 
-    DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd,
-            VerifyingFile vf) {
+    protected DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd,
+            VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory) {
+        this.httpDownloaderFactory = httpDownloaderFactory;
         _manager = manager;
         _rfd = rfd;
         _commonOutFile = vf;
@@ -746,7 +749,7 @@ public class DownloadWorker {
             _connectObserver = observer;
             try {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                Socket socket = SocketsManager.getSharedManager().connect(
+                Socket socket = ProviderHacks.getSocketsManager().connect(
                         new InetSocketAddress(_rfd.getHost(), _rfd.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
@@ -1596,8 +1599,8 @@ public class DownloadWorker {
          */
         public void handleConnect(Socket socket) {
             // LOG.debug(_rfd + " -- Handling connect from PushConnector");
-            HTTPDownloader dl = new HTTPDownloader(socket, _rfd,
-                    _commonOutFile, _manager instanceof InNetworkDownloader);
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+                    _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
                 DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
@@ -1689,8 +1692,8 @@ public class DownloadWorker {
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System
                     .currentTimeMillis() - createTime));
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
-            HTTPDownloader dl = new HTTPDownloader(socket, _rfd,
-                    _commonOutFile, _manager instanceof InNetworkDownloader);
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+                    _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP(); // already connected, timeout doesn't
                                     // matter.

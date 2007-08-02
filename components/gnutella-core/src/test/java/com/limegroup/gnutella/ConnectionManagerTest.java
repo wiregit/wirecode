@@ -29,6 +29,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -785,7 +786,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         private static int lastHost = 0;
 
         public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346);
+            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, RouterService.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory() );
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

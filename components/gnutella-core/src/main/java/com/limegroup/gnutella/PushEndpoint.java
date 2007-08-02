@@ -702,6 +702,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         IpPort addr = getIpPort();
         return addr != null ? addr.getInetSocketAddress() : null;
     }
+    
+    public boolean isLocal() {
+        return false;
+    }
 	
 	/**
 	 * Updates either the PushEndpoint or the GUID_PROXY_MAP to ensure

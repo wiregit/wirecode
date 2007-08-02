@@ -354,9 +354,9 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
                 // sleep to let the file manager initialize
                 Thread.sleep(2000);
             } catch(InterruptedException e) {}
-            if (RouterService.getPort() != port) {
+            if (ProviderHacks.getNetworkManager().getPort() != port) {
                 throw new IOException("Opened wrong port (wanted: "
-                     + port + ", was: " + RouterService.getPort() +")");
+                     + port + ", was: " + ProviderHacks.getNetworkManager().getPort() +")");
             }
             
             waitForShutdown(shutdownSocket);

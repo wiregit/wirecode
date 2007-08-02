@@ -20,6 +20,7 @@ import org.limewire.util.OSUtils;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
@@ -92,7 +93,7 @@ public final class QueryRequestTest extends LimeTestCase {
 				baos[i].write(0);
 				QueryRequest qr = null;
 				try {
-					qr = QueryRequest.createNetworkQuery(
+					qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 					    GUID.makeGuid(), (byte)6, (byte)4, 
                         baos[i].toByteArray(), Network.UNKNOWN);
 				} catch(BadPacketException e) {
@@ -119,69 +120,69 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	public void testEmptyQueryNotAccepted() {
 		try {
-			QueryRequest.createQuery("");
+			ProviderHacks.getQueryRequestFactory().createQuery("");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}		
 
 		try {
-			QueryRequest.createRequery("");
+			ProviderHacks.getQueryRequestFactory().createRequery("");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}		
 		try {
-			QueryRequest.createQuery((String)null);
+			ProviderHacks.getQueryRequestFactory().createQuery((String)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			QueryRequest.createQuery((URN)null);
+			ProviderHacks.getQueryRequestFactory().createQuery((URN)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			QueryRequest.createRequery((String)null);
+			ProviderHacks.getQueryRequestFactory().createRequery((String)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 
 		try {
-			QueryRequest.createRequery((URN)null);
+			ProviderHacks.getQueryRequestFactory().createRequery((URN)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			QueryRequest.createRequery(null, (byte)3);
+			ProviderHacks.getQueryRequestFactory().createRequery(null, (byte)3);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 
 		try {
-			QueryRequest.createQuery(null, "", "");
+			ProviderHacks.getQueryRequestFactory().createQuery(null, "", "");
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			QueryRequest.createQuery(new byte[16], null, "");
+			ProviderHacks.getQueryRequestFactory().createQuery(new byte[16], null, "");
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			QueryRequest.createQuery(new byte[16], "", null);
+			ProviderHacks.getQueryRequestFactory().createQuery(new byte[16], "", null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			QueryRequest.createQuery(new byte[16], "", "");
+			ProviderHacks.getQueryRequestFactory().createQuery(new byte[16], "", "");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}	
 			
 		try {
-			QueryRequest.createQuery(new byte[15], "test", "");
+			ProviderHacks.getQueryRequestFactory().createQuery(new byte[15], "test", "");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}				
 
 		try {
-			QueryRequest.createQuery("test", null);
+			ProviderHacks.getQueryRequestFactory().createQuery("test", null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			QueryRequest.createMulticastQuery(new byte[16], null);
+			ProviderHacks.getQueryRequestFactory().createMulticastQuery(new byte[16], null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
@@ -189,7 +190,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		try {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
-			QueryRequest.createNetworkQuery(
+			ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 			    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN );
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
@@ -202,27 +203,27 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	public void testTTLParameters() {
 		try {
-			QueryRequest.createQuery("test", (byte)-1);
+			ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)-1);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 		try {
-			QueryRequest.createQuery("test", (byte)8);
+			ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)8);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 
 		try {
-			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
+			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)-1);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 		try {
-			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)8);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 
-	    QueryRequest.createQuery("test", (byte)1);
-		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
-		QueryRequest.createQuery("test", (byte)3);
-		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
+	    ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);
+		ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)1);
+		ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3);
+		ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)3);
 
 	}
 
@@ -235,7 +236,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
-		QueryRequest.createNetworkQuery(
+		ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 
 		
@@ -249,7 +250,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
-		QueryRequest.createNetworkQuery(
+		ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 	}
 
@@ -259,17 +260,17 @@ public final class QueryRequestTest extends LimeTestCase {
 	public void testLegacyUnitTest() throws Exception {
         QueryRequest qr = null;
        
-		qr = QueryRequest.createQuery("blah");
+		qr = ProviderHacks.getQueryRequestFactory().createQuery("blah");
 		assertEquals("queries should be equal", "blah", qr.getQuery());
 
         // will normalize to lowercase.
-		qr = QueryRequest.createQuery("ZZZ");
+		qr = ProviderHacks.getQueryRequestFactory().createQuery("ZZZ");
 		assertEquals("queries should be equal", "zzz", qr.getQuery());
 
         //String is single null-terminated.
 		byte[] payload = new byte[2+2];
 		payload[2]=(byte)65;
-		qr=QueryRequest.createNetworkQuery(
+		qr=ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 		
   		assertEquals("queries should be equal", "A", qr.getQuery());
@@ -278,7 +279,7 @@ public final class QueryRequestTest extends LimeTestCase {
         //String is double null-terminated.
         payload = new byte[2+3];
         payload[2]=(byte)65;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 
 		assertEquals("queries should be equal", "A", qr.getQuery());
@@ -286,7 +287,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		try {
 			//String is empty.
 			payload = new byte[2+1];
-			qr = QueryRequest.createNetworkQuery(
+			qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 			    new byte[16], (byte)0, (byte)0, payload, Network.UNKNOWN);
 			fail("should not have accepted query");
 			//assertEquals("queries should be equal", "", qr.getQuery());
@@ -324,7 +325,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         for(int i=0; i<HugeTestUtils.URNS.length; i++) {
             try {
-                QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     URN_BYTES[i].toByteArray(), 
                                                     Network.UNKNOWN);
             } catch(BadPacketException e) {
@@ -335,7 +336,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
 
     public void testQueriesWithOnlyURNsAreAccepted() throws Exception {
-        QueryRequest qr = QueryRequest.createQuery(HugeTestUtils.SHA1);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.SHA1);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);
 
@@ -361,7 +362,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
 			baos[i].write(0);
 			baos[i].write(0);
-			QueryRequest qr = QueryRequest.createNetworkQuery(
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
 			    GUID.makeGuid(), ttl, hops, 
 			    baos[i].toByteArray(), Network.UNKNOWN);
 
@@ -404,7 +405,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			baos[i].write(0);
 			baos[i].write(0);
             try {
-                QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     baos[i].toByteArray(), 
                                                     Network.UNKNOWN);
                 
@@ -423,18 +424,18 @@ public final class QueryRequestTest extends LimeTestCase {
 	public void testUrnQueryConstructors() {
 		Set urnSet = new HashSet();
 		urnSet.add(HugeTestUtils.SHA1);
-		QueryRequest qr = QueryRequest.createRequery(HugeTestUtils.SHA1);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1);
 
 		runStandardChecks(qr, qr.getQueryUrns());
 		runRequeryChecks(qr);
 
 
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)4);
+		qr = ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)4);
 		runStandardChecks(qr, qr.getQueryUrns());
 		runRequeryChecks(qr);
 		assertEquals("TTLs should be equal", (byte)4, qr.getTTL());
 
-		qr = QueryRequest.createQuery(HugeTestUtils.SHA1);
+		qr = ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.SHA1);
 		runStandardChecks(qr, qr.getQueryUrns());
 		runNonRequeryChecks(qr);
 	}
@@ -443,7 +444,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * Tests constructor that only takes a string.
 	 */
 	public void testStringRequeryConstructor() {
-		QueryRequest qr = QueryRequest.createRequery("test");
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createRequery("test");
 		runStandardChecks(qr, "test");
 		runStringRequeryChecks(qr, "test");
 	}
@@ -453,7 +454,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * Tests constructor that only takes a string.
 	 */
 	public void testStringConstructor() {
-		QueryRequest qr = QueryRequest.createQuery("tests");
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("tests");
 		runStandardChecks(qr, "tests");
 		runNonRequeryChecks(qr);
 	}
@@ -462,7 +463,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * Tests constructor that only takes a string and a TTL.
 	 */
 	public void testStringTTLConstructor() {
-		QueryRequest qr = QueryRequest.createQuery("tests", (byte)3);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("tests", (byte)3);
 		runStandardChecks(qr, "tests");
 		runNonRequeryChecks(qr);
 		assertEquals("ttls should be equal", (byte)3, qr.getTTL());
@@ -472,7 +473,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * Tests constructor that only takes a string and a TTL.
 	 */
  	public void testStringXMLConstructor() throws Exception {
- 		QueryRequest qr = QueryRequest.createQuery("tests", XML_STRING);
+ 		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("tests", XML_STRING);
  		runStandardChecks(qr, "tests", XML_STRING);
  		runNonRequeryChecks(qr);
  	}
@@ -482,7 +483,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	public void testGUIDStringXMLConstructor() throws Exception {
 		QueryRequest qr = 
-			QueryRequest.createQuery(QueryRequest.newQueryGUID(false),
+			ProviderHacks.getQueryRequestFactory().createQuery(QueryRequest.newQueryGUID(false),
 			    "tests", XML_STRING);
 		runStandardChecks(qr, "tests", XML_STRING);
 		runNonRequeryChecks(qr);
@@ -495,7 +496,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	public void testStringQueryKeyConstructor() throws InvalidSecurityTokenException {
 		AddressSecurityToken key = new AddressSecurityToken(GUID.makeGuid());
 		QueryRequest qr =
-			QueryRequest.createQueryKeyQuery("test", key);
+			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("test", key);
 
 		runStandardChecks(qr, false, Collections.EMPTY_SET, key);		
 		assertEquals("unexpected query", "test", qr.getQuery());
@@ -507,8 +508,8 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * a multicast query.
 	 */
 	public void testMulticastQuery() {
-		QueryRequest testQuery = QueryRequest.createQuery("test");
-		QueryRequest qr = QueryRequest.createMulticastQuery(new byte[16], testQuery);		
+		QueryRequest testQuery = ProviderHacks.getQueryRequestFactory().createQuery("test");
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createMulticastQuery(new byte[16], testQuery);		
 		runStandardChecksMulticast(qr, "test");
 	}
 
@@ -657,7 +658,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // not firewalled, not wanting rich, and can't do FWTrans, just 10000000
         payload[0] = (byte) 0x80;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
@@ -665,7 +666,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // firewalled, not wanting rich, and can't do FWTrans, just 11000000
         payload[0] = (byte) 0xC0;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
@@ -673,7 +674,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // not firewalled, wanting rich, can't do FWTrans, just 10100000
         payload[0] = (byte) 0xA0;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
@@ -681,7 +682,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // firewalled, wanting rich, can't do FWTrans, just 11100000
         payload[0] = (byte) 0xE0;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
@@ -689,7 +690,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // not firewalled, not wanting rich, and can do FWTrans, just 10000010
         payload[0] = (byte) 0x82;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
@@ -697,7 +698,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // firewalled, not wanting rich, and can do FWTrans, just 11000010
         payload[0] = (byte) 0xC2;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
@@ -705,7 +706,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // not firewalled, wanting rich, can do FWTrans, just 10100010
         payload[0] = (byte) 0xA2;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
@@ -713,7 +714,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
         // firewalled, wanting rich, can do FWTrans, just 11100010
         payload[0] = (byte) 0xE2;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
@@ -728,7 +729,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, wanting rich, desiring out-of-band, can't do firewalled
         // transfer
         payload[0] = (byte) 0xE4;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
@@ -741,7 +742,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, not wanting rich, desiring out-of-band, can't do
         // firewalled transfer
         payload[0] = (byte) 0xC4;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
@@ -754,7 +755,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, wanting rich, desiring out-of-band, can't do
         // firewalled transfer
         payload[0] = (byte) 0xA4;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
@@ -767,7 +768,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, not wanting rich, desiring out-of-band, can't do
         // firewalled transfer
         payload[0] = (byte) 0x84;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
@@ -780,7 +781,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, wanting rich, desiring out-of-band, can do firewalled
         // transfer
         payload[0] = (byte) 0xE6;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
@@ -793,7 +794,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // firewalled, not wanting rich, desiring out-of-band, can do
         // firewalled transfer
         payload[0] = (byte) 0xC6;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
@@ -806,7 +807,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, wanting rich, desiring out-of-band, can do
         // firewalled transfer
         payload[0] = (byte) 0xA6;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(qr.desiresXMLResponses());
@@ -819,7 +820,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // not firewalled, not wanting rich, desiring out-of-band, can do
         // firewalled transfer
         payload[0] = (byte) 0x86;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             stanfordGuid, (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(!qr.isFirewalledSource());
         assertTrue(!qr.desiresXMLResponses());
@@ -834,7 +835,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         // make sure that a multicast source overrides that firewalled bit.
         payload[0] = (byte) 0xE0;
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.MULTICAST);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
@@ -845,11 +846,11 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testNetworkParameter() throws Exception {
         QueryRequest qr;
         
-        qr = QueryRequest.createQuery("sam");
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("sam");
         assertTrue(!qr.isMulticast());
         assertEquals(Network.UNKNOWN, qr.getNetwork());
         
-        qr = QueryRequest.createMulticastQuery(new byte[16], qr);
+        qr = ProviderHacks.getQueryRequestFactory().createMulticastQuery(new byte[16], qr);
         assertTrue(qr.isMulticast());
         assertEquals(Network.MULTICAST, qr.getNetwork());
         
@@ -860,22 +861,22 @@ public final class QueryRequestTest extends LimeTestCase {
         payload[2] = (byte) 65;
         payload[1] = (byte) 0;
         
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UNKNOWN);
         assertTrue(qr.isUnknownNetwork());
         assertEquals(Network.UNKNOWN, qr.getNetwork());
         
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.TCP);
         assertTrue(qr.isTCP());
         assertEquals(Network.TCP, qr.getNetwork());
         
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.UDP);
         assertTrue(qr.isUDP());
         assertEquals(Network.UDP, qr.getNetwork());
         
-        qr = QueryRequest.createNetworkQuery(
+        qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             GUID.makeGuid(), (byte)0, (byte)0, payload, Network.MULTICAST);        
         assertTrue(qr.isMulticast());
         assertEquals(Network.MULTICAST, qr.getNetwork());
@@ -888,7 +889,7 @@ public final class QueryRequestTest extends LimeTestCase {
         ByteArrayInputStream bais = null;
 
         {
-            outQuery = QueryRequest.createWhatIsNewQuery(GUID.makeGuid(), 
+            outQuery = ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(GUID.makeGuid(), 
                                                          (byte)3);
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
@@ -899,7 +900,7 @@ public final class QueryRequestTest extends LimeTestCase {
         }
 
         {
-            outQuery = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), 
+            outQuery = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), 
                                                          (byte)3);
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
@@ -912,11 +913,11 @@ public final class QueryRequestTest extends LimeTestCase {
     }
     
     public void testLimeQuery() throws Exception {
-        QueryRequest qr = QueryRequest.createQuery("asdf");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdf");
         assertFalse(qr.isQueryForLW());
-        qr = QueryRequest.createQuery("limewire pro");
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("limewire pro");
         assertTrue(qr.isQueryForLW());
-        qr = QueryRequest.createWhatIsNewQuery(new byte[16], (byte)1);
+        qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(new byte[16], (byte)1);
         assertFalse(qr.isQueryForLW());
         
         String XML_LIME =
@@ -924,18 +925,18 @@ public final class QueryRequestTest extends LimeTestCase {
              "<audios xsi:noNamespaceSchemaLocation=" +
              "\"http://www.limewire.com/schemas/audio.xsd\">" +
              "<audio title=\"xml\" artist=\"limewire\"/></audios>";
-        qr = QueryRequest.createQuery(new byte[16], "Asdf", XML_LIME);
+        qr = ProviderHacks.getQueryRequestFactory().createQuery(new byte[16], "Asdf", XML_LIME);
         assertTrue(qr.isQueryForLW());
-        qr = QueryRequest.createQuery(new byte[16], "Asdf", XML_STRING);
+        qr = ProviderHacks.getQueryRequestFactory().createQuery(new byte[16], "Asdf", XML_STRING);
         assertFalse(qr.isQueryForLW());
     }
 
 
     public void testMetaFlagConstructor() throws Exception {
         try {
-            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, true, Network.TCP, false, 0, false, 
-                             1);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)3, "whatever", "", null, null, true, Network.TCP,
+                    false, 0, false, 1);
             assertTrue(false);
         }
         catch (IllegalArgumentException yes) {}
@@ -973,10 +974,10 @@ public final class QueryRequestTest extends LimeTestCase {
         }
 
         try {
-            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, true, Network.TCP, false, 0, false,
-                             0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
-                             flags[4] | flags[5]);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)3, "whatever", "", null, null, true, Network.TCP,
+                    false, 0, false, 0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
+                     flags[4] | flags[5]);
             assertTrue(false);
         }
         catch (IllegalArgumentException yes) {}
@@ -986,9 +987,9 @@ public final class QueryRequestTest extends LimeTestCase {
     private void testMetaFlag(int flag) throws Exception {
         try {
         QueryRequest query = 
-            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, true, Network.TCP, false, 0, false,
-                             flag);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+                "whatever", "", null, null, true, Network.TCP, false, 0, false,
+                flag);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
             assertTrue(query.desiresAudio());
@@ -1029,7 +1030,7 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testMetaFlagConstructor2() throws Exception {
         {
             QueryRequest query = 
-                QueryRequest.createQuery(GUID.makeGuid(), "whatever", "",
+                ProviderHacks.getQueryRequestFactory().createQuery(GUID.makeGuid(), "whatever", "",
                                          MediaType.getAudioMediaType());
             
             assertTrue(query.desiresAudio());
@@ -1041,7 +1042,7 @@ public final class QueryRequestTest extends LimeTestCase {
         }
         {
             QueryRequest query = 
-                QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "whatever", 
+                ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(GUID.makeGuid(), "whatever", 
                                                   "",
                                                   MediaType.getVideoMediaType());
             
@@ -1054,7 +1055,7 @@ public final class QueryRequestTest extends LimeTestCase {
         }
         {
             QueryRequest query = 
-                QueryRequest.createQuery(GUID.makeGuid(), "whatever", "",
+                ProviderHacks.getQueryRequestFactory().createQuery(GUID.makeGuid(), "whatever", "",
                                          MediaType.getImageMediaType());
             
             assertFalse(query.desiresAudio());
@@ -1066,7 +1067,7 @@ public final class QueryRequestTest extends LimeTestCase {
         }
         {
             QueryRequest query = 
-                QueryRequest.createWhatIsNewQuery(GUID.makeGuid(), (byte) 2,
+                ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(GUID.makeGuid(), (byte) 2,
                                                MediaType.getDocumentMediaType());
             
             assertFalse(query.desiresAudio());
@@ -1078,7 +1079,7 @@ public final class QueryRequestTest extends LimeTestCase {
         }
         {
             QueryRequest query = 
-                QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte) 2,
+                ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), (byte) 2,
                                                MediaType.getProgramMediaType());
             
             assertFalse(query.desiresAudio());
@@ -1094,9 +1095,9 @@ public final class QueryRequestTest extends LimeTestCase {
     }
 
     public void testProxyQueries() throws Exception {
-        QueryRequest query = QueryRequest.createQuery("sush");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("sush");
         assertFalse(query.desiresOutOfBandReplies());
-        QueryRequest proxy = QueryRequest.createProxyQuery(query,
+        QueryRequest proxy = ProviderHacks.getQueryRequestFactory().createProxyQuery(query,
                                                            query.getGUID());
         assertDesiresOutOfBand(proxy);
         assertFalse(proxy.doNotProxy());
@@ -1108,7 +1109,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         OOBv2Disabled = true;
-        proxy = QueryRequest.createProxyQuery(query,
+        proxy = ProviderHacks.getQueryRequestFactory().createProxyQuery(query,
                 query.getGUID());
         assertDesiresOutOfBand(proxy);
     }
@@ -1121,25 +1122,25 @@ public final class QueryRequestTest extends LimeTestCase {
         // payload without ggep and huge
         byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
         
-        QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
+        QueryRequest proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
         // payload with multiple ggeps
         payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
+        query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertTrue(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
+        proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
@@ -1157,12 +1158,12 @@ public final class QueryRequestTest extends LimeTestCase {
         out.write(0x1c);
         
         payload = out.toByteArray();
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
+        query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
+        proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         // verfiy unknown gem is still there
@@ -1178,12 +1179,12 @@ public final class QueryRequestTest extends LimeTestCase {
         
         payload = out.toByteArray();
         
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
+        query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
-        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
+        proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         System.arraycopy(newPayload, startGem, part, 0, part.length);
@@ -1198,15 +1199,15 @@ public final class QueryRequestTest extends LimeTestCase {
                 (byte)0xD8, 00, 0x6C, 0x69, 0x6D, 0x65, 0x77, 0x69, 0x72, 0x65, 00
         };
         
-        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Network.UNKNOWN);
+        query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Network.UNKNOWN);
         assertEquals("limewire", query.getQuery());
         
         newPayload = QueryRequest.patchInGGEP(query.getPayload(), ggep);
         
-        QueryRequest patched = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Network.UNKNOWN);
+        QueryRequest patched = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Network.UNKNOWN);
         assertEquals(query.getQuery(), patched.getQuery());
         
-        patched = QueryRequest.createProxyQuery(query, GUID.makeGuid());
+        patched = ProviderHacks.getQueryRequestFactory().createProxyQuery(query, GUID.makeGuid());
         assertEquals(query.getQuery(), patched.getQuery());
         assertTrue (patched.desiresOutOfBandRepliesV3());
     }
@@ -1218,84 +1219,86 @@ public final class QueryRequestTest extends LimeTestCase {
      */
     public void testOOBSecurityTokenSet() throws Exception {
         // oob set
-        QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertTrue(request.isSecurityTokenRequired());
         
-        QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        QueryRequest fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
+        request = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        request = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        request = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
-        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        request = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
         assertTrue(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         // oob not set
-        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP, false, 0);
+        request = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)1,
+                "query", "", URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP,
+                false, 0);
         assertFalse(request.isSecurityTokenRequired());
         
-        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        fromNetwork = ProviderHacks.getQueryRequestFactory().createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
         assertFalse(fromNetwork.isSecurityTokenRequired());
         
     }
     
     public void testUnmarkOOBQuery() throws Exception {
-        QueryRequest query = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 5555);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 5555);
         assertDesiresOutOfBand(query);
         
-        QueryRequest copy = QueryRequest.unmarkOOBQuery(query);
+        QueryRequest copy = ProviderHacks.getQueryRequestFactory().unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getQuery(), copy.getQuery());
         
-        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        query = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
         assertDesiresOutOfBand(query);
         
-        copy = QueryRequest.unmarkOOBQuery(query);
+        copy = ProviderHacks.getQueryRequestFactory().unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getQuery(), copy.getQuery());
         assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
         assertEquals(query.getGUID(), copy.getGUID());
         
-        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        query = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
         assertDesiresOutOfBand(query);
         
-        copy = QueryRequest.unmarkOOBQuery(query);
+        copy = ProviderHacks.getQueryRequestFactory().unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getQuery(), copy.getQuery());
         assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
         assertEquals(query.getGUID(), copy.getGUID());
         assertEquals(query.getMetaMask(), copy.getMetaMask());
         
-        query = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertDesiresOutOfBand(query);
-        copy = QueryRequest.unmarkOOBQuery(query);
+        copy = ProviderHacks.getQueryRequestFactory().unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getQuery(), copy.getQuery());
         assertEquals(query.getGUID(), copy.getGUID());
         
      
-        query = QueryRequest.createQuery("query");
+        query = ProviderHacks.getQueryRequestFactory().createQuery("query");
         assertNotDesiresOutOfBand(query);
         
-        copy = QueryRequest.unmarkOOBQuery(query);
+        copy = ProviderHacks.getQueryRequestFactory().unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getPayload(), copy.getPayload());
     }
@@ -1307,13 +1310,12 @@ public final class QueryRequestTest extends LimeTestCase {
     }
     
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "",
-                URN.NO_URN_SET,
-                new AddressSecurityToken(InetAddress.getLocalHost(), 1094),
-                false, Network.MULTICAST, false, 0, false, 0, false);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)1, 5,
+                "query", "", URN.NO_URN_SET, new AddressSecurityToken(InetAddress.getLocalHost(), 1094), false, Network.MULTICAST,
+                false, 0, false, 0, false);
 
         try {
-            QueryRequest.createDoNotProxyQuery(query);
+            ProviderHacks.getQueryRequestFactory().createDoNotProxyQuery(query);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException iae) {
@@ -1324,7 +1326,7 @@ public final class QueryRequestTest extends LimeTestCase {
         // precondition
         assertFalse(query.doNotProxy());
         
-        QueryRequest proxy = QueryRequest.createDoNotProxyQuery(query);
+        QueryRequest proxy = ProviderHacks.getQueryRequestFactory().createDoNotProxyQuery(query);
         
         // post condition
         assertTrue(proxy.doNotProxy());
@@ -1343,7 +1345,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         // idempotence
         proxy.originate();
-        query = QueryRequest.createDoNotProxyQuery(proxy);
+        query = ProviderHacks.getQueryRequestFactory().createDoNotProxyQuery(proxy);
         
         assertEquals(query.getGUID(), proxy.getGUID());
         assertEquals(query.getHops(), proxy.getHops());

@@ -92,7 +92,7 @@ public final class MessageRouterTest extends LimeTestCase {
         RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         //TestConnectionManager tcm = new TestConnectionManager(4);
         //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        ROUTER = new StandardMessageRouter();
+        ROUTER = ProviderHacks.getNewStandardMessageRouter();
         ROUTER.initialize();
         Thread.sleep(5000);
     }
@@ -119,8 +119,8 @@ public final class MessageRouterTest extends LimeTestCase {
                 paramTypes);
         
         QueryRequest qr = 
-            QueryRequest.createQuery(LeafConnection.ALT_LEAF_KEYWORD);
-        ReplyHandler rh = new ManagedConnection("localhost", 6346);
+            ProviderHacks.getQueryRequestFactory().createQuery(LeafConnection.ALT_LEAF_KEYWORD);
+        ReplyHandler rh = ProviderHacks.getManagedConnectionFactory().createManagedConnection("localhost", 6346);
         Object[] params = new Object[]  {qr, rh};
         m.invoke(ROUTER, params);
         int numQueries = tcm.getNumLeafQueries();
@@ -134,7 +134,7 @@ public final class MessageRouterTest extends LimeTestCase {
         m = PrivilegedAccessor.getMethod(ROUTER, 
                     "forwardQueryRequestToLeaves",
                     paramTypes);
-        qr = QueryRequest.createQuery(LeafConnection.LEAF_KEYWORD);
+        qr = ProviderHacks.getQueryRequestFactory().createQuery(LeafConnection.LEAF_KEYWORD);
         params[0] = qr;
         m.invoke(ROUTER, params);
         numQueries = tcm.getNumLeafQueries();
@@ -169,7 +169,7 @@ public final class MessageRouterTest extends LimeTestCase {
                         paramTypes);
             Response[] res = new Response[20];
             Arrays.fill(res, new Response((long)0, (long)10, "test"));
-            QueryRequest query = QueryRequest.createQuery("test");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
             Object[] params = new Object[] {
                     res,
                     query,
@@ -251,7 +251,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardLimitedQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
         ReplyHandler rh = new OldConnection(10);
         
         m.invoke(ROUTER, new Object[] {qr, rh});
@@ -302,7 +302,7 @@ public final class MessageRouterTest extends LimeTestCase {
             PrivilegedAccessor.getMethod(ROUTER, 
                                          "forwardLimitedQueryToUltrapeers",
                                          params);        
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 15, 
@@ -334,7 +334,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardLimitedQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 0, tcm.getNumUltrapeerQueries());
@@ -364,7 +364,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardLimitedQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         // make sure we send a query from an old connection to old 
@@ -392,7 +392,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
         ReplyHandler rh = NewConnection.createConnection(10);
         
         m.invoke(ROUTER, new Object[] {qr, rh});
@@ -420,7 +420,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
@@ -447,7 +447,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
@@ -475,7 +475,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
@@ -506,7 +506,7 @@ public final class MessageRouterTest extends LimeTestCase {
                                          "forwardQueryToUltrapeers",
                                          params);        
 
-        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
@@ -535,7 +535,7 @@ public final class MessageRouterTest extends LimeTestCase {
         TestConnectionManager tcm = new TestConnectionManager(2, false);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        QueryRequest qr = QueryRequest.createQuery("test");      
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
 
         
         m.invoke(ROUTER, new Object[] {qr});
@@ -554,7 +554,7 @@ public final class MessageRouterTest extends LimeTestCase {
         StaticMessages.initialize();
         QueryReply limeReply = StaticMessages.getLimeReply();
         
-        QueryRequest qr = QueryRequest.createQuery("limewire pro");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("limewire pro");
         assertTrue(qr.isQueryForLW());
         
         final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
@@ -573,7 +573,7 @@ public final class MessageRouterTest extends LimeTestCase {
     
     public void testUDPPingReplies() throws Exception {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        ConnectionManager cm = new ConnectionManager();
+        ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
         cm.initialize();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
@@ -693,7 +693,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     public void testUDPPingReplyWithDHTIPPs() throws Exception{
-        ConnectionManager cm = new ConnectionManager();
+        ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
         cm.initialize();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
@@ -819,7 +819,7 @@ public final class MessageRouterTest extends LimeTestCase {
     	URN urn = FileDescStub.DEFAULT_SHA1;
     	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, 0xFF);
     	headRt.routeReply(ping.getGUID(),pinger);
-    	HeadPong pong = new HeadPong(ping);
+    	HeadPong pong = ProviderHacks.getHeadPongFactory().create(ping);
     	
     	ROUTER.handleMessage(pong, new ManagedConnectionStub());
     	
@@ -893,9 +893,9 @@ public final class MessageRouterTest extends LimeTestCase {
     /**
      * Stub MessageRouter that catches 'sendPingReply' pings.
      */
-    private static final class StubRouter extends StandardMessageRouter {
+    private static final class StubRouter extends HackMessageRouter {
         private List sentPongs = new LinkedList();
-        
+                
         // upp access.
         public void respondToUDPPingRequest(PingRequest req, 
                                             InetSocketAddress addr,

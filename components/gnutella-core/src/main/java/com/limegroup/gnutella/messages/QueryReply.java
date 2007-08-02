@@ -33,9 +33,9 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -1137,7 +1137,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setTLSCapable(supportsTLST);
             
             // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(new HostData(this));
+            _data.setHostData(ProviderHacks.getHostDataFactory().createHostData(this));
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -1183,7 +1183,7 @@ public class QueryReply extends Message implements SecureMessage {
      * not.  See RouterService.acceptingIncomingConnection or Acceptor for
      * details.  
      */
-	public int calculateQualityOfService(boolean iFirewalled) {
+	public int calculateQualityOfService(boolean iFirewalled, NetworkManager networkManager) {
         final int YES=1;
         final int MAYBE=0;
         final int NO=-1;
@@ -1219,7 +1219,7 @@ public class QueryReply extends Message implements SecureMessage {
         if ((this.getPushProxies() != null) && (this.getPushProxies().size() > 1))
             hasPushProxies = true;
 
-        if (getSupportsFWTransfer() && UDPService.instance().canDoFWT()) {
+        if (getSupportsFWTransfer() && networkManager.canDoFWT()) {
             iFirewalled = false;
             heFirewalled = NO;
         }
@@ -1227,7 +1227,7 @@ public class QueryReply extends Message implements SecureMessage {
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
          * this method, take a look at isFirewalledQuality! */
-		if(Arrays.equals(_address, RouterService.getAddress())) {
+		if(Arrays.equals(_address, networkManager.getAddress())) {
 			return 3;       // same address -- display it
         } else if (isMCastReply) {
             return 4;       // multicast, maybe busy (but doesn't matter)

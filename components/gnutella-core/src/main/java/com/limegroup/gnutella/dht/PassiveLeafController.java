@@ -7,6 +7,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -14,9 +15,9 @@ class PassiveLeafController extends AbstractDHTController {
 
     private RouteTable routeTable;
     
-    public PassiveLeafController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher, DHTMode.PASSIVE_LEAF);
+    PassiveLeafController(Vendor vendor, Version version, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher, NetworkManager networkManager) {
+        super(vendor, version, dispatcher, DHTMode.PASSIVE_LEAF, networkManager);
     }
 
     @Override

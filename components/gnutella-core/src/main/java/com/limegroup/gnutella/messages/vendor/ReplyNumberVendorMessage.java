@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -36,7 +35,7 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
     /**
      * whether we can receive unsolicited udp
      */
-    private static final byte UNSOLICITED=0x1;
+    protected static final byte UNSOLICITED=0x1;
 
     /**
      * Constructs a new ReplyNumberVendorMessages with data from the network.
@@ -73,28 +72,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    ReplyNumberVendorMessage(GUID replyGUID, int version, int numResults) {
-        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
-              derivePayload(numResults));
+    ReplyNumberVendorMessage(GUID replyGUID, int version, int numResults, byte[] payload) {
+        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, version, payload);
         setGUID(replyGUID);
     }
     
-    /**
-     * Constructs a new ReplyNumberVendorMessage with the current version
-     * number.
-     */
-    public ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        this(replyGUID, VERSION, numResults);
-    }
-    
-    public static ReplyNumberVendorMessage createV2ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        return new ReplyNumberVendorMessage(replyGUID, OLD_VERSION, numResults);
-    }
-    
-    public static ReplyNumberVendorMessage  createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        return new ReplyNumberVendorMessage(replyGUID, VERSION, numResults);
-    }
-
     /** @return an int (1-255) representing the amount of results that a host
      *  for a given query (as specified by the guid of this message).
      */
@@ -107,20 +89,6 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
             return true;
         else 
             return (getPayload()[1] & UNSOLICITED) == UNSOLICITED;
-    }
-
-    /**
-     * Constructs the payload from the desired number of results.
-     */
-    private static byte[] derivePayload(int numResults) {
-        if ((numResults < 1) || (numResults > 255))
-            throw new IllegalArgumentException("Number of results too big: " +
-                                               numResults);
-        byte[] bytes = new byte[2];
-        ByteOrder.short2leb((short) numResults, bytes, 0);
-        bytes[1] = RouterService.canReceiveUnsolicited() ? UNSOLICITED : 0x0;
-        
-        return bytes;
     }
 
     public boolean equals(Object other) {

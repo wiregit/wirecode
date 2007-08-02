@@ -18,6 +18,7 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -70,8 +71,11 @@ class Tracker {
     
     /** The key, as required by some trackers */
     private final String key;
+    
+    private final NetworkManager networkManager;
 	
-	public Tracker(URI uri, TorrentContext context, ManagedTorrent torrent) {
+	Tracker(URI uri, TorrentContext context, ManagedTorrent torrent, NetworkManager networkManager) {
+	    this.networkManager = networkManager;
 		this.uri = uri;
 		this.context = context;
 		this.torrent = torrent;
@@ -145,13 +149,12 @@ class Tracker {
 			addGetField(buf, "key", key);
 
 		} catch (UnsupportedEncodingException uee) {
-			ErrorService.error(uee);
-		}
+            ErrorService.error(uee);
+        }
 
-		addGetField(buf, "ip", NetworkUtils.ip2string(RouterService
-				.getAddress()));
+        addGetField(buf, "ip", NetworkUtils.ip2string(networkManager.getAddress()));
 
-		addGetField(buf, "port", String.valueOf(RouterService.getPort()));
+        addGetField(buf, "port", String.valueOf(networkManager.getPort()));
 
 		addGetField(buf, "downloaded", 
 				String.valueOf(torrent.getTotalDownloaded()));

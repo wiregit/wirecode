@@ -47,18 +47,17 @@ import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.Handshaker;
-import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -159,10 +158,6 @@ public class ManagedConnection extends Connection
      *  ConnectBack requests.
      */
     private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
-
-	/** Handle to the <tt>ConnectionManager</tt>.
-	 */
-    private ConnectionManager _manager;
 
 	/** Filter for filtering out messages that are considered spam.
 	 */
@@ -301,43 +296,56 @@ public class ManagedConnection extends Connection
 	 * proxied.
 	 */
     private int _maxDisabledOOBProtocolVersion = 0;
-
-    /**
-     * Creates a new outgoing connection to the specified host on the
-	 * specified port.  
-	 *
-	 * @param host the address of the host we're connecting to
-	 * @param port the port the host is listening on
-     */
-    public ManagedConnection(String host, int port) {
-        super(host, port);
-        _manager = RouterService.getConnectionManager();
-    }
+    
+    private final ConnectionManager connectionManager;
+    private final NetworkManager networkManager;
+    private final QueryRequestFactory queryRequestFactory;
+    private final HeadersFactory headersFactory;
+    private final HandshakeResponderFactory handshakeResponderFactory;
     
     /**
-     * Creates a new outgoing connection to the specified host on the
-     * specified port, using the specified kind of ConnectType.
-     *
+     * Creates a new outgoing connection to the specified host on the specified
+     * port, using the specified kind of ConnectType.
+     * 
      * @param host the address of the host we're connecting to
      * @param port the port the host is listening on
-     * @param type the type of outgoing connection we want to make (TLS, PLAIN, etc)
+     * @param type the type of outgoing connection we want to make (TLS, PLAIN,
+     *        etc)
      */
-    public ManagedConnection(String host, int port, ConnectType type) {
+    public ManagedConnection(String host, int port, ConnectType type,
+            ConnectionManager connectionManager, NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            HeadersFactory headersFactory,
+            HandshakeResponderFactory handshakeResponderFactory) {
         super(host, port, type);
-        _manager = RouterService.getConnectionManager();
+        this.connectionManager = connectionManager;
+        this.networkManager = networkManager;
+        this.queryRequestFactory = queryRequestFactory;
+        this.headersFactory = headersFactory;
+        this.handshakeResponderFactory = handshakeResponderFactory;
+        
     }
-      
+
     /**
-     * Creates an incoming connection.
-     * ManagedConnections should only be constructed within ConnectionManager.
-     * @requires the word "GNUTELLA " and nothing else has just been read
-     *  from socket
+     * Creates an incoming connection. ManagedConnections should only be
+     * constructed within ConnectionManager.
+     * 
+     * @requires the word "GNUTELLA " and nothing else has just been read from
+     *           socket
      * @effects wraps a connection around socket and does the rest of the
-     *  Gnutella handshake.
+     *          Gnutella handshake.
      */
-    ManagedConnection(Socket socket) {
+    public ManagedConnection(Socket socket,
+            ConnectionManager connectionManager, NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            HeadersFactory headersFactory,
+            HandshakeResponderFactory handshakeResponderFactory) {
         super(socket);
-        _manager = RouterService.getConnectionManager();
+        this.connectionManager = connectionManager;
+        this.networkManager = networkManager;
+        this.queryRequestFactory = queryRequestFactory;
+        this.headersFactory = headersFactory;
+        this.handshakeResponderFactory = handshakeResponderFactory;
     }
     
     /**
@@ -365,19 +373,23 @@ public class ManagedConnection extends Connection
         if(isOutgoing()) {
             String host = getAddress();
             if(RouterService.isSupernode()) {
-                requestHeaders = new UltrapeerHeaders(host);
-                responder = new UltrapeerHandshakeResponder(host);
+                requestHeaders = headersFactory.createUltrapeerHeaders(host);
+                responder = handshakeResponderFactory
+                        .createUltrapeerHandshakeResponder(host);
             } else {
-                requestHeaders = new LeafHeaders(host);
-                responder = new LeafHandshakeResponder(host);
+                requestHeaders = headersFactory.createLeafHeaders(host);
+                responder = handshakeResponderFactory
+                        .createLeafHandshakeResponder(host);
             }
         } else {
             String host = getSocket().getInetAddress().getHostAddress();
             requestHeaders = null;
             if(RouterService.isSupernode()) {
-                responder = new UltrapeerHandshakeResponder(host);
+                responder = handshakeResponderFactory
+                        .createUltrapeerHandshakeResponder(host);
             } else {
-                responder = new LeafHandshakeResponder(host);
+                responder = handshakeResponderFactory
+                        .createLeafHandshakeResponder(host);
             }
         }        
         
@@ -674,8 +686,8 @@ public class ManagedConnection extends Connection
         try {
             m = super.receive();
         } catch(IOException e) {
-            if( _manager != null )
-                _manager.remove(this);
+            if( connectionManager != null )
+                connectionManager.remove(this);
             throw e;
         }
         // record received message in stats
@@ -698,8 +710,8 @@ public class ManagedConnection extends Connection
             //do not remove, just rethrow.
             throw ioe;
         } catch(IOException e) {
-            if( _manager != null )
-                _manager.remove(this);
+            if( connectionManager != null )
+                connectionManager.remove(this);
             throw e;
         }
         
@@ -793,7 +805,7 @@ public class ManagedConnection extends Connection
                 && SearchSettings.DISABLE_OOB_V2.getBoolean()) {
             // don't proxy if we are a leaf and the ultrapeer 
             // does not know OOB v3 and they would proxy for us
-            query = QueryRequest.createDoNotProxyQuery(query);
+            query = queryRequestFactory.createDoNotProxyQuery(query);
             query.originate();
         }
         
@@ -871,10 +883,10 @@ public class ManagedConnection extends Connection
     public void messagingClosed() {
         // we must run this in another thread, as manager.remove
         // obtains locks, but this can be called from the NIO thread
-        if( _manager != null ) {
+        if( connectionManager != null ) {
             RouterService.getMessageDispatcher().dispatch(new Runnable() {
                 public void run() {
-                    _manager.remove(ManagedConnection.this);
+                    connectionManager.remove(ManagedConnection.this);
                 }
             });
         }
@@ -960,9 +972,10 @@ public class ManagedConnection extends Connection
             }
         }
         
-        if (!RouterService.isOOBCapable() || 
-            !OutOfBandThroughputStat.isSuccessRateGreat() ||
-            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
+        if (!networkManager.isOOBCapable()
+                || !OutOfBandThroughputStat.isSuccessRateGreat()
+                || !OutOfBandThroughputStat.isOOBEffectiveForProxy())
+            return query;
 
         // everything is a go - we need to do the following:
         // 1) mutate the GUID of the query - you should maintain every param of
@@ -977,12 +990,12 @@ public class ManagedConnection extends Connection
         byte[] origGUID = query.getGUID();
         byte[] oobGUID = new byte[origGUID.length];
         System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
-        GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
-                               RouterService.getPort());
+        GUID.addressEncodeGuid(oobGUID, networkManager.getAddress(),
+                networkManager.getPort());
         if (MessageSettings.STAMP_QUERIES.getValue())
             GUID.timeStampGuid(oobGUID);
 
-        query = QueryRequest.createProxyQuery(query, oobGUID);
+        query = queryRequestFactory.createProxyQuery(query, oobGUID);
         
         // 2) set up mappings between the guids
         _guidMap.addMapping(origGUID, oobGUID);
@@ -1167,7 +1180,7 @@ public class ManagedConnection extends Connection
             
             receivedCapVM = true;
             //fire a vendor event
-            _manager.dispatchEvent(new ConnectionLifecycleEvent(this, 
+            connectionManager.dispatchEvent(new ConnectionLifecycleEvent(this, 
                     EventType.CONNECTION_CAPABILITIES , this));
                 
         }
@@ -1197,20 +1210,20 @@ public class ManagedConnection extends Connection
             }
 
             // do i need to send any ConnectBack messages????
-            if (!UDPService.instance().canReceiveUnsolicited() &&
+            if (!ProviderHacks.getUdpService().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
-                GUID connectBackGUID = RouterService.getUDPConnectBackGUID();
-                Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
+                GUID connectBackGUID = networkManager.getUDPConnectBackGUID();
+                Message udp = new UDPConnectBackVendorMessage(networkManager.getPort(),
                                                               connectBackGUID);
                 send(udp);
                 _numUDPConnectBackRequests++;
             }
 
-            if (!RouterService.acceptedIncomingConnection() &&
+            if (!networkManager.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsTCPRedirect() > -1)) {
-                Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
+                Message tcp = new TCPConnectBackVendorMessage(networkManager.getPort());
                 send(tcp);
                 _numTCPConnectBackRequests++;
             }
@@ -1468,11 +1481,11 @@ public class ManagedConnection extends Connection
                     sendQueued();
                 }                
             } catch (IOException e) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
+                if(connectionManager != null)
+                    connectionManager.remove(ManagedConnection.this);
             } catch(Throwable t) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
+                if(connectionManager != null)
+                    connectionManager.remove(ManagedConnection.this);
                 ErrorService.error(t);
             }
         }

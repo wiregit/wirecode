@@ -12,6 +12,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -49,7 +50,7 @@ public class DHTManagerTest extends DHTTestCase {
         DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
         
         TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor, ProviderHacks.getDHTControllerFactory());
         
         try {
             assertFalse(manager.isRunning());
@@ -106,7 +107,7 @@ public class DHTManagerTest extends DHTTestCase {
     
     public void testStopStartLimeDHTManager() throws Exception{
         TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor, ProviderHacks.getDHTControllerFactory());
         try {
             manager.start(DHTMode.ACTIVE);
             manager.stop();

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * Helper class that always says it is an Ultrapeer.
@@ -8,7 +9,7 @@ import com.limegroup.gnutella.ConnectionManager;
 public final class UltrapeerConnectionManager extends ConnectionManager {
 
     public UltrapeerConnectionManager() {
-        super();
+        super(ProviderHacks.getNetworkManager());
     }
 
     public boolean isSupernode() {

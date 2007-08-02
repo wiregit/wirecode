@@ -127,9 +127,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertEquals(1, RouterService.getConnectionManager().getNumConnections());
 
         // send a query that should be answered
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
-                                              "berkeley", null, null,
-                                              null, false, Network.UNKNOWN, false, 0);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+                "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         testUP[0].send(query);
         testUP[0].flush();
 
@@ -294,7 +293,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 StringTokenizer st = new StringTokenizer(currLine, ":");
                 assertEquals(st.nextToken(), "X-Node");
                 InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-                Arrays.equals(addr.getAddress(), RouterService.getAddress());
+                Arrays.equals(addr.getAddress(), ProviderHacks.getNetworkManager().getAddress());
                 assertEquals(Integer.parseInt(st.nextToken()), PORT);
         
                 // send back a 202 and make sure no PushRequest is sent via the normal
@@ -404,8 +403,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertNotNull(pr);
         assertEquals(expectTLS, pr.isTLSCapable());
         assertEquals(clientGUID, pr.getClientGUID());
-        assertEquals(RouterService.getAddress(), pr.getIP());
-        assertEquals(RouterService.getPort(), pr.getPort());
+        assertEquals(ProviderHacks.getNetworkManager().getAddress(), pr.getIP());
+        assertEquals(ProviderHacks.getNetworkManager().getPort(), pr.getPort());
         assertEquals(10, pr.getIndex());
         assertFalse(pr.isFirewallTransferPush());
         

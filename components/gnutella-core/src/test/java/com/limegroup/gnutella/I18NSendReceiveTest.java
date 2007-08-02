@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
@@ -123,7 +123,7 @@ public class I18NSendReceiveTest
 
 
     private static void connect() throws Exception {
-        UltrapeerHeaders headers = new UltrapeerHeaders("localhost");
+        UltrapeerHeaders headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
         CONN_1 = new Connection("localhost", TEST_PORT);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
@@ -137,7 +137,7 @@ public class I18NSendReceiveTest
      */
     public void testSendReceive() throws Exception {        
         //test random query 
-        QueryRequest qr = QueryRequest.createQuery("asdfadf", (byte)2);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdfadf", (byte)2);
         CONN_1.send(qr);
         CONN_1.flush();
         
@@ -198,7 +198,7 @@ public class I18NSendReceiveTest
         int size = expectedReply.size();
 
         QueryRequest qr 
-            = QueryRequest.createQuery(q, xml);
+            = ProviderHacks.getQueryRequestFactory().createQuery(q, xml);
         CONN_1.send(qr);
         CONN_1.flush();
 

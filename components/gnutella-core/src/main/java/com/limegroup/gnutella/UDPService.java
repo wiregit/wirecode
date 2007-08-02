@@ -50,10 +50,6 @@ public class UDPService implements ReadWriteObserver {
 
     private static final Log LOG = LogFactory.getLog(UDPService.class);
     
-	/**
-	 * Constant for the single <tt>UDPService</tt> instance.
-	 */
-	private final static UDPService INSTANCE = new UDPService();
     
     private static final MACCalculator PING_GENERATOR = 
         MACCalculatorRepositoryManager.createDefaultCalculatorFactory().createMACCalculator();
@@ -147,18 +143,14 @@ public class UDPService implements ReadWriteObserver {
      * A buffer used for reading the header of incoming messages.
      */
     private static final byte[] IN_HEADER_BUF = new byte[23];
-
-	/**
-	 * Instance accessor.
-	 */
-	public static UDPService instance() {
-		return INSTANCE;
-	}
+    
+    private final NetworkManager networkManager;
 
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	protected UDPService() {	   
+	protected UDPService(NetworkManager networkManager) {
+	    this.networkManager = networkManager;
 	    OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
@@ -606,21 +598,21 @@ public class UDPService implements ReadWriteObserver {
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
-	                    " our external port "+RouterService.getPort()+
+	                    " our external port "+networkManager.getPort()+
 	                    " our non-forced port "+RouterService.getAcceptor().getPort(false)+
 	                    " number of received IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
-	                            RouterService.getExternalAddress()));
+	                            networkManager.getExternalAddress()));
 	        }
 	        
 	        ret= 
-	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
+	            NetworkUtils.isValidAddress(networkManager.getExternalAddress()) && 
 	    		_portStable;
 	        
 	        if (_numReceivedIPPongs == 1){
 	            ret = ret &&
 	            	(_lastReportedPort == RouterService.getAcceptor().getPort(false) ||
-	                    _lastReportedPort == RouterService.getPort());
+	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
 	    
@@ -654,7 +646,7 @@ public class UDPService implements ReadWriteObserver {
 	public int getStableUDPPort() {
 
 	    int localPort = RouterService.getAcceptor().getPort(false);
-	    int forcedPort = RouterService.getPort();
+	    int forcedPort = networkManager.getPort();
 
 	    synchronized(this) {
 	        if (_portStable && _numReceivedIPPongs > 1)
@@ -772,7 +764,7 @@ public class UDPService implements ReadWriteObserver {
             // straightforward - send a UDP ping to a host.  it doesn't really
             // matter who the guy is - we are just sending to open up any
             // potential firewall to UDP traffic
-            GUESSEndpoint ep = QueryUnicaster.instance().getUnicastEndpoint();
+            GUESSEndpoint ep = RouterService.getQueryUnicaster().getUnicastEndpoint();
             if (ep == null) return;
             // only do this if you can receive some form of UDP traffic.
             if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;

@@ -7,7 +7,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 
@@ -110,7 +110,7 @@ public final class HostData {
 	 * @param reply the <tt>QueryReply</tt> instance from which
 	 *  host data should be extracted.
 	 */
-	public HostData(QueryReply reply) {
+	protected HostData(QueryReply reply, NetworkManager networkManager) {
 		CLIENT_GUID = reply.getClientGUID();
 		MESSAGE_GUID = reply.getGUID();
 		IP = reply.getIP();
@@ -159,8 +159,8 @@ public final class HostData {
 		MEASURED_SPEED = measuredSpeed || multicast;
 		MULTICAST = multicast;
         VENDOR_CODE = vendor;
-		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
-        QUALITY = reply.calculateQualityOfService(ifirewalled);
+		boolean ifirewalled = !networkManager.acceptedIncomingConnection();
+        QUALITY = reply.calculateQualityOfService(ifirewalled, networkManager);
         PROXIES = reply.getPushProxies();
         CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
         FWT_VERSION = reply.getFWTransferVersion();

@@ -3,10 +3,11 @@ package com.limegroup.gnutella.filters;
 
 import java.io.IOException;
 
-import org.limewire.service.ErrorService;
-
 import junit.framework.Test;
 
+import org.limewire.service.ErrorService;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -29,9 +30,9 @@ public class HashFilterTest extends LimeTestCase {
     public static void globalSetUp() {
         try{
             URN sha1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-            urn = QueryRequest.createRequery(sha1);
-            urnFile = QueryRequest.createQuery(sha1,"some file");
-            noUrn = QueryRequest.createQuery("some file");
+            urn = ProviderHacks.getQueryRequestFactory().createRequery(sha1);
+            urnFile = ProviderHacks.getQueryRequestFactory().createQuery(sha1,"some file");
+            noUrn = ProviderHacks.getQueryRequestFactory().createQuery("some file");
         }catch(IOException impossible){
             ErrorService.error(impossible);
         }

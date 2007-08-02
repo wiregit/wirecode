@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * Helper class that always says it is a leaf.
@@ -8,7 +9,7 @@ import com.limegroup.gnutella.ConnectionManager;
 public final class LeafConnectionManager extends ConnectionManager {
 
     public LeafConnectionManager() {
-        super();
+        super(ProviderHacks.getNetworkManager());
     }
 
     public boolean isSupernode() {

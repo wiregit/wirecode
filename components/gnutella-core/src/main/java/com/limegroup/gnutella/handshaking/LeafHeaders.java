@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.limegroup.gnutella.NetworkManager;
+
 /**
  * Properties for connection handshake, if the node is a client
  */
@@ -13,8 +15,8 @@ public class LeafHeaders extends DefaultHeaders {
      *  on Gnutella -- useful in discovering the real address at the NAT
      *  or firewall
      */
-    public LeafHeaders(String remoteIP){
-        super(remoteIP);
+    LeafHeaders(String remoteIP, NetworkManager networkManager){
+        super(remoteIP, networkManager);
         //set Ultrapeer property
         put(HeaderNames.X_ULTRAPEER, "False");
     }

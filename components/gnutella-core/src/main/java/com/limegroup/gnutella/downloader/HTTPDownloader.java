@@ -49,11 +49,11 @@ import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -274,49 +274,17 @@ public class HTTPDownloader implements BandwidthTracker {
     /** Whether to count the bandwidth used by this downloader */
     private final boolean _inNetwork;
     
-
-    /**
-     * Allows subclasses to construct the class without an initialized
-     * socket.
-     *
-     * @param rfd complete information for the file to download, including
-     *  host address and port
-     * @param incompleteFile the temp file to use while downloading, which need
-     *  not exist.
-     *  @param inNetwork true if this download is for an in-network downloader
-     */
-	protected HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        this(null, rfd, incompleteFile, inNetwork, false);
-	}	
-
-	/**
-     * Constructs an HTTPDownloader with the given socket.
-     * If the socket was a PUSH socket, the GIV must have already been
-     * read off it.
-     * 
-     * You must call initializeTCP prior to connectHTTP.
-     * 
-     * @param socket the socket to download from.
-     * @param rfd complete information for the file to download, including
-     *  host address and port
-     * @param incompleteFile the temp file to use while downloading, which need
-     *  not exist.
-     * @param inNetwork true if this is for an in-network downloader.
-     */
-	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        this(socket, rfd, incompleteFile, inNetwork, true);
-    }
+    private final NetworkManager networkManager;
     
-    /**
-     * Constructs this HTTPDownloader with all the necessary parameters.
-     * If requireSocket is true, the socket parameter must be non-null.
-     */
-    private HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork, boolean requireSocket) {
-        if(rfd == null)
+    HTTPDownloader(Socket socket, RemoteFileDesc rfd,
+            VerifyingFile incompleteFile, boolean inNetwork,
+            boolean requireSocket, NetworkManager networkManager) {
+        if (rfd == null)
             throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
+        this.networkManager = networkManager;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -501,9 +469,9 @@ public class HTTPDownloader implements BandwidthTracker {
         //if I'm not firewalled or I can do FWT, say that I want pushlocs.
         //if I am firewalled, send the version of the FWT protocol I support.
         // (which implies that I want only altlocs that support FWT)
-        if (RouterService.acceptedIncomingConnection() || UDPService.instance().canDoFWT()) {
+        if (networkManager.acceptedIncomingConnection() || ProviderHacks.getUdpService().canDoFWT()) {
             features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
-            if (!RouterService.acceptedIncomingConnection())
+            if (!networkManager.acceptedIncomingConnection())
                 features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
         }
         	
@@ -511,8 +479,8 @@ public class HTTPDownloader implements BandwidthTracker {
         // Add ourselves to the mesh if the partial file is valid
         //if I'm firewalled add myself only if the other guy wants falts
         if( isPartialFileValid() && 
-        	 (RouterService.acceptedIncomingConnection() || _wantsFalts)) {
-        		AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
+        	 (networkManager.acceptedIncomingConnection() || _wantsFalts)) {
+        		AlternateLocation me = ProviderHacks.getAlternateLocationFactory().create(_rfd.getSHA1Urn());
         		if (me != null)
         			addSuccessfulAltLoc(me);
         }
@@ -539,10 +507,10 @@ public class HTTPDownloader implements BandwidthTracker {
         
         headers.put(HTTPHeaderName.RANGE, new SimpleHTTPHeaderValue("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
-		if (RouterService.acceptedIncomingConnection() &&
-           !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
-            int port = RouterService.getPort();
-            String host = NetworkUtils.ip2string(RouterService.getAddress());
+		if (networkManager.acceptedIncomingConnection() &&
+           !NetworkUtils.isPrivateAddress(networkManager.getAddress())) {
+            int port = networkManager.getPort();
+            String host = NetworkUtils.ip2string(networkManager.getAddress());
             headers.put(HTTPHeaderName.NODE, new SimpleHTTPHeaderValue(host + ":" + port));
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             // Legacy chat header. Replaced by X-Features header / X-Node
@@ -594,7 +562,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     if(loc instanceof PushAltLoc) {
                         PushAltLoc pushLoc = (PushAltLoc)loc;
                         if (pushLoc.getPushAddress().getProxies().isEmpty()) {
-                            if (pushLoc.getPushAddress() instanceof PushEndpointForSelf)
+                            if (pushLoc.getPushAddress().isLocal())
                                 continue;
                             else
                                 assert false : "empty pushloc in downloader";
@@ -968,8 +936,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	    return _rfd.getSHA1Urn() != null && 
                _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-               NetworkUtils.isValidPort(RouterService.getPort()) &&
-               NetworkUtils.isValidAddress(RouterService.getAddress()); 
+               NetworkUtils.isValidPort(networkManager.getPort()) &&
+               NetworkUtils.isValidAddress(networkManager.getAddress()); 
     }
     
     /**

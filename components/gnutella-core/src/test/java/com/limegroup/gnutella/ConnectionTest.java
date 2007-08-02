@@ -6,15 +6,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import junit.framework.Test;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -51,7 +50,7 @@ public class ConnectionTest extends LimeTestCase {
     public void testBlockingConnectFailing() throws Exception {
         Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
         try {
-            c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), 1000);
+            c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), 1000);
             fail("shouldn't have initialized");
         } catch(IOException iox) {
             // timed out.
@@ -61,7 +60,7 @@ public class ConnectionTest extends LimeTestCase {
     public void testNonBlockingConnectFailing() throws Exception {
         Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
-        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
+        c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(3000);
         assertTrue(observer.isShutdown());
         assertFalse(observer.isBadHandshake());
@@ -70,12 +69,12 @@ public class ConnectionTest extends LimeTestCase {
     }
     
     public void testBlockingConnectSucceeds() throws Exception {
-        ManagedConnection c = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         c.initialize();
     }
     
     public void testNonBlockingConnectSucceeds() throws Exception {
-        ManagedConnection c = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(observer);
         observer.waitForResponse(3000);
@@ -89,7 +88,7 @@ public class ConnectionTest extends LimeTestCase {
         ACCEPTOR.getObserver().setNoGOK(true);
         Connection c = new Connection("127.0.0.1", LISTEN_PORT);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
-        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
+        c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
         assertFalse(observer.isBadHandshake());
@@ -102,7 +101,7 @@ public class ConnectionTest extends LimeTestCase {
         ACCEPTOR.getObserver().setBadHandshake(true);
         Connection c = new Connection("127.0.0.1", LISTEN_PORT);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
-        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
+        c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
         assertTrue(observer.isBadHandshake());
@@ -156,7 +155,8 @@ public class ConnectionTest extends LimeTestCase {
                         }
                         
                         final Connection con = new Connection(socket);
-                        con.initialize(null, new UltrapeerHandshakeResponder("127.0.0.1"), 1000);
+                        con.initialize(null, ProviderHacks.getHandshakeResponderFactory()
+                                .createUltrapeerHandshakeResponder("127.0.0.1"), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);
                     }

@@ -85,6 +85,8 @@ public class DHTManagerImpl implements DHTManager {
     /** reference to a bunch of inspectables */
     public final DHTInspectables inspectables = new DHTInspectables();
     
+    private final DHTControllerFactory dhtControllerFactory;
+    
     /**
      * Constructs the DHTManager, using the given Executor to invoke blocking 
      * methods. The executor MUST be single-threaded, otherwise there will be 
@@ -92,9 +94,10 @@ public class DHTManagerImpl implements DHTManager {
      * 
      * @param service
      */
-    public DHTManagerImpl(Executor service) {
+    public DHTManagerImpl(Executor service, DHTControllerFactory dhtControllerFactory) {
         this.executor = service;
         this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
+        this.dhtControllerFactory = dhtControllerFactory;
     }
     
     /*
@@ -171,11 +174,15 @@ public class DHTManagerImpl implements DHTManager {
                     controller.stop();
 
                     if (mode == DHTMode.ACTIVE) {
-                        controller = new ActiveDHTNodeController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory.createActiveDHTNodeController(
+                                vendor, version, DHTManagerImpl.this);
                     } else if (mode == DHTMode.PASSIVE) {
-                        controller = new PassiveDHTNodeController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory
+                                .createPassiveDHTNodeController(vendor,
+                                        version, DHTManagerImpl.this);
                     } else if (mode == DHTMode.PASSIVE_LEAF) {
-                        controller = new PassiveLeafController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory.createPassiveLeafController(
+                                vendor, version, DHTManagerImpl.this);
                     } else {
                         controller = new NullDHTController();
                     }

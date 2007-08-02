@@ -56,12 +56,13 @@ public class FileRequestHandler implements HttpRequestHandler {
     private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
     private final HTTPUploadSessionManager sessionManager;
-
     private final FileManager fileManager;
+    private final HTTPHeaderUtils httpHeaderUtils;
     
-    public FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager) {
+    public FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
+        this.httpHeaderUtils = httpHeaderUtils;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -209,8 +210,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
             case REJECTED:
-                new LimitReachedRequestHandler(uploader).handle(request,
-                        response, context);
+                new LimitReachedRequestHandler(uploader, httpHeaderUtils).handle(request, response, context);
                 break;
             case BANNED:
                 uploader.setState(UploadStatus.BANNED_GREEDY);
@@ -257,9 +257,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
         }
 
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
-        HTTPHeaderUtils.addProxyHeader(response);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addProxyHeader(response);
 
         URN urn = fd.getSHA1Urn();
         if (uploader.isFirstReply()) {
@@ -278,7 +278,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // write x-features header once because the downloader is
         // supposed to cache that information anyway
         if (uploader.isFirstReply()) {
-            HTTPHeaderUtils.addFeatures(response);
+            httpHeaderUtils.addFeatures(response);
         }
 
         // write X-Thex-URI header with root hash if we have already
@@ -339,8 +339,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private void handleInvalidRange(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         uploader.getAltLocTracker().addAltLocHeaders(response);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
-        HTTPHeaderUtils.addProxyHeader(response);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addProxyHeader(response);
 
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
@@ -370,11 +370,11 @@ public class FileRequestHandler implements HttpRequestHandler {
                 ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
 
         if (uploader.isFirstReply()) {
-            HTTPHeaderUtils.addFeatures(response);
+            httpHeaderUtils.addFeatures(response);
         }
 
         // write X-Thex-URI header with root hash if we have already

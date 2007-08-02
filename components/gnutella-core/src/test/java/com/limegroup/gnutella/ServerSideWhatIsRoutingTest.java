@@ -10,8 +10,6 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -184,9 +182,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_2.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
@@ -202,7 +200,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
 	    LEAF = new Connection("localhost", PORT);
         //3. routed leaf, with route table for "test"
-        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
@@ -229,10 +227,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false, 
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -254,10 +251,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false, 
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -273,10 +269,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the LAST HOP query
         whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)1, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)1, QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false,
+                    Network.UNKNOWN, false, FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -299,10 +294,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -325,10 +319,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -351,10 +344,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         LEAF.send(whatIsNewQuery);
         LEAF.flush();
 
@@ -380,10 +372,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest unknownFeatureQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)3, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
 
@@ -411,10 +402,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest unknownFeatureQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
         ULTRAPEER_2.flush();
 

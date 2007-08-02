@@ -14,11 +14,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -28,7 +28,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Checks whether a leaf node handles GUESS queries correctly.  Tests the
@@ -81,16 +80,16 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         // first we need to set up GUESS capability
         // ----------------------------------------
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
         
         // you also have to set up TCP incoming....
         {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock = SocketsManager.getSharedManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                        SERVER_PORT), 1200);
                 os = sock.getOutputStream();
                 os.write("CONNECT BACK\r\n\r\n".getBytes());
@@ -123,7 +122,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // we should be able to send a query
-        QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
+        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -167,7 +166,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         URN berkeleyURN = (URN) iter.next();
         
         // we should be able to send a URN query
-        QueryRequest goodQuery = QueryRequest.createQueryKeyQuery(berkeleyURN, 
+        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery(berkeleyURN, 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -209,7 +208,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // send a query that shouldn't get results....
-        QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("anita", 
+        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("anita", 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -237,7 +236,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         {
             // we shouldn't get any response to our query...
-            QueryRequest badQuery = QueryRequest.createQueryKeyQuery("susheel", 
+            QueryRequest badQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
                                                                       qkToUse);
             send(badQuery, localHost, SERVER_PORT);
             

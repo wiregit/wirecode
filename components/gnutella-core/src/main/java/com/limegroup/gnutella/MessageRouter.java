@@ -36,6 +36,7 @@ import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -47,16 +48,19 @@ import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
@@ -80,6 +84,7 @@ import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
+import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -90,7 +95,6 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 
@@ -127,7 +131,7 @@ public abstract class MessageRouter {
 	 * this node.
 	 */
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
-		ForMeReplyHandler.instance();
+		ProviderHacks.getForMeReplyHandler();
 		
     /**
      * The maximum size for <tt>RouteTable</tt>s.
@@ -228,7 +232,7 @@ public abstract class MessageRouter {
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
 	 */
-	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
+	protected final QueryUnicaster UNICASTER = RouterService.getQueryUnicaster();
 
 	/**
 	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
@@ -312,11 +316,30 @@ public abstract class MessageRouter {
     private static final FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler> _udpReplyHandlerCache =
         new FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler>(500);
     
+    private final NetworkManager networkManager;
+    private final QueryRequestFactory queryRequestFactory;
+    private final QueryHandlerFactory queryHandlerFactory;
+    private final Provider<OnDemandUnicaster> onDemandUnicaster;
+    private final HeadPongFactory headPongFactory;
+    private final PingReplyFactory pingReplyFactory;
+    
     /**
-     * Creates a MessageRouter.  Must call initialize before using.
+     * Creates a MessageRouter. Must call initialize before using.
      */
-    protected MessageRouter() {
-        _clientGUID=RouterService.getMyGUID();
+    protected MessageRouter(NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            QueryHandlerFactory queryHandlerFactory,
+            Provider<OnDemandUnicaster> onDemandUnicaster, // DPINJ: convert to non-provider once OnDemandUnicaster's constructor doesn't do anything
+            HeadPongFactory headPongFactory,
+            PingReplyFactory pingReplyFactory
+            ) {
+        _clientGUID = RouterService.getMyGUID();
+        this.networkManager = networkManager;
+        this.queryRequestFactory = queryRequestFactory;
+        this.queryHandlerFactory = queryHandlerFactory;
+        this.onDemandUnicaster = onDemandUnicaster;
+        this.headPongFactory = headPongFactory;
+        this.pingReplyFactory = pingReplyFactory;
     }
     
     /** Sets a new handler to the given handlerMap, for the given class. */
@@ -478,7 +501,7 @@ public abstract class MessageRouter {
         RouterService.schedule(oobHandler, CLEAR_TIME, CLEAR_TIME);
         
         // handler for inspection requests
-        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this);
+        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager);
         
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
@@ -510,12 +533,12 @@ public abstract class MessageRouter {
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
-        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler());
+        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler(networkManager));
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler());
+        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager));
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
@@ -743,7 +766,7 @@ public abstract class MessageRouter {
 		if(host != null) {
 			try {
                 
-                reply = PingReply.createGUESSReply(guid, (byte)1, host);
+                reply = pingReplyFactory.createGUESSReply(guid, (byte)1, host);
             } catch(UnknownHostException e) {
 				reply = createPingReply(guid);
             }
@@ -755,7 +778,7 @@ public abstract class MessageRouter {
 		if( reply == null )
 		    return;
 
-        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
+        ProviderHacks.getUdpService().send(reply, addr.getAddress(), addr.getPort());
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
@@ -767,12 +790,12 @@ public abstract class MessageRouter {
 	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
-		    if(RouterService.isIpPortValid())
-                return PingReply.create(guid, (byte)1);
+		    if(networkManager.isIpPortValid())
+                return pingReplyFactory.create(guid, (byte)1);
             else
                 return null;
 		} else {
-            return PingReply.createGUESSReply(guid, (byte)1, 
+            return pingReplyFactory.createGUESSReply(guid, (byte)1, 
                                               endpoint.getPort(),
                                               endpoint.getInetAddress().getAddress());
 		}
@@ -962,8 +985,8 @@ public abstract class MessageRouter {
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
-            PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
+            pingReplyFactory.createQueryKeyReply(pr.getGUID(), (byte)1, key);
+        ProviderHacks.getUdpService().send(reply, addr.getAddress(), addr.getPort());
     }
 
 
@@ -972,7 +995,7 @@ public abstract class MessageRouter {
         if (reply.getQueryKey() != null) {
             // this is a PingReply in reply to my AddressSecurityToken Request - 
             //consume the Pong and return, don't process as usual....
-            OnDemandUnicaster.handleQueryKeyPong(reply);
+            onDemandUnicaster.get().handleQueryKeyPong(reply);
             return;
         }
 
@@ -1033,11 +1056,11 @@ public abstract class MessageRouter {
                 // got problems
                 String remoteAddr = handler.getInetAddress().getHostAddress();
                 String myAddress = 
-                    NetworkUtils.ip2string(RouterService.getAddress());
+                    NetworkUtils.ip2string(networkManager.getAddress());
                 if (request.getReplyAddress().equals(remoteAddr))
                     ; // continue below, everything looks good
                 else if (request.getReplyAddress().equals(myAddress) && 
-                         RouterService.isOOBCapable())
+                         networkManager.isOOBCapable())
                     // i am proxying - maybe i should check my success rate but
                     // whatever...
                     ; 
@@ -1054,12 +1077,12 @@ public abstract class MessageRouter {
             multicastQueryRequest(request);
             
 			if(handler.isGoodLeaf()) {
-				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
+				sendDynamicQuery(queryHandlerFactory.createHandlerForNewLeaf(request, 
 																	  handler,
                                                                       counter), 
 								 handler);
 			} else {
-				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
+				sendDynamicQuery(queryHandlerFactory.createHandlerForOldLeaf(request,
 																	  handler,
                                                                       counter), 
 								 handler);
@@ -1084,9 +1107,9 @@ public abstract class MessageRouter {
             // if (I'm firewalled AND the source is firewalled) AND 
             // NOT(he can do a FW transfer and so can i) then don't reply...
             if ((request.isFirewalledSource() &&
-                 !RouterService.acceptedIncomingConnection()) &&
+                 !networkManager.acceptedIncomingConnection()) &&
                 !(request.canDoFirewalledTransfer() &&
-                  UDPService.instance().canDoFWT())
+                  ProviderHacks.getUdpService().canDoFWT())
                 )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
@@ -1125,7 +1148,7 @@ public abstract class MessageRouter {
             
             //send the query replies
             for(QueryReply queryReply : iterable)
-                UDPService.instance().send(queryReply, iaddr, port);
+                ProviderHacks.getUdpService().send(queryReply, iaddr, port);
         }
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
@@ -1216,7 +1239,7 @@ public abstract class MessageRouter {
      * the given host using the given query GUID.
      */
     public boolean isHostUnicastQueried(GUID guid, IpPort host) {
-        return OnDemandUnicaster.isHostQueriedForGUID(guid, host);
+        return onDemandUnicaster.get().isHostQueriedForGUID(guid, host);
     }
     
     /**
@@ -1281,7 +1304,7 @@ public abstract class MessageRouter {
         UDPService.mutateGUID(guidToUse.bytes(), addrToContact, portToContact);
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        UDPService.instance().send(pr, addrToContact, portToContact);
+        ProviderHacks.getUdpService().send(pr, addrToContact, portToContact);
     }
     
     /**
@@ -1364,7 +1387,7 @@ public abstract class MessageRouter {
                 Socket sock = null;
                 try {
                     // DPINJ: Change to using passed-in SocketsManager!!!
-                    sock = SocketsManager.getSharedManager().connect(new InetSocketAddress(addrToContact, portToContact), 12000);
+                    sock = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
@@ -1393,9 +1416,9 @@ public abstract class MessageRouter {
     protected void handlePushProxyRequest(PushProxyRequest ppReq,
                                           ManagedConnection source) {
         if (source.isSupernodeClientConnection() 
-                && RouterService.isIpPortValid()) {
+                && networkManager.isIpPortValid()) {
             String stringAddr = 
-                NetworkUtils.ip2string(RouterService.getAddress());
+                NetworkUtils.ip2string(networkManager.getAddress());
             InetAddress addr = null;
             try {
                 addr = InetAddress.getByName(stringAddr);
@@ -1405,7 +1428,7 @@ public abstract class MessageRouter {
 
             // 1)
             PushProxyAcknowledgement ack = 
-                new PushProxyAcknowledgement(addr,RouterService.getPort(),
+                new PushProxyAcknowledgement(addr,networkManager.getPort(),
                                              ppReq.getClientGUID());
             source.send(ack);
             
@@ -1497,7 +1520,7 @@ public abstract class MessageRouter {
 			_queryRouteTable.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
-			sendDynamicQuery(QueryHandler.createHandlerForMe(query, 
+			sendDynamicQuery(queryHandlerFactory.createHandlerForMe(query, 
                                                              counter), 
 							 FOR_ME_REPLY_HANDLER);
 		} else {
@@ -1519,7 +1542,7 @@ public abstract class MessageRouter {
      */
     protected void originateMulticastQuery(QueryRequest query) {
         byte[] newGUID = GUID.makeGuid();
-        QueryRequest mquery = QueryRequest.createMulticastQuery(newGUID, query);
+        QueryRequest mquery = queryRequestFactory.createMulticastQuery(newGUID, query);
         _multicastGuidMap.addMapping(query.getGUID(), newGUID, MULTICAST_GUID_EXPIRE_TIME);
 		multicastQueryRequest(mquery);
 	}
@@ -1826,7 +1849,7 @@ public abstract class MessageRouter {
 			ManagedConnection mc = list.get(i);
             QueryRequest qrToSend = qr;
             if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
-                qrToSend = QueryRequest.unmarkOOBQuery(qr);
+                qrToSend = queryRequestFactory.unmarkOOBQuery(qr);
             mc.originateQuery(qrToSend);
         }
     }
@@ -2374,8 +2397,8 @@ public abstract class MessageRouter {
             // external address is valid (needed for input into the reply)
             final boolean fwTransfer = 
                 queryRequest.canDoFirewalledTransfer() && 
-                UDPService.instance().canDoFWT() &&
-                !RouterService.acceptedIncomingConnection();
+                ProviderHacks.getUdpService().canDoFWT() &&
+                !networkManager.acceptedIncomingConnection();
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.
@@ -2760,7 +2783,7 @@ public abstract class MessageRouter {
         //        and not need this anti-OO instanceof check.
         if (pingee instanceof ForMeReplyHandler) {
             // If it's for me, reply directly to the person who sent it.
-            HeadPong pong = new HeadPong(ping);
+            HeadPong pong = headPongFactory.create(ping);
             handler.reply(pong); // 
         } else {
             // Otherwise, remember who sent it and forward it on.
@@ -2798,7 +2821,7 @@ public abstract class MessageRouter {
     } 
     
     private void handleDHTContactsMessage(DHTContactsMessage msg, ReplyHandler handler) {
-        RouterService.getDHTManager().handleDHTContactsMessage(msg);
+        ProviderHacks.getDHTManager().handleDHTContactsMessage(msg);
     }
     
     /**

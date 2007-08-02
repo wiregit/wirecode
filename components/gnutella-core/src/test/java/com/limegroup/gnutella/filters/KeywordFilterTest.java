@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -42,26 +43,26 @@ public class KeywordFilterTest extends LimeTestCase {
     }
 	
 	public void testLegacy() {        
-        qr=QueryRequest.createQuery("Britney", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Britney", (byte)1);
         assertTrue(filter.allow(qr));
         filter.disallow("britney spears");
         assertTrue(filter.allow(qr));
         
-        qr=QueryRequest.createQuery("pie with rhubarb", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("pie with rhubarb", (byte)1);
         assertTrue(filter.allow(qr));
         filter.disallow("rhuBarb");
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("rhubarb.txt", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("rhubarb.txt", (byte)1);
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("Rhubarb*", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Rhubarb*", (byte)1);
         assertTrue(!filter.allow(qr));
         
         filter.disallowVbs();
-        qr=QueryRequest.createQuery("test.vbs", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.vbs", (byte)1);
         assertTrue(!filter.allow(qr));
         
         filter.disallowHtml();
-        qr=QueryRequest.createQuery("test.htm", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.htm", (byte)1);
         assertTrue(!filter.allow(qr));
     }
     

@@ -40,11 +40,11 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -127,7 +127,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	LOG.info("testing firewalled locations");
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
     	//first make sure we are sharing an incomplete file
     	
@@ -167,7 +167,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         AltLocWorkerStub worker = new AltLocWorkerStub(md,rfd,fakeDownloader);
         
         List l = new LinkedList();l.add(worker);
-    	md.initialize(manager,newFMStub,callback);
+    	md.initialize(DownloadProviderHacks.createDownloadReferences(manager,newFMStub,callback));
     	md.setDloaders(l);
     	md.setSHA1(partialURN);
     	md.setFM(newFMStub);
@@ -214,7 +214,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming",new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
     	
     }
     
@@ -252,7 +252,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         Set urns=qr.getQueryUrns();
         assertEquals(0, urns.size());
         
-        UDPService.instance().setReceiveSolicited(true);
+        ProviderHacks.getUdpService().setReceiveSolicited(true);
         qr=downloader.newRequery2();
         // minspeed mask | firewalled | xml | firewall transfer = 226
         assertEquals(226, qr.getMinSpeed());
@@ -277,14 +277,14 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
-        VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(1024);
+        VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1024);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
             new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm, null);
-        downloader.initialize(manager, fileman, callback);
+        downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, fileman, callback));
         requestStart(downloader);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -303,7 +303,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
                 new ByteArrayInputStream(baos.toByteArray()));
             downloader=(ManagedDownloader)in.readObject();
             in.close();
-            downloader.initialize(manager, fileman, callback);
+            downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, fileman, callback));
             requestStart(downloader);
         } catch (IOException e) {
             fail("Couldn't serialize", e);
@@ -325,7 +325,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     public void testWaitingForResults() throws Exception {
         TestFile.length();
         RequeryManager.NO_DELAY = true;
-        final DHTManager originalManager = RouterService.getDHTManager();
+        final DHTManager originalManager = ProviderHacks.getDHTManager();
         final AltLocFinder originalFinder = RouterService.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
@@ -338,7 +338,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         try {
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
-            assertSame(myManager,RouterService.getDHTManager());
+            assertSame(myManager,ProviderHacks.getDHTManager());
             assertSame(myFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
@@ -349,9 +349,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
                     new ManagedDownloader(
                             new RemoteFileDesc[] {fakeRFD()},
                             new IncompleteFileManager(), null);
-                downloader.initialize(manager, 
+                downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
-                                      callback);
+                                      callback));
                 LOG.debug("starting downloader");
                 requestStart(downloader);
                 assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -413,7 +413,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         } finally {
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
-            assertSame(originalManager,RouterService.getDHTManager());
+            assertSame(originalManager,ProviderHacks.getDHTManager());
             assertSame(originalFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
@@ -438,7 +438,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     public void testBasicRequeryBehavior() throws Exception {
         TestFile.length();
         RequeryManager.NO_DELAY = true;
-        final DHTManager originalManager = RouterService.getDHTManager();
+        final DHTManager originalManager = ProviderHacks.getDHTManager();
         final AltLocFinder originalFinder = RouterService.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
@@ -451,7 +451,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         try {
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
-            assertSame(myManager,RouterService.getDHTManager());
+            assertSame(myManager,ProviderHacks.getDHTManager());
             assertSame(myFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
@@ -464,9 +464,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
                     new ManagedDownloader(
                             new RemoteFileDesc[] {fakeRFD()},
                             new IncompleteFileManager(), null);
-                downloader.initialize(manager, 
+                downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
-                                      callback);
+                                      callback));
                 LOG.debug("starting downloader");
                 requestStart(downloader);
                 assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -557,7 +557,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         } finally {
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
-            assertSame(originalManager,RouterService.getDHTManager());
+            assertSame(originalManager,ProviderHacks.getDHTManager());
             assertSame(originalFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
@@ -581,7 +581,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     public void testProRequeryBehavior() throws Exception {
         TestFile.length();
         RequeryManager.NO_DELAY = true;
-        final DHTManager originalManager = RouterService.getDHTManager();
+        final DHTManager originalManager = ProviderHacks.getDHTManager();
         final AltLocFinder originalFinder = RouterService.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
@@ -596,7 +596,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         try {
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
-            assertSame(myManager,RouterService.getDHTManager());
+            assertSame(myManager,ProviderHacks.getDHTManager());
             assertSame(myFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
@@ -609,9 +609,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
                     new ManagedDownloader(
                             new RemoteFileDesc[] {fakeRFD()},
                             new IncompleteFileManager(), null);
-                downloader.initialize(manager, 
+                downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
-                                      callback);
+                                      callback));
                 LOG.debug("starting downloader");
                 requestStart(downloader);
                 assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -688,7 +688,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         } finally {
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
-            assertSame(originalManager,RouterService.getDHTManager());
+            assertSame(originalManager,ProviderHacks.getDHTManager());
             assertSame(originalFinder,RouterService.getAltLocFinder());
             PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.FALSE);
             assertFalse(LimeWireUtils.isPro());
@@ -755,9 +755,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 				new ManagedDownloader(
 						new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())},
                         new IncompleteFileManager(), null);
-            downloader.initialize(manager, 
+            downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                   fileman,
-                                  callback);
+                                  callback));
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
             uploader.waitForUploaderToStop();
@@ -1158,7 +1158,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         
         volatile boolean cancelled;
         public MyAltLocFinder() {
-            super(null);
+            super(null, ProviderHacks.getAlternateLocationFactory());
         }
         
         

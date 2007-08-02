@@ -66,6 +66,7 @@ public class AtomicLazyReferenceTest extends BaseTestCase {
         
     }
     
+
     private static class StubAtomicLazyReference extends AbstractLazySingletonProvider<Object> {
         Object obj;
 

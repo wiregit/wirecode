@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.TestFile;
@@ -203,10 +203,9 @@ public class ServerSideWhatIsNewTest
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -236,11 +235,9 @@ public class ServerSideWhatIsNewTest
 
         {
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW, false,
-                             0 | QueryRequest.AUDIO_MASK);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -256,11 +253,9 @@ public class ServerSideWhatIsNewTest
 
         {
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false,
-                             FeatureSearchData.WHAT_IS_NEW, false,
-                             0 | QueryRequest.DOC_MASK);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -353,10 +348,9 @@ public class ServerSideWhatIsNewTest
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false, 
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -419,10 +413,9 @@ public class ServerSideWhatIsNewTest
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false, 
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -488,10 +481,9 @@ public class ServerSideWhatIsNewTest
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte)2, 
-                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, false, Network.UNKNOWN, false, 
-                             FeatureSearchData.WHAT_IS_NEW);
+            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+                QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
+                FeatureSearchData.WHAT_IS_NEW);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 

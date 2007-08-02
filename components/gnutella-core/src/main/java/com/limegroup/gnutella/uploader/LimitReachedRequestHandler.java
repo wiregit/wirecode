@@ -53,9 +53,9 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
     /** True if this is a LimitReached state because we're validating the file */
     private final boolean validating;
 
-    private HTTPUploader uploader;
-
-    private FileDesc fd;
+    private final HTTPUploader uploader;
+    private final FileDesc fd;
+    private final HTTPHeaderUtils httpHeaderUtils;
 
     /**
      * Creates a new <tt>LimitReachedUploadState</tt> with the specified
@@ -63,21 +63,17 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
      * 
      * @param fd the <tt>FileDesc</tt> for the upload
      */
-    public LimitReachedRequestHandler(HTTPUploader uploader) {
-        this(uploader, false);
-    }
-
-    /* Note: Never invoked with validating = true, see Uploader.NOT_VALIDATED. */
-    private LimitReachedRequestHandler(HTTPUploader uploader, boolean validating) {
+    public LimitReachedRequestHandler(HTTPUploader uploader, HTTPHeaderUtils httpHeaderUtils) {
         this.uploader = uploader;
-        this.validating = validating;
+        this.validating = false; //Note: Never invoked with validating = true, see Uploader.NOT_VALIDATED.
         this.fd = uploader.getFileDesc();
+        this.httpHeaderUtils = httpHeaderUtils;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        HTTPHeaderUtils.addProxyHeader(response);
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addProxyHeader(response);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
 
         String errorMsg = ERROR_MESSAGE;
         if (fd != null) {
@@ -92,7 +88,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
                 String retry = !RouterService.getAltlocManager().hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
                         : NORMAL_RETRY_AFTER;
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(retry));
-                HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+                httpHeaderUtils.addRangeHeader(response, uploader, fd);
             } else {
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(NO_ALT_LOCS_RETRY_AFTER));
             }

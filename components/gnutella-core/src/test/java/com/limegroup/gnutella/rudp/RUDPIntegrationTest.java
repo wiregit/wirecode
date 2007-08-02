@@ -15,10 +15,9 @@ import org.limewire.rudp.UDPConnectionProcessor;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StandardMessageRouter;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
@@ -63,7 +62,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
+        RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getNewStandardMessageRouter());
         rs.start();
         Thread.sleep(1000);
     }
@@ -104,7 +103,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         NIODispatcher.instance().register(channel,  new StubIOErrorObserver());
         Thread.sleep(100);
         assertNotEquals(0, stub.id);
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", RouterService.getNonForcedPort());
+        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", ProviderHacks.getNetworkManager().getNonForcedPort());
         stub.addr = addr;
         stub.isConnecting = false;
         checkMessage(stub, LimeRUDPMessageHelper.getAck(stub.id));
@@ -138,7 +137,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     private void sendToUDP(Message m) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.write(out);
-        UDPService.instance().send(m, new InetSocketAddress("127.0.0.1", PORT));
+        ProviderHacks.getUdpService().send(m, new InetSocketAddress("127.0.0.1", PORT));
     }
     
     private void storeHandlers() throws Exception {

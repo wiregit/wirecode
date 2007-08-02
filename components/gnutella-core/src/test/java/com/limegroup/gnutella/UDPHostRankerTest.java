@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -78,7 +78,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             // as long as we don't get a ClassCastException we are good to go
             PingRequest ping = (PingRequest) MessageFactory.read(in);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PingReply pong = PingReply.create(ping.getGUID(), (byte)1);
+            PingReply pong = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1);
             pong.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,

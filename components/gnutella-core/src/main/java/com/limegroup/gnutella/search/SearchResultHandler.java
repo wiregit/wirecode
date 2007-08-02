@@ -20,10 +20,10 @@ import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -74,6 +74,12 @@ public final class SearchResultHandler implements Inspectable {
      */
     private final Map<GUID, Map<URN,ClassCNetworks[]>> cncCounter = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URN,ClassCNetworks[]>>(10));
+    
+    public final NetworkManager networkManager;
+    
+    public SearchResultHandler(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
 
     /*---------------------------------------------------    
       PUBLIC INTERFACE METHODS
@@ -206,9 +212,9 @@ public final class SearchResultHandler implements Inspectable {
             // no chance for FW transfer then drop the reply.
             if(data.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
-               (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
-               !(UDPService.instance().canDoFWT() && 
+               (!networkManager.acceptedIncomingConnection() ||
+                NetworkUtils.isPrivateAddress(networkManager.getAddress())) &&
+               !(networkManager.canDoFWT() && 
                  qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");

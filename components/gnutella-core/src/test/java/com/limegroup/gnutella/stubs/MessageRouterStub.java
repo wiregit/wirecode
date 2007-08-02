@@ -7,7 +7,7 @@ import java.util.List;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.HackMessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -15,7 +15,8 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 /** A stub for MessageRouter that does nothing. */
 @SuppressWarnings("unchecked")
-public class MessageRouterStub extends MessageRouter {
+public class MessageRouterStub extends HackMessageRouter {
+    
     
     @Override
     public void downloadFinished(GUID guid) throws IllegalArgumentException {

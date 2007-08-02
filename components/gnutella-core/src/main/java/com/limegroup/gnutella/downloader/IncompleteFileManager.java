@@ -25,6 +25,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -453,7 +454,7 @@ public class IncompleteFileManager implements Serializable {
                 VerifyingFile vf;
                 try {
                     // DPINJ: use a passed-in VerifyingFileFactory!!!
-                    vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(getCompletedSize(f));
+                    vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                 	continue;
                 }

@@ -53,66 +53,56 @@ public class NodeAssigner {
     private static final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
 
     /**
-     * A <tt>BandwidthTracker</tt> instance for keeping track of the 
-     * upload bandwidth used for file uploads.
-     */
-    private static BandwidthTracker _uploadTracker;
-
-    /**
-     * A <tt>BandwidthTracker</tt> instance for keeping track of the 
-     * download bandwidth used for file downloads.
-     */
-    private static BandwidthTracker _downloadTracker;
-    
-    /**
-     * A reference to the Connection Manager
-     */
-    private static ConnectionManager _manager;
-
-    /**
      * Variable for the current uptime of this node.
      */
-    private static long _currentUptime = 0;
+    private long _currentUptime = 0;
 
     /**
      * Variable for the maximum number of bytes per second transferred 
      * downstream over the history of the application.
      */
-    private static int _maxUpstreamBytesPerSec =
+    private int _maxUpstreamBytesPerSec =
         UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue();
 
     /**
      * Variable for the maximum number of bytes per second transferred 
      * upstream over the history of the application.
      */
-    private static int _maxDownstreamBytesPerSec = 
+    private int _maxDownstreamBytesPerSec = 
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
     
     /**
      * Variable for whether or not this node has such good values that it is too
      * good to pass up for becoming an Ultrapeer.
      */
-    private static volatile boolean _isTooGoodUltrapeerToPassUp = false;
+    private volatile boolean _isTooGoodUltrapeerToPassUp = false;
 
     /**
      * Variable for the last time we attempted to become an Ultrapeer.
      */
-    private static volatile long _lastUltrapeerAttempt = 0L;
+    private volatile long _lastUltrapeerAttempt = 0L;
 
     /**
      * Number of times we've tried to become an Ultrapeer.
      */
-    private static int _ultrapeerTries = 0;
+    private int _ultrapeerTries = 0;
     
     /**
      * Wether or not this node is "Hardcore" capable
      */
-    private static boolean _isHardcoreCapable;
+    private boolean _isHardcoreCapable;
     
     /**
      * The node assigner's timer task
      */
     private ScheduledFuture<?>  timer;
+    
+
+    private final BandwidthTracker uploadTracker;
+    private final BandwidthTracker downloadTracker;
+    private final ConnectionManager connectionManager;
+    private final NetworkManager networkManager;
+    
 
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
@@ -121,14 +111,16 @@ public class NodeAssigner {
      *                      tracking bandwidth used for uploads
      * @param downloadTracker the <tt>BandwidthTracker</tt> instance for
      *                        tracking bandwidth used for downloads
-     * @param manager Reference to the ConnectionManager for this node
+     * @param connectionManager Reference to the ConnectionManager for this node
      */
-    public NodeAssigner(final BandwidthTracker uploadTracker, 
-             final BandwidthTracker downloadTracker,
-             ConnectionManager manager) {
-        _uploadTracker = uploadTracker;
-        _downloadTracker = downloadTracker;  
-        _manager = manager;
+    public NodeAssigner(BandwidthTracker uploadTracker, 
+                        BandwidthTracker downloadTracker,
+                        ConnectionManager connectionManager,
+                        NetworkManager networkManager) {
+        this.uploadTracker = uploadTracker;
+        this.downloadTracker = downloadTracker;  
+        this.connectionManager = connectionManager;
+        this.networkManager = networkManager;
     }
     
     /**
@@ -166,29 +158,29 @@ public class NodeAssigner {
      * Collects data on the bandwidth that has been used for file uploads
      * and downloads.
      */
-    private static void collectBandwidthData() {
+    private void collectBandwidthData() {
         _currentUptime += TIMER_DELAY_IN_SECONDS;
-        _uploadTracker.measureBandwidth();
-        _downloadTracker.measureBandwidth();
-        _manager.measureBandwidth();
+        uploadTracker.measureBandwidth();
+        downloadTracker.measureBandwidth();
+        connectionManager.measureBandwidth();
         float bandwidth = 0;
         try {
-            bandwidth = _uploadTracker.getMeasuredBandwidth();
+            bandwidth = uploadTracker.getMeasuredBandwidth();
         }catch(InsufficientDataException ide) {
             bandwidth = 0;
         }
         int newUpstreamBytesPerSec = 
             (int)bandwidth
-           +(int)_manager.getMeasuredUpstreamBandwidth();
+           +(int)connectionManager.getMeasuredUpstreamBandwidth();
         bandwidth = 0;
         try {
-            bandwidth = _downloadTracker.getMeasuredBandwidth();
+            bandwidth = downloadTracker.getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             bandwidth = 0;
         }
         int newDownstreamBytesPerSec = 
             (int)bandwidth
-           +(int)_manager.getMeasuredDownstreamBandwidth();
+           +(int)connectionManager.getMeasuredDownstreamBandwidth();
         if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
             _maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
             UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
@@ -203,7 +195,7 @@ public class NodeAssigner {
      * Determinates whether or not a node is capable of handling a special
      * function such as beeing an ultrapeer or connecting to the dht
      */
-    private static void setHardcoreCapable() {
+    private void setHardcoreCapable() {
         _isHardcoreCapable = 
         //Is upstream OR downstream high enough?
         ((_maxUpstreamBytesPerSec >= 
@@ -234,7 +226,7 @@ public class NodeAssigner {
      * 
      * @return true if we are or will try to become an ultrapeer, false otherwise
      */
-    private static void assignUltrapeerNode() {
+    private void assignUltrapeerNode() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
@@ -252,7 +244,7 @@ public class NodeAssigner {
             (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
              _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue())
              //AND I have accepted incoming messages over UDP
-             && RouterService.isGUESSCapable());
+             && networkManager.isGUESSCapable());
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Node is "+(isUltrapeerCapable?"":"NOT")+" ultrapeer capable");
@@ -263,7 +255,7 @@ public class NodeAssigner {
         // check if this node has such good values that we simply can't pass
         // it up as an Ultrapeer -- it will just get forced to be one
         _isTooGoodUltrapeerToPassUp = isUltrapeerCapable &&
-            RouterService.acceptedIncomingConnection() &&
+            networkManager.acceptedIncomingConnection() &&
             (curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
             (BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
@@ -311,7 +303,7 @@ public class NodeAssigner {
      * @return <tt>true</tt> if we should try again to become an Ultrapeer,
      *  otherwise <tt>false</tt>
      */
-    private static boolean shouldTryToBecomeAnUltrapeer(long curTime) {
+    private boolean shouldTryToBecomeAnUltrapeer(long curTime) {
         if(curTime - _lastUltrapeerAttempt < UltrapeerSettings.UP_RETRY_TIME.getValue()) {
             return false;
         }
@@ -325,11 +317,11 @@ public class NodeAssigner {
      * 
      * @return true if we switched, false otherwise
      */
-    private static boolean switchFromActiveDHTNodeToUltrapeer() {
+    private boolean switchFromActiveDHTNodeToUltrapeer() {
         
         // If I'm not a DHT Node running in ACTIVE mode then
         // try to become an Ultrapeer
-        if (RouterService.getDHTManager().getDHTMode() != DHTMode.ACTIVE) {
+        if (ProviderHacks.getDHTManager().getDHTMode() != DHTMode.ACTIVE) {
             return true;
         }
         
@@ -356,7 +348,7 @@ public class NodeAssigner {
      * @return <tt>true</tt> if this node has extremely good Ultrapeer settings,
      *  otherwise <tt>false</tt>
      */
-    public static boolean isTooGoodUltrapeerToPassUp() {
+    public boolean isTooGoodUltrapeerToPassUp() {
         return _isTooGoodUltrapeerToPassUp;
     }
     
@@ -364,11 +356,11 @@ public class NodeAssigner {
      * This method assigns a DHT mode based on the local Node's
      * Ultrapeer, uptime and firewall status.
      */
-    private static DHTMode assignDHTMode() {
+    private DHTMode assignDHTMode() {
         
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
-        DHTManager manager = RouterService.getDHTManager();
+        DHTManager manager = ProviderHacks.getDHTManager();
         final DHTMode current = manager.getDHTMode();
         assert (current != null) : "Current DHTMode is null, fix your DHTManager-Stub!";
         
@@ -465,7 +457,7 @@ public class NodeAssigner {
     /**
      * Switches the mode of the DHT
      */
-    private static void switchDHTMode(final DHTMode from, final DHTMode to) {
+    private void switchDHTMode(final DHTMode from, final DHTMode to) {
         if (from != null) {
             switch(from) {
                 case ACTIVE:
@@ -497,9 +489,9 @@ public class NodeAssigner {
         Runnable init = new Runnable() {
             public void run() {
                 if (to != DHTMode.INACTIVE) {
-                    RouterService.getDHTManager().start(to);
+                    ProviderHacks.getDHTManager().start(to);
                 } else {
-                    RouterService.getDHTManager().stop();
+                    ProviderHacks.getDHTManager().stop();
                 }
                 
                 DHTSettings.DHT_MODE.setValue(to.toString());
@@ -512,7 +504,7 @@ public class NodeAssigner {
     /**
      * Returns whether ot not a Node is PASSIVE_LEAF capable
      */
-    private static boolean isPassiveLeafDHTCapable() {
+    private boolean isPassiveLeafDHTCapable() {
         long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
@@ -521,20 +513,20 @@ public class NodeAssigner {
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
-                && UDPService.instance().canReceiveSolicited();
+                && ProviderHacks.getUdpService().canReceiveSolicited();
     }
     
     /**
      * Returns whether ot not a Node is ACTIVE capable
      */
-    private static boolean isActiveDHTCapable() {
+    private boolean isActiveDHTCapable() {
         long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
         return _isHardcoreCapable
                 && (averageTime >= DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
-                && RouterService.isGUESSCapable();
+                && networkManager.isGUESSCapable();
     }
     
     /**
@@ -542,7 +534,7 @@ public class NodeAssigner {
      * 
      * See DHTSetting.DHT_ACCEPT_PROBABILITY for more info!
      */
-    private static boolean acceptDHTNode() {
+    private boolean acceptDHTNode() {
         return (Math.random() < DHTSettings.DHT_ACCEPT_PROBABILITY.getValue());
     }
     
@@ -551,7 +543,7 @@ public class NodeAssigner {
      * 
      * See DHTSetting.DHT_TO_ULTRAPEER_PROBABILITY for more info!
      */
-    private static boolean acceptUltrapeer() {
+    private boolean acceptUltrapeer() {
         return (Math.random() < DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.getValue());
     }
 }

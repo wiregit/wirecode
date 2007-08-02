@@ -68,7 +68,7 @@ public class UnicastSimulator {
         _pongs = new PingReply[NUM_LISTENERS];
         for (int i = 0; i < NUM_LISTENERS; i++) {
             _pongs[i] = 
-                PingReply.createExternal(GUID.makeGuid(), (byte)5,
+                ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)5,
                                          PORT_RANGE_BEGIN+i, _localAddress, 
                                          true);                                         
             assert(_pongs[i].isUltrapeer());
@@ -216,7 +216,7 @@ public class UnicastSimulator {
                                 new AddressSecurityToken(datagram.getAddress(),
                                         datagram.getPort());
                             PingReply pRep =
-                                PingReply.createQueryKeyReply(pr.getGUID(),
+                                ProviderHacks.getPingReplyFactory().createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,
                                                               port,
                                                               _localAddress,

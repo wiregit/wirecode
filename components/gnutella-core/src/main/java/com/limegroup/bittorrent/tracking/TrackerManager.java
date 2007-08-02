@@ -45,11 +45,11 @@ public class TrackerManager {
     
     private volatile String lastFailureReason;
 	
-	TrackerManager(ManagedTorrent torrent) {
+	TrackerManager(ManagedTorrent torrent, TrackerFactory trackerFactory) {
 		this.torrent = torrent;
 		TorrentContext context = torrent.getContext();
 		for (URI uri : context.getMetaInfo().getTrackers())
-			trackers.add(new Tracker(uri, context, torrent));
+			trackers.add(trackerFactory.create(uri, context, torrent));
 	}
 	
 	public void add(Tracker t) {

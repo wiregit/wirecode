@@ -8,8 +8,8 @@ import java.util.Set;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -49,7 +49,7 @@ public class PushAltLoc extends AlternateLocation {
 	protected PushAltLoc(URN sha1) throws IOException{
 		
 		super(sha1);
-		_pushAddress = PushEndpointForSelf.instance();
+		_pushAddress = ProviderHacks.getPushEndpointFactory().createForSelf();
 	}
 		
 	protected String generateHTTPString() {

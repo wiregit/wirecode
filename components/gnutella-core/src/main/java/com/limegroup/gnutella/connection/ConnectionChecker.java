@@ -20,13 +20,12 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -255,7 +254,7 @@ public final class ConnectionChecker implements Runnable {
                 // cancel the hosts we sent.
                 for (int i = 0; i < 5; i++) {
                     checker.wait(1000);
-                    if (UDPService.instance().getLastReceivedTime() > now) {
+                    if (ProviderHacks.getUdpService().getLastReceivedTime() > now) {
                         checker.received = true;
                         return false;
                     }
@@ -302,7 +301,7 @@ public final class ConnectionChecker implements Runnable {
             Observer observer = new Observer();
             synchronized(observer) {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                Socket s = SocketsManager.getSharedManager().connect(new InetSocketAddress(host, 80), 6000, observer);
+                Socket s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host, 80), 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {
                     observer.wait(12000);
@@ -311,7 +310,7 @@ public final class ConnectionChecker implements Runnable {
                     LOG.debug("No response!");
                     // only consider unsuccesful if we were able to remove it
                     // 'cause if it couldn't be removed, a response is still pending...
-                    if(SocketsManager.getSharedManager().removeConnectObserver(observer)) {
+                    if(ProviderHacks.getSocketsManager().removeConnectObserver(observer)) {
                         LOG.debug("Removed observer");
                         _unsuccessfulAttempts++;
                         IOUtils.close(s);

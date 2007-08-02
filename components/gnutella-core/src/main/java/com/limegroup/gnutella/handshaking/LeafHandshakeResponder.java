@@ -11,6 +11,8 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
  */
 public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
+    private final HeadersFactory headersFactory;
+    
     /**
      * Creates a new instance of LeafHandshakeResponder
      * @param manager Instance of connection manager, managing this
@@ -19,8 +21,9 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public LeafHandshakeResponder(String host) {
+    LeafHandshakeResponder(String host, HeadersFactory headersFactory) {
         super(host);
+        this.headersFactory = headersFactory;
     }
     
     /**
@@ -84,7 +87,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
             return HandshakeResponse.createLeafRejectOutgoingResponse(HandshakeStatus.WE_ARE_LEAVES);
         }		
         
-        Properties ret = new LeafHeaders(getRemoteIP());
+        Properties ret = headersFactory.createLeafHeaders(getRemoteIP());
         
         //If we already have enough ultrapeers, reject.
         HandshakeStatus status = _manager.allowConnection(hr);

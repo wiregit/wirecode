@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -317,7 +318,7 @@ public class MessageFactory {
     private static class PingReplyParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
-            return PingReply.createFromNetwork(guid, ttl, hops, payload, network);
+            return ProviderHacks.getPingReplyFactory().createFromNetwork(guid, ttl, hops, payload, network);
         }
     }
     
@@ -328,7 +329,7 @@ public class MessageFactory {
                 throw new BadPacketException("Query request too short: " + payload.length);
             }
             
-            return QueryRequest.createNetworkQuery(guid, ttl, hops, payload, network);
+            return ProviderHacks.getQueryRequestFactory().createNetworkQuery(guid, ttl, hops, payload, network);
         }
     }
     

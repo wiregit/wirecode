@@ -10,8 +10,8 @@ import org.limewire.security.SecureMessageVerifier;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.Message;
@@ -33,8 +33,10 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     /** The last version of the routable message that was routed */
     private final LongSetting lastRoutedVersion;
     
-    public RestrictedResponder(StringArraySetting setting) {
-        this(setting, null, null);
+    private final NetworkManager networkManager;
+    
+    public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager) {
+        this(setting, null, null, networkManager);
     }
     
     /**
@@ -45,10 +47,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
      */
     public RestrictedResponder(StringArraySetting setting, 
             SecureMessageVerifier verifier,
-            LongSetting lastRoutedVersion) {
+            LongSetting lastRoutedVersion,
+            NetworkManager networkManager) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
+        this.networkManager = networkManager;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         SimppManager.instance().addListener(this);
@@ -101,7 +105,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
                     msg.getReturnAddress().getPort());
         } else if (msg.getDestinationAddress() != null) {
             // if there is a destination address, it must match our external address
-            if (!Arrays.equals(RouterService.getExternalAddress(),
+            if (!Arrays.equals(networkManager.getExternalAddress(),
                     msg.getDestinationAddress().getInetAddress().getAddress()))
                 return;
         } else if (msg.getRoutableVersion() < 0) // no routable version either? drop.

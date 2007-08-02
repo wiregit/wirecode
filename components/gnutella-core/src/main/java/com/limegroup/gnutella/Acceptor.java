@@ -121,6 +121,12 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * to starting are dropped.
      */
     private volatile boolean _started;
+    
+    private final NetworkManager networkManager;
+    
+    public Acceptor(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
 
 	/**
      * @modifes this
@@ -149,7 +155,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 		}
 		
 		if( addrChanged )
-		    RouterService.addressChanged();
+		    networkManager.addressChanged();
 	}
 	
 	/**
@@ -242,7 +248,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         if (_port != oldPort || tryingRandom) {
             ConnectionSettings.PORT.setValue(_port);
             SettingsGroupManager.instance().save();
-            RouterService.addressChanged();
+            networkManager.addressChanged();
         }
 
         // if we created a socket and have a NAT, and the user is not 
@@ -278,14 +284,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
         	        ConnectionSettings.UPNP_IN_USE.setValue(true);
         	        if (mappedPort != _port)
-        	            RouterService.addressChanged();
+        	            networkManager.addressChanged();
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we clear the last connect back times.
         	        // This will not help with already established connections, but if 
         	        // we establish new ones in the near future
         		    resetLastConnectBackTime();
-        		    UDPService.instance().resetLastConnectBackTime();
+        		    ProviderHacks.getUdpService().resetLastConnectBackTime();
 			    }			        
         	}
         }
@@ -296,7 +302,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      */
 	public void start() {
         MulticastService.instance().start();
-        UDPService.instance().start();
+        ProviderHacks.getUdpService().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
         RouterService.getConnectionDispatcher().
         addConnectionAcceptor(this,
@@ -393,7 +399,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             _port=0;
 
             //Shut off UDPService also!
-            UDPService.instance().setListeningSocket(null);
+            ProviderHacks.getUdpService().setListeningSocket(null);
             //Shut off MulticastServier too!
             MulticastService.instance().setListeningSocket(null);            
 
@@ -417,7 +423,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             if(LOG.isDebugEnabled())
                 LOG.debug("changing port to " + port);
 
-            DatagramSocket udpServiceSocket = UDPService.instance().newListeningSocket(port);
+            DatagramSocket udpServiceSocket = ProviderHacks.getUdpService().newListeningSocket(port);
 
             LOG.trace("UDP Service is ready.");
             
@@ -459,7 +465,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             LOG.trace("Acceptor ready..");
 
             // Commit UDPService's new socket
-            UDPService.instance().setListeningSocket(udpServiceSocket);
+            ProviderHacks.getUdpService().setListeningSocket(udpServiceSocket);
             // Commit the MulticastService's new socket
             // if we were able to get it
             if (mcastServiceSocket != null) {
@@ -514,7 +520,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             }
         }
         if(changed)
-            RouterService.incomingStatusChanged();
+            networkManager.incomingStatusChanged();
     }
 
 
@@ -673,7 +679,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                                 }
                             }
                             if(changed)
-                                RouterService.incomingStatusChanged();
+                                networkManager.incomingStatusChanged();
                         }
                     };
                     RouterService.schedule(resetter, 

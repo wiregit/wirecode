@@ -12,27 +12,36 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
-import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  * Provides methods to add commonly used headers to {@link HttpResponse}s.
  */
 public class HTTPHeaderUtils {
 
+    private final NetworkManager networkManager;
+    private final FeaturesWriter featuresWriter;
+    
+    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager) {
+        this.networkManager = networkManager;
+        this.featuresWriter = featuresWriter;
+    }
+    
     /**
      * Adds the <code>X-Available-Ranges</code> header to
      * <code>response</code> if available.
      */
-    public static void addRangeHeader(HttpResponse response,
+    public void addRangeHeader(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         if (fd instanceof IncompleteFileDesc) {
             URN sha1 = uploader.getFileDesc().getSHA1Urn();
@@ -47,8 +56,8 @@ public class HTTPHeaderUtils {
      * Writes out the X-Push-Proxies header as specified by section 4.2 of the
      * Push Proxy proposal, v. 0.7
      */
-    public static void addProxyHeader(HttpResponse response) {
-        if (RouterService.acceptedIncomingConnection())
+    public void addProxyHeader(HttpResponse response) {
+        if (networkManager.acceptedIncomingConnection())
             return;
 
         Set<? extends Connectable> proxies = RouterService.getConnectionManager()
@@ -84,8 +93,8 @@ public class HTTPHeaderUtils {
         
         // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
         // for future fw-fw transfers
-        if (UDPService.instance().canDoFWT()) {
-            response.addHeader(HTTPHeaderName.FWTPORT.create(UDPService.instance().getStableUDPPort() + ""));
+        if (networkManager.canDoFWT()) {
+            response.addHeader(HTTPHeaderName.FWTPORT.create(ProviderHacks.getUdpService().getStableUDPPort() + ""));
         }
     }
 
@@ -93,7 +102,7 @@ public class HTTPHeaderUtils {
      * Adds alternate locations for <code>fd</code> to <code>response</code>
      * if available.
      */
-    public static void addAltLocationsHeader(HttpResponse response,
+    public void addAltLocationsHeader(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         // write the URN in case the caller wants it
         URN sha1 = fd.getSHA1Urn();
@@ -136,8 +145,8 @@ public class HTTPHeaderUtils {
     /**
      * Adds an <code>X-Features</code> header to <code>response</code>.
      */
-    public static void addFeatures(HttpResponse response) {
-        Set<HTTPHeaderValue> features = HTTPUtils.getFeaturesValue();
+    public void addFeatures(HttpResponse response) {
+        Set<HTTPHeaderValue> features = featuresWriter.getFeaturesValue();
         if (features.size() > 0) {
             response.addHeader(HTTPHeaderName.FEATURES.create(
                     new HTTPHeaderValueCollection(features)));

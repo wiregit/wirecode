@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 
@@ -33,7 +34,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-		QueryRequest query = QueryRequest.createQuery(guid, "test query", "");
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
         assertTrue(! filter.allow(query));
     }
 
@@ -43,7 +44,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5B;
-		QueryRequest query = QueryRequest.createQuery(guid, "test query", "");
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
         assertTrue(filter.allow(query));
     }
 
@@ -53,7 +54,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-		QueryRequest query = QueryRequest.createQuery(guid, "test query", "");
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
         assertTrue(filter.allow(query));
     }
 }

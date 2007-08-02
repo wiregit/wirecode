@@ -20,6 +20,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
@@ -100,13 +101,13 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         
         //send the pong now
         IpPortImpl ipp = new IpPortImpl("213.0.0.1", 1111);
-        PingReply reply = PingReply.create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
+        PingReply reply = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
                 Arrays.asList(ipp));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         reply.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                 baos.toByteArray().length,
-                new InetSocketAddress("localhost", RouterService.getPort()));
+                new InetSocketAddress("localhost", ProviderHacks.getNetworkManager().getPort()));
         UDP_ACCESS[0].send(pack);
         //test the processing
         Thread.sleep(1000);

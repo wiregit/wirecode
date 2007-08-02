@@ -21,8 +21,9 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.NetworkManagerImpl;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
@@ -202,7 +203,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // a message w/o a version will go through if it has the proper
         // destination address
         m.version = -1;
-        m.destAddr = new IpPortImpl(InetAddress.getByAddress(RouterService.getExternalAddress()),1234);
+        m.destAddr = new IpPortImpl(InetAddress.getByAddress(ProviderHacks.getNetworkManager().getExternalAddress()),1234);
         responder.handleMessage(m, addr, h);
         assertSame(m, responder.msg);
         
@@ -227,7 +228,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting);
+            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager());
         }
 
         @Override

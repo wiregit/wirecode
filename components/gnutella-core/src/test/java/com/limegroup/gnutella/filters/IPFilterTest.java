@@ -3,13 +3,12 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -42,12 +41,12 @@ public class IPFilterTest extends LimeTestCase{
         assertTrue(filter.allow("13.0.0.1"));
         byte[] address={(byte)18, (byte)239, (byte)0, (byte)144};
         assertTrue(filter.allow(
-            (Message)PingReply.createExternal(new byte[16], (byte)3, 6346, address, false)));
+            (Message)ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, address, false)));
         byte[] address2=new byte[] {(byte)18, (byte)239, (byte)0, (byte)143};
         assertTrue(! filter.allow(
             new QueryReply(new byte[16], (byte)3, 6346, address2, 0,
                            new Response[0], new byte[16], false)));
-        assertTrue(filter.allow(QueryRequest.createQuery("test", (byte)3)));
+        assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3)));
         PushRequest push1=new PushRequest( 
             new byte[16], (byte)3, new byte[16], 0l, address, 6346);
         assertTrue(filter.allow(push1));

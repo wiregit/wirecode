@@ -11,16 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.bittorrent.Torrent.TorrentState;
-import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -28,6 +25,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
+import com.limegroup.gnutella.downloader.DownloadReferences;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 
 /**
@@ -448,17 +446,15 @@ public class BTDownloader extends AbstractDownloader
 		
 	}
 
-	public void initialize(DownloadManager manager, 
-			FileManager fm, 
-			DownloadCallback callback) {
-		this.manager = manager;
-		ifm = manager.getIncompleteFileManager();
-		TorrentManager torrentManager = RouterService.getTorrentManager();
-		_torrent = new ManagedTorrent(context, torrentManager,
-				NIODispatcher.instance().getScheduledExecutorService()); 
-		torrentManager.addEventListener(this);
-		ifm.addTorrentEntry(_info.getURN());
-	}
+	public void initialize(DownloadReferences downloadReferences) {
+        this.manager = downloadReferences.getDownloadManager();
+        ifm = manager.getIncompleteFileManager();
+        _torrent = downloadReferences.getManagedTorrentFactory().create(context);
+        // DPINJ: make sure the torrentManager in the factory is the same as the one the listener is added to
+        TorrentManager torrentManager = RouterService.getTorrentManager();
+        torrentManager.addEventListener(this);
+        ifm.addTorrentEntry(_info.getURN());
+    }
 	
 	public void startDownload() {
 		new BTUploader((ManagedTorrent)_torrent,

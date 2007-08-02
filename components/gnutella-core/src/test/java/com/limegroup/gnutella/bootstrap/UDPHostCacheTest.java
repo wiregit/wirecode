@@ -15,15 +15,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -46,17 +45,17 @@ public class UDPHostCacheTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
+        new RouterService(new ActivityCallbackStub(), ProviderHacks.getNewStandardMessageRouter());
         RouterService.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(
-                UDPService.instance(),
+                ProviderHacks.getUdpService(),
                 "newListeningSocket",
                 new Object[] { new Integer(7000) },
                 new Class[] { Integer.TYPE } );
                                 
         PrivilegedAccessor.invokeMethod(
-                UDPService.instance(),
+                ProviderHacks.getUdpService(),
                 "setListeningSocket",
                 new Object[] { ds } ,
                 new Class[] { DatagramSocket.class });
@@ -442,7 +441,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     }    
     
     private void routeFor(String host, byte[] guid) throws Exception {
-        PingReply pr = PingReply.create(guid, (byte)1);
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)1);
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName(host), 6346);
         
         RouterService.getMessageRouter().handleUDPMessage(pr, addr);

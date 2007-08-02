@@ -12,7 +12,7 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -101,26 +101,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         
         // test old versions are no longer accepted 
         try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                    (byte) 0, 1, new byte[1]);
+            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+                    (byte) 1, (byte) 0, 1, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 1 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                    (byte) 0, 2, new byte[1]);
+            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+                    (byte) 1, (byte) 0, 2, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 2 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         
-        vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                (byte) 0, 3, new byte[2]);
+        vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+                (byte) 1, (byte) 0, 3, new byte[2]);
         
         testWrite(vm);
         // test other constructor....
-        vm = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
+        vm = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
 
         // Push Proxy Request
@@ -538,8 +538,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     public void testReadHeaderUpdateVendorMessage() throws Exception {
         
         // make a header update message as we do when our ip changes
-        byte addr[] = RouterService.getAddress();
-        int port = RouterService.getPort();
+        byte addr[] = ProviderHacks.getNetworkManager().getAddress();
+        int port = ProviderHacks.getNetworkManager().getPort();
         Properties props = new Properties();
         props.put(HeaderNames.LISTEN_IP, NetworkUtils.ip2string(addr) + ":" + port);
         HeaderUpdateVendorMessage m = new HeaderUpdateVendorMessage(props);

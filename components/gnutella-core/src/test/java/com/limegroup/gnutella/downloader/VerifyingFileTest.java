@@ -12,6 +12,7 @@ import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile.WriteCallback;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -62,7 +63,7 @@ public class VerifyingFileTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         hashTree = defaultHashTree;
-        vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile((int) completeFile.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) completeFile.length());
         vf.open(new File("outfile"));
         vf.setHashTree(defaultHashTree);
         raf.seek(0);
@@ -479,7 +480,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf = new RandomAccessFile(exact, "r");
 
         vf.close();
-        vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile((int) exact.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) exact.length());
         vf.open(new File("outfile"));
         vf.setHashTree(exactTree);
         vf.leaseWhite();

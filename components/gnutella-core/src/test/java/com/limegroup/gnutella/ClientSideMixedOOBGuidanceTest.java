@@ -21,7 +21,6 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -80,17 +79,17 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         UDP_ACCESS.setSoTimeout(TIMEOUT*2);
         // ----------------------------------------
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
 
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
  
         // you also have to set up TCP incoming....
         {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock=SocketsManager.getSharedManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock=ProviderHacks.getSocketsManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());
@@ -110,8 +109,8 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(RouterService.isGUESSCapable());
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
         // get rid of any messages that are stored up.
         drainAll();
@@ -119,8 +118,8 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(RouterService.newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                       RouterService.getAddress(), 
-                       RouterService.getPort()));
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
         RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 

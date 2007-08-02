@@ -25,8 +25,8 @@ import org.limewire.service.ErrorService;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {
@@ -128,14 +128,14 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		 // DPINJ: Change to using passed-in SocketsManager!!!
 		
 		while (_torrent.needsMoreConnections() &&
-				connecting.size() < SocketsManager.getSharedManager().getNumAllowedSockets() &&
+				connecting.size() < ProviderHacks.getSocketsManager().getNumAllowedSockets() &&
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 		}
 		
 		// we didn't start enough fetchers - see if there 
 		// are any busy hosts we could retry later.
-		if (connecting.size() < SocketsManager.getSharedManager().getNumAllowedSockets())
+		if (connecting.size() < ProviderHacks.getSocketsManager().getNumAllowedSockets())
 			fetch();
 	}
 
@@ -160,7 +160,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		++_triedHosts;
 		try {
             // DPINJ: Change to using passed-in SocketsManager!!!
-			connector.toCancel = SocketsManager.getSharedManager().connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
+			connector.toCancel = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
                                                  Constants.TIMEOUT, connector);
 		} catch (IOException impossible) {
 			connecting.remove(connector); // remove just in case

@@ -20,9 +20,9 @@ import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.messages.FindNodeRequestWireImpl;
 import com.limegroup.gnutella.dht.messages.FindNodeResponseWireImpl;
 import com.limegroup.gnutella.dht.messages.FindValueRequestWireImpl;
@@ -146,7 +146,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     protected boolean submit(Tag tag) {
         InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddress();
         ByteBuffer data = tag.getData();
-        UDPService.instance().send(data, dst, true);
+        ProviderHacks.getUdpService().send(data, dst, true);
         register(tag);
         SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message)tag.getMessage());
         

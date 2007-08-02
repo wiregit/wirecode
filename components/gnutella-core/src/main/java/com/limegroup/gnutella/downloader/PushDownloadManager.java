@@ -37,6 +37,8 @@ import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SocketProcessor;
@@ -99,17 +101,21 @@ public class PushDownloadManager implements ConnectionAcceptor {
     
     /** executor to run delayed tasks on. */
     private final ScheduledExecutorService scheduler;
+    
+    private final NetworkManager networkManager;
   
     public PushDownloadManager(PushedSocketHandler downloadAcceptor, 
     		MessageRouter router,
     		HttpExecutor executor,
             ScheduledExecutorService scheduler,
-    		SocketProcessor processor) {
+    		SocketProcessor processor,
+    		NetworkManager networkManager) {
     	this.downloadAcceptor = downloadAcceptor;
     	this.router = router;
     	this.executor = executor;
     	this.scheduler = scheduler;
     	this.processor = processor;
+    	this.networkManager = networkManager;
     }
     
     /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
@@ -155,8 +161,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
+        byte[] addr = networkManager.getAddress();
+        int port = networkManager.getPort();
         if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
             if(observer != null)
                 observer.shutdown();
@@ -171,9 +177,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
         
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
-        if (!RouterService.acceptedIncomingConnection()) {
+        if (!networkManager.acceptedIncomingConnection()) {
             // if we can do FWT, offload a TCP pusher.
-            if (UDPService.instance().canDoFWT())
+            if (ProviderHacks.getUdpService().canDoFWT())
                 sendPushTCP(file, guid, observer);
             else if (observer != null)
                 observer.shutdown();
@@ -208,8 +214,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
-            byte[] addr = RouterService.getNonForcedAddress();
-            int port = RouterService.getNonForcedPort();
+            byte[] addr = networkManager.getNonForcedAddress();
+            int port = networkManager.getNonForcedPort();
             if( NetworkUtils.isValidAddress(addr) &&
                 NetworkUtils.isValidPort(port) ) {
                 PushRequest pr = new PushRequest(guid,
@@ -240,14 +246,14 @@ public class PushDownloadManager implements ConnectionAcceptor {
                                 (byte)2,
                                 file.getClientGUID(),
                                 file.getIndex(),
-                                RouterService.getAddress(),
-                                RouterService.getPort(),
+                                networkManager.getAddress(),
+                                networkManager.getPort(),
                                 Network.UDP,
                                 SSLSettings.isIncomingTLSEnabled());
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
-        UDPService udpService = UDPService.instance();
+        UDPService udpService = ProviderHacks.getUdpService();
         //and send the push to the node 
         try {
             InetAddress address = InetAddress.getByName(file.getHost());
@@ -280,8 +286,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         UDPService.instance().canDoFWT() &&
-                        !RouterService.acceptedIncomingConnection();
+                         ProviderHacks.getUdpService().canDoFWT() &&
+                        !networkManager.acceptedIncomingConnection();
 
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);
 
@@ -307,13 +313,13 @@ public class PushDownloadManager implements ConnectionAcceptor {
         data.getMultiShutdownable().addShutdownable(null);
 
         // if push proxies failed, but we need a fw-fw transfer, give up.
-        if (data.isFWTransfer() && !RouterService.acceptedIncomingConnection()) {
+        if (data.isFWTransfer() && !networkManager.acceptedIncomingConnection()) {
             data.getMultiShutdownable().shutdown();
             return;
         }
 
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
+        byte[] addr = networkManager.getAddress();
+        int port = networkManager.getPort();
         if (!NetworkUtils.isValidAddressAndPort(addr, port)) {
             data.getMultiShutdownable().shutdown();
             return;
@@ -345,7 +351,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * is told to send the push through the network.
      */
     private void sendPushThroughProxies(PushData data, Set<? extends IpPort> proxies) {
-        byte[] externalAddr = RouterService.getExternalAddress();
+        byte[] externalAddr = networkManager.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
         if (data.isFWTransfer() && !NetworkUtils.isValidAddress(externalAddr)) {
@@ -353,8 +359,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
             return;
         }
 
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
+        byte[] addr = networkManager.getAddress();
+        int port = networkManager.getPort();
 
         //TODO: send push msg directly to a proxy if you're connected to it.
 

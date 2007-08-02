@@ -48,27 +48,16 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
     private final Map<GUID, GUID> GUID_REQUESTS = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, GUID>(200));
+    
+    private final NetworkManager networkManager;
 
-	/**
-	 * Instance following singleton.
-	 */
-	private static final ReplyHandler INSTANCE =
-		new ForMeReplyHandler();
-
-	/**
-	 * Singleton accessor.
-	 *
-	 * @return the <tt>ReplyHandler</tt> instance for this node
-	 */
-	public static ReplyHandler instance() {
-		return INSTANCE;
-	}
-	   
 	/**
 	 * Private constructor to ensure that only this class can construct
 	 * itself.
 	 */
-	private ForMeReplyHandler() {
+	ForMeReplyHandler(NetworkManager networkManager) {
+	    this.networkManager = networkManager;
+	    
 	    //Clear push requests every 30 seconds.
 	    RouterService.schedule(new Runnable() {
 	        public void run() {
@@ -372,7 +361,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     public InetAddress getInetAddress() {
         try {
             return InetAddress.
-                getByName(NetworkUtils.ip2string(RouterService.getAddress()));
+                getByName(NetworkUtils.ip2string(networkManager.getAddress()));
         } catch(UnknownHostException e) {
             // may want to do something else here if we ever use this!
             return null;
@@ -384,11 +373,11 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     }
     
     public int getPort() {
-        return RouterService.getPort();
+        return networkManager.getPort();
     }
     
     public String getAddress() {
-        return NetworkUtils.ip2string(RouterService.getAddress());
+        return NetworkUtils.ip2string(networkManager.getAddress());
     }
     
     public void handleSimppVM(SimppVM simppVM) {

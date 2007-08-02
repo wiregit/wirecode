@@ -16,9 +16,6 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
@@ -93,11 +90,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         }
     }
     
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-            DownloadCallback callback) {
-		assert(getMagnet() != null);
+    public void initialize(DownloadReferences downloadReferences) {
+        assert (getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(manager, fileManager, callback);
+        super.initialize(downloadReferences);
     }
 
 	private synchronized MagnetOptions getMagnet() {
@@ -257,11 +253,11 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		String textQuery = magnet.getQueryString();
         if (textQuery != null) {
             String q = QueryUtils.createQueryString(textQuery);
-            return QueryRequest.createQuery(q);
+            return queryRequestFactory.createQuery(q);
         }
         else {
             String q = QueryUtils.createQueryString(getSaveFile().getName());
-            return QueryRequest.createQuery(q);
+            return queryRequestFactory.createQuery(q);
         }
     }
 

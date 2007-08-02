@@ -27,10 +27,8 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
-import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -184,15 +182,15 @@ public class FileManagerTest extends LimeTestCase {
             
         // it is important to check the query at all bounds,
         // including tests for case.
-        responses=fman.query(QueryRequest.createQuery("unit",(byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("FileManager", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("test", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("file", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery(
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);        
                 
@@ -226,7 +224,7 @@ public class FileManagerTest extends LimeTestCase {
         
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertNotEquals("responses gave same index",
             responses[0].getIndex(), responses[1].getIndex() );
         for (int i=0; i<responses.length; i++) {
@@ -251,7 +249,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNotNull("should have been able to remove shared file", fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
         files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
@@ -271,7 +269,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNotNull(result.getFileDescs()[0]);
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
         assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
@@ -287,7 +285,7 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue("should be valid", fman.isValidIndex(0));
         assertTrue("should be valid (was at one time)", fman.isValidIndex(1));
 
-        responses=fman.query(QueryRequest.createQuery("*unit*", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
         files = fman.getSharedFileDescriptors(_sharedDir);
@@ -359,7 +357,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
-        responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
         assertEquals("files differ", responses[1].getName(), f5.getName());
@@ -377,7 +375,7 @@ public class FileManagerTest extends LimeTestCase {
         // add one incomplete file and make sure the numbers go up.
         Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
@@ -385,7 +383,7 @@ public class FileManagerTest extends LimeTestCase {
             
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
@@ -394,7 +392,7 @@ public class FileManagerTest extends LimeTestCase {
         // add another incomplete file with another hash, it should be added.
         urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(new File("c"), urns, "c", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("c"), urns, "c", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
@@ -411,10 +409,10 @@ public class FileManagerTest extends LimeTestCase {
             
         Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(new File("b"), urns, "b", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("b"), urns, "b", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
         fman.removeFileIfShared( new File("a") );
@@ -438,10 +436,10 @@ public class FileManagerTest extends LimeTestCase {
         Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
             
-        QueryRequest qr = QueryRequest.createQuery(urn, "sambe");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(urn, "sambe");
         Response[] hits = fman.query(qr);
         assertNotNull(hits);
         assertEquals("unexpected number of resp.", 0, hits.length);
@@ -461,7 +459,7 @@ public class FileManagerTest extends LimeTestCase {
         Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
             
         // First test that we DO get this IFD.
@@ -483,7 +481,7 @@ public class FileManagerTest extends LimeTestCase {
         urns = fd.getUrns();
         
         // now add an ifd with those urns.
-        fman.addIncompleteFile(new File("sam"), urns, "b", 0, VerifyingFileFactory.getSharedFactory().createVerifyingFile(0));
+        fman.addIncompleteFile(new File("sam"), urns, "b", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         
         FileDesc retFD = fman.getFileDescForUrn(urn);    
         assertNotNull(retFD);
@@ -519,7 +517,7 @@ public class FileManagerTest extends LimeTestCase {
 			Set<URN> queryUrnSet = new UrnSet();
 			queryUrnSet.add(urn);
 			for(int j = 0; j < requestedUrnSets.length; j++) {
-				QueryRequest qr = QueryRequest.createQuery(queryUrnSet);
+				QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(queryUrnSet);
 				Response[] hits = fman.query(qr);
 				assertEquals("there should only be one response", 1, hits.length);
 				assertEquals("responses should be equal", testResponse, hits[0]);		
@@ -549,7 +547,7 @@ public class FileManagerTest extends LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(name);
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -575,7 +573,7 @@ public class FileManagerTest extends LimeTestCase {
 	    for(int i = 0; i < fds.length; i++) {
 	        URN urn = fds[i].getSHA1Urn();
 	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-	            RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn),null);
+	            RouterService.getAltlocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn),null);
 	        }
 	    }
         
@@ -593,7 +591,7 @@ public class FileManagerTest extends LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(name);
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -625,7 +623,7 @@ public class FileManagerTest extends LimeTestCase {
         QueryRouteTable qrt = fman.getQRT();
 
         //test that QRT doesn't contain random keyword
-        QueryRequest qr = QueryRequest.createQuery("asdfasdf");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdfasdf");
         assertFalse("query should not be in qrt",
                    qrt.contains(qr));
 
@@ -1192,7 +1190,7 @@ public class FileManagerTest extends LimeTestCase {
     private QueryRequest get_qr(File f) {
         String norm = I18NConvert.instance().getNorm(f.getName());
         norm = StringUtils.replace(norm, "_", " ");
-        return QueryRequest.createQuery(norm);
+        return ProviderHacks.getQueryRequestFactory().createQuery(norm);
     }
 	
 	private void addFilesToLibrary() throws Exception {

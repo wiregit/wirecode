@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import org.limewire.collection.Periodic;
 import org.limewire.statistic.StatisticsManager;
 
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
@@ -33,8 +34,8 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     /** Utility that will perform the shutting off. */
     private final Periodic shutOff;
     
-    public AdvancedToggleHandler() {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES);
+    public AdvancedToggleHandler(NetworkManager networkManager) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){

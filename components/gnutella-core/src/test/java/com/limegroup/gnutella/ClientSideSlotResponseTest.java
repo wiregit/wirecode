@@ -7,11 +7,11 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -112,7 +112,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testResponsesSent() throws Exception {
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -129,7 +129,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      */
     public void testNothingSent() throws Exception {
     	uStub.mayBeServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -144,7 +144,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testAllFiltered() throws Exception {
     	uStub.mayBeServiceable = true;
     	uStub.isServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(TEXT_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(TEXT_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -159,7 +159,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testNoneFiltered() throws Exception {
     	uStub.mayBeServiceable = true;
     	uStub.isServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(OTHER_TORRENT);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(OTHER_TORRENT);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -177,7 +177,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testMetaFilesSent() throws Exception {
     	uStub.isServiceable = false;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();

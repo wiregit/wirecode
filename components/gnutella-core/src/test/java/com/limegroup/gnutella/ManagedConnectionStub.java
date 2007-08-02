@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since
@@ -12,15 +11,7 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
  */
 public class ManagedConnectionStub extends ManagedConnection {
     public ManagedConnectionStub() {
-        super("1.2.3.4", 6346);
-		
-        try {
-            PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
+        super("1.2.3.4", 6346, ConnectType.PLAIN, new ConnectionManagerStub(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory());
     }
 
     public void initialize() {

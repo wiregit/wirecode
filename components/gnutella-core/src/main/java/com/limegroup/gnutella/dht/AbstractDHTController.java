@@ -37,16 +37,16 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
+import com.limegroup.gnutella.dht.db.AbstractPushProxiesValue;
 import com.limegroup.gnutella.dht.db.AltLocModel;
-import com.limegroup.gnutella.dht.db.AltLocValue;
-import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesModel;
-import com.limegroup.gnutella.dht.db.PushProxiesValue;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -123,9 +123,13 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final int routeTableVersion;
     
+    private final NetworkManager networkManager;
+    
     public AbstractDHTController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
-            DHTMode mode) {
+            DHTMode mode, NetworkManager networkManager) {
+        
+        this.networkManager = networkManager;
         
         switch(mode) {
             case ACTIVE:
@@ -154,10 +158,10 @@ public abstract class AbstractDHTController implements DHTController {
         dht.setHostFilter(new FilterDelegate());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                AltLocValue.ALT_LOC, new AltLocValueFactory());
+                AbstractAltLocValue.ALT_LOC, ProviderHacks.getAltLocValueFactory());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                PushProxiesValue.PUSH_PROXIES, new PushProxiesValueFactory());
+                AbstractPushProxiesValue.PUSH_PROXIES, ProviderHacks.getPushProxiesValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -172,14 +176,14 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         dht.getStorableModelManager().addStorableModel(
-                AltLocValue.ALT_LOC, new AltLocModel());
+                AbstractAltLocValue.ALT_LOC, new AltLocModel(ProviderHacks.getAltLocValueFactory()));
         
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
         if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
-                    PushProxiesValue.PUSH_PROXIES, new PushProxiesModel());
+                    AbstractPushProxiesValue.PUSH_PROXIES, new PushProxiesModel(ProviderHacks.getNetworkManager(), ProviderHacks.getPushProxiesValueFactory()));
         }
         
         this.bootstrapper = new DHTBootstrapperImpl(this);
@@ -264,8 +268,8 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         try {
-            InetAddress addr = InetAddress.getByAddress(RouterService.getAddress());
-            int port = RouterService.getPort();
+            InetAddress addr = InetAddress.getByAddress(networkManager.getAddress());
+            int port = networkManager.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             

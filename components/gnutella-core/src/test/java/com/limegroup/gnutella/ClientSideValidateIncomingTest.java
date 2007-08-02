@@ -10,14 +10,15 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Set;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
@@ -85,7 +86,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     public void testTCPExpireRequestsNotSent() throws Exception {
         drainAll();
         for (int i = 0; i < 2; i++) {
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
             try {
                 testUP[0].receive(TIMEOUT);
@@ -93,7 +94,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             catch (InterruptedIOException expected) {}
             
             Thread.sleep(MY_EXPIRE_TIME+MY_VALIDATE_TIME);
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
             Thread.sleep(100);
             // now we should get the connect backs cuz it has been a while
             Message m = null;
@@ -112,20 +113,20 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             s.close();
             Thread.sleep(100); 
             // Socket must have said CONNECT BACK
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
             
             s = new Socket("localhost", PORT);
             s.getOutputStream().write("CONNECT BACK\r\r".getBytes());
             Thread.sleep(500);
             s.close(); 
             // Socket must have said CONNECT BACK
-            assertTrue(RouterService.acceptedIncomingConnection());
+            assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
             
             // wait until the expire time is realized
             Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME + 1000);
             
             // it should send off more requests
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
             Message m = null;
             do {
                 m = testUP[0].receive(TIMEOUT);
@@ -180,7 +181,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // back messages are NOT sent
     public void testUDPExpireRequestsNotSent() throws Exception {
         drainAll();
-        UDPService udpServ = UDPService.instance();
+        UDPService udpServ = ProviderHacks.getUdpService();
         for (int i = 0; i < 2; i++) {
             assertFalse(udpServ.canReceiveUnsolicited());
 
@@ -205,7 +206,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // it asks for a connect back again
     public void testUDPExpireRequestsSent() throws Exception {
         drainAll();
-        UDPService udpServ = UDPService.instance();
+        UDPService udpServ = ProviderHacks.getUdpService();
         for (int i = 0; i < 2; i++) {
             // wait until the expire time is realized
             
@@ -251,14 +252,15 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // it asks for a connect back again
     public void testUDPInterleavingRequestsSent() throws Exception {
         drainAll();
-        UDPService udpServ = UDPService.instance();
+        UDPService udpServ = ProviderHacks.getUdpService();
         Random rand = new Random();
         for (int i = 0; i < 6; i++) {
             if (rand.nextBoolean()) {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    new ReplyNumberVendorMessage(new GUID(cbGuid), 1);
+                    new ReplyNumberVendorMessageFactory().create(
+                        new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 
                     new DatagramPacket(baos.toByteArray(), 
@@ -278,7 +280,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    new ReplyNumberVendorMessage(new GUID(cbGuid), 1);
+                    new ReplyNumberVendorMessageFactory().create(
+                        new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 
                     new DatagramPacket(baos.toByteArray(), 

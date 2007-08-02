@@ -32,6 +32,7 @@ import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -43,6 +44,8 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
+    
+    private HTTPDownloaderFactory httpDownloaderFactory;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -50,6 +53,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     
     public static Test suite() {
         return buildTestSuite(HTTPDownloaderTest.class);
+    }
+    
+    public void setUp() {
+        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager());
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {
@@ -67,10 +74,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                         boolean failed = false;
                         AlternateLocation loc;            
                         if(i == 25 || i == 30 || Math.random() < 0.5) {
-                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], true);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, HugeTestUtils.URNS[0], true);
                             tls = true;
                         } else {
-                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], false);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, HugeTestUtils.URNS[0], false);
                         }
                         
                         if(i != 30 && (i == 25 || Math.random() < 0.5)) {
@@ -185,9 +192,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                             null, false, false, "LIME",
                                             null, -1, false);
         File f = new File("sam");
-        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(length);
+        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(length);
         vf.open(f);
-        HTTPDownloader dl = new HTTPDownloader(rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(null, rfd, vf, false);
         
         PrivilegedAccessor.setValue(dl, "_amountToRead", new Long(rfd.getSize()));
         
@@ -363,12 +370,12 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 0,
                                                 false);
                                                 
-        VerifyingFile vf = VerifyingFileFactory.getSharedFactory().createVerifyingFile(1000);
+        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1000);
         
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();
         
-        HTTPDownloader dl = new HTTPDownloader(socket, rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(socket, rfd, vf, false);
         func.apply(dl);
         
         dl.initializeTCP();
@@ -399,7 +406,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     
-    private static HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
+    private HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
@@ -422,7 +429,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 -1,
                                                 0,
                                                 false);
-        HTTPDownloader d = new HTTPDownloader(rfd, null, false);
+        HTTPDownloader d = httpDownloaderFactory.create(null, rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;
     }

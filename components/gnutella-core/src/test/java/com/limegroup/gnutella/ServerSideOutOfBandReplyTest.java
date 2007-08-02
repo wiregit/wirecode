@@ -124,8 +124,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
     public void testBasicOutOfBandRequest() throws Exception {
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true));
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true));
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
         
         DatagramPacket pack = null;
         if (UDP_ACCESS == null)
@@ -134,7 +134,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         drain();
 
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("txt",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
@@ -179,7 +179,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         //rince and repeat, this time pretend to be firewalled
         
         query = 
-            QueryRequest.createOutOfBandQuery("txt",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
@@ -188,11 +188,11 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         
         query.hop();
         
-        UDPService service = RouterService.getUdpService();
+        UDPService service = ProviderHacks.getUdpService();
         PrivilegedAccessor.setValue(
         		service,"_acceptedUnsolicitedIncoming",new Boolean(false));
         
-        assertFalse(RouterService.getUdpService().canReceiveUnsolicited());
+        assertFalse(ProviderHacks.getUdpService().canReceiveUnsolicited());
         assertTrue(query.desiresOutOfBandReplies());
 
         // we needed to hop the message because we need to make it seem that it
@@ -230,7 +230,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         
         //restore our un-firewalled status and repeat
         query = 
-            QueryRequest.createOutOfBandQuery("txt",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         query.hop();
@@ -641,7 +641,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         drain();
 
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("txt",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         query.hop();
@@ -745,7 +745,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         drain();
 
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("txt",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         query.hop();
@@ -819,7 +819,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // THIS TESTS ASSUMES SOLICITED SUPPORT - set up in a previous test
 
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("berkeley",
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("berkeley",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         query.hop();
@@ -911,7 +911,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             int numReplyNumberVMs = 0;
             for (int i = 0; i < MAX_BUFFERED_REPLIES; i++) {
                 QueryRequest query = 
-                    QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                    ProviderHacks.getQueryRequestFactory().createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
                             InetAddress.getLocalHost().getAddress(),
                             UDP_ACCESS.getLocalPort());
                 query.hop();
@@ -947,7 +947,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             // send 2 new queries that shouldn't be ACKed
             for (int i = 0; i < 2; i++) {
                 QueryRequest query = 
-                    QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                    ProviderHacks.getQueryRequestFactory().createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
                             InetAddress.getLocalHost().getAddress(),
                             UDP_ACCESS.getLocalPort());
                 query.hop();
@@ -980,7 +980,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         drain();
 
         byte[] crapIP = {(byte)192,(byte)168,(byte)1,(byte)1};
-        QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("berkeley", 
                                                                crapIP, 6346);
         LEAF[0].send(query);
         LEAF[0].flush();
@@ -994,7 +994,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             (Socket)PrivilegedAccessor.getValue(LEAF[0], "_socket");
         // try a good query
         query = 
-            QueryRequest.createOutOfBandQuery("berkeley", 
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("berkeley", 
                                               socket.getLocalAddress().getAddress(),
                                               6346);
         LEAF[0].send(query);
@@ -1017,7 +1017,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         byte[] meIP = {(byte)127,(byte)0,(byte)0,(byte)1};
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("susheel", meIP, 
+            ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("susheel", meIP, 
                                               UDP_ACCESS.getLocalPort());
         ULTRAPEER[1].send(query);
         ULTRAPEER[1].flush();

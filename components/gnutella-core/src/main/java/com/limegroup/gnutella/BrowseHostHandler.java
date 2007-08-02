@@ -31,7 +31,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -160,7 +159,7 @@ public class BrowseHostHandler {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Attempting direct connection with type: " + type);
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                Socket socket = SocketsManager.getSharedManager().connect(new InetSocketAddress(host.getAddress(), host.getPort()),
+                Socket socket = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
                 browseExchange(socket);
@@ -358,7 +357,7 @@ public class BrowseHostHandler {
         			reply.setGUID(_guid);
         			reply.setBrowseHostReply(true);
 					
-        			ForMeReplyHandler.instance().handleQueryReply(reply, null);
+        			ProviderHacks.getForMeReplyHandler().handleQueryReply(reply, null);
         		}
         	}
         }

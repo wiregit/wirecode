@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -77,10 +75,9 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Overriden to ensure that the 'downloadSHA1' variable is set & we're listening
      * for alternate locations.
      */
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
-        super.initialize(manager, fileManager, callback);
-        if(downloadSHA1 == null) {
+    public void initialize(DownloadReferences downloadReferences) {
+        super.initialize(downloadReferences);
+        if (downloadSHA1 == null) {
             downloadSHA1 = urn;
             RouterService.getAltlocManager().addListener(downloadSHA1,this);
         }

@@ -9,11 +9,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.limewire.io.IOUtils;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
+import org.limewire.io.IOUtils;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -91,7 +90,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
 	    LEAF[0] = new Connection("localhost", PORT);
-        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF[0].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         //  Give the connection a chance to send its initial messages

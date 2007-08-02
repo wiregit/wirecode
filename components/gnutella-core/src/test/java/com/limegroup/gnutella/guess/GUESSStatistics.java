@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.guess;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 public class GUESSStatistics {
@@ -74,7 +75,7 @@ public class GUESSStatistics {
         int chop = 0;
         while (numAttempted < 10) {
 			QueryRequest qr = 
-				QueryRequest.createQuery(searchKey.substring(0,size-chop), (byte)1);
+				ProviderHacks.getQueryRequestFactory().createQuery(searchKey.substring(0,size-chop), (byte)1);
             if (++chop > 3)
                 chop = 0;
             try {

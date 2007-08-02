@@ -11,16 +11,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
@@ -67,7 +66,7 @@ public class RequeryDownloadTest
     /** The TestMessageRouter's queryRouteTable. */
     private RouteTable _queryRouteTable;
     /** The TestMessageRouter's FOR_ME_REPLY_HANDLER. */
-    private final ReplyHandler _ourReplyHandler = ForMeReplyHandler.instance();
+    private final ReplyHandler _ourReplyHandler = ProviderHacks.getForMeReplyHandler();
     
     private static final int PORT = 6939;
 
@@ -103,7 +102,7 @@ public class RequeryDownloadTest
 
     public void setUp() throws Exception {
         setSettings();
-        RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
+        ProviderHacks.getNetworkManager().setListeningPort(ConnectionSettings.PORT.getValue());
         PrivilegedAccessor.setValue(
             RouterService.class, "manager", new ConnectionManagerStub());
         _queryRouteTable = 
@@ -178,7 +177,7 @@ public class RequeryDownloadTest
        }
 
        //Record information in IncompleteFileManager.
-       VerifyingFile vf=VerifyingFileFactory.getSharedFactory().createVerifyingFile(TestFile.length());
+       VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;
@@ -303,7 +302,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response....
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
+        _router.handleQueryReply(reply, ProviderHacks.getManagedConnectionFactory().createManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(2000);

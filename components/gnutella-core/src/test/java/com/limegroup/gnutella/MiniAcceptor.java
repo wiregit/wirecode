@@ -7,7 +7,6 @@ import java.net.Socket;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -51,7 +50,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(int port) {
-		this(new UltrapeerHandshakeResponder("localhost"), port);
+		this(ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("localhost"), port);
     }
 
     /** Blocks until a connection is available, and returns it. 

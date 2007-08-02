@@ -6,10 +6,13 @@ import java.util.StringTokenizer;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPUtils;
 
 /** Useful utilities relating to AlternateLocations. */
+
+// DPINJ: Must make this into an instance class, since it requires an AlternateLocationFactory!!!
 public class AltLocUtils {
     
     private AltLocUtils() {}
@@ -59,7 +62,7 @@ public class AltLocUtils {
             } 
 
             try {
-                AlternateLocation al = AlternateLocation.create(token, sha1, tlsIdx.isSet(idx));
+                AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(token, sha1, tlsIdx.isSet(idx));
                 idx++;
                 
                 assert al.getSHA1Urn().equals(sha1) : "sha1 mismatch!";

@@ -24,6 +24,7 @@ import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * This class implements a simple chat protocol that allows to exchange text
@@ -139,7 +139,7 @@ public class InstantMessenger implements Chatter {
         if (outgoing) {
             try {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                SocketsManager.getSharedManager().connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
+                ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)
                                     throws IOException {

@@ -17,7 +17,6 @@ import org.limewire.rudp.UDPConnection;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -100,7 +99,7 @@ public final class PushManager {
             try {
                 ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                SocketsManager.getSharedManager().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false), type);
+                ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false), type);
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }

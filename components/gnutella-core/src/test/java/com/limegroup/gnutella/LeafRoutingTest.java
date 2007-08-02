@@ -21,13 +21,16 @@ import junit.framework.Test;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactoryImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -190,7 +193,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
         PingReply reply = 
-            PingReply.createExternal(guid, (byte)7,
+            ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
                                      socket.getLocalPort(), 
                                      ultrapeer ? ultrapeerIP : oldIP,
                                      ultrapeer);
@@ -348,9 +351,8 @@ public class LeafRoutingTest extends LimeTestCase {
         assertTrue(RouterService.getFileManager().getNumFiles() == 2);
 
         // send a query that should hit
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
-                                              "berkeley", null, null,
-                                              null, false, Network.UNKNOWN, false, 0);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+                "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         ultrapeer2.send(query);
         ultrapeer2.flush();
         
@@ -395,7 +397,7 @@ public class LeafRoutingTest extends LimeTestCase {
         URN susheelURN = (URN) iter.next();
 
         // send a query that should hit
-        QueryRequest query = QueryRequest.createQuery(berkeleyURN);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(berkeleyURN);
 
         ultrapeer2.send(query);
         ultrapeer2.flush();
@@ -413,7 +415,7 @@ public class LeafRoutingTest extends LimeTestCase {
         } while (!(m instanceof QueryReply)) ;
         
         // send another query that should hit
-        query = QueryRequest.createQuery(susheelURN);
+        query = ProviderHacks.getQueryRequestFactory().createQuery(susheelURN);
 
         ultrapeer2.send(query);
         ultrapeer2.flush();
@@ -459,7 +461,7 @@ public class LeafRoutingTest extends LimeTestCase {
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
+            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }

@@ -11,10 +11,7 @@ import java.util.Map;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
@@ -167,8 +164,8 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 		return getSaveFile().equals(saveFile);
 	}
 	
-	public abstract void initialize(DownloadManager m, 
-			FileManager fm, DownloadCallback ac);
+	// DPINJ: See: CORE-306
+	public abstract void initialize(DownloadReferences downloadReferences);
 
 	/**
 	 * Sets the file name and directory where the download will be saved once

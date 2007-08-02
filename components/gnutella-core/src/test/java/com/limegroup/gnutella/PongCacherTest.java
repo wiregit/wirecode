@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.limewire.collection.BucketQueue;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -110,14 +110,14 @@ public final class PongCacherTest extends LimeTestCase {
         
         List pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
 
-        PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
+        PingReply pong = ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
         pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("unexpected number of cached pongs", 
                      1, pongs.size());        
 
-        pong = PingReply.create(new GUID().bytes(), (byte)5);
+        pong = ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
 
@@ -128,7 +128,7 @@ public final class PongCacherTest extends LimeTestCase {
         // fill up the pongs at the default hop
         for(int i=0; i<30; i++) {
             PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)5);
+                ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
             PC.addPong(curPong);
         }
 
@@ -138,7 +138,7 @@ public final class PongCacherTest extends LimeTestCase {
                      PongCacher.NUM_PONGS_PER_HOP, pongs.size());
 
         PingReply highHopPong = 
-            PingReply.create(new GUID().bytes(), (byte)5);
+            ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         
         highHopPong.hop();
         highHopPong.hop();
@@ -155,7 +155,7 @@ public final class PongCacherTest extends LimeTestCase {
         assertEquals("first pong should be high hops", highHopPong, pr); 
 
         PingReply highHopPong2 = 
-            PingReply.create(new GUID().bytes(), (byte)5);
+            ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         highHopPong2.hop();
         highHopPong2.hop();
         highHopPong2.hop();
@@ -180,7 +180,7 @@ public final class PongCacherTest extends LimeTestCase {
         ConnectionManager cm = new UltrapeerConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
 
-        PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
+        PingReply pong = ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);
 
         Map m = 
@@ -190,7 +190,7 @@ public final class PongCacherTest extends LimeTestCase {
             (BucketQueue)m.get(pong.getClientLocale());
         assertEquals("unexpected bucket queue size", 1, bq.size());
 
-        pong = PingReply.create(new GUID().bytes(), (byte)5);
+        pong = ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);
         assertEquals("unexpected bucket queue size", 1, bq.size());
         assertEquals("unexpected bucket queue size", 1, bq.size(0));
@@ -281,7 +281,7 @@ public final class PongCacherTest extends LimeTestCase {
     private static class TestManager extends ConnectionManager {
 
         public TestManager() {
-            super();
+            super(ProviderHacks.getNetworkManager());
         }
 
         public boolean isSupernode() {

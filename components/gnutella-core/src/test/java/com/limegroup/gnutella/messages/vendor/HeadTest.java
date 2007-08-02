@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.concurrent.SimpleProvider;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -22,15 +23,20 @@ import org.limewire.util.PrivilegedAccessor;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.NetworkManagerImpl;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -41,6 +47,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.stubs.MockNetworkManager;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -55,8 +62,10 @@ public class HeadTest extends LimeTestCase {
 	/**
 	 * keep a file manager which shares one complete file and one incomplete file
 	 */
-	private static FileManagerStub _fm;
-    private static UploadManagerStub _um;
+	private FileManagerStub _fm;
+    private UploadManagerStub _um;
+    private MockNetworkManager networkManager;
+    private HeadPongFactory headPongFactory;
 	
 	/**
 	 * URNs for the 3 files that will be requested
@@ -169,28 +178,28 @@ public class HeadTest extends LimeTestCase {
         };
         _partialLarge.setRangesByte(_rangesLarge.toBytes());
 		_complete = new FileDescStub("complete",_haveFull,2);		
-		
-		Map urns = new HashMap();
-		urns.put(_havePartial,_partial);
-		urns.put(_haveFull,_complete);
-        urns.put(_largeURN, _partialLarge);
-		List descs = new LinkedList();
-		descs.add(_partial);
-		descs.add(_complete);
-		descs.add(_partialLarge);
-        
-        _um = new UploadManagerStub();
-		_fm = new FileManagerStub(urns,descs);
-		
-		assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
-        assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));
-		assertEquals(_complete,_fm.getFileDescForUrn(_haveFull));
-		
-		PrivilegedAccessor.setValue(HeadPong.class, "_fileManager",_fm);
-		PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager",_um);
     }
     
     public void setUp() throws Exception {
+        Map urns = new HashMap();
+        urns.put(_havePartial,_partial);
+        urns.put(_haveFull,_complete);
+        urns.put(_largeURN, _partialLarge);
+        List descs = new LinkedList();
+        descs.add(_partial);
+        descs.add(_complete);
+        descs.add(_partialLarge);
+        
+        _um = new UploadManagerStub();
+        _fm = new FileManagerStub(urns,descs);
+        networkManager = new MockNetworkManager();
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm));
+        
+        assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
+        assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));
+        assertEquals(_complete,_fm.getFileDescForUrn(_haveFull));
+        
+        
         blankRFD = new RemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false, -1, false, null, null, false, false, null, null, -1, false);
         assertFalse(blankRFD.isBrowseHostEnabled());
         assertFalse(blankRFD.isChatEnabled());
@@ -209,7 +218,7 @@ public class HeadTest extends LimeTestCase {
         RouterService.getAltlocManager().purge();
         createCollections();
         
-        PrivilegedAccessor.setValue(HeadPong.class, "PACKET_SIZE", HeadPong.DEFAULT_PACKET_SIZE);
+        PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", HeadPongFactoryImpl.DEFAULT_PACKET_SIZE);
     }
     
     private void clearStoredProxies() throws Exception {
@@ -221,7 +230,7 @@ public class HeadTest extends LimeTestCase {
 	 */
 	public void testFileNotFound() throws Exception {
 		HeadPing ping = new HeadPing(_notHave);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
 		pong = reparse(pong);
 		
@@ -239,12 +248,12 @@ public class HeadTest extends LimeTestCase {
         ping.setGuid(GUID.makeGuid());
         ping.setUrn(_largeURN);
         ping.setPongGGEPCapable(false);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         pong = reparse(pong);
         assertFalse(pong.hasFile());
         
         ping.setPongGGEPCapable(true);
-        pong = new HeadPong(ping);
+        pong = headPongFactory.create(ping);
         pong = reparse(pong);
         assertTrue(pong.hasFile());
     }
@@ -254,13 +263,13 @@ public class HeadTest extends LimeTestCase {
 	 * behind firewall or open.
 	 */
 	public void testFirewalledNoAcceptedIncoming() throws Exception {
-		PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.FALSE);
-		assertFalse(RouterService.acceptedIncomingConnection());
+	    networkManager.setAcceptedIncomingConnection(false);
+		assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 		
 		HeadPing ping = new HeadPing(_haveFull);
 		HeadPing pingi = new HeadPing(_havePartial);
-		HeadPong pong = new HeadPong(ping);
-		HeadPong pongi = new HeadPong(pingi);
+		HeadPong pong = headPongFactory.create(ping);
+		HeadPong pongi = headPongFactory.create(pingi);
         clearStoredProxies();
         pong = reparse(pong);
         pongi = reparse(pongi);
@@ -282,13 +291,13 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testFirewalledAcceptedIncoming() throws Exception {
-		PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", new Boolean(true));
-		assertTrue(RouterService.acceptedIncomingConnection());
+        networkManager.setAcceptedIncomingConnection(true);
+		assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 		
 		HeadPing ping = new HeadPing(_haveFull);
         HeadPing pingi = new HeadPing(_havePartial);
-		HeadPong pong = new HeadPong(ping);
-        HeadPong pongi = new HeadPong(pingi);
+		HeadPong pong = headPongFactory.create(ping);
+        HeadPong pongi = headPongFactory.create(pingi);
         clearStoredProxies();
         pong = reparse(pong);
         pongi = reparse(pongi);
@@ -315,7 +324,7 @@ public class HeadTest extends LimeTestCase {
 	public void testActivelyDownloading() throws Exception {	
 		_partial.setActivelyDownloading(true);
 		HeadPing ping = new HeadPing(_havePartial);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
 		pong = reparse(pong);
 		assertTrue(pong.isDownloading());
@@ -324,7 +333,7 @@ public class HeadTest extends LimeTestCase {
     public void testNotActivelyDownloading() throws Exception {		
 		_partial.setActivelyDownloading(false);
         HeadPing ping = new HeadPing(_havePartial);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
 		assertFalse(pong.isDownloading());
@@ -336,8 +345,8 @@ public class HeadTest extends LimeTestCase {
 	public void testRangesFit() throws Exception {		
 		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.INTERVALS);
 		HeadPing pingi = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.INTERVALS);		
-		HeadPong pong = new HeadPong(ping);
-		HeadPong pongi = new HeadPong(pingi);
+		HeadPong pong = headPongFactory.create(ping);
+		HeadPong pongi = headPongFactory.create(pingi);
         clearStoredProxies();
         pong = reparse(pong);
         pongi = reparse(pongi);
@@ -364,12 +373,12 @@ public class HeadTest extends LimeTestCase {
 		_partial.setRangesByte(_rangesTooBig.toBytes());
         try {    		
     		HeadPing pingi = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.INTERVALS);
-    		HeadPong pongi = new HeadPong(pingi);
+    		HeadPong pongi = headPongFactory.create(pingi);
             clearStoredProxies();
             pongi = reparse(pongi);
     		
     		assertNull(pongi.getRanges());
-    		assertLessThan(HeadPong.DEFAULT_PACKET_SIZE,pongi.getPayload().length);
+    		assertLessThan(HeadPongFactoryImpl.DEFAULT_PACKET_SIZE,pongi.getPayload().length);
         } finally {
             _partial.setRangesByte(_ranges.toBytes());
         }
@@ -378,7 +387,7 @@ public class HeadTest extends LimeTestCase {
     public void testLargeRanges() throws Exception {
        _partialLarge.setRangesByte(_rangesLarge.toBytes());
        HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
-       HeadPong pong = new HeadPong(ping);
+       HeadPong pong = headPongFactory.create(ping);
        clearStoredProxies();
        pong = reparse(pong);
        IntervalSet large = pong.getRanges();
@@ -388,7 +397,7 @@ public class HeadTest extends LimeTestCase {
     public void testOnlyLargeRanges() throws Exception {
         _partialLarge.setRangesByte(_rangesOnlyLarge.toBytes());
         HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
         IntervalSet large = pong.getRanges();
@@ -400,7 +409,7 @@ public class HeadTest extends LimeTestCase {
 	 */
 	public void testQueueStatusEmpty() throws Exception {
 		HeadPing ping = new HeadPing(_havePartial);		
-		HeadPong pong = new HeadPong(ping);
+		HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
 		int allFree =  pong.getQueueStatus();
@@ -413,7 +422,7 @@ public class HeadTest extends LimeTestCase {
     public void testQueueStatusSomeTaken() throws Exception {
         HeadPing ping = new HeadPing(_havePartial);     
         _um.setUploadsInProgress(10);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
 		assertEquals(-UploadSettings.HARD_MAX_UPLOADS.getValue()+10,pong.getQueueStatus());
@@ -425,7 +434,7 @@ public class HeadTest extends LimeTestCase {
     public void testQueueStatusSomeQueued() throws Exception {
         HeadPing ping = new HeadPing(_havePartial);
         _um.setNumQueuedUploads(5);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
 		assertEquals(5,pong.getQueueStatus());
@@ -438,7 +447,7 @@ public class HeadTest extends LimeTestCase {
         HeadPing ping = new HeadPing(_havePartial);
         _um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
         _um.setNumQueuedUploads(0);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);    
 		assertEquals(0,pong.getQueueStatus());
@@ -451,12 +460,12 @@ public class HeadTest extends LimeTestCase {
         HeadPing ping = new HeadPing(_havePartial);
         _um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
         _um.setNumQueuedUploads(0);
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);  
 		
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-		pong = reparse(new HeadPong(ping));
+		pong = reparse(headPongFactory.create(ping));
 		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
         pong.updateRFD(blankRFD);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
@@ -467,7 +476,7 @@ public class HeadTest extends LimeTestCase {
 	 * tests handling of alternate locations.
 	 */
 	public void testAltLocsFitWithRanges() throws Exception {	
-        PrivilegedAccessor.setValue(HeadPong.class, "PACKET_SIZE", 600);
+        PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", 600);
         
 		//add some big interval that fill most of the packet but not all
 		_partial.setRangesByte(_rangesMedium.toBytes());
@@ -479,8 +488,8 @@ public class HeadTest extends LimeTestCase {
 		HeadPing ping2 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
 		
-		HeadPong pong1 = new HeadPong(ping1);
-		HeadPong pong2 = new HeadPong(ping2);
+		HeadPong pong1 = headPongFactory.create(ping1);
+		HeadPong pong2 = headPongFactory.create(ping2);
         clearStoredProxies();
         pong1 = reparse(pong1);
         pong2 = reparse(pong2);
@@ -495,13 +504,13 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testAltLocsDontFitBecauseOfTooManyRanges() throws Exception {
-        PrivilegedAccessor.setValue(HeadPong.class, "PACKET_SIZE", 600);
+        PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", 600);
         
 		//now test if no locs will fit because of too many ranges
 		_partial.setRangesByte(_rangesJustFit.toBytes());
 		HeadPing ping2 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
-		HeadPong pong2 = new HeadPong(ping2);
+		HeadPong pong2 = headPongFactory.create(ping2);
         clearStoredProxies();
         pong2 = reparse(pong2);
         
@@ -517,7 +526,7 @@ public class HeadTest extends LimeTestCase {
 		//try with a file that doesn't have push locs
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
-		HeadPong pong1 = new HeadPong(ping1);
+		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
 		assertNull(pong1.getPushLocs());
@@ -526,7 +535,7 @@ public class HeadTest extends LimeTestCase {
     public void testPushAltLocsReturned() throws Exception {
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
-		HeadPong pong1 = new HeadPong(ping1);
+		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
 
@@ -555,7 +564,7 @@ public class HeadTest extends LimeTestCase {
 		//now ask only for fwt push locs - nothing returned
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
 		assertTrue(ping1.requestsFWTOnlyPushLocs());
-		HeadPong pong1 = new HeadPong(ping1);
+		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
 		assertNull(pong1.getPushLocs());
@@ -564,7 +573,7 @@ public class HeadTest extends LimeTestCase {
     public void testTLSPushLocs() throws Exception {
         HeadPing ping = new HeadPing(new GUID(), _tlsURN, HeadPing.PUSH_ALTLOCS);
         assertTrue(ping.requestsPushLocs());
-        HeadPong pong = new HeadPong(ping);
+        HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
         assertNull(pong.getRanges());
@@ -618,7 +627,7 @@ public class HeadTest extends LimeTestCase {
     public void testTLSPushLocsWithOldHeadPing() throws Exception {
         HeadPing ping = new HeadPing(new GUID(), _tlsURN, HeadPing.PUSH_ALTLOCS);
         assertTrue(ping.requestsPushLocs());
-        HeadPong pong = new HeadPong(reversion(ping, (short)1));
+        HeadPong pong = headPongFactory.create(reversion(ping, (short)1));
         clearStoredProxies();
         pong = reparse(pong);
         assertNull(pong.getRanges());
@@ -659,7 +668,7 @@ public class HeadTest extends LimeTestCase {
 	public void testMixedLocs() throws Exception {
 		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);		
-		HeadPong pong = new HeadPong(ping);
+		HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
 		
@@ -709,7 +718,7 @@ public class HeadTest extends LimeTestCase {
 	
 	private void  createCollections() throws Exception{
 		for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
+            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_haveFull);
             RouterService.getAltlocManager().add(al, null);
 		}
         AlternateLocationCollection col = RouterService.getAltlocManager().getDirect(_haveFull);
@@ -717,7 +726,7 @@ public class HeadTest extends LimeTestCase {
         
 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
+            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_havePartial);
             RouterService.getAltlocManager().add(al, null);
 		}
         col = RouterService.getAltlocManager().getDirect(_havePartial);
@@ -726,7 +735,7 @@ public class HeadTest extends LimeTestCase {
         
         //add some push altlocs to the incomplete collection        
         GUID guid = new GUID(GUID.makeGuid());		
-        PushAltLoc firewalled = (PushAltLoc)AlternateLocation.create(guid.toHexString()+";1.2.3.4:5",_havePartial);
+        PushAltLoc firewalled = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(guid.toHexString()+";1.2.3.4:5",_havePartial);
         firewalled.updateProxies(true);
 		pushCollectionPE = firewalled.getPushAddress();
         RouterService.getAltlocManager().add(firewalled, null);
@@ -734,7 +743,7 @@ public class HeadTest extends LimeTestCase {
         assertEquals(1, col.getAltLocsSize());
         
         GUID g = new GUID();
-        PushAltLoc tls = (PushAltLoc)AlternateLocation.create(g.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", _tlsURN);
+        PushAltLoc tls = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(g.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", _tlsURN);
         tls.updateProxies(true);
         tlsCollectionPE = tls.getPushAddress();
         RouterService.getAltlocManager().add(tls, null);

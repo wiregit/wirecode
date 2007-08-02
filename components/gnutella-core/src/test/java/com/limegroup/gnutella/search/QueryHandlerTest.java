@@ -6,18 +6,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
@@ -54,9 +55,9 @@ public final class QueryHandlerTest extends LimeTestCase {
      */
     public void testSendQueryToHost() throws Exception {
         ReplyHandler rh = new UltrapeerConnection();        
-        QueryRequest query = QueryRequest.createQuery("test", (byte)1);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);
         QueryHandler qh = 
-            QueryHandler.createHandler(query, rh, new TestResultCounter());
+            ProviderHacks.getQueryHandlerFactory().createHandler(query, rh, new TestResultCounter());
         Class[] paramTypes = new Class[] {
             QueryRequest.class, 
             ManagedConnection.class,
@@ -88,7 +89,7 @@ public final class QueryHandlerTest extends LimeTestCase {
 
         // make sure it adds the connection when the ttl is higher
         // than one and the connection supports probe queries
-        params[0] = QueryRequest.createQuery("test");
+        params[0] = ProviderHacks.getQueryRequestFactory().createQuery("test");
         params[1] = new UltrapeerConnection();
 
         m.invoke(null, params);
@@ -148,7 +149,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         }   
 
         QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
+            ProviderHacks.getQueryHandlerFactory().createHandler(ProviderHacks.getQueryRequestFactory().createQuery("test"),
                                        NewConnection.createConnection(),
                                        new TestResultCounter(0));
 
@@ -261,7 +262,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         }   
 
         QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
+            ProviderHacks.getQueryHandlerFactory().createHandler(ProviderHacks.getQueryRequestFactory().createQuery("test"),
                                        NewConnection.createConnection(8),
                                        new TestResultCounter(0));
         

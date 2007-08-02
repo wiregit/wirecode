@@ -10,11 +10,12 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.AddressSecurityToken;
-
 import junit.framework.Test;
 
+import org.limewire.security.AddressSecurityToken;
+
 import com.limegroup.gnutella.Backend;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -118,7 +119,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         (new Random()).nextBytes(fakeQueryKey);
 
 		QueryRequest crapQuery = 
-			QueryRequest.createQueryKeyQuery("susheel", 
+			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
 											 new AddressSecurityToken(fakeQueryKey));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
@@ -141,7 +142,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 
         // now try a legit one....
 		QueryRequest goodQuery =
-			QueryRequest.createQueryKeyQuery("susheel", qkToUse);
+			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", qkToUse);
 
 		byte[] guid = goodQuery.getGUID();
         send(goodQuery, address, Backend.BACKEND_PORT);

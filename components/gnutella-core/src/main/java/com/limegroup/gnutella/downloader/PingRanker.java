@@ -21,6 +21,8 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -34,6 +36,9 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
+    
+    private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();    
+    private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
     /**
      * the pinger to send the pings
@@ -84,11 +89,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private long lastPingTime;
     
-    private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();
+    private final NetworkManager networkManager;
     
-    private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
-    
-    protected PingRanker() {
+    protected PingRanker(NetworkManager networkManager) {
+        this.networkManager = networkManager; 
         pinger = new UDPPinger();
         pingedHosts = new TreeMap<IpPort, RemoteFileDesc>(IpPort.COMPARATOR);
         testedLocations = new HashSet<RemoteFileDesc>();
@@ -270,8 +274,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      * schedules a push ping to each proxy of the given host
      */
     private void pingProxies(RemoteFileDesc rfd) {
-        if (RouterService.acceptedIncomingConnection() || 
-                (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
+        if (networkManager.acceptedIncomingConnection() || 
+                (ProviderHacks.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
                 new HeadPing(myGUID,rfd.getSHA1Urn(),
                         new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
@@ -290,10 +294,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * @return the appropriate ping flags based on current conditions
      */
-    private static int getPingFlags() {
+    private int getPingFlags() {
         int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
-        if (RouterService.acceptedIncomingConnection() ||
-                RouterService.getUdpService().canDoFWT())
+        if (networkManager.acceptedIncomingConnection() ||
+                networkManager.canDoFWT())
             flags |= HeadPing.PUSH_ALTLOCS;
         return flags;
     }

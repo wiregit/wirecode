@@ -9,6 +9,7 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
@@ -30,7 +31,8 @@ public class LimeRUDPContext implements RUDPContext {
     public LimeRUDPContext() {
         factory = new LimeRUDPMessageFactory(new DefaultMessageFactory());
         settings = new LimeRUDPSettings();
-        service = new LimeUDPService();
+        // DPINJ: Get rid of!
+        service = new LimeUDPService(ProviderHacks.getNetworkManager());
         MessageParser parser = new LimeRUDPMessageParser(factory);
         MessageFactory.setParser(RUDPMessage.F_RUDP_MESSAGE, parser);
     }

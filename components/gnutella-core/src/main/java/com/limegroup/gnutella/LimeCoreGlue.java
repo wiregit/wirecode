@@ -95,11 +95,12 @@ public class LimeCoreGlue {
         // be the LocalSocketAddressProvider.
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
-                return RouterService.getAddress();
+                // DPINJ: make this work :/
+                return ProviderHacks.getNetworkManager().getAddress();
             }
 
             public int getLocalPort() {
-                return RouterService.getPort();
+                return ProviderHacks.getNetworkManager().getPort();
             }
 
             public boolean isLocalAddressPrivate() {

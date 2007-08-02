@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -22,14 +21,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
@@ -52,8 +49,6 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -61,7 +56,6 @@ import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -69,7 +63,6 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
-import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -79,7 +72,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -146,7 +138,7 @@ public class RouterService {
 	 * <tt>Acceptor</tt> instance for accepting new connections, HTTP
 	 * requests, etc.
 	 */
-    private static final Acceptor acceptor = new Acceptor();
+    private static final Acceptor acceptor = new Acceptor(ProviderHacks.getNetworkManager());
     
 	/**
 	 * <tt>TorrentManager</tt> instance for handling torrents
@@ -167,7 +159,8 @@ public class RouterService {
 	/**
 	 * Initialize the class that manages all TCP connections.
 	 */
-    private static ConnectionManager manager = new ConnectionManager();
+    // DPINJ: Fix!
+    private static ConnectionManager manager = new ConnectionManager(ProviderHacks.getNetworkManager());
 
     /**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
@@ -178,7 +171,7 @@ public class RouterService {
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    static DownloadManager downloadManager = new DownloadManager();
+    private static DownloadManager downloadManager = new DownloadManager(ProviderHacks.getNetworkManager());
     
     /**
      * Acceptor for HTTP connections.
@@ -212,7 +205,7 @@ public class RouterService {
 	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private static final UDPService UDPSERVICE = UDPService.instance();
+	static final UDPService UDPSERVICE = ProviderHacks.getUdpService();
     
 
 	/**
@@ -220,7 +213,7 @@ public class RouterService {
 	 * search results sent back to this client.
 	 */
 	private static final SearchResultHandler RESULT_HANDLER =
-		new SearchResultHandler();
+		new SearchResultHandler(ProviderHacks.getNetworkManager());
 
     /**
      * The manager of altlocs
@@ -286,28 +279,16 @@ public class RouterService {
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
 
     /**
-     * The DHTManager that manages the DHT and its various modes
-     */
-    private static Provider<DHTManager> DHT_MANAGER_REFERENCE
-        = new AbstractLazySingletonProvider<DHTManager>() {
-            @Override
-            public DHTManager createObject() {
-                return new DHTManagerImpl(
-                        ExecutorsHelper.newProcessingQueue("DHT-Processor"));
-            }
-        };
-    
-    /**
      * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
     private static Provider<AltLocFinder> ALT_LOC_FINDER_REFERENCE
         = new AbstractLazySingletonProvider<AltLocFinder>() {
             @Override
             public AltLocFinder createObject() {
-                return new AltLocFinder(DHT_MANAGER_REFERENCE.get());
+                return new AltLocFinder(ProviderHacks.getDHTManager(), ProviderHacks.getAlternateLocationFactory());
             }
         };
-    
+        
     private static MessageDispatcher messageDispatcher;
     
     /**
@@ -396,7 +377,7 @@ public class RouterService {
 	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
-        this(callback, new StandardMessageRouter());
+        this(callback, ProviderHacks.getNewStandardMessageRouter());
     }
 
 	/**
@@ -414,11 +395,12 @@ public class RouterService {
         RouterService.setMessageRouter(router);
         
         manager.addEventListener(callback);
-        manager.addEventListener(DHT_MANAGER_REFERENCE.get());
+        manager.addEventListener(ProviderHacks.getDHTManager());
         
         nodeAssigner = new NodeAssigner(uploadManager, 
                                         downloadManager, 
-                                        manager);
+                                        manager,
+                                        ProviderHacks.getNetworkManager()); // DPINJ: Use passed in manager!
   	}
 
     public static void setMessageRouter(MessageRouter messageRouter) {
@@ -601,7 +583,7 @@ public class RouterService {
 
             LOG.trace("START QueryUnicaster");
             callback.componentLoading("QUERY_UNICASTER");
-    		QueryUnicaster.instance().start();
+    		RouterService.getQueryUnicaster().start();
     		LOG.trace("STOP QueryUnicaster");
     		
     		LOG.trace("START HTTPAcceptor");
@@ -667,23 +649,16 @@ public class RouterService {
         LOG.trace("Started manual GC thread.");
     }
 	                
+	// DPINJ: HACK! REMOVE!
+    public static QueryUnicaster getQueryUnicaster() {
+        return ProviderHacks.queryUnicaster.get();
+    }
+
     /**
      *  Returns the number of initialized messaging connections.
      */
     public static int getNumInitializedConnections() {
     	return getConnectionManager().getNumInitializedConnections();
-    }
-
-    public static boolean canReceiveSolicited() {
-    	return getUdpService().canReceiveSolicited();
-    }
-
-    public static boolean canReceiveUnsolicited() {
-    	return getUdpService().canReceiveUnsolicited();
-    }
-
-    public static boolean canDoFWT() {
-        return getUdpService().canDoFWT();
     }
 
     /**
@@ -778,17 +753,16 @@ public class RouterService {
     }
 
     /**
-     * Accessor for the <tt>LimeDHTManager</tt> instance.
-     */
-    public static DHTManager getDHTManager() {
-        return DHT_MANAGER_REFERENCE.get();
-    }
-    
-    /**
      * Accessor for the <tt>AltLocFinder</tt> instance.
      */
     public static AltLocFinder getAltLocFinder() {
         return ALT_LOC_FINDER_REFERENCE.get();
+    }
+    
+    /** Returns the node assigner in use. */
+    // DPINJ: REMOVE!
+    public static NodeAssigner getNodeAssigner() {
+        return nodeAssigner;
     }
     
 	/**
@@ -837,15 +811,6 @@ public class RouterService {
         return contentManager;
     }
     
-	/**
-	 * Accessor for the <tt>UDPService</tt> instance.
-	 *
-	 * @return the <tt>UDPService</tt> instance in use
-	 */
-	public static UDPService getUdpService() {
-		return UDPSERVICE;
-	}
-
 	/**
 	 * Accessor for the <tt>ConnectionManager</tt> instance.
 	 *
@@ -1176,7 +1141,7 @@ public class RouterService {
             
             nodeAssigner.stop();
 
-            getDHTManager().stop();
+            ProviderHacks.getDHTManager().stop();
             
             getAcceptor().shutdown();
             
@@ -1190,7 +1155,7 @@ public class RouterService {
 			// torrentManager.shutdown();
 			
             //Update firewalled status
-            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
+            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
             //Write gnutella.net
             try {
@@ -1321,24 +1286,6 @@ public class RouterService {
     }
 
     /**
-     * Sets the port on which to listen for incoming connections.
-     * If that fails, this is <i>not</i> modified and IOException is thrown.
-     * If port==0, tells this to stop listening to incoming connections.
-     */
-    public static void setListeningPort(int port) throws IOException {
-        acceptor.setListeningPort(port);
-    }
-
-    /** 
-     * Returns true if this has accepted an incoming connection, and hence
-     * probably isn't firewalled.  (This is useful for colorizing search
-     * results in the GUI.)
-     */
-    public static boolean acceptedIncomingConnection() {
-		return acceptor.acceptedIncoming();
-    }
-
-    /**
      * Count up all the messages on active connections
      */
     public static int getActiveConnectionMessages() {
@@ -1359,8 +1306,9 @@ public class RouterService {
      */
     public static byte[] newQueryGUID() {
         byte []ret;
-        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
-            ret = GUID.makeAddressEncodedGuid(getAddress(), getPort());
+        // DPINJ: Use passed in NetworkManager!!!
+        if (ProviderHacks.getNetworkManager().isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
+            ret = GUID.makeAddressEncodedGuid(ProviderHacks.getNetworkManager().getAddress(), ProviderHacks.getNetworkManager().getPort());
         else
             ret = GUID.makeGuid();
         if (MessageSettings.STAMP_QUERIES.getValue())
@@ -1415,20 +1363,21 @@ public class RouterService {
 
 		try {
             QueryRequest qr = null;
-            if (isIpPortValid() && (new GUID(guid)).addressesMatch(getAddress(), 
-                                                                   getPort())) {
+            // DPINJ: Use a passed in networkManager!!!
+            if (ProviderHacks.getNetworkManager().isIpPortValid() && (new GUID(guid)).addressesMatch(ProviderHacks.getNetworkManager().getAddress(), 
+                    ProviderHacks.getNetworkManager().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
                 // of band support.  note that there is a VERY small chance that
                 // the guid will be address encoded but not meant for out of band
                 // delivery of results.  bad things may happen in this case but 
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery,
+                qr = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(guid, query, richQuery,
                                                        type);
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else
-                qr = QueryRequest.createQuery(guid, query, richQuery, type);
+                qr = ProviderHacks.getQueryRequestFactory().createQuery(guid, query, richQuery, type);
             recordAndSendQuery(qr, type);
 		} catch(Throwable t) {
 			ErrorService.error(t);
@@ -1442,18 +1391,18 @@ public class RouterService {
 	public static void queryWhatIsNew(final byte[] guid, final MediaType type) {
 		try {
             QueryRequest qr = null;
-            if (GUID.addressesMatch(guid, getAddress(), getPort())) {
+            if (GUID.addressesMatch(guid, ProviderHacks.getNetworkManager().getAddress(), ProviderHacks.getNetworkManager().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
                 // of band support.  note that there is a VERY small chance that
                 // the guid will be address encoded but not meant for out of band
                 // delivery of results.  bad things may happen in this case but 
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.createWhatIsNewOOBQuery(guid, (byte)2, type);
+                qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(guid, (byte)2, type);
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else
-                qr = QueryRequest.createWhatIsNewQuery(guid, (byte)2, type);
+                qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(guid, (byte)2, type);
 
             if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
                 MutableGUIDFilter.instance().addGUID(guid);
@@ -1489,7 +1438,7 @@ public class RouterService {
      *  @param guid The GUID of the query you want to get rid of....
      */
     public static void stopQuery(GUID guid) {
-        QueryUnicaster.instance().purgeQuery(guid);
+        RouterService.getQueryUnicaster().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
         messageRouter.queryKilled(guid);
         if(RouterService.isSupernode())
@@ -1893,150 +1842,5 @@ public class RouterService {
 	 */
     public static boolean getIsShuttingDown() {
 		return isShuttingDown;
-    }
-    
-    /**
-     * Notifies components that this' IP address has changed.
-     */
-    public static boolean addressChanged() {
-        if(callback != null)
-            callback.handleAddressStateChanged();        
-        
-        // Only continue if the current address/port is valid & not private.
-        byte addr[] = getAddress();
-        int port = getPort();
-        if(!NetworkUtils.isValidAddress(addr))
-            return false;
-        if(NetworkUtils.isPrivateAddress(addr))
-            return false;            
-        if(!NetworkUtils.isValidPort(port))
-            return false;
-
-        
-        // reset the last connect back time so the next time the TCP/UDP
-        // validators run they try to connect back.
-        if (acceptor != null)
-        	acceptor.resetLastConnectBackTime();
-        if (UDPSERVICE != null)
-        	UDPSERVICE.resetLastConnectBackTime();
-        
-        // Notify the DHT
-        getDHTManager().addressChanged();
-        
-        if (manager != null) {
-        	Properties props = new Properties();
-        	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
-        	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
-        	
-            for(ManagedConnection c : manager.getInitializedConnections()) {
-        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
-        			c.send(huvm);
-        	}
-        	
-            for(ManagedConnection c : manager.getInitializedClientConnections()) {
-        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
-        			c.send(huvm);
-        	}
-        }
-        return true;
-    }
-    
-    /**
-     * Notification that we've either just set or unset acceptedIncoming.
-     */
-    public static boolean incomingStatusChanged() {
-        if(callback != null)
-            callback.handleAddressStateChanged();
-        // Only continue if the current address/port is valid & not private.
-        byte addr[] = getAddress();
-        int port = getPort();
-        if(!NetworkUtils.isValidAddress(addr))
-            return false;
-        if(NetworkUtils.isPrivateAddress(addr))
-            return false;            
-        if(!NetworkUtils.isValidPort(port))
-            return false;
-            
-        return true;
-    }
-    
-    /**
-     * Returns the external IP address for this host.
-     */
-    public static byte[] getExternalAddress() {
-        return acceptor.getExternalAddress();
-    }
-
-	/**
-	 * Returns the raw IP address for this host.
-	 *
-	 * @return the raw IP address for this host
-	 */
-	public static byte[] getAddress() {
-		return acceptor.getAddress(true);
-	}
-	
-	/**
-	 * Returns the Non-Forced IP address for this host.
-	 *
-	 * @return the non-forced IP address for this host
-	 */
-	public static byte[] getNonForcedAddress() {
-	    return acceptor.getAddress(false);
-	}
-	
-
-    /**
-     * Returns the port used for downloads and messaging connections.
-     * Used to fill out the My-Address header in ManagedConnection.
-     * @see Acceptor#getPort
-     */    
-	public static int getPort() {
-		return acceptor.getPort(true);
-	}
-	
-    /**
-	 * Returns the Non-Forced port for this host.
-	 *
-	 * @return the non-forced port for this host
-	 */
-	public static int getNonForcedPort() {
-	    return acceptor.getPort(false);
-	}
-
-	/**
-	 * Returns whether or not this node is capable of sending its own
-	 * GUESS queries.  This would not be the case only if this node
-	 * has not successfully received an incoming UDP packet.
-	 *
-	 * @return <tt>true</tt> if this node is capable of running its own
-	 *  GUESS queries, <tt>false</tt> otherwise
-	 */
-	public static boolean isGUESSCapable() {
-		return UDPSERVICE.isGUESSCapable();
-	}
-
-
-    /** 
-     * Returns whether or not this node is capable of performing OOB queries.
-     */
-    public static boolean isOOBCapable() {
-        return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
-               !NetworkUtils.isPrivate() &&
-               SearchSettings.OOB_ENABLED.getValue() &&
-               acceptor.isAddressExternal() && isIpPortValid();
-    }
-
-
-    public static GUID getUDPConnectBackGUID() {
-        return UDPSERVICE.getConnectBackGUID();
-    }
-
-    
-    /** @return true if your IP and port information is valid.
-     */
-    public static boolean isIpPortValid() {
-        return (NetworkUtils.isValidAddress(getAddress()) &&
-                NetworkUtils.isValidPort(getPort()));
     }
 }

@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -74,7 +75,7 @@ public class ProxyTest extends LimeTestCase {
         fps.setAuthentication(false);
         fps.setProxyVersion(NONE);
 
-        Socket s = SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+        Socket s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
         // we should be connected to something, NPE is an error
         s.close();
     }
@@ -238,10 +239,10 @@ public class ProxyTest extends LimeTestCase {
         if (success) {
             Socket s;
             if (!nb) {
-                s = SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+                s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
             } else {
                 StubConnectObserver o = new StubConnectObserver();
-                s = SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
+                s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertEquals(s, o.getSocket());
                 assertNull(o.getIoException());
@@ -252,14 +253,14 @@ public class ProxyTest extends LimeTestCase {
         } else {
             if (!nb) {
                 try {
-                    SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+                    ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
                     fail("acceptedConnection from a bad proxy server");
                 } catch (IOException iox) {
                     // Good -- expected behaviour
                 }
             } else {
                 StubConnectObserver o = new StubConnectObserver();
-                SocketsManager.getSharedManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
+                ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertNull(o.getSocket());
                 assertNull(o.getIoException());

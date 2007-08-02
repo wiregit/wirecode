@@ -28,6 +28,7 @@ import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
@@ -39,10 +40,13 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
     
-    private HTTPUploadSessionManager sessionManager;
+    private final HTTPUploadSessionManager sessionManager;
+    private final QueryRequestFactory queryRequestFactory;
 
-    public BrowseRequestHandler(HTTPUploadSessionManager sessionManager) {
+    public BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
+            QueryRequestFactory queryRequestFactory) {
         this.sessionManager = sessionManager;
+        this.queryRequestFactory = queryRequestFactory;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -109,7 +113,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(this);
             
-            query = QueryRequest.createBrowseHostQuery();
+            query = queryRequestFactory.createBrowseHostQuery();
             iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }

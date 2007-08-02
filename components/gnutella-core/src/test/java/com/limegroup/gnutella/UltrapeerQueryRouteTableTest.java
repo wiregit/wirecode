@@ -105,7 +105,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      */
     public void testSentQueryIsNotTTL1() throws Exception {
         assertTrue("should be connected", RouterService.isConnected());
-        QueryRequest qr = QueryRequest.createQuery(noMatch, (byte)1);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(noMatch, (byte)1);
         sendQuery(qr);        
         Thread.sleep(2000);
         // we will send the query, but with a TTL of 2, not 1, because
@@ -127,7 +127,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     public void testDynamicQueryingWithQRPHit() throws Exception {
         assertTrue("should be connected", RouterService.isConnected());
                 
-        QueryRequest qr = QueryRequest.createQuery(
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(
             "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
@@ -159,10 +159,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         //mr.broadcastQueryRequest(qr);
     }
     
-    private static class TestMessageRouter extends StandardMessageRouter {
-        public TestMessageRouter() {
-            super();
-        }
+    private static class TestMessageRouter extends HackMessageRouter {
         
         public boolean originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);

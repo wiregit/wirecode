@@ -53,7 +53,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -412,12 +411,12 @@ public class Connection implements IpPort, Inspectable, Connectable {
     
     protected Socket connect(String addr, int port, int timeout) throws IOException {
         // DPINJ: Change to using passed-in SocketsManager!!!
-        return SocketsManager.getSharedManager().connect(new InetSocketAddress(addr, port), timeout, _connectType);
+        return ProviderHacks.getSocketsManager().connect(new InetSocketAddress(addr, port), timeout, _connectType);
     }
 
     protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
         // DPINJ: Change to using passed-in SocketsManager!!!
-        return SocketsManager.getSharedManager().connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
+        return ProviderHacks.getSocketsManager().connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
     }
 
     /**

@@ -9,6 +9,7 @@ import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -42,7 +43,7 @@ public class InstantMessengerTest extends BaseTestCase {
         ChatManager.instance().initialize();
         
         // start it up!
-        acceptThread = new Acceptor();
+        acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
         acceptThread.start();
     }
 

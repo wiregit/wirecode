@@ -222,7 +222,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.addAcceptorListener(responseListener);
 
         // browse
-        acceptor.registerHandler("/", new BrowseRequestHandler(this));
+        acceptor.registerHandler("/", new BrowseRequestHandler(this, ProviderHacks.getQueryRequestFactory()));
 
         // push-proxy requests
         HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this, messageRouter);
@@ -230,7 +230,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        FileRequestHandler fileRequestHandler = new FileRequestHandler(this, fileManager);
+        FileRequestHandler fileRequestHandler = new FileRequestHandler(this, fileManager, ProviderHacks.getHTTPHeaderUtils());
         acceptor.registerHandler("/get*", fileRequestHandler);
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
         

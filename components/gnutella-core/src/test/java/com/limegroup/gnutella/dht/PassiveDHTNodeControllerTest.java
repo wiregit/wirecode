@@ -23,6 +23,7 @@ import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -59,7 +60,8 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        PassiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         try {
             Context context = (Context) controller.getMojitoDHT();
             Contact localContact = context.getLocalNode();
@@ -77,7 +79,8 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             Thread.sleep(5000);
             controller.stop();
             //now nodeID should have changed and we should have persisted SOME nodes
-            controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+            controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
+                    Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
             assertNotEquals(nodeID, context.getLocalNodeID());
@@ -97,7 +100,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //   There are 20 Nodes from Port 2000 to 20019
         //   Total: 22 Nodes
         
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(
+        PassiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();

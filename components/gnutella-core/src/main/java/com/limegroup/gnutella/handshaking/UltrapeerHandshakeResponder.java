@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
@@ -13,6 +13,9 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
  */
 public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 
+    private final HeadersFactory headersFactory;
+    private final NetworkManager networkManager;
+    
 	/**
      * Creates a new instance of ClientHandshakeResponder
      * @param manager Instance of connection manager, managing this
@@ -21,8 +24,10 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public UltrapeerHandshakeResponder(String host) {
+    UltrapeerHandshakeResponder(String host, NetworkManager networkManager, HeadersFactory headersFactory) {
         super(host);
+        this.networkManager = networkManager;
+        this.headersFactory = headersFactory;
     }
     
 	/**
@@ -80,12 +85,12 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 		}
 
 		//Incoming connection....
-		Properties ret = new UltrapeerHeaders(getRemoteIP());
+		Properties ret = headersFactory.createUltrapeerHeaders(getRemoteIP());
 		
 		//give own IP address
 		ret.put(HeaderNames.LISTEN_IP,
-				NetworkUtils.ip2string(RouterService.getAddress())+":"
-				+ RouterService.getPort());
+				NetworkUtils.ip2string(networkManager.getAddress())+":"
+				+ networkManager.getPort());
 		
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.

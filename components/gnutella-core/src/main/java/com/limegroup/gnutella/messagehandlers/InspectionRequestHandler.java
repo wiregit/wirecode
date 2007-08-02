@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
@@ -34,10 +35,10 @@ public class InspectionRequestHandler extends RestrictedResponder {
                 "TJRPIU4UA24I", null);
     
     private final MessageRouter router;
-    public InspectionRequestHandler(MessageRouter router) {
+    public InspectionRequestHandler(MessageRouter router, NetworkManager networkManager) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION);
+                MessageSettings.INSPECTION_VERSION, networkManager);
         this.router = router;
     }
     

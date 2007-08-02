@@ -22,6 +22,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.SSLSettings;
 
@@ -54,7 +55,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testHasFreeSlots() throws Exception {
         byte[] guid = GUID.makeGuid();
         byte[] ip = {1,1,1,1};
-        PingReply pr = PingReply.create(guid, (byte)3, 6346, ip, 
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
 
         //All values are determined based on connection status, and because
@@ -70,7 +71,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         ConnectionManager manager = new TestConnectionManager(7, 10);
         PrivilegedAccessor.setValue(RouterService.class, "manager", manager);
         
-        pr = PingReply.create(guid, (byte)3, 6346, ip, 
+        pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
             
         assertTrue("no slots", pr.hasFreeSlots());
@@ -104,10 +105,10 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         boolean isGUESSCapable = false;
         
         PingReply pr = 
-            PingReply.create(guid, ttl, port, ip, files, kbytes, 
+            ProviderHacks.getPingReplyFactory().create(guid, ttl, port, ip, files, kbytes, 
                              isUltrapeer, dailyUptime, isGUESSCapable);
         
-        PingReply testPR = pr.mutateGUID(new GUID().bytes());
+        PingReply testPR = ProviderHacks.getPingReplyFactory().mutateGUID(pr, new GUID().bytes());
         
         assertNotEquals(pr.getGUID(), testPR.getGUID());
         assertEquals(pr.getTTL(), testPR.getTTL());
@@ -130,7 +131,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         // make sure we reject invalid payload sizes
         try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            ProviderHacks.getPingReplyFactory().createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted payload size");
         } catch(BadPacketException e) {
@@ -141,7 +142,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
         addIP(payload);
         try {
-            PingReply.createFromNetwork(null, (byte)4, (byte)3,
+            ProviderHacks.getPingReplyFactory().createFromNetwork(null, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted null guid");
         } catch(NullPointerException e) {
@@ -150,7 +151,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         // make sure we reject null payloads
         try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            ProviderHacks.getPingReplyFactory().createFromNetwork(guid, (byte)4, (byte)3,
                                             null);
             fail("should have not accepted null payload");
         } catch(NullPointerException e) {
@@ -178,7 +179,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
                          payload, PingReply.STANDARD_PAYLOAD_SIZE, 
                          extensions.length);
         try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            ProviderHacks.getPingReplyFactory().createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted bad GGEP in payload");
         } catch(BadPacketException e) {
@@ -191,7 +192,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         addIP(payload);        
 
         // this one should go through
-        PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+        ProviderHacks.getPingReplyFactory().createFromNetwork(guid, (byte)4, (byte)3,
                                         payload);
     }
 
@@ -200,7 +201,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
         byte[] ip={(byte)0xFE, (byte)0x00, (byte)0x00, (byte)0x1};
-        PingReply pr = PingReply.create(new byte[16], (byte)0,
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)0,
                                         u2, ip, u4, u4);
 
         assertEquals(u2, pr.getPort());
@@ -216,7 +217,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public void testPongMarking() {
         PingReply pr = 
-            PingReply.createExternal(new byte[16], (byte)2, 6346, IP,
+            ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)2, 6346, IP,
                                      false);
 
         
@@ -224,32 +225,32 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
-        pr = PingReply.createExternal(new byte[16], (byte)2, 6346, IP,
+        pr = ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)2, 6346, IP,
                                       true);
         assertTrue(pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
+        pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)2, 6346, IP,
                               5, 2348, false, 0, false);        
         assertTrue(! pr.isUltrapeer());
         assertEquals(2348, pr.getKbytes());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
+        pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)2, 6346, IP,
                               5, 2348, true, 0, true);
         assertTrue(pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
+        pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)2, 6346, IP,
                               5, 345882, false, 0, false);
         assertTrue(! pr.isUltrapeer());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
 
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
+        pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)2, 6346, IP,
                               5, 345882, true, -1, true);
         assertTrue(pr.isUltrapeer());
         // after added unicast support, all Ultrapeer Pongs have GGEP extension
@@ -298,7 +299,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         payload[14] = (byte) 65;
         payload[15] = (byte) 66;
         PingReply pr=null;
-        pr = PingReply.createFromNetwork(new byte[16], (byte)2, (byte)4, payload);
+        pr = ProviderHacks.getPingReplyFactory().createFromNetwork(new byte[16], (byte)2, (byte)4, payload);
         assertTrue(! pr.hasGGEPExtension());
 
         assertEquals("pong should not have a daily uptime", -1,
@@ -327,7 +328,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         // create a pong
         PingReply pr = 
-            PingReply.createExternal(new byte[16], (byte)3, 6349, IP, false);
+            ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6349, IP, false);
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         pr.write(baos);
 
@@ -350,7 +351,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         // And try creating a new pong w/o TLS.
         // create a pong
-        pr = PingReply.createExternal(new byte[16], (byte)3, 6349, IP, false);
+        pr = ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6349, IP, false);
         baos.reset();
         pr.write(baos);
         bytes=baos.toByteArray();
@@ -367,7 +368,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecode() throws Exception {
-        PingReply pr = PingReply.create(new byte[16], (byte)3, 6349, IP,
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)3, 6349, IP,
                                    0l, 0l, true, 523, true);        
 
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -450,7 +451,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoGUESS() throws Exception {
-        PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
+        PingReply pr=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)3, 6349, IP,
                                       0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         pr.write(baos);
@@ -524,7 +525,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoTLS() throws Exception {
         SSLSettings.TLS_INCOMING.setValue(false);
-        PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
+        PingReply pr=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)3, 6349, IP,
                                       0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         pr.write(baos);
@@ -610,7 +611,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
         qk = new AddressSecurityToken(randBytes);
         PingReply pr = 
-            PingReply.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
+            ProviderHacks.getPingReplyFactory().createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
                                           2, 2, true, qk);
         assertTrue(pr.getQueryKey().equals(qk));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -627,7 +628,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         // a pong carrying an ip:port
         Endpoint e = new Endpoint("1.2.3.4",5);
-        PingReply p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        PingReply p = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1,e);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         p.write(baos);
@@ -644,7 +645,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
             }
         };
         
-        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        p = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1,e);
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
@@ -655,7 +656,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         //a pong carrying private ip
         e = new Endpoint("192.168.0.1",20);
-        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        p = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1,e);
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
@@ -665,7 +666,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0,fromNet.getMyPort());
         
         // a pong not carrying ip:port
-        p = PingReply.create(GUID.makeGuid(),(byte)1);
+        p = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1);
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
@@ -679,7 +680,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testUDPHostCacheExtension() throws Exception {
         GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     (long)0, (long)0, false, ggep);
         assertTrue(pr.isUDPHostCache());
@@ -695,7 +696,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.nowhere.org");
-        pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     (long)0, (long)0, false, ggep);
         assertTrue(pr.isUDPHostCache());
@@ -718,7 +719,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
 
@@ -744,7 +745,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, /* no port */ } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         l = pr.getPackedIPPorts();
@@ -757,7 +758,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         l = pr.getPackedIPPorts();
@@ -770,7 +771,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         l = pr.getPackedIPPorts();
@@ -785,7 +786,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertTrue(pr.isUDPHostCache());
@@ -828,7 +829,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         // Try with one of the constructors.
         l = new LinkedList(l);
         l.add(new Endpoint("1.5.3.5", 5));
-        pr = PingReply.create(GUID.makeGuid(), (byte)1, l, null);
+        pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, l, null);
         l = pr.getPackedIPPorts();
         assertFalse(pr.isUDPHostCache());
         l = pr.getPackedIPPorts();
@@ -879,7 +880,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
             }
         }
         
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, l, null);
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, l, null);
         l = pr.getPackedIPPorts();
         assertEquals(10, l.size());
         for(int i = 1; i < 11; i++) {
@@ -906,7 +907,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         // mark the second & third items as TLS (and the fifth, just to see if it will ignore it)
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20 | 0x8));
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
 
@@ -967,7 +968,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         addrs.add("www.eff.org");
         addrs.add("www.test.org:1&something=somethingelse&nothing=this");
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, toBytes(addrs));
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
 
@@ -996,7 +997,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         addrs.add("www.eff.org");
         addrs.add("www.test.org:1&something=somethingelse&nothing=this");
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, toBytes(addrs));
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         s.clear();
@@ -1023,7 +1024,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         addrs.add("5.4.3.2:1:1");
         addrs.add("13.13.1.1:notanumber");
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, toBytes(addrs));
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         s.addAll(pr.getPackedUDPHostCaches());
@@ -1035,21 +1036,21 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[0]);
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertEquals(0, pr.getPackedUDPHostCaches().size());
         
         ggep = new GGEP();
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[] { 1, 1, 1, 1 } );
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertEquals(0, pr.getPackedUDPHostCaches().size());
         
         ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, new byte[] { 1, 1, 1, 1 } );
-        pr = PingReply.create(
+        pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
             0, 0, false, ggep);
         assertEquals(0, pr.getPackedUDPHostCaches().size());        
@@ -1082,7 +1083,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         private final int NUM_FREE_LEAF_SLOTS;
 
         TestConnectionManager(int numFreeNonLeafSlots, int numFreeLeafSlots) {
-            super();
+            super(ProviderHacks.getNetworkManager());
             NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
             NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
         }

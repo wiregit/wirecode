@@ -13,16 +13,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -70,7 +71,7 @@ public class PingRankerTest extends LimeTestCase {
     public void setUp() throws Exception {
         pinger.messages.clear();
         pinger.hosts.clear();
-        ranker = new PingRanker();
+        ranker = new PingRanker(ProviderHacks.getNetworkManager());
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
@@ -204,7 +205,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testPingsFirewalledHosts() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
         assertEquals(1,pinger.hosts.size());
@@ -218,8 +219,8 @@ public class PingRankerTest extends LimeTestCase {
      * tests that we do not ping firewalled hosts if we cannot do FWT and are firewalled
      */
     public void testSkipsFirewalledHosts() throws Exception {
-        assertFalse(RouterService.acceptedIncomingConnection());
-        assertFalse(RouterService.getUdpService().canDoFWT());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getUdpService().canDoFWT());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
         assertEquals(0,pinger.hosts.size());
@@ -251,7 +252,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testMultipleProxyReplies() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3;1.3.3.3:4","2.2.2.3:5"));
         
@@ -377,7 +378,7 @@ public class PingRankerTest extends LimeTestCase {
     public void testFirewalledPreferred() throws Exception {
         
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
         RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
         RemoteFileDesc openMoreSlots = newRFDWithURN("1.2.3.5",3);
@@ -550,7 +551,7 @@ public class PingRankerTest extends LimeTestCase {
                 boolean firewalled, boolean busy, boolean downloading,
                 IntervalSet ranges, Set altLocs, Set pushLocs) 
         throws IOException{
-            super(new HeadPing(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE")));
+            super(new GUID(), HeadPong.VERSION, ProviderHacks.getHeadPongFactory().create(new HeadPing(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE"))).getPayload());
             this.altLocs = altLocs;
             this.pushLocs = pushLocs;
             this.queueStatus = queueStatus;

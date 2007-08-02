@@ -20,12 +20,19 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
@@ -40,6 +47,20 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 public class StandardMessageRouter extends MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
+    
+    private final NetworkManager networkManager;
+    private final PingReplyFactory pingReplyFactory;
+    
+    public StandardMessageRouter(NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            QueryHandlerFactory queryHandlerFactory,
+            Provider<OnDemandUnicaster> onDemandUnicaster,
+            HeadPongFactory headPongFactory,
+            PingReplyFactory pingReplyFactory) {
+        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory);
+        this.networkManager = networkManager;
+        this.pingReplyFactory = pingReplyFactory;
+    }
     
     /**
      * Responds to a Gnutella ping with cached pongs.  This does special 
@@ -61,8 +82,8 @@ public class StandardMessageRouter extends MessageRouter {
             return;
             
         // Only send pongs for ourself if we have a valid address & port.
-        if(NetworkUtils.isValidAddress(RouterService.getAddress()) &&
-           NetworkUtils.isValidPort(RouterService.getPort())) {    
+        if(NetworkUtils.isValidAddress(networkManager.getAddress()) &&
+           NetworkUtils.isValidPort(networkManager.getPort())) {    
             //SPECIAL CASE: for crawler ping
             // TODO:: this means that we can never send TTL=2 pings without
             // them being interpreted as from the crawler!!
@@ -76,7 +97,7 @@ public class StandardMessageRouter extends MessageRouter {
     
             // handle heartbeat pings specially -- bypass pong caching code
             if(ping.isHeartbeat()) {
-                sendPingReply(PingReply.create(ping.getGUID(), (byte)1), 
+                sendPingReply(pingReplyFactory.create(ping.getGUID(), (byte)1), 
                     handler);
                 return;
             }
@@ -91,7 +112,7 @@ public class StandardMessageRouter extends MessageRouter {
             if(RouterService.getConnectionManager().hasFreeSlots()  ||
                Statistics.instance().calculateDailyUptime() > 60*30) {
                 PingReply pr = 
-                    PingReply.create(ping.getGUID(), (byte)newTTL);
+                    pingReplyFactory.create(ping.getGUID(), (byte)newTTL);
                 
                 sendPingReply(pr, handler);
             }
@@ -103,7 +124,7 @@ public class StandardMessageRouter extends MessageRouter {
         for(PingReply pr : pongs) {
             if(pr.getInetAddress().equals(pingerIP))
                 continue;
-            sendPingReply(pr.mutateGUID(guid), handler);
+            sendPingReply(pingReplyFactory.mutateGUID(pr, guid), handler);
         }
     }
 
@@ -121,7 +142,7 @@ public class StandardMessageRouter extends MessageRouter {
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   InetSocketAddress addr,
                                            ReplyHandler handler) {
-        if(!RouterService.isIpPortValid())
+        if(!networkManager.isIpPortValid())
             return;
         
         IpPort ipport = null;
@@ -136,8 +157,8 @@ public class StandardMessageRouter extends MessageRouter {
         List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         
-        if (request.requestsDHTIPP() && RouterService.getDHTManager().isRunning()) {
-            dhthosts = RouterService.getDHTManager().getActiveDHTNodes(maxHosts);
+        if (request.requestsDHTIPP() && ProviderHacks.getDHTManager().isRunning()) {
+            dhthosts = ProviderHacks.getDHTManager().getActiveDHTNodes(maxHosts);
         }
         
         int numDHTHosts = dhthosts.size();
@@ -163,9 +184,9 @@ public class StandardMessageRouter extends MessageRouter {
         
         PingReply reply;
     	if (ipport != null)
-    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
+    	    reply = pingReplyFactory.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
     	else
-    	    reply = PingReply.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
+    	    reply = pingReplyFactory.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Responding to UDPPingRequest "+(request.requestsDHTIPP()?"with DHTIPP ":"") +
@@ -194,7 +215,7 @@ public class StandardMessageRouter extends MessageRouter {
         for(ManagedConnection connection : leafConnections) {
             //create the pong for this connection
             PingReply pr = 
-                PingReply.createExternal(m.getGUID(), (byte)2, 
+                pingReplyFactory.createExternal(m.getGUID(), (byte)2, 
                                          connection.getPort(),
                                          connection.getInetAddress().getAddress(),
                                          false);
@@ -232,8 +253,8 @@ public class StandardMessageRouter extends MessageRouter {
                                                 
         // Ensure that we have a valid IP & Port before we send the response.
         // Otherwise the QueryReply will fail on creation.
-        if( !NetworkUtils.isValidPort(RouterService.getPort()) ||
-            !NetworkUtils.isValidAddress(RouterService.getAddress()))
+        if( !NetworkUtils.isValidPort(networkManager.getPort()) ||
+            !NetworkUtils.isValidAddress(networkManager.getAddress()))
             return false;
                                                      
         // Run the local query
@@ -284,7 +305,7 @@ public class StandardMessageRouter extends MessageRouter {
         // uploads AND not connected to the originator of the query
         if (query.desiresOutOfBandReplies() &&
             !isConnectedTo(query, handler) && 
-			RouterService.canReceiveSolicited() &&
+			networkManager.canReceiveSolicited() &&
             NetworkUtils.isValidAddressAndPort(query.getReplyAddress(), query.getReplyPort())) {
             
             // send the replies out-of-band - we need to
@@ -304,9 +325,9 @@ public class StandardMessageRouter extends MessageRouter {
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
                     ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
-                            ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
-                                ReplyNumberVendorMessage.createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
-                    UDPService.instance().send(vm, addr, port);
+                            new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
+                                new ReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
+                    ProviderHacks.getUdpService().send(vm, addr, port);
                     return true;
                 }
             } else {
@@ -368,8 +389,8 @@ public class StandardMessageRouter extends MessageRouter {
         // first try using multicast addresses & ports, but if they're
         // invalid, fallback to non multicast.
         if(isFromMcast) {
-            ip = RouterService.getNonForcedAddress();
-            port = RouterService.getNonForcedPort();
+            ip = networkManager.getNonForcedAddress();
+            port = networkManager.getNonForcedPort();
             if(!NetworkUtils.isValidPort(port) ||
                !NetworkUtils.isValidAddress(ip))
                 isFromMcast = false;
@@ -379,8 +400,8 @@ public class StandardMessageRouter extends MessageRouter {
             
             // see if we have a valid FWTrans address.  if not, fall back.
             if(isFWTransfer) {
-                port = UDPService.instance().getStableUDPPort();
-                ip = RouterService.getExternalAddress();
+                port = ProviderHacks.getUdpService().getStableUDPPort();
+                ip = networkManager.getExternalAddress();
                 if(!NetworkUtils.isValidAddress(ip) 
                         || !NetworkUtils.isValidPort(port))
                     isFWTransfer = false;
@@ -388,8 +409,8 @@ public class StandardMessageRouter extends MessageRouter {
             
             // if we still don't have a valid address here, exit early.
             if(!isFWTransfer) {
-                ip = RouterService.getAddress();
-                port = RouterService.getPort();
+                ip = networkManager.getAddress();
+                port = networkManager.getPort();
                 if(!NetworkUtils.isValidAddress(ip) ||
                         !NetworkUtils.isValidPort(port))
                     return Collections.emptyList();
@@ -411,7 +432,7 @@ public class StandardMessageRouter extends MessageRouter {
         
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
-        boolean notIncoming = !RouterService.acceptedIncomingConnection();
+        boolean notIncoming = !networkManager.acceptedIncomingConnection();
         Set<? extends IpPort> proxies = notIncoming ? _manager.getPushProxies() : null;
         
         // it may be too big....

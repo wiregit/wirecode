@@ -618,7 +618,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         AlternateLocationCollection alc =
             AlternateLocationCollection.create(urn);
         for(int i = 0; i < 20; i++) {
-            AlternateLocation al = AlternateLocation.create("1.2.3." + i + ":1", urn);
+            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i + ":1", urn);
             alc.add(al);
         }
         
@@ -660,7 +660,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // First create a bunch of alts.
         AlternateLocationCollection alc = AlternateLocationCollection.create(urn);
         for(int i = 0; i < 10; i++) {
-            AlternateLocation al = AlternateLocation.create("1.2.3." + i + ":1", urn, i % 3 == 0);
+            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i + ":1", urn, i % 3 == 0);
             alc.add(al);
         }
         

@@ -14,7 +14,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
@@ -22,6 +21,7 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /**
@@ -58,20 +58,6 @@ public final class QueryHandler implements Inspectable {
      */
     public static final double UP_RESULT_BUMP = 1.15;
 
-
-	/**
-	 * The number of results to try to get if the query came from an old
-	 * leaf -- they are connected to 2 other Ultrapeers that may or may
-	 * not use this algorithm.
-	 */
-	private static final int OLD_LEAF_RESULTS = 20;
-
-	/**
-	 * The number of results to try to get for new leaves -- they only 
-	 * maintain 2 connections and don't generate as much overall traffic,
-	 * so give them a little more.
-	 */
-	private static final int NEW_LEAF_RESULTS = 38;
 
 	/**
 	 * The number of results to try to get for queries by hash -- really
@@ -203,6 +189,8 @@ public final class QueryHandler implements Inspectable {
      * locale will be used before the other connections.
      */
     private final String _prefLocale;
+    
+    private final QueryRequestFactory queryRequestFactory;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -217,14 +205,16 @@ public final class QueryHandler implements Inspectable {
      * @param counter the <tt>ResultCounter</tt> that keeps track of how
      *  many results have been returned for this query
 	 */
-	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
-                         ResultCounter counter) {
+	QueryHandler(QueryRequest query, int results, ReplyHandler handler,
+                         ResultCounter counter, QueryRequestFactory queryRequestFactory) {
         if( query == null )
             throw new IllegalArgumentException("null query");
         if( handler == null )
             throw new IllegalArgumentException("null reply handler");
         if( counter == null )
             throw new IllegalArgumentException("null result counter");
+        
+        this.queryRequestFactory = queryRequestFactory;
             
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		QUERY = query;
@@ -241,75 +231,6 @@ public final class QueryHandler implements Inspectable {
 
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandler(QueryRequest query, 
-											 ReplyHandler handler,
-                                             ResultCounter counter) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.  Used by supernodes to run
-     * their own queries (ties up to ForMeReplyHandler.instance()).
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForMe(QueryRequest query, 
-                                                  ResultCounter counter) {	
-        // because UPs seem to get less results, give them more than usual
-		return new QueryHandler(query, (int)(ULTRAPEER_RESULTS * UP_RESULT_BUMP),
-                                ForMeReplyHandler.instance(), counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
-													   ReplyHandler handler,
-                                                       ResultCounter counter) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS, handler, counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
-													   ReplyHandler handler,
-                                                       ResultCounter counter) {		
-		return new QueryHandler(query, NEW_LEAF_RESULTS, handler, counter);
-	}
-
-	/**
 	 * Factory method for creating new <tt>QueryRequest</tt> instances with
 	 * the same guid, query, xml query, urn types, etc.
 	 *
@@ -321,7 +242,7 @@ public final class QueryHandler implements Inspectable {
 	 * @throw NullPointerException if the <tt>query</tt> argument is 
 	 *    <tt>null</tt>
 	 */
-	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
+	public QueryRequest createQuery(QueryRequest query, byte ttl) {
 		if(ttl < 1 || ttl > MAX_QUERY_TTL) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 		if(query == null) {
@@ -330,10 +251,10 @@ public final class QueryHandler implements Inspectable {
 
 		// build it from scratch if it's from us
 		if(query.getHops() == 0) {
-			return QueryRequest.createQuery(query, ttl);
+			return queryRequestFactory.createQuery(query, ttl);
 		} else {
 			try {
-				return QueryRequest.createNetworkQuery(query.getGUID(), ttl, 
+				return queryRequestFactory.createNetworkQuery(query.getGUID(), ttl, 
 													   query.getHops(), 
 													   query.getPayload(),
 													   query.getNetwork());

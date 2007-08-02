@@ -55,7 +55,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         
         Thread.sleep(250);
         
-        QueryRequest query = QueryRequest.createQuery("txt");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt");
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
@@ -79,7 +79,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         
         drainAll();
         
-        QueryRequest query = QueryRequest.createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
         
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
@@ -102,7 +102,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         
         drainAll();
         
-        QueryRequest query = QueryRequest.createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
         
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
@@ -125,7 +125,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         
         drainAll();
         
-        QueryRequest query = QueryRequest.createQuery("txt");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt");
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         

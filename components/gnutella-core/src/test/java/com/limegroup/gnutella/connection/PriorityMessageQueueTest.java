@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -70,16 +71,16 @@ public class PriorityMessageQueueTest extends LimeTestCase {
 
         //By hops
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
-        QueryRequest query = QueryRequest.createQuery("low hops", (byte)5);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("low hops", (byte)5);
         q.add(query);
-        query=QueryRequest.createQuery("high hops",(byte)5);
+        query=ProviderHacks.getQueryRequestFactory().createQuery("high hops",(byte)5);
         for (int i=0; i<8; i++)
             query.hop(); 
         q.add(query);
-        query=QueryRequest.createQuery("medium hops", (byte)5);
+        query=ProviderHacks.getQueryRequestFactory().createQuery("medium hops", (byte)5);
         query.hop();
         q.add(query);
-        query=QueryRequest.createQuery("medium hops2", (byte)5);
+        query=ProviderHacks.getQueryRequestFactory().createQuery("medium hops2", (byte)5);
         query.hop();
         q.add(query);
 
@@ -96,16 +97,16 @@ public class PriorityMessageQueueTest extends LimeTestCase {
 
         //By negative hops
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
-        PingReply pong=PingReply.create(
+        PingReply pong=ProviderHacks.getPingReplyFactory().create(
             new byte[16], (byte)5, 6340, IP, 0, 0);
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6330, IP, 0, 0);
+        pong=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, 6330, IP, 0, 0);
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6342, IP, 0, 0);
+        pong=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, 6342, IP, 0, 0);
         pong.hop();
         pong.hop();
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6341, IP, 0, 0);
+        pong=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, 6341, IP, 0, 0);
         pong.hop();
         q.add(pong);
         pong=(PingReply)q.removeNextInternal();

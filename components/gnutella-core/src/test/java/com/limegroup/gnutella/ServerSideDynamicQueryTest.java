@@ -76,7 +76,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testBasicProbeMechanicsFromUltrapeer() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -129,7 +129,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testBasicProbeMechanicsFromLeaf() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.hop();
         request.setTTL((byte)1);
         assertEquals(1, request.getHops());
@@ -184,7 +184,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testDuplicateProbes() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -217,7 +217,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testProbeIsLimited() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -268,7 +268,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         for (int i = 2; i < 5; i++) {
             drainAll();
 
-            QueryRequest request = QueryRequest.createQuery("berkeley");
+            QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
             request.setTTL((byte)i);
 
             ULTRAPEER[1].send(request);

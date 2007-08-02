@@ -6,7 +6,6 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -75,7 +74,7 @@ public class TLSConnectionTest extends LimeTestCase {
         assertEquals(0.0f, c.getReadLostFromSSL());
         
         assertEquals(0, RouterService.getConnectionManager().getNumConnections());
-        c.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         drain(c);
         assertGreaterThan(0, c.getSentLostFromSSL());
         assertGreaterThan(0, c.getReadLostFromSSL());
@@ -115,7 +114,7 @@ public class TLSConnectionTest extends LimeTestCase {
         
         assertEquals(0, RouterService.getConnectionManager().getNumConnections());
         StubGnetConnectObserver connector = new StubGnetConnectObserver();
-        c.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000, connector);
+        c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000, connector);
         connector.waitForResponse(1000);
         assertTrue(connector.isConnect());
         drain(c);

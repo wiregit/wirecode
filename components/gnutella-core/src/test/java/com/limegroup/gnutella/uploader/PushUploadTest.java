@@ -35,10 +35,10 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -280,7 +280,7 @@ public class PushUploadTest extends LimeTestCase {
         // try when we are not firewalled
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming", new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         establishConnection();
         HttpRequest request = new BasicHttpRequest("GET", url,
@@ -293,7 +293,7 @@ public class PushUploadTest extends LimeTestCase {
         
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming", new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         response = sendRequest(request);
         UploadTestUtils.assertNotHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
@@ -319,7 +319,7 @@ public class PushUploadTest extends LimeTestCase {
 
             PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                     "_acceptedIncoming", new Boolean(false));
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
             HttpRequest request = new BasicHttpRequest("GET", url,
                     HttpVersion.HTTP_1_1);
@@ -337,9 +337,9 @@ public class PushUploadTest extends LimeTestCase {
     public void testDuplicatePushes() throws Exception {
         Connection connection = new Connection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
             QueryReply reply = null;
@@ -397,11 +397,11 @@ public class PushUploadTest extends LimeTestCase {
             BadPacketException {
         Connection connection = new Connection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
 
             // send query
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
 

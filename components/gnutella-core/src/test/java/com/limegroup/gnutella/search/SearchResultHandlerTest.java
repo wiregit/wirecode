@@ -11,7 +11,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseVerifier;
@@ -48,7 +48,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testSecureActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
+        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
@@ -65,7 +65,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureActionNotSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
+        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
         Response actionResponse = new Response(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
@@ -78,7 +78,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
+        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
         Response actionResponse = new Response(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
@@ -96,7 +96,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testFailedReplyNotForwarded() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
+        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
         Response actionResponse = new Response(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
@@ -131,7 +131,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
                              , false
                              , Collections.EMPTY_SET
                              , null);
-        PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", reply);
+        PrivilegedAccessor.invokeMethod(ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", reply);
         return reply;
     }
     

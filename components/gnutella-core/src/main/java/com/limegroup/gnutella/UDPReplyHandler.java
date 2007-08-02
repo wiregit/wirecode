@@ -28,7 +28,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	/**
 	 * Constant for the <tt>UDPService</tt>.
 	 */
-	private static final UDPService UDP_SERVICE = UDPService.instance();
+	private static final UDPService UDP_SERVICE = ProviderHacks.getUdpService();
     
     /**
      * Used to filter messages that are considered spam.
@@ -269,11 +269,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * sends the response through udp back to the requesting party
 	 */
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
-		UDPService.instance().send(m, addr);
+		ProviderHacks.getUdpService().send(m, addr);
 	}
 	
 	public void reply(Message m) {
-		UDPService.instance().send(m, addr);
+		ProviderHacks.getUdpService().send(m, addr);
 	}
 	
 	public int getPort() {

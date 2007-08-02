@@ -14,6 +14,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -72,27 +73,27 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 	    assertTrue(result.toString(), result.isAddEvent());
 	    assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 	    
-	    Response[] r1 = fman.query(QueryRequest.createQuery("sam",
+	    Response[] r1 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("sam",
 	                                buildAudioXMLString("artist=\"sam\"")));
         assertNotNull(r1);
         assertEquals(1, r1.length);
         assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
         
         // test a match where 50% matches -- should get no matches.
-        Response[] r2 = fman.query(QueryRequest.createQuery("sam jazz in c",
+        Response[] r2 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("sam jazz in c",
                                    buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
         if(r2 != null)
             assertEquals(0, r2.length);
             
             
         // test where the keyword matches only.
-        Response[] r3 = fman.query(QueryRequest.createQuery("meaningles"));
+        Response[] r3 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("meaningles"));
         assertNotNull(r3);
         assertEquals(1, r3.length);
         assertEquals(d1.getXMLString(), r3[0].getDocument().getXMLString());
                                   
         // test where keyword matches, but xml doesn't.
-        Response[] r4 = fman.query(QueryRequest.createQuery("meaningles",
+        Response[] r4 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("meaningles",
                                    buildAudioXMLString("artist=\"bob\"")));
         if(r4 != null)
             assertEquals(0, r4.length);
@@ -109,13 +110,13 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 	    assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         // pure keyword.
-        Response[] r5 = fman.query(QueryRequest.createQuery("jazz in d"));
+        Response[] r5 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("jazz in d"));
         assertNotNull(r5);
         assertEquals(1, r5.length);
         assertEquals(d2.getXMLString(), r5[0].getDocument().getXMLString());
         
         // keyword, but has XML to check more efficiently.
-        Response[] r6 = fman.query(QueryRequest.createQuery("jazz in d",
+        Response[] r6 = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("jazz in d",
                                    buildAudioXMLString("album=\"jazz in d\"")));
         if(r6 != null)
             assertEquals(0, r6.length);
@@ -163,7 +164,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         String dir1 = "director=\"loopola\"";
 
         //make sure there's nothing with this xml query
-        Response[] res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
+        Response[] res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir1)));
         
         assertEquals("there should be no matches", 0, res.length);
         
@@ -203,42 +204,42 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         Thread.sleep(100);
-        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 
-        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir2)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
         
         //remove a file
         fman.removeFileIfShared(f1);
 
-        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be no matches", 0, res.length);
         
         //make sure the two other files are there
-        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir2)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
 
         //remove another and check we still have on left
         fman.removeFileIfShared(f2);
-        res = fman.query(QueryRequest.createQuery("",buildVideoXMLString(dir3)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("",buildVideoXMLString(dir3)));
         assertEquals("there should be one match", 1, res.length);
 
         //remove the last file and make sure we get no replies
         fman.removeFileIfShared(f3);
-        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir3)));
+        res = fman.query(ProviderHacks.getQueryRequestFactory().createQuery("", buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
     }
 
     private QueryRequest get_qr(File f) {
         return 
-            QueryRequest.createQuery
+            ProviderHacks.getQueryRequestFactory().createQuery
             (I18NConvert.instance().getNorm(f.getName()));
     }
     
     private QueryRequest get_qr(String xml) {
         return 
-            QueryRequest.createQuery("", xml);
+            ProviderHacks.getQueryRequestFactory().createQuery("", xml);
     }
 
     // build xml string for video

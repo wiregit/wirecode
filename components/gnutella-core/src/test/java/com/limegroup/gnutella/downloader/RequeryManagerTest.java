@@ -7,6 +7,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
@@ -379,7 +380,7 @@ public class RequeryManagerTest extends LimeTestCase {
         
         volatile boolean cancelled;
         public MyAltLocFinder() {
-            super(null);
+            super(null, ProviderHacks.getAlternateLocationFactory());
         }
         
         

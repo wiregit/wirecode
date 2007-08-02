@@ -8,7 +8,6 @@ import java.net.ServerSocket;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -120,7 +119,7 @@ public final class ServerSideIntermediateRedirectTest
 
         Connection redirUP = new Connection("localhost", PORT);
         
-        redirUP.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        redirUP.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
@@ -171,7 +170,7 @@ public final class ServerSideIntermediateRedirectTest
     public void testSendsRedirectMultiple() throws Exception {
 
         Connection redirUP1 = new Connection("localhost", PORT);
-        redirUP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        redirUP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
@@ -180,7 +179,7 @@ public final class ServerSideIntermediateRedirectTest
         redirUP1.flush();
 
         Connection redirUP2 = new Connection("localhost", PORT);
-        redirUP2.initialize( new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        redirUP2.initialize( ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 

@@ -15,25 +15,23 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
+import junit.framework.Test;
+
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManagerStub;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -44,9 +42,9 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.EmptyResponder;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class UDPCrawlerMessagesTest extends LimeTestCase {
@@ -136,7 +134,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
         
-        RouterService.setListeningPort(PORT);
+        ProviderHacks.getNetworkManager().setListeningPort(PORT);
 		ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
         RouterService.connect();	
@@ -179,14 +177,14 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //ultrapeers 
-        UP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
-        UP2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
-        UP3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP2.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP3.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         //leafs
-        LEAF_1.initialize(new LeafHeaders("localhost"),new EmptyResponder(), 1000);
-        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
-        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_1.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"),new EmptyResponder(), 1000);
+        LEAF_2.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_3.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
                 
 
 		assertTrue("ULTRAPEER_2 should be connected", UP2.isOpen());
@@ -607,7 +605,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     }
     
  	private void tryMessage() throws Exception {
- 		assertTrue(UDPService.instance().isListening());
+ 		assertTrue(ProviderHacks.getUdpService().isListening());
  		UDP_ACCESS.setSoTimeout(5000);
  		
  		

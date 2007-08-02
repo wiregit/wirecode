@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -126,7 +126,7 @@ public class UDPPushTest extends LimeTestCase {
 		Acceptor acc = RouterService.getAcceptor();
 		PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
 
-		assertTrue(RouterService.acceptedIncomingConnection());
+		assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 	}
 	
 	

@@ -47,10 +47,10 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -732,16 +732,16 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             new byte[16], false);
         
         //Remember that a return value of N corresponds to N+1 stars
-        assertEquals(3,  reachableNonBusy.calculateQualityOfService(false));
-        assertEquals(3,  reachableNonBusy.calculateQualityOfService(true));
-        assertEquals(1,  reachableBusy.calculateQualityOfService(false));
-        assertEquals(1,  reachableBusy.calculateQualityOfService(true));
-        assertEquals(2,  unreachableNonBusy.calculateQualityOfService(false));
-        assertEquals(-1, unreachableNonBusy.calculateQualityOfService(true));
-        assertEquals(0,  unreachableBusy.calculateQualityOfService(false));
-        assertEquals(-1, unreachableBusy.calculateQualityOfService(true));        
-        assertEquals(0,  oldStyle.calculateQualityOfService(false));
-        assertEquals(0,  oldStyle.calculateQualityOfService(true));
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
+        assertEquals(1,  reachableBusy.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals(1,  reachableBusy.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
+        assertEquals(2,  unreachableNonBusy.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals(-1, unreachableNonBusy.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
+        assertEquals(0,  unreachableBusy.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals(-1, unreachableBusy.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));        
+        assertEquals(0,  oldStyle.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals(0,  oldStyle.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
     }
 
 
@@ -1118,7 +1118,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(fd.getFileName());
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(fd.getFileName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -1179,7 +1179,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(fd.getFileName());
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(fd.getFileName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -1418,7 +1418,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for(int i = 0; i < fds.length; i++) {
             URN urn = fds[i].getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-                RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn), null);
+                RouterService.getAltlocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn), null);
             }
         }
     }

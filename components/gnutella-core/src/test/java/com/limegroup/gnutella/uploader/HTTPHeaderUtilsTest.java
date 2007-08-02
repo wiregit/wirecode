@@ -19,6 +19,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
@@ -59,7 +60,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         StubFileDesc fd = new StubFileDesc();
         
         tracker.setNextSetOfAltsToSend(new ArrayList<DirectAltLoc>());
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
         assertNull(response.getLastHeader("X-Alt"));
     }
     
@@ -70,7 +71,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         StubFileDesc fd = new StubFileDesc();
         
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "2.3.4.6", "7.3.2.1", "2.1.5.3:6201", "1.2.65.2"));
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
         assertEquals("1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", response.getLastHeader("X-Alt").getValue());
     }
     
@@ -81,7 +82,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         StubFileDesc fd = new StubFileDesc();
         
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "T2.3.4.6", "T7.3.2.1", "2.1.5.3:6201", "T1.2.65.2"));
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
         String expected = "tls=68,1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2";
         assertEquals(expected, response.getLastHeader("X-Alt").getValue());
         
@@ -105,7 +106,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     public void testWritePushProxiesWhenEmpty() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertNull(response.getLastHeader("X-Push-Proxy"));
     }
     
@@ -113,7 +114,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
         stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
         stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -122,7 +123,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
         stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("pptls=A,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -133,7 +134,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -144,7 +145,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -155,7 +156,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -167,7 +168,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
                 tls = true;
                 loc = loc.substring(1);
             }
-            alts.add((DirectAltLoc)AlternateLocation.create(loc, HugeTestUtils.SHA1, tls));
+            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.SHA1, tls));
         }
         return alts;
     }
@@ -190,6 +191,9 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     /** A fake ConnectionManager with custom proxies. */
     private static class StubConnectionManager extends ConnectionManager {
+        public StubConnectionManager() {
+            super(ProviderHacks.getNetworkManager());
+        }
         private Set<Connectable> proxies;
         @Override
         public Set<? extends Connectable> getPushProxies() {
