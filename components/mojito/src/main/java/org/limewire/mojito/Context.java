@@ -584,7 +584,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
-     * 
+     * Returns the SecurityTokenHelper
      */
     public SecurityTokenHelper getSecurityTokenHelper() {
         return tokenHelper;
