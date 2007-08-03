@@ -1575,7 +1575,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		URN urn = _rfd.getSHA1Urn();
 		if (urn != null) {
 			ManagedDownloader myDownloader = (ManagedDownloader)
-			RouterService.getDownloadManager().getDownloaderForURN(urn);
+			ProviderHacks.getDownloadManager().getDownloaderForURN(urn);
 			if (myDownloader == null)
 				allWorkers = "couldn't find my downloader???";
 			else

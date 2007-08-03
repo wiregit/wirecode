@@ -326,7 +326,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         TestFile.length();
         RequeryManager.NO_DELAY = true;
         final DHTManager originalManager = ProviderHacks.getDHTManager();
-        final AltLocFinder originalFinder = RouterService.getAltLocFinder();
+        final AltLocFinder originalFinder = ProviderHacks.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
@@ -339,7 +339,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
             assertSame(myManager,ProviderHacks.getDHTManager());
-            assertSame(myFinder,RouterService.getAltLocFinder());
+            assertSame(myFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
             RequeryManager.TIME_BETWEEN_REQUERIES = 10000;
@@ -414,7 +414,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
             assertSame(originalManager,ProviderHacks.getDHTManager());
-            assertSame(originalFinder,RouterService.getAltLocFinder());
+            assertSame(originalFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
             RequeryManager.TIME_BETWEEN_REQUERIES = TIME_BETWEEN_REQUERIES;
@@ -439,7 +439,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         TestFile.length();
         RequeryManager.NO_DELAY = true;
         final DHTManager originalManager = ProviderHacks.getDHTManager();
-        final AltLocFinder originalFinder = RouterService.getAltLocFinder();
+        final AltLocFinder originalFinder = ProviderHacks.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
@@ -452,7 +452,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
             assertSame(myManager,ProviderHacks.getDHTManager());
-            assertSame(myFinder,RouterService.getAltLocFinder());
+            assertSame(myFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
             RequeryManager.TIME_BETWEEN_REQUERIES = 10000;
@@ -558,7 +558,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
             assertSame(originalManager,ProviderHacks.getDHTManager());
-            assertSame(originalFinder,RouterService.getAltLocFinder());
+            assertSame(originalFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",PUSH_CONNECT_TIME);
             RequeryManager.TIME_BETWEEN_REQUERIES = TIME_BETWEEN_REQUERIES;
@@ -582,7 +582,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         TestFile.length();
         RequeryManager.NO_DELAY = true;
         final DHTManager originalManager = ProviderHacks.getDHTManager();
-        final AltLocFinder originalFinder = RouterService.getAltLocFinder();
+        final AltLocFinder originalFinder = ProviderHacks.getAltLocFinder();
         final MyDHTManager myManager = new MyDHTManager();
         final MyAltLocFinder myFinder = new MyAltLocFinder();
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
@@ -597,7 +597,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",(DHTManager)myManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",(AltLocFinder)myFinder);
             assertSame(myManager,ProviderHacks.getDHTManager());
-            assertSame(myFinder,RouterService.getAltLocFinder());
+            assertSame(myFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",1000);
             PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",1000);
             RequeryManager.TIME_BETWEEN_REQUERIES = 10000;
@@ -689,7 +689,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             setLazyReference("DHT_MANAGER_REFERENCE",originalManager);
             setLazyReference("ALT_LOC_FINDER_REFERENCE",originalFinder);
             assertSame(originalManager,ProviderHacks.getDHTManager());
-            assertSame(originalFinder,RouterService.getAltLocFinder());
+            assertSame(originalFinder,ProviderHacks.getAltLocFinder());
             PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.FALSE);
             assertFalse(LimeWireUtils.isPro());
             PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",NORMAL_CONNECT_TIME);

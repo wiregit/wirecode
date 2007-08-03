@@ -127,7 +127,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
         resultHandler.handleQueryReply(reply);
 
-        DownloadManager dm = RouterService.getDownloadManager();
+        DownloadManager dm = ProviderHacks.getDownloadManager();
         dm.handleQueryReply(reply);
     }
 	

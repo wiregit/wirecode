@@ -15,8 +15,9 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
@@ -28,6 +29,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
 
 /** Utility class for sending GUESS queries.
  */
+@Singleton
 public class OnDemandUnicaster {
     
     private static final Log LOG = LogFactory.getLog(OnDemandUnicaster.class);
@@ -43,10 +45,7 @@ public class OnDemandUnicaster {
 
     /** GUESSEndpoints => AddressSecurityToken. */
     private final Map<GUESSEndpoint, AddressSecurityToken> _queryKeys;
-
-    /** Access to UDP traffic. */
-    private final UDPService _udp;
-    
+  
     /**
      * Short term store for queries waiting for query keys.
      * GUESSEndpoints => URNs
@@ -54,15 +53,19 @@ public class OnDemandUnicaster {
     private final Map<GUESSEndpoint, SendLaterBundle> _bufferedURNs;
     
     private final QueryRequestFactory queryRequestFactory;
+    private final UDPService udpService;
 
-    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory) {
+    @Inject
+    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService) {
         this.queryRequestFactory = queryRequestFactory;
+        this.udpService = udpService;
         
         // static initializers are only called once, right?
         _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
         _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _queriedHosts = new HashMap<GUID.TimedGUID, Set<IpPort>>();
-        _udp = ProviderHacks.getUdpService();
+        
+        // DPINJ: move scheduling to an initializer
         // schedule a runner to clear various data structures
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
         RouterService.schedule(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME);
@@ -128,7 +131,7 @@ public class OnDemandUnicaster {
             SendLaterBundle bundle = new SendLaterBundle(queryURN);
             _bufferedURNs.put(endpoint, bundle);
             PingRequest pr = PingRequest.createQueryKeyRequest();
-            _udp.send(pr, ep.getInetAddress(), ep.getPort());
+            udpService.send(pr, ep.getInetAddress(), ep.getPort());
         }
         // ------
         // if possible send query, else buffer
@@ -174,7 +177,7 @@ public class OnDemandUnicaster {
             LOG.debug("Sending query with GUID: " + qGUID + " for URN: " + urn + " to host: " + ipp);
         
         RouterService.getMessageRouter().originateQueryGUID(query.getGUID());
-        _udp.send(query, ipp.getInetAddress(), ipp.getPort());
+        udpService.send(query, ipp.getInetAddress(), ipp.getPort());
     }
 
     private class SendLaterBundle {

@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
@@ -39,7 +38,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
 
-import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -48,7 +46,6 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.HostileFilter;
@@ -148,11 +145,6 @@ public class RouterService {
      * for tests.
 	 */
     private static HostCatcher catcher = new HostCatcher();
-	
-	/**
-	 * <tt>DownloadManager</tt> for handling HTTP downloading.
-	 */
-    private static DownloadManager downloadManager = new DownloadManager(ProviderHacks.getNetworkManager());
     
     /**
      * Acceptor for HTTP connections.
@@ -243,17 +235,7 @@ public class RouterService {
      */
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
 
-    /**
-     * The AltLocFinder utilitizes the DHT to find Alternate Locations
-     */
-    private static Provider<AltLocFinder> ALT_LOC_FINDER_REFERENCE
-        = new AbstractLazySingletonProvider<AltLocFinder>() {
-            @Override
-            public AltLocFinder createObject() {
-                return new AltLocFinder(ProviderHacks.getDHTManager(), ProviderHacks.getAlternateLocationFactory());
-            }
-        };
-        
+       
     private static MessageDispatcher messageDispatcher;
     
     /**
@@ -342,7 +324,7 @@ public class RouterService {
 	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
-        this(callback, ProviderHacks.getNewStandardMessageRouter());
+        this(callback, ProviderHacks.getMessageRouter());
     }
 
 	/**
@@ -363,7 +345,7 @@ public class RouterService {
         ProviderHacks.getConnectionManager().addEventListener(ProviderHacks.getDHTManager());
         
         nodeAssigner = new NodeAssigner(ProviderHacks.getUploadManager(), 
-                                        downloadManager, 
+                                        ProviderHacks.getDownloadManager(), 
                                         ProviderHacks.getConnectionManager(),
                                         ProviderHacks.getNetworkManager()); // DPINJ: Use passed in manager!
   	}
@@ -496,7 +478,7 @@ public class RouterService {
     		
     		LOG.trace("START DownloadManager");
     		callback.componentLoading("DOWNLOAD_MANAGER");
-    		downloadManager.initialize(); 
+    		ProviderHacks.getDownloadManager().initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
     		LOG.trace("START NodeAssigner");
@@ -538,7 +520,7 @@ public class RouterService {
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
             callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
-            downloadManager.postGuiInit();
+            ProviderHacks.getDownloadManager().postGuiInit();
             LOG.trace("STOP DownloadManager.postGuiInit");
             
             LOG.trace("START UpdateManager.instance");
@@ -548,7 +530,7 @@ public class RouterService {
 
             LOG.trace("START QueryUnicaster");
             callback.componentLoading("QUERY_UNICASTER");
-    		RouterService.getQueryUnicaster().start();
+    		ProviderHacks.getQueryUnicaster().start();
     		LOG.trace("STOP QueryUnicaster");
     		
     		LOG.trace("START HTTPAcceptor");
@@ -614,12 +596,7 @@ public class RouterService {
         LOG.trace("Started manual GC thread.");
     }
 	                
-	// DPINJ: HACK! REMOVE!
-    public static QueryUnicaster getQueryUnicaster() {
-        return ProviderHacks.queryUnicaster.get();
-    }
-
-    /**
+	/**
      *  Returns the number of initialized messaging connections.
      */
     public static int getNumInitializedConnections() {
@@ -717,13 +694,6 @@ public class RouterService {
         }
     }
 
-    /**
-     * Accessor for the <tt>AltLocFinder</tt> instance.
-     */
-    public static AltLocFinder getAltLocFinder() {
-        return ALT_LOC_FINDER_REFERENCE.get();
-    }
-    
     /** Returns the node assigner in use. */
     // DPINJ: REMOVE!
     public static NodeAssigner getNodeAssigner() {
@@ -746,16 +716,7 @@ public class RouterService {
 		return bandwidthManager;
 	}
     
-	/** 
-     * Accessor for the <tt>DownloadManager</tt> instance in use.
-     *
-     * @return the <tt>DownloadManager</tt> in use
-     */
-    public static DownloadManager getDownloadManager() {
-        return downloadManager;
-    }
-    
-    public static AltLocManager getAltlocManager() {
+	public static AltLocManager getAltlocManager() {
         return altManager;
     }
     
@@ -971,14 +932,14 @@ public class RouterService {
      * Returns the number of downloads in progress.
      */
     public static int getNumDownloads() {
-        return downloadManager.downloadsInProgress();
+        return ProviderHacks.getDownloadManager().downloadsInProgress();
     }
     
     /**
      * Returns the number of active downloads.
      */
     public static int getNumActiveDownloads() {
-        return downloadManager.getNumActiveDownloads();
+        return ProviderHacks.getDownloadManager().getNumActiveDownloads();
     }
     
     /**
@@ -1087,7 +1048,7 @@ public class RouterService {
             
             cleanupTorrentMetadataFiles();
             
-            downloadManager.writeSnapshot();
+            ProviderHacks.getDownloadManager().writeSnapshot();
             
            // torrentManager.writeSnapshot();
             
@@ -1354,7 +1315,7 @@ public class RouterService {
      *  @param guid The GUID of the query you want to get rid of....
      */
     public static void stopQuery(GUID guid) {
-        RouterService.getQueryUnicaster().purgeQuery(guid);
+        ProviderHacks.getQueryUnicaster().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
         messageRouter.queryKilled(guid);
         if(RouterService.isSupernode())
@@ -1544,7 +1505,7 @@ public class RouterService {
                                       boolean overwrite, File saveDir,
 									  String fileName)
 		throws SaveLocationException {
-		return downloadManager.download(files, alts, queryGUID, overwrite, saveDir,
+		return ProviderHacks.getDownloadManager().download(files, alts, queryGUID, overwrite, saveDir,
 								   fileName);
 	}
 	
@@ -1590,7 +1551,7 @@ public class RouterService {
 		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
 		}
-		return downloadManager.download(magnet, overwrite, null, magnet.getDisplayName());
+		return ProviderHacks.getDownloadManager().download(magnet, overwrite, null, magnet.getDisplayName());
 	}
 
 	/**
@@ -1611,7 +1572,7 @@ public class RouterService {
 	 */
 	public static Downloader download(MagnetOptions magnet, boolean overwrite,
 			File saveDir, String fileName) throws SaveLocationException {
-		return downloadManager.download(magnet, overwrite, saveDir, fileName);
+		return ProviderHacks.getDownloadManager().download(magnet, overwrite, saveDir, fileName);
 	}
 
    /**
@@ -1622,7 +1583,7 @@ public class RouterService {
      */ 
     public static Downloader download(File incompleteFile)
             throws CantResumeException, SaveLocationException {
-        return downloadManager.download(incompleteFile);
+        return ProviderHacks.getDownloadManager().download(incompleteFile);
     }
 
     
@@ -1636,7 +1597,7 @@ public class RouterService {
 	 */
 	public static Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
 			throws SaveLocationException {
-		return downloadManager.downloadTorrent(info, overwrite);
+		return ProviderHacks.getDownloadManager().downloadTorrent(info, overwrite);
 	}
     
 	/**

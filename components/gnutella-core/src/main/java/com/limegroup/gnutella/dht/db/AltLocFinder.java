@@ -26,6 +26,8 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.nio.observer.Shutdownable;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
@@ -39,6 +41,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 /**
  * The AltLocFinder queries the DHT for Alternate Locations
  */
+@Singleton
 public class AltLocFinder {
 
     private static final Log LOG = LogFactory.getLog(AltLocFinder.class);
@@ -46,6 +49,7 @@ public class AltLocFinder {
     private final DHTManager manager;
     private final AlternateLocationFactory alternateLocationFactory;
     
+    @Inject
     public AltLocFinder(DHTManager manager, AlternateLocationFactory alternateLocationFactory) {
         this.manager = manager;
         this.alternateLocationFactory = alternateLocationFactory;

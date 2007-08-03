@@ -107,7 +107,7 @@ public class CreationTimeCacheTest
 
         callback=new MyActivityCallback();
         fm = new MyFileManager();
-        rs= new RouterService(callback, ProviderHacks.getNewStandardMessageRouter());
+        rs= new RouterService(callback, ProviderHacks.getMessageRouter());
         PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 
         assertEquals("unexpected port",

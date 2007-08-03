@@ -14,7 +14,7 @@ public class DownloadProviderHacks {
                 downloadCallback, ProviderHacks.getNetworkManager(),
                 ProviderHacks.getAlternateLocationFactory(), ProviderHacks
                         .getQueryRequestFactory(),
-                ProviderHacks.onDemandUnicaster, 
+                ProviderHacks.getOnDemandUnicaster(), 
                 ProviderHacks.getDownloadWorkerFactory(),
                 ProviderHacks.getManagedTorrentFactory());
     }

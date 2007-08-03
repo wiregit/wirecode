@@ -15,6 +15,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
@@ -82,6 +84,11 @@ public class LimeWireCore {
     @Inject private Provider<UDPService> udpService;
     @Inject private Provider<Acceptor> acceptor;
     @Inject private Provider<ForMeReplyHandler> forMeReplyHandler;
+    @Inject private Provider<QueryUnicaster> queryUnicaster;
+    @Inject private Provider<OnDemandUnicaster> onDemandUnicaster;
+    @Inject private Provider<MessageRouter> messageRouter;
+    @Inject private Provider<DownloadManager> downloadManager;
+    @Inject private Provider<AltLocFinder> altLocFinder;
 
     public Injector getInjector() {
         return injector;
@@ -225,6 +232,26 @@ public class LimeWireCore {
     
     public ForMeReplyHandler getForMeReplyHandler() {
         return forMeReplyHandler.get(); 
+    }
+    
+    public QueryUnicaster getQueryUnicaster() {
+        return queryUnicaster.get();
+    }
+    
+    public OnDemandUnicaster getOnDemandUnicaster() {
+        return onDemandUnicaster.get(); 
+    }
+
+    public MessageRouter getMessageRouter() {
+        return messageRouter.get();
+    }
+
+    public DownloadManager getDownloadManager() {
+        return downloadManager.get();
+    }
+
+    public AltLocFinder getAltLocFinder() {
+        return altLocFinder.get();
     }
 
 }

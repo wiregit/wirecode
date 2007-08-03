@@ -69,7 +69,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        RouterService.getDownloadManager().clearAllDownloads();        
+        ProviderHacks.getDownloadManager().clearAllDownloads();        
         
         //      Turn off by default, explicitly test elsewhere.
         SSLSettings.TLS_INCOMING.setValue(false);

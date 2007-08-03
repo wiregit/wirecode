@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 
@@ -94,19 +93,16 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(DiskController.class);
         bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
         //bind(ForMeReplyHandler.class);
-        
-        
-        // DPINJ: Need to figure out what the hell to do with these.
-        //----------------------------------------------        
-        bind(ActivityCallback.class).toProvider(ProviderHacks.activityCallback);
-        
+        //bind(QueryUnicaster.class);
+        //bind(OnDemandUnicaster.class);
+        bind(MessageRouter.class).to(StandardMessageRouter.class);
+        //bind(DownloadManager.class);
+        //bind(AltLocFinder.class);
+                
         
         // DPINJ: Could delay instantiation...
         //----------------------------------------------
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
-        
-        // DPINJ: Need to create & inject the provider w/ NIODispatcher somehow...
-        //----------------------------------------------
-        bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(ProviderHacks.nioScheduledExecutorService);
+ 
     }    
 }

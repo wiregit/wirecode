@@ -19,6 +19,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -35,6 +37,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
  * individual queries by reply counts.
  */ 
+@Singleton
 public final class QueryUnicaster {
     
     private static final Log LOG = LogFactory.getLog(QueryUnicaster.class);
@@ -112,7 +115,7 @@ public final class QueryUnicaster {
 	private final NetworkManager networkManager;
 	private final QueryRequestFactory queryRequestFactory;
 
-	
+	@Inject
     public QueryUnicaster(NetworkManager networkManager, QueryRequestFactory queryRequestFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;

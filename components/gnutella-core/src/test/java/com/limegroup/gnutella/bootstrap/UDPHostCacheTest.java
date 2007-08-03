@@ -45,7 +45,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), ProviderHacks.getNewStandardMessageRouter());
+        new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
         ProviderHacks.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(

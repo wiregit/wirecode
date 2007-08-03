@@ -224,8 +224,8 @@ public final class ConnectionChecker implements Runnable {
      * @return true if we don't have any transfers going at non-zero speed
      */
     private boolean hasNoTransfers(){
-        RouterService.getDownloadManager().measureBandwidth();
-        float down = RouterService.getDownloadManager().getMeasuredBandwidth();
+        ProviderHacks.getDownloadManager().measureBandwidth();
+        float down = ProviderHacks.getDownloadManager().getMeasuredBandwidth();
         
         if (down != 0)
             return false;

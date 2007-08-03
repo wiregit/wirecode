@@ -143,7 +143,7 @@ public class DownloadTest extends LimeTestCase {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 		RouterService rs = new RouterService(callback);
-        dm = RouterService.getDownloadManager();
+        dm = ProviderHacks.getDownloadManager();
         dm.initialize();
 
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);

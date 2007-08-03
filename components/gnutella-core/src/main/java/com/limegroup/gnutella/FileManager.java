@@ -773,7 +773,7 @@ public abstract class FileManager {
         // Various cleanup & persisting...
         trim();
         CreationTimeCache.instance().pruneTimes();
-        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        ProviderHacks.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
         SavedFileManager.instance().run();
         UpdateHandler.instance().tryToDownloadUpdates();

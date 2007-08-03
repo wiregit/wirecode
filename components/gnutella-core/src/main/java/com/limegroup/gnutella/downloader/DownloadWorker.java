@@ -779,7 +779,7 @@ public class DownloadWorker {
                     _rfd.getHost());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
-            RouterService.getDownloadManager().getPushManager().sendPush(_rfd,
+            ProviderHacks.getDownloadManager().getPushManager().sendPush(_rfd,
                     observer);
             RouterService.schedule(new Runnable() {
                 public void run() {

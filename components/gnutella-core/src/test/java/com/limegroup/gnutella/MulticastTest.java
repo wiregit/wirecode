@@ -87,7 +87,7 @@ public class MulticastTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
-        ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getNewStandardMessageRouter());
+        ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getMessageRouter());
         FMAN = ProviderHacks.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
@@ -243,7 +243,7 @@ public class MulticastTest extends LimeTestCase {
         
         // Finally, we have the RFD we want to push.
         SSLSettings.TLS_INCOMING.setValue(true);
-        RouterService.getDownloadManager().getPushManager().sendPush(rfd);
+        ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
         
         
         // sleep to make sure the push goes through.
@@ -309,7 +309,7 @@ public class MulticastTest extends LimeTestCase {
         
         // Finally, we have the RFD we want to push.
         SSLSettings.TLS_INCOMING.setValue(false);
-        RouterService.getDownloadManager().getPushManager().sendPush(rfd);
+        ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
         
         
         // sleep to make sure the push goes through.

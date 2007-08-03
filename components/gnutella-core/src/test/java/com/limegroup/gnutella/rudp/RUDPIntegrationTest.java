@@ -62,7 +62,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getNewStandardMessageRouter());
+        RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
         rs.start();
         Thread.sleep(1000);
     }

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -18,7 +17,7 @@ public class DownloadReferences {
     private final NetworkManager networkManager;
     private final AlternateLocationFactory alternateLocationFactory;
     private final QueryRequestFactory queryRequestFactory;
-    private final Provider<OnDemandUnicaster> onDemandUnicaster; // DPINJ: Convert to non-provider when onDemandUnicaster's constructor doesn't schedule!
+    private final OnDemandUnicaster onDemandUnicaster;
     private final DownloadWorkerFactory downloadWorkerFactory;
     private final ManagedTorrentFactory managedTorrentFactory;
     
@@ -27,7 +26,7 @@ public class DownloadReferences {
             NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory,
             QueryRequestFactory queryRequestFactory,
-            Provider<OnDemandUnicaster> onDemandUnicaster,
+            OnDemandUnicaster onDemandUnicaster,
             DownloadWorkerFactory downloadWorkerFactory,
             ManagedTorrentFactory managedTorrentFactory) {
         this.downloadManager = downloadManager;
@@ -65,7 +64,7 @@ public class DownloadReferences {
         return queryRequestFactory;
     }
 
-    public Provider<OnDemandUnicaster> getOnDemandUnicaster() {
+    public OnDemandUnicaster getOnDemandUnicaster() {
         return onDemandUnicaster;
     }
     

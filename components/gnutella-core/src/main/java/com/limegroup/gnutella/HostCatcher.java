@@ -600,7 +600,7 @@ public class HostCatcher {
         }
         
         if(pr.supportsUnicast()) {
-            RouterService.getQueryUnicaster().
+            ProviderHacks.getQueryUnicaster().
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         

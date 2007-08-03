@@ -474,7 +474,7 @@ public class UpdateHandler implements HttpClientListener {
             if (isHopeless(next))
                 continue; 
 
-            DownloadManager dm = RouterService.getDownloadManager();
+            DownloadManager dm = ProviderHacks.getDownloadManager();
             FileManager fm = ProviderHacks.getFileManager();
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
                 
@@ -518,7 +518,7 @@ public class UpdateHandler implements HttpClientListener {
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	DownloadManager dm = RouterService.getDownloadManager();
+    	DownloadManager dm = ProviderHacks.getDownloadManager();
     	FileManager fm = ProviderHacks.getFileManager();
     	if (!dm.isGUIInitd() || !fm.isLoadFinished())
     		return;
@@ -673,7 +673,7 @@ public class UpdateHandler implements HttpClientListener {
         if (updates == null)
             return;
         
-        DownloadManager dm = RouterService.getDownloadManager();
+        DownloadManager dm = ProviderHacks.getDownloadManager();
         if (!dm.hasInNetworkDownload())
             return;
         

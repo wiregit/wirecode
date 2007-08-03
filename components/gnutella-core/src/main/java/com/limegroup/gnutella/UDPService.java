@@ -765,7 +765,7 @@ public class UDPService implements ReadWriteObserver {
             // straightforward - send a UDP ping to a host.  it doesn't really
             // matter who the guy is - we are just sending to open up any
             // potential firewall to UDP traffic
-            GUESSEndpoint ep = RouterService.getQueryUnicaster().getUnicastEndpoint();
+            GUESSEndpoint ep = ProviderHacks.getQueryUnicaster().getUnicastEndpoint();
             if (ep == null) return;
             // only do this if you can receive some form of UDP traffic.
             if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;

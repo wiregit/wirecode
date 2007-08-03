@@ -36,7 +36,8 @@ import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -104,6 +105,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
  */
+@Singleton
 public abstract class MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(MessageRouter.class);
@@ -232,7 +234,7 @@ public abstract class MessageRouter {
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
 	 */
-	protected final QueryUnicaster UNICASTER = RouterService.getQueryUnicaster();
+	protected final QueryUnicaster UNICASTER = ProviderHacks.getQueryUnicaster();
 
 	/**
 	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
@@ -319,17 +321,18 @@ public abstract class MessageRouter {
     private final NetworkManager networkManager;
     private final QueryRequestFactory queryRequestFactory;
     private final QueryHandlerFactory queryHandlerFactory;
-    private final Provider<OnDemandUnicaster> onDemandUnicaster;
+    private final OnDemandUnicaster onDemandUnicaster;
     private final HeadPongFactory headPongFactory;
     private final PingReplyFactory pingReplyFactory;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
      */
+    @Inject
     protected MessageRouter(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
-            Provider<OnDemandUnicaster> onDemandUnicaster, // DPINJ: convert to non-provider once OnDemandUnicaster's constructor doesn't do anything
+            OnDemandUnicaster onDemandUnicaster, 
             HeadPongFactory headPongFactory,
             PingReplyFactory pingReplyFactory
             ) {
@@ -482,7 +485,7 @@ public abstract class MessageRouter {
 		_callback = RouterService.getCallback();
 		_fileManager = ProviderHacks.getFileManager();
         
-		_bypassedResultsCache = new BypassedResultsCache(_callback, RouterService.getDownloadManager());
+		_bypassedResultsCache = new BypassedResultsCache(_callback, ProviderHacks.getDownloadManager());
         
 	    QRP_PROPAGATOR.start();
 
@@ -995,7 +998,7 @@ public abstract class MessageRouter {
         if (reply.getQueryKey() != null) {
             // this is a PingReply in reply to my AddressSecurityToken Request - 
             //consume the Pong and return, don't process as usual....
-            onDemandUnicaster.get().handleQueryKeyPong(reply);
+            onDemandUnicaster.handleQueryKeyPong(reply);
             return;
         }
 
@@ -1239,7 +1242,7 @@ public abstract class MessageRouter {
      * the given host using the given query GUID.
      */
     public boolean isHostUnicastQueried(GUID guid, IpPort host) {
-        return onDemandUnicaster.get().isHostQueriedForGUID(guid, host);
+        return onDemandUnicaster.isHostQueriedForGUID(guid, host);
     }
     
     /**

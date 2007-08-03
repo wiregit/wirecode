@@ -929,7 +929,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                                               UDP_ACCESS[i].getLocalPort(),
                                               ip, 10, 10, false, qk);
             pr.hop();
-            ProviderHacks.onDemandUnicaster.get().handleQueryKeyPong(pr);
+            ProviderHacks.getOnDemandUnicaster().handleQueryKeyPong(pr);
 
         }
 
@@ -1220,7 +1220,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                                               UDP_ACCESS[i].getLocalPort(),
                                               ip, 10, 10, false, qk);
             pr.hop();
-            ProviderHacks.onDemandUnicaster.get().handleQueryKeyPong(pr);
+            ProviderHacks.getOnDemandUnicaster().handleQueryKeyPong(pr);
 
         }
 

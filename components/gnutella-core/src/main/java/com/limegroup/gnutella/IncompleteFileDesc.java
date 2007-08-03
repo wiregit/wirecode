@@ -76,7 +76,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     }
 
     private Downloader getMyDownloader() {
-        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
+        return ProviderHacks.getDownloadManager().getDownloaderForURN(getSHA1Urn());
     }
     
 	/**

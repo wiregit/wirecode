@@ -110,14 +110,14 @@ public class RequeryDownloadTest
                                                      "_queryRouteTable");
 
         createSnapshot();
-        _mgr=RouterService.getDownloadManager();
+        _mgr=ProviderHacks.getDownloadManager();
         _mgr.initialize();
         _mgr.scheduleWaitingPump();
         boolean ok=_mgr.readSnapshot(_snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         _uploader=new TestUploader("uploader 6666", 6666, false);
         _uploader.setRate(Integer.MAX_VALUE);
-        RouterService.getDownloadManager().clearAllDownloads();
+        ProviderHacks.getDownloadManager().clearAllDownloads();
         
         new File( getSaveDirectory(), _filename).delete();
     }    

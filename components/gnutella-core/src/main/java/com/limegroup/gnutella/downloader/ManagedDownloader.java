@@ -33,7 +33,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
-import com.google.inject.Provider;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -460,7 +459,7 @@ public class ManagedDownloader extends AbstractDownloader
     protected volatile RequeryManager requeryManager;
 
     protected QueryRequestFactory queryRequestFactory;
-    protected Provider<OnDemandUnicaster> onDemandUnicaster;
+    protected OnDemandUnicaster onDemandUnicaster;
     protected DownloadWorkerFactory downloadWorkerFactory;
     
     /**
@@ -614,7 +613,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.callback=downloadReferences.getDownloadCallback();
         this.requeryManager = new RequeryManager(this, 
                 manager,
-                RouterService.getAltLocFinder(),
+                ProviderHacks.getAltLocFinder(),
                 ProviderHacks.getDHTManager());
         this.networkManager = downloadReferences.getNetworkManager();
         this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
@@ -958,7 +957,7 @@ public class ManagedDownloader extends AbstractDownloader
         //TODO: should we increment a stat to get a sense of
         //how much this is happening?
         for(GUESSEndpoint ep : guessLocs) {
-            onDemandUnicaster.get().query(ep, downloadSHA1);
+            onDemandUnicaster.query(ep, downloadSHA1);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)

@@ -85,7 +85,7 @@ public class UDPPushTest extends LimeTestCase {
 	public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		Map map = (Map) PrivilegedAccessor.getValue(
-                RouterService.getDownloadManager().getPushManager(), "UDP_FAILOVER");
+                ProviderHacks.getDownloadManager().getPushManager(), "UDP_FAILOVER");
         map.clear();
 		
 		long now = System.currentTimeMillis();
@@ -383,7 +383,7 @@ public class UDPPushTest extends LimeTestCase {
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{
 		Thread t = ThreadExecutor.newManagedThread(new Runnable() {
 			public void run() {
-				RouterService.getDownloadManager().getPushManager().sendPush(rfd);
+				ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
 			}
 		});
 		t.start();

@@ -30,6 +30,8 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
@@ -73,6 +75,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
+@Singleton
 public class DownloadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
@@ -152,6 +155,7 @@ public class DownloadManager implements BandwidthTracker {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public DownloadManager(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }
@@ -560,7 +564,7 @@ public class DownloadManager implements BandwidthTracker {
                 callback(downloader), ProviderHacks.getNetworkManager(),
                 ProviderHacks.getAlternateLocationFactory(),
                 ProviderHacks.getQueryRequestFactory(),
-                ProviderHacks.onDemandUnicaster,
+                ProviderHacks.getOnDemandUnicaster(),
                 ProviderHacks.getDownloadWorkerFactory(),
                 ProviderHacks.getManagedTorrentFactory());
     }

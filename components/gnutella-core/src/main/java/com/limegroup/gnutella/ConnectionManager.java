@@ -1684,7 +1684,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 c));
 
         // 5) Clean up Unicaster
-        RouterService.getQueryUnicaster().purgeQuery(c);
+        ProviderHacks.getQueryUnicaster().purgeQuery(c);
     }
     
     /**
@@ -2254,7 +2254,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
 		if(conn.isGUESSUltrapeer())
-			RouterService.getQueryUnicaster().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
+			ProviderHacks.getQueryUnicaster().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Looping for messages with conn: " + conn);

@@ -20,7 +20,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
@@ -44,6 +45,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 /**
  * This class is the message routing implementation for TCP messages.
  */
+@Singleton
 public class StandardMessageRouter extends MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
@@ -51,10 +53,11 @@ public class StandardMessageRouter extends MessageRouter {
     private final NetworkManager networkManager;
     private final PingReplyFactory pingReplyFactory;
     
+    @Inject
     public StandardMessageRouter(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
-            Provider<OnDemandUnicaster> onDemandUnicaster,
+            OnDemandUnicaster onDemandUnicaster,
             HeadPongFactory headPongFactory,
             PingReplyFactory pingReplyFactory) {
         super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory);

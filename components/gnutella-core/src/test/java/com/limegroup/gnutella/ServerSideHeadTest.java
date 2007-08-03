@@ -34,10 +34,10 @@ public class ServerSideHeadTest extends LimeTestCase {
         return buildTestSuite(ServerSideHeadTest.class);
     }
     
-    static DatagramSocket socket1, socket2;
-    static int port1, port2;
-    static InetSocketAddress addr1, addr2;
-    static HeadPing ping1, ping2;
+    private static DatagramSocket socket1, socket2;
+    private static int port1, port2;
+    private static InetSocketAddress addr1, addr2;
+    private static HeadPing ping1, ping2;
 
     
     public static void globalSetUp() throws Exception {
