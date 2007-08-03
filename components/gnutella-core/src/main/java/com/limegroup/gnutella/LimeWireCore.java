@@ -2,10 +2,8 @@ package com.limegroup.gnutella;
 
 
 
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
@@ -37,17 +35,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 
 public class LimeWireCore {
-    
-    // DPINJ:  This would go away eventually, once we don't need ProviderHacks to have a single instance of LimeWireCore
-    public static LimeWireCore create(Module... modules) {
-        Module[] allModules = new Module[modules.length + 1];
-        System.arraycopy(modules, 0, allModules, 0, modules.length);
-        allModules[allModules.length-1] = new LimeWireCoreModule();
-        Injector injector = Guice.createInjector(allModules);
-        LimeWireCore core = injector.getInstance(LimeWireCore.class);
-        return core;
-    }
-    
+        
     @Inject private Injector injector;
     @Inject private Provider<LocalFileDetailsFactory> localFileDetailsFactory;
     @Inject private Provider<AlternateLocationFactory> alternateLocationFactory;
