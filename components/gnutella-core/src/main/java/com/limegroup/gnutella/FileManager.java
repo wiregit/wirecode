@@ -890,7 +890,6 @@ public abstract class FileManager {
     private void updateSharedDirectories(File directory, File parent, int revision) {
 //        if(LOG.isDebugEnabled())
 //            LOG.debug("Attempting to share directory: " + directory);
-        
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
@@ -1404,7 +1403,6 @@ public abstract class FileManager {
         if(LOG.isDebugEnabled())
             LOG.debug("Sharing file: " + file);
         
-
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
         ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
@@ -2017,22 +2015,7 @@ public abstract class FileManager {
         
         if (folder.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return false;
-        
-        //TODO: 
-        // don't share the location we download purchased songs from the LWS
-        if( folder.equals(SharingSettings.DIRECTORY_FOR_SAVING_LWS_FILES.getValue()))
-            return false;
-        else {
-            File parent = folder;
-            // if the parent is the LimeWire Store directory, don't share it
-            while( parent.getParentFile() != null ) {
-                parent = parent.getParentFile();
-                if( parent.equals(SharingSettings.DIRECTORY_FOR_SAVING_LWS_FILES.getValue()))
-                    return false;
-            }
-        }
-            
-        
+              
         if (isApplicationSpecialShareDirectory(folder)) {
             return false;
         }

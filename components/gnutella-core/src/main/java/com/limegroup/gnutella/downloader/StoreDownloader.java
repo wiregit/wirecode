@@ -14,6 +14,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -21,12 +22,15 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.store.StoreDescriptor;
 
@@ -274,8 +278,8 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     
 
 
-    /*
-        private DownloadStatus saveFile(URN fileHash){
+
+    private DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( DownloadStatus.SAVING );
         
@@ -337,14 +341,10 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
             }
         }
 
-        
-        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-            fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
-        else
-            fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
+        fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
         return DownloadStatus.COMPLETE;
     }
-    */
+
 
 }

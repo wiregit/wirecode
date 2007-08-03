@@ -235,7 +235,7 @@ public class ManagedDownloader extends AbstractDownloader
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The place to share completed downloads (and their metadata) */
-    private FileManager fileManager;
+    protected FileManager fileManager;
     /** The repository of incomplete files. */
     protected IncompleteFileManager incompleteFileManager;
     /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
@@ -684,7 +684,7 @@ public class ManagedDownloader extends AbstractDownloader
             ErrorService.error(cause);
         }
     }
-    private void reportDiskProblem(String cause) {
+    protected void reportDiskProblem(String cause) {
         if (DownloadSettings.REPORT_DISK_PROBLEMS.getBoolean())
             ErrorService.error(new DiskException(cause));
     }
@@ -2647,7 +2647,7 @@ public class ManagedDownloader extends AbstractDownloader
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
-    private synchronized List<LimeXMLDocument> getXMLDocuments() {
+    protected synchronized List<LimeXMLDocument> getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
         //those locations that we download from?
         List<LimeXMLDocument> allDocs = new ArrayList<LimeXMLDocument>();
