@@ -18,6 +18,8 @@ import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -36,6 +38,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This is the class that goes in the route table when a request is
  * sent whose reply is for me.
  */
+@Singleton
 public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
@@ -51,10 +54,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     
     private final NetworkManager networkManager;
 
-	/**
-	 * Private constructor to ensure that only this class can construct
-	 * itself.
-	 */
+    @Inject
 	ForMeReplyHandler(NetworkManager networkManager) {
 	    this.networkManager = networkManager;
 	    

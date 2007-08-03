@@ -1,123 +1,230 @@
 package com.limegroup.gnutella;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.concurrent.ExecutorsHelper;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
+import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
-import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
-import com.limegroup.bittorrent.TorrentEvent;
-import com.limegroup.bittorrent.TorrentEventListener;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
-import com.limegroup.bittorrent.tracking.TrackerFactoryImpl;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
-import com.limegroup.bittorrent.tracking.TrackerManagerFactoryImpl;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
-import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
-import com.limegroup.gnutella.dht.DHTControllerFactoryImpl;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
+import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
-import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
-import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
+import com.limegroup.gnutella.downloader.SourceRankerFactory;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
-import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
-import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.PingReplyFactory;
-import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.QueryRequestFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
-import com.limegroup.gnutella.messages.vendor.HeadPongFactoryImpl;
 import com.limegroup.gnutella.search.HostDataFactory;
-import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
-import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
-import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.SocketsManager;
 
 public class LimeWireCore {
     
-    private final Injector injector;
-    
-    public LimeWireCore() {
-        this.injector = Guice.createInjector(new LimeWireCoreModule());
+    // DPINJ:  This would go away eventually, once we don't need ProviderHacks to have a single instance of LimeWireCore
+    public static LimeWireCore create(Module... modules) {
+        Module[] allModules = new Module[modules.length + 1];
+        System.arraycopy(modules, 0, allModules, 0, modules.length);
+        allModules[allModules.length-1] = new LimeWireCoreModule();
+        Injector injector = Guice.createInjector(allModules);
+        LimeWireCore core = injector.getInstance(LimeWireCore.class);
+        return core;
     }
     
+    @Inject private Injector injector;
+    @Inject private Provider<LocalFileDetailsFactory> localFileDetailsFactory;
+    @Inject private Provider<AlternateLocationFactory> alternateLocationFactory;
+    @Inject private Provider<AltLocValueFactory> altLocValueFactory;
+    @Inject private Provider<DiskController> diskController;
+    @Inject private Provider<VerifyingFileFactory> verifyingFileFactory;
+    @Inject private Provider<SocketsManager> socketsManager;
+    @Inject private Provider<SourceRankerFactory> sourceRankerFactory;
+    @Inject private Provider<HostDataFactory> hostDataFactory;
+    @Inject private Provider<ManagedConnectionFactory> managedConnectionFactory;
+    @Inject private Provider<QueryRequestFactory> queryRequestFactory;
+    @Inject private Provider<QueryHandlerFactory> queryHandlerFactory;
+    @Inject private Provider<UploadSlotManager> uploadSlotManager;
+    @Inject private Provider<FileManager> fileManager;
+    @Inject private Provider<UploadManager> uploadManager;
+    @Inject private Provider<HeadPongFactory> headPongFactory;
+    @Inject private Provider<HTTPDownloaderFactory> httpDownloaderFactory;
+    @Inject private Provider<DownloadWorkerFactory> downloadWorkerFactory;
+    @Inject private Provider<FeaturesWriter> featuresWriter;
+    @Inject private Provider<HTTPHeaderUtils> httpHeaderUtils;
+    @Inject private Provider<TrackerFactory> trackerFactory;
+    @Inject private Provider<TrackerManagerFactory> trackerManagerFactory;
+    @Inject private Provider<TorrentManager> torrentManager;
+    @Inject private Provider<ManagedTorrentFactory> managedTorrentFactory;
+    @Inject private Provider<PushEndpointFactory> pushEndpointFactory;
+    @Inject private Provider<HeadersFactory> headersFactory;
+    @Inject private Provider<HandshakeResponderFactory> handshakeResponderFactory;
+    @Inject private Provider<PushProxiesValueFactory> pushProxiesValueFactory;
+    @Inject private Provider<PingReplyFactory> pingReplyFactory;
+    @Inject private Provider<DHTControllerFactory> dhtControllerFactory;
+    @Inject private Provider<DHTManager> dhtManager;
+    @Inject private Provider<ConnectionManager> connectionManager;
+    @Inject private Provider<NetworkManager> networkManager;
+    @Inject private Provider<UDPService> udpService;
+    @Inject private Provider<Acceptor> acceptor;
+    @Inject private Provider<ForMeReplyHandler> forMeReplyHandler;
+
     public Injector getInjector() {
         return injector;
     }
+
+    public LocalFileDetailsFactory getLocalFileDetailsFactory() {
+        return localFileDetailsFactory.get();
+    }
+
+    public AlternateLocationFactory getAlternateLocationFactory() {
+        return alternateLocationFactory.get();
+    }
+
+    public AltLocValueFactory getAltLocValueFactory() {
+        return altLocValueFactory.get();
+    }
+
+    public DiskController getDiskController() {
+        return diskController.get();
+    }
+
+    public VerifyingFileFactory getVerifyingFileFactory() {
+        return verifyingFileFactory.get();
+    }
+
+    public SocketsManager getSocketsManager() {
+        return socketsManager.get();
+    }
+
+    public SourceRankerFactory getSourceRankerFactory() {
+        return sourceRankerFactory.get();
+    }
+
+    public HostDataFactory getHostDataFactory() {
+        return hostDataFactory.get();
+    }
+
+    public ManagedConnectionFactory getManagedConnectionFactory() {
+        return managedConnectionFactory.get();
+    }
+
+    public QueryRequestFactory getQueryRequestFactory() {
+        return queryRequestFactory.get();
+    }
+
+    public QueryHandlerFactory getQueryHandlerFactory() {
+        return queryHandlerFactory.get();
+    }
+
+    public UploadSlotManager getUploadSlotManager() {
+        return uploadSlotManager.get();
+    }
+
+    public FileManager getFileManager() {
+        return fileManager.get();
+    }
+
+    public UploadManager getUploadManager() {
+        return uploadManager.get();
+    }
+
+    public HeadPongFactory getHeadPongFactory() {
+        return headPongFactory.get();
+    }
+
+    public HTTPDownloaderFactory getHttpDownloaderFactory() {
+        return httpDownloaderFactory.get();
+    }
+
+    public DownloadWorkerFactory getDownloadWorkerFactory() {
+        return downloadWorkerFactory.get();
+    }
+
+    public FeaturesWriter getFeaturesWriter() {
+        return featuresWriter.get();
+    }
+
+    public HTTPHeaderUtils getHttpHeaderUtils() {
+        return httpHeaderUtils.get();
+    }
+
+    public TrackerFactory getTrackerFactory() {
+        return trackerFactory.get();
+    }
+
+    public TrackerManagerFactory getTrackerManagerFactory() {
+        return trackerManagerFactory.get();
+    }
+
+    public TorrentManager getTorrentManager() {
+        return torrentManager.get();
+    }
+
+    public ManagedTorrentFactory getManagedTorrentFactory() {
+        return managedTorrentFactory.get();
+    }
+
+    public PushEndpointFactory getPushEndpointFactory() {
+        return pushEndpointFactory.get();
+    }
+
+    public HeadersFactory getHeadersFactory() {
+        return headersFactory.get();
+    }
+
+    public HandshakeResponderFactory getHandshakeResponderFactory() {
+        return handshakeResponderFactory.get();
+    }
+
+    public PushProxiesValueFactory getPushProxiesValueFactory() {
+        return pushProxiesValueFactory.get();
+    }
+
+    public PingReplyFactory getPingReplyFactory() {
+        return pingReplyFactory.get();
+    }
+
+    public DHTControllerFactory getDhtControllerFactory() {
+        return dhtControllerFactory.get();
+    }
+
+    public DHTManager getDhtManager() {
+        return dhtManager.get();
+    }
+
+    public ConnectionManager getConnectionManager() {
+        return connectionManager.get();
+    }
+
+    public NetworkManager getNetworkManager() {
+        return networkManager.get();
+    }
+
+    public UDPService getUdpService() {
+        return udpService.get();
+    }
+
+    public Acceptor getAcceptor() {
+        return acceptor.get();
+    }
     
-    private static class LimeWireCoreModule extends AbstractModule {
-        @Override
-        protected void configure() {
-            bind(NetworkManager.class).to(NetworkManagerImpl.class);
-            bind(DHTManager.class).to(DHTManagerImpl.class);
-            bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
-            bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);
-            bind(PushProxiesValueFactory.class).to(PushProxiesValueFactoryImpl.class);
-            bind(HandshakeResponderFactory.class).to(HandshakeResponderFactoryImpl.class);
-            bind(HeadersFactory.class).to(HeadersFactoryImpl.class);
-            bind(PushEndpointFactory.class).to(PushEndpointFactoryImpl.class);
-            bind(ManagedTorrentFactory.class).to(ManagedTorrentFactoryImpl.class);
-            bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);            
-            bind(TrackerManagerFactory.class).to(TrackerManagerFactoryImpl.class);
-            bind(TrackerFactory.class).to(TrackerFactoryImpl.class);
-            bind(DownloadWorkerFactory.class).to(DownloadWorkerFactoryImpl.class);
-            bind(HTTPDownloaderFactory.class).to(HTTPDownloaderFactoryImpl.class);
-            bind(HeadPongFactory.class).to(HeadPongFactoryImpl.class);
-            bind(UploadManager.class).to(HTTPUploadManager.class);
-            bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
-            bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
-            bind(ManagedConnectionFactory.class).to(ManagedConnectionFactoryImpl.class);
-            bind(HostDataFactory.class).to(HostDataFactoryImpl.class);
-            bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
-            bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
-            bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
-            
-            // DPINJ: Necessary evil for now...
-            requestStaticInjection(ProviderHacks.class);
-            
-            // DPINJ: Need to add interface to these classes
-            //bind(UDPService.class)
-            //bind(Acceptor.class);
-            //bind(ConnectionManager.class);
-            //bind(TorrentManager.class);
-            //bind(HTTPHeaderUtils.class)
-            //bind(FeaturesWriter.class);
-            bind(FileManager.class).to(MetaFileManager.class);
-            //bind(UploadSlotManager.class);
-            //bind(SourceRankerFactory.class);
-            //bind(SocketsManager.class);
-            //bind(VerifyingFileFactory.class);
-            //bind(DiskController.class);
-            
-            // DPINJ: Need to figure out what the hell to do with these.
-            bind(ActivityCallback.class).toProvider(ProviderHacks.activityCallback);
-            
-            
-            // DPINJ: Could delay instantiation...
-            bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
-            
-            // DPINJ: Need to create & inject the provider somehow...
-            bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(ProviderHacks.nioScheduledExecutorService);
-        }    
+    public ForMeReplyHandler getForMeReplyHandler() {
+        return forMeReplyHandler.get(); 
     }
 
 }

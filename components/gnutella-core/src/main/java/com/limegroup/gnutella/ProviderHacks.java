@@ -6,7 +6,6 @@ import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
@@ -110,13 +109,6 @@ public class ProviderHacks {
         }
     };
     
-    public static final Provider<ForMeReplyHandler> forMeReplyHandler = new AbstractLazySingletonProvider<ForMeReplyHandler>() {
-        protected ForMeReplyHandler createObject() {
-            return new ForMeReplyHandler(getNetworkManager());
-        }
-    };
-    public static ForMeReplyHandler getForMeReplyHandler() { return forMeReplyHandler.get(); }
-    
     
     //-------------------------------------------
     // hack that always constructs new things -- hard to guicify...
@@ -129,114 +121,43 @@ public class ProviderHacks {
     
     
     //-------------------------------------------
-    // hack providers that construct new things, and getters for getting them easily.
-
-    static {
-        new LimeWireCore();
-    }
-
-
-    @Inject public static Provider<Acceptor> acceptor;
-    public static Acceptor getAcceptor() { return acceptor.get(); }
-    
-    @Inject public static Provider<UDPService> udpService;
-    public static UDPService getUdpService() { return udpService.get(); }
-    
-    @Inject public static Provider<NetworkManager> networkManager;
-    public static final NetworkManager getNetworkManager() { return networkManager.get(); }
-    
-    @Inject public static Provider<ConnectionManager> connectionManager;
-    public static ConnectionManager getConnectionManager() { return connectionManager.get(); }
-    
-    @Inject public static Provider<DHTManager> dhtManager;
-    public static DHTManager getDHTManager() { return dhtManager.get(); }
-    
-    @Inject public static Provider<DHTControllerFactory> dhtControllerFactory;
-    public static DHTControllerFactory getDHTControllerFactory() { return dhtControllerFactory.get(); }
-    
-    @Inject public static Provider<PingReplyFactory> pingReplyFactory;
-    public static final PingReplyFactory getPingReplyFactory() { return pingReplyFactory.get(); }
-    
-    @Inject public static Provider<PushProxiesValueFactory> pushProxiesValueFactory;
-    public static final PushProxiesValueFactory getPushProxiesValueFactory() { return pushProxiesValueFactory.get(); }
-    
-    @Inject public static Provider<HandshakeResponderFactory> handshakeResponderFactory;
-    public static HandshakeResponderFactory getHandshakeResponderFactory() { return handshakeResponderFactory.get(); }
-   
-    @Inject public static Provider<HeadersFactory> headersFactory;
-    public static HeadersFactory getHeadersFactory() { return headersFactory.get(); }
-    
-    @Inject public static Provider<PushEndpointFactory> pushEndpointFactory;
-    public static final PushEndpointFactory getPushEndpointFactory() { return pushEndpointFactory.get(); }
- 
-    @Inject public static Provider<ManagedTorrentFactory> managedTorrentFactory;
-    public static ManagedTorrentFactory getManagedTorrentFactory() { return managedTorrentFactory.get(); }
-    
-    @Inject public static Provider<TorrentManager> torrentManager;
-    public static TorrentManager getTorrentManager() { return torrentManager.get(); }
-    
-    @Inject public static Provider<TrackerManagerFactory> trackerManagerFactory;
-    public static TrackerManagerFactory getTrackerManagerFactory() { return trackerManagerFactory.get(); }
-
-    @Inject public static Provider<TrackerFactory> trackerFactory;
-    public static TrackerFactory getTrackerFactory() { return trackerFactory.get(); }
-    
-    @Inject public static Provider<HTTPHeaderUtils> httpHeaderUtils;
-    public static final HTTPHeaderUtils getHTTPHeaderUtils() { return httpHeaderUtils.get(); }
-    
-    @Inject public static Provider<FeaturesWriter> featuresWriter;
-    public static FeaturesWriter getFeaturesWriter() { return featuresWriter.get(); }
-
-    @Inject public static Provider<DownloadWorkerFactory> downloadWorkerFactory;
-    public static DownloadWorkerFactory getDownloadWorkerFactory() { return downloadWorkerFactory.get(); }
- 
-    @Inject public static Provider<HTTPDownloaderFactory> httpDownloaderFactory;
-    public static HTTPDownloaderFactory getHTTPDownloaderFactory() { return httpDownloaderFactory.get(); }
-
-    @Inject public static Provider<HeadPongFactory> headPongFactory;
-    public static HeadPongFactory getHeadPongFactory() { return headPongFactory.get(); }
- 
-    @Inject public static Provider<UploadManager> uploadManager;
-    public static UploadManager getUploadManager() { return uploadManager.get(); }
-
-    @Inject public static Provider<FileManager> fileManager;
-    public static FileManager getFileManager() { return fileManager.get(); }
-    
-    @Inject public static Provider<UploadSlotManager> uploadSlotManager;
-    public static UploadSlotManager getUploadSlotManager() { return uploadSlotManager.get(); }
-
-    @Inject public static Provider<QueryHandlerFactory> queryHandlerFactory;
-    public static QueryHandlerFactory getQueryHandlerFactory() { return queryHandlerFactory.get(); }
-    
-    @Inject public static Provider<QueryRequestFactory> queryRequestFactory;
-    public static QueryRequestFactory getQueryRequestFactory() { return queryRequestFactory.get(); }
-    
-    @Inject public static Provider<ManagedConnectionFactory> managedConnectionFactory;
-    public static ManagedConnectionFactory getManagedConnectionFactory() { return managedConnectionFactory.get(); }
-       
-    @Inject public static Provider<HostDataFactory> hostDataFactory;
-    public static HostDataFactory getHostDataFactory() { return hostDataFactory.get(); }
-
-    @Inject public static Provider<SourceRankerFactory> sourceRankerFactory ;
-    public static SourceRankerFactory getSourceRankerFactory() { return sourceRankerFactory.get(); }
-
-    @Inject public static Provider<SocketsManager> socketsManager;
-    public static SocketsManager getSocketsManager() { return socketsManager.get(); }
-    
-    @Inject public static Provider<VerifyingFileFactory> verifyingFileFactory;
-    public static VerifyingFileFactory getVerifyingFileFactory() { return verifyingFileFactory.get(); }
-    
-    @Inject public static Provider<DiskController> diskController;
-    public static DiskController getDiskController() { return diskController.get(); }    
-    
-    @Inject public static Provider<AltLocValueFactory> altLocValueFactory;
-    public static final AltLocValueFactory getAltLocValueFactory() { return altLocValueFactory.get(); }
-    
-    @Inject public static Provider<AlternateLocationFactory> alternateLocationFactory;
-    public static final AlternateLocationFactory getAlternateLocationFactory() { return alternateLocationFactory.get(); }
-      
-    @Inject public static Provider<LocalFileDetailsFactory> localFileDetailsFactory ;
-    public static final LocalFileDetailsFactory getLocalFileDetailsFactory() { return localFileDetailsFactory.get(); }
+    public final static LimeWireCore core = LimeWireCore.create();
+    public static LimeWireCore getCore() { return core; }
+    public static Acceptor getAcceptor() { return core.getAcceptor(); }    
+    public static UDPService getUdpService() { return core.getUdpService(); }    
+    public static NetworkManager getNetworkManager() { return core.getNetworkManager(); }    
+    public static ConnectionManager getConnectionManager() { return core.getConnectionManager(); }    
+    public static DHTManager getDHTManager() { return core.getDhtManager(); }    
+    public static DHTControllerFactory getDHTControllerFactory() { return core.getDhtControllerFactory(); }    
+    public static PingReplyFactory getPingReplyFactory() { return core.getPingReplyFactory(); }    
+    public static PushProxiesValueFactory getPushProxiesValueFactory() { return core.getPushProxiesValueFactory(); }    
+    public static HandshakeResponderFactory getHandshakeResponderFactory() { return core.getHandshakeResponderFactory(); }   
+    public static HeadersFactory getHeadersFactory() { return core.getHeadersFactory(); }    
+    public static PushEndpointFactory getPushEndpointFactory() { return core.getPushEndpointFactory(); } 
+    public static ManagedTorrentFactory getManagedTorrentFactory() { return core.getManagedTorrentFactory(); }    
+    public static TorrentManager getTorrentManager() { return core.getTorrentManager(); }    
+    public static TrackerManagerFactory getTrackerManagerFactory() { return core.getTrackerManagerFactory(); }
+    public static TrackerFactory getTrackerFactory() { return core.getTrackerFactory(); }    
+    public static HTTPHeaderUtils getHTTPHeaderUtils() { return core.getHttpHeaderUtils(); }    
+    public static FeaturesWriter getFeaturesWriter() { return core.getFeaturesWriter(); }
+    public static DownloadWorkerFactory getDownloadWorkerFactory() { return core.getDownloadWorkerFactory(); } 
+    public static HeadPongFactory getHeadPongFactory() { return core.getHeadPongFactory(); } 
+    public static UploadManager getUploadManager() { return core.getUploadManager(); }
+    public static FileManager getFileManager() { return core.getFileManager(); }    
+    public static UploadSlotManager getUploadSlotManager() { return core.getUploadSlotManager(); }
+    public static QueryHandlerFactory getQueryHandlerFactory() { return core.getQueryHandlerFactory(); }    
+    public static QueryRequestFactory getQueryRequestFactory() { return core.getQueryRequestFactory(); }    
+    public static ManagedConnectionFactory getManagedConnectionFactory() { return core.getManagedConnectionFactory(); }       
+    public static HostDataFactory getHostDataFactory() { return core.getHostDataFactory(); }
+    public static SourceRankerFactory getSourceRankerFactory() { return core.getSourceRankerFactory(); }
+    public static SocketsManager getSocketsManager() { return core.getSocketsManager(); }    
+    public static VerifyingFileFactory getVerifyingFileFactory() { return core.getVerifyingFileFactory(); }    
+    public static DiskController getDiskController() { return core.getDiskController(); }    
+    public static AltLocValueFactory getAltLocValueFactory() { return core.getAltLocValueFactory(); }    
+    public static AlternateLocationFactory getAlternateLocationFactory() { return core.getAlternateLocationFactory(); }      
+    public static LocalFileDetailsFactory getLocalFileDetailsFactory() { return core.getLocalFileDetailsFactory(); }
+    public static HTTPDownloaderFactory getHTTPDownloaderFactory() { return core.getHttpDownloaderFactory(); }
+    public static ForMeReplyHandler getForMeReplyHandler() { return core.getForMeReplyHandler(); }
 
     
 }
