@@ -118,7 +118,6 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE = new RouterService(callback);
-        RouterService.preGuiInit();
 		ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
         RouterService.connect();

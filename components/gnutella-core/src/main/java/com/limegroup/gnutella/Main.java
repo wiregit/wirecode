@@ -26,7 +26,6 @@ public class Main {
         //RouterService.setCallback(callback);
         
         RouterService service = new RouterService(callback);
-        RouterService.preGuiInit();
         service.start(); 
         
         // DPINJ: get from injector!

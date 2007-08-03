@@ -403,7 +403,7 @@ public class RouterService {
   	 * performs the tasks usually run while the gui is initializing synchronously
   	 * to be used for tests and when running only the core
   	 */
-  	public static void preGuiInit() {
+  	public void preGuiInit() {
   		
   		synchronized(RouterService.class) {
   			if (_state != StartStatus.NOTHING) // already did this?

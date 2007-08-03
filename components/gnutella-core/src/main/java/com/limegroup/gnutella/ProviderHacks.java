@@ -46,7 +46,11 @@ public class ProviderHacks {
 
     public static final Provider<ActivityCallback> activityCallback = new Provider<ActivityCallback>() {
         public ActivityCallback get() {
-            return RouterService.getCallback();
+            ActivityCallback callback = RouterService.getCallback();
+            // Guice can't deal with null values, and lots of tests leave this
+            // as null sometimes...
+            // This might cause some problems if stuff is constructed too early, but we'll find out in tests.
+            return callback != null ? callback : new ActivityCallbackAdapter();
         }
     };
     

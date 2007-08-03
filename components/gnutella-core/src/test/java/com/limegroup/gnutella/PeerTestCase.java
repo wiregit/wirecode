@@ -78,7 +78,6 @@ public abstract class PeerTestCase extends LimeTestCase {
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                          "getActivityCallback");
         rs=new RouterService(callback);
-        RouterService.preGuiInit();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();

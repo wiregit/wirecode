@@ -22,7 +22,6 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;

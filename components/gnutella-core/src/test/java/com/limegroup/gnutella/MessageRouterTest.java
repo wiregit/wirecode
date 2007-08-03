@@ -713,7 +713,6 @@ public final class MessageRouterTest extends LimeTestCase {
         AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
                 rs, "DHT_MANAGER_REFERENCE");
         PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
-        RouterService.preGuiInit();
         rs.start();
         
         Thread.sleep(300);
