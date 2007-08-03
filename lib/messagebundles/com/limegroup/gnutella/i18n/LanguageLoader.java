@@ -44,7 +44,7 @@ class LanguageLoader {
      * 
      * @return the languages map (from complete locale codes to LocaleInfo)
      */
-    Map loadLanguages() {
+    Map<String, LanguageInfo> loadLanguages() {
         if (!this.lib.isDirectory())
             throw new IllegalArgumentException("invalid lib: " + this.lib);
         final String[] files = this.lib.list();

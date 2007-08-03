@@ -26,6 +26,7 @@ import org.limewire.util.OSUtils;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
@@ -176,13 +177,13 @@ public class ExternalControl {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
 				msg = msg != null ? msg : curOpt.toString();
-                MessageService.showError("ERROR_BAD_MAGNET_LINK", msg);
+                MessageService.showError(I18n.marktr("ERROR_BAD_MAGNET_LINK"), msg);
                 return;	
             }
             
             // Warn the user that the link was slightly invalid
             if( msg != null )
-                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
+                MessageService.showError(I18n.marktr("ERROR_INVALID_URLS_IN_MAGNET"));
             
             try {
             	RouterService.download(curOpt, false);

@@ -241,7 +241,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageService.showError(I18n.marktr("ERROR_NO_PORTS_AVAILABLE"));
             }
         }
         

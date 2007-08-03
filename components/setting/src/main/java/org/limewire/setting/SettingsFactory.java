@@ -17,6 +17,8 @@ import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.I18n;
+
 
 /**
  * Coordinates the creating, storing and reloading of persistent data to and 
@@ -183,7 +185,7 @@ public final class SettingsFactory implements Iterable<Setting> {
                 }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError("ERROR_PROPS_CORRUPTED");
+                MessageService.showError(I18n.marktr("ERROR_PROPS_CORRUPTED"));
             }
         } catch(IOException e) {
             ErrorService.error(e);

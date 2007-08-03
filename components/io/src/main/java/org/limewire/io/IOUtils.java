@@ -29,6 +29,19 @@ import org.limewire.util.StringUtils;
  */
 public class IOUtils {
     
+    // mark message strings for translation
+    static {
+        I18n.marktr("ERROR_DISK_FULL_GENERIC");
+		I18n.marktr("ERROR_LOCKED_BY_PROCESS_GENERIC");
+		I18n.marktr("ERROR_ACCESS_DENIED_GENERIC");
+		I18n.marktr("ERROR_INVALID_NAME_GENERIC");
+
+        I18n.marktr("ERROR_DISK_FULL_DOWNLOAD");
+		I18n.marktr("ERROR_LOCKED_BY_PROCESS_DOWNLOAD");
+		I18n.marktr("ERROR_ACCESS_DENIED_DOWNLOAD");
+		I18n.marktr("ERROR_INVALID_NAME_DOWNLOAD");
+    }
+    
     /**
      * Attempts to handle an IOException. If we know expect the problem,
      * we can either ignore it or display a friendly error (both returning

@@ -212,7 +212,7 @@ public class DownloadManager implements BandwidthTracker {
             // only show the error if the files existed but couldn't be read.
             } else if(backup.exists() || real.exists()) {
                 LOG.debug("Reading both downloads files failed.");
-                MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+                MessageService.showError(I18n.marktr("DOWNLOAD_COULD_NOT_READ_SNAPSHOT"));
             }   
         } else {
             LOG.debug("Reading downloads.dat worked!");
