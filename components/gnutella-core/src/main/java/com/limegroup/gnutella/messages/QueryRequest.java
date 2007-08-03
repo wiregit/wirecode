@@ -187,7 +187,8 @@ public class QueryRequest extends Message implements Serializable{
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
-                        int metaFlagMask, boolean normalize) {
+                        int metaFlagMask, boolean normalize,
+                        boolean canDoFWT) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
@@ -238,7 +239,7 @@ public class QueryRequest extends Message implements Serializable{
                 minSpeed |= SPECIAL_FIREWALL_MASK;
             // if i'm firewalled and can do solicited, mark the query for fw
             // transfer capability.
-            if (isFirewalled && ProviderHacks.getUdpService().canDoFWT())
+            if (isFirewalled && canDoFWT)
                 minSpeed |= SPECIAL_FWTRANS_MASK;
             // THE DEAL:
             // if we can NOT receive out of band replies, we want in-band XML -

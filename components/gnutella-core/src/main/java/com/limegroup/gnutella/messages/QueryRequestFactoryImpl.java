@@ -677,7 +677,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         return new QueryRequest(guid, ttl, minSpeed, query, richQuery,
                 queryUrns, addressSecurityToken, isFirewalled, network,
                 canReceiveOutOfBandReplies, featureSelector, doNotProxy,
-                metaFlagMask, normalize);
+                metaFlagMask, normalize, networkManager.canDoFWT());
     }
 
 }

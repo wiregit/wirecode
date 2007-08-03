@@ -120,6 +120,12 @@ import com.limegroup.gnutella.version.UpdateHandler;
  */
 public class RouterService {
     
+    /////-------------------------
+    // DPINJ: TODOS!!!! ----------
+    //  UDPService was always init'd (which internally scheduled) immediately when RS was touched.
+    //     It now is constructed lazily when needed.
+    //     Check if this is a problem, and if so, fix it.
+    
     private static final Log LOG = LogFactory.getLog(RouterService.class);
     
     static {
@@ -165,12 +171,6 @@ public class RouterService {
 	 */
 	@SuppressWarnings("unused") //DPINJ: touched to ensure it initializes, fix!
     private static final Statistics STATISTICS = Statistics.instance();
-
-	/**
-	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
-	 * messages.
-	 */
-	static final UDPService UDPSERVICE = ProviderHacks.getUdpService();
     
 
 	/**
