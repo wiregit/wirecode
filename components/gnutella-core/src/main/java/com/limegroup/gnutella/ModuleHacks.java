@@ -19,6 +19,10 @@ public class ModuleHacks extends AbstractModule {
         // DPINJ: Need to figure out what the hell to do with these.
         //----------------------------------------------        
         bind(ActivityCallback.class).toProvider(activityCallback);
+        bind(NIODispatcher.class).toProvider(nioDispatcher);
+        bind(Statistics.class).toProvider(statistics);
+        bind(ContentManager.class).toProvider(contentManager);
+        bind(ByteBufferCache.class).toProvider(byteBufferCache);
         
         // DPINJ: Need to create & inject the provider w/ NIODispatcher somehow...
         //----------------------------------------------
