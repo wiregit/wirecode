@@ -40,5 +40,5 @@ public class SecuritySettings extends MojitoProps {
      */
     public static final BooleanSetting SUBSTITUTE_TOKEN_PORT
         = FACTORY.createRemoteBooleanSetting("SUBSTITUTE_TOKEN_PORT", 
-                false, "Mojito.SubstituteTokenPort");
+                true, "Mojito.SubstituteTokenPort");
 }
