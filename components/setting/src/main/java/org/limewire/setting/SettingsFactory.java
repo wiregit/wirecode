@@ -17,9 +17,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.I18n;
-
-
 /**
  * Coordinates the creating, storing and reloading of persistent data to and 
  * from disk for {@link Setting} objects. Each <code>Setting</code> creation 
