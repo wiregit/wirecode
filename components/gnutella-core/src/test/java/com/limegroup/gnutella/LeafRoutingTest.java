@@ -348,7 +348,7 @@ public class LeafRoutingTest extends LimeTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
+        assertTrue(ProviderHacks.getFileManager().getNumFiles() == 2);
 
         // send a query that should hit
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -384,7 +384,7 @@ public class LeafRoutingTest extends LimeTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, RouterService.getFileManager().getNumFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
 
         // get the URNS for the files
         File berkeley = 

@@ -264,9 +264,9 @@ public class DownloadTest extends LimeTestCase {
         System.runFinalization();
         System.gc();
         
-        FileDesc []shared = RouterService.getFileManager().getAllSharedFileDescriptors();
+        FileDesc []shared = ProviderHacks.getFileManager().getAllSharedFileDescriptors();
         for (int i = 0; i < shared.length; i++) 
-            RouterService.getFileManager().removeFileIfShared(shared[i].getFile());
+            ProviderHacks.getFileManager().removeFileIfShared(shared[i].getFile());
         
         saveAltLocs = false;
         validAlts = null;
@@ -1870,7 +1870,7 @@ public class DownloadTest extends LimeTestCase {
             public void run() {
                 try {
                     Thread.sleep(complete ? 4000 : 1500);
-                    FileDesc fd = RouterService.getFileManager().
+                    FileDesc fd = ProviderHacks.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertTrue(fd instanceof IncompleteFileDesc);
                     RouterService.getAltlocManager().add(
@@ -1935,7 +1935,7 @@ public class DownloadTest extends LimeTestCase {
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =
-            RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
+            ProviderHacks.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
         RouterService.getAltlocManager().add(al1, null);

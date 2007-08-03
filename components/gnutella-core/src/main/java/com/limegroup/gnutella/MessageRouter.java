@@ -480,7 +480,7 @@ public abstract class MessageRouter {
     public void initialize() {
         _manager = ProviderHacks.getConnectionManager();
 		_callback = RouterService.getCallback();
-		_fileManager = RouterService.getFileManager();
+		_fileManager = ProviderHacks.getFileManager();
         
 		_bypassedResultsCache = new BypassedResultsCache(_callback, RouterService.getDownloadManager());
         
@@ -2318,7 +2318,7 @@ public abstract class MessageRouter {
         byte[] guid = queryRequest.getGUID();
         byte ttl = (byte)(queryRequest.getHops() + 1);
 
-		UploadManager um = RouterService.getUploadManager();
+		UploadManager um = ProviderHacks.getUploadManager();
 
         //Return measured speed if possible, or user's speed otherwise.
         long speed = um.measuredUploadSpeed();
@@ -2910,7 +2910,7 @@ public abstract class MessageRouter {
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value
-            boolean isBusy = !RouterService.getUploadManager().mayBeServiceable();
+            boolean isBusy = !ProviderHacks.getUploadManager().mayBeServiceable();
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.

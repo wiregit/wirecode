@@ -4,16 +4,20 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 
 
 /**
  * Factory to create AltLocValues
  */
+@Singleton
 public class AltLocValueFactoryImpl implements AltLocValueFactory {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public AltLocValueFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

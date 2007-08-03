@@ -12,8 +12,11 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.ssl.TLSSocketFactory;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Singleton;
+
 
 /** Factory for creating Sockets. */
+@Singleton
 public class SocketsManager {
     
     /** The different ways a connection can be attempted. */
@@ -35,11 +38,6 @@ public class SocketsManager {
         OSUtils.isSocketChallengedWindows() ?
                 new LimitedSocketController(4) :
                 new SimpleSocketController();
-        
-	/**
-	 * Ensure this cannot be constructed.
-	 */
-	public SocketsManager() {}
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

@@ -1,13 +1,17 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 
+@Singleton
 public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory {
 
     private final HeadersFactory headersFactory;
 
     private final NetworkManager networkManager;
 
+    @Inject
     public HandshakeResponderFactoryImpl(HeadersFactory headersFactory,
             NetworkManager networkManager) {
         this.headersFactory = headersFactory;

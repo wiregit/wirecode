@@ -35,6 +35,7 @@ import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 
@@ -315,7 +316,7 @@ PieceSendListener, PieceReadListener {
 		if (usingSlot) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this+" cancelling slot request");
-			RouterService.getUploadSlotManager().cancelRequest(this);
+			ProviderHacks.getUploadSlotManager().cancelRequest(this);
 		}
 		usingSlot = false;
 	}
@@ -502,7 +503,7 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
 		usingSlot = false;
-		RouterService.getUploadSlotManager().requestDone(this);
+		ProviderHacks.getUploadSlotManager().requestDone(this);
 		readyForWriting();
 	}
 	
@@ -515,7 +516,7 @@ PieceSendListener, PieceReadListener {
 			return;
 		
 		usingSlot = true;
-		int proceed = RouterService.getUploadSlotManager().requestSlot(
+		int proceed = ProviderHacks.getUploadSlotManager().requestSlot(
 					this,
 					!context.getDiskManager().isComplete());
 		

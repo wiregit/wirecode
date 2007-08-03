@@ -1,12 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
+@Singleton
 public class SourceRankerFactory {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public SourceRankerFactory(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

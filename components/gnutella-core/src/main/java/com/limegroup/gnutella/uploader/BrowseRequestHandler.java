@@ -18,6 +18,7 @@ import org.limewire.http.HttpCoreUtils;
 import org.limewire.nio.observer.WriteObserver;
 
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -114,7 +115,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             sender.setWriteChannel(this);
             
             query = queryRequestFactory.createBrowseHostQuery();
-            iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
+            iterable = ProviderHacks.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }
         

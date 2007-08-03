@@ -20,8 +20,8 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
@@ -451,7 +451,7 @@ public class BTDownloader extends AbstractDownloader
         ifm = manager.getIncompleteFileManager();
         _torrent = downloadReferences.getManagedTorrentFactory().create(context);
         // DPINJ: make sure the torrentManager in the factory is the same as the one the listener is added to
-        TorrentManager torrentManager = RouterService.getTorrentManager();
+        TorrentManager torrentManager = ProviderHacks.getTorrentManager();
         torrentManager.addEventListener(this);
         ifm.addTorrentEntry(_info.getURN());
     }
@@ -459,7 +459,7 @@ public class BTDownloader extends AbstractDownloader
 	public void startDownload() {
 		new BTUploader((ManagedTorrent)_torrent,
 				_info, 
-				RouterService.getTorrentManager());
+				ProviderHacks.getTorrentManager());
 		_torrent.start();
 	}
 	
@@ -468,7 +468,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == DownloadStatus.QUEUED && RouterService.getTorrentManager().allowNewTorrent(); 
+		return getState() == DownloadStatus.QUEUED && ProviderHacks.getTorrentManager().allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {
@@ -499,7 +499,7 @@ public class BTDownloader extends AbstractDownloader
 
 	public synchronized void finish() {
         finished = true;
-		RouterService.getTorrentManager().removeEventListener(this);
+		ProviderHacks.getTorrentManager().removeEventListener(this);
 		_torrent = new FinishedTorrentDownload(_torrent);
 		_info = null;
 		propertiesMap.remove(METAINFO);

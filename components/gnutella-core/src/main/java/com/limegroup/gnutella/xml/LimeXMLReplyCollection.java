@@ -28,7 +28,7 @@ import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
@@ -626,7 +626,7 @@ public class LimeXMLReplyCollection {
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        RouterService.getFileManager().fileChanged(new File(fileName));
+        ProviderHacks.getFileManager().fileChanged(new File(fileName));
         return retVal;
     }
     

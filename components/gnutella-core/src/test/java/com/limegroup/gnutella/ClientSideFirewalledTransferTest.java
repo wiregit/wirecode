@@ -126,7 +126,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         drainUDP();
 
         // make sure leaf is sharing
-        assertEquals(2, RouterService.getFileManager().getNumFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,

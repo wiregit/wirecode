@@ -2,10 +2,14 @@ package com.limegroup.bittorrent;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 
+@Singleton
 public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     
     private final EventDispatcher<TorrentEvent, TorrentEventListener> eventDispatcher;
@@ -13,9 +17,10 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     private final NetworkManager networkManager;
     private final TrackerManagerFactory trackerManagerFactory;
 
+    @Inject
     public ManagedTorrentFactoryImpl(
             EventDispatcher<TorrentEvent, TorrentEventListener> eventDispatcher,
-            ScheduledExecutorService scheduledExecutorService,
+            @Named("nioExecutor") ScheduledExecutorService scheduledExecutorService,
             NetworkManager networkManager,
             TrackerManagerFactory trackerManagerFactory) {
         this.eventDispatcher = eventDispatcher;

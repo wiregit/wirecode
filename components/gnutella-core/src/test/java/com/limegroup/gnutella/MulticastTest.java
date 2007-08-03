@@ -88,7 +88,7 @@ public class MulticastTest extends LimeTestCase {
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
         ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getNewStandardMessageRouter());
-        FMAN = RouterService.getFileManager();
+        FMAN = ProviderHacks.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
     
@@ -119,7 +119,7 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER.multicasted.clear();
         U_HANDLER.unicasted.clear();
         
-        RouterService.getFileManager().loadSettingsAndWait(2000);
+        ProviderHacks.getFileManager().loadSettingsAndWait(2000);
         assertEquals("unexpected number of shared files", 1,
             FMAN.getNumFiles() );
 	}

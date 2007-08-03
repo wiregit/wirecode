@@ -41,7 +41,6 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
@@ -80,11 +79,9 @@ import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
@@ -128,16 +125,6 @@ public class RouterService {
     static {
         LimeCoreGlue.preinstall();
     }
-
-	/**
-	 * <tt>FileManager</tt> instance that manages access to shared files.
-	 */
-    private static FileManager fileManager = new MetaFileManager();
-    
-	/**
-	 * <tt>TorrentManager</tt> instance for handling torrents
-	 */
-	private static TorrentManager torrentManager = new TorrentManager();
     
     /**
      * ConnectionDispatcher instance that will dispatch incoming connections to
@@ -166,16 +153,6 @@ public class RouterService {
      */    
     private static com.limegroup.gnutella.HTTPAcceptor httpUploadAcceptor = new com.limegroup.gnutella.HTTPAcceptor();
 
-    /**
-     * <tt>UploadSlotManager</tt> for controlling upload slots.
-     */
-    private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
-    
-	/**
-	 * <tt>UploadManager</tt> for handling HTTP uploading.
-	 */
-    private static UploadManager uploadManager = new HTTPUploadManager(uploadSlotManager);
-    
     /**
      * <tt>PushManager</tt> for handling push requests.
      */
@@ -379,13 +356,13 @@ public class RouterService {
 	 */
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
-        fileManager.addFileEventListener(callback);
+        ProviderHacks.getFileManager().addFileEventListener(callback);
         RouterService.setMessageRouter(router);
         
         ProviderHacks.getConnectionManager().addEventListener(callback);
         ProviderHacks.getConnectionManager().addEventListener(ProviderHacks.getDHTManager());
         
-        nodeAssigner = new NodeAssigner(uploadManager, 
+        nodeAssigner = new NodeAssigner(ProviderHacks.getUploadManager(), 
                                         downloadManager, 
                                         ProviderHacks.getConnectionManager(),
                                         ProviderHacks.getNetworkManager()); // DPINJ: Use passed in manager!
@@ -496,7 +473,7 @@ public class RouterService {
 
             LOG.trace("START HTTPUploadManager");
             callback.componentLoading("UPLOAD_MANAGER");
-            uploadManager.start(httpUploadAcceptor, fileManager, callback, messageRouter); 
+            ProviderHacks.getUploadManager().start(httpUploadAcceptor, ProviderHacks.getFileManager(), callback, messageRouter); 
             LOG.trace("STOP HTTPUploadManager");
 
             LOG.trace("START HTTPUploadAcceptor");
@@ -545,12 +522,12 @@ public class RouterService {
             // callback.
             LOG.trace("START FileManager");
             callback.componentLoading("FILE_MANAGER");
-            fileManager.start();
+            ProviderHacks.getFileManager().start();
             LOG.trace("STOP FileManager");
     
             LOG.trace("START TorrentManager");
             callback.componentLoading("TORRENT_MANAGER");
-			torrentManager.initialize(fileManager, dispatcher, SimpleTimer.sharedTimer());
+			ProviderHacks.getTorrentManager().initialize(ProviderHacks.getFileManager(), dispatcher, SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
             
             LOG.trace("START ControlRequestAcceptor");
@@ -654,9 +631,9 @@ public class RouterService {
      * going at speed greater than 0.
      */
     public static boolean hasActiveUploads() {
-        getUploadSlotManager().measureBandwidth();
+        ProviderHacks.getUploadSlotManager().measureBandwidth();
         try {
-            return getUploadSlotManager().getMeasuredBandwidth() > 0;
+            return ProviderHacks.getUploadSlotManager().getMeasuredBandwidth() > 0;
         } catch (InsufficientDataException ide) {
         }
         return false;
@@ -769,26 +746,13 @@ public class RouterService {
 		return bandwidthManager;
 	}
     
-	/**
-	 * Accessor for the <tt>FileManager</tt> instance in use.
-	 *
-	 * @return the <tt>FileManager</tt> in use
-	 */
-    public static FileManager getFileManager(){
-        return fileManager;
-    }
-
-    /** 
+	/** 
      * Accessor for the <tt>DownloadManager</tt> instance in use.
      *
      * @return the <tt>DownloadManager</tt> in use
      */
     public static DownloadManager getDownloadManager() {
         return downloadManager;
-    }
-    
-    public static TorrentManager getTorrentManager() {
-    	return torrentManager;
     }
     
     public static AltLocManager getAltlocManager() {
@@ -799,24 +763,6 @@ public class RouterService {
         return contentManager;
     }
     
-	/** 
-     * Accessor for the <tt>UploadManager</tt> instance.
-     *
-     * @return the <tt>UploadManager</tt> in use
-     */
-	public static UploadManager getUploadManager() {
-		return uploadManager;
-	}
-
-    /** 
-     * Accessor for the <tt>UploadSlotManager</tt> instance.
-     *
-     * @return the <tt>UploadSlotManager</tt> in use
-     */
-	public static UploadSlotManager getUploadSlotManager() {
-		return uploadSlotManager;
-	}
-	
 	/**
 	 * Accessor for the <tt>HTTPAcceptor</tt> instance.
 	 *
@@ -983,7 +929,7 @@ public class RouterService {
         String host = addr.getHostAddress();
         return ProviderHacks.getConnectionManager().isConnectedTo(host) ||
                UDP_MULTIPLEXOR.isConnectedTo(addr) ||
-               uploadManager.isConnectedTo(addr); // ||
+               ProviderHacks.getUploadManager().isConnectedTo(addr); // ||
                // dloadManager.isConnectedTo(addr);
     }
 
@@ -1039,14 +985,14 @@ public class RouterService {
      * Returns the number of uploads in progress.
      */
     public static int getNumUploads() {
-        return uploadManager.uploadsInProgress() + torrentManager.getNumActiveTorrents();
+        return ProviderHacks.getUploadManager().uploadsInProgress() + ProviderHacks.getTorrentManager().getNumActiveTorrents();
     }
 
     /**
      * Returns the number of queued uploads.
      */
     public static int getNumQueuedUploads() {
-        return uploadManager.getNumQueuedUploads();
+        return ProviderHacks.getUploadManager().getNumQueuedUploads();
     }
     
     /**
@@ -1145,7 +1091,7 @@ public class RouterService {
             
            // torrentManager.writeSnapshot();
             
-            fileManager.stop(); // Saves UrnCache and CreationTimeCache
+            ProviderHacks.getFileManager().stop(); // Saves UrnCache and CreationTimeCache
 
             TigerTreeCache.instance().persistCache();
 
@@ -1195,7 +1141,7 @@ public class RouterService {
     }
     
     private static void cleanupTorrentMetadataFiles() {
-        if(!fileManager.isLoadFinished()) {
+        if(!ProviderHacks.getFileManager().isLoadFinished()) {
             return;
         }
         
@@ -1214,7 +1160,7 @@ public class RouterService {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(!fileManager.isFileShared(tFile) &&
+            if(!ProviderHacks.getFileManager().isFileShared(tFile) &&
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }
@@ -1521,14 +1467,14 @@ public class RouterService {
      * Returns the number of files being shared locally.
      */
     public static int getNumSharedFiles( ) {
-        return( fileManager.getNumFiles() );
+        return( ProviderHacks.getFileManager().getNumFiles() );
     }
     
     /**
      * Returns the number of files which are awaiting sharing.
      */
     public static int getNumPendingShared() {
-        return( fileManager.getNumPendingFiles() );
+        return( ProviderHacks.getFileManager().getNumPendingFiles() );
     }
 
 	/**
@@ -1537,14 +1483,14 @@ public class RouterService {
 	 * @return the size in bytes of shared files on this host
 	 */
 	public static int getSharedFileSize() {
-		return fileManager.getSize();
+		return ProviderHacks.getFileManager().getSize();
 	}
 	
 	/** 
 	 * Returns a list of all incomplete shared file descriptors.
 	 */
 	public static FileDesc[] getIncompleteFileDescriptors() {
-	    return fileManager.getIncompleteFileDescriptors();
+	    return ProviderHacks.getFileManager().getIncompleteFileDescriptors();
 	}
 
     /**
@@ -1557,7 +1503,7 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static FileDesc[] getSharedFileDescriptors(File directory) {
-		return fileManager.getSharedFileDescriptors(directory);
+		return ProviderHacks.getFileManager().getSharedFileDescriptors(directory);
     }
     
     /** 

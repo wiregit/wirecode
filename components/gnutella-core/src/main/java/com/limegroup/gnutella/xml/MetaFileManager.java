@@ -14,11 +14,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NameValue;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -31,6 +33,7 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
  * This class handles querying shared files with XML data and returning XML data
  * in replies.
  */
+@Singleton
 public class MetaFileManager extends FileManager {
     
     private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
@@ -423,7 +426,7 @@ public class MetaFileManager extends FileManager {
             if (file == null) { //pure metadata (no file)
                 res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
             } else { //meta-data about a specific file
-                FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
+                FileDesc fd = ProviderHacks.getFileManager().getFileDescForFile(file);
                 if( fd == null) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.

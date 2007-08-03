@@ -28,6 +28,7 @@ import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData;
@@ -579,7 +580,7 @@ BTLinkListener {
 			return false;
 		
 		// if we are complete, do not open any sockets - the active torrents will need them.
-		if (isComplete() && RouterService.getTorrentManager().hasNonSeeding())
+		if (isComplete() && ProviderHacks.getTorrentManager().hasNonSeeding())
 			return false;
 		
 		// provision some slots for incoming connections unless we're firewalled

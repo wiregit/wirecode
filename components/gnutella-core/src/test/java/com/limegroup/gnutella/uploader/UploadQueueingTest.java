@@ -145,13 +145,13 @@ public class UploadQueueingTest extends BaseTestCase {
         fm.get(0);
 
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        upManager = (HTTPUploadManager) RouterService.getUploadManager();
+        upManager = (HTTPUploadManager) ProviderHacks.getUploadManager();
         upManager.start(RouterService.getHTTPUploadAcceptor(), fm, RouterService.getCallback(), RouterService.getMessageRouter());
 
         RouterService.getHTTPUploadAcceptor().start(RouterService.getConnectionDispatcher());
         
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
     }
     
     @Override
@@ -171,8 +171,8 @@ public class UploadQueueingTest extends BaseTestCase {
         upManager.stop(RouterService.getHTTPUploadAcceptor());
         upManager = null;
         
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
 
         fm = null;
         rfd1 = null;

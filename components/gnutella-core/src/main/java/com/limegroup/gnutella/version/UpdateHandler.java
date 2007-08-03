@@ -475,7 +475,7 @@ public class UpdateHandler implements HttpClientListener {
                 continue; 
 
             DownloadManager dm = RouterService.getDownloadManager();
-            FileManager fm = RouterService.getFileManager();
+            FileManager fm = ProviderHacks.getFileManager();
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
                 
                 FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
@@ -519,7 +519,7 @@ public class UpdateHandler implements HttpClientListener {
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
     	DownloadManager dm = RouterService.getDownloadManager();
-    	FileManager fm = RouterService.getFileManager();
+    	FileManager fm = ProviderHacks.getFileManager();
     	if (!dm.isGUIInitd() || !fm.isLoadFinished())
     		return;
     	
@@ -709,7 +709,7 @@ public class UpdateHandler implements HttpClientListener {
      * there was nothing to download
      */
     private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         if (!fm.isLoadFinished())
             return false;
         

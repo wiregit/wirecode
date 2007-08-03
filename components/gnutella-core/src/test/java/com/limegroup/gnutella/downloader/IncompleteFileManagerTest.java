@@ -46,7 +46,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
     
     public void setUp() {
         ifm=new IncompleteFileManager();
-        fm = RouterService.getFileManager();
+        fm = ProviderHacks.getFileManager();
     }
 
     /** @param urn a SHA1 urn, or null */

@@ -59,13 +59,13 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
-        RouterService.getFileManager().addFileAlways(textFile, waiter);
-        RouterService.getFileManager().addFileAlways(torrentFile, waiter);
-        RouterService.getFileManager().addFileAlways(userTorrentFile, waiter);
-        RouterService.getFileManager().addFileAlways(appTextFile, waiter);
-        RouterService.getFileManager().addFileAlways(appTorrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(textFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(torrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(userTorrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(appTextFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(appTorrentFile, waiter);
         waiter.waitForLoad();
-    	assertEquals(5, RouterService.getFileManager().getNumFiles());
+    	assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
     }
     
     public static Integer numUPs() {

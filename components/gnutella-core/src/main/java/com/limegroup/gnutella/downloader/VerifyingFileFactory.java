@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /** A factory for creating VerifyingFiles. */
+@Singleton
 public class VerifyingFileFactory {
     
     private final DiskController diskController;
     
     /** Constructs a VerifyingFileFactory that uses the given DiskController when constructing VerifyingFiles. */
+    @Inject
     public VerifyingFileFactory(DiskController diskController) {
         this.diskController = diskController;
     }

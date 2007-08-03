@@ -10,13 +10,17 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.UDPConnection;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
+@Singleton
 public class PushEndpointFactoryImpl implements PushEndpointFactory {
     
     private final NetworkManager networkManager;
     private final Provider<PushEndpoint> selfProvider;
     
+    @Inject
     public PushEndpointFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
         this.selfProvider = new AbstractLazySingletonProvider<PushEndpoint>() {

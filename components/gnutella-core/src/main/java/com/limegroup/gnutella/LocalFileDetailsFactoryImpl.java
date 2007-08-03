@@ -5,12 +5,16 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+@Singleton
 public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public LocalFileDetailsFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

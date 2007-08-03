@@ -82,11 +82,11 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	public void setUp() throws Exception {
 	    super.setUp();
 	    
-	    RouterService.getFileManager().loadSettingsAndWait(4000);
+	    ProviderHacks.getFileManager().loadSettingsAndWait(4000);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    FileManager fm = RouterService.getFileManager();
+	    FileManager fm = ProviderHacks.getFileManager();
 	    FileDesc[] fds = fm.getAllSharedFileDescriptors();
 	    assertEquals(5, fds.length);
 	    for(int i = 0; i < fds.length; i++)

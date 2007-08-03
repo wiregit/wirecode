@@ -149,7 +149,7 @@ public class ServerSideWhatIsNewTest
         assertEquals(2, RouterService.getNumSharedFiles());
 
         CreationTimeCache ctCache = CreationTimeCache.instance();
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
 
@@ -284,7 +284,7 @@ public class ServerSideWhatIsNewTest
     // fine
     public void testAddSharedFiles() throws Exception {
         CreationTimeCache ctCache = CreationTimeCache.instance();
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
 
@@ -314,7 +314,7 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
 
-        RouterService.getFileManager().loadSettings();
+        ProviderHacks.getFileManager().loadSettings();
         int i = 0;
         for (; (i < 15) && (RouterService.getNumSharedFiles() < 4); i++)
             Thread.sleep(1000);
@@ -381,7 +381,7 @@ public class ServerSideWhatIsNewTest
     // a total black box test, but hacking up the changing of ID3 data isn't
     // worth the cost.  this test should be good enough....
     public void testFileChanged() throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         Long cTime = ctCache.getCreationTime(tempFile1URN);
@@ -445,7 +445,7 @@ public class ServerSideWhatIsNewTest
     // test that the fileChanged method of FM does the right thing when you 
     // change the file to a existing URN.
     public void testFileChangedToExistingURN() throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
 //        URN tempFile2URN = fm.getURNForFile(tempFile2);
@@ -511,7 +511,7 @@ public class ServerSideWhatIsNewTest
 
     // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();        
         
         int size = 0;
@@ -560,7 +560,7 @@ public class ServerSideWhatIsNewTest
     // manually delete a file, make sure it isn't shared and that the CTC has
     // the correct sizes, etc...
     public void testManualFileDeleteLoadSettings() throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
 
         tempFile1.delete(); tempFile1 = null;
@@ -588,7 +588,7 @@ public class ServerSideWhatIsNewTest
 
     // download a file and make sure the creation time given back is stored...
     public void testDownloadCapturesCreationTime() throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
         
         final int UPLOADER_PORT = 10000;
@@ -640,7 +640,7 @@ public class ServerSideWhatIsNewTest
     // download a file and make sure the creation time given back is stored...
     public void testSwarmDownloadCapturesOlderCreationTime() throws Exception {
         
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
 
         // get rid of the old shared file
@@ -709,7 +709,7 @@ public class ServerSideWhatIsNewTest
         susheel.setLastModified(123456);
         berkeley.setLastModified(123457);
         
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
 
         File winInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
@@ -739,9 +739,9 @@ public class ServerSideWhatIsNewTest
         osxDst.deleteOnExit();
         
         try {
-            RouterService.getFileManager().loadSettings();
+            ProviderHacks.getFileManager().loadSettings();
             int i = 0;
-            for (; (i < 15) && (RouterService.getNumSharedFiles()+RouterService.getFileManager().getNumForcedFiles() < 5); i++)
+            for (; (i < 15) && (RouterService.getNumSharedFiles()+ProviderHacks.getFileManager().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             if (i == 15)
                 fail("num shared files? " + RouterService.getNumSharedFiles());
@@ -753,7 +753,7 @@ public class ServerSideWhatIsNewTest
             //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
             //      files don't count), and 3 forced shared files
             assertEquals(2, RouterService.getNumSharedFiles());
-            assertEquals(3, RouterService.getFileManager().getNumForcedFiles());
+            assertEquals(3, ProviderHacks.getFileManager().getNumForcedFiles());
     
             {
                 Map urnToLong = 

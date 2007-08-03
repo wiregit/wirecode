@@ -14,6 +14,8 @@ import org.limewire.collection.NumericBuffer;
 import org.limewire.collection.QueueCounter;
 import org.limewire.inspection.Inspectable;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -24,6 +26,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
  * More information available here:  
  * http://limewire.org/wiki/index.php?title=UploadSlotsAndBT
  */
+@Singleton
 public class UploadSlotManager implements BandwidthTracker {
 	
 	private static final Log LOG = LogFactory.getLog(UploadSlotManager.class);
@@ -66,6 +69,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	private float sessionAverage;
 	private int numMeasures;
 	
+    @Inject
 	public UploadSlotManager() {
 		active = new CountingList<UploadSlotRequest>();
 		queued = new CountingList<HTTPSlotRequest>();

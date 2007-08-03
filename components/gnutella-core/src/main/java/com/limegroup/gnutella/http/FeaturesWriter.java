@@ -6,13 +6,17 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.settings.ChatSettings;
 
+@Singleton
 public class FeaturesWriter {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public FeaturesWriter(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

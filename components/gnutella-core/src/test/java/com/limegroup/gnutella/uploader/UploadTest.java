@@ -173,7 +173,7 @@ public class UploadTest extends LimeTestCase {
         }
 
         // make sure the FileDesc objects in file manager are up-to-date 
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         fm.loadSettingsAndWait(2000);
         
         File incFile = new File(_incompleteDir, incName);
@@ -187,9 +187,9 @@ public class UploadTest extends LimeTestCase {
         assertEquals(1, fm.getNumIncompleteFiles());
         assertEquals(2, fm.getNumFiles());
 
-        assertEquals("Unexpected uploads in progress", 0, RouterService
+        assertEquals("Unexpected uploads in progress", 0, ProviderHacks
                 .getUploadManager().uploadsInProgress());
-        assertEquals("Unexpected queued uploads", 0, RouterService
+        assertEquals("Unexpected queued uploads", 0, ProviderHacks
                 .getUploadManager().getNumQueuedUploads());
 
         client = HttpClientManager.getNewClient();
@@ -202,14 +202,14 @@ public class UploadTest extends LimeTestCase {
 
     @Override
     public void tearDown() {
-        ((HTTPUploadManager) RouterService.getUploadManager()).cleanup();
+        ((HTTPUploadManager) ProviderHacks.getUploadManager()).cleanup();
 
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
     }
 
     private void initThexTree() throws Exception {
-        FD = RouterService.getFileManager().getFileDescForFile(
+        FD = ProviderHacks.getFileManager().getFileDescForFile(
                 new File(_sharedDir, fileName));
         while (FD.getHashTree() == null) {
             Thread.sleep(300);
@@ -1259,7 +1259,7 @@ public class UploadTest extends LimeTestCase {
         // modify shared file and make sure it gets new timestamp
         Thread.sleep(1000);
         File file = new File(_sharedDir, fileName);
-        FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);        
+        FileDesc fd = ProviderHacks.getFileManager().getFileDescForFile(file);        
         FileOutputStream out = new FileOutputStream(file);
         try {
             out.write("abc".getBytes());
@@ -1278,7 +1278,7 @@ public class UploadTest extends LimeTestCase {
             }            
         };
         try {
-            RouterService.getFileManager().addFileEventListener(listener);
+            ProviderHacks.getFileManager().addFileEventListener(listener);
 
             GetMethod method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
             try {
@@ -1290,7 +1290,7 @@ public class UploadTest extends LimeTestCase {
 
             latch.await(500, TimeUnit.MILLISECONDS);
 
-            fd = RouterService.getFileManager().getFileDescForFile(file);
+            fd = ProviderHacks.getFileManager().getFileDescForFile(file);
             assertNotNull(fd);
             method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
             try {
@@ -1301,7 +1301,7 @@ public class UploadTest extends LimeTestCase {
                 method.releaseConnection();
             }
         } finally {
-            RouterService.getFileManager().removeFileEventListener(listener);
+            ProviderHacks.getFileManager().removeFileEventListener(listener);
         }
         
     }

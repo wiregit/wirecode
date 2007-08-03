@@ -10,6 +10,8 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
@@ -26,11 +28,13 @@ import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 /**
  * Provides methods to add commonly used headers to {@link HttpResponse}s.
  */
+@Singleton
 public class HTTPHeaderUtils {
 
     private final NetworkManager networkManager;
     private final FeaturesWriter featuresWriter;
     
+    @Inject
     public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager) {
         this.networkManager = networkManager;
         this.featuresWriter = featuresWriter;

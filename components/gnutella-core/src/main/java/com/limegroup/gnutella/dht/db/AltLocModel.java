@@ -20,7 +20,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -53,7 +53,7 @@ public class AltLocModel implements StorableModel {
             return Collections.emptySet();
         }
         
-        FileManager fileManager = RouterService.getFileManager();
+        FileManager fileManager = ProviderHacks.getFileManager();
         FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
         
         // List of Storables we're going to publish

@@ -172,7 +172,7 @@ public class DownloadManager implements BandwidthTracker {
         initialize(
                    RouterService.getCallback(),
                    RouterService.getMessageRouter(),
-                   RouterService.getFileManager()
+                   ProviderHacks.getFileManager()
                   );
     }
     
@@ -815,7 +815,7 @@ public class DownloadManager implements BandwidthTracker {
     	if (!overwrite)
     		checkTargetLocation(system, overwrite);
     	else
-    		RouterService.getTorrentManager().killTorrentForFile(system.getCompleteFile());
+    		ProviderHacks.getTorrentManager().killTorrentForFile(system.getCompleteFile());
     	AbstractDownloader ret = new BTDownloader(info);
     	initializeDownload(ret);
     	return ret;

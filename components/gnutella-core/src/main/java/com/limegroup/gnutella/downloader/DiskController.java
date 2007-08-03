@@ -12,9 +12,12 @@ import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.RouterService;
 
 /** Manages writing / reading from / to disk. */
+@Singleton
 public class DiskController {
     
     private final Log LOG = LogFactory.getLog(DiskController.class);
@@ -44,6 +47,7 @@ public class DiskController {
     /** A lock to use for the queue size + chunksScheduled. */
     private final Object SCHEDULE_LOCK = new Object();
     
+    @Inject
     public DiskController() {
         // DPINJ: Change to using passed in scheduler!
         RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);

@@ -81,7 +81,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        RouterService.getFileManager().loadSettingsAndWait(2000);        
+        ProviderHacks.getFileManager().loadSettingsAndWait(2000);        
     }
     
     ///////////////////////// Actual Tests ////////////////////////////

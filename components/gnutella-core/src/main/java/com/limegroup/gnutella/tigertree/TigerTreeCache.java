@@ -23,6 +23,7 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 
@@ -181,7 +182,7 @@ public final class TigerTreeCache {
         while (iter.hasNext()) {
             URN sha1 = iter.next();
             if (map.get(sha1) != BUSH) {
-                if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
+                if (ProviderHacks.getFileManager().getFileDescForUrn(sha1) != null)
                     continue;
                 else if (RouterService.getDownloadManager()
                         .getIncompleteFileManager().getFileForUrn(sha1) != null)

@@ -70,7 +70,7 @@ public final class PushManager {
             throw new NullPointerException("null guid");
                                     
 
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         
         // TODO: why is this check here?  it's a tiny optimization,
         // but could potentially kill any sharing of files that aren't

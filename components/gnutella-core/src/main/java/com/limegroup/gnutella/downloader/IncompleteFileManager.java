@@ -27,7 +27,6 @@ import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -128,7 +127,7 @@ public class IncompleteFileManager implements Serializable {
             File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
-                RouterService.getFileManager().removeFileIfShared(file);
+                ProviderHacks.getFileManager().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
@@ -155,7 +154,7 @@ public class IncompleteFileManager implements Serializable {
             }
             if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
                 ret=true;
-                RouterService.getFileManager().removeFileIfShared(file);
+                ProviderHacks.getFileManager().removeFileIfShared(file);
                 file.delete();
                 iter.remove();
             }
@@ -529,7 +528,7 @@ public class IncompleteFileManager implements Serializable {
         }
         
         //Remove the entry from FileManager
-        RouterService.getFileManager().removeFileIfShared(incompleteFile);
+        ProviderHacks.getFileManager().removeFileIfShared(incompleteFile);
     }
 
     /**
@@ -590,7 +589,7 @@ public class IncompleteFileManager implements Serializable {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        RouterService.getFileManager().addIncompleteFile(
+        ProviderHacks.getFileManager().addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),

@@ -151,7 +151,7 @@ public final class CreationTimeCache {
     private void pruneTimes(boolean shouldClearURNSetMap) {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
-        synchronized (RouterService.getFileManager()) {
+        synchronized (ProviderHacks.getFileManager()) {
             synchronized (this) {
                 Iterator<Map.Entry<URN, Long>> iter = URN_TO_TIME_MAP.entrySet().iterator();
                 while (iter.hasNext()) {
@@ -162,7 +162,7 @@ public final class CreationTimeCache {
                     // check to see if file still exists
                     // NOTE: technically a URN can map to multiple FDs, but I only want
                     // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                    FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                    FileDesc fd = ProviderHacks.getFileManager().getFileDescForUrn(currURN);
                     if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                         dirty = true;
                         iter.remove();
@@ -258,7 +258,7 @@ public final class CreationTimeCache {
         throws IllegalArgumentException {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
-        synchronized (RouterService.getFileManager()) {
+        synchronized (ProviderHacks.getFileManager()) {
             synchronized (this) {
                 if (max < 1)
                     throw new IllegalArgumentException("bad max = " + max);
@@ -279,7 +279,7 @@ public final class CreationTimeCache {
                         if(urnList.size() >= max)
                             break;
                         
-                        FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                        FileDesc fd = ProviderHacks.getFileManager().getFileDescForUrn(currURN);
                         // unfortunately fds can turn into ifds so ignore
                         if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                             if (toRemove == null)
@@ -381,7 +381,7 @@ public final class CreationTimeCache {
             URN urn = currEntry.getKey();    
             
             // don't ever add IFDs
-            if (RouterService.getFileManager().getFileDescForUrn(urn)
+            if (ProviderHacks.getFileManager().getFileDescForUrn(urn)
                 instanceof IncompleteFileDesc) continue;
 
             // put the urn in a set of urns that have that creation time....

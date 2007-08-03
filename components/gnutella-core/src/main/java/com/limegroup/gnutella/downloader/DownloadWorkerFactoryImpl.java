@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 
+@Singleton
 public class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     
     private final HTTPDownloaderFactory httpDownloaderFactory;
     
+    @Inject
     public DownloadWorkerFactoryImpl(HTTPDownloaderFactory httpDownloaderFactory) {
         this.httpDownloaderFactory = httpDownloaderFactory;
     }

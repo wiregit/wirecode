@@ -13,6 +13,8 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
@@ -28,10 +30,12 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+@Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {
 
     private final NetworkManager networkManager;
 
+    @Inject
     public PingReplyFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

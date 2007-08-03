@@ -20,6 +20,7 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -104,7 +105,7 @@ public class BrowseTest extends LimeTestCase {
         if (!RouterService.isLoaded()) {
             rs.start();
         }
-        RouterService.getFileManager().loadSettingsAndWait(100000);
+        ProviderHacks.getFileManager().loadSettingsAndWait(100000);
 
         client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
@@ -148,7 +149,7 @@ public class BrowseTest extends LimeTestCase {
 
             assertEquals(RouterService.getNumSharedFiles(), files.size());
             
-            for (Iterator<Response> it = RouterService.getFileManager()
+            for (Iterator<Response> it = ProviderHacks.getFileManager()
                     .getIndexingIterator(false); it.hasNext();) {
                 Response result = it.next();
                 boolean contained = files.remove(result.getName());

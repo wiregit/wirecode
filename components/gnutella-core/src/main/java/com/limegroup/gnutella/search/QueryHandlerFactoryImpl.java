@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.search;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 
+@Singleton
 public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
 
     /**
@@ -23,6 +26,7 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
 
     private final QueryRequestFactory queryRequestFactory;
 
+    @Inject
     public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory) {
         this.queryRequestFactory = queryRequestFactory;
     }

@@ -25,6 +25,8 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -87,6 +89,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  * @see com.limegroup.gnutella.HTTPAcceptor
  */
+@Singleton
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadManager, HTTPUploadSessionManager {
 
@@ -182,6 +185,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private volatile boolean started;
     
+    @Inject
     public HTTPUploadManager(UploadSlotManager slotManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");

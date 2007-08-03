@@ -123,7 +123,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         drain(testUP[0]);
 
         // make sure leaf is sharing
-        assertEquals(2, RouterService.getFileManager().getNumFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
         assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
 
         // send a query that should be answered

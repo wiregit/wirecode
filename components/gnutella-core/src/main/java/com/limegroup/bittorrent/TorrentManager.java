@@ -16,6 +16,7 @@ import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.ConnectionAcceptor;
@@ -44,6 +45,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * If active torrent limit is reached and none of the torrents are seeding,
  * the new torrent is queued.
  */
+@Singleton
 public class TorrentManager 
 implements FileLocker, ConnectionAcceptor, TorrentEventListener, 
 EventDispatcher<TorrentEvent, TorrentEventListener> {

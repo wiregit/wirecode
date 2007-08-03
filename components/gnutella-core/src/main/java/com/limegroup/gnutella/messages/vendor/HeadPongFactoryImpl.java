@@ -18,7 +18,9 @@ import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -36,6 +38,7 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 
+@Singleton
 public class HeadPongFactoryImpl implements HeadPongFactory {
     
     private static final Log LOG = LogFactory.getLog(HeadPongFactoryImpl.class);
@@ -51,6 +54,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     // DPINJ: Should either be a parameter in the constructor, or changed by a setter
     private static /*final*/ int PACKET_SIZE = DEFAULT_PACKET_SIZE;
     
+    @Inject
     public HeadPongFactoryImpl(NetworkManager networkManager,
             Provider<UploadManager> uploadManager,
             Provider<FileManager> fileManager) {

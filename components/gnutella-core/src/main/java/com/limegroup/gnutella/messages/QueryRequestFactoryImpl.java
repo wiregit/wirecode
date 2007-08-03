@@ -6,6 +6,8 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
@@ -15,10 +17,12 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SearchSettings;
 
+@Singleton
 public class QueryRequestFactoryImpl implements QueryRequestFactory {
 
     private final NetworkManager networkManager;
 
+    @Inject
     public QueryRequestFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

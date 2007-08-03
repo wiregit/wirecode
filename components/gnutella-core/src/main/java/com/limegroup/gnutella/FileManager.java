@@ -43,6 +43,8 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
@@ -69,6 +71,7 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
  *
  * This class is thread-safe.
  */
+@Singleton
 public abstract class FileManager {
 	
     private static final Log LOG = LogFactory.getLog(FileManager.class);
@@ -395,6 +398,7 @@ public abstract class FileManager {
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
+    @Inject
     public FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -732,7 +736,7 @@ public abstract class FileManager {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
-	    RouterService.getFileManager().loadSettings();
+	    ProviderHacks.getFileManager().loadSettings();
     }
     
     /**

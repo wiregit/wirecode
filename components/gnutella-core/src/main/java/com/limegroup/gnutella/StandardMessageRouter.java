@@ -246,7 +246,7 @@ public class StandardMessageRouter extends MessageRouter {
         // slots are full.  This allows some spillover into our queue that
         // is necessary because we're always returning more total hits than
         // we have slots available.
-        if(!RouterService.getUploadManager().mayBeServiceable() )  {
+        if(!ProviderHacks.getUploadManager().mayBeServiceable() )  {
             return false;
         }
                                                 
@@ -259,7 +259,7 @@ public class StandardMessageRouter extends MessageRouter {
                                                      
         // Run the local query
         Response[] responses = 
-            RouterService.getFileManager().query(queryRequest);
+            ProviderHacks.getFileManager().query(queryRequest);
         
         if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
             if( responses != null && responses.length > 0 )
@@ -282,12 +282,12 @@ public class StandardMessageRouter extends MessageRouter {
 
         // if we cannot service a regular query, only send back results for
         // application-shared metafiles, if any.
-        if (!RouterService.getUploadManager().isServiceable()) {
+        if (!ProviderHacks.getUploadManager().isServiceable()) {
         	
         	List<Response> filtered = new ArrayList<Response>(responses.length);
         	for(Response r : responses) {
         		if (r.isMetaFile() && 
-        				RouterService.getFileManager().isFileApplicationShared(r.getName()))
+        				ProviderHacks.getFileManager().isFileApplicationShared(r.getName()))
         			filtered.add(r);
         	}
         	

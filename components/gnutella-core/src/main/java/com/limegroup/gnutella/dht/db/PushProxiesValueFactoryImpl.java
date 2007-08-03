@@ -8,19 +8,23 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
 
 /**
  * Factory to create PushProxiesValues
  */
+@Singleton
 public class PushProxiesValueFactoryImpl implements PushProxiesValueFactory {
 
     private final NetworkManager networkManager;
     private final PushEndpointFactory pushEndpointFactory;
     private final Provider<PushProxiesValue> lazySelf;
 
+    @Inject
     public PushProxiesValueFactoryImpl(NetworkManager networkManager,
             PushEndpointFactory pushEndpointFactory) {
         this.networkManager = networkManager;

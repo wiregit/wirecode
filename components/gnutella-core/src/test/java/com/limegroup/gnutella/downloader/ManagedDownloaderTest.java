@@ -154,7 +154,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	FileDesc test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
     	
     	assertEquals(0,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
     	
@@ -182,7 +182,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
     	//the altloc should have been added to the file descriptor
-    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
     	assertEquals(1,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
     	
     	//now repeat the test, pretending the uploader wants push altlocs
@@ -196,7 +196,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	assertTrue(fakeDownloader._addedSuccessfull);
     	
     	//make sure the file was added to the file descriptor
-    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
     	assertEquals(1,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
     	
     	//rince and repeat, saying this was a bad altloc. 

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.NetworkManager;
@@ -10,6 +12,7 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
+@Singleton
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     private final ConnectionManager connectionManager;
@@ -18,6 +21,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final HeadersFactory headersFactory;
     private final HandshakeResponderFactory handshakeResponderFactory;
 
+    @Inject
     public ManagedConnectionFactoryImpl(ConnectionManager connectionManager,
             NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,

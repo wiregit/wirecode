@@ -273,7 +273,7 @@ public class I18NSendReceiveTest
      * add the metadata
      */
     private void addMetaData(String fname, String xmlstr) throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         FileDesc fd = 
             fm.getFileDescForFile(new File(_sharedDir, fname));
         

@@ -9,6 +9,8 @@ import org.limewire.io.IpPortForSelf;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -17,10 +19,12 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 
+@Singleton
 public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public AlternateLocationFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

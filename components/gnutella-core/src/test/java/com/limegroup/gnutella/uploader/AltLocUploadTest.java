@@ -174,10 +174,10 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // make sure the FileDesc objects in file manager are up-to-date 
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         fm.loadSettingsAndWait(2000);
 
-        FD = RouterService.getFileManager().getFileDescForFile(
+        FD = ProviderHacks.getFileManager().getFileDescForFile(
                 new File(_sharedDir, fileName));
 
         RouterService.getAltlocManager().purge();
@@ -187,8 +187,8 @@ public class AltLocUploadTest extends LimeTestCase {
         config.setHost("localhost", PORT);
         client.setHostConfiguration(config);
 
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
     }
 
     @Override
@@ -1306,7 +1306,7 @@ public class AltLocUploadTest extends LimeTestCase {
         List<HTTPUploader> activeUploads = new ArrayList<HTTPUploader>();
 
         public TestUploadManager() {
-            super(RouterService.getUploadSlotManager());
+            super(ProviderHacks.getUploadSlotManager());
         }
 
         public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {
