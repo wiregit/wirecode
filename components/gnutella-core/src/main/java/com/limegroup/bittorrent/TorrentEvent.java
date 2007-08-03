@@ -10,10 +10,12 @@ public class TorrentEvent extends EventObject {
 	
 	private final Type type;
 	private final ManagedTorrent torrent;
-	public TorrentEvent(Object source, Type type, ManagedTorrent torrent) {
+    private final String description;
+	public TorrentEvent(Object source, Type type, ManagedTorrent torrent, String description) {
 		super(source);
 		this.type = type;
 		this.torrent = torrent;
+        this.description = description;
 	}
 	
 	public Type getType() {
@@ -23,4 +25,8 @@ public class TorrentEvent extends EventObject {
 	public ManagedTorrent getTorrent() {
 		return torrent;
 	}
+    
+    public String getDescription() {
+        return description;
+    }
 }

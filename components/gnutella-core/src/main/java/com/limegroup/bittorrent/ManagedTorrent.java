@@ -310,8 +310,11 @@ BTLinkListener {
 		
 		// fire off an announcement to the tracker
 		// unless we're stopping because of a tracker failure
+        String failureReason = null;
 		if (state.get() != TorrentState.TRACKER_FAILURE)
 			trackerManager.announceStop();
+        else
+            failureReason = trackerManager.getLastFailureReason();
 		
 		// write the snapshot if not complete
 		if (!_folder.isComplete()) {
@@ -335,7 +338,7 @@ BTLinkListener {
 		};
 		networkInvoker.execute(closer);
 		
-		dispatchEvent(TorrentEvent.Type.STOPPED); 
+		dispatchEvent(TorrentEvent.Type.STOPPED, failureReason); 
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -347,7 +350,11 @@ BTLinkListener {
 	}
 	
 	private void dispatchEvent(TorrentEvent.Type type) {
-		TorrentEvent evt = new TorrentEvent(this, type, this);
+        dispatchEvent(type, null);
+    }
+    
+    private void dispatchEvent(TorrentEvent.Type type, String description) {
+		TorrentEvent evt = new TorrentEvent(this, type, this, description);
 		dispatcher.dispatchEvent(evt);
 	}
 	
