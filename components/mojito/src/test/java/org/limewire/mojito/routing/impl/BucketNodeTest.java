@@ -153,6 +153,7 @@ public class BucketNodeTest extends MojitoTestCase {
         Contact leastRecentlySeen = null;
         Contact mostRecentlySeen = null;
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        assertGreaterThan(0, k);
         for (int i = 0; i < k; i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
@@ -176,6 +177,7 @@ public class BucketNodeTest extends MojitoTestCase {
         
         // Touch the least recently seen Node which makes it the 
         // most recently seen Node
+        assert leastRecentlySeen != null; // avoid NPE warning
         leastRecentlySeen.setTimeStamp(/* fake time */ Integer.MAX_VALUE);
         assertSame(leastRecentlySeen, bucket.getMostRecentlySeenActiveContact());
         assertNotSame(mostRecentlySeen, bucket.getMostRecentlySeenActiveContact());
