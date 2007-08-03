@@ -133,12 +133,6 @@ public class RouterService {
 	 * <tt>FileManager</tt> instance that manages access to shared files.
 	 */
     private static FileManager fileManager = new MetaFileManager();
-
-	/**
-	 * <tt>Acceptor</tt> instance for accepting new connections, HTTP
-	 * requests, etc.
-	 */
-    private static final Acceptor acceptor = new Acceptor(ProviderHacks.getNetworkManager());
     
 	/**
 	 * <tt>TorrentManager</tt> instance for handling torrents
@@ -155,12 +149,6 @@ public class RouterService {
      * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
      */
     private static HTTPAcceptor httpAcceptor;
-
-	/**
-	 * Initialize the class that manages all TCP connections.
-	 */
-    // DPINJ: Fix!
-    private static ConnectionManager manager = new ConnectionManager(ProviderHacks.getNetworkManager());
 
     /**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
@@ -394,12 +382,12 @@ public class RouterService {
         fileManager.addFileEventListener(callback);
         RouterService.setMessageRouter(router);
         
-        manager.addEventListener(callback);
-        manager.addEventListener(ProviderHacks.getDHTManager());
+        ProviderHacks.getConnectionManager().addEventListener(callback);
+        ProviderHacks.getConnectionManager().addEventListener(ProviderHacks.getDHTManager());
         
         nodeAssigner = new NodeAssigner(uploadManager, 
                                         downloadManager, 
-                                        manager,
+                                        ProviderHacks.getConnectionManager(),
                                         ProviderHacks.getNetworkManager()); // DPINJ: Use passed in manager!
   	}
 
@@ -463,7 +451,7 @@ public class RouterService {
                     reloadIPFilter();
                 }
             });
-  	        RouterService.getAcceptor().init();
+  	        ProviderHacks.getAcceptor().init();
   	    }
   	}
   	
@@ -517,7 +505,7 @@ public class RouterService {
 
             LOG.trace("START Acceptor");
             callback.componentLoading("ACCEPTOR");
-    		acceptor.start();
+    		ProviderHacks.getAcceptor().start();
     		LOG.trace("STOP Acceptor");
     		
             LOG.trace("START loading StaticMessages");
@@ -526,7 +514,7 @@ public class RouterService {
             
     		LOG.trace("START ConnectionManager");
     		callback.componentLoading("CONNECTION_MANAGER");
-    		manager.initialize();
+            ProviderHacks.getConnectionManager().initialize();
     		LOG.trace("STOP ConnectionManager");
     		
     		LOG.trace("START DownloadManager");
@@ -658,7 +646,7 @@ public class RouterService {
      *  Returns the number of initialized messaging connections.
      */
     public static int getNumInitializedConnections() {
-    	return getConnectionManager().getNumInitializedConnections();
+    	return ProviderHacks.getConnectionManager().getNumInitializedConnections();
     }
 
     /**
@@ -696,7 +684,7 @@ public class RouterService {
             float speed = ConnectionSettings.CONNECTION_SPEED.getValue() / 8f * uSpeed / 100f;
             
             // reduced upload speed if we are an ultrapeer
-            speed -= getConnectionManager().getMeasuredUpstreamBandwidth();
+            speed -= ProviderHacks.getConnectionManager().getMeasuredUpstreamBandwidth();
             
             // we need bytes per second
             return Math.max(speed, 1f) * 1024f;
@@ -811,16 +799,7 @@ public class RouterService {
         return contentManager;
     }
     
-	/**
-	 * Accessor for the <tt>ConnectionManager</tt> instance.
-	 *
-	 * @return the <tt>ConnectionManager</tt> instance in use
-	 */
-	public static ConnectionManager getConnectionManager() {
-		return manager;
-	}
-	
-    /** 
+	/** 
      * Accessor for the <tt>UploadManager</tt> instance.
      *
      * @return the <tt>UploadManager</tt> in use
@@ -863,15 +842,6 @@ public class RouterService {
 	    return pushManager;
 	}
 	
-    /** 
-     * Accessor for the <tt>Acceptor</tt> instance.
-     *
-     * @return the <tt>Acceptor</tt> in use
-     */
-	public static Acceptor getAcceptor() {
-		return acceptor;
-	}
-    
     /**
      * Accessor for the ConnectionDispatcher instance.
      */
@@ -965,7 +935,7 @@ public class RouterService {
      */
     public static ManagedConnection connectToHostBlocking(String hostname, int portnum, ConnectType type)
 		throws IOException {
-        return manager.createConnectionBlocking(hostname, portnum, type);
+        return ProviderHacks.getConnectionManager().createConnectionBlocking(hostname, portnum, type);
     }
 
     /**
@@ -986,18 +956,18 @@ public class RouterService {
         } catch(UnknownHostException e) {
             return;
         }
-        if ((cIP[0] == 127) && (portnum==acceptor.getPort(true)) &&
+        if ((cIP[0] == 127) && (portnum==ProviderHacks.getAcceptor().getPort(true)) &&
 			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
 			return;
         } else {
-            byte[] managerIP=acceptor.getAddress(true);
+            byte[] managerIP=ProviderHacks.getAcceptor().getAddress(true);
             if (Arrays.equals(cIP, managerIP)
-                && portnum==acceptor.getPort(true))
+                && portnum==ProviderHacks.getAcceptor().getPort(true))
                 return;
         }
 
-        if (!acceptor.isBannedIP(cIP)) {
-            manager.createConnectionAsynchronously(hostname, portnum, type);
+        if (!ProviderHacks.getAcceptor().isBannedIP(cIP)) {
+            ProviderHacks.getConnectionManager().createConnectionAsynchronously(hostname, portnum, type);
 		}
     }
     
@@ -1011,7 +981,7 @@ public class RouterService {
         // TODO: rewrite ManagedDownloader
         
         String host = addr.getHostAddress();
-        return manager.isConnectedTo(host) ||
+        return ProviderHacks.getConnectionManager().isConnectedTo(host) ||
                UDP_MULTIPLEXOR.isConnectedTo(addr) ||
                uploadManager.isConnectedTo(addr); // ||
                // dloadManager.isConnectedTo(addr);
@@ -1025,7 +995,7 @@ public class RouterService {
         adjustSpamFilters();
         
         //delegate to connection manager
-        manager.connect();
+        ProviderHacks.getConnectionManager().connect();
     }
 
     /**
@@ -1034,14 +1004,14 @@ public class RouterService {
      */
     public static void disconnect() {
 		// Delegate to connection manager
-		manager.disconnect(false);
+        ProviderHacks.getConnectionManager().disconnect(false);
     }
 
     /**
      * Closes and removes the given connection.
      */
     public static void removeConnection(ManagedConnection c) {
-        manager.remove(c);
+        ProviderHacks.getConnectionManager().remove(c);
     }
 
     /**
@@ -1143,10 +1113,10 @@ public class RouterService {
 
             ProviderHacks.getDHTManager().stop();
             
-            getAcceptor().shutdown();
+            ProviderHacks.getAcceptor().shutdown();
             
             //clean-up connections and record connection uptime for this session
-            manager.disconnect(false);
+            ProviderHacks.getConnectionManager().disconnect(false);
             
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
@@ -1272,7 +1242,7 @@ public class RouterService {
         
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
-        for(ManagedConnection c : manager.getConnections()) {
+        for(ManagedConnection c : ProviderHacks.getConnectionManager().getConnections()) {
             if(ipFilter.allow(c)) {
                 c.setPersonalFilter(SpamFilter.newPersonalFilter());
                 c.setRouteFilter(SpamFilter.newRouteFilter());
@@ -1289,14 +1259,14 @@ public class RouterService {
      * Count up all the messages on active connections
      */
     public static int getActiveConnectionMessages() {
-		return manager.getActiveConnectionMessages();
+		return ProviderHacks.getConnectionManager().getActiveConnectionMessages();
     }
 
     /**
      * Count how many connections have already received N messages
      */
     public static int countConnectionsWithNMessages(int messageThreshold) {
-		return manager.countConnectionsWithNMessages(messageThreshold);
+		return ProviderHacks.getConnectionManager().countConnectionsWithNMessages(messageThreshold);
     }
     
     /** 
@@ -1498,7 +1468,7 @@ public class RouterService {
         
         if(hosts.size() < num) {
             //we first try to get the connections that match the locale.
-            for(IpPort ipp : manager.getInitializedConnectionsMatchLocale(locale)) {
+            for(IpPort ipp : ProviderHacks.getConnectionManager().getInitializedConnectionsMatchLocale(locale)) {
                 if(hosts.size() >= num)
                     break;
                 hosts.add(ipp);
@@ -1507,7 +1477,7 @@ public class RouterService {
             //if we still don't have enough hosts, get them from the list
             //of all initialized connection
             if(hosts.size() < num) {
-                for(IpPort ipp : manager.getInitializedConnections()) {
+                for(IpPort ipp : ProviderHacks.getConnectionManager().getInitializedConnections()) {
                     if(hosts.size() >= num)
                         break;
                     hosts.add(ipp);
@@ -1526,7 +1496,7 @@ public class RouterService {
 	 *  <tt>false</tt> otherwise
 	 */
 	public static boolean isFullyConnected() {
-		return manager.isFullyConnected();
+		return ProviderHacks.getConnectionManager().isFullyConnected();
 	}    
 
 	/**
@@ -1537,14 +1507,14 @@ public class RouterService {
 	 *  <tt>false</tt> otherwise
 	 */
 	public static boolean isConnected() {
-		return manager.isConnected();
+		return ProviderHacks.getConnectionManager().isConnected();
 	}
 	
 	/**
 	 * Returns whether or not this client is attempting to connect.
 	 */
 	public static boolean isConnecting() {
-	    return manager.isConnecting();
+	    return ProviderHacks.getConnectionManager().isConnecting();
 	}
 
     /**
@@ -1767,7 +1737,7 @@ public class RouterService {
      * @return true, if supernode, false otherwise
      */
     public static boolean isSupernode() {
-        return manager.isSupernode();
+        return ProviderHacks.getConnectionManager().isSupernode();
     }
     
     /**
@@ -1776,7 +1746,7 @@ public class RouterService {
      * @return true, if active supernode, false otherwise
      */
     public static boolean isActiveSuperNode() {
-        return manager.isActiveSupernode();
+        return ProviderHacks.getConnectionManager().isActiveSupernode();
     }
     
 	/**
@@ -1786,7 +1756,7 @@ public class RouterService {
 	 *  <tt>false</tt> otherwise
 	 */
     public static boolean isShieldedLeaf() {
-        return manager.isShieldedLeaf();
+        return ProviderHacks.getConnectionManager().isShieldedLeaf();
     }    
 
 
@@ -1794,7 +1764,7 @@ public class RouterService {
      * @return the number of free leaf slots.
      */
     public static int getNumFreeLeafSlots() {
-            return manager.getNumFreeLeafSlots();
+            return ProviderHacks.getConnectionManager().getNumFreeLeafSlots();
     }
 
     
@@ -1802,14 +1772,14 @@ public class RouterService {
      * @return the number of free non-leaf slots.
      */
     public static int getNumFreeNonLeafSlots() {
-        return manager.getNumFreeNonLeafSlots();
+        return ProviderHacks.getConnectionManager().getNumFreeNonLeafSlots();
     }
 
     /**
      * @return the number of free leaf slots available for limewires.
      */
     public static int getNumFreeLimeWireLeafSlots() {
-            return manager.getNumFreeLimeWireLeafSlots();
+            return ProviderHacks.getConnectionManager().getNumFreeLimeWireLeafSlots();
     }
 
     
@@ -1817,7 +1787,7 @@ public class RouterService {
      * @return the number of free non-leaf slots available for limewires.
      */
     public static int getNumFreeLimeWireNonLeafSlots() {
-        return manager.getNumFreeLimeWireNonLeafSlots();
+        return ProviderHacks.getConnectionManager().getNumFreeLimeWireNonLeafSlots();
     }
 
 

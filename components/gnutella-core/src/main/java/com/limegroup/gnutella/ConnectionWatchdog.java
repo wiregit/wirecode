@@ -139,8 +139,8 @@ public final class ConnectionWatchdog {
     /** Returns an iterable of all initialized connections in this, including
      *  leaf connecions. */
     private Iterable<ManagedConnection> allConnections() {
-        List<ManagedConnection> normal = RouterService.getConnectionManager().getInitializedConnections();
-        List<ManagedConnection> leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
+        List<ManagedConnection> normal = ProviderHacks.getConnectionManager().getInitializedConnections();
+        List<ManagedConnection> leaves =  ProviderHacks.getConnectionManager().getInitializedClientConnections();
 
         List<ManagedConnection> buf = new ArrayList<ManagedConnection>(normal.size() + leaves.size());
         buf.addAll(normal);

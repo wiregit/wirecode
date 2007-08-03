@@ -624,7 +624,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testIpRequestPong() throws Exception {
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
         
         // a pong carrying an ip:port
         Endpoint e = new Endpoint("1.2.3.4",5);

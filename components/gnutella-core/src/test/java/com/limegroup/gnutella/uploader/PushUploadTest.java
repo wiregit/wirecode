@@ -278,7 +278,7 @@ public class PushUploadTest extends LimeTestCase {
      */
     public void testForPushProxyHeaderWithoutProxy() throws Exception {
         // try when we are not firewalled
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming", new Boolean(true));
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
@@ -291,7 +291,7 @@ public class PushUploadTest extends LimeTestCase {
         // now try with an empty set of proxies
         establishPushConnection();
         
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming", new Boolean(false));
         assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
@@ -303,7 +303,7 @@ public class PushUploadTest extends LimeTestCase {
         establishPushConnection();
 
         // now try with some proxies
-        ConnectionManager original = RouterService.getConnectionManager();
+        ConnectionManager original = ProviderHacks.getConnectionManager();
         try {
             final Set<Connectable> proxies = new TreeSet<Connectable>(IpPort.COMPARATOR);
             Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
@@ -317,7 +317,7 @@ public class PushUploadTest extends LimeTestCase {
             };
             PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
 
-            PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                     "_acceptedIncoming", new Boolean(false));
             assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 

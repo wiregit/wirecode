@@ -80,7 +80,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 				SharingSettings.FREELOADER_ALLOWED.getValue())
 			&& (handler instanceof ManagedConnection)
             && (handler.isStable())) {
-			ConnectionManager cm = RouterService.getConnectionManager();
+			ConnectionManager cm = ProviderHacks.getConnectionManager();
             cm.remove((ManagedConnection)handler);
         }
 	}
@@ -227,7 +227,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         }
         
         // if the IP is banned, don't accept it
-        if (RouterService.getAcceptor().isBannedIP(ip))
+        if (ProviderHacks.getAcceptor().isBannedIP(ip))
             return;
 
         int port = pushRequest.getPort();

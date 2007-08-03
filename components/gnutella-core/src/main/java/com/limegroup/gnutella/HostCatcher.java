@@ -428,7 +428,7 @@ public class HostCatcher {
     private synchronized boolean needsPongRanking() {
         if(RouterService.isFullyConnected())
             return false;
-        int have = RouterService.getConnectionManager().
+        int have = ProviderHacks.getConnectionManager().
             getInitializedConnections().size();
         if(have >= MAX_CONNECTIONS)
             return false;
@@ -448,7 +448,7 @@ public class HostCatcher {
             }
         }
 
-        int preferred = RouterService.getConnectionManager().
+        int preferred = ProviderHacks.getConnectionManager().
             getPreferredConnectionCount();
         
         return size < preferred - have;
@@ -1155,7 +1155,7 @@ public class HostCatcher {
         String loc = ApplicationSettings.LANGUAGE.getValue();
         ExtendedEndpoint ret = null;
         // preference a locale host if we haven't matched any locales yet
-        if(!RouterService.getConnectionManager().isLocaleMatched()) {
+        if(!ProviderHacks.getConnectionManager().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
                 Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
                 for(ExtendedEndpoint e : base.keySet()) {

@@ -148,10 +148,10 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         readNumConnectBacks(1,testUP[1], TIMEOUT);
         
         // leave only one connection open
-        assertGreaterThan(1,RouterService.getConnectionManager().getNumInitializedConnections());
+        assertGreaterThan(1,ProviderHacks.getConnectionManager().getNumInitializedConnections());
         testUP[1].close();
         Thread.sleep(500);
-        assertEquals(1,RouterService.getConnectionManager().getNumInitializedConnections());
+        assertEquals(1,ProviderHacks.getConnectionManager().getNumInitializedConnections());
         
         drainAll();
         // sleep

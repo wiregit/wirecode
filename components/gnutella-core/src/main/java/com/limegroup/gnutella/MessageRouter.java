@@ -478,7 +478,7 @@ public abstract class MessageRouter {
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize() {
-        _manager = RouterService.getConnectionManager();
+        _manager = ProviderHacks.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
         
@@ -760,7 +760,7 @@ public abstract class MessageRouter {
 	 * Sends an ack back to the GUESS client node.  
 	 */
 	protected void sendAcknowledgement(InetSocketAddress addr, byte[] guid) {
-		ConnectionManager manager = RouterService.getConnectionManager();
+		ConnectionManager manager = ProviderHacks.getConnectionManager();
 		Endpoint host = manager.getConnectedGUESSUltrapeer();
 		PingReply reply;
 		if(host != null) {

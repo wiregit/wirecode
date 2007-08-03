@@ -156,7 +156,7 @@ public class FWTDetectionTest extends LimeTestCase {
         assertFalse(ProviderHacks.getUdpService().canDoFWT());
         
         //reply with a pong that does carry info
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         Endpoint myself = new Endpoint(ProviderHacks.getNetworkManager().getExternalAddress(),
                 ProviderHacks.getNetworkManager().getPort());
         ponger1.reply(myself);
@@ -188,7 +188,7 @@ public class FWTDetectionTest extends LimeTestCase {
         assertTrue(ponger1.listen().requestsIP());
         
         //send one pong which does has a different port
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         ponger1.reply(new Endpoint(ProviderHacks.getNetworkManager().getExternalAddress(),1000));
         
         Thread.sleep(1000);
@@ -215,9 +215,9 @@ public class FWTDetectionTest extends LimeTestCase {
      * external port
      */
     public void testForcedPort() throws Exception {
-        int localPort = RouterService.getAcceptor().getPort(false);
+        int localPort = ProviderHacks.getAcceptor().getPort(false);
         ConnectionSettings.FORCED_PORT.setValue(1000);
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(InetAddress.getLocalHost().getHostAddress());
         assertEquals(1000,ProviderHacks.getNetworkManager().getPort());
@@ -267,7 +267,7 @@ public class FWTDetectionTest extends LimeTestCase {
         
         //make sure our port is valid
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         assertTrue(
                 NetworkUtils.isValidAddress(ProviderHacks.getNetworkManager().getExternalAddress()));
         
@@ -298,19 +298,19 @@ public class FWTDetectionTest extends LimeTestCase {
         assertTrue(ponger1.listen().requestsIP());
         
         //send one pong which does has a different port
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         ponger1.reply(new Endpoint(ProviderHacks.getNetworkManager().getExternalAddress(),ProviderHacks.getNetworkManager().getPort()));
         
         Thread.sleep(1000);
         
         // try with valid external address
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         assertTrue(
                 NetworkUtils.isValidAddress(ProviderHacks.getNetworkManager().getExternalAddress()));
         assertTrue(ProviderHacks.getUdpService().canDoFWT());
         
         // and with an invalid one
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("0.0.0.0"));
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getByName("0.0.0.0"));
         assertFalse(
                 NetworkUtils.isValidAddress(ProviderHacks.getNetworkManager().getExternalAddress()));
         assertFalse(ProviderHacks.getUdpService().canDoFWT());
@@ -355,7 +355,7 @@ public class FWTDetectionTest extends LimeTestCase {
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         Endpoint myself = new Endpoint(ProviderHacks.getNetworkManager().getExternalAddress(),
                 ProviderHacks.getNetworkManager().getPort());
         ponger1.reply(myself);
@@ -379,7 +379,7 @@ public class FWTDetectionTest extends LimeTestCase {
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
         Endpoint badPort1 = new Endpoint(InetAddress.getLocalHost().getAddress(),12345);
         Endpoint badPort2 = new Endpoint(InetAddress.getLocalHost().getAddress(),12346);
@@ -397,7 +397,7 @@ public class FWTDetectionTest extends LimeTestCase {
      * status
      */
     public void testMaliciousPongDoesNotDisable() throws Exception {
-        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         cmStub.setConnected(true);
         assertTrue(ProviderHacks.getUdpService().canDoFWT());
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");

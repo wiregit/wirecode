@@ -452,7 +452,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         }
         
         // Notify the acceptor of our address.
-        RouterService.getAcceptor().setAddress(localAddress);        
+        ProviderHacks.getAcceptor().setAddress(localAddress);        
         performHandshake(requestHeaders, responder, observer);
     }
     

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -35,7 +34,7 @@ public abstract class TestConnection extends ManagedConnection {
     protected QueryRouteTable QRT;
     
     TestConnection(int connections) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, RouterService.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory());
+        super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory());
         CONNECTIONS = connections;
     }
     

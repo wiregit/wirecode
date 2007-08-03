@@ -60,14 +60,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         CATCHER = new TestHostCatcher();
         LISTENER = new ConnectionListener();
         
-        RouterService.getConnectionManager().addEventListener(LISTENER);
+        ProviderHacks.getConnectionManager().addEventListener(LISTENER);
         
         setSettings();
         launchAllBackends();
                 
         PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
 
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_catcher",CATCHER);
              
         ROUTER_SERVICE.start();
@@ -205,7 +205,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
         
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         
         // test preconditions
         assertTrue("should not start as supernode", !mgr.isSupernode());
@@ -284,7 +284,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             nonLimePeers[i] = new SupernodeSupernode(false);
             
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         setConnectTime();
         // test preconditions
         assertTrue("should start as supernode", mgr.isSupernode());
@@ -442,8 +442,8 @@ public class ConnectionManagerTest extends LimeTestCase {
         
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -458,8 +458,8 @@ public class ConnectionManagerTest extends LimeTestCase {
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertTrue(mc.isTLSEncoded());
     }
@@ -474,8 +474,8 @@ public class ConnectionManagerTest extends LimeTestCase {
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -497,7 +497,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(0);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -535,7 +535,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //test time changed during session
         long now = System.currentTimeMillis();
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_connectTime", new Long(now+(60L*60L*1000L)));
         mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
@@ -552,7 +552,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(2);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -591,7 +591,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             ConnectionSettings.FILTER_CLASS_C.setValue(true);
             TestHostCatcher2 catcher = new TestHostCatcher2();
             TestConnectionObserver observer = new TestConnectionObserver();
-            ConnectionManager cm = RouterService.getConnectionManager();
+            ConnectionManager cm = ProviderHacks.getConnectionManager();
             PrivilegedAccessor.setValue(cm,"_catcher",catcher);
             cm.addEventListener(observer);
             cm.connect();
@@ -662,7 +662,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void setConnectTime() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_connectTime", new Integer(0));
     }
     
@@ -670,14 +670,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Need to setup the _outputRunner member of c as well...
         PrivilegedAccessor.setValue(c, "_outputRunner", new NullOutputRunner() );
         
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
             "connectionInitializingIncoming",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );
     }
     
     private void initializeDone(ManagedConnection c) throws Exception {
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
             "connectionInitialized",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );            
@@ -786,7 +786,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         private static int lastHost = 0;
 
         public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, RouterService.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory() );
+            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory() );
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;
@@ -878,7 +878,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void pretendConnected() throws Exception {
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
         PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections");
     }

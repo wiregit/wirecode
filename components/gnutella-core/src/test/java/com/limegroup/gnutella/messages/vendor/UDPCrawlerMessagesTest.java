@@ -441,7 +441,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		assertGreaterThan(0,msvm.supportsUDPCrawling());
  		
- 		List upCons = RouterService.getConnectionManager().getInitializedConnections();
+ 		List upCons = ProviderHacks.getConnectionManager().getInitializedConnections();
  		
  		Connection notSupporting = (Connection) upCons.get(0);
  		Connection supporting = (Connection) upCons.get(1);

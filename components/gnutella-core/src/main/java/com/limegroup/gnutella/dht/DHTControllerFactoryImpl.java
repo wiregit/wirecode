@@ -3,13 +3,17 @@ package com.limegroup.gnutella.dht;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 
+@Singleton
 public class DHTControllerFactoryImpl implements DHTControllerFactory {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public DHTControllerFactoryImpl(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

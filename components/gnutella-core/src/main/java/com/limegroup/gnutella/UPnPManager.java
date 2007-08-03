@@ -271,7 +271,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		Random gen=null;
 		
 		String localAddress = NetworkUtils.ip2string(
-				RouterService.getAcceptor().getAddress(false));
+				ProviderHacks.getAcceptor().getAddress(false));
 		int localPort = port;
 	
 		// try adding new mappings with the same port

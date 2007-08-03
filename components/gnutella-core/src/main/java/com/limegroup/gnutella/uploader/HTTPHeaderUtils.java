@@ -15,7 +15,6 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -60,7 +59,7 @@ public class HTTPHeaderUtils {
         if (networkManager.acceptedIncomingConnection())
             return;
 
-        Set<? extends Connectable> proxies = RouterService.getConnectionManager()
+        Set<? extends Connectable> proxies = ProviderHacks.getConnectionManager()
                 .getPushProxies();
 
         StringBuilder buf = new StringBuilder();

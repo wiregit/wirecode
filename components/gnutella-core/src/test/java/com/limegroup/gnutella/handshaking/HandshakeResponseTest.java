@@ -92,7 +92,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         assertEquals(0, RouterService.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
         ipPorts.add(ProviderHacks.getManagedConnectionFactory().createManagedConnection("24.67.85.4", 6346));
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
             "_initializedConnections", ipPorts);
         
         Object[] params = new Object[2];

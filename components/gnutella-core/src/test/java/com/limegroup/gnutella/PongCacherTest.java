@@ -47,7 +47,7 @@ public final class PongCacherTest extends LimeTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
     }
 
     /**

@@ -283,7 +283,7 @@ public class NodeAssigner {
             Runnable ultrapeerRunner = new Runnable() {
                 public void run() {
                     NodeAssignerStat.ULTRAPEER_ASSIGNMENTS.incrementStat();
-                    RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
+                    ProviderHacks.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
                 }
             };
                 
@@ -392,7 +392,7 @@ public class NodeAssigner {
             assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L) 
                     > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
                     
-            final long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+            final long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
                     ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
             
             // This is the minimum requirement to connect to the DHT in passive mode
@@ -505,7 +505,7 @@ public class NodeAssigner {
      * Returns whether ot not a Node is PASSIVE_LEAF capable
      */
     private boolean isPassiveLeafDHTCapable() {
-        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+        long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
         // TODO: I'm not sure if it's really necessary to be an ULTRAPEER_OS
@@ -520,7 +520,7 @@ public class NodeAssigner {
      * Returns whether ot not a Node is ACTIVE capable
      */
     private boolean isActiveDHTCapable() {
-        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+        long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
         return _isHardcoreCapable

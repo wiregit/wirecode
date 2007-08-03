@@ -32,6 +32,9 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.statistic.StatsUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -44,6 +47,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
+@Singleton
 public class DHTManagerImpl implements DHTManager {
     
     private static final Log LOG = LogFactory.getLog(DHTManagerImpl.class);
@@ -94,7 +98,8 @@ public class DHTManagerImpl implements DHTManager {
      * 
      * @param service
      */
-    public DHTManagerImpl(Executor service, DHTControllerFactory dhtControllerFactory) {
+    @Inject
+    public DHTManagerImpl(@Named("dhtExecutor") Executor service, DHTControllerFactory dhtControllerFactory) {
         this.executor = service;
         this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
         this.dhtControllerFactory = dhtControllerFactory;

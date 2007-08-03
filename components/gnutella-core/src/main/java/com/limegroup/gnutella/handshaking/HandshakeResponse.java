@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -398,12 +399,12 @@ public class HandshakeResponse {
         
 		// add any leaves
         List<? extends IpPort> leaves =
-            RouterService.getConnectionManager().getInitializedClientConnections();
+            ProviderHacks.getConnectionManager().getInitializedClientConnections();
 		headers.put(HeaderNames.LEAVES, createEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
         List<? extends IpPort> ultrapeers = 
-            RouterService.getConnectionManager().getInitializedConnections();
+            ProviderHacks.getConnectionManager().getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			

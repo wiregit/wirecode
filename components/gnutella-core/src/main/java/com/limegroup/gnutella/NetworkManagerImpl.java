@@ -5,22 +5,25 @@ import java.util.Properties;
 
 import org.limewire.io.NetworkUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 
+@Singleton
 public class NetworkManagerImpl implements NetworkManager {
     
-    private static Provider<UDPService> udpService;
-    private static Provider<Acceptor> acceptor;
-    private static Provider<DHTManager> dhtManager;
-    private static Provider<ConnectionManager> connectionManager;
-    private static Provider<ActivityCallback> activityCallback;
+    private Provider<UDPService> udpService;
+    private Provider<Acceptor> acceptor;
+    private Provider<DHTManager> dhtManager;
+    private Provider<ConnectionManager> connectionManager;
+    private Provider<ActivityCallback> activityCallback;
     
-    @SuppressWarnings("all") // REMOVE!
+    @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
             Provider<Acceptor> acceptor,
             Provider<DHTManager> dhtManager,

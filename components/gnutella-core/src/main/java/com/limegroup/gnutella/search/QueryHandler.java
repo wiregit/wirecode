@@ -17,6 +17,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -117,7 +118,7 @@ public final class QueryHandler implements Inspectable {
      * testing purposes.
 	 */
 	private static ConnectionManager _connectionManager =
-		RouterService.getConnectionManager();
+		ProviderHacks.getConnectionManager();
 
     /**
      * Variable for the number of results the leaf reports it has.

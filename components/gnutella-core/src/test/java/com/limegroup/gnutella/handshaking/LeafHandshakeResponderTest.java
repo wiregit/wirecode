@@ -7,7 +7,6 @@ import org.limewire.util.PrivilegedAccessor;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -188,7 +187,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
     }
     
     private void setPreferredConnections() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_preferredConnections",
                                     new Integer(ConnectionSettings.NUM_CONNECTIONS.getValue()));
     }

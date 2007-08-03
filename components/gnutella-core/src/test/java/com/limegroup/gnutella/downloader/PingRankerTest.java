@@ -74,7 +74,7 @@ public class PingRankerTest extends LimeTestCase {
         ranker = new PingRanker(ProviderHacks.getNetworkManager());
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
         ranker.setMeshHandler(new MockMesh(ranker));
         DownloadSettings.WORKER_INTERVAL.setValue(-1);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
@@ -132,7 +132,7 @@ public class PingRankerTest extends LimeTestCase {
      * Tests that the ranker learns about new hosts from altlocs
      */
     public void testLearnsFromAltLocs() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         RemoteFileDesc original = newRFDWithURN("1.2.3.4",3); 
         ranker.addToPool(original);
         assertEquals(1,pinger.hosts.size());
@@ -174,7 +174,7 @@ public class PingRankerTest extends LimeTestCase {
      * either from other altlocs or from direct addition
      */
     public void testIgnoresDuplicateAlts() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         RemoteFileDesc original = newRFDWithURN("1.2.3.4",3);
         GUID g = new GUID(GUID.makeGuid());
         RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
@@ -204,7 +204,7 @@ public class PingRankerTest extends LimeTestCase {
      * source as long as we are not firewalled or can do FWT
      */
     public void testPingsFirewalledHosts() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
@@ -212,7 +212,7 @@ public class PingRankerTest extends LimeTestCase {
         assertIpPortEquals(new IpPortImpl("1.2.2.2",3),(IpPort)pinger.hosts.get(0));
         HeadPing ping = (HeadPing)pinger.messages.get(0);
         assertEquals(g,ping.getClientGuid());
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
     }
     
     /**
@@ -251,7 +251,7 @@ public class PingRankerTest extends LimeTestCase {
      * from more than one - only one should be processed. 
      */
     public void testMultipleProxyReplies() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3;1.3.3.3:4","2.2.2.3:5"));
@@ -377,7 +377,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testFirewalledPreferred() throws Exception {
         
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
         RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
@@ -408,7 +408,7 @@ public class PingRankerTest extends LimeTestCase {
      * tests that within the same rank and firewall status, partial sources are preferred
      */
     public void testPartialPreferred() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         List l = new ArrayList();
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));

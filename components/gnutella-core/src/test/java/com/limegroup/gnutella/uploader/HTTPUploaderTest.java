@@ -63,7 +63,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         doSettings();
 
         // TODO acceptor shutdown in globalTearDown()
-        Acceptor acceptor = RouterService.getAcceptor();
+        Acceptor acceptor = ProviderHacks.getAcceptor();
         acceptor.init();
         acceptor.start();
     }

@@ -258,7 +258,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
     
     private void setAcceptedIncoming() throws Exception {
-        Acceptor ac = RouterService.getAcceptor();
+        Acceptor ac = ProviderHacks.getAcceptor();
         PrivilegedAccessor.setValue(ac, "_acceptedIncoming", Boolean.TRUE);
     }
     

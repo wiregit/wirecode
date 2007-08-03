@@ -23,7 +23,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -61,7 +60,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		//(they support UDP ponging, obviously)
 		boolean newOnly = request.hasNewOnly();
 		
-        for(ManagedConnection c : RouterService.getConnectionManager().getInitializedConnections()) {
+        for(ManagedConnection c : ProviderHacks.getConnectionManager().getInitializedConnections()) {
 			if (newOnly) {  
 				if (c.remoteHostSupportsUDPCrawling() >= 1)
 					endpointsUP.add(c);
@@ -71,7 +70,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		}
 		
 		//add all leaves.. or not?
-        for(ManagedConnection c : RouterService.getConnectionManager().getInitializedClientConnections()) {
+        for(ManagedConnection c : ProviderHacks.getConnectionManager().getInitializedClientConnections()) {
 			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
 				endpointsLeaf.add(c);
 		}
@@ -102,14 +101,14 @@ public class UDPCrawlerPong extends VendorMessage {
 			//move the connections with the locale pref to the head of the lists
 			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
 			List<ManagedConnection> prefedcons =
-                RouterService.getConnectionManager().getInitializedConnectionsMatchLocale(myLocale);
+                ProviderHacks.getConnectionManager().getInitializedConnectionsMatchLocale(myLocale);
 			for(ManagedConnection c : prefedcons) {
 			    endpointsUP.remove(c);
                 endpointsUP.add(0, c);
             }
 			
 			prefedcons =
-                RouterService.getConnectionManager().getInitializedClientConnectionsMatchLocale(myLocale);
+                ProviderHacks.getConnectionManager().getInitializedClientConnectionsMatchLocale(myLocale);
             for(ManagedConnection c : prefedcons) {
                 endpointsLeaf.remove(c);
                 endpointsLeaf.add(0, c);
@@ -151,7 +150,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		result[2] = format;
 		
         if(request.hasNodeUptime()) {
-            long currentAverage = RouterService.getConnectionManager().getCurrentAverageUptime()/1000L;//in sec
+            long currentAverage = ProviderHacks.getConnectionManager().getCurrentAverageUptime()/1000L;//in sec
             if(currentAverage > Integer.MAX_VALUE)
                 currentAverage = Integer.MAX_VALUE;
             ByteOrder.int2leb((int)currentAverage, result, 3);

@@ -148,7 +148,7 @@ public class DownloadTest extends LimeTestCase {
 
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
@@ -160,7 +160,7 @@ public class DownloadTest extends LimeTestCase {
         
         PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         
-        RouterService.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
+        ProviderHacks.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
         
         assertTrue(RouterService.isConnected());
         
@@ -1715,7 +1715,7 @@ public class DownloadTest extends LimeTestCase {
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
             "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
         LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
@@ -1776,7 +1776,7 @@ public class DownloadTest extends LimeTestCase {
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
             "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
         LOG.info("-Testing that downloader does not add itself to the mesh if it has no tree");

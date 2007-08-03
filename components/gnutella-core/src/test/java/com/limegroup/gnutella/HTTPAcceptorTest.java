@@ -44,7 +44,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
         doSettings();
 
         // TODO acceptor shutdown in globalTearDown()
-        acceptor = RouterService.getAcceptor();
+        acceptor = ProviderHacks.getAcceptor();
         acceptor.init();
         acceptor.start();
     }

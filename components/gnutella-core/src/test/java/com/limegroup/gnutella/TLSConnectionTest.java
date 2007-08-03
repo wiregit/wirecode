@@ -59,8 +59,8 @@ public class TLSConnectionTest extends LimeTestCase {
     public void setUp() throws Exception {
         setSettings();
         RouterService.clearHostCatcher();
-        RouterService.getConnectionManager().disconnect(false);
-        RouterService.getConnectionManager().connect();
+        ProviderHacks.getConnectionManager().disconnect(false);
+        ProviderHacks.getConnectionManager().connect();
     }
 
     public void testTLSConnectionBlockingConnect() throws Exception {
@@ -73,15 +73,15 @@ public class TLSConnectionTest extends LimeTestCase {
         assertEquals(0.0f, c.getSentLostFromSSL());
         assertEquals(0.0f, c.getReadLostFromSSL());
         
-        assertEquals(0, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(0, ProviderHacks.getConnectionManager().getNumConnections());
         c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         drain(c);
         assertGreaterThan(0, c.getSentLostFromSSL());
         assertGreaterThan(0, c.getReadLostFromSSL());
         System.out.println("sent: " + c.getSentLostFromSSL() + ", read: " + c.getReadLostFromSSL());
-        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
         
-        ConnectionManager manager = RouterService.getConnectionManager();
+        ConnectionManager manager = ProviderHacks.getConnectionManager();
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);
@@ -112,7 +112,7 @@ public class TLSConnectionTest extends LimeTestCase {
         assertEquals(0.0f, c.getSentLostFromSSL());
         assertEquals(0.0f, c.getReadLostFromSSL());
         
-        assertEquals(0, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(0, ProviderHacks.getConnectionManager().getNumConnections());
         StubGnetConnectObserver connector = new StubGnetConnectObserver();
         c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000, connector);
         connector.waitForResponse(1000);
@@ -120,9 +120,9 @@ public class TLSConnectionTest extends LimeTestCase {
         drain(c);
         assertGreaterThan(0, c.getSentLostFromSSL());
         assertGreaterThan(0, c.getReadLostFromSSL());
-        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
         
-        ConnectionManager manager = RouterService.getConnectionManager();
+        ConnectionManager manager = ProviderHacks.getConnectionManager();
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);

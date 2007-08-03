@@ -68,7 +68,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
             mc[i] = new ManagedConnectionStub();
         }
         
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_initializedClientConnections", Arrays.asList(mc));
     }
     
@@ -76,7 +76,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
      * Restores the ConnectionManager._initializedClientConnections List
      */
     private void freeSlots() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_initializedClientConnections", Collections.EMPTY_LIST);
     }
     
@@ -268,7 +268,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
     }
     
     private void setPreferredConnections() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_preferredConnections",
                                     new Integer(ConnectionSettings.NUM_CONNECTIONS.getValue()));
     }

@@ -124,7 +124,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // make sure leaf is sharing
         assertEquals(2, RouterService.getFileManager().getNumFiles());
-        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
 
         // send a query that should be answered
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -528,7 +528,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     }
 
     private static void setAccepted(boolean accepted) throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(), "_acceptedIncoming", accepted);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(), "_acceptedIncoming", accepted);
     }
 
 }

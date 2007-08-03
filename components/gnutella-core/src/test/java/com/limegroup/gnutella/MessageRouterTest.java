@@ -89,7 +89,7 @@ public final class MessageRouterTest extends LimeTestCase {
 	}  
 
     public static void globalSetUp() throws Exception {
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
         //TestConnectionManager tcm = new TestConnectionManager(4);
         //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         ROUTER = ProviderHacks.getNewStandardMessageRouter();

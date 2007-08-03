@@ -48,7 +48,7 @@ public class AcceptorTest extends LimeTestCase {
     public static void globalSetUp() throws Exception {
         setSettings();
         new RouterService(new ActivityCallbackStub());
-        RouterService.getConnectionManager().initialize();
+        ProviderHacks.getConnectionManager().initialize();
         
         // start it up!
         acceptThread = new Acceptor(ProviderHacks.getNetworkManager());

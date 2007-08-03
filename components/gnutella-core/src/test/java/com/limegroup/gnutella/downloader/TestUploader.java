@@ -839,12 +839,12 @@ public class TestUploader extends AssertComparisons {
                 boolean previous = ProviderHacks.getNetworkManager().acceptedIncomingConnection();
                 
                 try{
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                         "_acceptedIncoming",new Boolean(false));
                     
                     ProviderHacks.getFeaturesWriter().writeFeatures(out);
                     
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                             "_acceptedIncoming",new Boolean(previous));
                 }catch(Exception bad) {
                     ErrorService.error(bad);

@@ -123,7 +123,7 @@ public class UDPPushTest extends LimeTestCase {
 				"ALT",
 				proxies,now, false);
 		
-		Acceptor acc = RouterService.getAcceptor();
+		Acceptor acc = ProviderHacks.getAcceptor();
 		PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
 
 		assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());

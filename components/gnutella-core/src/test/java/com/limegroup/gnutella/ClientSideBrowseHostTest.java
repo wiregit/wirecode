@@ -59,7 +59,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     // 3. if all else fails the client sends a PushRequest
 
     public static void globalSetUp() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
     }
 
     public void testHTTPRequest() throws Exception {

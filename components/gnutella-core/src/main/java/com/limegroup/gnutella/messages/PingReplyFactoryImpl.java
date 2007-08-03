@@ -52,7 +52,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                         .getValue()
                         : ApplicationSettings.LANGUAGE.getValue(),
-                RouterService.getConnectionManager()
+                ProviderHacks.getConnectionManager()
                         .getNumLimeWireLocalePrefSlots(), gnutHosts, dhtHosts);
     }
 
@@ -74,7 +74,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                 .getValue()
                 : ApplicationSettings.LANGUAGE.getValue();
-        addLocale(ggep, locale, RouterService.getConnectionManager()
+        addLocale(ggep, locale, ProviderHacks.getConnectionManager()
                 .getNumLimeWireLocalePrefSlots());
 
         addAddress(ggep, returnAddr);

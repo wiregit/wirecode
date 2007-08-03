@@ -28,6 +28,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.SystemUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
@@ -87,6 +89,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
  */
+@Singleton
 public class ConnectionManager implements ConnectionAcceptor, 
         EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener> {
 
@@ -302,6 +305,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Constructs a ConnectionManager.  Must call initialize before using
      * other methods of this class.
      */
+    @Inject
     public ConnectionManager(NetworkManager networkManager) { 
         this.networkManager = networkManager;
     }
@@ -2603,11 +2607,11 @@ class LegacyConnectionStats implements Inspectable {
     
     public Object inspect() {
         List<ManagedConnection> conns = 
-            RouterService.getConnectionManager().getConnections();
+            ProviderHacks.getConnectionManager().getConnections();
         
         Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
         for(ManagedConnection mc : conns) {
-            if (RouterService.getConnectionManager().isSupernode()) {
+            if (ProviderHacks.getConnectionManager().isSupernode()) {
                 if (leaf && mc.isSupernodeSupernodeConnection())
                     continue;
                 if (!leaf && mc.isSupernodeClientConnection())

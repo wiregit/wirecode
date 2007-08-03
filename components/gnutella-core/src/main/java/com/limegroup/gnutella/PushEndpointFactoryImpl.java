@@ -50,7 +50,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
          */
         @Override
         public Set<? extends IpPort> getProxies() {
-            return RouterService.getConnectionManager().getPushProxies();
+            return ProviderHacks.getConnectionManager().getPushProxies();
         }
 
         /**

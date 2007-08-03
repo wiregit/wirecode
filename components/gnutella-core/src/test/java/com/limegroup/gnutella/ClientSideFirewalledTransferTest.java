@@ -117,7 +117,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
     public void testStartsUDPTransfer() throws Exception {
 
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                                     "_externalAddress",
                                     new byte[] {(byte) 10, (byte) 07,
                                                 (byte) 19, (byte) 76});
@@ -158,7 +158,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(ppi.getPort(), 6355);
         
         assertEquals(ppi.getInetAddress(), 
-                ((Connection)RouterService.getConnectionManager().getConnections().get(0)).getInetAddress() 
+                ((Connection)ProviderHacks.getConnectionManager().getConnections().get(0)).getInetAddress() 
                 );
 
         // set up a ServerSocket to get give on

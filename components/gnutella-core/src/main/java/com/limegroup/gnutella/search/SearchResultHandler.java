@@ -21,6 +21,7 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
@@ -117,7 +118,7 @@ public final class SearchResultHandler implements Inspectable {
             // deal if it does....
             QueryStatusResponse stat = new QueryStatusResponse(guid, 
                                                                MAX_RESULTS);
-            RouterService.getConnectionManager().updateQueryStatus(stat);
+            ProviderHacks.getConnectionManager().updateQueryStatus(stat);
         }
     }
 
@@ -336,7 +337,7 @@ public final class SearchResultHandler implements Inspectable {
                     QueryStatusResponse stat = 
                         new QueryStatusResponse(gc.getGUID(), 
                                                 numResultsToReport);
-                    RouterService.getConnectionManager().updateQueryStatus(stat);
+                    ProviderHacks.getConnectionManager().updateQueryStatus(stat);
                 }
 
             }

@@ -109,7 +109,7 @@ public class StandardMessageRouter extends MessageRouter {
     
             // send our own pong if we have free slots or if our average
             // daily uptime is more than 1/2 hour
-            if(RouterService.getConnectionManager().hasFreeSlots()  ||
+            if(ProviderHacks.getConnectionManager().hasFreeSlots()  ||
                Statistics.instance().calculateDailyUptime() > 60*30) {
                 PingReply pr = 
                     pingReplyFactory.create(ping.getGUID(), (byte)newTTL);

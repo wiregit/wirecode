@@ -620,6 +620,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
         this.queryRequestFactory = downloadReferences.getQueryRequestFactory();
         this.onDemandUnicaster = downloadReferences.getOnDemandUnicaster();
+        this.downloadWorkerFactory = downloadReferences.getDownloadWorkerFactory();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();

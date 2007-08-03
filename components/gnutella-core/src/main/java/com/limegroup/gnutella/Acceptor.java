@@ -29,6 +29,8 @@ import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BufferUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -42,6 +44,7 @@ import com.limegroup.gnutella.statistics.HTTPStat;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
+@Singleton
 public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
@@ -124,6 +127,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     
     private final NetworkManager networkManager;
     
+    @Inject
     public Acceptor(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }
@@ -658,7 +662,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // clear and revalidate if 1) we haven't had in incoming 
             // or 2) we've never had incoming and we haven't checked
             final long currTime = System.currentTimeMillis();
-            final ConnectionManager cm = RouterService.getConnectionManager();
+            final ConnectionManager cm = ProviderHacks.getConnectionManager();
             if (
                 (_acceptedIncoming && //1)
                  ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 

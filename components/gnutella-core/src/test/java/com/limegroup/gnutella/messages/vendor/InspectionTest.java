@@ -216,7 +216,7 @@ public class InspectionTest extends ServerSideTestCase {
         // and handling it should also respond to the return address
         MessageSettings.INSPECTION_VERSION.setValue(1);
         MessageRouter router = RouterService.getMessageRouter();
-        router.handleMessage(received, RouterService.getConnectionManager().getInitializedClientConnections().get(0));
+        router.handleMessage(received, ProviderHacks.getConnectionManager().getInitializedClientConnections().get(0));
         pack = new DatagramPacket(new byte[1000],1000);
         socket2.receive(pack);
         assertEquals(2, received.getRoutableVersion());

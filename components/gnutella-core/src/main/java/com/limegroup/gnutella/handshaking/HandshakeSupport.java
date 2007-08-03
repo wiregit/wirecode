@@ -10,7 +10,6 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.setting.StringSetting;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HeaderSupport;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -166,10 +165,10 @@ class HandshakeSupport extends HeaderSupport {
         // Otherwise, if our current address is invalid, change.
         else if(!NetworkUtils.isValidAddress(ProviderHacks.getNetworkManager().getAddress())) {
             // will auto-call addressChanged.
-            RouterService.getAcceptor().setAddress(ia);
+            ProviderHacks.getAcceptor().setAddress(ia);
         }
         
-        RouterService.getAcceptor().setExternalAddress(ia);
+        ProviderHacks.getAcceptor().setExternalAddress(ia);
     }
     
     /** Returns the number of headers we've read so far. */

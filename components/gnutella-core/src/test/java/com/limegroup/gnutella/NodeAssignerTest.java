@@ -62,7 +62,7 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void setUp() throws Exception {
         setSettings();
-        ASSIGNER = new NodeAssigner(BW, BW, RouterService.getConnectionManager(), ProviderHacks.getNetworkManager());
+        ASSIGNER = new NodeAssigner(BW, BW, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager());
 
     }
     
@@ -148,7 +148,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         ULTRAPEER.setAcceptsUltrapeers(true);
         connect();
-        assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
+        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
         assertTrue("should be passively connected to the DHT", ProviderHacks.getDHTManager().isRunning() 
                 && (ProviderHacks.getDHTManager().getDHTMode() != DHTMode.ACTIVE));
         
@@ -162,7 +162,7 @@ public class NodeAssignerTest extends LimeTestCase {
           ROUTER_SERVICE.start();
         connect();
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         setUltrapeerCapabilities();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         ULTRAPEER.setAcceptsUltrapeers(true);
@@ -171,7 +171,7 @@ public class NodeAssignerTest extends LimeTestCase {
         
         sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
+        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
         assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
     }
     
@@ -187,7 +187,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));

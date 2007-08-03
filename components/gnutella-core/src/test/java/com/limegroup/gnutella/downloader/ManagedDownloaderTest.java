@@ -125,7 +125,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
      */
     public void testFirewalledLocs() throws Exception {
     	LOG.info("testing firewalled locations");
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
@@ -212,7 +212,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	//make sure the altloc is demoted now
     	assertEquals(0,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
     	
-    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+    	PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming",new Boolean(false));
         assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
     	

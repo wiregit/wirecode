@@ -83,7 +83,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testConnectionStatsRecorded() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection in = createLeafConnection();
@@ -121,7 +121,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testForwardsGGEP() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection conn = createLeafConnection();
@@ -163,7 +163,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	// Tests to make sure that connections are closed correctly from the
     //	  client side.
     public void testClientSideClose() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection out = createLeafConnection();
@@ -183,7 +183,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	 // Tests to make sure that connections are closed correctly from the
 	 // server side.
     public void testServerSideClose() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection out = createLeafConnection();

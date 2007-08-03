@@ -92,7 +92,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         boolean acceptsSolicited = ProviderHacks.getUdpService().canReceiveSolicited();
         boolean lastFWTState = ConnectionSettings.LAST_FWT_STATE.getValue();
-        ConnectionManager manager = RouterService.getConnectionManager();
+        ConnectionManager manager = ProviderHacks.getConnectionManager();
 
         PrivilegedAccessor.setValue(RouterService.class, "manager",
                 proxyManager);

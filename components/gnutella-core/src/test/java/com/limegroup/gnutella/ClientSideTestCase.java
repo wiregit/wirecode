@@ -128,7 +128,7 @@ public abstract class ClientSideTestCase
             } catch(NoGnutellaOkException ngoke) {
                 fail("couldn't connect ultrapeer: " + (i+1) +
                      ", preferred is: " + 
-                     RouterService.getConnectionManager().getPreferredConnectionCount(),
+                     ProviderHacks.getConnectionManager().getPreferredConnectionCount(),
                      ngoke);
             }
         }

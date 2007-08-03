@@ -45,7 +45,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     public void setUp() throws Exception {
         stub = new StubConnectionManager();
         stub.proxies = new StrictIpPortSet<Connectable>();
-        oldCM = RouterService.getConnectionManager();
+        oldCM = ProviderHacks.getConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
     }
     

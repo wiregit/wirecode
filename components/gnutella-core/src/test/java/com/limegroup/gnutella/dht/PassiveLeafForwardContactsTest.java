@@ -161,7 +161,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testForwardContacts() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
@@ -262,7 +262,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendCapabilitiesVM() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
@@ -323,7 +323,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendPushProxyRequest() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer

@@ -227,7 +227,7 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         DHTContactsMessage msg = new DHTContactsMessage(node);
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         List<ManagedConnection> list = cm.getInitializedClientConnections();
         for (ManagedConnection mc : list) {
             if (mc.isPushProxyFor()
@@ -384,7 +384,7 @@ public abstract class AbstractDHTController implements DHTController {
         LOG.debug("Sending updated capabilities to our connections");
         
         CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
+        ProviderHacks.getConnectionManager().sendUpdatedCapabilities();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }

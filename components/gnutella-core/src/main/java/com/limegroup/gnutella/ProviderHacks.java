@@ -7,6 +7,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
@@ -61,20 +62,6 @@ import com.limegroup.gnutella.util.SocketsManager;
 // DPINJ: REMOVE THIS CLASS!!!
 public class ProviderHacks {
     
-    //------------------------------------------
-    // hack providers that delegate to RS or singletons
-
-    public static final Provider<Acceptor> acceptor = new Provider<Acceptor>() {
-        public Acceptor get() {
-            return RouterService.getAcceptor();
-        }
-    };
-    
-    public static final Provider<ConnectionManager> connectionManager = new Provider<ConnectionManager>() {
-        public ConnectionManager get() {
-            return RouterService.getConnectionManager();
-        }
-    };
 
     public static final Provider<ActivityCallback> activityCallback = new Provider<ActivityCallback>() {
         public ActivityCallback get() {
@@ -159,12 +146,7 @@ public class ProviderHacks {
         }
     };
     
-    public static final Provider<UDPService> udpService = new AbstractLazySingletonProvider<UDPService>() {
-        protected UDPService createObject() {
-            return new UDPService(getNetworkManager());
-        }
-    };
-    public static UDPService getUdpService() { return udpService.get(); }
+
     
     public static final Provider<ForMeReplyHandler> forMeReplyHandler = new AbstractLazySingletonProvider<ForMeReplyHandler>() {
         protected ForMeReplyHandler createObject() {
@@ -173,13 +155,6 @@ public class ProviderHacks {
     };
     public static ForMeReplyHandler getForMeReplyHandler() { return forMeReplyHandler.get(); }
     
-    public static /* final */ Provider<DHTManager> dhtManager = new AbstractLazySingletonProvider<DHTManager>() {
-        public DHTManager createObject() {
-            return new DHTManagerImpl(
-                    ExecutorsHelper.newProcessingQueue("DHT-Processor"), getDHTControllerFactory());
-        }
-    };
-    public static DHTManager getDHTManager() { return dhtManager.get(); }
     
     //-------------------------------------------
     // hack that constructs things -- closest to the real world!
@@ -194,13 +169,7 @@ public class ProviderHacks {
     //-------------------------------------------
     // hack providers that construct new things, and getters for getting them easily.
     
-    public static final Provider<NetworkManager> networkManager = new AbstractLazySingletonProvider<NetworkManager>() {
-        @Override
-        protected NetworkManager createObject() {
-            return new NetworkManagerImpl(udpService, acceptor, dhtManager, connectionManager, activityCallback);
-        }
-    };
-    public static final NetworkManager getNetworkManager() { return networkManager.get(); }
+
     
     public static final Provider<LocalFileDetailsFactory> localFileDetailsFactory = new AbstractLazySingletonProvider<LocalFileDetailsFactory>() {
         @Override
@@ -350,13 +319,6 @@ public class ProviderHacks {
     };
     public static ManagedTorrentFactory getManagedTorrentFactory() { return managedTorrentFactory.get(); }
     
-    public static final Provider<DHTControllerFactory> dhtControllerFactory = new AbstractLazySingletonProvider<DHTControllerFactory>() {
-        protected DHTControllerFactory createObject() {
-            return new DHTControllerFactoryImpl(getNetworkManager());
-        }
-    };
-    public static DHTControllerFactory getDHTControllerFactory() { return dhtControllerFactory.get(); }
-    
     public static final Provider<HeadersFactory> headersFactory = new AbstractLazySingletonProvider<HeadersFactory>() {
         protected HeadersFactory createObject() {
             return new HeadersFactoryImpl(getNetworkManager());
@@ -384,5 +346,31 @@ public class ProviderHacks {
         }        
     };
     public static final PingReplyFactory getPingReplyFactory() { return pingReplyFactory.get(); }
+    
+    
+    static {
+        LimeWireCore core = new LimeWireCore();
+    }
+
+
+
+
+    @Inject public static Provider<Acceptor> acceptor;
+    public static Acceptor getAcceptor() { return acceptor.get(); }
+    
+    @Inject public static Provider<UDPService> udpService;
+    public static UDPService getUdpService() { return udpService.get(); }
+    
+    @Inject public static Provider<NetworkManager> networkManager;
+    public static final NetworkManager getNetworkManager() { return networkManager.get(); }
+    
+    @Inject public static Provider<ConnectionManager> connectionManager;
+    public static ConnectionManager getConnectionManager() { return connectionManager.get(); }
+    
+    @Inject public static Provider<DHTManager> dhtManager;
+    public static DHTManager getDHTManager() { return dhtManager.get(); }
+    
+    @Inject public static Provider<DHTControllerFactory> dhtControllerFactory;
+    public static DHTControllerFactory getDHTControllerFactory() { return dhtControllerFactory.get(); }
     
 }

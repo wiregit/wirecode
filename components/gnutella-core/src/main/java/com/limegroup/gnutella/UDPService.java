@@ -24,6 +24,8 @@ import org.limewire.security.MACCalculator;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -46,6 +48,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * @see QueryUnicaster
  *
  */
+@Singleton
 public class UDPService implements ReadWriteObserver {
 
     private static final Log LOG = LogFactory.getLog(UDPService.class);
@@ -146,9 +149,7 @@ public class UDPService implements ReadWriteObserver {
     
     private final NetworkManager networkManager;
 
-	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
-	 */
+	@Inject
 	protected UDPService(NetworkManager networkManager) {
 	    this.networkManager = networkManager;
 	    OUTGOING_MSGS = new LinkedList<SendBundle>();
@@ -401,7 +402,7 @@ public class UDPService implements ReadWriteObserver {
         //  OR
         //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         return
-                !RouterService.getConnectionManager().isConnectedTo(host)
+                !ProviderHacks.getConnectionManager().isConnectedTo(host)
             &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
              ;
 
@@ -599,7 +600,7 @@ public class UDPService implements ReadWriteObserver {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
 	                    " our external port "+networkManager.getPort()+
-	                    " our non-forced port "+RouterService.getAcceptor().getPort(false)+
+	                    " our non-forced port "+ProviderHacks.getAcceptor().getPort(false)+
 	                    " number of received IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
 	                            networkManager.getExternalAddress()));
@@ -611,7 +612,7 @@ public class UDPService implements ReadWriteObserver {
 	        
 	        if (_numReceivedIPPongs == 1){
 	            ret = ret &&
-	            	(_lastReportedPort == RouterService.getAcceptor().getPort(false) ||
+	            	(_lastReportedPort == ProviderHacks.getAcceptor().getPort(false) ||
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
@@ -645,7 +646,7 @@ public class UDPService implements ReadWriteObserver {
 	 */
 	public int getStableUDPPort() {
 
-	    int localPort = RouterService.getAcceptor().getPort(false);
+	    int localPort = ProviderHacks.getAcceptor().getPort(false);
 	    int forcedPort = networkManager.getPort();
 
 	    synchronized(this) {
@@ -717,7 +718,7 @@ public class UDPService implements ReadWriteObserver {
             // or 2) we've never had incoming and we haven't checked in an hour
             final long currTime = System.currentTimeMillis();
             final MessageRouter mr = RouterService.getMessageRouter();
-            final ConnectionManager cm = RouterService.getConnectionManager();
+            final ConnectionManager cm = ProviderHacks.getConnectionManager();
             // if these haven't been created yet, exit and wait till they have.
             if(mr == null || cm == null)
                 return;

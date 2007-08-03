@@ -111,7 +111,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     public static void globalSetUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         try {
-            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+            ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }        

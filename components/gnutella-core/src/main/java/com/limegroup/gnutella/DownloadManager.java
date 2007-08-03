@@ -190,7 +190,7 @@ public class DownloadManager implements BandwidthTracker {
     		router,
     		RouterService.getHttpExecutor(),
     		RouterService.getScheduledExecutorService(),
-    		RouterService.getAcceptor(),
+    		ProviderHacks.getAcceptor(),
     		ProviderHacks.getNetworkManager()); // DPINJ: use passed-in version!
         pushManager.initialize(RouterService.getConnectionDispatcher());
     }

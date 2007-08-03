@@ -14,7 +14,6 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -46,7 +45,7 @@ public final class MessageReaderTest extends LimeTestCase {
 	
 	public void setUp() throws Exception {
 	    STUB.clear();
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());	    
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());	    
 	}
 	
 	public void testSingleMessageRead() throws Exception {

@@ -34,6 +34,7 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -283,7 +284,7 @@ public class UpdateHandler implements HttpClientListener {
             
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
             CapabilitiesVM.reconstructInstance();
-            RouterService.getConnectionManager().sendUpdatedCapabilities();
+            ProviderHacks.getConnectionManager().sendUpdatedCapabilities();
         }
 
         Version limeV;
@@ -545,7 +546,7 @@ public class UpdateHandler implements HttpClientListener {
      * Adds all current connections that have the right update ID as a source for this download.
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
-        for(ManagedConnection mc : RouterService.getConnectionManager().getConnections()) {
+        for(ManagedConnection mc : ProviderHacks.getConnectionManager().getConnections()) {
             if(mc.getRemoteHostUpdateVersion() == _lastId) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
