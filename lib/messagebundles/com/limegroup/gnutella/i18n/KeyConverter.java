@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.i18n;
 
 import java.io.File;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
@@ -27,6 +28,8 @@ public class KeyConverter {
             new ConcatenateRule("SEARCH_VIRUS_MSG", "SEARCH_VIRUS_MSG_ONE",
                     "SEARCH_VIRUS_MSG_TWO", "SEARCH_VIRUS_MSG_THREE") };
 
+    private static final Rule encodeMnemonics = new EncodeMnemonicAsAmpersAnd();
+    
     /**
      * Call this in lib/messagebundles.
      */
@@ -34,10 +37,10 @@ public class KeyConverter {
         File dir = new File(".");
         LanguageLoader loader = new LanguageLoader(dir);
         Map<String, LanguageInfo> languages = loader.loadLanguages();
-
+        
         // apply conversions
         for (LanguageInfo language : languages.values()) {
-            applyRules(language.getProperties());
+            applyRules(language.getProperties(), encodeMnemonics);
         }
 
         LanguageUpdater updater = new LanguageUpdater(dir, languages, loader
@@ -45,7 +48,7 @@ public class KeyConverter {
         updater.updateAllLanguages();
     }
 
-    private static void applyRules(Properties props) {
+    private static void applyRules(Properties props, Rule...rules) {
         for (Rule rule : rules) {
             rule.apply(props);
         }
@@ -117,6 +120,30 @@ public class KeyConverter {
             System.out.println(newKey + "=" + builder.toString());
             props.setProperty(newKey, builder.toString());
         }
+    }
+    
+    private static class EncodeMnemonicAsAmpersAnd implements Rule {
+
+        public void apply(Properties props) {
+            for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
+                String key = (String)e.nextElement();
+                if (key.endsWith("_MNEMONIC")) {
+                    // find corresponding label key
+                    String labelKey = key.substring(0, key.length() - "_MNEMONIC".length());
+                    String label = props.getProperty(labelKey, null);
+                    if (label != null) {
+                        String mnemonic = props.getProperty(key);
+                        String replaced = label.replaceFirst(mnemonic, "&" + mnemonic);
+                        if (replaced.equals(label)) {
+                            replaced = label.replaceFirst(mnemonic.toLowerCase(), "&" + mnemonic.toLowerCase());
+                        }
+                        System.out.println("Replaced: " + replaced);
+                        props.put(labelKey, replaced);
+                    }
+                }
+            }
+        }
+        
     }
 
 }
