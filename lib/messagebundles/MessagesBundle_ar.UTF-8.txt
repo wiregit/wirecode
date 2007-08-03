@@ -374,38 +374,28 @@ MENU_NAV_TITLE_MNEMONIC=N
 MENU_NAV_SEARCH=بحث
 #### MENU_NAV_SEARCH_MNEMONIC=S
 MENU_NAV_SEARCH_MNEMONIC=S
-#### MENU_NAV_SEARCH_ACCESSIBLE=Display the Search Screen
-MENU_NAV_SEARCH_ACCESSIBLE=عرض شاشة البحث
+#### MENU_NAV_ACCESSIBLE=Display the {0} Screen
+#? MENU_NAV_ACCESSIBLE=
 #### MENU_NAV_MONITOR=Monitor
 MENU_NAV_MONITOR=متابعة
 #### MENU_NAV_MONITOR_MNEMONIC=M
 MENU_NAV_MONITOR_MNEMONIC=M
-#### MENU_NAV_MONITOR_ACCESSIBLE=Display the Monitor Screen
-MENU_NAV_MONITOR_ACCESSIBLE=عرض شاشة المتابعة
 #### MENU_NAV_CONN=Connections
 MENU_NAV_CONN=الاتصالات
 #### MENU_NAV_CONN_MNEMONIC=C
 MENU_NAV_CONN_MNEMONIC=C
-#### MENU_NAV_CONN_ACCESSIBLE=Display the Connections Screen
-MENU_NAV_CONN_ACCESSIBLE=عرض شاشة الاتصالات
 #### MENU_NAV_LIB=Library
 MENU_NAV_LIB=المكتبة
 #### MENU_NAV_LIB_MNEMONIC=L
 MENU_NAV_LIB_MNEMONIC=L
-#### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
-MENU_NAV_LIB_ACCESSIBLE=عرض شاشة المكتبة
 #### MENU_NAV_CONSOLE=Console
 #? MENU_NAV_CONSOLE=
 #### MENU_NAV_CONSOLE_MNEMONIC=O
 MENU_NAV_CONSOLE_MNEMONIC=O
-#### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
-#? MENU_NAV_CONSOLE_ACCESSIBLE=
 #### MENU_NAV_LOGGING=Logging
 MENU_NAV_LOGGING=الدخول
 #### MENU_NAV_LOGGING_MNEMONIC=G
 MENU_NAV_LOGGING_MNEMONIC=G
-#### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
-MENU_NAV_LOGGING_ACCESSIBLE=عرض شاشة الدخول
 
 
 #### MENU_VIEW_TITLE=View
@@ -434,32 +424,24 @@ MENU_VIEW_SHOW_HIDE_ACCESSIBLE=عرض أو إخفاء الجداول الفرد�
 MENU_VIEW_MONITOR=متابعة
 #### MENU_VIEW_MONITOR_MNEMONIC=M
 MENU_VIEW_MONITOR_MNEMONIC=M
-#### MENU_VIEW_MONITOR_ACCESSIBLE=Show Monitor Window
-MENU_VIEW_MONITOR_ACCESSIBLE=عرض شاشة المتابعة
+#### MENU_VIEW_ACCESSIBLE=Show {0} Window
+#? MENU_VIEW_ACCESSIBLE=
 #### MENU_VIEW_CONNECTIONS=Connections
 MENU_VIEW_CONNECTIONS=اتصالات
 #### MENU_VIEW_CONNECTIONS_MNEMONIC=C
 MENU_VIEW_CONNECTIONS_MNEMONIC=C
-#### MENU_VIEW_CONNECTIONS_ACCESSIBLE=Show Connections Window
-MENU_VIEW_CONNECTIONS_ACCESSIBLE=عرض نافذة الاتصالات
 #### MENU_VIEW_LIBRARY=Library
 MENU_VIEW_LIBRARY=المكتبة
 #### MENU_VIEW_LIBRARY_MNEMONIC=L
 MENU_VIEW_LIBRARY_MNEMONIC=L
-#### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
-MENU_VIEW_LIBRARY_ACCESSIBLE=عرض نافذة المكتبة
 #### MENU_VIEW_CONSOLE=Console
 #? MENU_VIEW_CONSOLE=
 #### MENU_VIEW_CONSOLE_MNEMONIC=O
 MENU_VIEW_CONSOLE_MNEMONIC=O
-#### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
-#? MENU_VIEW_CONSOLE_ACCESSIBLE=
 #### MENU_VIEW_LOGGING=Logging
 MENU_VIEW_LOGGING=الدخول
 #### MENU_VIEW_LOGGING_MNEMONIC=G
 MENU_VIEW_LOGGING_MNEMONIC=G
-#### MENU_VIEW_LOGGING_ACCESSIBLE=Show Logging Window
-MENU_VIEW_LOGGING_ACCESSIBLE=عرض شاشة الدخول
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=تطبيق السمات
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -716,12 +698,8 @@ SEARCH_RESULT_TABLE_LABEL=النتائج
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=بحث أكثر
 #### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
 SEARCH_RESULT_SECURE_TIP=هذه نتيجة مضمونة. لا معلومات في هذه النتيجة قد تم العبث فيها.
-#### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
-SEARCH_VIRUS_MSG_ONE=واحد من الملفات المحددة قابل للتنفيذ
-#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
-SEARCH_VIRUS_MSG_TWO=برنامج وقد يحتوي على فيروس.
-#### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
-SEARCH_VIRUS_MSG_THREE=هل ترغب بالفعل في تنزيله؟
+#### SEARCH_VIRUS_MSG=One of the selected files is an executable program and could contain a virus. Are you sure you want to download it?
+SEARCH_VIRUS_MSG=واحد من الملفات المحددة قابل للتنفيذ برنامج وقد يحتوي على فيروس. هل ترغب بالفعل في تنزيله؟
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=اسم الملف
 #### SEARCH_MULTIPLE_HOSTS=Multiple
@@ -1306,10 +1284,8 @@ DOWNLOAD_BITTORRENT_FETCH_FAIL=LimeWire لايمكنه تنزيل ملف .torren
 # {3} the localized name of the "Apply Skins" menu
 #### DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=You have downloaded a skin titled "{0}", you can activate the new skin by clicking "{1}" in the "{2}"->"{3}" menu and then selecting it from the list of available skins.
 DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=أنت قمت بتنزيل سمة عنوانها "{0}", يمكنك تفعيل السمة الجديدة عن طريق نقر "{1}" في "{2}"->"{3}" قائمة وقم بتحديدها من قائمة السمات المتوفرة.
-#### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
-DOWNLOAD_APPLY_NEW_THEME_START=لقد قمت بتنزيل سمة جديدة باسم "
-#### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
-DOWNLOAD_APPLY_NEW_THEME_END=." هل ترغب في استخدام هذه السمة الجديدة?
+#### DOWNLOAD_APPLY_NEW_THEME=You have downloaded a new skin titled {0}. Would you like to use this new skin?
+DOWNLOAD_APPLY_NEW_THEME=لقد قمت بتنزيل سمة جديدة باسم "{0}." هل ترغب في استخدام هذه السمة الجديدة?
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
 DOWNLOAD_POSSIBLE_HOSTS=المضيفون الممكنون
 #### DOWNLOAD_BUSY_HOSTS=Busy Hosts
@@ -1638,8 +1614,8 @@ PLAYLIST_OPTIONS_SHUFFLE=تبديل
 PLAYLIST_DIALOG_OPEN_TITLE=اختر قائمة قراءة (*.m3u)
 #### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
 PLAYLIST_DIALOG_SAVE_TITLE=حفظ قائمة القراءة باسم
-#### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
-PLAYLIST_CANNOT_PLAY_FILE=لا يتمكن LimeWire من تشغيل الملف.
+#### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file {0}. {1}
+#? PLAYLIST_CANNOT_PLAY_FILE=
 #### PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
 PLAYLIST_FILE_UNSUPPORTED=.نوع الملف غير معترف به.
 #### PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
@@ -2380,24 +2356,16 @@ MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=LimeWire لا يمكنه تنفيذ الم
 MESSAGE_CONFIRM_FILE_DELETE=هل أنت متأكد أنك تريد حذف الملف المحدد(s)?
 #### MESSAGE_UNABLE_TO_DELETE_FILES=The following files could not be deleted. They may be in use by another application or are currently being downloaded to.
 MESSAGE_UNABLE_TO_DELETE_FILES=الملفات التالية لا يمكن حذفها. قد تكون مستخدمة من قبل تطبيق آخر أو أنها حالياً للتنزيل.
-#### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
-MESSAGE_UNABLE_TO_RENAME_FILE_START=لا يمكن إعادة تسمية الملف
-#### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
-MESSAGE_UNABLE_TO_RENAME_FILE_END=قد يكون مستخدم من قبل تطبيق آخر
-#### MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire will not allow you to
-MESSAGE_INCOMPLETE_DIRECTORY_START=لن يسمح لك LimeWire بـ
-#### MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
-MESSAGE_INCOMPLETE_DIRECTORY_END=المجلد مخصص للملفات الغير مكتملة.
+#### MESSAGE_UNABLE_TO_RENAME_FILE=Unable to rename the file '{0}'. It may be in use by another application.
+MESSAGE_UNABLE_TO_RENAME_FILE=لا يمكن إعادة تسمية الملف {0} قد يكون مستخدم من قبل تطبيق آخر
+#### MESSAGE_INCOMPLETE_DIRECTORY=LimeWire will not allow you delete to the folder reserved for incomplete files.
+#? MESSAGE_INCOMPLETE_DIRECTORY=
 #### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified folder for saving files. Please try a different folder.
 MESSAGE_INVALID_SAVE_DIRECTORY=لم يتمكن LimeWire من استخدام المجلد المحدد لحفظ الملفات. من فضلك اختر مجلدا آخر.
-#### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
-MESSAGE_FILE_CORRUPT=اكتشف LimeWire خطأ في الملف.
-#### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
-MESSAGE_CONTINUE_DOWNLOAD=هل تريد الاستمرار في التنزيل؟
-#### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
-MESSAGE_SENSITIVE_SHARE_TOP=أنت تحاول مشاركة مجلد من المحتمل أن يحتوي معلومات حساسة:
-#### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
-MESSAGE_SENSITIVE_SHARE_BOTTOM=مشاركة هذا المجلد؟
+#### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file {0}. Do you want to continue the download?
+MESSAGE_FILE_CORRUPT=اكتشف LimeWire خطأ في الملف. {0} هل تريد الاستمرار في التنزيل؟
+#### MESSAGE_SENSITIVE_SHARE=You are attempting to share a folder that is likely to contain sensitive information:\n\n{0}\n\nShare this folder?
+MESSAGE_SENSITIVE_SHARE=أنت تحاول مشاركة مجلد من المحتمل أن يحتوي معلومات حساسة:\n\n{0}\n\nمشاركة هذا المجلد؟
 #### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
 WARNING_INSTALLATION_CORRUPTED=<html><b>LimeWire الخاص بك قد أصبح تالف بسبب فيروس أو ملف تجسس!</b><br><br>من فضلك قم بزيارة <a href="http://www.limewire.com/corrupted">www.limewire.com</a> وتنزيل أحدث إصدار من LimeWire.</html>
 
@@ -2525,16 +2493,12 @@ ERROR_ALREADY_DOWNLOADING=أنت بالفعل تقوم بتنزيل هذا ال�
 FORMATTED_ERROR_ALREADY_DOWNLOADING=أنت تقوم بالفعل بتنزيل هذا الملف إلى "{0}".
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=لقد قمت بالفعل بالتنزيل
-#### NO_PREVIEW_BEGIN=There is nothing to preview for file
-NO_PREVIEW_BEGIN=لا شيء هناك لمعاينة الملف
-#### NO_PREVIEW_END=.
-NO_PREVIEW_END=.
-#### ERROR_CANT_RESUME_START=The file
-ERROR_CANT_RESUME_START=.لا يبدو الملف ناقصاً ولا يمكن إكمال تنزيله
-#### ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
-ERROR_CANT_RESUME_END=الملف.
-#### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
-ERROR_OPEN_URL=LimeWire لا يمكنه اكتشاف متصفح الويب الخاص بك لعرض الصفحة التالية:
+#### NO_PREVIEW_BEGIN=There is nothing to preview for file {0}.
+#? NO_PREVIEW_BEGIN=
+#### ERROR_CANT_RESUME=The file "{0}" is not a valid incomplete file and cannot be resumed.
+ERROR_CANT_RESUME=.لا يبدو الملف ناقصاً ولا يمكن إكمال تنزيله {0} الملف.
+#### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage: {0}.
+#? ERROR_OPEN_URL=
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
 ERROR_DEL_META_USER=لا يمكن إزالة المعلومات الغير محفوظة.
 #### ERROR_DEL_META_SYSTEM=Unable to remove data.
@@ -2555,10 +2519,8 @@ ERROR_SAVE_META_DISK=حدث خطأ داخلي. لا يمكن حفظ البيان
 ERROR_SAVE_META_BAD=تم إدخال هيئة غير صحيحة. لن يتم حفظ التغييرات.
 #### ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
 ERROR_REMOVE_LAST_COL=لا يمكنك إطفاء جميع الأعمدة.
-#### ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Could not browse host
-ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
-#### ERROR_BROWSE_HOST_FAILED_END_KEY=.
-ERROR_BROWSE_HOST_FAILED_END_KEY=.
+#### ERROR_BROWSE_HOST_FAILED=Could not browse host {0}.
+ERROR_BROWSE_HOST_FAILED=لا يمكن استعراض المضيف {0} .
 #### ERROR_BROWSE_INVALID_HOST=The address format is incorrect, please use host:port.
 #? ERROR_BROWSE_INVALID_HOST=
 #### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
@@ -2573,8 +2535,8 @@ ERROR_THEME_OUT_OF_DATE_TITLE=سمة غير صالحة
 ERROR_THEME_OUT_OF_DATE_GET_MORE=المزيد من السمات
 #### ERROR_THEME_OUT_OF_DATE_LATER=Later
 ERROR_THEME_OUT_OF_DATE_LATER=لاحقاً
-#### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
-ERROR_BAD_MAGNET_LINK=لا يمكن تشغيل الوصلة السيئة البارزة.
+#### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link {0}
+#? ERROR_BAD_MAGNET_LINK=
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 ERROR_INVALID_URLS_IN_MAGNET=واحدة أو أكثر من الوصلات البارزة غير صالحة. قد لا يتم تنزيل الملف بصورة صحيحة.
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
