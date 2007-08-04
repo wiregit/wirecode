@@ -15,28 +15,43 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Statistics;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {
 
     private final NetworkManager networkManager;
+    private final Statistics statistics;
+    private final UDPService udpService;
+    private final ConnectionManager connectionManager;
+    private final HostCatcher hostCatcher;
+    private final DHTManager dhtManager;
 
     @Inject
-    public PingReplyFactoryImpl(NetworkManager networkManager) {
+    public PingReplyFactoryImpl(NetworkManager networkManager,
+            Statistics statistics, UDPService udpService,
+            ConnectionManager connectionManager,
+            HostCatcher hostCatcher,
+            DHTManager dhtManager) {
         this.networkManager = networkManager;
+        this.statistics = statistics;
+        this.udpService = udpService;
+        this.connectionManager = connectionManager;
+        this.hostCatcher = hostCatcher;
+        this.dhtManager = dhtManager;
     }
 
     public PingReply create(byte[] guid, byte ttl,
@@ -50,13 +65,13 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 RouterService.getNumSharedFiles(),
                 RouterService.getSharedFileSize() / 1024,
                 RouterService.isSupernode(),
-                ProviderHacks.getStatistics().calculateDailyUptime(),
-                ProviderHacks.getUdpService().isGUESSCapable(),
+                statistics.calculateDailyUptime(),
+                udpService.isGUESSCapable(),
                 ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                         .getValue()
                         : ApplicationSettings.LANGUAGE.getValue(),
-                ProviderHacks.getConnectionManager()
-                        .getNumLimeWireLocalePrefSlots(), gnutHosts, dhtHosts);
+                connectionManager.getNumLimeWireLocalePrefSlots(), gnutHosts,
+                dhtHosts);
     }
 
     public PingReply create(byte[] guid, byte ttl) {
@@ -70,14 +85,14 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     public PingReply create(byte[] guid, byte ttl, IpPort returnAddr,
             Collection<? extends IpPort> gnutHosts,
             Collection<? extends IpPort> dhtHosts) {
-        GGEP ggep = newGGEP(ProviderHacks.getStatistics().calculateDailyUptime(),
-                RouterService.isSupernode(), ProviderHacks.getUdpService()
+        GGEP ggep = newGGEP(statistics.calculateDailyUptime(),
+                RouterService.isSupernode(), udpService
                         .isGUESSCapable());
 
         String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                 .getValue()
                 : ApplicationSettings.LANGUAGE.getValue();
-        addLocale(ggep, locale, ProviderHacks.getConnectionManager()
+        addLocale(ggep, locale, connectionManager
                 .getNumLimeWireLocalePrefSlots());
 
         addAddress(ggep, returnAddr);
@@ -450,14 +465,10 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
      * 
      */
     private byte[] getTLSData(Collection<? extends IpPort> hosts) {
-        HostCatcher catcher = ProviderHacks.getHostCatcher();
-        if (catcher == null)
-            return DataUtils.EMPTY_BYTE_ARRAY;
-
         BitNumbers bn = new BitNumbers(hosts.size());
         int i = 0;
         for (IpPort ipp : hosts) {
-            if (catcher.isHostTLSCapable(ipp))
+            if (hostCatcher.isHostTLSCapable(ipp))
                 bn.set(i);
             i++;
         }
@@ -497,13 +508,12 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         byte[] payload = new byte[3];
 
         // put version
-        DHTManager manager = ProviderHacks.getDHTManager();
-        int version = manager.getVersion().shortValue();
+        int version = dhtManager.getVersion().shortValue();
 
         ByteOrder.short2beb((short) version, payload, 0);
 
-        if (manager.isMemberOfDHT()) {
-            DHTMode mode = manager.getDHTMode();
+        if (dhtManager.isMemberOfDHT()) {
+            DHTMode mode = dhtManager.getDHTMode();
             assert (mode != null);
             payload[2] = mode.byteValue();
         } else {

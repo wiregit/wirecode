@@ -38,6 +38,9 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -87,6 +90,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.ResultCounter;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -96,6 +100,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 
@@ -109,11 +114,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
 public abstract class MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(MessageRouter.class);
-	
-    /**
-     * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
-     */
-    protected static ConnectionManager _manager;
 
     /**
      * Constant for the number of old connections to use when forwarding
@@ -128,12 +128,6 @@ public abstract class MessageRouter {
     protected byte[] _clientGUID;
 
 
-	/**
-	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
-	 * this node.
-	 */
-    private final ReplyHandler FOR_ME_REPLY_HANDLER = 
-		ProviderHacks.getForMeReplyHandler();
 		
     /**
      * The maximum size for <tt>RouteTable</tt>s.
@@ -231,12 +225,6 @@ public abstract class MessageRouter {
         ExecutorsHelper.newProcessingQueue("TCPConnectBack");
     
 	/**
-	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
-	 * upon very frequently.
-	 */
-	protected final QueryUnicaster UNICASTER = ProviderHacks.getQueryUnicaster();
-
-	/**
 	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
 	 * generated queries that adjust to the number of results received, the
 	 * number of connections, etc.
@@ -248,11 +236,6 @@ public abstract class MessageRouter {
 	 * display.
 	 */
 	private ActivityCallback _callback;
-
-	/**
-	 * Handle to the <tt>FileManager</tt> instance.
-	 */
-	private static FileManager _fileManager;
     
 	/**
 	 * A handle to the thread that deals with QRP Propagation
@@ -318,12 +301,24 @@ public abstract class MessageRouter {
     private static final FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler> _udpReplyHandlerCache =
         new FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler>(500);
     
-    private final NetworkManager networkManager;
-    private final QueryRequestFactory queryRequestFactory;
-    private final QueryHandlerFactory queryHandlerFactory;
-    private final OnDemandUnicaster onDemandUnicaster;
-    private final HeadPongFactory headPongFactory;
-    private final PingReplyFactory pingReplyFactory;
+    protected final NetworkManager networkManager;
+    protected final QueryRequestFactory queryRequestFactory;
+    protected final QueryHandlerFactory queryHandlerFactory;
+    protected final OnDemandUnicaster onDemandUnicaster;
+    protected final HeadPongFactory headPongFactory;
+    protected final PingReplyFactory pingReplyFactory;
+    protected final ConnectionManager connectionManager;
+    protected final ReplyHandler forMeReplyHandler;
+    protected final QueryUnicaster queryUnicaster;
+    protected final FileManager fileManager;
+    protected final ContentManager contentManager;
+    protected final DHTManager dhtManager;
+    protected final UploadManager uploadManager;
+    protected final DownloadManager downloadManager;
+    protected final UDPService udpService;
+    protected final SearchResultHandler searchResultHandler;
+    protected final SocketsManager socketsManager;
+    protected final HostCatcher hostCatcher;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -334,7 +329,19 @@ public abstract class MessageRouter {
             QueryHandlerFactory queryHandlerFactory,
             OnDemandUnicaster onDemandUnicaster, 
             HeadPongFactory headPongFactory,
-            PingReplyFactory pingReplyFactory
+            PingReplyFactory pingReplyFactory,
+            ConnectionManager connectionManager,
+            @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler,
+            QueryUnicaster queryUnicaster,
+            FileManager fileManager,
+            ContentManager contentManager,
+            DHTManager dhtManager,
+            UploadManager uploadManager,
+            DownloadManager downloadManager,
+            UDPService udpService,
+            SearchResultHandler searchResultHandler,
+            SocketsManager socketsManager,
+            HostCatcher hostCatcher
             ) {
         _clientGUID = RouterService.getMyGUID();
         this.networkManager = networkManager;
@@ -343,6 +350,19 @@ public abstract class MessageRouter {
         this.onDemandUnicaster = onDemandUnicaster;
         this.headPongFactory = headPongFactory;
         this.pingReplyFactory = pingReplyFactory;
+        this.connectionManager = connectionManager;
+        this.forMeReplyHandler = forMeReplyHandler;
+        this.queryUnicaster = queryUnicaster;
+        this.fileManager = fileManager;
+        this.contentManager = contentManager;
+        this.dhtManager = dhtManager;
+        this.uploadManager = uploadManager;
+        this.downloadManager = downloadManager;
+        this.udpService = udpService;
+        this.searchResultHandler = searchResultHandler;
+        this.socketsManager = socketsManager;
+        this.hostCatcher = hostCatcher;
+         
     }
     
     /** Sets a new handler to the given handlerMap, for the given class. */
@@ -481,11 +501,9 @@ public abstract class MessageRouter {
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize() {
-        _manager = ProviderHacks.getConnectionManager();
 		_callback = RouterService.getCallback();
-		_fileManager = ProviderHacks.getFileManager();
         
-		_bypassedResultsCache = new BypassedResultsCache(_callback, ProviderHacks.getDownloadManager());
+		_bypassedResultsCache = new BypassedResultsCache(_callback, downloadManager);
         
 	    QRP_PROPAGATOR.start();
 
@@ -495,7 +513,7 @@ public abstract class MessageRouter {
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
         // schedule a runner to send hops-flow messages
-        RouterService.schedule(new HopsFlowManager(), HOPS_FLOW_INTERVAL*10, 
+        RouterService.schedule(new HopsFlowManager(uploadManager, connectionManager), HOPS_FLOW_INTERVAL*10, 
                                HOPS_FLOW_INTERVAL);
         RouterService.schedule(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME);
         
@@ -554,7 +572,7 @@ public abstract class MessageRouter {
      * Routes a query GUID to yourself.
      */
     public void originateQueryGUID(byte[] guid) {
-        _queryRouteTable.routeReply(guid, FOR_ME_REPLY_HANDLER);
+        _queryRouteTable.routeReply(guid, forMeReplyHandler);
     }
 
     /** Call this to inform us that a query has been killed by a user or
@@ -763,8 +781,7 @@ public abstract class MessageRouter {
 	 * Sends an ack back to the GUESS client node.  
 	 */
 	protected void sendAcknowledgement(InetSocketAddress addr, byte[] guid) {
-		ConnectionManager manager = ProviderHacks.getConnectionManager();
-		Endpoint host = manager.getConnectedGUESSUltrapeer();
+		Endpoint host = connectionManager.getConnectedGUESSUltrapeer();
 		PingReply reply;
 		if(host != null) {
 			try {
@@ -781,7 +798,7 @@ public abstract class MessageRouter {
 		if( reply == null )
 		    return;
 
-        ProviderHacks.getUdpService().send(reply, addr.getAddress(), addr.getPort());
+        udpService.send(reply, addr.getAddress(), addr.getPort());
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
@@ -791,7 +808,7 @@ public abstract class MessageRouter {
 	 * if no GUESS endpoints are available.
 	 */
 	private PingReply createPingReply(byte[] guid) {
-		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
+		GUESSEndpoint endpoint = queryUnicaster.getUnicastEndpoint();
 		if(endpoint == null) {
 		    if(networkManager.isIpPortValid())
                 return pingReplyFactory.create(guid, (byte)1);
@@ -989,7 +1006,7 @@ public abstract class MessageRouter {
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
             pingReplyFactory.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-        ProviderHacks.getUdpService().send(reply, addr.getAddress(), addr.getPort());
+        udpService.send(reply, addr.getAddress(), addr.getPort());
     }
 
 
@@ -1112,7 +1129,7 @@ public abstract class MessageRouter {
             if ((request.isFirewalledSource() &&
                  !networkManager.acceptedIncomingConnection()) &&
                 !(request.canDoFirewalledTransfer() &&
-                  ProviderHacks.getUdpService().canDoFWT())
+                  udpService.canDoFWT())
                 )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
@@ -1151,7 +1168,7 @@ public abstract class MessageRouter {
             
             //send the query replies
             for(QueryReply queryReply : iterable)
-                ProviderHacks.getUdpService().send(queryReply, iaddr, port);
+                udpService.send(queryReply, iaddr, port);
         }
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
@@ -1197,8 +1214,7 @@ public abstract class MessageRouter {
     public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
     	GUID qGUID = new GUID(reply.getGUID());
     	
-        int numResults = 
-    		ProviderHacks.getSearchResultHandler().getNumResultsForQuery(qGUID);
+        int numResults = searchResultHandler.getNumResultsForQuery(qGUID);
     	
         if (numResults < 0) // this may be a proxy query
     		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
@@ -1260,7 +1276,7 @@ public abstract class MessageRouter {
 
         int sentTo = 0;
         List<ManagedConnection> peers =
-            new ArrayList<ManagedConnection>(_manager.getInitializedConnections());
+            new ArrayList<ManagedConnection>(connectionManager.getInitializedConnections());
         Collections.shuffle(peers);
         for(ManagedConnection currMC : peers) {
             if(sentTo >= MAX_UDP_CONNECTBACK_FORWARDS)
@@ -1294,7 +1310,7 @@ public abstract class MessageRouter {
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
                                          portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress()))
+        if (connectionManager.isConnectedTo(endPoint.getAddress()))
             return;
 
         // keep track of who you tried connecting back too, don't do it too
@@ -1307,7 +1323,7 @@ public abstract class MessageRouter {
         UDPService.mutateGUID(guidToUse.bytes(), addrToContact, portToContact);
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        ProviderHacks.getUdpService().send(pr, addrToContact, portToContact);
+        udpService.send(pr, addrToContact, portToContact);
     }
     
     /**
@@ -1345,7 +1361,7 @@ public abstract class MessageRouter {
 
         int sentTo = 0;
         List<ManagedConnection> peers =
-            new ArrayList<ManagedConnection>(_manager.getInitializedConnections());
+            new ArrayList<ManagedConnection>(connectionManager.getInitializedConnections());
         Collections.shuffle(peers);
         for(ManagedConnection currMC : peers) {
             if(sentTo >= MAX_TCP_CONNECTBACK_FORWARDS)
@@ -1377,7 +1393,7 @@ public abstract class MessageRouter {
         // only connect back if you aren't connected to the host - that is the
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact, portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress()))
+        if (connectionManager.isConnectedTo(endPoint.getAddress()))
             return;
 
         // keep track of who you tried connecting back too, don't do it too
@@ -1390,7 +1406,7 @@ public abstract class MessageRouter {
                 Socket sock = null;
                 try {
                     // DPINJ: Change to using passed-in SocketsManager!!!
-                    sock = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(addrToContact, portToContact), 12000);
+                    sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
@@ -1472,7 +1488,7 @@ public abstract class MessageRouter {
         if(connection == null) {
             throw new NullPointerException("null connection");
         }
-        _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
+        _pingRouteTable.routeReply(request.getGUID(), forMeReplyHandler);
         connection.send(request);
     }
 
@@ -1488,7 +1504,7 @@ public abstract class MessageRouter {
         if(connection == null) {
             throw new NullPointerException("null connection");
         }
-        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
+        _queryRouteTable.routeReply(request.getGUID(), forMeReplyHandler);
         connection.send(request);
     }
 
@@ -1500,8 +1516,8 @@ public abstract class MessageRouter {
 		if(ping == null) {
 			throw new NullPointerException("null ping");
 		}
-        _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
-        broadcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
+        _pingRouteTable.routeReply(ping.getGUID(), forMeReplyHandler);
+        broadcastPingRequest(ping, forMeReplyHandler, connectionManager);
     }
 
 	/**
@@ -1521,11 +1537,11 @@ public abstract class MessageRouter {
 		// get the result counter so we can track the number of results
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(query.getGUID(), 
-										FOR_ME_REPLY_HANDLER);
+										forMeReplyHandler);
 		if(RouterService.isSupernode()) {
 			sendDynamicQuery(queryHandlerFactory.createHandlerForMe(query, 
                                                              counter), 
-							 FOR_ME_REPLY_HANDLER);
+							 forMeReplyHandler);
 		} else {
             originateLeafQuery(query);
 		} 
@@ -1601,7 +1617,7 @@ public abstract class MessageRouter {
         for(int i=0; i<size; i++) {
             ManagedConnection mc = list.get(i);
             if(!mc.isStable()) continue;
-            if (receivingConnection == FOR_ME_REPLY_HANDLER || 
+            if (receivingConnection == forMeReplyHandler || 
                 (mc != receivingConnection && 
                  !mc.isClientSupernodeConnection())) {
 
@@ -1635,7 +1651,7 @@ public abstract class MessageRouter {
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
-        List<ManagedConnection> list = _manager.getInitializedClientConnections();
+        List<ManagedConnection> list = connectionManager.getInitializedClientConnections();
         List<ManagedConnection> hitConnections = new ArrayList<ManagedConnection>();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = list.get(i);
@@ -1700,7 +1716,7 @@ public abstract class MessageRouter {
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 				
-		UNICASTER.addQuery(query, conn);
+		queryUnicaster.addQuery(query, conn);
 	}
 	
     /**
@@ -1735,7 +1751,7 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List<ManagedConnection> list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = connectionManager.getInitializedConnections();
         int limit = list.size();
 
 		for(int i=0; i<limit; i++) {
@@ -1760,7 +1776,7 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List<ManagedConnection> list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = connectionManager.getInitializedConnections();
         int limit = list.size();
 
         int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
@@ -1838,7 +1854,7 @@ public abstract class MessageRouter {
      * @param qr the <tt>QueryRequest</tt> to send
      */
     private void originateLeafQuery(QueryRequest qr) {
-		List<ManagedConnection> list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = connectionManager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions - also, don't send what is new
@@ -1933,7 +1949,7 @@ public abstract class MessageRouter {
     protected void handlePingReply(PingReply reply,
                                    ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
-        boolean newAddress = ProviderHacks.getHostCatcher().add(reply);
+        boolean newAddress = hostCatcher.add(reply);
 
         if(newAddress && !reply.isUDPHostCache()) {
             PongCacher.instance().addPong(reply);
@@ -1959,7 +1975,7 @@ public abstract class MessageRouter {
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
         if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
-            List<ManagedConnection> list=_manager.getInitializedClientConnections();
+            List<ManagedConnection> list=connectionManager.getInitializedClientConnections();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = list.get(i);
                 assert c != null : "null c.";
@@ -2014,7 +2030,7 @@ public abstract class MessageRouter {
             // remember more stats
             _queryRouteTable.countHopsTTLNet(queryReply);
             // if this reply is for us, remember even more stats
-            if (rh == FOR_ME_REPLY_HANDLER)
+            if (rh == forMeReplyHandler)
                 _queryRouteTable.timeStampResults(queryReply);
             
             if(!shouldDropReply(rrp, rh, queryReply)) {                
@@ -2022,7 +2038,7 @@ public abstract class MessageRouter {
                 // also add to the QueryUnicaster for accounting - basically,
                 // most results will not be relevant, but since it is a simple
                 // HashSet lookup, it isn't a prohibitive expense...
-                UNICASTER.handleQueryReply(queryReply);
+                queryUnicaster.handleQueryReply(queryReply);
 
             } else {
 				RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
@@ -2069,7 +2085,7 @@ public abstract class MessageRouter {
         int ttl = qr.getTTL();
                                            
         // Reason 2 --  The reply is meant for me, do not drop it.
-        if( rh == FOR_ME_REPLY_HANDLER ) return false;
+        if( rh == forMeReplyHandler ) return false;
         
         // Reason 3 -- drop if TTL is 0.
         if( ttl == 0 ) return true;                
@@ -2138,7 +2154,7 @@ public abstract class MessageRouter {
     
     /** Handles a ContentResponse msg -- passing it to the ContentManager. */
     private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
-        ProviderHacks.getContentManager().handleContentResponse(msg);
+        contentManager.handleContentResponse(msg);
     }
 
     /**
@@ -2187,7 +2203,7 @@ public abstract class MessageRouter {
         if(replyHandler != null)
             return replyHandler;
         else if(Arrays.equals(_clientGUID, guid))
-            return FOR_ME_REPLY_HANDLER;
+            return forMeReplyHandler;
         else
             return null;
     }
@@ -2255,7 +2271,7 @@ public abstract class MessageRouter {
         ReplyHandler replyHandler = getPushHandler(push.getClientGUID());
 
         if(replyHandler != null)
-            replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
+            replyHandler.handlePushRequest(push, forMeReplyHandler);
         else
             throw new IOException("no route for push");
     }
@@ -2321,10 +2337,8 @@ public abstract class MessageRouter {
         byte[] guid = queryRequest.getGUID();
         byte ttl = (byte)(queryRequest.getHops() + 1);
 
-		UploadManager um = ProviderHacks.getUploadManager();
-
         //Return measured speed if possible, or user's speed otherwise.
-        long speed = um.measuredUploadSpeed();
+        long speed = uploadManager.measuredUploadSpeed();
         boolean measuredSpeed=true;
         if (speed==-1) {
             speed=ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -2387,8 +2401,8 @@ public abstract class MessageRouter {
 			// see if there are any open slots
             // Note: if we are busy, non-metafile results would be filtered.
             // by this point.
-			boolean busy = !um.mayBeServiceable();
-            boolean uploaded = um.hadSuccesfulUpload();
+			boolean busy = !uploadManager.mayBeServiceable();
+            boolean uploaded = uploadManager.hadSuccesfulUpload();
 			
             // We only want to return a "reply to multicast query" QueryReply
             // if the request travelled a single hop.
@@ -2400,7 +2414,7 @@ public abstract class MessageRouter {
             // external address is valid (needed for input into the reply)
             final boolean fwTransfer = 
                 queryRequest.canDoFirewalledTransfer() && 
-                ProviderHacks.getUdpService().canDoFWT() &&
+                networkManager.canDoFWT() &&
                 !networkManager.acceptedIncomingConnection();
             
 			if ( mcast ) {
@@ -2573,7 +2587,7 @@ public abstract class MessageRouter {
 		long time = System.currentTimeMillis();
 
 		//For all connections to new hosts c needing an update...
-		List<ManagedConnection> list=_manager.getInitializedConnections();
+		List<ManagedConnection> list=connectionManager.getInitializedConnections();
 		QueryRouteTable table = null;
 		List<RouteTableMessage> patches = null;
 		QueryRouteTable lastSent = null;
@@ -2663,8 +2677,8 @@ public abstract class MessageRouter {
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    private static QueryRouteTable createRouteTable() {
-        QueryRouteTable ret = _fileManager.getQRT();
+    private QueryRouteTable createRouteTable() {
+        QueryRouteTable ret = fileManager.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
         if(RouterService.isSupernode()) {
@@ -2684,8 +2698,8 @@ public abstract class MessageRouter {
 	 *
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
-	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
-		List<ManagedConnection> leaves = _manager.getInitializedClientConnections();
+	private void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
+		List<ManagedConnection> leaves = connectionManager.getInitializedClientConnections();
 		
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = leaves.get(i);
@@ -2773,7 +2787,7 @@ public abstract class MessageRouter {
         if(clientGUID != null)
             pingee = getPushHandler(clientGUID.bytes());
         else
-            pingee = FOR_ME_REPLY_HANDLER; // handle ourselves.
+            pingee = forMeReplyHandler; // handle ourselves.
         
         //drop the ping if no entry for the given clientGUID
         if (pingee == null) 
@@ -2824,7 +2838,7 @@ public abstract class MessageRouter {
     } 
     
     private void handleDHTContactsMessage(DHTContactsMessage msg, ReplyHandler handler) {
-        ProviderHacks.getDHTManager().handleDHTContactsMessage(msg);
+        dhtManager.handleDHTContactsMessage(msg);
     }
     
     /**
@@ -2832,13 +2846,13 @@ public abstract class MessageRouter {
      * support it.
      */
     public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
-        if (!_manager.isSupernode())
+        if (!connectionManager.isSupernode())
             return;
         // only inspection requests with return address are forwarded.
         if (ir.getReturnAddress() == null)
             return;
         
-        for (ManagedConnection mc : _manager.getInitializedClientConnections()) {
+        for (ManagedConnection mc : connectionManager.getInitializedClientConnections()) {
             if (mc.remoteHostSupportsInspections() >= ir.getVersion())
                 mc.send(ir);
         }
@@ -2897,6 +2911,14 @@ public abstract class MessageRouter {
     }
 
     static class HopsFlowManager implements Runnable {
+        private final UploadManager uploadManager;
+        private final ConnectionManager connectionManager;
+        
+        public HopsFlowManager(UploadManager uploadManager, ConnectionManager connectionManager) {
+            this.uploadManager = uploadManager;
+            this.connectionManager = connectionManager;
+        }
+        
         /* in case we don't want any queries any more */
         private static final byte BUSY_HOPS_FLOW = 0;
 
@@ -2913,11 +2935,11 @@ public abstract class MessageRouter {
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value
-            boolean isBusy = !ProviderHacks.getUploadManager().mayBeServiceable();
+            boolean isBusy = !uploadManager.mayBeServiceable();
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.
-            final List<ManagedConnection> connections = _manager.getInitializedConnections();
+            final List<ManagedConnection> connections = connectionManager.getInitializedConnections();
             final HopsFlowVendorMessage hops = 
                 new HopsFlowVendorMessage(isBusy ? BUSY_HOPS_FLOW :
                                           FREE_HOPS_FLOW);

@@ -126,8 +126,11 @@ public class ProviderHacks {
     public static HttpExecutor getHttpExecutor() { i(); return core.getHttpExecutor(); }
     public static QueryStats getQueryStats() { i(); return core.getQueryStats(); }
     public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
-    public static Statistics getStatistics() { i(); return core.getStatistics(); }
     public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
     public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
+    
+    
+    // Cleaned up in all but RS & tests
+    public static Statistics getStatistics() { i(); return core.getStatistics(); }
     
 }

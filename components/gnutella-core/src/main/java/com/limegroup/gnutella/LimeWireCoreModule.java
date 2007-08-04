@@ -100,6 +100,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(DiskController.class);
         bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
         //bind(ForMeReplyHandler.class);
+        bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);
         //bind(QueryUnicaster.class);
         //bind(OnDemandUnicaster.class);
         bind(MessageRouter.class).to(StandardMessageRouter.class);

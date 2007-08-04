@@ -22,6 +22,9 @@ import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
@@ -34,11 +37,13 @@ import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -50,19 +55,35 @@ public class StandardMessageRouter extends MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
     
-    private final NetworkManager networkManager;
-    private final PingReplyFactory pingReplyFactory;
+    private final Statistics statistics;
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
-            OnDemandUnicaster onDemandUnicaster,
+            OnDemandUnicaster onDemandUnicaster, 
             HeadPongFactory headPongFactory,
-            PingReplyFactory pingReplyFactory) {
-        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory);
-        this.networkManager = networkManager;
-        this.pingReplyFactory = pingReplyFactory;
+            PingReplyFactory pingReplyFactory,
+            ConnectionManager connectionManager,
+            @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler,
+            QueryUnicaster queryUnicaster,
+            FileManager fileManager,
+            ContentManager contentManager,
+            DHTManager dhtManager,
+            UploadManager uploadManager,
+            DownloadManager downloadManager,
+            UDPService udpService,
+            SearchResultHandler searchResultHandler,
+            SocketsManager socketsManager,
+            HostCatcher hostCatcher,
+            Statistics statistics) {
+        super(networkManager, queryRequestFactory, queryHandlerFactory,
+                onDemandUnicaster, headPongFactory, pingReplyFactory,
+                connectionManager, forMeReplyHandler, queryUnicaster,
+                fileManager, contentManager, dhtManager, uploadManager,
+                downloadManager, udpService, searchResultHandler,
+                socketsManager, hostCatcher);
+        this.statistics = statistics;
     }
     
     /**
@@ -81,7 +102,7 @@ public class StandardMessageRouter extends MessageRouter {
         int hops = ping.getHops();
         int ttl = ping.getTTL();
         if (   (hops+ttl > 2) 
-            && !_manager.allowAnyConnection())
+            && !connectionManager.allowAnyConnection())
             return;
             
         // Only send pongs for ourself if we have a valid address & port.
@@ -112,8 +133,8 @@ public class StandardMessageRouter extends MessageRouter {
     
             // send our own pong if we have free slots or if our average
             // daily uptime is more than 1/2 hour
-            if(ProviderHacks.getConnectionManager().hasFreeSlots()  ||
-               ProviderHacks.getStatistics().calculateDailyUptime() > 60*30) {
+            if(connectionManager.hasFreeSlots()  ||
+               statistics.calculateDailyUptime() > 60*30) {
                 PingReply pr = 
                     pingReplyFactory.create(ping.getGUID(), (byte)newTTL);
                 
@@ -160,8 +181,8 @@ public class StandardMessageRouter extends MessageRouter {
         List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         
-        if (request.requestsDHTIPP() && ProviderHacks.getDHTManager().isRunning()) {
-            dhthosts = ProviderHacks.getDHTManager().getActiveDHTNodes(maxHosts);
+        if (request.requestsDHTIPP() && dhtManager.isRunning()) {
+            dhthosts = dhtManager.getActiveDHTNodes(maxHosts);
         }
         
         int numDHTHosts = dhthosts.size();
@@ -213,7 +234,7 @@ public class StandardMessageRouter extends MessageRouter {
         //words, why no ultrapong marking, proper address calculation, etc?
         
         //send the pongs for leaves
-        List<ManagedConnection> leafConnections = _manager.getInitializedClientConnections();
+        List<ManagedConnection> leafConnections = connectionManager.getInitializedClientConnections();
         
         for(ManagedConnection connection : leafConnections) {
             //create the pong for this connection
@@ -249,7 +270,7 @@ public class StandardMessageRouter extends MessageRouter {
         // slots are full.  This allows some spillover into our queue that
         // is necessary because we're always returning more total hits than
         // we have slots available.
-        if(!ProviderHacks.getUploadManager().mayBeServiceable() )  {
+        if(!uploadManager.mayBeServiceable() )  {
             return false;
         }
                                                 
@@ -261,8 +282,7 @@ public class StandardMessageRouter extends MessageRouter {
             return false;
                                                      
         // Run the local query
-        Response[] responses = 
-            ProviderHacks.getFileManager().query(queryRequest);
+        Response[] responses = fileManager.query(queryRequest);
         
         if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
             if( responses != null && responses.length > 0 )
@@ -285,12 +305,12 @@ public class StandardMessageRouter extends MessageRouter {
 
         // if we cannot service a regular query, only send back results for
         // application-shared metafiles, if any.
-        if (!ProviderHacks.getUploadManager().isServiceable()) {
+        if (!uploadManager.isServiceable()) {
         	
         	List<Response> filtered = new ArrayList<Response>(responses.length);
         	for(Response r : responses) {
         		if (r.isMetaFile() && 
-        				ProviderHacks.getFileManager().isFileApplicationShared(r.getName()))
+        				fileManager.isFileApplicationShared(r.getName()))
         			filtered.add(r);
         	}
         	
@@ -330,7 +350,7 @@ public class StandardMessageRouter extends MessageRouter {
                     ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
                             new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
                                 new ReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
-                    ProviderHacks.getUdpService().send(vm, addr, port);
+                    udpService.send(vm, addr, port);
                     return true;
                 }
             } else {
@@ -403,7 +423,7 @@ public class StandardMessageRouter extends MessageRouter {
             
             // see if we have a valid FWTrans address.  if not, fall back.
             if(isFWTransfer) {
-                port = ProviderHacks.getUdpService().getStableUDPPort();
+                port = udpService.getStableUDPPort();
                 ip = networkManager.getExternalAddress();
                 if(!NetworkUtils.isValidAddress(ip) 
                         || !NetworkUtils.isValidPort(port))
@@ -436,7 +456,7 @@ public class StandardMessageRouter extends MessageRouter {
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
         boolean notIncoming = !networkManager.acceptedIncomingConnection();
-        Set<? extends IpPort> proxies = notIncoming ? _manager.getPushProxies() : null;
+        Set<? extends IpPort> proxies = notIncoming ? connectionManager.getPushProxies() : null;
         
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
