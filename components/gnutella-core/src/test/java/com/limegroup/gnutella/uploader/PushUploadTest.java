@@ -157,7 +157,7 @@ public class PushUploadTest extends LimeTestCase {
         PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
                 httpAcceptor);
 
-        upMan = new HTTPUploadManager(new UploadSlotManager());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
         PrivilegedAccessor
                 .setValue(RouterService.class, "uploadManager", upMan);
 

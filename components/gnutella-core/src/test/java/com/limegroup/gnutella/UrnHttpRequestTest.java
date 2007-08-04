@@ -70,7 +70,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         fm = new MetaFileManager();
         acceptor = new HTTPAcceptor();
-        uploadManager = new HTTPUploadManager(new UploadSlotManager());
+        uploadManager = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
         connectionDispatcher = new ConnectionDispatcher();
         
         fm.startAndWait(4000);

@@ -79,7 +79,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static class UploadManagerStub extends HTTPUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
-    		super(new UploadSlotManager());
+    		super(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
     	}
 		@Override
 		public synchronized boolean isServiceable() {

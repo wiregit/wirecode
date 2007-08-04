@@ -18,6 +18,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -46,7 +47,8 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
     private MessageRouter messageRouter;
 
-    public PushProxyRequestHandler(HTTPUploadSessionManager sessionManager, MessageRouter messageRouter) {
+    @Inject
+    PushProxyRequestHandler(HTTPUploadSessionManager sessionManager, MessageRouter messageRouter) {
         if (sessionManager == null) {
             throw new IllegalArgumentException();
         }

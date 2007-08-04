@@ -32,13 +32,11 @@ import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.uploader.BrowseRequestHandler;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
-import com.limegroup.gnutella.uploader.FreeLoaderRequestHandler;
+import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
-import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
-import com.limegroup.gnutella.uploader.HTTPUploadSession;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 
@@ -113,7 +111,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /** Number of force-shared active uploads. */
     private int forcedUploads;
 
-    final private HttpRequestHandler freeLoaderRequestHandler = new FreeLoaderRequestHandler();
+    private final HttpRequestHandler freeLoaderRequestHandler;
 
     private final ResponseListener responseListener = new ResponseListener();
 
@@ -185,13 +183,17 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private volatile boolean started;
     
+    private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+    
     @Inject
-    public HTTPUploadManager(UploadSlotManager slotManager) {
+    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
         }
 
         this.slotManager = slotManager;
+        this.httpRequestHandlerFactory = httpRequestHandlerFactory;
+        this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
     }
 
     /**
@@ -226,15 +228,15 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.addAcceptorListener(responseListener);
 
         // browse
-        acceptor.registerHandler("/", new BrowseRequestHandler(this, ProviderHacks.getQueryRequestFactory()));
+        acceptor.registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler(this, messageRouter);
+        HttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
         acceptor.registerHandler("/gnutella/push-proxy", pushProxyHandler);
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        FileRequestHandler fileRequestHandler = new FileRequestHandler(this, fileManager, ProviderHacks.getHTTPHeaderUtils());
+        FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler();
         acceptor.registerHandler("/get*", fileRequestHandler);
         acceptor.registerHandler("/uri-res/*", fileRequestHandler);
         

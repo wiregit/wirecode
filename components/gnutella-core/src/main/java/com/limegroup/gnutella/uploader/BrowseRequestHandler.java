@@ -17,8 +17,9 @@ import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.nio.observer.WriteObserver;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -43,11 +44,14 @@ public class BrowseRequestHandler implements HttpRequestHandler {
     
     private final HTTPUploadSessionManager sessionManager;
     private final QueryRequestFactory queryRequestFactory;
+    private final FileManager fileManager;
 
-    public BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
-            QueryRequestFactory queryRequestFactory) {
+    @Inject
+    BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
+            QueryRequestFactory queryRequestFactory, FileManager fileManager) {
         this.sessionManager = sessionManager;
         this.queryRequestFactory = queryRequestFactory;
+        this.fileManager = fileManager;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -115,7 +119,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             sender.setWriteChannel(this);
             
             query = queryRequestFactory.createBrowseHostQuery();
-            iterable = ProviderHacks.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
+            iterable = fileManager.getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }
         

@@ -65,7 +65,7 @@ public class HTTPUploadManagerTest extends BaseTestCase {
 
         httpAcceptor = new HTTPAcceptor();
 
-        upMan = new HTTPUploadManager(new UploadSlotManager());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());

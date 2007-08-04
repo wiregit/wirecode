@@ -78,7 +78,10 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         sessionManager = new MockHTTPUploadSessionManager();
         fileManager = new FileManagerStub(urns, descs);        
-        requestHandler = new FileRequestHandler(sessionManager, fileManager, ProviderHacks.getHTTPHeaderUtils());        
+        requestHandler = new FileRequestHandler(sessionManager, fileManager,
+                ProviderHacks.getHTTPHeaderUtils(), ProviderHacks
+                        .getHttpRequestHandlerFactory(), ProviderHacks
+                        .getCreationTimeCache());        
     }
     
     public void testHandleAccept() throws Exception {

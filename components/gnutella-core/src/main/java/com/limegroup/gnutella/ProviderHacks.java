@@ -37,6 +37,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 
@@ -128,7 +129,7 @@ public class ProviderHacks {
     public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
     public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
     public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
-    
+    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
     
     // Cleaned up in all but RS & tests
     public static Statistics getStatistics() { i(); return core.getStatistics(); }

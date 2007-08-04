@@ -1306,7 +1306,7 @@ public class AltLocUploadTest extends LimeTestCase {
         List<HTTPUploader> activeUploads = new ArrayList<HTTPUploader>();
 
         public TestUploadManager() {
-            super(ProviderHacks.getUploadSlotManager());
+            super(ProviderHacks.getUploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
         }
 
         public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {

@@ -41,6 +41,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 
@@ -106,6 +107,7 @@ public class LimeWireCore {
     @Inject private Provider<Statistics> statistics;
     @Inject private Provider<SecureMessageVerifier> secureMessageVerifier;
     @Inject private Provider<CreationTimeCache> creationTimeCache;
+    @Inject private Provider<HttpRequestHandlerFactory> httpRequestHandlerFactory;
 
     public Injector getInjector() {
         return injector;
@@ -345,6 +347,10 @@ public class LimeWireCore {
 
     public CreationTimeCache getCreationTimeCache() {
         return creationTimeCache.get();
+    }
+
+    public HttpRequestHandlerFactory getHttpRequestHandlerFactory() {
+        return httpRequestHandlerFactory.get();
     }
 
 }

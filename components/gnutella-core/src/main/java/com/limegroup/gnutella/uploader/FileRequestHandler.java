@@ -17,11 +17,11 @@ import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
@@ -59,11 +59,19 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final HTTPUploadSessionManager sessionManager;
     private final FileManager fileManager;
     private final HTTPHeaderUtils httpHeaderUtils;
+    private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+    private final CreationTimeCache creationTimeCache;
     
-    public FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils) {
+    @Inject
+    FileRequestHandler(HTTPUploadSessionManager sessionManager,
+            FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
+            HttpRequestHandlerFactory httpRequestHandlerFactory,
+            CreationTimeCache creationTimeCache) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
+        this.httpRequestHandlerFactory = httpRequestHandlerFactory;
+        this.creationTimeCache = creationTimeCache;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -211,7 +219,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
             case REJECTED:
-                new LimitReachedRequestHandler(uploader, httpHeaderUtils).handle(request, response, context);
+                httpRequestHandlerFactory.createLimitReachedRequestHandler(uploader).handle(request, response, context);
                 break;
             case BANNED:
                 uploader.setState(UploadStatus.BANNED_GREEDY);
@@ -269,10 +277,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             // this information again.
             // it's possible t do that because we don't use the same
             // uploader for different files
-            CreationTimeCache cache = ProviderHacks.getCreationTimeCache();
-            if (cache.getCreationTime(urn) != null) {
+            if (creationTimeCache.getCreationTime(urn) != null) {
                 response.addHeader(HTTPHeaderName.CREATION_TIME
-                        .create(cache.getCreationTime(urn).toString()));
+                        .create(creationTimeCache.getCreationTime(urn).toString()));
             }
         }
 

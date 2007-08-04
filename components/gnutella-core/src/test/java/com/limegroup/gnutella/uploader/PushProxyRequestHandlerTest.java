@@ -54,8 +54,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             }
         };
         sessionManager.uploader = uploader;
-        requestHandler = new PushProxyRequestHandler(sessionManager,
-                messageRouter);
+        requestHandler = new PushProxyRequestHandler(sessionManager, messageRouter);
         context = new HttpExecutionContext(null);
     }
 

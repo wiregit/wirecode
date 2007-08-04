@@ -11,9 +11,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
@@ -56,6 +56,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
     private final HTTPUploader uploader;
     private final FileDesc fd;
     private final HTTPHeaderUtils httpHeaderUtils;
+    private final AltLocManager altLocManager;
 
     /**
      * Creates a new <tt>LimitReachedUploadState</tt> with the specified
@@ -63,11 +64,12 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
      * 
      * @param fd the <tt>FileDesc</tt> for the upload
      */
-    public LimitReachedRequestHandler(HTTPUploader uploader, HTTPHeaderUtils httpHeaderUtils) {
+    LimitReachedRequestHandler(HTTPUploader uploader, HTTPHeaderUtils httpHeaderUtils, AltLocManager altLocManager) {
         this.uploader = uploader;
         this.validating = false; //Note: Never invoked with validating = true, see Uploader.NOT_VALIDATED.
         this.fd = uploader.getFileDesc();
         this.httpHeaderUtils = httpHeaderUtils;
+        this.altLocManager = altLocManager;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -85,7 +87,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
             } else if (sha1 != null) {
                 // write the Retry-After header, using different values
                 // depending on if we had any alts to send or not.
-                String retry = !ProviderHacks.getAltLocManager().hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
+                String retry = !altLocManager.hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
                         : NORMAL_RETRY_AFTER;
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(retry));
                 httpHeaderUtils.addRangeHeader(response, uploader, fd);

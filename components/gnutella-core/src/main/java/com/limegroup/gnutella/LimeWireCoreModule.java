@@ -52,6 +52,9 @@ import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
+import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -75,6 +78,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HTTPDownloaderFactory.class).to(HTTPDownloaderFactoryImpl.class);
         bind(HeadPongFactory.class).to(HeadPongFactoryImpl.class);
         bind(UploadManager.class).to(HTTPUploadManager.class);
+        bind(HTTPUploadSessionManager.class).to(HTTPUploadManager.class);
         bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
         bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
         bind(ManagedConnectionFactory.class).to(ManagedConnectionFactoryImpl.class);
@@ -83,6 +87,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
+        bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -124,6 +129,14 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Statistics.class).asEagerSingleton(); // DPINJ: need to move time-capture to initialization
         bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
         //bind(CreationTimeCache.class);
+        
+        //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
+        //bind(BrowseRequestHandler.class);
+        //bind(FileRequestHandler.class);
+        //bind(FreeLoaderRequestHandler.class);
+        //bind(LimitReachedRequestHandler.class); // Not really bound, because factory creates it
+        //bind(PushProxyRequestHandler.class);
+        
         
         // For NodeAssigner...
         bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);
