@@ -9,6 +9,7 @@ import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -46,7 +47,7 @@ public final class ChatManager implements ConnectionAcceptor {
 	}
 
     public void initialize() {
-        RouterService.getConnectionDispatcher().
+        ProviderHacks.getConnectionDispatcher().
         addConnectionAcceptor(this,
                 false,
                 false,
@@ -65,7 +66,7 @@ public final class ChatManager implements ConnectionAcceptor {
 			return;
 		}
 
-        if(!RouterService.getIpFilter().allow(socket.getInetAddress())) {
+        if(!ProviderHacks.getIpFilter().allow(socket.getInetAddress())) {
             IOUtils.close(socket);
             return;
         }

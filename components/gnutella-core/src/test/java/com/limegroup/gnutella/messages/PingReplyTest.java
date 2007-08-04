@@ -867,16 +867,16 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
                 ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
                 ep.setTLSCapable(true);
                 l.add(ep);
-                assertTrue(RouterService.getHostCatcher().isHostTLSCapable(ep));
+                assertTrue(ProviderHacks.getHostCatcher().isHostTLSCapable(ep));
             } else {
                 l.add(new IpPortImpl("1.2.3." + i, i+1));
                 if(i % 3 == 0) {
                     ExtendedEndpoint ep = new ExtendedEndpoint("1.2.3." + i, i+1);
                     ep.setTLSCapable(true);
-                    RouterService.getHostCatcher().add(ep, true);
+                    ProviderHacks.getHostCatcher().add(ep, true);
                 }
                 
-                assertEquals(i%3==0, RouterService.getHostCatcher().isHostTLSCapable(new IpPortImpl("1.2.3." + i, i+1)));
+                assertEquals(i%3==0, ProviderHacks.getHostCatcher().isHostTLSCapable(new IpPortImpl("1.2.3." + i, i+1)));
             }
         }
         

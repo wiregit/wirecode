@@ -67,14 +67,14 @@ public class HTTPUploadManagerTest extends BaseTestCase {
 
         upMan = new HTTPUploadManager(new UploadSlotManager());
 
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
     }
 
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testIsConnectedTo() throws Exception {

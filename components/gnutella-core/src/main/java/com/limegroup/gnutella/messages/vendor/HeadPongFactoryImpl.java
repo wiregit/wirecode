@@ -26,7 +26,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -95,7 +95,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
                                         int written, boolean includeSize) {
         //now add any non-firewalled altlocs in case they were requested. 
         if (ping.requestsAltlocs()) {
-            AlternateLocationCollection<DirectAltLoc> col = RouterService.getAltlocManager().getDirect(urn);
+            AlternateLocationCollection<DirectAltLoc> col = ProviderHacks.getAltLocManager().getDirect(urn);
             synchronized(col) {
                 try {
                     return !writeLocs(out, col.iterator(), tlsIndexes, written, includeSize);
@@ -117,7 +117,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         try {
             boolean FWTOnly = ping.requestsFWTOnlyPushLocs();           
             if (FWTOnly) {
-                AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPushFWT(urn);
+                AlternateLocationCollection<PushAltLoc> push = ProviderHacks.getAltLocManager().getPushFWT(urn);
                 synchronized(push) {
                     return !writePushLocs(out,
                                           push.iterator(),
@@ -126,8 +126,8 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
                                           includeSize);
                 }
             } else {
-                AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPushNoFWT(urn);
-                AlternateLocationCollection<PushAltLoc> fwt = RouterService.getAltlocManager().getPushFWT(urn);
+                AlternateLocationCollection<PushAltLoc> push = ProviderHacks.getAltLocManager().getPushNoFWT(urn);
+                AlternateLocationCollection<PushAltLoc> fwt = ProviderHacks.getAltLocManager().getPushFWT(urn);
                 synchronized(push) {
                     synchronized(fwt) {
                         return !writePushLocs(out,

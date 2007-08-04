@@ -1164,7 +1164,7 @@ public class ManagedConnection extends Connection
             int smpV = capVM.supportsSIMPP();
             if(smpV != -1 && (!receivedCapVM || smpV > SimppManager.instance().getVersion())) {
                 //request the simpp message
-                RouterService.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.SIMPP);
+                ProviderHacks.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.SIMPP);
                 send(new SimppRequestVM());
             }
             
@@ -1172,7 +1172,7 @@ public class ManagedConnection extends Connection
             int latestId = UpdateHandler.instance().getLatestId();
             int currentId = capVM.supportsUpdate();
             if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
-                RouterService.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.VERSION);
+                ProviderHacks.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.VERSION);
                 send(new UpdateRequest());
             } else if(currentId == latestId) {
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
@@ -1192,7 +1192,7 @@ public class ManagedConnection extends Connection
             if(isClientSupernodeConnection() &&
                (remoteHostSupportsLeafGuidance() >= 0)) {
                 SearchResultHandler srh =
-                    RouterService.getSearchResultHandler();
+                    ProviderHacks.getSearchResultHandler();
                 List<QueryRequest> queries = srh.getQueriesToReSend();
                 for(QueryRequest qr : queries) {
                     send(qr);

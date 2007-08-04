@@ -10,6 +10,7 @@ import org.limewire.collection.ForgetfulHashMap;
 import org.limewire.collection.MultiIterable;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -19,6 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * Typical use is to call record(..) on an outgoing query request, and
  * score/matchesType/isMandragoreWorm on each incoming response.  
  */
+@Singleton
 public class ResponseVerifier {
     private static class RequestData {
         /** The original query. */

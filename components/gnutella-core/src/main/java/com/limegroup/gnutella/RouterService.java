@@ -33,36 +33,28 @@ import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.rudp.UDPSelectorProviderFactory;
-import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
-import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.search.QueryDispatcher;
-import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -74,7 +66,6 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -128,82 +119,7 @@ public class RouterService {
     static {
         LimeCoreGlue.preinstall();
     }
-    
-    /**
-     * ConnectionDispatcher instance that will dispatch incoming connections to
-     * the appropriate managers.
-     */
-    private static final ConnectionDispatcher dispatcher = new ConnectionDispatcher();
-
-    /**
-     * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
-     */
-    private static HTTPAcceptor httpAcceptor;
-
-    /**
-	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
-     * for tests.
-	 */
-    private static HostCatcher catcher = new HostCatcher();
-    
-    /**
-     * Acceptor for HTTP connections.
-     */    
-    private static com.limegroup.gnutella.HTTPAcceptor httpUploadAcceptor = new com.limegroup.gnutella.HTTPAcceptor();
-
-    /**
-     * <tt>PushManager</tt> for handling push requests.
-     */
-    private static PushManager pushManager = new PushManager();
-    
-    private static ResponseVerifier VERIFIER = new ResponseVerifier();
-
-	/**
-	 * <tt>Statistics</tt> class for managing statistics.
-	 */
-	@SuppressWarnings("unused") //DPINJ: touched to ensure it initializes, fix!
-    private static final Statistics STATISTICS = Statistics.instance();
-    
-
-	/**
-	 * Constant for the <tt>SearchResultHandler</tt> class that processes
-	 * search results sent back to this client.
-	 */
-	private static final SearchResultHandler RESULT_HANDLER =
-		new SearchResultHandler(ProviderHacks.getNetworkManager());
-
-    /**
-     * The manager of altlocs
-     */
-    private static AltLocManager altManager = AltLocManager.instance();
-    
-    /** Variable for the <tt>SecureMessageVerifier</tt> that verifies secure messages. */
-    private static SecureMessageVerifier secureMessageVerifier =
-        new SecureMessageVerifier("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
-                "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5" +
-                "RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O" +
-                "5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV" +
-                "37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2B" +
-                "BOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOE" +
-                "EBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7Y" +
-                "L7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76" +
-                "Z5ESUA4BQUAAFAMBACDW4TNFXK772ZQN752VPKQSFXJWC6PPSIVTHKDNLRUIQ7UF" +
-                "4J2NF6J2HC5LVC4FO4HYLWEWSB3DN767RXILP37KI5EDHMFAU6HIYVQTPM72WC7FW" +
-                "SAES5K2KONXCW65VSREAPY7BF24MX72EEVCZHQOCWHW44N4RG5NPH2J4EELDPXMNR" +
-                "WNYU22LLSAMBUBKW3KU4QCQXG7NNY", null);    
-    
-    /** The content manager */
-    private static ContentManager contentManager = new ContentManager();
-    
-    /** The IP Filter to use. */
-    private static IPFilter ipFilter = new IPFilter(false);
-    
-    /** The Hostiles Filter to use */
-    private static HostileFilter hostileFilter = new HostileFilter();
-    
-    /** A sanity checker for network update requests/responses. */
-    private static NetworkUpdateSanityChecker networkSanityChecker = new NetworkUpdateSanityChecker();
-    
+        
     /**
      * isShuttingDown flag
      */
@@ -220,10 +136,6 @@ public class RouterService {
 	 */
     private static MessageRouter messageRouter;
     
-    /**
-     * A central location for the upload and download throttles
-     */
-    private static BandwidthManager bandwidthManager = new BandwidthManager();
     
     /**
      * The UDPMultiplexor.
@@ -238,12 +150,6 @@ public class RouterService {
        
     private static MessageDispatcher messageDispatcher;
     
-    /**
-     * The Node assigner class
-     * 
-     */
-    private static NodeAssigner nodeAssigner;
-    
     static {
         // Link the multiplexor & NIODispatcher together.
         UDPSelectorProviderFactory factory = new DefaultUDPSelectorProviderFactory(new LimeRUDPContext());
@@ -256,11 +162,6 @@ public class RouterService {
         } catch(IOException ignored) {}
         NIODispatcher.instance().registerSelector(UDP_MULTIPLEXOR, socketChannel.getClass());
     }
-    
-    /**
-     * An executor of http requests.
-     */
-    private static final HttpExecutor HTTP_EXECUTOR = new DefaultHttpExecutor();
     
     /**
      * A list of items that require running prior to shutting down LW.
@@ -280,10 +181,6 @@ public class RouterService {
     private static volatile StartStatus _state = StartStatus.NOTHING;
 
 
-	/**
-	 * Keeps track of times of queries.
-	 */
-	private static QueryStats queryStats = new QueryStats();
 	
 	/**
 	 * Whether or not we are running at full power.
@@ -344,10 +241,6 @@ public class RouterService {
         ProviderHacks.getConnectionManager().addEventListener(callback);
         ProviderHacks.getConnectionManager().addEventListener(ProviderHacks.getDHTManager());
         
-        nodeAssigner = new NodeAssigner(ProviderHacks.getUploadManager(), 
-                                        ProviderHacks.getDownloadManager(), 
-                                        ProviderHacks.getConnectionManager(),
-                                        ProviderHacks.getNetworkManager()); // DPINJ: Use passed in manager!
   	}
 
     public static void setMessageRouter(MessageRouter messageRouter) {
@@ -362,11 +255,7 @@ public class RouterService {
         return messageDispatcher;
     }
     
-    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() {
-        return networkSanityChecker;
-    }
-        
-  	/**
+    /**
   	 * Performs startup tasks that should happen while the GUI loads
   	 */
   	public static void asyncGuiInit() {
@@ -400,7 +289,7 @@ public class RouterService {
   	private static class Initializer implements Runnable {
   	    public void run() {
   	        //add more while-gui init tasks here
-            RouterService.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
+            ProviderHacks.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
                 public void ipFiltersLoaded() {
                     adjustSpamFilters();
                 }
@@ -445,7 +334,7 @@ public class RouterService {
     		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");
             callback.componentLoading("CONTENT_MANAGER");
-            contentManager.initialize();
+            ProviderHacks.getContentManager().initialize();
             LOG.trace("STOP ContentManager");
 
             LOG.trace("START MessageRouter");
@@ -455,11 +344,11 @@ public class RouterService {
 
             LOG.trace("START HTTPUploadManager");
             callback.componentLoading("UPLOAD_MANAGER");
-            ProviderHacks.getUploadManager().start(httpUploadAcceptor, ProviderHacks.getFileManager(), callback, messageRouter); 
+            ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), callback, messageRouter); 
             LOG.trace("STOP HTTPUploadManager");
 
             LOG.trace("START HTTPUploadAcceptor");
-            httpUploadAcceptor.start(getConnectionDispatcher()); 
+            ProviderHacks.getHTTPUploadAcceptor().start(ProviderHacks.getConnectionDispatcher()); 
             LOG.trace("STOP HTTPUploadAcceptor");
 
             LOG.trace("START Acceptor");
@@ -483,12 +372,12 @@ public class RouterService {
     		
     		LOG.trace("START NodeAssigner");
     		callback.componentLoading("NODE_ASSIGNER");
-    		nodeAssigner.start();
+    		ProviderHacks.getNodeAssigner().start();
     		LOG.trace("STOP NodeAssigner");
 			
             LOG.trace("START HostCatcher.initialize");
             callback.componentLoading("HOST_CATCHER");
-    		catcher.initialize();
+    		ProviderHacks.getHostCatcher().initialize();
     		LOG.trace("STOP HostCatcher.initialize");
     
     		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
@@ -509,12 +398,12 @@ public class RouterService {
     
             LOG.trace("START TorrentManager");
             callback.componentLoading("TORRENT_MANAGER");
-			ProviderHacks.getTorrentManager().initialize(ProviderHacks.getFileManager(), dispatcher, SimpleTimer.sharedTimer());
+			ProviderHacks.getTorrentManager().initialize(ProviderHacks.getFileManager(), ProviderHacks.getConnectionDispatcher(), SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
             
             LOG.trace("START ControlRequestAcceptor");
             callback.componentLoading("CONTROL_REQUEST_ACCEPTOR");
-			(new ControlRequestAcceptor()).register(getConnectionDispatcher());
+			(new ControlRequestAcceptor()).register(ProviderHacks.getConnectionDispatcher());
 			LOG.trace("STOP ControlRequestAcceptor");
 			
             // Restore any downloads in progress.
@@ -535,8 +424,7 @@ public class RouterService {
     		
     		LOG.trace("START HTTPAcceptor");
             callback.componentLoading("HTTPACCEPTOR");
-            httpAcceptor = new HTTPAcceptor();  
-            httpAcceptor.start();
+            ProviderHacks.getHTTPAcceptor().start();
             LOG.trace("STOP HTTPAcceptor");
             
             LOG.trace("START Pinger");
@@ -673,15 +561,6 @@ public class RouterService {
         return RouterService.callback;
     }
     
-    /** Gets the IPFilter that should be shared. */
-    public static IPFilter getIpFilter() {
-        return ipFilter;
-    }
-    
-    public static HostileFilter getHostileFilter() {
-        return hostileFilter;
-    }
-    
     /**
      * Sets full power mode.
      */
@@ -694,13 +573,7 @@ public class RouterService {
         }
     }
 
-    /** Returns the node assigner in use. */
-    // DPINJ: REMOVE!
-    public static NodeAssigner getNodeAssigner() {
-        return nodeAssigner;
-    }
-    
-	/**
+    /**
 	 * Accessor for the <tt>MessageRouter</tt> instance.
 	 *
 	 * @return the <tt>MessageRouter</tt> instance in use --
@@ -712,83 +585,14 @@ public class RouterService {
 		return messageRouter;
 	}
 	
-	public static BandwidthManager getBandwidthManager() {
-		return bandwidthManager;
-	}
-    
-	public static AltLocManager getAltlocManager() {
-        return altManager;
-    }
-    
-    public static ContentManager getContentManager() {
-        return contentManager;
-    }
-    
-	/**
-	 * Accessor for the <tt>HTTPAcceptor</tt> instance.
-	 *
-	 * @return the <tt>HTTPAcceptor</tt> in use
-	 */
-	public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() {
-	    return httpUploadAcceptor;
-	}
-
 	/**
 	 * Push uploads from firewalled clients.
 	 */
 	public static void acceptUpload(Socket socket, HTTPConnectionData data) {
-	    getHTTPUploadAcceptor().acceptConnection(socket, data);
+	    ProviderHacks.getHTTPUploadAcceptor().acceptConnection(socket, data);
 	}
 
-	/**
-	 * Accessor for the <tt>PushManager</tt> instance.
-	 *
-	 * @return the <tt>PushManager</tt> in use
-	 */
-	public static PushManager getPushManager() {
-	    return pushManager;
-	}
-	
-    /**
-     * Accessor for the ConnectionDispatcher instance.
-     */
-    public static ConnectionDispatcher getConnectionDispatcher() {
-        return dispatcher;
-    }
-
-    /** 
-     * Accessor for the <tt>Acceptor</tt> instance.
-     *
-     * @return the <tt>Acceptor</tt> in use
-     */
-    public static HTTPAcceptor getHTTPAcceptor() {
-        return httpAcceptor;
-    }
-
-    /** 
-     * Accessor for the <tt>HostCatcher</tt> instance.
-     *
-     * @return the <tt>HostCatcher</tt> in use
-     */
-	public static HostCatcher getHostCatcher() {
-		return catcher;
-	}
-
-    /** 
-     * Accessor for the <tt>SearchResultHandler</tt> instance.
-     *
-     * @return the <tt>SearchResultHandler</tt> in use
-     */
-	public static SearchResultHandler getSearchResultHandler() {
-		return RESULT_HANDLER;
-	}
-	
-    /** Gets the SecureMessageVerifier. */
-    public static SecureMessageVerifier getSecureMessageVerifier() {
-        return secureMessageVerifier;
-    }
-    
-    /** Gets the UDP Multiplexor. */
+	/** Gets the UDP Multiplexor. */
     public static UDPMultiplexor getUDPMultiplexor() {
         return UDP_MULTIPLEXOR;
     }
@@ -798,11 +602,7 @@ public class RouterService {
     	return UDP_SELECTOR_PROVIDER;
     }
     
-    public static HttpExecutor getHttpExecutor() {
-    	return HTTP_EXECUTOR;
-    }
-	
-	public static byte [] getMyGUID() {
+    public static byte [] getMyGUID() {
 	    return MYGUID;
 	}
 	
@@ -925,7 +725,7 @@ public class RouterService {
      * Clears the hostcatcher.
      */
     public static void clearHostCatcher() {
-        catcher.clear();
+        ProviderHacks.getHostCatcher().clear();
     }
 
     /**
@@ -1016,7 +816,7 @@ public class RouterService {
                 
             _state = StartStatus.SHUTTING;
             
-            nodeAssigner.stop();
+            ProviderHacks.getNodeAssigner().stop();
 
             ProviderHacks.getDHTManager().stop();
             
@@ -1026,7 +826,7 @@ public class RouterService {
             ProviderHacks.getConnectionManager().disconnect(false);
             
             //Update fractional uptime statistics (before writing limewire.props)
-            Statistics.instance().shutdown();
+            ProviderHacks.getStatistics().shutdown();
             
 			// start closing all active torrents
 			// torrentManager.shutdown();
@@ -1036,7 +836,7 @@ public class RouterService {
 
             //Write gnutella.net
             try {
-                catcher.write();
+                ProviderHacks.getHostCatcher().write();
             } catch (IOException e) {}
             
             // save limewire.props & other settings
@@ -1058,7 +858,7 @@ public class RouterService {
 
             LicenseFactory.persistCache();
             
-            contentManager.shutdown();
+            ProviderHacks.getContentManager().shutdown();
  
             
             runShutdownItems();
@@ -1132,12 +932,12 @@ public class RouterService {
      * Reloads the IP Filter data & adjusts spam filters when ready.
      */
     public static void reloadIPFilter() {
-        ipFilter.refreshHosts(new IPFilter.IPFilterCallback() {
+        ProviderHacks.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {
                 adjustSpamFilters();
             }
         });
-        hostileFilter.refreshHosts();
+        ProviderHacks.getHostileFilter().refreshHosts();
     }
 
     /**
@@ -1150,7 +950,7 @@ public class RouterService {
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
         for(ManagedConnection c : ProviderHacks.getConnectionManager().getConnections()) {
-            if(ipFilter.allow(c)) {
+            if(ProviderHacks.getIpFilter().allow(c)) {
                 c.setPersonalFilter(SpamFilter.newPersonalFilter());
                 c.setRouteFilter(SpamFilter.newRouteFilter());
             } else {
@@ -1294,9 +1094,9 @@ public class RouterService {
      */ 
     private static void recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
-        queryStats.recordQuery();
-        VERIFIER.record(qr, type);
-        RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
+        ProviderHacks.getQueryStats().recordQuery();
+        ProviderHacks.getResponseVerifier().record(qr, type);
+        ProviderHacks.getSearchResultHandler().addQuery(qr); // so we can leaf guide....
         messageRouter.sendDynamicQuery(qr);
     }
 
@@ -1307,7 +1107,7 @@ public class RouterService {
 	 *  January 1, 1970, that the last query originated from this host
 	 */
 	public static long getLastQueryTime() {
-		return queryStats.getLastQueryTime();
+		return ProviderHacks.getQueryStats().getLastQueryTime();
 	}
 
     /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
@@ -1316,7 +1116,7 @@ public class RouterService {
      */
     public static void stopQuery(GUID guid) {
         ProviderHacks.getQueryUnicaster().purgeQuery(guid);
-        RESULT_HANDLER.removeQuery(guid);
+        ProviderHacks.getSearchResultHandler().removeQuery(guid);
         messageRouter.queryKilled(guid);
         if(RouterService.isSupernode())
             QueryDispatcher.instance().addToRemove(guid);
@@ -1332,11 +1132,11 @@ public class RouterService {
      * @see ResponseVerifier#matchesType(byte[], Response) 
      */
     public static boolean matchesType(byte[] guid, Response response) {
-        return VERIFIER.matchesType(guid, response);
+        return ProviderHacks.getResponseVerifier().matchesType(guid, response);
     }
 
     public static boolean matchesQuery(byte [] guid, Response response) {
-        return VERIFIER.matchesQuery(guid, response);
+        return ProviderHacks.getResponseVerifier().matchesQuery(guid, response);
     }
     /** 
      * Returns true if the given response for the query with the given guid is a
@@ -1350,7 +1150,7 @@ public class RouterService {
      * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
      */
     public static boolean isMandragoreWorm(byte[] guid, Response response) {
-        return VERIFIER.isMandragoreWorm(guid, response);
+        return ProviderHacks.getResponseVerifier().isMandragoreWorm(guid, response);
     }
     
     /**
@@ -1367,9 +1167,9 @@ public class RouterService {
         Set<IpPort> hosts = new IpPortSet();
         
         if(isUltrapeer)
-            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
+            hosts.addAll(ProviderHacks.getHostCatcher().getUltrapeersWithFreeUltrapeerSlots(locale,num));
         else
-            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale,num));
+            hosts.addAll(ProviderHacks.getHostCatcher().getUltrapeersWithFreeLeafSlots(locale,num));
         
         // If we don't have enough hosts, add more.
         

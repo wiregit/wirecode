@@ -14,6 +14,7 @@ import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 /**
  * Manages state for push upload requests.
  */
+@Singleton
 public final class PushManager {
     
     private static final Log LOG = LogFactory.getLog(PushManager.class);

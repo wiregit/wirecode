@@ -14,6 +14,7 @@ import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.messages.DHTMessage;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 
+@Singleton
 public class HostileFilter extends SpamFilter {
 
     private static final Log LOG = LogFactory.getLog(HostileFilter.class);

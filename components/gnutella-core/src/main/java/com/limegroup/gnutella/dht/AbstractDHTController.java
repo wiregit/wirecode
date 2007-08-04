@@ -506,11 +506,11 @@ public abstract class AbstractDHTController implements DHTController {
     private static class FilterDelegate implements HostFilter {
         
         public boolean allow(SocketAddress addr) {
-            return RouterService.getIpFilter().allow(addr);
+            return ProviderHacks.getIpFilter().allow(addr);
         }
 
         public void ban(SocketAddress addr) {
-            RouterService.getIpFilter().ban(addr);
+            ProviderHacks.getIpFilter().ban(addr);
             RouterService.reloadIPFilter();
         }
     }

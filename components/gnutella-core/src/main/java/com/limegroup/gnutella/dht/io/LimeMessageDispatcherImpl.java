@@ -208,7 +208,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             return;
         }
         
-        SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
+        SecureMessageVerifier verifier = ProviderHacks.getSecureMessageVerifier();
         verifier.verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 }

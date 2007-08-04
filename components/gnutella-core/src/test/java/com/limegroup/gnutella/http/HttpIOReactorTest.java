@@ -109,7 +109,7 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
         });
         server.execute(new MyEventListener());
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(
+        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);

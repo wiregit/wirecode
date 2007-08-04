@@ -148,7 +148,7 @@ public class ServerSideWhatIsNewTest
         // we should be sharing two files - two text files.
         assertEquals(2, RouterService.getNumSharedFiles());
 
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         FileManager fm = ProviderHacks.getFileManager();
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
@@ -283,7 +283,7 @@ public class ServerSideWhatIsNewTest
     // test that the creation time cache handles the additional sharing of files
     // fine
     public void testAddSharedFiles() throws Exception {
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         FileManager fm = ProviderHacks.getFileManager();
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
@@ -382,7 +382,7 @@ public class ServerSideWhatIsNewTest
     // worth the cost.  this test should be good enough....
     public void testFileChanged() throws Exception {
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         Long cTime = ctCache.getCreationTime(tempFile1URN);
 
@@ -446,7 +446,7 @@ public class ServerSideWhatIsNewTest
     // change the file to a existing URN.
     public void testFileChangedToExistingURN() throws Exception {
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
 //        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
@@ -512,7 +512,7 @@ public class ServerSideWhatIsNewTest
     // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();        
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();        
         
         int size = 0;
         {
@@ -561,7 +561,7 @@ public class ServerSideWhatIsNewTest
     // the correct sizes, etc...
     public void testManualFileDeleteLoadSettings() throws Exception {
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
 
         tempFile1.delete(); tempFile1 = null;
         tempFile2.delete(); tempFile2 = null;
@@ -589,7 +589,7 @@ public class ServerSideWhatIsNewTest
     // download a file and make sure the creation time given back is stored...
     public void testDownloadCapturesCreationTime() throws Exception {
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
@@ -641,7 +641,7 @@ public class ServerSideWhatIsNewTest
     public void testSwarmDownloadCapturesOlderCreationTime() throws Exception {
         
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
 
         // get rid of the old shared file
         File newFile = new File(_savedDir, "whatever.txt");
@@ -710,7 +710,7 @@ public class ServerSideWhatIsNewTest
         berkeley.setLastModified(123457);
         
         FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
 
         File winInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         File linInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");

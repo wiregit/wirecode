@@ -20,8 +20,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 
@@ -136,7 +136,7 @@ public class SimppManager {
      */
     public void checkAndUpdate(final ReplyHandler handler, final byte[] simppPayload) { 
         if(simppPayload == null) {
-            RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
+            ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
             return;
         }
         
@@ -147,10 +147,10 @@ public class SimppManager {
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 
                 if (!verifier.verifySource()) {
-                    RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
+                    ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
                     return;
                 } else {
-                    RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.SIMPP);
+                    ProviderHacks.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.SIMPP);
                 }
                 
                 SimppParser parser=null;

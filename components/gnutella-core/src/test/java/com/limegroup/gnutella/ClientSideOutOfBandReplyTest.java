@@ -162,7 +162,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         		ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(reply);
         Thread.sleep(250);
-        assertEquals(10,RouterService.getSearchResultHandler().getNumResultsForQuery(queryGuid));
+        assertEquals(10,ProviderHacks.getSearchResultHandler().getNumResultsForQuery(queryGuid));
     }
 
     public void testOOBv2Disabled() throws Exception {
@@ -503,7 +503,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         
         // nothing should be accepted.
         Thread.sleep(250);
-        SearchResultHandler handler = RouterService.getSearchResultHandler();
+        SearchResultHandler handler = ProviderHacks.getSearchResultHandler();
         assertEquals(0,handler.getNumResultsForQuery(queryGuid));
     }
     

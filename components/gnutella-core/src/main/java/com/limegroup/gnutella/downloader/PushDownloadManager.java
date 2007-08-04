@@ -40,7 +40,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -266,7 +265,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             }
         } catch(UnknownHostException notCritical) {}
     
-        IPFilter filter = RouterService.getIpFilter();
+        IPFilter filter = ProviderHacks.getIpFilter();
         //make sure we send it to the proxies, if any
         for(IpPort ppi : file.getPushProxies()) {
             if (filter.allow(ppi.getAddress())) {
@@ -378,7 +377,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
 
         // the methods to execute
         final List<HeadMethod> methods = new ArrayList<HeadMethod>();
-        IPFilter filter = RouterService.getIpFilter();
+        IPFilter filter = ProviderHacks.getIpFilter();
         // try to contact each proxy
         for(IpPort ppi : proxies) {
             if (!filter.allow(ppi.getAddress()))

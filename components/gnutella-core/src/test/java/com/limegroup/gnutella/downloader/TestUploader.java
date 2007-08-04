@@ -28,7 +28,6 @@ import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -203,7 +202,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = RouterService.getIpFilter();
+    private final IPFilter IP_FILTER = ProviderHacks.getIpFilter();
     
     
     /**

@@ -154,7 +154,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
         // MessageRouter.responsesToQueryReplies()
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        ProviderHacks.getUploadManager().start(RouterService.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), RouterService.getCallback(), RouterService.getMessageRouter());
+        ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), RouterService.getCallback(), RouterService.getMessageRouter());
         try {
             Class[] paramTypes = new Class[] {
                     Response[].class, 
@@ -206,7 +206,7 @@ public final class MessageRouterTest extends LimeTestCase {
 
             assertEquals("responses should have been put in 20 hits", 20, size);
         } finally {
-            ProviderHacks.getUploadManager().stop(RouterService.getHTTPUploadAcceptor());
+            ProviderHacks.getUploadManager().stop(ProviderHacks.getHTTPUploadAcceptor());
         }
     }
 
@@ -733,7 +733,7 @@ public final class MessageRouterTest extends LimeTestCase {
         
         //try requesting other IPP too -- this should not change anything
         GUID guid = new GUID();
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
         List<NameValue> l = new LinkedList<NameValue>();
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
         l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
@@ -832,7 +832,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     private void addFreeLeafSlotHosts(int num) throws Exception {
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e =new ExtendedEndpoint("1.2.3." + i, i+1);
@@ -841,7 +841,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     private void addFreeLeafSlotHostsClassB(int num) throws Exception {
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
@@ -850,7 +850,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     private void addFreeUltrapeerSlotHostsClassB(int num) throws Exception {
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
@@ -859,7 +859,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     private void clearFreeLeafSlotHosts() throws Exception {
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
         set.clear();
     }        

@@ -47,6 +47,7 @@ import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -63,6 +64,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * handling. It needs to be start by invoking
  * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
+@Singleton
 public class HTTPAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);

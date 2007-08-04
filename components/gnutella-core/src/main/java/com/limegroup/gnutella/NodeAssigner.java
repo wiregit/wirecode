@@ -9,6 +9,9 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -30,6 +33,7 @@ import com.limegroup.gnutella.statistics.NodeAssignerStat;
  * It then updates the UltrapeerCapable and DHTCapable status of this node
  * 
  */
+@Singleton
 public class NodeAssigner {
     
     private static final Log LOG = LogFactory.getLog(NodeAssigner.class);
@@ -113,8 +117,9 @@ public class NodeAssigner {
      *                        tracking bandwidth used for downloads
      * @param connectionManager Reference to the ConnectionManager for this node
      */
-    public NodeAssigner(BandwidthTracker uploadTracker, 
-                        BandwidthTracker downloadTracker,
+    @Inject
+    public NodeAssigner(@Named("uploadTracker") BandwidthTracker uploadTracker, 
+                        @Named("downloadTracker") BandwidthTracker downloadTracker,
                         ConnectionManager connectionManager,
                         NetworkManager networkManager) {
         this.uploadTracker = uploadTracker;

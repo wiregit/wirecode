@@ -242,7 +242,7 @@ public class UpdateHandler implements HttpClientListener {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
                 if(!fromDisk && handler != null)
-                    RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
+                    ProviderHacks.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
                 if (fromDisk || uc.getId() <= _lastId)
                     doHttpFailover(uc);
@@ -250,12 +250,12 @@ public class UpdateHandler implements HttpClientListener {
                     storeAndUpdate(data, uc, fromDisk);
             } else {
                 if(!fromDisk && handler != null)
-                    RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+                    ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
             if(!fromDisk && handler != null)
-                RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+                ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
         }
     }
@@ -381,7 +381,7 @@ public class UpdateHandler implements HttpClientListener {
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         get.setFollowRedirects(true);
-        RouterService.getHttpExecutor().execute(get,this, 10000);
+        ProviderHacks.getHttpExecutor().execute(get,this, 10000);
     }
 
     public boolean requestComplete(HttpMethod method) {
@@ -405,7 +405,7 @@ public class UpdateHandler implements HttpClientListener {
             LOG.warn("couldn't fetch data ",failed);
             return false;
         } finally {
-            RouterService.getHttpExecutor().releaseResources(method);
+            ProviderHacks.getHttpExecutor().releaseResources(method);
         }
         
         handleNewData(inflated, null);
@@ -416,7 +416,7 @@ public class UpdateHandler implements HttpClientListener {
     public boolean requestFailed(HttpMethod m, IOException exc) {
         LOG.warn("http failover failed",exc);
         httpUpdate.set(false);
-        RouterService.getHttpExecutor().releaseResources(m);
+        ProviderHacks.getHttpExecutor().releaseResources(m);
         // nothing we can do.
         return false;
     }

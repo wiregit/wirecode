@@ -26,6 +26,8 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -50,6 +52,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * LOCKING: Note on grabbing the FM lock - if I ever do that, I first grab that
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
+@Singleton
 public final class CreationTimeCache {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
@@ -59,12 +62,6 @@ public final class CreationTimeCache {
      */
     private static final File CTIME_CACHE_FILE = 
         new File(CommonUtils.getUserSettingsDir(), "createtimes.cache");
-
-    /**
-     * CreationTimeCache instance variable.  
-     * LOCKING: obtain CreationTimeCache.class.
-     */
-    private static CreationTimeCache instance = new CreationTimeCache();
 
     /**
      * CreationTimeCache container.  LOCKING: obtain this.
@@ -84,17 +81,9 @@ public final class CreationTimeCache {
     private boolean dirty;
 
     /**
-	 * Returns the <tt>CreationTimeCache</tt> instance.
-	 *
-	 * @return the <tt>CreationTimeCache</tt> instance
-     */
-    public static synchronized CreationTimeCache instance() {
-        return instance;
-    }
-
-    /**
      * Create and initialize urn cache.
      */
+    @Inject
     private CreationTimeCache() {
         dirty = false;
         URN_TO_TIME_MAP = createMap();

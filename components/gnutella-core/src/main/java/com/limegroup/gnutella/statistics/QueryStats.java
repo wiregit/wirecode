@@ -11,11 +11,13 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.RouterService;
 
 /**
  * Keeps track and reports some statistics about local queries.
  */
+@Singleton
 public class QueryStats implements Inspectable {
     
     private NumericBuffer<Long> times = new NumericBuffer<Long>(200);

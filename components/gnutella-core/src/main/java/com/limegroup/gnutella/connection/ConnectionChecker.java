@@ -241,7 +241,7 @@ public final class ConnectionChecker implements Runnable {
     private boolean udpIsDead() {
         PingRequest ping = PingRequest.createUDPPing();
         Collection<IpPort> hosts = RouterService.getPreferencedHosts(false,"en",50);
-        UDPPinger myPinger = RouterService.getHostCatcher().getPinger();
+        UDPPinger myPinger = ProviderHacks.getHostCatcher().getPinger();
         UDPChecker checker = new UDPChecker();
         
         // send some hosts to be ranked

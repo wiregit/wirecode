@@ -255,7 +255,7 @@ public class DownloadTest extends LimeTestCase {
         tlsUploader5.stopThread();
 
         deleteAllFiles();
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
         
         Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         m.clear();
@@ -1873,9 +1873,9 @@ public class DownloadTest extends LimeTestCase {
                     FileDesc fd = ProviderHacks.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertTrue(fd instanceof IncompleteFileDesc);
-                    RouterService.getAltlocManager().add(
+                    ProviderHacks.getAltLocManager().add(
                             ProviderHacks.getAlternateLocationFactory().create(rfd2),this);
-                    RouterService.getAltlocManager().add(
+                    ProviderHacks.getAltLocManager().add(
                             ProviderHacks.getAlternateLocationFactory().create(rfd3),this);
                 } catch(Throwable e) {
                     ErrorService.error(e);
@@ -1938,9 +1938,9 @@ public class DownloadTest extends LimeTestCase {
             ProviderHacks.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
-        RouterService.getAltlocManager().add(al1, null);
-        RouterService.getAltlocManager().add(al2, null);
-        RouterService.getAltlocManager().add(al3, null);
+        ProviderHacks.getAltLocManager().add(al1, null);
+        ProviderHacks.getAltLocManager().add(al2, null);
+        ProviderHacks.getAltLocManager().add(al3, null);
         
         tResume(incFile);
 
@@ -2476,7 +2476,7 @@ public class DownloadTest extends LimeTestCase {
         RouterService.download(rfds,false,null);
         Thread.sleep(1000);
         synchronized(COMPLETE_LOCK) {
-        	RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
+        	ProviderHacks.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
         	waitForInvalid();       
         }
     }

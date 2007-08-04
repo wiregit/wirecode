@@ -11,7 +11,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -85,7 +85,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
             } else if (sha1 != null) {
                 // write the Retry-After header, using different values
                 // depending on if we had any alts to send or not.
-                String retry = !RouterService.getAltlocManager().hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
+                String retry = !ProviderHacks.getAltLocManager().hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
                         : NORMAL_RETRY_AFTER;
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(retry));
                 httpHeaderUtils.addRangeHeader(response, uploader, fd);

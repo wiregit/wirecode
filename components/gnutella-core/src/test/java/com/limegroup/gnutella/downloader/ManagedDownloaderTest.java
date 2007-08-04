@@ -111,7 +111,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         callback = new ActivityCallbackStub();
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
         PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
         PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
         PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
@@ -156,7 +156,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	FileDesc test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
     	
-    	assertEquals(0,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
+    	assertEquals(0,ProviderHacks.getAltLocManager().getNumLocs(test.getSHA1Urn()));
     	
     	//add one fake downloader to the downloader list
     	Endpoint e = new Endpoint("1.2.3.5",12345);
@@ -183,7 +183,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	//the altloc should have been added to the file descriptor
     	test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
-    	assertEquals(1,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
+    	assertEquals(1,ProviderHacks.getAltLocManager().getNumLocs(test.getSHA1Urn()));
     	
     	//now repeat the test, pretending the uploader wants push altlocs
     	fakeDownloader.setWantsFalts(true);
@@ -197,7 +197,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	
     	//make sure the file was added to the file descriptor
     	test = ProviderHacks.getFileManager().getFileDescForUrn(partialURN);
-    	assertEquals(1,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
+    	assertEquals(1,ProviderHacks.getAltLocManager().getNumLocs(test.getSHA1Urn()));
     	
     	//rince and repeat, saying this was a bad altloc. 
     	//it should be sent to the other downloaders. 
@@ -210,7 +210,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
     	//make sure the altloc is demoted now
-    	assertEquals(0,RouterService.getAltlocManager().getNumLocs(test.getSHA1Urn()));
+    	assertEquals(0,ProviderHacks.getAltLocManager().getNumLocs(test.getSHA1Urn()));
     	
     	PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming",new Boolean(false));

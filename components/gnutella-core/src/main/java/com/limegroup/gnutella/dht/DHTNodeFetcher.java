@@ -17,6 +17,7 @@ import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
@@ -106,7 +107,7 @@ public class DHTNodeFetcher {
         
         //TODO: min version: for now, 0
         List<ExtendedEndpoint> dhtHosts = 
-            RouterService.getHostCatcher().getDHTSupportEndpoint(0);
+            ProviderHacks.getHostCatcher().getDHTSupportEndpoint(0);
         
         //first see if we have any active dht node in our HostCatcher and add them all 
         //to the bootstrapper.
@@ -150,14 +151,14 @@ public class DHTNodeFetcher {
             LOG.debug("Sending ping to dht capable hosts");
             
             //we don't have active hosts but have hosts that support dht
-            RouterService.getHostCatcher().getPinger().rank(dhtHosts, 
+            ProviderHacks.getHostCatcher().getPinger().rank(dhtHosts, 
                                                             listener, canceller, m);
         } else {
             
             LOG.debug("Sending ping to all hosts");
             
             //send to all hosts
-            RouterService.getHostCatcher().sendMessageToAllHosts(m, 
+            ProviderHacks.getHostCatcher().sendMessageToAllHosts(m, 
                     listener, canceller);
         }
     }

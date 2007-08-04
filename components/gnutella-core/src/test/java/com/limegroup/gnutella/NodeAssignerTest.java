@@ -132,7 +132,7 @@ public class NodeAssignerTest extends LimeTestCase {
         RouterService.clearHostCatcher();
         RouterService.connect();
         assertFalse("should not be connected", RouterService.isConnected());
-        RouterService.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
+        ProviderHacks.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
         sleep();
         sleep();
         assertTrue("should be connected", RouterService.isConnected());

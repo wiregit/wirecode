@@ -2,7 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.util.Vector;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.FilterSettings;
 
@@ -31,7 +31,7 @@ public abstract class SpamFilter {
         Vector<SpamFilter> buf=new Vector<SpamFilter>();
 
         //1. IP-based techniques.
-        IPFilter ipFilter = RouterService.getIpFilter();
+        IPFilter ipFilter = ProviderHacks.getIpFilter();
         if(ipFilter.hasBlacklistedHosts())
             buf.add(ipFilter);
 
@@ -102,7 +102,7 @@ public abstract class SpamFilter {
         //     buf.add(new BearShareFilter());
         
         // always filter hostiles
-        buf.add(RouterService.getHostileFilter());
+        buf.add(ProviderHacks.getHostileFilter());
 
         return compose(buf);
     }

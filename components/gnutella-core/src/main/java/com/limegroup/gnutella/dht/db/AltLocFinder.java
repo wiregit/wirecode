@@ -29,9 +29,9 @@ import org.limewire.nio.observer.Shutdownable;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -275,7 +275,7 @@ public class AltLocFinder {
                 try {
                     AlternateLocation location = alternateLocationFactory
                             .createDirectDHTAltLoc(c, urn, fileSize, ttroot);
-                    AltLocManager.instance().add(location, this);
+                    ProviderHacks.getAltLocManager().add(location, this);
                     return true;
                 } catch (IOException e) {
                     // Thrown if IpPort is an invalid address
@@ -353,7 +353,7 @@ public class AltLocFinder {
             
             try {
                 AlternateLocation location = alternateLocationFactory.createPushAltLoc(pe, urn);
-                AltLocManager.instance().add(location, this);
+                ProviderHacks.getAltLocManager().add(location, this);
                 return true;
             } catch (IOException e) {
                 // Impossible. Thrown if URN or PushEndpoint is null

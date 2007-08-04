@@ -9,7 +9,7 @@ import java.util.Set;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.MultiRRIterator;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -66,8 +66,8 @@ public class AltLocTracker {
      * sent out already.
      */
     public Collection<DirectAltLoc> getNextSetOfAltsToSend() {
-        AlternateLocationCollection<DirectAltLoc> coll = RouterService
-                .getAltlocManager().getDirect(urn);
+        AlternateLocationCollection<DirectAltLoc> coll = ProviderHacks
+                .getAltLocManager().getDirect(urn);
         Collection<DirectAltLoc> ret = null;
         long now = System.currentTimeMillis();
         synchronized (coll) {
@@ -99,14 +99,14 @@ public class AltLocTracker {
         if (!wantsFAlts)
             return Collections.emptySet();
 
-        AlternateLocationCollection<PushAltLoc> fwt = RouterService
-                .getAltlocManager().getPushFWT(urn);
+        AlternateLocationCollection<PushAltLoc> fwt = ProviderHacks
+                .getAltLocManager().getPushFWT(urn);
 
         AlternateLocationCollection<PushAltLoc> push;
         if (fwtVersion > 0)
             push = AlternateLocationCollection.getEmptyCollection();
         else
-            push = RouterService.getAltlocManager().getPushNoFWT(urn);
+            push = ProviderHacks.getAltLocManager().getPushNoFWT(urn);
 
         Collection<PushAltLoc> ret = null;
         long now = System.currentTimeMillis();

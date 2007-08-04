@@ -17,7 +17,7 @@ public class AltLocManagerTest extends LimeTestCase {
         return buildTestSuite(AltLocManagerTest.class);
     }
     
-    private final AltLocManager manager = AltLocManager.instance();
+    private final AltLocManager manager = ProviderHacks.getAltLocManager();
 
     public void setUp() {
         manager.purge();

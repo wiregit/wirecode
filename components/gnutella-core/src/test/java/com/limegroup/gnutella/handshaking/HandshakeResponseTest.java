@@ -63,13 +63,13 @@ public final class HandshakeResponseTest extends LimeTestCase {
                     ProviderHacks.getHeadersFactory().createUltrapeerHeaders("45.67.89.54"));
         LEAF_HEADERS =
             HandshakeResponse.createResponse(ProviderHacks.getHeadersFactory().createLeafHeaders("45.67.89.54"));
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
     }
 
     public void testLeafRejectIncoming() throws Exception {
         Properties props = new Properties();
         props.put(HeaderNames.X_ULTRAPEER, "false");
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
         HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS);
@@ -88,8 +88,8 @@ public final class HandshakeResponseTest extends LimeTestCase {
                 Properties.class});
         // First, check to make sure that we add connected hosts when we don't
         // have any hosts in the host catcher. 
-        RouterService.getHostCatcher().clear();
-        assertEquals(0, RouterService.getHostCatcher().getNumHosts());
+        ProviderHacks.getHostCatcher().clear();
+        assertEquals(0, ProviderHacks.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
         ipPorts.add(ProviderHacks.getManagedConnectionFactory().createManagedConnection("24.67.85.4", 6346));
         PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
@@ -105,7 +105,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         assertEquals("unexpected header", "24.67.85.4:6346", xTry);
         
         // Add a bunch of hosts to the host catcher to look for later.
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         int limit = 30;
         Set ultrapeersWithLeafSlots = new HashSet();
         Set ultrapeersWithUltrapeerSlots = new HashSet();

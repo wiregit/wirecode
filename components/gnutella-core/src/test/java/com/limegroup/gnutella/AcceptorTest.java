@@ -171,7 +171,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          Socket tls = new TLSNIOSocket("localhost", port);
          tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
@@ -184,7 +184,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          SSLContext context = SSLUtils.getTLSContext();
          SSLSocket tls = (SSLSocket)context.getSocketFactory().createSocket();

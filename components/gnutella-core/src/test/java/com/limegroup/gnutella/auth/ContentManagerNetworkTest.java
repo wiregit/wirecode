@@ -132,7 +132,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     public void testResponseReceived() throws Exception {        
         mgr.shutdown();
-        mgr = RouterService.getContentManager();
+        mgr = ProviderHacks.getContentManager();
         mgr.request(URN_1, one, 4000);
         ProviderHacks.getUdpService().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
         Thread.sleep(1000); // let the message process.

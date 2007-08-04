@@ -29,7 +29,6 @@ import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -243,7 +242,7 @@ BTLinkListener {
                  }
              }
 		};
-		RouterService.getContentManager().request(context.getMetaInfo().getURN(),
+		ProviderHacks.getContentManager().request(context.getMetaInfo().getURN(),
 				observer, 5000);
 	}
 	
@@ -542,7 +541,7 @@ BTLinkListener {
 	public void addEndpoint(TorrentLocation to) {
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
-		if (!RouterService.getIpFilter().allow(to.getAddress()))
+		if (!ProviderHacks.getIpFilter().allow(to.getAddress()))
 			return;
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;

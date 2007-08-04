@@ -480,7 +480,7 @@ public abstract class FileManager {
         _data.save();
             
         UrnCache.instance().persistCache();
-        CreationTimeCache.instance().persistCache();
+        ProviderHacks.getCreationTimeCache().persistCache();
     }
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -772,7 +772,7 @@ public abstract class FileManager {
         
         // Various cleanup & persisting...
         trim();
-        CreationTimeCache.instance().pruneTimes();
+        ProviderHacks.getCreationTimeCache().pruneTimes();
         ProviderHacks.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
         SavedFileManager.instance().run();
@@ -1349,7 +1349,7 @@ public abstract class FileManager {
 
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        ContentResponseData r = ProviderHacks.getContentManager().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1402,7 +1402,7 @@ public abstract class FileManager {
         // result set.
         if (!isForcedShare(file)) {
             URN mainURN = fileDesc.getSHA1Urn();
-            CreationTimeCache ctCache = CreationTimeCache.instance();
+            CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
             synchronized (ctCache) {
                 Long cTime = ctCache.getCreationTime(mainURN);
                 if (cTime == null)
@@ -1540,7 +1540,7 @@ public abstract class FileManager {
         this.removeUrnIndex(fd);
         //Remove creation time information
         if (_urnMap.get(fd.getSHA1Urn()) == null)
-            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
+            ProviderHacks.getCreationTimeCache().removeTime(fd.getSHA1Urn());
   
         // Notify the GUI...
         if (notify) {
@@ -1623,7 +1623,7 @@ public abstract class FileManager {
     
     /** Attempts to validate the given FileDesc. */
     public void validate(final FileDesc fd) {
-        ContentManager cm = RouterService.getContentManager();
+        ContentManager cm = ProviderHacks.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
             cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
@@ -1680,7 +1680,7 @@ public abstract class FileManager {
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0) {
-                RouterService.getAltlocManager().purge(urn);
+                ProviderHacks.getAltLocManager().purge(urn);
                 _urnMap.remove(urn);
             }
 		}
@@ -2138,7 +2138,7 @@ public abstract class FileManager {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List<URN> urnList = CreationTimeCache.instance().getFiles(request, 3);
+        List<URN> urnList = ProviderHacks.getCreationTimeCache().getFiles(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
@@ -2597,7 +2597,7 @@ public abstract class FileManager {
                     if (isRareFile(fds[i]))
                         rare++;
                     // locking FM->ALM ok.
-                    int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn());
+                    int numAlts = ProviderHacks.getAltLocManager().getNumLocs(fds[i].getSHA1Urn());
                     if (!nonZero || numAlts > 0) {
                         alts.add((double)numAlts);
                         topAltsFDs.put(numAlts,fds[i]);

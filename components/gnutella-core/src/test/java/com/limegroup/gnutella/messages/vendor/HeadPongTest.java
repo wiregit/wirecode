@@ -27,9 +27,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
@@ -73,12 +71,12 @@ public class HeadPongTest extends LimeTestCase {
         headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager));
         
         SSLSettings.TLS_INCOMING.setValue(false);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
     }
     
     public void tearDown() throws Exception {
         SSLSettings.TLS_INCOMING.revertToDefault();
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
     }
     
     public void testReadBinary() throws Exception {
@@ -1043,20 +1041,20 @@ public class HeadPongTest extends LimeTestCase {
         GUID peGUID = new GUID(GUID.makeGuid());      
         PushAltLoc firewalled = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
         firewalled.updateProxies(true);
-        RouterService.getAltlocManager().add(firewalled, null);
+        ProviderHacks.getAltLocManager().add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
         PushAltLoc tls = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         tls.updateProxies(true);
-        RouterService.getAltlocManager().add(tls, null);
+        ProviderHacks.getAltLocManager().add(tls, null);
         
         GUID peFwtGUID = new GUID();
         PushAltLoc fwt = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        ProviderHacks.getAltLocManager().add(fwt, null);
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1179,20 +1177,20 @@ public class HeadPongTest extends LimeTestCase {
         GUID peGUID = new GUID(GUID.makeGuid());      
         PushAltLoc firewalled = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
         firewalled.updateProxies(true);
-        RouterService.getAltlocManager().add(firewalled, null);
+        ProviderHacks.getAltLocManager().add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
         PushAltLoc tls = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         tls.updateProxies(true);
-        RouterService.getAltlocManager().add(tls, null);
+        ProviderHacks.getAltLocManager().add(tls, null);
         
         GUID peFwtGUID = new GUID();
         PushAltLoc fwt = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        ProviderHacks.getAltLocManager().add(fwt, null);
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1264,10 +1262,10 @@ public class HeadPongTest extends LimeTestCase {
         GUID peFwtGUID = new GUID();
         PushAltLoc fwt = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        ProviderHacks.getAltLocManager().add(fwt, null);
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1308,10 +1306,10 @@ public class HeadPongTest extends LimeTestCase {
         GUID peFwtGUID = new GUID();
         PushAltLoc fwt = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        ProviderHacks.getAltLocManager().add(fwt, null);
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1350,11 +1348,11 @@ public class HeadPongTest extends LimeTestCase {
                 
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
         }
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1415,11 +1413,11 @@ public class HeadPongTest extends LimeTestCase {
                 
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
         }
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1458,11 +1456,11 @@ public class HeadPongTest extends LimeTestCase {
                 
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234", HugeTestUtils.SHA1, i % 2 == 0);
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
         }
         
         HeadPong pong = headPongFactory.create(req);
-        AltLocManager.instance().purge();
+        ProviderHacks.getAltLocManager().purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();

@@ -160,14 +160,14 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         dhtBootstrapper.setWaitingForNodes(true);
         DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
         
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {
             ExtendedEndpoint ep = new ExtendedEndpoint(
                     "127.0.0.1",
                     UDP_ACCESS[i].getLocalPort());
             ep.setDHTVersion(0);
             ep.setDHTMode(DHTMode.ACTIVE);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
         }
         
         nodeFetcher.start();
@@ -182,14 +182,14 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         dhtBootstrapper.setWaitingForNodes(true);
         DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
         
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {
             ExtendedEndpoint ep = new ExtendedEndpoint(
                     "127.0.0.1",
                     UDP_ACCESS[i].getLocalPort());
             ep.setDHTVersion(0);
             ep.setDHTMode(DHTMode.PASSIVE);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
         }
         nodeFetcher.start();
         Thread.sleep(1000);

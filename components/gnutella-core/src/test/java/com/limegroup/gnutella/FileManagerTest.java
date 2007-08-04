@@ -123,7 +123,7 @@ public class FileManagerTest extends LimeTestCase {
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        ContentManager cm = RouterService.getContentManager();
+        ContentManager cm = ProviderHacks.getContentManager();
         cm.initialize();
         // request the urn so we can use the response.
         cm.request(u1, new StubContentResponseObserver(), 1000);
@@ -573,7 +573,7 @@ public class FileManagerTest extends LimeTestCase {
 	    for(int i = 0; i < fds.length; i++) {
 	        URN urn = fds[i].getSHA1Urn();
 	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-	            RouterService.getAltlocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn),null);
+	            ProviderHacks.getAltLocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn),null);
 	        }
 	    }
         
@@ -604,7 +604,7 @@ public class FileManagerTest extends LimeTestCase {
 			    testResponse.getLocations(), hits[0].getLocations());
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
     }	
     
     /**

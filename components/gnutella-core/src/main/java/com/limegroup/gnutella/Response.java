@@ -150,8 +150,8 @@ public class Response {
 		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
-			    getAsIpPorts(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
-			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn()),
+			    getAsIpPorts(ProviderHacks.getAltLocManager().getDirect(fd.getSHA1Urn())),
+			    ProviderHacks.getCreationTimeCache().getCreationTimeAsLong(fd.getSHA1Urn()),
                 fd.getFileSize()),
 			 null);
 	}
@@ -767,7 +767,7 @@ public class Response {
                 }
                 
                 // if we're me or banned, ignore.
-                if(!RouterService.getIpFilter().allow(ipp) || NetworkUtils.isMe(ipp))
+                if(!ProviderHacks.getIpFilter().allow(ipp) || NetworkUtils.isMe(ipp))
                     continue;
                 
                 if(locations == null)

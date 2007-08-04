@@ -315,9 +315,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
     public void initialize() {
-        _catcher = RouterService.getHostCatcher();
+        _catcher = ProviderHacks.getHostCatcher();
 
-        RouterService.getConnectionDispatcher().
+        ProviderHacks.getConnectionDispatcher().
         addConnectionAcceptor(this,
         		false,
         		false,
@@ -1996,7 +1996,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-        else if(RouterService.getNodeAssigner().isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
+        else if(ProviderHacks.getNodeAssigner().isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
 			return false;
         else
 		    return true;
@@ -2358,7 +2358,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         
         /** Returns true if we are able to make a connection attempt to this host. */
         private boolean isConnectableHost(IpPort host) {
-            return RouterService.getIpFilter().allow(host)
+            return ProviderHacks.getIpFilter().allow(host)
                 && !isConnectedTo(host.getAddress()) 
                 && !isConnectingTo(host);
         }

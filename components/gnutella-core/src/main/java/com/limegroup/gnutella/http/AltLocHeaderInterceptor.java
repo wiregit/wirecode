@@ -9,7 +9,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.Function;
 import org.limewire.http.HeaderInterceptor;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -65,9 +65,9 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if (isGood)
-                    RouterService.getAltlocManager().add(location, null);
+                    ProviderHacks.getAltLocManager().add(location, null);
                 else
-                    RouterService.getAltlocManager().remove(location, null);
+                    ProviderHacks.getAltLocManager().remove(location, null);
 
                 tracker.addLocation(location);
                 return null;

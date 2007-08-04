@@ -6,9 +6,11 @@ import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
 import org.limewire.rudp.UDPConnection;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
+@Singleton
 public class BandwidthManager {
 
 	private final Throttle UP_TCP, DOWN_TCP, UP_UDP;

@@ -13,9 +13,11 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
+@Singleton
 public class ConnectionDispatcher {
     
     private static final Log LOG = LogFactory.getLog(ConnectionDispatcher.class);

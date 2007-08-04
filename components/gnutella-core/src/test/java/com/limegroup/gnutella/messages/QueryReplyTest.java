@@ -42,7 +42,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -1418,7 +1417,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for(int i = 0; i < fds.length; i++) {
             URN urn = fds[i].getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-                RouterService.getAltlocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn), null);
+                ProviderHacks.getAltLocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn), null);
             }
         }
     }
@@ -1427,8 +1426,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         FileDesc[] fds = fman.getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
             long time = (fds[i].getIndex() + 1) * 10013;
-            CreationTimeCache.instance().addTime(fds[i].getSHA1Urn(), time);
-            CreationTimeCache.instance().commitTime(fds[i].getSHA1Urn());
+            ProviderHacks.getCreationTimeCache().addTime(fds[i].getSHA1Urn(), time);
+            ProviderHacks.getCreationTimeCache().commitTime(fds[i].getSHA1Urn());
         }
     }        
     

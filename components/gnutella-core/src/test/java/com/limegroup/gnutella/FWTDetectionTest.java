@@ -141,8 +141,8 @@ public class FWTDetectionTest extends LimeTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -181,8 +181,8 @@ public class FWTDetectionTest extends LimeTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -229,8 +229,8 @@ public class FWTDetectionTest extends LimeTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -291,8 +291,8 @@ public class FWTDetectionTest extends LimeTestCase {
         // send a pong
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -326,16 +326,16 @@ public class FWTDetectionTest extends LimeTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
         
         // if we have received incoming, pings should not be requesting
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         assertFalse(ponger1.listen().requestsIP());
         
@@ -350,8 +350,8 @@ public class FWTDetectionTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -374,8 +374,8 @@ public class FWTDetectionTest extends LimeTestCase {
     public void testPongCarriesBadPort() throws Exception{
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -402,8 +402,8 @@ public class FWTDetectionTest extends LimeTestCase {
         assertTrue(ProviderHacks.getUdpService().canDoFWT());
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         cmStub.setConnected(false);
-        RouterService.getHostCatcher().expire();
-        RouterService.getHostCatcher().sendUDPPings();
+        ProviderHacks.getHostCatcher().expire();
+        ProviderHacks.getHostCatcher().sendUDPPings();
         ponger1.listen();
         Endpoint badAddress = new Endpoint("1.2.3.4",ProviderHacks.getNetworkManager().getPort());
         PingReply badGuid = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1,badAddress);

@@ -14,6 +14,7 @@ import org.limewire.nio.SocketFactory;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.I18n;
@@ -23,6 +24,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
  * threads to handle requests.  This allows simple HTTP requests.
  */
+@Singleton
 public class HTTPAcceptor {
 	/** Magnet request for a default action on parameters */
     private static final String MAGNET_DEFAULT = "magnet10/default.js?";

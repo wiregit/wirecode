@@ -140,7 +140,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -180,7 +180,7 @@ public class AltLocUploadTest extends LimeTestCase {
         FD = ProviderHacks.getFileManager().getFileDescForFile(
                 new File(_sharedDir, fileName));
 
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
 
         client = HttpClientManager.getNewClient();
         HostConfiguration config = new HostConfiguration();
@@ -211,13 +211,13 @@ public class AltLocUploadTest extends LimeTestCase {
                 + ";fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
-        RouterService.getAltlocManager().add(direct, null);
-        RouterService.getAltlocManager().add(push, null);
-        RouterService.getAltlocManager().add(pushFwt, null);
+        ProviderHacks.getAltLocManager().add(direct, null);
+        ProviderHacks.getAltLocManager().add(push, null);
+        ProviderHacks.getAltLocManager().add(pushFwt, null);
 
         assertEquals(0, ((PushAltLoc) push).supportsFWTVersion());
         assertEquals(1, pushFwt.supportsFWTVersion());
-        assertEquals(3, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(3, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -250,13 +250,13 @@ public class AltLocUploadTest extends LimeTestCase {
                 clientGUID2.toHexString() + ";fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
-        RouterService.getAltlocManager().add(direct, null);
-        RouterService.getAltlocManager().add(push, null);
-        RouterService.getAltlocManager().add(pushFwt, null);
+        ProviderHacks.getAltLocManager().add(direct, null);
+        ProviderHacks.getAltLocManager().add(push, null);
+        ProviderHacks.getAltLocManager().add(pushFwt, null);
 
         assertEquals(0, ((PushAltLoc) push).supportsFWTVersion());
         assertEquals(1, pushFwt.supportsFWTVersion());
-        assertEquals(3, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(3, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -295,13 +295,13 @@ public class AltLocUploadTest extends LimeTestCase {
                 clientGUID2.toHexString() + ";fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
-        RouterService.getAltlocManager().add(direct, null);
-        RouterService.getAltlocManager().add(push, null);
-        RouterService.getAltlocManager().add(pushFwt, null);
+        ProviderHacks.getAltLocManager().add(direct, null);
+        ProviderHacks.getAltLocManager().add(push, null);
+        ProviderHacks.getAltLocManager().add(pushFwt, null);
 
         assertEquals(0, ((PushAltLoc) push).supportsFWTVersion());
         assertEquals(1, pushFwt.supportsFWTVersion());
-        assertEquals(3, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(3, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -332,7 +332,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 .toHexString()
                 + ";1.2.3.4:5", sha1);
         ((PushAltLoc) push).updateProxies(true);
-        assertEquals(0, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(0, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -345,23 +345,23 @@ public class AltLocUploadTest extends LimeTestCase {
             method.releaseConnection();
         }
 
-        assertEquals(2, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(2, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
-        assertEquals(1, RouterService.getAltlocManager().getPushNoFWT(
+        assertEquals(1, ProviderHacks.getAltLocManager().getPushNoFWT(
                 FD.getSHA1Urn()).getAltLocsSize());
-        assertEquals(1, RouterService.getAltlocManager().getDirect(
+        assertEquals(1, ProviderHacks.getAltLocManager().getDirect(
                 FD.getSHA1Urn()).getAltLocsSize());
 
-        assertTrue(RouterService.getAltlocManager().getPushNoFWT(FD.getSHA1Urn())
+        assertTrue(ProviderHacks.getAltLocManager().getPushNoFWT(FD.getSHA1Urn())
                 .contains(push));
-        assertTrue(RouterService.getAltlocManager().getDirect(FD.getSHA1Urn())
+        assertTrue(ProviderHacks.getAltLocManager().getDirect(FD.getSHA1Urn())
                 .contains(direct));
     }
 
    public void testAlternateLocationAddAndRemove() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -375,7 +375,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
         
         // ensure that one removal doesn't stop it.
-        RouterService.getAltlocManager().remove(al, null);
+        ProviderHacks.getAltLocManager().remove(al, null);
         method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -391,7 +391,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a second one, so we can check to make sure
         // another removal removes the first one.
         AlternateLocation al2 = ProviderHacks.getAlternateLocationFactory().create("2.2.2.2:2", hashURN);
-        RouterService.getAltlocManager().add(al2, null);
+        ProviderHacks.getAltLocManager().add(al2, null);
         method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -407,7 +407,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // remove the first guy again, should only have loc2 left.
-        RouterService.getAltlocManager().remove(al, null);
+        ProviderHacks.getAltLocManager().remove(al, null);
         method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -424,7 +424,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testSentHeaderIsUsed() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -453,7 +453,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // make sure the FD has that loc now.
-        AlternateLocationCollection<DirectAltLoc> alc = RouterService.getAltlocManager()
+        AlternateLocationCollection<DirectAltLoc> alc = ProviderHacks.getAltLocManager()
                 .getDirect(FD.getSHA1Urn());
         assertEquals("unexpected number of locs", 2, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
@@ -520,7 +520,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testMiniNewHeaderIsUsed() throws Exception {
         // Add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -549,7 +549,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // nake sure the FD has that loc now.
-        AlternateLocationCollection<DirectAltLoc> alc = RouterService.getAltlocManager()
+        AlternateLocationCollection<DirectAltLoc> alc = ProviderHacks.getAltLocManager()
         .getDirect(FD.getSHA1Urn());
         assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
@@ -567,7 +567,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testMultipleAlternates() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -599,7 +599,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
         
         // make sure the FD has that loc now.
-        AlternateLocationCollection<DirectAltLoc> alc = RouterService.getAltlocManager()
+        AlternateLocationCollection<DirectAltLoc> alc = ProviderHacks.getAltLocManager()
                 .getDirect(FD.getSHA1Urn());
         assertEquals("wrong # locs", 4, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
@@ -657,8 +657,8 @@ public class AltLocUploadTest extends LimeTestCase {
 
         String bcdHttp = bcd.httpStringValue();
 
-        RouterService.getAltlocManager().add(bcd, null);
-        assertEquals(1, RouterService.getAltlocManager().getNumLocs(urn));
+        ProviderHacks.getAltLocManager().add(bcd, null);
+        assertEquals(1, ProviderHacks.getAltLocManager().getNumLocs(urn));
 
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("X-NFAlt", abcHttp);
@@ -671,7 +671,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // two of the proxies of bcd should be gone
-        assertEquals("wrong # locs", 1, RouterService.getAltlocManager()
+        assertEquals("wrong # locs", 1, ProviderHacks.getAltLocManager()
                 .getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies", 1, bcd.getPushAddress().getProxies()
                 .size());
@@ -690,7 +690,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // all proxies should be gone, and bcd should be removed from
         // the filedesc
-        assertEquals("wrong # locs", 0, RouterService.getAltlocManager()
+        assertEquals("wrong # locs", 0, ProviderHacks.getAltLocManager()
                 .getPushNoFWT(FD.getSHA1Urn()).getAltLocsSize());
         assertEquals("wrong # proxies", 0, bcd.getPushAddress().getProxies()
                 .size());
@@ -702,7 +702,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testInvalidAltsAreIgnored() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -730,7 +730,7 @@ public class AltLocUploadTest extends LimeTestCase {
             method.releaseConnection();
         }
         // FD should still only have 1
-        AlternateLocationCollection alc = RouterService.getAltlocManager()
+        AlternateLocationCollection alc = ProviderHacks.getAltLocManager()
                 .getDirect(FD.getSHA1Urn());
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
@@ -791,7 +791,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void test10AltsAreSent() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.setHttp11(false);
         try {
@@ -805,10 +805,10 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         for (int i = 0; i < 20; i++) {
-            RouterService.getAltlocManager().add(
+            ProviderHacks.getAltLocManager().add(
                     ProviderHacks.getAlternateLocationFactory().create("1.1.1." + i + ":6346", hashURN), null);
         }
-        assertEquals(21, RouterService.getAltlocManager().getDirect(
+        assertEquals(21, ProviderHacks.getAltLocManager().getDirect(
                 FD.getSHA1Urn()).getAltLocsSize());
 
         String pre = "1.1.1.";
@@ -848,7 +848,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // test that an altloc will expire if given out too often
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
 
         // send it out several times
         int i = 0;
@@ -873,7 +873,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertFalse(al.canBeSent(AlternateLocation.MESH_LEGACY));
 
         // now add the altloc again, it will be reset
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
     }
 
@@ -883,7 +883,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testExpiredAltsRemoved() throws Exception {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES
                 .setValue(new String[] { "*.*.*.*" });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         // set the expiration values to the bare minimum
         UploadSettings.LEGACY_BIAS.setValue(0f);
         UploadSettings.PING_BIAS.setValue(0f);
@@ -894,34 +894,34 @@ public class AltLocUploadTest extends LimeTestCase {
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         assertTrue(al.canBeSent(AlternateLocation.MESH_PING));
         assertTrue(al.canBeSent(AlternateLocation.MESH_RESPONSE));
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
 
         // drain the meshes in various orders
         drainLegacy();
         drainPing();
         drainResponse();
-        assertFalse(RouterService.getAltlocManager()
+        assertFalse(ProviderHacks.getAltLocManager()
                 .hasAltlocs(al.getSHA1Urn()));
 
         // and re-add the altloc
         al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
 
         // repeat
         drainResponse();
         drainLegacy();
         drainPing();
-        assertFalse(RouterService.getAltlocManager()
+        assertFalse(ProviderHacks.getAltLocManager()
                 .hasAltlocs(al.getSHA1Urn()));
 
         al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
 
         // repeat 2
         drainPing();
         drainResponse();
         drainLegacy();
-        assertFalse(RouterService.getAltlocManager()
+        assertFalse(ProviderHacks.getAltLocManager()
                 .hasAltlocs(al.getSHA1Urn()));
 
         UploadSettings.LEGACY_BIAS.revertToDefault();
@@ -989,7 +989,7 @@ public class AltLocUploadTest extends LimeTestCase {
         FilterSettings.FILTER_HASH_QUERIES.setValue(false); // easier with hash
         MyReplyHandler handler = new MyReplyHandler();
 
-        assertTrue(RouterService.getAltlocManager().hasAltlocs(FD.getSHA1Urn()));
+        assertTrue(ProviderHacks.getAltLocManager().hasAltlocs(FD.getSHA1Urn()));
         int i = 0;
         for (; i < 20; i++) {
             QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery(FD.getSHA1Urn());
@@ -1024,7 +1024,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testChunksGiveDifferentLocs() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -1038,10 +1038,10 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         for (int i = 0; i < 20; i++) {
-            RouterService.getAltlocManager().add(
+            ProviderHacks.getAltLocManager().add(
                     ProviderHacks.getAlternateLocationFactory().create("1.1.1." + i + ":6346", hashURN), null);
         }
-        assertEquals(21, RouterService.getAltlocManager().getNumLocs(
+        assertEquals(21, ProviderHacks.getAltLocManager().getNumLocs(
                 FD.getSHA1Urn()));
 
         String pre = "1.1.1.";
@@ -1096,7 +1096,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         // Now if some more are added to file desc, make sure they're reported.
-        RouterService.getAltlocManager().add(
+        ProviderHacks.getAltLocManager().add(
                 ProviderHacks.getAlternateLocationFactory().create("1.1.1.99:6346", hashURN), null);
         required = pre + 99 + post;
         method = new GetMethod(hashUrl);
@@ -1114,7 +1114,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testPrioritizingAlternates() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
         GetMethod method = new GetMethod(hashUrl);
         method.addRequestHeader("Connection", "close");
         try {
@@ -1127,37 +1127,37 @@ public class AltLocUploadTest extends LimeTestCase {
             method.releaseConnection();
         }
         // get rid of it.
-        RouterService.getAltlocManager().remove(al, null);
-        RouterService.getAltlocManager().remove(al, null);
+        ProviderHacks.getAltLocManager().remove(al, null);
+        ProviderHacks.getAltLocManager().remove(al, null);
 
         for (int i = 0; i < 50; i++) {
             al = ProviderHacks.getAlternateLocationFactory().create("1.1.1." + i + ":6346", hashURN);
 
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
 
             // 0-9, make as demoted.
             if (i < 10) {
-                RouterService.getAltlocManager().remove(al, null); // should
+                ProviderHacks.getAltLocManager().remove(al, null); // should
                 // demote.
             }
             // 10-19, increment once.
             else if (i < 20) {
-                RouterService.getAltlocManager().add(al, null); // should
+                ProviderHacks.getAltLocManager().add(al, null); // should
                 // increment.
             }
             // 20-29, increment & demote.
             else if (i < 30) {
-                RouterService.getAltlocManager().add(al, null); // increment
-                RouterService.getAltlocManager().remove(al, null); // demote
+                ProviderHacks.getAltLocManager().add(al, null); // increment
+                ProviderHacks.getAltLocManager().remove(al, null); // demote
             }
             // 30-39, increment twice.
             else if (i < 40) {
-                RouterService.getAltlocManager().add(al, null); // increment
-                RouterService.getAltlocManager().add(al, null); // increment
+                ProviderHacks.getAltLocManager().add(al, null); // increment
+                ProviderHacks.getAltLocManager().add(al, null); // increment
             }
             // 40-49, leave normal.
         }
-        AlternateLocationCollection alc = RouterService.getAltlocManager()
+        AlternateLocationCollection alc = ProviderHacks.getAltLocManager()
                 .getDirect(FD.getSHA1Urn());
         assertEquals(50, alc.getAltLocsSize());
 
@@ -1261,7 +1261,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // test that an altloc will not expire if given out less often
         AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.1.1.1:1", hashURN);
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
-        RouterService.getAltlocManager().add(al, null);
+        ProviderHacks.getAltLocManager().add(al, null);
 
         for (int i = 0; i < 10; i++) {
             GetMethod method = new GetMethod(hashUrl);

@@ -967,7 +967,7 @@ public class HostCatcherTest extends LimeTestCase {
             expired = true;
             fetched = true;
             Endpoint ep = new Endpoint(host, 6346);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
             return true;
         }
         

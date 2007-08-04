@@ -138,7 +138,7 @@ public class UploadQueueingTest extends BaseTestCase {
         //upManager = new HTTPUploadManager(RouterService.getHTTPUploadAcceptor(), slotManager);
         
         fm = new FileManagerStub(urns,descs);
-        RouterService.getContentManager().initialize();
+        ProviderHacks.getContentManager().initialize();
         PrivilegedAccessor.setValue(RouterService.class,"fileManager",fm);
         //PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
@@ -146,9 +146,9 @@ public class UploadQueueingTest extends BaseTestCase {
 
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         upManager = (HTTPUploadManager) ProviderHacks.getUploadManager();
-        upManager.start(RouterService.getHTTPUploadAcceptor(), fm, RouterService.getCallback(), RouterService.getMessageRouter());
+        upManager.start(ProviderHacks.getHTTPUploadAcceptor(), fm, RouterService.getCallback(), RouterService.getMessageRouter());
 
-        RouterService.getHTTPUploadAcceptor().start(RouterService.getConnectionDispatcher());
+        ProviderHacks.getHTTPUploadAcceptor().start(ProviderHacks.getConnectionDispatcher());
         
         assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
         assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
@@ -163,12 +163,12 @@ public class UploadQueueingTest extends BaseTestCase {
         }
         LimeTestUtils.waitForNIO();
         
-        RouterService.getHTTPUploadAcceptor().stop(RouterService.getConnectionDispatcher());
+        ProviderHacks.getHTTPUploadAcceptor().stop(ProviderHacks.getConnectionDispatcher());
         
         upManager.cleanup();
         LimeTestUtils.waitForNIO();
         
-        upManager.stop(RouterService.getHTTPUploadAcceptor());
+        upManager.stop(ProviderHacks.getHTTPUploadAcceptor());
         upManager = null;
         
         assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
@@ -201,7 +201,7 @@ public class UploadQueueingTest extends BaseTestCase {
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         
         StubContentAuthority auth = new StubContentAuthority();
-        RouterService.getContentManager().setContentAuthority(auth);
+        ProviderHacks.getContentManager().setContentAuthority(auth);
         assertEquals(0, auth.getSent().size());
         
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);

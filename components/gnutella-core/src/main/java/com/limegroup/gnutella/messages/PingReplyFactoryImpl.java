@@ -20,7 +20,6 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -51,7 +50,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 RouterService.getNumSharedFiles(),
                 RouterService.getSharedFileSize() / 1024,
                 RouterService.isSupernode(),
-                Statistics.instance().calculateDailyUptime(),
+                ProviderHacks.getStatistics().calculateDailyUptime(),
                 ProviderHacks.getUdpService().isGUESSCapable(),
                 ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                         .getValue()
@@ -71,7 +70,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     public PingReply create(byte[] guid, byte ttl, IpPort returnAddr,
             Collection<? extends IpPort> gnutHosts,
             Collection<? extends IpPort> dhtHosts) {
-        GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
+        GGEP ggep = newGGEP(ProviderHacks.getStatistics().calculateDailyUptime(),
                 RouterService.isSupernode(), ProviderHacks.getUdpService()
                         .isGUESSCapable());
 
@@ -451,7 +450,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
      * 
      */
     private byte[] getTLSData(Collection<? extends IpPort> hosts) {
-        HostCatcher catcher = RouterService.getHostCatcher();
+        HostCatcher catcher = ProviderHacks.getHostCatcher();
         if (catcher == null)
             return DataUtils.EMPTY_BYTE_ARRAY;
 

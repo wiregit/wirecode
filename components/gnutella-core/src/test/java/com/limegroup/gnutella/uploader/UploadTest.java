@@ -32,7 +32,6 @@ import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
@@ -140,7 +139,7 @@ public class UploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -1042,7 +1041,7 @@ public class UploadTest extends LimeTestCase {
     public void testCreationTimeHeaderReturned() throws Exception {
         // assert that creation time exists
         URN urn = URN.createSHA1Urn(hash);
-        Long creationTime = CreationTimeCache.instance().getCreationTime(urn);
+        Long creationTime = ProviderHacks.getCreationTimeCache().getCreationTime(urn);
         assertNotNull(creationTime);
         assertTrue(creationTime.longValue() > 0);
 
@@ -1067,7 +1066,7 @@ public class UploadTest extends LimeTestCase {
 
         URN urn = URN.createSHA1Urn(incompleteHash);
         Long creationTime = new Long("10776");
-        CreationTimeCache.instance().addTime(urn, creationTime.longValue());
+        ProviderHacks.getCreationTimeCache().addTime(urn, creationTime.longValue());
 
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         method.addRequestHeader("Range", "bytes 2-5");

@@ -72,11 +72,11 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testGetRequest() throws Exception {
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
 
         GetMethod method = new GetMethod("/");
         try {
@@ -98,7 +98,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
     public void testAddRemoveAcceptorListener() throws Exception {
         MyHTTPAcceptorListener listener = new MyHTTPAcceptorListener();
         httpAcceptor.addAcceptorListener(listener);
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         assertFalse(listener.opened);
         assertFalse(listener.closed);
         
@@ -148,7 +148,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             }
             
         };
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
 
         httpAcceptor.registerHandler("/", handler);
         GetMethod method = new GetMethod("/");

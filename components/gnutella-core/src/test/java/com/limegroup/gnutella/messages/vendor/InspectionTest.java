@@ -76,7 +76,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     public static void setUpQRPTables() throws Exception {}
     public static void setSettings() throws Exception{
-        SecureMessageVerifier vf = RouterService.getSecureMessageVerifier();
+        SecureMessageVerifier vf = ProviderHacks.getSecureMessageVerifier();
         PrivilegedAccessor.setValue(InspectionRequestHandler.class,"inspectionVerifier",vf);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000);

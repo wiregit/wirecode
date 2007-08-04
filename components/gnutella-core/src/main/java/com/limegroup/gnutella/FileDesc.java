@@ -416,7 +416,7 @@ public class FileDesc implements StringLookup {
      * Determines if this FileDesc has been validated.
      */
     public boolean isVerified() {
-        return RouterService.getContentManager().isVerified(SHA1_URN);
+        return ProviderHacks.getContentManager().isVerified(SHA1_URN);
     }
     
     /**

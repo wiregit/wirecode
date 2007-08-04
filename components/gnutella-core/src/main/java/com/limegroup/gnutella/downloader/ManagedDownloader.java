@@ -661,7 +661,7 @@ public class ManagedDownloader extends AbstractDownloader
         }
         
 		if (downloadSHA1 != null) 
-		    RouterService.getAltlocManager().addListener(downloadSHA1,this);
+		    ProviderHacks.getAltLocManager().addListener(downloadSHA1,this);
         
 		
 		// make sure all rfds have the same sha1
@@ -1131,9 +1131,9 @@ public class ManagedDownloader extends AbstractDownloader
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             //create validAlts
-            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                    RouterService.getAltlocManager().getPushNoFWT(hash),
-                    RouterService.getAltlocManager().getPushFWT(hash),
+            addLocationsToDownload(ProviderHacks.getAltLocManager().getDirect(hash),
+                    ProviderHacks.getAltLocManager().getPushNoFWT(hash),
+                    ProviderHacks.getAltLocManager().getPushFWT(hash),
                     size);
         }
     }
@@ -1274,7 +1274,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !RouterService.getIpFilter().allow(other.getHost()) )
+        if ( !ProviderHacks.getIpFilter().allow(other.getHost()) )
             return false;            
 
         if (networkManager.acceptedIncomingConnection() ||
@@ -1536,7 +1536,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+            ProviderHacks.getAltLocManager().addListener(downloadSHA1,this);
         }
 
         //add to allFiles for resume purposes if caching...
@@ -1761,9 +1761,9 @@ public class ManagedDownloader extends AbstractDownloader
         
         // and to the global collection
         if (good)
-            RouterService.getAltlocManager().add(loc, this);
+            ProviderHacks.getAltLocManager().add(loc, this);
         else
-            RouterService.getAltlocManager().remove(loc, this);
+            ProviderHacks.getAltLocManager().remove(loc, this);
 
         // add to the downloaders
         for(DownloadWorker worker : getActiveWorkers()) {
@@ -1948,7 +1948,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void finish() {
         if (downloadSHA1 != null)
-            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
+            ProviderHacks.getAltLocManager().removeListener(downloadSHA1, this);
         requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
@@ -2071,7 +2071,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                ProviderHacks.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;

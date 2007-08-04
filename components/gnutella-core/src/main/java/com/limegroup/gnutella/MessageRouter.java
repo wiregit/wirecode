@@ -1198,7 +1198,7 @@ public abstract class MessageRouter {
     	GUID qGUID = new GUID(reply.getGUID());
     	
         int numResults = 
-    		RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+    		ProviderHacks.getSearchResultHandler().getNumResultsForQuery(qGUID);
     	
         if (numResults < 0) // this may be a proxy query
     		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
@@ -1933,7 +1933,7 @@ public abstract class MessageRouter {
     protected void handlePingReply(PingReply reply,
                                    ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
-        boolean newAddress = RouterService.getHostCatcher().add(reply);
+        boolean newAddress = ProviderHacks.getHostCatcher().add(reply);
 
         if(newAddress && !reply.isUDPHostCache()) {
             PongCacher.instance().addPong(reply);
@@ -2138,7 +2138,7 @@ public abstract class MessageRouter {
     
     /** Handles a ContentResponse msg -- passing it to the ContentManager. */
     private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
-        RouterService.getContentManager().handleContentResponse(msg);
+        ProviderHacks.getContentManager().handleContentResponse(msg);
     }
 
     /**

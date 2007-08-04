@@ -1,11 +1,16 @@
 package com.limegroup.gnutella;
 
+import org.limewire.security.SecureMessageVerifier;
+
 import com.google.inject.Guice;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -17,15 +22,20 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.filters.HostileFilter;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
@@ -60,7 +70,6 @@ public class ProviderHacks {
         initialized = true;
     }
     
-    public static LimeWireCore getCore() { i(); return core; }
     public static Acceptor getAcceptor() { i(); return core.getAcceptor(); }    
     public static UDPService getUdpService() { i(); return core.getUdpService(); }    
     public static NetworkManager getNetworkManager() { i(); return core.getNetworkManager(); }    
@@ -101,6 +110,24 @@ public class ProviderHacks {
     public static MessageRouter getMessageRouter() {i();  return core.getMessageRouter(); } // DPINJ: Figure out what's going on with RS.getMessageRouter
     public static DownloadManager getDownloadManager() {i();  return core.getDownloadManager(); }
     public static AltLocFinder getAltLocFinder() { i(); return core.getAltLocFinder(); }
-    
+    public static ConnectionDispatcher getConnectionDispatcher() { i(); return core.getConnectionDispatcher(); }
+    public static HTTPAcceptor getHTTPAcceptor() { i(); return core.getHTTPAcceptor(); }
+    public static HostCatcher getHostCatcher() { i(); return core.getHostCatcher(); }
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { i(); return core.getHttpUploadAcceptor(); }
+    public static PushManager getPushManager() { i(); return core.getPushManager(); }
+    public static ResponseVerifier getResponseVerifier() { i(); return core.getResponseVerifier(); }
+    public static SearchResultHandler getSearchResultHandler() { i(); return core.getSearchResultHandler(); }
+    public static AltLocManager getAltLocManager() { i(); return core.getAltLocManager(); }
+    public static ContentManager getContentManager() { i(); return core.getContentManager(); }
+    public static IPFilter getIpFilter() { i(); return core.getIpFilter(); }
+    public static HostileFilter getHostileFilter() { i(); return core.getHostileFilter(); }
+    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { i(); return core.getNetworkUpdateSanityChecker(); }
+    public static BandwidthManager getBandwidthManager() { i(); return core.getBandwidthManager(); }
+    public static HttpExecutor getHttpExecutor() { i(); return core.getHttpExecutor(); }
+    public static QueryStats getQueryStats() { i(); return core.getQueryStats(); }
+    public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
+    public static Statistics getStatistics() { i(); return core.getStatistics(); }
+    public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
+    public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
     
 }

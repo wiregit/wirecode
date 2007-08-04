@@ -112,7 +112,7 @@ public class PushUploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -161,7 +161,7 @@ public class PushUploadTest extends LimeTestCase {
         PrivilegedAccessor
                 .setValue(RouterService.class, "uploadManager", upMan);
 
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, RouterService.getCallback(), RouterService.getMessageRouter());
     }
 
@@ -170,7 +170,7 @@ public class PushUploadTest extends LimeTestCase {
         closeConnection();
 
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testDownloadHTTP10() throws Exception {

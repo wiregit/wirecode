@@ -308,7 +308,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         MulticastService.instance().start();
         ProviderHacks.getUdpService().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
-        RouterService.getConnectionDispatcher().
+        ProviderHacks.getConnectionDispatcher().
         addConnectionAcceptor(this,
         		false,
         		false,
@@ -626,7 +626,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(byte[] addr) {        
-        return !RouterService.getIpFilter().allow(addr);
+        return !ProviderHacks.getIpFilter().allow(addr);
     }
     
     /**
@@ -703,7 +703,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         
         AsyncConnectionDispatcher(Socket client, String allowedWord) {
             // + 1 for whitespace
-            super(RouterService.getConnectionDispatcher().getMaximumWordSize() + 1);
+            super(ProviderHacks.getConnectionDispatcher().getMaximumWordSize() + 1);
             
             this.client = client;
             this.allowedWord = allowedWord;
@@ -729,7 +729,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // See if we have a full word.
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
-                    ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
+                    ConnectionDispatcher dispatcher = ProviderHacks.getConnectionDispatcher();
                     String word = new String(buffer.array(), 0, i);
                     if(dispatcher.isValidProtocolWord(word)) {
                         if(allowedWord != null && !allowedWord.equals(word)) {
@@ -742,7 +742,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                             LOG.debug("Dispatching word: " + word);
                         buffer.limit(buffer.position()).position(i+1);
                         source.interestRead(false);
-                        RouterService.getConnectionDispatcher().dispatch(word, client, true);
+                        ProviderHacks.getConnectionDispatcher().dispatch(word, client, true);
                     } else {
                         startTLS();
                     }
@@ -826,7 +826,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     throw new IOException(e.getMessage());
                 }
                 
-                ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
+                ConnectionDispatcher dispatcher = ProviderHacks.getConnectionDispatcher();
                 String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
                 if(allowedWord != null && !allowedWord.equals(word))
                     throw new IOException("wrong word!");

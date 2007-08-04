@@ -8,19 +8,9 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
  * Statistics.instance() to guarantee initialization.  
  */
 public class Statistics {
-    private static Statistics _instance=new Statistics();
-
     /** "PROTECTED" FOR TESTING PURPOSES ONLY! */
     protected Statistics() {}
     
-    /** Returns the single Statistics instance. */
-    public static Statistics instance() {
-        return _instance;
-    }
-
-    
-    /////////////////////////////////////////////////////////////////////
-
     /** The number of seconds in a day. */
     private static final int SECONDS_PER_DAY=24*60*60;
     /** Controls how much past is remembered in calculateFractionalUptime.

@@ -110,7 +110,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         if(handler != null && handler.isPersonalSpam(reply)) return;
         
         if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
-            RouterService.getSecureMessageVerifier().verify(reply, this);
+            ProviderHacks.getSecureMessageVerifier().verify(reply, this);
         } else {
             routeQueryReplyInternal(reply);
         }
@@ -124,7 +124,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     
     /** Passes the QueryReply off to where it should go. */
     private void routeQueryReplyInternal(QueryReply reply) {
-        SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
+        SearchResultHandler resultHandler = ProviderHacks.getSearchResultHandler();
         resultHandler.handleQueryReply(reply);
 
         DownloadManager dm = ProviderHacks.getDownloadManager();
@@ -238,7 +238,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        RouterService.getPushManager().
+        ProviderHacks.getPushManager().
             acceptPushUpload(h, port, req_guid_hexstring,
                              pushRequest.isMulticast(), // force accept
                              pushRequest.isFirewallTransferPush(),

@@ -389,7 +389,7 @@ public class CreationTimeCacheTest
         deleteCacheFile();
         assertTrue("cache should not be present", !cacheExists() );
         
-        CreationTimeCache cache = CreationTimeCache.instance();
+        CreationTimeCache cache = ProviderHacks.getCreationTimeCache();
         FileDesc[] descs = createFileDescs();
         assertNotNull("should have some file descs", descs);
         assertGreaterThan("should have some file descs", 0, descs.length);
@@ -412,7 +412,7 @@ public class CreationTimeCacheTest
 		for(int i=0; i<files.length; i++) {
 			Set urns = calculateAndCacheURN(files[i]);            
 			fileDescs[i] = new FileDesc(files[i], urns, i);
-            CreationTimeCache.instance().addTime(fileDescs[i].getSHA1Urn(),
+            ProviderHacks.getCreationTimeCache().addTime(fileDescs[i].getSHA1Urn(),
                                                  files[i].lastModified());
 		}				
 		return fileDescs;

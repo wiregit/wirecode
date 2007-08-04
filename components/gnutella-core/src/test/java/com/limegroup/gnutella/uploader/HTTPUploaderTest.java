@@ -20,7 +20,6 @@ import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -98,7 +97,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         upMan = new HTTPUploadManager(new UploadSlotManager());
 
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
 
         client = new HttpClient();
@@ -110,7 +109,7 @@ public class HTTPUploaderTest extends LimeTestCase {
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testChatAndBrowseEnabled() throws Exception {

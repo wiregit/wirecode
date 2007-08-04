@@ -21,6 +21,7 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
@@ -268,7 +269,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             // this information again.
             // it's possible t do that because we don't use the same
             // uploader for different files
-            CreationTimeCache cache = CreationTimeCache.instance();
+            CreationTimeCache cache = ProviderHacks.getCreationTimeCache();
             if (cache.getCreationTime(urn) != null) {
                 response.addHeader(HTTPHeaderName.CREATION_TIME
                         .create(cache.getCreationTime(urn).toString()));

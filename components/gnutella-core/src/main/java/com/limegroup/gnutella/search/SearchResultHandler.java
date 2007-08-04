@@ -19,6 +19,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
@@ -41,6 +43,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * results from <tt>QueryReply</tt> instances and performs the logic 
  * necessary to pass those results up to the UI.
  */
+@Singleton
 public final class SearchResultHandler implements Inspectable {
     
     private static final Log LOG =
@@ -78,6 +81,7 @@ public final class SearchResultHandler implements Inspectable {
     
     public final NetworkManager networkManager;
     
+    @Inject
     public SearchResultHandler(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }

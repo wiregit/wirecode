@@ -2,9 +2,12 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.Executor;
 
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
@@ -32,10 +35,13 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
+import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -76,6 +82,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
+        bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -98,6 +105,28 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MessageRouter.class).to(StandardMessageRouter.class);
         //bind(DownloadManager.class);
         //bind(AltLocFinder.class);
+        //bind(ConnectionDispatcher.class);
+        //bind(HTTPAcceptor.class); //the one in browser
+        //bind(HostCatcher.class);
+        //bind(HTTPAcceptor.class); // the one in gnutella
+        //bind(PushManager.class);
+        //bind(ResponseVerifier.class);
+        //bind(SearchResultHandler.class);
+        //bind(AltLocManager.class);
+        //bind(ContentManager.class);
+        bind(IPFilter.class).toProvider(new IPFilterProvider());
+        //bind(HostileFilter.class);
+        //bind(NetworkUpdateSanityChecker.class);
+        //bind(BandwidthManager.class);
+        //bind(QueryStats.class);
+        //bind(NodeAssigner.class);
+        bind(Statistics.class).asEagerSingleton(); // DPINJ: need to move time-capture to initialization
+        bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
+        //bind(CreationTimeCache.class);
+        
+        // For NodeAssigner...
+        bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);
+        bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class);
                 
         
         // DPINJ: Could delay instantiation...
@@ -105,4 +134,33 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
  
     }    
+    
+    // DPINJ: Do i need the lazy-singleton-ness here?
+    @Singleton
+    private static class IPFilterProvider extends AbstractLazySingletonProvider<IPFilter> {
+        @Override
+        protected IPFilter createObject() {
+            return new IPFilter(false);
+        }
+    }
+    
+    @Singleton
+    private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
+        @Override
+        protected SecureMessageVerifier createObject() {
+            return new SecureMessageVerifier("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
+                    "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5" +
+                    "RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O" +
+                    "5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV" +
+                    "37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2B" +
+                    "BOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOE" +
+                    "EBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7Y" +
+                    "L7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76" +
+                    "Z5ESUA4BQUAAFAMBACDW4TNFXK772ZQN752VPKQSFXJWC6PPSIVTHKDNLRUIQ7UF" +
+                    "4J2NF6J2HC5LVC4FO4HYLWEWSB3DN767RXILP37KI5EDHMFAU6HIYVQTPM72WC7FW" +
+                    "SAES5K2KONXCW65VSREAPY7BF24MX72EEVCZHQOCWHW44N4RG5NPH2J4EELDPXMNR" +
+                    "WNYU22LLSAMBUBKW3KU4QCQXG7NNY", null);    
+        }
+    };
+        
 }

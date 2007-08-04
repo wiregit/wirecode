@@ -220,7 +220,7 @@ public class UDPPushTest extends LimeTestCase {
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
 		
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		other.close();
 		
@@ -269,7 +269,7 @@ public class UDPPushTest extends LimeTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -277,7 +277,7 @@ public class UDPPushTest extends LimeTestCase {
 		other = serversocket.accept();
 		socket.setSoTimeout(1000);
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		Thread.sleep(5200);
@@ -317,7 +317,7 @@ public class UDPPushTest extends LimeTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -361,14 +361,14 @@ public class UDPPushTest extends LimeTestCase {
         socket = new NIOSocket(InetAddress.getLocalHost(),10000);
         Socket other = serversocket.accept();        
         sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
         socket.close();        
         socket = new NIOSocket(InetAddress.getLocalHost(),10000);
         other = serversocket.accept();
         socket.setSoTimeout(1000);
         sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
         socket.close();
         Thread.sleep(5200);        

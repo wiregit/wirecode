@@ -11,7 +11,7 @@ import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
@@ -73,7 +73,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             return;
         }
         
-        uploader.getSession().getIOSession().setThrottle(RouterService
+        uploader.getSession().getIOSession().setThrottle(ProviderHacks
                 .getBandwidthManager().getWriteThrottle(uploader.getSession().getIOSession().getSocket()));
 
         reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());

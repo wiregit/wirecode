@@ -5,7 +5,6 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -32,7 +31,7 @@ public class IPFilterTest extends LimeTestCase{
             new String[] {"18.239.0.*", "13.0.0.0"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"18.239.0.144"});
-        IPFilter filter = RouterService.getIpFilter();
+        IPFilter filter = ProviderHacks.getIpFilter();
         filter.refreshHosts();
         assertTrue(filter.allow("18.240.0.0"));
         assertTrue(! filter.allow("18.239.0.142"));

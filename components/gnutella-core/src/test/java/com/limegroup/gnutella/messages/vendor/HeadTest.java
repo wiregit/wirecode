@@ -215,7 +215,7 @@ public class HeadTest extends LimeTestCase {
         
         // Get a fresh environment for each test
         ((Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP")).clear();
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
         createCollections();
         
         PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", HeadPongFactoryImpl.DEFAULT_PACKET_SIZE);
@@ -719,17 +719,17 @@ public class HeadTest extends LimeTestCase {
 	private void  createCollections() throws Exception{
 		for(int i=0;i<10;i++ ) {
             AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_haveFull);
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
 		}
-        AlternateLocationCollection col = RouterService.getAltlocManager().getDirect(_haveFull);
+        AlternateLocationCollection col = ProviderHacks.getAltLocManager().getDirect(_haveFull);
         assertEquals("failed to set test up", 10, col.getAltLocsSize());
         
 
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_havePartial);
-            RouterService.getAltlocManager().add(al, null);
+            ProviderHacks.getAltLocManager().add(al, null);
 		}
-        col = RouterService.getAltlocManager().getDirect(_havePartial);
+        col = ProviderHacks.getAltLocManager().getDirect(_havePartial);
         assertEquals("failed to set test up", 10, col.getAltLocsSize());
         
         
@@ -738,16 +738,16 @@ public class HeadTest extends LimeTestCase {
         PushAltLoc firewalled = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(guid.toHexString()+";1.2.3.4:5",_havePartial);
         firewalled.updateProxies(true);
 		pushCollectionPE = firewalled.getPushAddress();
-        RouterService.getAltlocManager().add(firewalled, null);
-        col = RouterService.getAltlocManager().getPushNoFWT(_havePartial);
+        ProviderHacks.getAltLocManager().add(firewalled, null);
+        col = ProviderHacks.getAltLocManager().getPushNoFWT(_havePartial);
         assertEquals(1, col.getAltLocsSize());
         
         GUID g = new GUID();
         PushAltLoc tls = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(g.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", _tlsURN);
         tls.updateProxies(true);
         tlsCollectionPE = tls.getPushAddress();
-        RouterService.getAltlocManager().add(tls, null);
-        col = RouterService.getAltlocManager().getPushNoFWT(_tlsURN);
+        ProviderHacks.getAltLocManager().add(tls, null);
+        col = ProviderHacks.getAltLocManager().getPushNoFWT(_tlsURN);
         assertEquals(1, col.getAltLocsSize());
 	}
 	

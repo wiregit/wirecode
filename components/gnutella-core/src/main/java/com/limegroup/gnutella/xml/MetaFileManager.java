@@ -128,7 +128,7 @@ public class MetaFileManager extends FileManager {
             return;
             
         // store the creation time for later re-input
-        CreationTimeCache ctCache = CreationTimeCache.instance();
+        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         final Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
         List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();        
@@ -157,7 +157,7 @@ public class MetaFileManager extends FileManager {
         
                 if(evt.isAddEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
-                    CreationTimeCache ctCache = CreationTimeCache.instance();
+                    CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
                     //re-populate the ctCache
                     synchronized (ctCache) {
                         ctCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified

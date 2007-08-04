@@ -2,7 +2,7 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Arrays;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * This is a simple token holding a 4-byte-ip / port pair
@@ -59,7 +59,7 @@ public class AddressToken extends AbstractToken {
         }
         // this initial value is an
         _good = INITIAL_GOOD;
-        int logDistance = RouterService.getIpFilter().logMinDistanceTo(_address);
+        int logDistance = ProviderHacks.getIpFilter().logMinDistanceTo(_address);
         
         // Constants 1600 and 3.3 chosen such that:
         // Same /24 subnet as a banned IP results in a rating of 0.07

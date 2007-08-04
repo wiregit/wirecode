@@ -36,7 +36,6 @@ import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 
 /**
@@ -228,7 +227,7 @@ PieceSendListener, PieceReadListener {
 		_writer.init(invoker, CONNECTION_TIMEOUT - 5000);
 		
 		ThrottleReader readThrottle = new ThrottleReader(
-				RouterService.getBandwidthManager().getReadThrottle());
+				ProviderHacks.getBandwidthManager().getReadThrottle());
 		_reader.setReadChannel(readThrottle);
 		readThrottle.interestRead(true);
 		_socket.setReadObserver(_reader);
@@ -548,7 +547,7 @@ PieceSendListener, PieceReadListener {
 	 * @see com.limegroup.bittorrent.PieceReadListener#pieceRead(com.limegroup.bittorrent.BTInterval, byte[])
 	 */
 	public void pieceRead(final BTInterval in, final byte [] data) {
-		RouterService.getBandwidthManager().applyUploadRate();
+		ProviderHacks.getBandwidthManager().applyUploadRate();
 		Runnable pieceSender = new Runnable() {
 			public void run() {
 				if (LOG.isDebugEnabled())

@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.io.IP;
 
+import com.google.inject.Singleton;
+
 /**
  * A sanity checker for many different in-network verification
  * requests.
@@ -21,6 +23,7 @@ import org.limewire.io.IP;
  * of hosts from different areas, message the user to hit
  * the website as the installation may possible be corrupted.
  */
+@Singleton
 public class NetworkUpdateSanityChecker {
     
     public static enum RequestType {

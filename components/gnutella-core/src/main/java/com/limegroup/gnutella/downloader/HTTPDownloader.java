@@ -53,7 +53,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -390,7 +389,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getReadThrottle()));
+        _stateMachine.setReadChannel(new ThrottleReader(ProviderHacks.getBandwidthManager().getReadThrottle()));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -1268,7 +1267,7 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new ProblemReadingHeaderException(e);
         }
         if (rfd.getSHA1Urn() != null && milliSeconds > 0) {
-            CreationTimeCache ctCache = CreationTimeCache.instance();
+            CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
             synchronized (ctCache) {
                 Long cTime = ctCache.getCreationTime(rfd.getSHA1Urn());
                 // prefer older times....

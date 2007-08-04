@@ -41,6 +41,8 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -76,6 +78,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
  * use those anymore.
  */
+@Singleton
 public class HostCatcher {
     
     /**
@@ -311,6 +314,7 @@ public class HostCatcher {
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
+    @Inject
 	public HostCatcher() {
         pinger = new UniqueHostPinger();
         udpHostCache = new UDPHostCache(pinger);
@@ -916,7 +920,7 @@ public class HostCatcher {
             return false;
 
         //Skip if this host is banned.
-        if (!RouterService.getIpFilter().allow(addr))
+        if (!ProviderHacks.getIpFilter().allow(addr))
             return false;  
         
         synchronized(this) {

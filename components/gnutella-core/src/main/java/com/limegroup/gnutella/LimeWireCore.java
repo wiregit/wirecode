@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 
 
+import org.limewire.security.SecureMessageVerifier;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -9,7 +11,10 @@ import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -21,15 +26,20 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.filters.HostileFilter;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
@@ -77,6 +87,25 @@ public class LimeWireCore {
     @Inject private Provider<MessageRouter> messageRouter;
     @Inject private Provider<DownloadManager> downloadManager;
     @Inject private Provider<AltLocFinder> altLocFinder;
+    @Inject private Provider<ConnectionDispatcher> connectionDispatcher;
+    @Inject private Provider<HTTPAcceptor> httpAcceptor;
+    @Inject private Provider<HostCatcher> hostCatcher;
+    @Inject private Provider<com.limegroup.gnutella.HTTPAcceptor> httpUploadAcceptor;
+    @Inject private Provider<PushManager> pushManager;
+    @Inject private Provider<ResponseVerifier> responseVerifier;
+    @Inject private Provider<SearchResultHandler> searchResultHandler;
+    @Inject private Provider<AltLocManager> altLocManager;
+    @Inject private Provider<ContentManager> contentManager;
+    @Inject private Provider<IPFilter> ipFilter;
+    @Inject private Provider<HostileFilter> hostileFilter;
+    @Inject private Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+    @Inject private Provider<BandwidthManager> bandwidthManager;
+    @Inject private Provider<HttpExecutor> httpExecutor;
+    @Inject private Provider<QueryStats> queryStats;
+    @Inject private Provider<NodeAssigner> nodeAssigner;
+    @Inject private Provider<Statistics> statistics;
+    @Inject private Provider<SecureMessageVerifier> secureMessageVerifier;
+    @Inject private Provider<CreationTimeCache> creationTimeCache;
 
     public Injector getInjector() {
         return injector;
@@ -240,6 +269,82 @@ public class LimeWireCore {
 
     public AltLocFinder getAltLocFinder() {
         return altLocFinder.get();
+    }
+
+    public ConnectionDispatcher getConnectionDispatcher() {
+        return connectionDispatcher.get();
+    }
+
+    public HTTPAcceptor getHTTPAcceptor() {
+        return httpAcceptor.get();
+    }
+
+    public HostCatcher getHostCatcher() {
+        return hostCatcher.get();
+    }
+
+    public com.limegroup.gnutella.HTTPAcceptor getHttpUploadAcceptor() {
+        return httpUploadAcceptor.get();
+    }
+
+    public PushManager getPushManager() {
+        return pushManager.get();
+    }
+
+    public ResponseVerifier getResponseVerifier() {
+        return responseVerifier.get();
+    }
+
+    public SearchResultHandler getSearchResultHandler() {
+        return searchResultHandler.get();
+    }
+
+    public AltLocManager getAltLocManager() {
+        return altLocManager.get();
+    }
+
+    public ContentManager getContentManager() {
+        return contentManager.get();
+    }
+
+    public IPFilter getIpFilter() {
+        return ipFilter.get();
+    }
+
+    public HostileFilter getHostileFilter() {
+        return hostileFilter.get();
+    }
+
+    public NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() {
+        return networkUpdateSanityChecker.get();
+    }
+
+    public BandwidthManager getBandwidthManager() {
+        return bandwidthManager.get();
+    }
+
+    public HttpExecutor getHttpExecutor() {
+        return httpExecutor.get();
+    }
+
+    public QueryStats getQueryStats() {
+        return queryStats.get();
+    }
+
+    public NodeAssigner getNodeAssigner() {
+        return nodeAssigner.get();
+    }
+
+    public Statistics getStatistics() {
+        return statistics.get();
+    }
+
+    public SecureMessageVerifier getSecureMessageVerifier() {
+        return secureMessageVerifier.get();
+    }
+
+    public CreationTimeCache getCreationTimeCache() {
+        return creationTimeCache.get();
     }
 
 }
