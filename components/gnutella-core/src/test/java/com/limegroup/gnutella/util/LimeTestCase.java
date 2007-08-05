@@ -26,7 +26,6 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -351,7 +350,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         };
         
         synchronized(myUrns) {
-            UrnCache.instance().calculateAndCacheUrns(f, blocker);
+            ProviderHacks.getUrnCache().calculateAndCacheUrns(f, blocker);
             if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
                 myUrns.wait(3000);
         }

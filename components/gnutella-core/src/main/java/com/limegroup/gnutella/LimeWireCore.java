@@ -108,6 +108,7 @@ public class LimeWireCore {
     @Inject private Provider<SecureMessageVerifier> secureMessageVerifier;
     @Inject private Provider<CreationTimeCache> creationTimeCache;
     @Inject private Provider<HttpRequestHandlerFactory> httpRequestHandlerFactory;
+    @Inject private Provider<UrnCache> urnCache;
 
     public Injector getInjector() {
         return injector;
@@ -351,6 +352,10 @@ public class LimeWireCore {
 
     public HttpRequestHandlerFactory getHttpRequestHandlerFactory() {
         return httpRequestHandlerFactory.get();
+    }
+
+    public UrnCache getUrnCache() {
+        return urnCache.get();
     }
 
 }

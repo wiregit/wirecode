@@ -52,7 +52,6 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -2215,7 +2214,7 @@ public class ManagedDownloader extends AbstractDownloader
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
-            UrnCache.instance().addUrns(file, urns);
+            ProviderHacks.getUrnCache().addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
             SavedFileManager.instance().addSavedFile(file, urns);

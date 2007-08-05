@@ -129,6 +129,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Statistics.class).asEagerSingleton(); // DPINJ: need to move time-capture to initialization
         bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
         //bind(CreationTimeCache.class);
+        //bind(UrnCache.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);

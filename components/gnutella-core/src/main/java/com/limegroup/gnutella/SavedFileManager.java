@@ -127,9 +127,9 @@ public final class SavedFileManager implements Runnable {
                 LOG.trace("Loading: " + file);
                 
             tempNames.add(file.getName());
-            Set<URN> urns = UrnCache.instance().getUrns(file);
+            Set<URN> urns = ProviderHacks.getUrnCache().getUrns(file);
             if(urns.isEmpty()) // if not calculated, calculate at some point.
-                UrnCache.instance().calculateAndCacheUrns(file, callback);
+                ProviderHacks.getUrnCache().calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.
                 ((Collection<? super URN>)tempUrns).addAll(urns);
         }

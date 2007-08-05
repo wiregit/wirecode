@@ -129,9 +129,13 @@ public class ProviderHacks {
     public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
     public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
     public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
-    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
+    public static UrnCache getUrnCache() { i(); return core.getUrnCache(); }
     
     // Cleaned up in all but RS & tests
     public static Statistics getStatistics() { i(); return core.getStatistics(); }
+    
+    // Cleaned up in all but tests
+    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
+
     
 }

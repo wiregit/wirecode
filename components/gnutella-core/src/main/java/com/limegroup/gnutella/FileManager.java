@@ -479,7 +479,7 @@ public abstract class FileManager {
     protected void save(){
         _data.save();
             
-        UrnCache.instance().persistCache();
+        ProviderHacks.getUrnCache().persistCache();
         ProviderHacks.getCreationTimeCache().persistCache();
     }
 	
@@ -743,7 +743,7 @@ public abstract class FileManager {
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
-        UrnCache.instance().clearPendingHashes(this);
+        ProviderHacks.getUrnCache().clearPendingHashes(this);
     }
     
     /**
@@ -1050,7 +1050,7 @@ public abstract class FileManager {
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
-                            UrnCache.instance().clearPendingHashesFor(f, this);
+                            ProviderHacks.getUrnCache().clearPendingHashesFor(f, this);
                     }
                 }
             }
@@ -1266,7 +1266,7 @@ public abstract class FileManager {
             _pendingFinished = -1;
         }
         
-		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+		ProviderHacks.getUrnCache().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
     /**
@@ -1444,7 +1444,7 @@ public abstract class FileManager {
 		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
-		    UrnCache.instance().clearPendingHashesFor(file, this);
+		    ProviderHacks.getUrnCache().clearPendingHashesFor(file, this);
         } else {
 			file = fd.getFile();
 			// if file was not specially shared, add it to files_not_to_share
@@ -1721,7 +1721,7 @@ public abstract class FileManager {
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
         // Prepopulate the cache with new URNs.
-        UrnCache.instance().addUrns(newName, removed.getUrns());
+        ProviderHacks.getUrnCache().addUrns(newName, removed.getUrns());
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
