@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -108,7 +109,6 @@ public class CreationTimeCacheTest
         callback=new MyActivityCallback();
         fm = new MyFileManager();
         rs= new RouterService(callback, ProviderHacks.getMessageRouter());
-        PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
@@ -128,10 +128,13 @@ public class CreationTimeCacheTest
     ///////////////////////// Actual Tests ////////////////////////////
 
     private CreationTimeCache getCTC() throws Exception {
-        final Class clazz = 
-            Class.forName("com.limegroup.gnutella.CreationTimeCache");
-        return (CreationTimeCache) PrivilegedAccessor.invokeConstructor(clazz,
-                                                                        null);
+        return new CreationTimeCache(fm);
+    }
+    
+    private Map getUrnToTime(CreationTimeCache cache) throws Exception {
+        Future<?> future = (Future)PrivilegedAccessor.getValue(cache, "deserializer");
+        Object o = future.get();
+        return (Map)PrivilegedAccessor.invokeMethod(o, "getUrnToTime");
     }
 
     /** Tests that the URN_MAP is derived correctly from the URN_TO_TIME_MAP
@@ -155,9 +158,8 @@ public class CreationTimeCacheTest
         
         // now have the CreationTimeCache read it in
         CreationTimeCache ctCache = getCTC();
-        Map TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, 
-                                                        "URN_TO_TIME_MAP");
-        assertEquals(toSerialize, TIME_MAP);
+        Map map = getUrnToTime(ctCache);
+        assertEquals(toSerialize, map);
     }
 
 
@@ -259,7 +261,7 @@ public class CreationTimeCacheTest
         ctCache = getCTC();
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        TIME_MAP = getUrnToTime(ctCache);
         assertEquals(0, TIME_MAP.size());
 
         ctCache.addTime(hash1, middle.longValue());
@@ -278,7 +280,7 @@ public class CreationTimeCacheTest
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        TIME_MAP = getUrnToTime(ctCache);
         assertEquals(1, TIME_MAP.size());
 
         ctCache.addTime(hash2, old.longValue());
@@ -307,7 +309,7 @@ public class CreationTimeCacheTest
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        TIME_MAP = getUrnToTime(ctCache);
         assertEquals(3, TIME_MAP.size());
         ctCache.removeTime(hash3);
         ctCache.persistCache();
@@ -321,7 +323,7 @@ public class CreationTimeCacheTest
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        TIME_MAP = getUrnToTime(ctCache);
         assertEquals(1, TIME_MAP.size());
         ctCache = null;
         fm.clearExcludeURN();
@@ -343,7 +345,7 @@ public class CreationTimeCacheTest
         ctCache = getCTC();
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+        TIME_MAP = getUrnToTime(ctCache);
         assertEquals(0, TIME_MAP.size());
         // ---------------------------
 
@@ -441,6 +443,10 @@ public class CreationTimeCacheTest
     public static class MyFileManager extends MetaFileManager {
         private FileDesc fd = null;
         public URN toExclude = null;
+        
+        public MyFileManager() {
+            super(ProviderHacks.getFileManagerController());
+        }
 
         public void setExcludeURN(URN urn) {
             toExclude = urn;

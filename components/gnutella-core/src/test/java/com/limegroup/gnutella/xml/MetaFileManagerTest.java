@@ -9,14 +9,14 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.SimpleProvider;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.FileManagerControllerImpl;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -54,12 +54,15 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
-        fman = new MetaFileManager();
-        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
+        fman = new MetaFileManager(new FileManagerControllerImpl(SimpleProvider
+                .of(ProviderHacks.getUrnCache()), SimpleProvider
+                .of(ProviderHacks.getDownloadManager()), SimpleProvider
+                .of(ProviderHacks.getCreationTimeCache()), SimpleProvider
+                .of(new ContentManager()), SimpleProvider.of(ProviderHacks
+                .getAltLocManager())));
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        PrivilegedAccessor.setValue(RouterService.class,  "fileManager", fman);
-	    
-	}
+
+    }
 	
 	public void testMetaQueriesWithConflictingMatches() throws Exception {
 	    waitForLoad();

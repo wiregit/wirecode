@@ -136,6 +136,7 @@ public class ProviderHacks {
     
     // Cleaned up in all but tests
     public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
+    public static FileManagerController getFileManagerController() { i(); return core.getFileManagerController(); }
 
     
 }

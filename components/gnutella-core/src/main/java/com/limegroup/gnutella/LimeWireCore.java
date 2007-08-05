@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-
-
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
@@ -109,6 +107,7 @@ public class LimeWireCore {
     @Inject private Provider<CreationTimeCache> creationTimeCache;
     @Inject private Provider<HttpRequestHandlerFactory> httpRequestHandlerFactory;
     @Inject private Provider<UrnCache> urnCache;
+    @Inject private Provider<FileManagerController> fileManagerController;
 
     public Injector getInjector() {
         return injector;
@@ -356,6 +355,10 @@ public class LimeWireCore {
 
     public UrnCache getUrnCache() {
         return urnCache.get();
+    }
+
+    public FileManagerController getFileManagerController() {
+        return fileManagerController.get();
     }
 
 }

@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -46,7 +48,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManagerEvent.Type;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -62,7 +63,6 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -395,11 +395,14 @@ public abstract class FileManager {
     /** Contains the definition of a rare file */
     private final RareFileDefinition rareDefinition = new RareFileDefinition();
     
+    protected final FileManagerController fileManagerController;
+    
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
     @Inject
-    public FileManager() {
+    public FileManager(FileManagerController fileManagerController) {
+        this.fileManagerController = fileManagerController;
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
@@ -478,9 +481,7 @@ public abstract class FileManager {
 
     protected void save(){
         _data.save();
-            
-        ProviderHacks.getUrnCache().persistCache();
-        ProviderHacks.getCreationTimeCache().persistCache();
+        fileManagerController.save();
     }
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -736,14 +737,14 @@ public abstract class FileManager {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
-	    ProviderHacks.getFileManager().loadSettings();
+	    loadSettings();
     }
     
     /**
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
-        ProviderHacks.getUrnCache().clearPendingHashes(this);
+        fileManagerController.loadStarted();
     }
     
     /**
@@ -772,8 +773,7 @@ public abstract class FileManager {
         
         // Various cleanup & persisting...
         trim();
-        ProviderHacks.getCreationTimeCache().pruneTimes();
-        ProviderHacks.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        fileManagerController.loadFinished();
         save();
         SavedFileManager.instance().run();
         UpdateHandler.instance().tryToDownloadUpdates();
@@ -1050,7 +1050,7 @@ public abstract class FileManager {
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
-                            ProviderHacks.getUrnCache().clearPendingHashesFor(f, this);
+                            fileManagerController.clearPendingShare(f);
                     }
                 }
             }
@@ -1266,7 +1266,7 @@ public abstract class FileManager {
             _pendingFinished = -1;
         }
         
-		ProviderHacks.getUrnCache().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+		fileManagerController.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
     /**
@@ -1322,7 +1322,7 @@ public abstract class FileManager {
             }
             
             public boolean isOwner(Object o) {
-                return o == FileManager.this;
+                return o == fileManagerController;
             }
         };
     }
@@ -1349,7 +1349,7 @@ public abstract class FileManager {
 
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        ContentResponseData r = ProviderHacks.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        ContentResponseData r = fileManagerController.getResponseDataFor(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1401,23 +1401,7 @@ public abstract class FileManager {
         // so we have to make sure we don't influence the what is new
         // result set.
         if (!isForcedShare(file)) {
-            URN mainURN = fileDesc.getSHA1Urn();
-            CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(mainURN);
-                if (cTime == null)
-                    cTime = new Long(file.lastModified());
-                // if cTime is non-null but 0, then the IO subsystem is
-                // letting us know that the file was FNF or an IOException
-                // occurred - the best course of action is to
-                // ignore the issue and not add it to the CTC, hopefully
-                // we'll get a correct reading the next time around...
-                if (cTime.longValue() > 0) {
-                    // these calls may be superfluous but are quite fast....
-                    ctCache.addTime(mainURN, cTime.longValue());
-                    ctCache.commitTime(mainURN);
-                }
-            }
+            fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
         }
 
         // Ensure file can be found by URN lookups
@@ -1444,7 +1428,7 @@ public abstract class FileManager {
 		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
-		    ProviderHacks.getUrnCache().clearPendingHashesFor(file, this);
+            fileManagerController.clearPendingShare(file);
         } else {
 			file = fd.getFile();
 			// if file was not specially shared, add it to files_not_to_share
@@ -1494,7 +1478,7 @@ public abstract class FileManager {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
-            this.removeUrnIndex(fd);
+            removeUrnIndex(fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
             assert removed : "File "+i+" not found in " + _incompletesShared;
@@ -1537,10 +1521,7 @@ public abstract class FileManager {
         }
 
         //Remove hash information.
-        this.removeUrnIndex(fd);
-        //Remove creation time information
-        if (_urnMap.get(fd.getSHA1Urn()) == null)
-            ProviderHacks.getCreationTimeCache().removeTime(fd.getSHA1Urn());
+        removeUrnIndex(fd);
   
         // Notify the GUI...
         if (notify) {
@@ -1623,15 +1604,14 @@ public abstract class FileManager {
     
     /** Attempts to validate the given FileDesc. */
     public void validate(final FileDesc fd) {
-        ContentManager cm = ProviderHacks.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
+            fileManagerController.requestValidation(fd.getSHA1Urn(), new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
                        removeFileIfShared(fd.getFile());
                }
-            }, 5000);
+            });
         }
     }
 
@@ -1680,7 +1660,7 @@ public abstract class FileManager {
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0) {
-                ProviderHacks.getAltLocManager().purge(urn);
+                fileManagerController.lastUrnRemoved(urn);
                 _urnMap.remove(urn);
             }
 		}
@@ -1721,7 +1701,7 @@ public abstract class FileManager {
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
         // Prepopulate the cache with new URNs.
-        ProviderHacks.getUrnCache().addUrns(newName, removed.getUrns());
+        fileManagerController.addUrns(newName, removed.getUrns());
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -2138,7 +2118,7 @@ public abstract class FileManager {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List<URN> urnList = ProviderHacks.getCreationTimeCache().getFiles(request, 3);
+        List<URN> urnList = fileManagerController.getNewestUrns(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
@@ -2597,7 +2577,7 @@ public abstract class FileManager {
                     if (isRareFile(fds[i]))
                         rare++;
                     // locking FM->ALM ok.
-                    int numAlts = ProviderHacks.getAltLocManager().getNumLocs(fds[i].getSHA1Urn());
+                    int numAlts = fileManagerController.getAlternateLocationCount(fds[i].getSHA1Urn());
                     if (!nonZero || numAlts > 0) {
                         alts.add((double)numAlts);
                         topAltsFDs.put(numAlts,fds[i]);

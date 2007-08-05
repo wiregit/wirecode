@@ -873,7 +873,10 @@ public final class MessageRouterTest extends LimeTestCase {
         private final List KEYWORDS = 
             Arrays.asList(MY_KEYWORDS);
 
-        TestFileManager() {}
+        TestFileManager() {
+            super(ProviderHacks.getFileManagerController());
+        }
+        
 
         public List getKeyWords() {
             return KEYWORDS;

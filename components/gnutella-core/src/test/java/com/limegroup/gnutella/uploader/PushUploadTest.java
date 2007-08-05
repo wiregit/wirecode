@@ -149,7 +149,7 @@ public class PushUploadTest extends LimeTestCase {
                 .length());
 
         // start services
-        fm = new MetaFileManager();
+        fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         fm.startAndWait(4000);
         PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 

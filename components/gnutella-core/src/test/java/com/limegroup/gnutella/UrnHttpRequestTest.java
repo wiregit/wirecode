@@ -68,7 +68,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 
-        fm = new MetaFileManager();
+        fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         acceptor = new HTTPAcceptor();
         uploadManager = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
         connectionDispatcher = new ConnectionDispatcher();
