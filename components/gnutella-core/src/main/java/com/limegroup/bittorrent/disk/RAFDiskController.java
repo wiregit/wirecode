@@ -29,6 +29,12 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	 * The instances RandomAccessFile for all files contained in this torrent
 	 */
 	protected RandomAccessFile[] _fos = null;
+    
+    /**
+     * indices of RandomAccessFiles that have changed and should 
+     * be flushed.
+     */
+    private boolean[] dirty;
 	
 	
 	/* (non-Javadoc)
@@ -46,6 +52,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 						data.length - written);
 
 				writeImpl(_fos[i], startOffset, data, written, toWrite);
+                dirty[i] = true;
 				startOffset += toWrite;
 				written += toWrite;
 			} 
@@ -135,6 +142,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
         }
         
         _fos = fos;
+        dirty = new boolean[_fos.length];
 		return filesToVerify;
 	}
 	
@@ -162,6 +170,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    _fos[index] = setReadOnly(_fos[index], completed.getPath());
         if (!_fos[index].getFD().valid())
             throw new IOException("new fd invalid "+completed);
+        dirty[index] = false;
 	}
 	
 	protected RandomAccessFile setReadOnly(RandomAccessFile f, String path) throws IOException {
@@ -219,10 +228,13 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    LOG.debug("flushing");
 	    if (!isOpen())
 	        return;
-		for (RandomAccessFile f : _fos) {
-            if (f != null)
-                f.getChannel().force(false);
-            else {
+		for (int i = 0; i < _fos.length; i++) {
+            RandomAccessFile f = _fos[i];
+            if (f != null) {
+                if (dirty[i])
+                    f.getChannel().force(false);
+                dirty[i] = false;
+            } else {
                 StringBuilder report = new StringBuilder();
                 report.append("flush npe report:");
                 report.append("  files:").append(_files).append("  ");
