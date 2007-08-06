@@ -191,9 +191,9 @@ public class UnicastSimulator {
                         byte[] inGUID = ((QueryRequest)message).getGUID();
                         Response[] resps = new Response[rand.nextInt(15)];
                         for (int i = 0; i < resps.length; i++) {
-                            resps[i] = new Response(port, 200, 
-                                                    query + " - " + 
-                                                    rand.nextInt(250));
+                            resps[i] = ProviderHacks.getResponseFactory().createResponse(port, 200,
+                                    query + " - " + 
+                                    rand.nextInt(250));
                         }
                         QueryReply qr = new QueryReply(inGUID, (byte) 5,
                                                        port, _localAddress,

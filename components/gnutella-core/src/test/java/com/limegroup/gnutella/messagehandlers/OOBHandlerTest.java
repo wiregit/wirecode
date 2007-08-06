@@ -571,7 +571,7 @@ public class OOBHandlerTest extends LimeTestCase {
             byte[] addr, SecurityToken token, int offset, boolean needsPush) {
         Response[] res = new Response[numResults];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "susheel" + j + offset);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel" + j + offset);
 
         return new QueryReply(guid, (byte) 1, 1, addr, 0, res, GUID.makeGuid(),
                 new byte[0], needsPush, false, true, true, false, false, true,

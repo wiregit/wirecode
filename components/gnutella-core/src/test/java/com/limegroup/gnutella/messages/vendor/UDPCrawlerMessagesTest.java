@@ -552,7 +552,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     	// send a few query replies on each conn
     	Response[] res = new Response[1];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "not proxied");
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "not proxied");
         Message reply = 
             new QueryReply(GUID.makeGuid(), (byte) 3, 6356, InetAddress.getLocalHost().getAddress(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,

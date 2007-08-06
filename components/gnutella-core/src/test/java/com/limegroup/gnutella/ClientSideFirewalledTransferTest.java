@@ -226,7 +226,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Set proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
-        res[0] = new Response(10, 10, "boalt.org");
+        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 9000, myIP(), 0, res, 
                            clientGUID, new byte[0], true, false, true,
                            true, false, false, true, proxies, null);

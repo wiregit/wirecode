@@ -431,8 +431,7 @@ public class MetaFileManager extends FileManager {
             File file = currDoc.getIdentifier();// returns null if none
             Response res = null;
             if (file == null) { // pure metadata (no file)
-                res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0,
-                        " ");
+                res = fileManagerController.createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = getFileDescForFile(file);
                 if (fd == null) {
@@ -440,7 +439,7 @@ public class MetaFileManager extends FileManager {
                     // FileManager -- this is bad.
                     continue;
                 } else { // we found a file with the right name
-                    res = new Response(fd);
+                    res = fileManagerController.createResponse(fd);
                     fd.incrementHitCount();
                     RouterService.getCallback().handleSharedFileUpdate(
                             fd.getFile());

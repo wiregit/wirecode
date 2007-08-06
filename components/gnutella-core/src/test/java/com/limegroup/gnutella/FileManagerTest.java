@@ -498,7 +498,7 @@ public class FileManagerTest extends LimeTestCase {
 
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			assertEquals("FileDescs should match", fd, 
 						 fman.getFileDescForUrn(urn));
@@ -535,7 +535,7 @@ public class FileManagerTest extends LimeTestCase {
 	    boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
             
@@ -580,7 +580,7 @@ public class FileManagerTest extends LimeTestCase {
         boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
             
             char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();

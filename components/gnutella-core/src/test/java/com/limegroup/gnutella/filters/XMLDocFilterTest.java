@@ -101,6 +101,6 @@ public class XMLDocFilterTest extends KeywordFilterTest {
         NameValue<String> nameValue = new NameValue<String>(field, values);
         LimeXMLDocument doc = new LimeXMLDocument(Collections.singletonList(nameValue),
                 LimeXMLNames.VIDEO_SCHEMA);
-        return new Response(101, 1340, fileName, doc);
+        return ProviderHacks.getResponseFactory().createResponse(101, 1340, fileName, doc);
     }
 }

@@ -140,20 +140,17 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         // we're sending.
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[] {
-                // Only the 'susheel' Responses will pass the 
-                // ResponseVerifier.matchesQuery() check and 
-                // the others wont
-                new Response(10, 10, "susheel"+i),
-                new Response(10, 10, "susheel smells good"+i),
-                new Response(10, 10, "anita is sweet"+i),
-                new Response(10, 10, "anita is prety"+i),
-                new Response(10, 10, "susheel smells bad" + i),
-                new Response(10, 10, "renu is sweet " + i),
-                new Response(10, 10, "prety is spelled pretty " + i),
-                new Response(10, 10, "go susheel go" + i),
-                new Response(10, 10, "susheel runs fast" + i),
-                new Response(10, 10, "susheel jumps high" + i),
-                new Response(10, 10, "sleepy susheel" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells good"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is sweet"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is prety"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells bad" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "renu is sweet " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "prety is spelled pretty " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "go susheel go" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel runs fast" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel jumps high" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "sleepy susheel" + i),
             };
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,

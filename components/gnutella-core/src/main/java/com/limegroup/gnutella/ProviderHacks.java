@@ -128,8 +128,9 @@ public class ProviderHacks {
     public static QueryStats getQueryStats() { i(); return core.getQueryStats(); }
     public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
     public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
-    public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
     public static UrnCache getUrnCache() { i(); return core.getUrnCache(); }
+    
+    public static ResponseFactory getResponseFactory() { i(); return core.getResponseFactory(); }
     
     // Cleaned up in all but RS & tests
     public static Statistics getStatistics() { i(); return core.getStatistics(); }
@@ -137,6 +138,7 @@ public class ProviderHacks {
     // Cleaned up in all but tests
     public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
     public static FileManagerController getFileManagerController() { i(); return core.getFileManagerController(); }
+    public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
 
     
 }

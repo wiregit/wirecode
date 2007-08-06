@@ -12,6 +12,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.xml.LimeXMLProperties;
 
 @Singleton
 public class FileManagerControllerImpl implements FileManagerController {
@@ -21,6 +22,7 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<CreationTimeCache> creationTimeCache;
     private final Provider<ContentManager> contentManager;
     private final Provider<AltLocManager> altLocManager;
+    private final Provider<ResponseFactory> responseFactory;
     
     /**
      * @param urnCache
@@ -34,12 +36,14 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<DownloadManager> downloadManager,
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
-            Provider<AltLocManager> altLocManager) {
+            Provider<AltLocManager> altLocManager,
+            Provider<ResponseFactory> responseFactory) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.contentManager = contentManager;
         this.altLocManager = altLocManager;
+        this.responseFactory = responseFactory;
     }
     
     /* (non-Javadoc)
@@ -156,6 +160,14 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public Long getCreationTime(URN urn) {
         return creationTimeCache.get().getCreationTime(urn);
+    }
+
+    public Response createPureMetadataResponse() {
+        return responseFactory.get().createResponse(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
+    }
+
+    public Response createResponse(FileDesc desc) {
+        return responseFactory.get().createResponse(desc);
     }
 
 }

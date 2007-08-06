@@ -89,7 +89,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             IpPort[] proxies = new IpPortImpl[1];
             proxies[0] = new IpPortImpl("127.0.0.1", 7000);
             Response[] res = new Response[1];
-            res[0] = new Response(10, 10, "boalt.org");
+            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
             m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
                     InetAddress.getLocalHost().getAddress(), 0, res, 
                     clientGUID, new byte[0], false, false, true,
@@ -159,7 +159,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             final IpPortSet proxies = new IpPortSet();
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
-            res[0] = new Response(10, 10, "nyu.edu");
+            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "nyu.edu");
             m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
                     InetAddress.getLocalHost().getAddress(), 0, res, 
                     clientGUID, new byte[0], false, false, true,
@@ -268,7 +268,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         final IpPortSet proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7001));
         Response[] res = new Response[1];
-        res[0] = new Response(10, 10, "anita");
+        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita");
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,

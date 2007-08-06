@@ -69,7 +69,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         assertQuery(testUP[0], guid);
         
         // send back a result that will be filtered
-        Response resp = new Response(101, 1019, "sex");
+        Response resp = ProviderHacks.getResponseFactory().createResponse(101, 1019, "sex");
         sendAndAssertResponse(resp, guid, enabled);
         
         resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_TYPE, "adult");
@@ -78,7 +78,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_RATING, "NC-17");
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = new Response(105, 345, "harmless");
+        resp = ProviderHacks.getResponseFactory().createResponse(105, 345, "harmless");
         sendAndAssertResponse(resp, guid, false);
     }
     

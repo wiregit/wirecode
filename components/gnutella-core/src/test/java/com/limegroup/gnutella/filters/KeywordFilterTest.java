@@ -86,7 +86,7 @@ public class KeywordFilterTest extends LimeTestCase {
     }
     
     protected QueryReply createReply(String response) {
-        return createReply(new Response(5, 5, response), new GUID(), 5555, address); 
+        return createReply(ProviderHacks.getResponseFactory().createResponse(5, 5, response), new GUID(), 5555, address); 
     }
     
     public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {

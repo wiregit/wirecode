@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -52,7 +52,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
-        Response actionResponse = new Response(0, 1, "test", actionDoc);
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(0, callback.results.size());
@@ -66,7 +66,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     public void testInsecureActionNotSent() throws Exception {
         SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
-        Response actionResponse = new Response(0, 1, "test");
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
@@ -79,13 +79,13 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
         SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
-        Response actionResponse = new Response(0, 1, "test");
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         assertEquals(0, callback.results.size());
         handler.handleQueryReply(reply);
@@ -97,13 +97,13 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     public void testFailedReplyNotForwarded() throws Exception {
         SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
-        Response actionResponse = new Response(0, 1, "test");
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         reply.setSecureStatus(SecureMessage.FAILED);
         

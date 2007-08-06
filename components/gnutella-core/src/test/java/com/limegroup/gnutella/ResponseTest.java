@@ -54,7 +54,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	 * the Response class.
 	 */
 	public void testLegacyResponseUnitTest() throws Exception {
-        Response r = new Response(3,4096,"A.mp3");
+        Response r = ProviderHacks.getResponseFactory().createResponse(3, 4096, "A.mp3");
         assertEquals("A.mp3", r.getName());
         assertNull(r.getDocument());
 
@@ -101,8 +101,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         LimeXMLDocument d2 = null;
         d1 = new LimeXMLDocument(xml1);
         d2 = new LimeXMLDocument(xml2);
-        Response ra = new Response(12,231,"def1.txt",d1);
-        Response rb = new Response(13,232,"def2.txt",d2);
+        Response ra = ProviderHacks.getResponseFactory().createResponse(12, 231, "def1.txt", d1);
+        Response rb = ProviderHacks.getResponseFactory().createResponse(13, 232, "def2.txt", d2);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());
 		assertEquals("problem with doc constructor", d2, rb.getDocument());
 	}
@@ -126,7 +126,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -163,12 +163,12 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
 	    
-	    r = Response.createFromStream(in);
+	    r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 2181, r.getIndex());
 	    assertEquals("wrong size", 1981, r.getSize());
 	    assertEquals("wrong name", "s.a.b", r.getName());
@@ -196,7 +196,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -225,7 +225,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -254,7 +254,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -290,7 +290,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -323,7 +323,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -360,7 +360,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sammy", r.getName());
@@ -401,7 +401,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -438,7 +438,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         byte[] output = baos.toByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(output);
-        Response r = Response.createFromStream(in);
+        Response r = ProviderHacks.getResponseFactory().createFromStream(in);
         assertEquals("wrong index", 257, r.getIndex());
         assertEquals("wrong size", 1029, r.getSize());
         assertEquals("wrong name", "sam", r.getName());
@@ -492,7 +492,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -529,7 +529,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -577,7 +577,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = Response.createFromStream(in);
+	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -627,7 +627,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1, 0);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0);
         addGGEP(baos, gc);
         
         // See if we can correctly read the GGEP block.
@@ -669,7 +669,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        Response.GGEPContainer gc = new Response.GGEPContainer(endpoints, -1, 0);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0);
         addGGEP(baos, gc);
         
         // See if we can correctly read the GGEP block.
@@ -700,7 +700,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
      */
     public void testGGEPUtilGetGGEP() throws Exception {
         GGEP ggep = new GGEP(true);
-        Response.GGEPContainer container;
+        ResponseFactoryImpl.GGEPContainer container;
         long ctime;
         Set locs;
         byte[] data;
@@ -771,39 +771,40 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testHashCode() {
-        Response r1 = new Response(0, 0, "name");
-        Response r2 = new Response(0, 1, "name");
+        Response r1 = ProviderHacks.getResponseFactory().createResponse(0, 0, "name");
+        Response r2 = ProviderHacks.getResponseFactory().createResponse(0, 1, "name");
         assertNotEquals(r1.hashCode(), r2.hashCode());
         
-        Response r3 = new Response(1, 0, "name");
+        Response r3 = ProviderHacks.getResponseFactory().createResponse(1, 0, "name");
         assertNotEquals(r1.hashCode(), r3.hashCode());
         assertNotEquals(r2.hashCode(), r3.hashCode());
         
-        assertEquals(r1.hashCode(), new Response(0, 0, "name").hashCode());
+        assertEquals(r1.hashCode(), ProviderHacks.getResponseFactory().createResponse(0, 0, "name").hashCode());
         
         // max int values
-        r1 = new Response(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
-        r2 = new Response(0, Integer.MAX_VALUE, "name");
+        r1 = ProviderHacks.getResponseFactory()
+                .createResponse(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
+        r2 = ProviderHacks.getResponseFactory().createResponse(0, Integer.MAX_VALUE, "name");
         assertNotEquals(r1.hashCode(), r2.hashCode());
     }
     
     public void testIllegalFilenamesInInputStream() throws Exception {
         // illegal filename
-        Response resp = new Response(1, 2, "a;lksdflkfj../");
+        Response resp = ProviderHacks.getResponseFactory().createResponse(1, 2, "a;lksdflkfj../");
         assertResponseParsingFails(resp);
-        assertResponseParsingFails(new Response(1, 4545, "s;lkdf\n\n\n"));
-        assertResponseParsingFails(new Response(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
-        assertResponseParsingFails(new Response(4545, 3454, ""));
-        assertResponseParsingFails(new Response(1454, 3245, "dlksdf\r"));
+        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1, 4545, "s;lkdf\n\n\n"));
+        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
+        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(4545, 3454, ""));
+        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1454, 3245, "dlksdf\r"));
     }
     
     public void testLargeFiles() throws Exception {
-        Response resp = new Response(1, Constants.MAX_FILE_SIZE, "asdf");
+        Response resp = ProviderHacks.getResponseFactory().createResponse(1, Constants.MAX_FILE_SIZE, "asdf");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resp.writeToStream(baos);
         byte [] data = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        Response read = Response.createFromStream(bais);
+        Response read = ProviderHacks.getResponseFactory().createFromStream(bais);
         assertEquals(Constants.MAX_FILE_SIZE, read.getSize());
         
         // also check the data manually
@@ -820,7 +821,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // if the file is too large, we do not construct
         try {
-            resp = new Response(1, Constants.MAX_FILE_SIZE + 1, "asdf");
+            resp = ProviderHacks.getResponseFactory().createResponse(1, Constants.MAX_FILE_SIZE + 1, "asdf");
             fail("constructed too large file");
         } catch (IllegalArgumentException expected){}
         
@@ -833,7 +834,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         baos.write(0x0);
         bais = new ByteArrayInputStream(baos.toByteArray());
         try {
-            Response.createFromStream(bais);
+            ProviderHacks.getResponseFactory().createFromStream(bais);
             fail("read a response with too large file");
         } catch (IOException expected){}
     }
@@ -850,20 +851,18 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     
     private Set getAsIpPorts(AlternateLocationCollection col)
       throws Exception {
-        return (Set)PrivilegedAccessor.invokeMethod(Response.class,
+        return (Set)PrivilegedAccessor.invokeMethod(ProviderHacks.getResponseFactory(),
             "getAsIpPorts", new Object[] { col } );
     }
     
-    private void addGGEP(OutputStream os, Response.GGEPContainer gc) throws Exception {
-        Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
-        PrivilegedAccessor.invokeMethod(c, "addGGEP",
+    private void addGGEP(OutputStream os, ResponseFactoryImpl.GGEPContainer gc) throws Exception {
+        PrivilegedAccessor.invokeMethod(ProviderHacks.getResponseFactory(), "addGGEP",
             new Object[] { os, gc },
-            new Class[] { OutputStream.class, Response.GGEPContainer.class } );
+            new Class[] { OutputStream.class, ResponseFactoryImpl.GGEPContainer.class } );
     }
     
-    private Response.GGEPContainer getGGEP(GGEP info) throws Exception {
-        Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
-        return (Response.GGEPContainer)PrivilegedAccessor.invokeMethod(
-            c, "getGGEP", new Object[] { info } );
+    private ResponseFactoryImpl.GGEPContainer getGGEP(GGEP info) throws Exception {
+        return (ResponseFactoryImpl.GGEPContainer)PrivilegedAccessor.invokeMethod(
+                ProviderHacks.getResponseFactory(), "getGGEP", new Object[] { info } );
     }    
 }

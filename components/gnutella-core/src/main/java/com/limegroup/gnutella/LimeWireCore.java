@@ -108,6 +108,7 @@ public class LimeWireCore {
     @Inject private Provider<HttpRequestHandlerFactory> httpRequestHandlerFactory;
     @Inject private Provider<UrnCache> urnCache;
     @Inject private Provider<FileManagerController> fileManagerController;
+    @Inject private Provider<ResponseFactory> responseFactory;
 
     public Injector getInjector() {
         return injector;
@@ -359,6 +360,10 @@ public class LimeWireCore {
 
     public FileManagerController getFileManagerController() {
         return fileManagerController.get();
+    }
+
+    public ResponseFactory getResponseFactory() {
+        return responseFactory.get();
     }
 
 }

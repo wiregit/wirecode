@@ -83,20 +83,17 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         assertGreaterThan(REPORT_INTERVAL, 6*testUP.length);
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[] {
-                // Only the 'susheel' Responses will pass the 
-                // ResponseVerifier.matchesQuery() check and 
-                // the others wont
-                new Response(10, 10, "susheel"+i),
-                new Response(10, 10, "susheel smells good"+i),
-                new Response(10, 10, "anita is sweet"+i),
-                new Response(10, 10, "anita is prety"+i),
-                new Response(10, 10, "susheel smells bad" + i),
-                new Response(10, 10, "renu is sweet " + i),
-                new Response(10, 10, "prety is spelled pretty " + i),
-                new Response(10, 10, "go susheel go" + i),
-                new Response(10, 10, "susheel runs fast" + i),
-                new Response(10, 10, "susheel jumps high" + i),
-                new Response(10, 10, "sleepy susheel" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells good"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is sweet"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is prety"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells bad" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "renu is sweet " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "prety is spelled pretty " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "go susheel go" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel runs fast" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel jumps high" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "sleepy susheel" + i),
             };
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
@@ -148,7 +145,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             //send enough responses per ultrapeer to shut off querying.
             Response[] res = new Response[150/testUP.length + 10];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10, 10, "susheel good"+i+j);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel good"+i+j);
 
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
@@ -182,7 +179,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // leaf guidance...
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita is pretty"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
                            true, false, false, null);
@@ -216,7 +213,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // from the leaf
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita is pretty"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
@@ -237,7 +234,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // REPORT_INTERVAL - and confirm we don't get messages
         res = new Response[REPORT_INTERVAL-1];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita is sweet"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is sweet"+j);
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
@@ -255,7 +252,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // simply send 2 more responses....
         res = new Response[2];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita is young"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is young"+j);
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
@@ -287,7 +284,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // more results should not result in more status messages...
         res = new Response[REPORT_INTERVAL*2];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita is pretty"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
@@ -341,7 +338,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // from the leaf
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "anita kasevan "+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita kasevan "+j);
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,

@@ -2096,7 +2096,7 @@ public abstract class FileManager {
             desc.incrementHitCount();
             RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
 
-            Response resp = new Response(desc);
+            Response resp = fileManagerController.createResponse(desc);
             if(includeXML) {
                 addXMLToResponse(resp, desc);
                 if(doc != null && resp.getDocument() != null &&
@@ -2134,7 +2134,7 @@ public abstract class FileManager {
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
             
             // Formulate the response
-            Response r = new Response(desc);
+            Response r = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(r, desc);
             
@@ -2167,7 +2167,7 @@ public abstract class FileManager {
                 continue;
         
             assert j<ret.length : "_numFiles is too small";
-            ret[j] = new Response(desc);
+            ret[j] = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(ret[j], desc);
             j++;
@@ -2389,7 +2389,7 @@ public abstract class FileManager {
                         if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                             continue;
 
-                        preview = new Response(desc);
+                        preview = fileManagerController.createResponse(desc);
                         if(includeXML)
                             addXMLToResponse(preview, desc);
                         return true;

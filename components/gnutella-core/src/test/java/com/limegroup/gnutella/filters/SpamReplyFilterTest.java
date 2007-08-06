@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -24,8 +25,8 @@ public class SpamReplyFilterTest extends LimeTestCase {
 
     private final QueryReply _reply = 
          new QueryReply(GUID.makeGuid(), (byte) 1, 6346, IP, (long) 3,
-                        new Response[] { new Response((long) 2, (long) 2,
-                                                      "Susheel") },
+                        new Response[] { ProviderHacks.getResponseFactory().createResponse((long) 2,
+                                (long) 2, "Susheel") },
                         GUID.makeGuid(), true, true, true, true, true, false);
 
     private byte[] _replyBytes = null;

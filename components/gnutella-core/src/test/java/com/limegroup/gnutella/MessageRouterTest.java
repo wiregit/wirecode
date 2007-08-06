@@ -168,7 +168,8 @@ public final class MessageRouterTest extends LimeTestCase {
                         "responsesToQueryReplies",
                         paramTypes);
             Response[] res = new Response[20];
-            Arrays.fill(res, new Response((long)0, (long)10, "test"));
+            Arrays.fill(res, ProviderHacks.getResponseFactory().createResponse(
+                    (long) 0, (long) 10, "test"));
             QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
             Object[] params = new Object[] {
                     res,

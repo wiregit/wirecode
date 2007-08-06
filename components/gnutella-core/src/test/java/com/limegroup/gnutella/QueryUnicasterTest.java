@@ -292,7 +292,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     private QueryReply generateFakeReply(byte[] guid, int numResponses) {
         Response[] resps = new Response[numResponses];
         for (int i = 0; i< resps.length; i++)
-            resps[i] = new Response(i, i, ""+i);
+            resps[i] = ProviderHacks.getResponseFactory().createResponse(i, i, ""+i);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply toReturn = new QueryReply(guid,
                                              (byte) 2,

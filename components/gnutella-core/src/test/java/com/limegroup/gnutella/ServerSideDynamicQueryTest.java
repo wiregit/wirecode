@@ -90,7 +90,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=new Response(0L, 0L, "berkeley rocks");
+		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
 		QueryReply reply1=new QueryReply(request.getGUID(),
 										 (byte)2,
@@ -145,7 +145,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=new Response(0L, 0L, "berkeley rocks");
+		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
 		QueryReply reply1=new QueryReply(request.getGUID(),
 										 (byte)2,

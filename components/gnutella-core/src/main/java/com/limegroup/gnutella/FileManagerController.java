@@ -38,4 +38,8 @@ public interface FileManagerController {
 
     public void fileChanged(URN urn, Long time);
 
+    public Response createResponse(FileDesc desc);
+
+    public Response createPureMetadataResponse();
+
 }

@@ -933,7 +933,7 @@ public class QueryReply extends Message implements SecureMessage {
                 new ByteArrayInputStream(_payload,i,_payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
-                Response r = Response.createFromStream(bais);
+                Response r = ProviderHacks.getResponseFactory().createFromStream(bais);
                 responses[responses.length-left] = r;
                 i+=r.getLength();
                 

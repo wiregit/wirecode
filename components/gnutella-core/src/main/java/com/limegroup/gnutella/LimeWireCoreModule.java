@@ -89,6 +89,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
         bind(FileManagerController.class).to(FileManagerControllerImpl.class);
+        bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
