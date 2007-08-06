@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
@@ -89,6 +90,7 @@ public class LimeCoreGlue {
         SimppManager simppManager = SimppManager.instance();
         SimppSettingsManager settingsManager = SimppSettingsManager.instance();
         LimeProps.instance().getFactory().setRemoteSettingManager(settingsManager);
+        MojitoProps.instance().getFactory().setRemoteSettingManager(settingsManager);
         settingsManager.updateSimppSettings(simppManager.getPropsString());
         
         // Setup RouterService & ConnectionSettings.LOCAL_IS_PRIVATE to 
