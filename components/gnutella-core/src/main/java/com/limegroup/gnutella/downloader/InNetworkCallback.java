@@ -10,7 +10,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * Once an in-network download finishes, the UpdateHandler is notified.
  */
 @Singleton
-class InNetworkCallback implements DownloadCallback {
+public class InNetworkCallback implements DownloadCallback {
     
     public void addDownload(Downloader d) {
     }
