@@ -321,7 +321,7 @@ public class RouterService {
             HttpClientManager.initialize();
             
             LOG.trace("START SSL Test");
-            callback.componentLoading("SSL_TEST");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SSL_TEST"));
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), NIODispatcher.instance().getBufferCache());
             if(!sslTester.go()) {
                 Throwable t = sslTester.getLastFailureCause();
@@ -333,17 +333,17 @@ public class RouterService {
     
     		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");
-            callback.componentLoading("CONTENT_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTENT_MANAGER"));
             ProviderHacks.getContentManager().initialize();
             LOG.trace("STOP ContentManager");
 
             LOG.trace("START MessageRouter");
-            callback.componentLoading("MESSAGE_ROUTER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER"));
     		messageRouter.initialize();
     		LOG.trace("STOPMessageRouter");
 
             LOG.trace("START HTTPUploadManager");
-            callback.componentLoading("UPLOAD_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER"));
             ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), callback, messageRouter); 
             LOG.trace("STOP HTTPUploadManager");
 
@@ -352,7 +352,7 @@ public class RouterService {
             LOG.trace("STOP HTTPUploadAcceptor");
 
             LOG.trace("START Acceptor");
-            callback.componentLoading("ACCEPTOR");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR"));
     		ProviderHacks.getAcceptor().start();
     		LOG.trace("STOP Acceptor");
     		
@@ -361,22 +361,22 @@ public class RouterService {
             LOG.trace("END loading StaticMessages");
             
     		LOG.trace("START ConnectionManager");
-    		callback.componentLoading("CONNECTION_MANAGER");
+    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER"));
             ProviderHacks.getConnectionManager().initialize();
     		LOG.trace("STOP ConnectionManager");
     		
     		LOG.trace("START DownloadManager");
-    		callback.componentLoading("DOWNLOAD_MANAGER");
+    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER"));
     		ProviderHacks.getDownloadManager().initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
     		LOG.trace("START NodeAssigner");
-    		callback.componentLoading("NODE_ASSIGNER");
+    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_NODE_ASSIGNER"));
     		ProviderHacks.getNodeAssigner().start();
     		LOG.trace("STOP NodeAssigner");
 			
             LOG.trace("START HostCatcher.initialize");
-            callback.componentLoading("HOST_CATCHER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER"));
     		ProviderHacks.getHostCatcher().initialize();
     		LOG.trace("STOP HostCatcher.initialize");
     
@@ -392,58 +392,58 @@ public class RouterService {
             // Asynchronously load files now that the GUI is up, notifying
             // callback.
             LOG.trace("START FileManager");
-            callback.componentLoading("FILE_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER"));
             ProviderHacks.getFileManager().start();
             LOG.trace("STOP FileManager");
     
             LOG.trace("START TorrentManager");
-            callback.componentLoading("TORRENT_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER"));
 			ProviderHacks.getTorrentManager().initialize(ProviderHacks.getFileManager(), ProviderHacks.getConnectionDispatcher(), SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
             
             LOG.trace("START ControlRequestAcceptor");
-            callback.componentLoading("CONTROL_REQUEST_ACCEPTOR");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR"));
 			(new ControlRequestAcceptor()).register(ProviderHacks.getConnectionDispatcher());
 			LOG.trace("STOP ControlRequestAcceptor");
 			
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
-            callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI"));
             ProviderHacks.getDownloadManager().postGuiInit();
             LOG.trace("STOP DownloadManager.postGuiInit");
             
             LOG.trace("START UpdateManager.instance");
-            callback.componentLoading("UPDATE_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER"));
             UpdateHandler.instance();
             LOG.trace("STOP UpdateManager.instance");
 
             LOG.trace("START QueryUnicaster");
-            callback.componentLoading("QUERY_UNICASTER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER"));
     		ProviderHacks.getQueryUnicaster().start();
     		LOG.trace("STOP QueryUnicaster");
     		
     		LOG.trace("START HTTPAcceptor");
-            callback.componentLoading("HTTPACCEPTOR");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR"));
             ProviderHacks.getHTTPAcceptor().start();
             LOG.trace("STOP HTTPAcceptor");
             
             LOG.trace("START Pinger");
-            callback.componentLoading("PINGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_PINGER"));
             Pinger.instance().start();
             LOG.trace("STOP Pinger");
             
             LOG.trace("START ConnectionWatchdog");
-            callback.componentLoading("CONNECTION_WATCHDOG");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG"));
             ConnectionWatchdog.instance().start();
             LOG.trace("STOP ConnectionWatchdog");
             
             LOG.trace("START SavedFileManager");
-            callback.componentLoading("SAVED_FILE_MANAGER");
+            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER"));
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
 			
 			LOG.trace("START loading spam data");
-			callback.componentLoading("SPAM");
+			callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SPAM"));
 			RatingTable.instance();
 			LOG.trace("START loading spam data");
             
