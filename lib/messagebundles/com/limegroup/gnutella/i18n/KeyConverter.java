@@ -5,6 +5,9 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Was used to convert certain keys in the old MessageBundle_**_.properties files.
+ */
 public class KeyConverter {
 
     @SuppressWarnings("unused")
