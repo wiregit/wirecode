@@ -129,7 +129,8 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private QueryReply r(int port) {
-        return new QueryReply(new byte[16], (byte)5, port, IP, 0, new Response[0], new byte[16], false);
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5,
+                port, IP, 0, new Response[0], new byte[16], false);
     }
     
     private ResetTableMessage t() {

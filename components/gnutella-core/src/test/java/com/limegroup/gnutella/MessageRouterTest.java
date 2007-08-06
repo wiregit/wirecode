@@ -37,7 +37,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
@@ -552,8 +551,8 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testLimeReply() throws Exception {
         PrivilegedAccessor.setValue(ROUTER, "_callback", new ActivityCallbackStub());
         
-        StaticMessages.initialize();
-        QueryReply limeReply = StaticMessages.getLimeReply();
+        ProviderHacks.getStaticMessages().initialize();
+        QueryReply limeReply = ProviderHacks.getStaticMessages().getLimeReply();
         
         QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("limewire pro");
         assertTrue(qr.isQueryForLW());

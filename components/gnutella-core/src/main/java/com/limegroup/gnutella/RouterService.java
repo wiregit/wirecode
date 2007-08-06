@@ -51,7 +51,6 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -357,7 +356,7 @@ public class RouterService {
     		LOG.trace("STOP Acceptor");
     		
             LOG.trace("START loading StaticMessages");
-            StaticMessages.initialize();
+            ProviderHacks.getStaticMessages().initialize();
             LOG.trace("END loading StaticMessages");
             
     		LOG.trace("START ConnectionManager");

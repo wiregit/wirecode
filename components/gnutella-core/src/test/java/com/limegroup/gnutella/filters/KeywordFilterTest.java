@@ -105,8 +105,8 @@ public class KeywordFilterTest extends LimeTestCase {
         else //there is no XML
             xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         
-        return new QueryReply(guid.bytes(), (byte)1,
-                port, address, 0, new Response[] { resp },
-                GUID.makeGuid(), xmlCompressed, false, false, true, true, true, false);
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+                port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
+                false, true, true, true, false);
     }
 }

@@ -4,7 +4,7 @@ import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
@@ -32,7 +32,9 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -43,327 +45,286 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 
+/**
+ * Contains mostly all references to singletons within LimeWire.
+ * This class should only be used if it is not possible to inject
+ * the correct values into what you're using.  In most cases,
+ * it should be possible to just get the injector and call
+ * injector.injectMembers(myObject), which is still a superior
+ * option to retrieving the individual objects from this class.
+ */
+@Singleton
 public class LimeWireCore {
         
-    @Inject private Injector injector;
-    @Inject private Provider<LocalFileDetailsFactory> localFileDetailsFactory;
-    @Inject private Provider<AlternateLocationFactory> alternateLocationFactory;
-    @Inject private Provider<AltLocValueFactory> altLocValueFactory;
-    @Inject private Provider<DiskController> diskController;
-    @Inject private Provider<VerifyingFileFactory> verifyingFileFactory;
-    @Inject private Provider<SocketsManager> socketsManager;
-    @Inject private Provider<SourceRankerFactory> sourceRankerFactory;
-    @Inject private Provider<HostDataFactory> hostDataFactory;
-    @Inject private Provider<ManagedConnectionFactory> managedConnectionFactory;
-    @Inject private Provider<QueryRequestFactory> queryRequestFactory;
-    @Inject private Provider<QueryHandlerFactory> queryHandlerFactory;
-    @Inject private Provider<UploadSlotManager> uploadSlotManager;
-    @Inject private Provider<FileManager> fileManager;
-    @Inject private Provider<UploadManager> uploadManager;
-    @Inject private Provider<HeadPongFactory> headPongFactory;
-    @Inject private Provider<HTTPDownloaderFactory> httpDownloaderFactory;
-    @Inject private Provider<DownloadWorkerFactory> downloadWorkerFactory;
-    @Inject private Provider<FeaturesWriter> featuresWriter;
-    @Inject private Provider<HTTPHeaderUtils> httpHeaderUtils;
-    @Inject private Provider<TrackerFactory> trackerFactory;
-    @Inject private Provider<TrackerManagerFactory> trackerManagerFactory;
-    @Inject private Provider<TorrentManager> torrentManager;
-    @Inject private Provider<ManagedTorrentFactory> managedTorrentFactory;
-    @Inject private Provider<PushEndpointFactory> pushEndpointFactory;
-    @Inject private Provider<HeadersFactory> headersFactory;
-    @Inject private Provider<HandshakeResponderFactory> handshakeResponderFactory;
-    @Inject private Provider<PushProxiesValueFactory> pushProxiesValueFactory;
-    @Inject private Provider<PingReplyFactory> pingReplyFactory;
-    @Inject private Provider<DHTControllerFactory> dhtControllerFactory;
-    @Inject private Provider<DHTManager> dhtManager;
-    @Inject private Provider<ConnectionManager> connectionManager;
-    @Inject private Provider<NetworkManager> networkManager;
-    @Inject private Provider<UDPService> udpService;
-    @Inject private Provider<Acceptor> acceptor;
-    @Inject private Provider<ForMeReplyHandler> forMeReplyHandler;
-    @Inject private Provider<QueryUnicaster> queryUnicaster;
-    @Inject private Provider<OnDemandUnicaster> onDemandUnicaster;
-    @Inject private Provider<MessageRouter> messageRouter;
-    @Inject private Provider<DownloadManager> downloadManager;
-    @Inject private Provider<AltLocFinder> altLocFinder;
-    @Inject private Provider<ConnectionDispatcher> connectionDispatcher;
-    @Inject private Provider<HTTPAcceptor> httpAcceptor;
-    @Inject private Provider<HostCatcher> hostCatcher;
-    @Inject private Provider<com.limegroup.gnutella.HTTPAcceptor> httpUploadAcceptor;
-    @Inject private Provider<PushManager> pushManager;
-    @Inject private Provider<ResponseVerifier> responseVerifier;
-    @Inject private Provider<SearchResultHandler> searchResultHandler;
-    @Inject private Provider<AltLocManager> altLocManager;
-    @Inject private Provider<ContentManager> contentManager;
-    @Inject private Provider<IPFilter> ipFilter;
-    @Inject private Provider<HostileFilter> hostileFilter;
-    @Inject private Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
-    @Inject private Provider<BandwidthManager> bandwidthManager;
-    @Inject private Provider<HttpExecutor> httpExecutor;
-    @Inject private Provider<QueryStats> queryStats;
-    @Inject private Provider<NodeAssigner> nodeAssigner;
-    @Inject private Provider<Statistics> statistics;
-    @Inject private Provider<SecureMessageVerifier> secureMessageVerifier;
-    @Inject private Provider<CreationTimeCache> creationTimeCache;
-    @Inject private Provider<HttpRequestHandlerFactory> httpRequestHandlerFactory;
-    @Inject private Provider<UrnCache> urnCache;
-    @Inject private Provider<FileManagerController> fileManagerController;
-    @Inject private Provider<ResponseFactory> responseFactory;
+    private final Injector injector;
+    
+    @Inject
+    public LimeWireCore(Injector injector) {
+        this.injector = injector;
+    }
 
     public Injector getInjector() {
         return injector;
     }
 
     public LocalFileDetailsFactory getLocalFileDetailsFactory() {
-        return localFileDetailsFactory.get();
+        return injector.getInstance(LocalFileDetailsFactory.class);
     }
 
     public AlternateLocationFactory getAlternateLocationFactory() {
-        return alternateLocationFactory.get();
+        return injector.getInstance(AlternateLocationFactory.class);
     }
 
     public AltLocValueFactory getAltLocValueFactory() {
-        return altLocValueFactory.get();
+        return injector.getInstance(AltLocValueFactory.class);
     }
 
     public DiskController getDiskController() {
-        return diskController.get();
+        return injector.getInstance(DiskController.class);
     }
 
     public VerifyingFileFactory getVerifyingFileFactory() {
-        return verifyingFileFactory.get();
+        return injector.getInstance(VerifyingFileFactory.class);
     }
 
     public SocketsManager getSocketsManager() {
-        return socketsManager.get();
+        return injector.getInstance(SocketsManager.class);
     }
 
     public SourceRankerFactory getSourceRankerFactory() {
-        return sourceRankerFactory.get();
+        return injector.getInstance(SourceRankerFactory.class);
     }
 
     public HostDataFactory getHostDataFactory() {
-        return hostDataFactory.get();
+        return injector.getInstance(HostDataFactory.class);
     }
 
     public ManagedConnectionFactory getManagedConnectionFactory() {
-        return managedConnectionFactory.get();
+        return injector.getInstance(ManagedConnectionFactory.class);
     }
 
     public QueryRequestFactory getQueryRequestFactory() {
-        return queryRequestFactory.get();
+        return injector.getInstance(QueryRequestFactory.class);
     }
 
     public QueryHandlerFactory getQueryHandlerFactory() {
-        return queryHandlerFactory.get();
+        return injector.getInstance(QueryHandlerFactory.class);
     }
 
     public UploadSlotManager getUploadSlotManager() {
-        return uploadSlotManager.get();
+        return injector.getInstance(UploadSlotManager.class);
     }
 
     public FileManager getFileManager() {
-        return fileManager.get();
+        return injector.getInstance(FileManager.class);
     }
 
     public UploadManager getUploadManager() {
-        return uploadManager.get();
+        return injector.getInstance(UploadManager.class);
     }
 
     public HeadPongFactory getHeadPongFactory() {
-        return headPongFactory.get();
+        return injector.getInstance(HeadPongFactory.class);
     }
 
     public HTTPDownloaderFactory getHttpDownloaderFactory() {
-        return httpDownloaderFactory.get();
+        return injector.getInstance(HTTPDownloaderFactory.class);
     }
 
     public DownloadWorkerFactory getDownloadWorkerFactory() {
-        return downloadWorkerFactory.get();
+        return injector.getInstance(DownloadWorkerFactory.class);
     }
 
     public FeaturesWriter getFeaturesWriter() {
-        return featuresWriter.get();
+        return injector.getInstance(FeaturesWriter.class);
     }
 
     public HTTPHeaderUtils getHttpHeaderUtils() {
-        return httpHeaderUtils.get();
+        return injector.getInstance(HTTPHeaderUtils.class);
     }
 
     public TrackerFactory getTrackerFactory() {
-        return trackerFactory.get();
+        return injector.getInstance(TrackerFactory.class);
     }
 
     public TrackerManagerFactory getTrackerManagerFactory() {
-        return trackerManagerFactory.get();
+        return injector.getInstance(TrackerManagerFactory.class);
     }
 
     public TorrentManager getTorrentManager() {
-        return torrentManager.get();
+        return injector.getInstance(TorrentManager.class);
     }
 
     public ManagedTorrentFactory getManagedTorrentFactory() {
-        return managedTorrentFactory.get();
+        return injector.getInstance(ManagedTorrentFactory.class);
     }
 
     public PushEndpointFactory getPushEndpointFactory() {
-        return pushEndpointFactory.get();
+        return injector.getInstance(PushEndpointFactory.class);
     }
 
     public HeadersFactory getHeadersFactory() {
-        return headersFactory.get();
+        return injector.getInstance(HeadersFactory.class);
     }
 
     public HandshakeResponderFactory getHandshakeResponderFactory() {
-        return handshakeResponderFactory.get();
+        return injector.getInstance(HandshakeResponderFactory.class);
     }
 
     public PushProxiesValueFactory getPushProxiesValueFactory() {
-        return pushProxiesValueFactory.get();
+        return injector.getInstance(PushProxiesValueFactory.class);
     }
 
     public PingReplyFactory getPingReplyFactory() {
-        return pingReplyFactory.get();
+        return injector.getInstance(PingReplyFactory.class);
     }
 
     public DHTControllerFactory getDhtControllerFactory() {
-        return dhtControllerFactory.get();
+        return injector.getInstance(DHTControllerFactory.class);
     }
 
     public DHTManager getDhtManager() {
-        return dhtManager.get();
+        return injector.getInstance(DHTManager.class);
     }
 
     public ConnectionManager getConnectionManager() {
-        return connectionManager.get();
+        return injector.getInstance(ConnectionManager.class);
     }
 
     public NetworkManager getNetworkManager() {
-        return networkManager.get();
+        return injector.getInstance(NetworkManager.class);
     }
 
     public UDPService getUdpService() {
-        return udpService.get();
+        return injector.getInstance(UDPService.class);
     }
 
     public Acceptor getAcceptor() {
-        return acceptor.get();
+        return injector.getInstance(Acceptor.class);
     }
     
     public ForMeReplyHandler getForMeReplyHandler() {
-        return forMeReplyHandler.get(); 
+        return injector.getInstance(ForMeReplyHandler.class);
     }
     
     public QueryUnicaster getQueryUnicaster() {
-        return queryUnicaster.get();
+        return injector.getInstance(QueryUnicaster.class);
     }
     
     public OnDemandUnicaster getOnDemandUnicaster() {
-        return onDemandUnicaster.get(); 
+        return injector.getInstance(OnDemandUnicaster.class);
     }
 
     public MessageRouter getMessageRouter() {
-        return messageRouter.get();
+        return injector.getInstance(MessageRouter.class);
     }
 
     public DownloadManager getDownloadManager() {
-        return downloadManager.get();
+        return injector.getInstance(DownloadManager.class);
     }
 
     public AltLocFinder getAltLocFinder() {
-        return altLocFinder.get();
+        return injector.getInstance(AltLocFinder.class);
     }
 
     public ConnectionDispatcher getConnectionDispatcher() {
-        return connectionDispatcher.get();
+        return injector.getInstance(ConnectionDispatcher.class);
     }
 
     public HTTPAcceptor getHTTPAcceptor() {
-        return httpAcceptor.get();
+        return injector.getInstance(HTTPAcceptor.class);
     }
 
     public HostCatcher getHostCatcher() {
-        return hostCatcher.get();
+        return injector.getInstance(HostCatcher.class);
     }
 
     public com.limegroup.gnutella.HTTPAcceptor getHttpUploadAcceptor() {
-        return httpUploadAcceptor.get();
+        return injector.getInstance(com.limegroup.gnutella.HTTPAcceptor.class);
     }
 
     public PushManager getPushManager() {
-        return pushManager.get();
+        return injector.getInstance(PushManager.class);
     }
 
     public ResponseVerifier getResponseVerifier() {
-        return responseVerifier.get();
+        return injector.getInstance(ResponseVerifier.class);
     }
 
     public SearchResultHandler getSearchResultHandler() {
-        return searchResultHandler.get();
+        return injector.getInstance(SearchResultHandler.class);
     }
 
     public AltLocManager getAltLocManager() {
-        return altLocManager.get();
+        return injector.getInstance(AltLocManager.class);
     }
 
     public ContentManager getContentManager() {
-        return contentManager.get();
+        return injector.getInstance(ContentManager.class);
     }
 
     public IPFilter getIpFilter() {
-        return ipFilter.get();
+        return injector.getInstance(IPFilter.class);
     }
 
     public HostileFilter getHostileFilter() {
-        return hostileFilter.get();
+        return injector.getInstance(HostileFilter.class);
     }
 
     public NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() {
-        return networkUpdateSanityChecker.get();
+        return injector.getInstance(NetworkUpdateSanityChecker.class);
     }
 
     public BandwidthManager getBandwidthManager() {
-        return bandwidthManager.get();
+        return injector.getInstance(BandwidthManager.class);
     }
 
     public HttpExecutor getHttpExecutor() {
-        return httpExecutor.get();
+        return injector.getInstance(HttpExecutor.class);
     }
 
     public QueryStats getQueryStats() {
-        return queryStats.get();
+        return injector.getInstance(QueryStats.class);
     }
 
     public NodeAssigner getNodeAssigner() {
-        return nodeAssigner.get();
+        return injector.getInstance(NodeAssigner.class);
     }
 
     public Statistics getStatistics() {
-        return statistics.get();
+        return injector.getInstance(Statistics.class);
     }
 
     public SecureMessageVerifier getSecureMessageVerifier() {
-        return secureMessageVerifier.get();
+        return injector.getInstance(SecureMessageVerifier.class);
     }
 
     public CreationTimeCache getCreationTimeCache() {
-        return creationTimeCache.get();
+        return injector.getInstance(CreationTimeCache.class);
     }
 
     public HttpRequestHandlerFactory getHttpRequestHandlerFactory() {
-        return httpRequestHandlerFactory.get();
+        return injector.getInstance(HttpRequestHandlerFactory.class); 
     }
 
     public UrnCache getUrnCache() {
-        return urnCache.get();
+        return injector.getInstance(UrnCache.class);
     }
 
     public FileManagerController getFileManagerController() {
-        return fileManagerController.get();
+        return injector.getInstance(FileManagerController.class);
     }
 
     public ResponseFactory getResponseFactory() {
-        return responseFactory.get();
+        return injector.getInstance(ResponseFactory.class);
+    }
+
+    public QueryReplyFactory getQueryReplyFactory() {
+        return injector.getInstance(QueryReplyFactory.class);
+    }
+
+    public StaticMessages getStaticMessages() {
+        return injector.getInstance(StaticMessages.class);
     }
 
 }

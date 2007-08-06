@@ -528,9 +528,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "stanford0");
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             sendF(ULTRAPEER[0], m);
             
             Thread.sleep(1000); // processing wait
@@ -558,9 +558,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             assertNotNull(token);
             
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null, token);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6356,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null, token);
             
             // send off the reply
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -597,9 +597,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "stanford2");
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6356,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             
             // send a ReplyNumberVM
             ReplyNumberVendorMessage replyNum = 
@@ -676,9 +676,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "not proxied");
         Message m = 
-            new QueryReply(query.getGUID(), (byte) 3, 6356, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null, token);
+            ProviderHacks.getQueryReplyFactory().createQueryReply(query.getGUID(), (byte) 3, 6356,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null, token);
         
         // and send them OOB 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

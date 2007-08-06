@@ -135,9 +135,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	 */
 	public void testLegacy() throws Exception {		
 		responses=new Response[0];
-		qr=new QueryReply(guid, (byte)5,
-									 0xF3F1, ip, 1, responses,
-									 guid, false);
+		qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xF3F1,
+                ip, 1, responses, guid, false);
 		assertEquals(1, qr.getSpeed());
 		assertEquals(Integer.toHexString(qr.getPort()), 0xF3F1, qr.getPort());
 
@@ -146,9 +145,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		responses=new Response[2];
 		responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
 		responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-		qr=new QueryReply(guid, (byte)5,
-						  0xFFFF, ip, u4, responses,
-						  guid, false);
+		qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, false);
 		assertEquals("254.0.0.1",qr.getIP());
 		assertEquals(0xFFFF, qr.getPort());
 		assertEquals(u4, qr.getSpeed());
@@ -170,8 +168,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		payload[3]=1;            //non-blank ip
 		payload[11+8]=(byte)65;  //The character 'A'
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-						  payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
 
 		iter=qr.getResults();
@@ -198,8 +196,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		payload[3]=1;                    //non-blank ip
         payload[11+8]=(byte)65;          //The character 'A'
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-						  payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         try {
             iter=qr.getResults();
@@ -233,7 +231,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+4+1+4+4]=(byte)0;   //null terminator
 		
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
         iter=qr.getResults();
         Response r = (Response)iter.next();
         assertEquals("Sumeet test1", "A",  r.getName());
@@ -258,7 +257,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+4+1+2]=(byte)4;  // set xml length
         payload[11+11+4+1+3]=(byte)0;
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
@@ -286,7 +286,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for (int i = 0; i < 20000; i++)
             payload[11+11+4+1+4+i] = 'a';
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         vendor=qr.getVendor();
         assertEquals(vendor, "LLME", vendor);
@@ -306,7 +307,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         try {
             qr.getNeedsPush();
@@ -331,7 +333,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         qr.getResults();
         
@@ -359,7 +362,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+4+1+1]=(byte)0x0; 
         payload[11+11+4+1+2]=(byte)1;         
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 						  
         vendor=qr.getVendor();
         assertEquals("unexpected vendor", "LIME", vendor);
@@ -399,7 +403,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         payload[11+11+4+1+4]=(byte)0x1; //supports chat
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 							  
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
@@ -426,7 +431,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload[11+11+4+1+1]=(byte)0x01;  // 0000 0001  //push understood
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+		qr=ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
@@ -442,10 +448,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         responses=new Response[2];
         responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
         responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          false, true, true, false, true, false);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, false, true, true, false,
+                true, false);
         assertEquals("254.0.0.1", qr.getIP());
         assertEquals(0xFFFF, qr.getPort());
         assertEquals(u4, qr.getSpeed());
@@ -473,10 +478,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         responses=new Response[2];
         responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
         responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          true, false, false, true, false, false);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, true, false, false, true,
+                false, false);
 
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -520,10 +524,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         responses=new Response[2];
         responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
         responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          true, false, false, true, false, false);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, true, false, false, true,
+                false, false);
 
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -569,10 +572,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         responses=new Response[2];
         responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
         responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          true, false, false, true, false, false);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, true, false, false, true,
+                false, false);
 
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -627,11 +629,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
         SSLSettings.TLS_INCOMING.setValue(false);
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid, new byte[0],
-                          true, false, false, true, false, false, true,
-                          proxies, null);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, new byte[0], true, false,
+                false, true, false, false, true, proxies, null);
         
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -679,9 +679,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         responses=new Response[2];
         responses[0]=ProviderHacks.getResponseFactory().createResponse(11, 22, "Sample.txt");
         responses[1]=ProviderHacks.getResponseFactory().createResponse(0x2FF2, 0xF11F, "Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid, false);
+        qr=ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)5, 0xFFFF,
+                ip, u4, responses, guid, false);
         try {
             qr.getVendor();
             fail("qr should have been invalid");
@@ -710,25 +709,20 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     public void testCalculateQualityOfService() {
         final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-        QueryReply reachableNonBusy=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
-            false, false,    //!needsPush, !isBusy
-            true, false, false, false);
-        QueryReply reachableBusy=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
-            false, true,     //!needsPush, isBusy
-            true, false, false, false);
-        QueryReply unreachableNonBusy=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
-            true, false,     //needsPush, !isBusy
-            true, false, false, false);
-        QueryReply unreachableBusy=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
-            true, true,      //needsPush, isBusy
-            true, false, false, false);
-        QueryReply oldStyle=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], 
-            new byte[16], false);
+        QueryReply reachableNonBusy=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                addr, 0l, new Response[0], new byte[16], false, false, true, false,
+                false, false);
+        QueryReply reachableBusy=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                addr, 0l, new Response[0], new byte[16], false, true, true, false,
+                false, false);
+        QueryReply unreachableNonBusy=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                addr, 0l, new Response[0], new byte[16], true, false, true, false,
+                false, false);
+        QueryReply unreachableBusy=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                addr, 0l, new Response[0], new byte[16], true, true, true, false,
+                false, false);
+        QueryReply oldStyle=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                addr, 0l, new Response[0], new byte[16], false);
         
         //Remember that a return value of N corresponds to N+1 stars
         assertEquals(3,  reachableNonBusy.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
@@ -1021,11 +1015,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 proxies.add(
                     new IpPortImpl(hosts[i], 6346));
             
-            QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           proxies);
+            QueryReply qr = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                    IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                    true, true, true, false, proxies);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qr.write(baos);
@@ -1057,11 +1049,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         proxies.add(new ConnectableImpl("1.2.3.5", 5, true));
         proxies.add(new ConnectableImpl("1.2.3.6", 5, true));
         proxies.add(new ConnectableImpl("1.2.3.7", 5, false));
-        QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                6346, IP, 0, new Response[0],
-                GUID.makeGuid(), new byte[0],
-                false, false, true, true, true, false,
-                proxies);
+        QueryReply qr = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, proxies);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         qr.write(out);
         
@@ -1138,11 +1128,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 			    
 			// then actually create a QueryReply and read it, to make
 			// sure we can write & read stuff correctly.
-            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, hits,
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);			    
+            QueryReply qReply = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                    IP, 0, hits, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, true, false, null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
@@ -1196,11 +1184,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 			    
 			// then actually create a QueryReply and read it, to make
 			// sure we can write & read stuff correctly.
-            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, hits,
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);			    
+            QueryReply qReply = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                    IP, 0, hits, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, true, false, null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
@@ -1232,7 +1218,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 		//payload[11+8]=(byte)65;  //The character 'A'
 
 		QueryReply qr = 
-            new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+            ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)5,
+                (byte)0, payload);
 
         
         try {
@@ -1307,21 +1294,21 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     
     public void testSecurityTokenBytesSetAndParsed() throws IllegalArgumentException, IOException, BadPacketException {
         Response r = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
-        QueryReply query = new QueryReply(GUID.makeGuid(), (byte)1, 1459, 
-                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r },
-                GUID.makeGuid(), new byte[0], false, false, false, false, false,
-                false, false, IpPort.EMPTY_SET, _token);
+        QueryReply query = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
                 
         assertEquals(_token.getBytes(), query.getSecurityToken());
         
         // test copy constructor preserves security bytes
-        query = new QueryReply(GUID.makeGuid(), query);
+        query = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), query);
         assertEquals(_token.getBytes(), query.getSecurityToken());
         
         // test network constructor
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         query.writePayload(out);
-        query = new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, out.toByteArray());
+        query = ProviderHacks.getQueryReplyFactory().createFromNetwork(GUID.makeGuid(), (byte)1,
+                (byte)1, out.toByteArray());
         assertEquals(_token.getBytes(), query.getSecurityToken());
     }
     
@@ -1382,7 +1369,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         payload.reset();
         out.writeTo(payload);
         
-        return new QueryReply(new byte[16], (byte)1, (byte)1, out.toByteArray());
+        return ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)1,
+                (byte)1, out.toByteArray());
     }
 
     private void addFilesToLibrary() throws Exception {

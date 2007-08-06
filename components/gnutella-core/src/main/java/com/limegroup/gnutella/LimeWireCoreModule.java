@@ -44,6 +44,8 @@ import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
@@ -90,6 +92,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
         bind(FileManagerController.class).to(FileManagerControllerImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
+        bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -132,6 +135,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
         //bind(CreationTimeCache.class);
         //bind(UrnCache.class);
+        //bind(StaticMessage.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);

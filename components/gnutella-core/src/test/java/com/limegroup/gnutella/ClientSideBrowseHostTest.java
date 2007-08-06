@@ -24,7 +24,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -90,10 +89,9 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             proxies[0] = new IpPortImpl("127.0.0.1", 7000);
             Response[] res = new Response[1];
             res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
-            m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
-                    InetAddress.getLocalHost().getAddress(), 0, res, 
-                    clientGUID, new byte[0], false, false, true,
-                    true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[0].send(m);
             testUP[0].flush();
 
@@ -160,10 +158,9 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
             res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "nyu.edu");
-            m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
-                    InetAddress.getLocalHost().getAddress(), 0, res, 
-                    clientGUID, new byte[0], false, false, true,
-                    true, false, false, proxies);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6999,
+                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
+                    true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
@@ -269,10 +266,9 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         proxies.add(new IpPortImpl("127.0.0.1", 7001));
         Response[] res = new Response[1];
         res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita");
-        m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
-                           InetAddress.getLocalHost().getAddress(), 0, res, 
-                           clientGUID, new byte[0], false, false, true,
-                           true, false, false, proxies);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+                InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false, true,
+                true, false, false, proxies);
         testUP[0].send(m);
         testUP[0].flush();
 

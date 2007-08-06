@@ -13,32 +13,46 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.Data;
 
+@Singleton
 public final class StaticMessages {
     
     private static final Log LOG = LogFactory.getLog(StaticMessages.class);
 
-    private static volatile QueryReply updateReply, limeReply;
+    private volatile QueryReply updateReply;
+    private volatile QueryReply limeReply;
     
-    public static void initialize() {
+    private final QueryReplyFactory queryReplyFactory;
+    private final Provider<SimppManager> simppManager;
+    
+    @Inject
+    public StaticMessages(QueryReplyFactory queryReplyFactory, Provider<SimppManager> simppManager) {
+        this.queryReplyFactory = queryReplyFactory;
+        this.simppManager = simppManager;
+    }
+   
+    public void initialize() {
         reloadMessages();
-        SimppManager.instance().addListener(new SimppListener() {
+        simppManager.get().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {
                 reloadMessages();
             }
         });
     }
     
-    private static void reloadMessages() {
+    private void reloadMessages() {
         updateReply = readUpdateReply();
         limeReply = createLimeReply();
     }
     
-    private static QueryReply readUpdateReply() {
+    private QueryReply readUpdateReply() {
         try {
             return createReply(new FileInputStream(new File(CommonUtils.getUserSettingsDir(), "data.ser")));
         } catch (FileNotFoundException bad) {
@@ -46,17 +60,18 @@ public final class StaticMessages {
         }
     }
     
-    private static QueryReply createLimeReply() {
+    private QueryReply createLimeReply() {
         byte [] reply = Base32.decode(SearchSettings.LIME_SIGNED_RESPONSE.getValue());
         return createReply(new ByteArrayInputStream(reply));
     }
     
-    private static QueryReply createReply(InputStream source) {
+    private QueryReply createReply(InputStream source) {
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(source);
             byte[] payload = ((Data) in.readObject()).data;
-            return new QueryReply(new byte[16], (byte) 1, (byte) 0, payload);
+            return queryReplyFactory.createFromNetwork(new byte[16], (byte) 1,
+                    (byte) 0, payload);
         } catch (Throwable t) {
             LOG.error("Unable to read serialized data", t);
             return null;
@@ -65,11 +80,11 @@ public final class StaticMessages {
         }
     }
     
-    public static QueryReply getUpdateReply() {
+    public QueryReply getUpdateReply() {
         return updateReply;
     }
     
-    public static QueryReply getLimeReply() {
+    public QueryReply getLimeReply() {
         return limeReply;
     }
 }

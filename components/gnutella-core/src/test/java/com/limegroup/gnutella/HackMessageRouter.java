@@ -19,6 +19,7 @@ public class HackMessageRouter extends StandardMessageRouter {
                         .getUdpService(), ProviderHacks
                         .getSearchResultHandler(), ProviderHacks
                         .getSocketsManager(), ProviderHacks.getHostCatcher(),
+                        ProviderHacks.getQueryReplyFactory(), ProviderHacks.getStaticMessages(),
                 ProviderHacks.getStatistics()
 
         );

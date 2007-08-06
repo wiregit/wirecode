@@ -11,6 +11,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
@@ -95,9 +96,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                 ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel jumps high" + i),
                 ProviderHacks.getResponseFactory().createResponse(10, 10, "sleepy susheel" + i),
             };
-            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -147,9 +148,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel good"+i+j);
 
-            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -180,9 +181,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         testUP[0].send(m);
         testUP[0].flush();
@@ -215,9 +216,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
 
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -236,9 +237,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is sweet"+j);
 
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         testUP[2].send(m);
         testUP[2].flush();
@@ -254,9 +255,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is young"+j);
 
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         testUP[1].send(m);
         testUP[1].flush();
@@ -286,9 +287,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is pretty"+j);
 
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         testUP[0].send(m);
         testUP[0].flush();
@@ -340,9 +341,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita kasevan "+j);
 
-        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         testUP[0].send(m);
         testUP[0].flush();

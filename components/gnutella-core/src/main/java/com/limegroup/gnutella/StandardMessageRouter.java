@@ -31,8 +31,10 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
@@ -76,13 +78,15 @@ public class StandardMessageRouter extends MessageRouter {
             SearchResultHandler searchResultHandler,
             SocketsManager socketsManager,
             HostCatcher hostCatcher,
+            QueryReplyFactory queryReplyFactory,
+            StaticMessages staticMessages,
             Statistics statistics) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
                 fileManager, contentManager, dhtManager, uploadManager,
                 downloadManager, udpService, searchResultHandler,
-                socketsManager, hostCatcher);
+                socketsManager, hostCatcher, queryReplyFactory, staticMessages);
         this.statistics = statistics;
     }
     
@@ -486,14 +490,10 @@ public class StandardMessageRouter extends MessageRouter {
                         xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
                     
                     // create the new queryReply
-                    queryReply = new QueryReply(guid, ttl, port, ip, speed, 
-                                                currResps, _clientGUID, 
-                                                xmlCompressed, notIncoming, 
-                                                busy, uploaded, 
-                                                measuredSpeed, 
-                                                ChatSettings.CHAT_ENABLED.getValue(),
-                                                isFromMcast, isFWTransfer,
-                                                proxies, securityToken);
+                    queryReply = queryReplyFactory.createQueryReply(guid, ttl,
+                            port, ip, speed, currResps, _clientGUID,
+                            xmlCompressed, notIncoming, busy, uploaded, measuredSpeed,
+                            ChatSettings.CHAT_ENABLED.getValue(), isFromMcast, isFWTransfer, proxies, securityToken);
                     queryReplies.add(queryReply);
                 }
             }
@@ -509,13 +509,10 @@ public class StandardMessageRouter extends MessageRouter {
                 xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
             
             // create the new queryReply
-            queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
-                                        _clientGUID, xmlCompressed,
-                                        notIncoming, busy, uploaded, 
-                                        measuredSpeed, 
-                                        ChatSettings.CHAT_ENABLED.getValue(),
-                                        isFromMcast, isFWTransfer,
-                                        proxies, securityToken);
+            queryReply = queryReplyFactory.createQueryReply(guid, ttl, port,
+                    ip, speed, res, _clientGUID, xmlCompressed, notIncoming,
+                    busy, uploaded, measuredSpeed, ChatSettings.CHAT_ENABLED.getValue(), isFromMcast, isFWTransfer,
+                    proxies, securityToken);
             queryReplies.add(queryReply);
         }
 

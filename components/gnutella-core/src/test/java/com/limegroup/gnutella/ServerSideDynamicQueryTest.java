@@ -92,13 +92,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // make sure probes are routed back correctly....
 		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=new QueryReply(request.getGUID(),
-										 (byte)2,
-										 6346,
-										 IP,
-										 56,
-										 new Response[] {response1},
-										 guid1, false);
+		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();
@@ -147,13 +142,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // make sure probes are routed back correctly....
 		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=new QueryReply(request.getGUID(),
-										 (byte)2,
-										 6346,
-										 IP,
-										 56,
-										 new Response[] {response1},
-										 guid1, false);
+		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();

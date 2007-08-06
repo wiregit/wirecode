@@ -16,6 +16,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
@@ -152,9 +153,9 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
                 ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel jumps high" + i),
                 ProviderHacks.getResponseFactory().createResponse(10, 10, "sleepy susheel" + i),
             };
-            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }

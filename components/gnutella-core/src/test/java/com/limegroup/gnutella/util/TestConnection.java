@@ -34,7 +34,7 @@ public abstract class TestConnection extends ManagedConnection {
     protected QueryRouteTable QRT;
     
     TestConnection(int connections) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory());
+        super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory(), ProviderHacks.getQueryReplyFactory());
         CONNECTIONS = connections;
     }
     

@@ -276,13 +276,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		drain(LEAF);
 		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "response1.txt");
 		byte[] clientGUID = GUID.makeGuid();
-		QueryReply reply1=new QueryReply(qr.getGUID(),
-										 (byte)2,
-										 6346,
-										 IP,
-										 56,
-										 new Response[] {response1},
-										 clientGUID, false);
+		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response1}, clientGUID, false);
 		ULTRAPEER_2.send(reply1);
 		ULTRAPEER_2.flush();
 		
@@ -294,8 +289,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		Response response2 = ProviderHacks.getResponseFactory().createResponse(0l, 0l, "response2.txt");
 		byte[] guid2 = GUID.makeGuid();
 		QueryReply reply2 = 
-			new QueryReply(qr.getGUID(), (byte)2, 6346, IP,
-						   56, new Response[] {response2}, guid2, false);
+			ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response2}, guid2, false);
 		ULTRAPEER_1.send(reply2);
 		ULTRAPEER_1.flush();
 		

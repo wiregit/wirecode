@@ -242,9 +242,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
             res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
-            m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                    clientGUID, new byte[0], true, false, true, true, false,
-                    false, proxies);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, clientGUID, new byte[0], true, false,
+                    true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
@@ -379,9 +379,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // send a reply with NO PushProxy info
         Response[] res = new Response[1];
         res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "golf is awesome");
-        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                clientGUID, new byte[0], false, false, true, true, false,
-                false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+                myIP(), 0, res, clientGUID, new byte[0], false, false, true,
+                true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -440,9 +440,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             proxies.add(new IpPortImpl("127.0.0.1", 8000));
             Response[] res = new Response[1];
             res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "berkeley.edu");
-            m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                    clientGUID, new byte[0], true, false, true, true, false,
-                    false, proxies);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, clientGUID, new byte[0], true, false,
+                    true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 

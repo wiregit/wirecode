@@ -296,12 +296,9 @@ public class RequeryDownloadTest
         Response response = newResponse(0l, TestFile.length(),
                                         responseName, responseURNs);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply reply = new QueryReply(guidToUse, 
-            (byte)6, 6666, ip, 0l, 
-            new Response[] { response }, new byte[16],
-            false, false, //needs push, is busy
-            true, false,  //finished upload, measured speed
-            false, false);//supports chat, is multicast response....
+        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guidToUse, (byte)6, 6666,
+                ip, 0l, new Response[] { response }, new byte[16], false, false, true, false,
+                false, false);//supports chat, is multicast response....
         _router.handleQueryReply(reply, ProviderHacks.getManagedConnectionFactory().createManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.

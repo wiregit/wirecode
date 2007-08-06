@@ -150,9 +150,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+j);
         Message m = 
-            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null, ack.getSecurityToken());
+            ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null, ack.getSecurityToken());
         baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();
@@ -327,9 +327,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+i+j);
             Message m = 
-                new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
 
             testUP[i].send(m);
             testUP[i].flush();
@@ -489,9 +489,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+j);
         Message m = 
-            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+            ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();

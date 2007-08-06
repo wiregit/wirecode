@@ -140,9 +140,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -218,9 +218,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -230,10 +230,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -342,9 +341,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -354,10 +353,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -469,9 +467,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -481,10 +479,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "metadata "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -584,9 +581,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -699,9 +696,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -831,9 +828,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         { // send back a query request, the TestUploader should service upload
             rfd = makeRFD(urn, UPLOADER_PORT + 1);
             Response[] res = new Response[] { ProviderHacks.getResponseFactory().createResponse(10, 10, "whatever") };
-            m = new QueryReply(urnQueryGUID, (byte) 1, UPLOADER_PORT+1, myIP(), 
-                               0, res, GUID.makeGuid(), new byte[0], false, 
-                               false, true, true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(urnQueryGUID, (byte) 1,
+                    UPLOADER_PORT+1, myIP(), 0, res, GUID.makeGuid(),
+                    new byte[0], false, false, true, true, false, false, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             m.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -883,9 +880,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1019,9 +1016,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1141,9 +1138,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
                 res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }

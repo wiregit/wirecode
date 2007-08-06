@@ -114,23 +114,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     private QueryReply newQueryReply(Response[] responses) throws Exception {
         QueryReply reply = 
-               new QueryReply( new byte[16]
-                             , (byte)1
-                             , 6346
-                             , new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }
-                             , 1
-                             , responses
-                             , new byte[16]
-                             , LimeXMLDocumentHelper.getAggregateString(responses).getBytes()
-                             , false
-                             , false
-                             , true
-                             , true
-                             , false
-                             , false
-                             , false
-                             , Collections.EMPTY_SET
-                             , null);
+               ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)1, 6346,
+                new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], LimeXMLDocumentHelper.getAggregateString(responses).getBytes(), false, false,
+                true, true, false, false, false, Collections.EMPTY_SET, null);
         PrivilegedAccessor.invokeMethod(ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", reply);
         return reply;
     }

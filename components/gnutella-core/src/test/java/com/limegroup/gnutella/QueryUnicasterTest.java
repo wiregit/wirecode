@@ -294,10 +294,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         for (int i = 0; i< resps.length; i++)
             resps[i] = ProviderHacks.getResponseFactory().createResponse(i, i, ""+i);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply toReturn = new QueryReply(guid,
-                                             (byte) 2,
-                                             1, ip, 0, resps,
-                                             GUID.makeGuid(), false);
+        QueryReply toReturn = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 2, 1,
+                ip, 0, resps, GUID.makeGuid(), false);
         return toReturn;
     }
 

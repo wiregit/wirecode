@@ -30,7 +30,9 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -130,15 +132,19 @@ public class ProviderHacks {
     public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
     public static UrnCache getUrnCache() { i(); return core.getUrnCache(); }
     
-    public static ResponseFactory getResponseFactory() { i(); return core.getResponseFactory(); }
+    // Cleaned up in all but message parsers & tests
+    public static QueryReplyFactory getQueryReplyFactory() { i(); return core.getQueryReplyFactory(); }    
     
     // Cleaned up in all but RS & tests
     public static Statistics getStatistics() { i(); return core.getStatistics(); }
+    public static StaticMessages getStaticMessages() { i(); return core.getStaticMessages(); }
     
     // Cleaned up in all but tests
+    public static ResponseFactory getResponseFactory() { i(); return core.getResponseFactory(); }
     public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
     public static FileManagerController getFileManagerController() { i(); return core.getFileManagerController(); }
     public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
+
 
     
 }

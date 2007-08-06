@@ -56,6 +56,7 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
@@ -319,6 +320,8 @@ public abstract class MessageRouter {
     protected final SearchResultHandler searchResultHandler;
     protected final SocketsManager socketsManager;
     protected final HostCatcher hostCatcher;
+    protected final QueryReplyFactory queryReplyFactory;
+    protected final StaticMessages staticMessages;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -341,7 +344,9 @@ public abstract class MessageRouter {
             UDPService udpService,
             SearchResultHandler searchResultHandler,
             SocketsManager socketsManager,
-            HostCatcher hostCatcher
+            HostCatcher hostCatcher,
+            QueryReplyFactory queryReplyFactory,
+            StaticMessages staticMessages
             ) {
         _clientGUID = RouterService.getMyGUID();
         this.networkManager = networkManager;
@@ -362,6 +367,8 @@ public abstract class MessageRouter {
         this.searchResultHandler = searchResultHandler;
         this.socketsManager = socketsManager;
         this.hostCatcher = hostCatcher;
+        this.queryReplyFactory = queryReplyFactory;
+        this.staticMessages = staticMessages;
          
     }
     
@@ -690,7 +697,7 @@ public abstract class MessageRouter {
             // check to see if it was from the multicast map.
             byte[] origGUID = _multicastGuidMap.getOriginalGUID(msg.getGUID());
             if(origGUID != null) {
-                msg = new QueryReply(origGUID, (QueryReply)msg);
+                msg = queryReplyFactory.createQueryReply(origGUID, (QueryReply)msg);
                 ((QueryReply)msg).setMulticastAllowed(true);
             }
         }
@@ -2513,8 +2520,8 @@ public abstract class MessageRouter {
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
         
         if (SearchSettings.SEND_LIME_RESPONSES.getBoolean() &&
-                request.isQueryForLW() && StaticMessages.getLimeReply() != null) {
-            QueryReply qr = new QueryReply(request.getGUID(),StaticMessages.getLimeReply());
+                request.isQueryForLW() && staticMessages.getLimeReply() != null) {
+            QueryReply qr = queryReplyFactory.createQueryReply(request.getGUID(), staticMessages.getLimeReply());
             qr.setHops((byte)0);
             qr.setTTL((byte)(request.getHops()+1));
             try {
@@ -2527,10 +2534,10 @@ public abstract class MessageRouter {
             return;
         
         Connection c = (Connection) handler;
-        QueryReply update = StaticMessages.getUpdateReply();
+        QueryReply update = staticMessages.getUpdateReply();
         if (request.getHops() == 1 && c.isOldLimeWire()) {
             if (update != null) {
-                QueryReply qr = new QueryReply(request.getGUID(), update);
+                QueryReply qr = queryReplyFactory.createQueryReply(request.getGUID(), update);
                 try {
                     sendQueryReply(qr);
                 } catch (IOException ignored) {

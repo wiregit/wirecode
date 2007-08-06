@@ -195,10 +195,9 @@ public class UnicastSimulator {
                                     query + " - " + 
                                     rand.nextInt(250));
                         }
-                        QueryReply qr = new QueryReply(inGUID, (byte) 5,
-                                                       port, _localAddress,
-                                                       0, resps, 
-                                                       GUID.makeGuid(), false);
+                        QueryReply qr = ProviderHacks.getQueryReplyFactory().createQueryReply(inGUID,
+                                (byte) 5, port, _localAddress, 0, resps,
+                                GUID.makeGuid(), false);
                         // send the QR...
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());

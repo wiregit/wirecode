@@ -56,6 +56,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -302,6 +303,7 @@ public class ManagedConnection extends Connection
     private final QueryRequestFactory queryRequestFactory;
     private final HeadersFactory headersFactory;
     private final HandshakeResponderFactory handshakeResponderFactory;
+    private final QueryReplyFactory queryReplyFactory;
     
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -316,13 +318,15 @@ public class ManagedConnection extends Connection
             ConnectionManager connectionManager, NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory,
-            HandshakeResponderFactory handshakeResponderFactory) {
+            HandshakeResponderFactory handshakeResponderFactory,
+            QueryReplyFactory queryReplyFactory) {
         super(host, port, type);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.headersFactory = headersFactory;
         this.handshakeResponderFactory = handshakeResponderFactory;
+        this.queryReplyFactory = queryReplyFactory;
         
     }
 
@@ -339,13 +343,15 @@ public class ManagedConnection extends Connection
             ConnectionManager connectionManager, NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory,
-            HandshakeResponderFactory handshakeResponderFactory) {
+            HandshakeResponderFactory handshakeResponderFactory,
+            QueryReplyFactory queryReplyFactory) {
         super(socket);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.headersFactory = headersFactory;
         this.handshakeResponderFactory = handshakeResponderFactory;
+        this.queryReplyFactory = queryReplyFactory;
     }
     
     /**
@@ -1098,7 +1104,7 @@ public class ManagedConnection extends Connection
             if (origGUID != null) {
             	checkOOB = false;
                 byte prevHops = queryReply.getHops();
-                queryReply = new QueryReply(origGUID, queryReply);
+                queryReply = queryReplyFactory.createQueryReply(origGUID, queryReply);
                 queryReply.setTTL((byte)2); // we ttl 1 more than necessary
                 queryReply.setHops(prevHops);
             }

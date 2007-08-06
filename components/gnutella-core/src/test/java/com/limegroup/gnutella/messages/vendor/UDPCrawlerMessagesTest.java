@@ -34,7 +34,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -554,9 +553,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "not proxied");
         Message reply = 
-            new QueryReply(GUID.makeGuid(), (byte) 3, 6356, InetAddress.getLocalHost().getAddress(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+            ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 3, 6356,
+                InetAddress.getLocalHost().getAddress(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         
         int [] sent = new int[]{1,2,3,1,2,3};
         LEAF_1.send(reply);LEAF_1.flush();

@@ -7,7 +7,6 @@ import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -43,8 +42,8 @@ public class IPFilterTest extends LimeTestCase{
             (Message)ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, address, false)));
         byte[] address2=new byte[] {(byte)18, (byte)239, (byte)0, (byte)143};
         assertTrue(! filter.allow(
-            new QueryReply(new byte[16], (byte)3, 6346, address2, 0,
-                           new Response[0], new byte[16], false)));
+            ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)3, 6346,
+                    address2, 0, new Response[0], new byte[16], false)));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3)));
         PushRequest push1=new PushRequest( 
             new byte[16], (byte)3, new byte[16], 0l, address, 6346);

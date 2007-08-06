@@ -340,7 +340,8 @@ public class MessageFactory {
                 throw new BadPacketException("Query reply too short: " + payload.length);
             }
             
-            return new QueryReply(guid, ttl, hops, payload, network);
+            return ProviderHacks.getQueryReplyFactory().createFromNetwork(guid, ttl, hops,
+                    payload, network);
         }
     }
     

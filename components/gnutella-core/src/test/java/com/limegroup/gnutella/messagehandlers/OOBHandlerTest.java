@@ -573,9 +573,9 @@ public class OOBHandlerTest extends LimeTestCase {
         for (int j = 0; j < res.length; j++)
             res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel" + j + offset);
 
-        return new QueryReply(guid, (byte) 1, 1, addr, 0, res, GUID.makeGuid(),
-                new byte[0], needsPush, false, true, true, false, false, true,
-                null, token);
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, 1,
+                addr, 0, res, GUID.makeGuid(), new byte[0], needsPush, false,
+                true, true, false, false, true, null, token);
     }
 
     private static class MyMessageRouter extends MessageRouterStub {

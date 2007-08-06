@@ -59,8 +59,8 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(m);
 
         // send QueryReply with priority 1
-        m=new QueryReply(new byte[16], (byte)5, 6340, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6340,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(30000);
         QUEUE.add(m);
         
@@ -73,8 +73,8 @@ public class CompositeQueueTest extends LimeTestCase {
                                  0, IP, 6342));
                                  
         // send QueryReply with priority 1
-        m=new QueryReply(new byte[16], (byte)5, 6343, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6343,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(30000);
         QUEUE.add(m);
                                  
@@ -89,8 +89,8 @@ public class CompositeQueueTest extends LimeTestCase {
                                  0, IP, 6346));                                                                                                                                    
                                  
         // send QueryReply with priority 7                                 
-        m=new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
+                IP, 0, new Response[0], new byte[16], false);
         QUEUE.add(m);
         
         // send PingReply with 3 hops
@@ -104,14 +104,14 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(m);        
         
         // send QueryReply with priority 2
-        m=new QueryReply(new byte[16], (byte)5, 6344, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6344,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(20000);
         QUEUE.add(m);
         
         // send QueryReply with priority 0
-        m=new QueryReply(new byte[16], (byte)5, 6345, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6345,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(50000);
         QUEUE.add(m);              
         
@@ -128,14 +128,14 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(m);
         
         // send QueryReply with priority 4
-        m=new QueryReply(new byte[16], (byte)5, 6346, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(5000);
         QUEUE.add(m);            
         
         // send QueryReply with priority 5
-        m=new QueryReply(new byte[16], (byte)5, 6342, IP, 0, 
-                         new Response[0], new byte[16], false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6342,
+                IP, 0, new Response[0], new byte[16], false);
         m.setPriority(1000);
         QUEUE.add(m);
         
@@ -376,8 +376,8 @@ public class CompositeQueueTest extends LimeTestCase {
         //  PING: 
         //  OTHER: reset
         QUEUE.add(new PingRequest((byte)1));
-        QUEUE.add(new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
-                                new Response[0], new byte[16], false));
+        QUEUE.add(ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
+                IP, 0, new Response[0], new byte[16], false));
         QUEUE.add(new ResetTableMessage(1024, (byte)2));
         QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
         m=QUEUE.removeNext();

@@ -9,6 +9,7 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -20,18 +21,21 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final QueryRequestFactory queryRequestFactory;
     private final HeadersFactory headersFactory;
     private final HandshakeResponderFactory handshakeResponderFactory;
+    private final QueryReplyFactory queryReplyFactory;
 
     @Inject
     public ManagedConnectionFactoryImpl(ConnectionManager connectionManager,
             NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory,
-            HandshakeResponderFactory handshakeResponderFactory) {
+            HandshakeResponderFactory handshakeResponderFactory,
+            QueryReplyFactory queryReplyFactory) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.headersFactory = headersFactory;
         this.handshakeResponderFactory = handshakeResponderFactory;
+        this.queryReplyFactory = queryReplyFactory;
     }
 
     /*
@@ -54,7 +58,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             ConnectType type) {
         return new ManagedConnection(host, port, type, connectionManager,
                 networkManager, queryRequestFactory, headersFactory,
-                handshakeResponderFactory);
+                handshakeResponderFactory, queryReplyFactory);
     }
 
     /*
@@ -64,6 +68,6 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
      */
     public ManagedConnection createManagedConnection(Socket socket) {
         return new ManagedConnection(socket, connectionManager, networkManager,
-                queryRequestFactory, headersFactory, handshakeResponderFactory);
+                queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory);
     }
 }

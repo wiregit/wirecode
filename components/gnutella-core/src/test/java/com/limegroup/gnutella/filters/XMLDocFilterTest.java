@@ -90,7 +90,8 @@ public class XMLDocFilterTest extends KeywordFilterTest {
         // write out to network so it is parsed again and xml docs are constructed
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         qr.writePayload(out);
-        qr = new QueryReply(GUID.makeGuid(), (byte) 1, (byte) 1, out.toByteArray());
+        qr = ProviderHacks.getQueryReplyFactory().createFromNetwork(GUID.makeGuid(), (byte) 1,
+                (byte) 1, out.toByteArray());
         
         // hack, query replies have to be equipped with xml again
         PrivilegedAccessor.invokeMethod(ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", qr);

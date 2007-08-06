@@ -38,24 +38,24 @@ public class PriorityMessageQueueTest extends LimeTestCase {
         //By guid volume
         PriorityMessageQueue q=new PriorityMessageQueue(
             1000, Integer.MAX_VALUE, 100);
-        m=new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
-                         new Response[0], new byte[16], 
-                         false, false, false, false, false, false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
+                IP, 0, new Response[0], new byte[16], false, false, false, false,
+                false, false);
         m.setPriority(1000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6331, IP, 0, 
-                         new Response[0], new byte[16],
-                         false, false, false, false, false, false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6331,
+                IP, 0, new Response[0], new byte[16], false, false, false, false,
+                false, false);
         m.setPriority(1000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6349, IP, 0, 
-                         new Response[0], new byte[16],
-                         false, false, false, false, false, false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6349,
+                IP, 0, new Response[0], new byte[16], false, false, false, false,
+                false, false);
         m.setPriority(9000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6340, IP, 0, 
-                         new Response[0], new byte[16],
-                         false, false, false, false, false, false);
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6340,
+                IP, 0, new Response[0], new byte[16], false, false, false, false,
+                false, false);
         m.setPriority(0);
         q.add(m);
         m=q.removeNextInternal();

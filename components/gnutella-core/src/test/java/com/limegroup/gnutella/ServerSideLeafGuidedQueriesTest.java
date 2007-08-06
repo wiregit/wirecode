@@ -330,8 +330,8 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         byte[] ip = new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
         byte[] clientGUID = GUID.makeGuid();
         Response[] resp = new Response[] {ProviderHacks.getResponseFactory().createResponse(0, 10, "berkeley")};
-        QueryReply reply = new QueryReply(guid, (byte)3, 6346, ip, 0, resp,
-                                          clientGUID, false);
+        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)3, 6346,
+                ip, 0, resp, clientGUID, false);
         source.send(reply);
         source.flush();
     }

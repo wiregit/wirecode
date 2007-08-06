@@ -50,7 +50,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         Thread.sleep(1000);
         QueryReply r = getFirstQueryReply(testUP[0]);
         assertNotNull(r);
-        QueryReply expected = StaticMessages.getLimeReply();
+        QueryReply expected = ProviderHacks.getStaticMessages().getLimeReply();
         assertTrue(expected.getResultsAsList().containsAll(r.getResultsAsList()));
         assertTrue(r.getResultsAsList().containsAll(expected.getResultsAsList()));
         

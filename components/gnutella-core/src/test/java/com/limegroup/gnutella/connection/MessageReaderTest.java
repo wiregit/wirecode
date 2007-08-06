@@ -17,7 +17,6 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -62,11 +61,9 @@ public final class MessageReaderTest extends LimeTestCase {
     public void testReadMultipleMessages() throws Exception {
         Message out1 = new PingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         Message[] allOut = new Message[] { out1, out2, out3, out4, out5 };
@@ -92,11 +89,9 @@ public final class MessageReaderTest extends LimeTestCase {
     public void testBadPacketIgnored() throws Exception {
         Message out1 = new PingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
@@ -123,11 +118,9 @@ public final class MessageReaderTest extends LimeTestCase {
     public void testLargeLengthThrows() throws Exception {
         Message out1 = new PingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
@@ -160,11 +153,9 @@ public final class MessageReaderTest extends LimeTestCase {
     public void testSmallLengthThrows() throws Exception {
         Message out1 = new PingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
