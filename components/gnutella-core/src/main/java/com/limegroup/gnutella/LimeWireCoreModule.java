@@ -37,6 +37,7 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
+import com.limegroup.gnutella.downloader.InNetworkCallback;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
 import com.limegroup.gnutella.filters.IPFilter;
