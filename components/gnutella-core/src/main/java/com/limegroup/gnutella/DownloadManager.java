@@ -354,12 +354,17 @@ public class DownloadManager implements BandwidthTracker {
             } else if(md.shouldBeRemoved()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
-            } else if(hasFreeSlot() && (md.shouldBeRestarted())) {
+            } 
+            // handle downloads from LWS seperately, only allow 1 at a time
+            else if( storeDownloadCount == 0 && md instanceof StoreDownloader ) {
+                i.remove();
+                storeDownloadCount++;
+                active.add(md);
+                md.startDownload();
+            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && !(md instanceof StoreDownloader)) {
                 i.remove();
                 if(md instanceof InNetworkDownloader)
                     innetworkCount++;
-                if(md instanceof StoreDownloader)
-                    storeDownloadCount++;
                 active.add(md);
                 md.startDownload();
             } else {
