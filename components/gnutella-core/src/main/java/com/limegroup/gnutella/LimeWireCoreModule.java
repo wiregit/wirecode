@@ -31,10 +31,14 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
+import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
+import com.limegroup.gnutella.downloader.DownloadReferencesFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
+import com.limegroup.gnutella.downloader.RequeryManagerFactory;
+import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
@@ -93,6 +97,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FileManagerController.class).to(FileManagerControllerImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
+        bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
+        bind(DownloadReferencesFactory.class).to(DownloadReferencesFactoryImpl.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -135,7 +141,11 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
         //bind(CreationTimeCache.class);
         //bind(UrnCache.class);
-        //bind(StaticMessage.class);
+        //bind(StaticMessages.class);
+        //bind(SavedFileManager.class);
+        bind(DownloadCallback.class).to(ActivityCallback.class);
+        bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);
+        //bind(InNetworkCallback.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);

@@ -32,14 +32,14 @@ import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.DownloadReferences;
+import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -56,7 +56,6 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /** 
@@ -87,12 +86,8 @@ public class DownloadManager implements BandwidthTracker {
 
     /** The callback for notifying the GUI of major changes. */
     private DownloadCallback callback;
-    /** The callback for innetwork downloaders. */
-    private DownloadCallback innetworkCallback;
     /** The message router to use for pushes. */
     private MessageRouter router;
-    /** Used to check if the file exists. */
-    private FileManager fileManager;
     /** The repository of incomplete files 
      *  INVARIANT: incompleteFileManager is same as those of all downloaders */
     private IncompleteFileManager incompleteFileManager
@@ -154,10 +149,16 @@ public class DownloadManager implements BandwidthTracker {
     private PushDownloadManager pushManager;
     
     private final NetworkManager networkManager;
+    private final DownloadReferencesFactory downloadReferencesFactory;
+    private final DownloadCallback innetworkCallback;
     
     @Inject
-    public DownloadManager(NetworkManager networkManager) {
+    public DownloadManager(NetworkManager networkManager,
+            DownloadReferencesFactory downloadReferencesFactory,
+            @Named("inNetwork") DownloadCallback innetworkCallback) {
         this.networkManager = networkManager;
+        this.downloadReferencesFactory = downloadReferencesFactory;
+        this.innetworkCallback = innetworkCallback;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -183,9 +184,7 @@ public class DownloadManager implements BandwidthTracker {
     protected void initialize(DownloadCallback guiCallback, MessageRouter router,
                               FileManager fileManager) {
         this.callback = guiCallback;
-        this.innetworkCallback = new InNetworkCallback();
         this.router = router;
-        this.fileManager = fileManager;
         scheduleWaitingPump();
         pushManager = new PushDownloadManager(new PushedSocketHandler() {
             public void acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
@@ -546,7 +545,7 @@ public class DownloadManager implements BandwidthTracker {
                     continue;
                 
                 waiting.add(downloader);
-                downloader.initialize(createReferences(downloader));
+                downloader.initialize(downloadReferencesFactory.create(downloader));
                 callback(downloader).addDownload(downloader);
             }
             return true;
@@ -558,17 +557,6 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
     
-    // DPINJ:  Remove!  See CORE-306
-    private DownloadReferences createReferences(Downloader downloader) {
-        return new DownloadReferences(this, this.fileManager,
-                callback(downloader), ProviderHacks.getNetworkManager(),
-                ProviderHacks.getAlternateLocationFactory(),
-                ProviderHacks.getQueryRequestFactory(),
-                ProviderHacks.getOnDemandUnicaster(),
-                ProviderHacks.getDownloadWorkerFactory(),
-                ProviderHacks.getManagedTorrentFactory());
-    }
-     
     private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
         List<File> ret = new ArrayList<File>(downloaders.size());
         for (Downloader d : downloaders) {
@@ -859,8 +847,7 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(AbstractDownloader md) {
-        // remove providerHacks!
-        md.initialize(createReferences(md));
+        md.initialize(downloadReferencesFactory.create(md));
 		waiting.add(md);
         callback(md).addDownload(md);
         RouterService.schedule(new Runnable() {
@@ -1215,27 +1202,5 @@ public class DownloadManager implements BandwidthTracker {
 		}
 		return fileName;
 	}
-    
-
-    /**
-     * Once an in-network download finishes, the UpdateHandler is notified.
-     */
-    private static class InNetworkCallback implements DownloadCallback {
-        public void addDownload(Downloader d) {}
-        public void removeDownload(Downloader d) {
-            InNetworkDownloader downloader = (InNetworkDownloader)d;
-            UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
-                    downloader.getState() == DownloadStatus.COMPLETE);
-        }
-        
-        public void downloadsComplete() {}
-        
-    	public void showDownloads() {}
-    	// always discard corruption.
-        public void promptAboutCorruptDownload(Downloader dloader) {
-            dloader.discardCorruptDownload(true);
-        }
-        public String getHostValue(String key) { return null; }
-    }
 	
 }

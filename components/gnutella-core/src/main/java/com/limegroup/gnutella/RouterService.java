@@ -438,7 +438,7 @@ public class RouterService {
             
             LOG.trace("START SavedFileManager");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER"));
-            SavedFileManager.instance();
+            ProviderHacks.getSavedFileManager();
             LOG.trace("STOP SavedFileManager");
 			
 			LOG.trace("START loading spam data");

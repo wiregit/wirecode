@@ -23,6 +23,7 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<ContentManager> contentManager;
     private final Provider<AltLocManager> altLocManager;
     private final Provider<ResponseFactory> responseFactory;
+    private final Provider<SavedFileManager> savedFileManager;
     
     /**
      * @param urnCache
@@ -37,13 +38,15 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
-            Provider<ResponseFactory> responseFactory) {
+            Provider<ResponseFactory> responseFactory,
+            Provider<SavedFileManager> savedFileManager) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.contentManager = contentManager;
         this.altLocManager = altLocManager;
         this.responseFactory = responseFactory;
+        this.savedFileManager = savedFileManager;
     }
     
     /* (non-Javadoc)
@@ -168,6 +171,10 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public Response createResponse(FileDesc desc) {
         return responseFactory.get().createResponse(desc);
+    }
+
+    public void loadFinishedPostSave() {
+        savedFileManager.get().run();
     }
 
 }

@@ -775,7 +775,7 @@ public abstract class FileManager {
         trim();
         fileManagerController.loadFinished();
         save();
-        SavedFileManager.instance().run();
+        fileManagerController.loadFinishedPostSave();
         UpdateHandler.instance().tryToDownloadUpdates();
         
         RouterService.getCallback().fileManagerLoaded();

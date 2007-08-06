@@ -44,7 +44,6 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.RouterService;
@@ -52,16 +51,20 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -460,6 +463,14 @@ public class ManagedDownloader extends AbstractDownloader
     protected QueryRequestFactory queryRequestFactory;
     protected OnDemandUnicaster onDemandUnicaster;
     protected DownloadWorkerFactory downloadWorkerFactory;
+    protected AltLocManager altLocManager;
+    protected ContentManager contentManager;
+    protected SourceRankerFactory sourceRankerFactory;
+    protected UrnCache urnCache;
+    protected SavedFileManager savedFileManager;
+    protected VerifyingFileFactory verifyingFileFactory;
+    protected DiskController diskController;
+    protected IPFilter ipFilter;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -610,15 +621,20 @@ public class ManagedDownloader extends AbstractDownloader
         this.manager=downloadReferences.getDownloadManager();
 		this.fileManager=downloadReferences.getFileManager();
         this.callback=downloadReferences.getDownloadCallback();
-        this.requeryManager = new RequeryManager(this, 
-                manager,
-                ProviderHacks.getAltLocFinder(),
-                ProviderHacks.getDHTManager());
+        this.requeryManager = downloadReferences.getRequeryManagerFactory().createRequeryManager(this);
         this.networkManager = downloadReferences.getNetworkManager();
         this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
         this.queryRequestFactory = downloadReferences.getQueryRequestFactory();
         this.onDemandUnicaster = downloadReferences.getOnDemandUnicaster();
         this.downloadWorkerFactory = downloadReferences.getDownloadWorkerFactory();
+        this.altLocManager = downloadReferences.getAltLocManager();
+        this.contentManager = downloadReferences.getContentManager();
+        this.sourceRankerFactory = downloadReferences.getSourceRankerFactory();
+        this.urnCache = downloadReferences.getUrnCache();
+        this.savedFileManager = downloadReferences.getSavedFileManager();
+        this.verifyingFileFactory = downloadReferences.getVerifyingFileFactory();
+        this.diskController = downloadReferences.getDiskController();
+        this.ipFilter = downloadReferences.getIpFilter();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -660,7 +676,7 @@ public class ManagedDownloader extends AbstractDownloader
         }
         
 		if (downloadSHA1 != null) 
-		    ProviderHacks.getAltLocManager().addListener(downloadSHA1,this);
+		    altLocManager.addListener(downloadSHA1,this);
         
 		
 		// make sure all rfds have the same sha1
@@ -824,7 +840,7 @@ public class ManagedDownloader extends AbstractDownloader
                     + "> completed download, state: " + getState());
         }
         
-        ProviderHacks.getDiskController().clearCaches();
+        diskController.clearCaches();
 
         // if this is all completed, nothing else to do.
         if(complete) {
@@ -1066,8 +1082,7 @@ public class ManagedDownloader extends AbstractDownloader
 			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
             if (completedSize > MAX_FILE_SIZE)
                 throw new IOException("invalid incomplete file "+completedSize);
-            // DPINJ:  Use a passed in VerifyingFileFactory!!!
-			commonOutFile = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(completedSize);
+			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
 			incompleteFileManager.addEntry(incompleteFile, commonOutFile);
@@ -1130,9 +1145,9 @@ public class ManagedDownloader extends AbstractDownloader
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             //create validAlts
-            addLocationsToDownload(ProviderHacks.getAltLocManager().getDirect(hash),
-                    ProviderHacks.getAltLocManager().getPushNoFWT(hash),
-                    ProviderHacks.getAltLocManager().getPushFWT(hash),
+            addLocationsToDownload(altLocManager.getDirect(hash),
+                    altLocManager.getPushNoFWT(hash),
+                    altLocManager.getPushFWT(hash),
                     size);
         }
     }
@@ -1273,7 +1288,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !ProviderHacks.getIpFilter().allow(other.getHost()) )
+        if ( !ipFilter.allow(other.getHost()) )
             return false;            
 
         if (networkManager.acceptedIncomingConnection() ||
@@ -1535,7 +1550,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
-            ProviderHacks.getAltLocManager().addListener(downloadSHA1,this);
+            altLocManager.addListener(downloadSHA1,this);
         }
 
         //add to allFiles for resume purposes if caching...
@@ -1760,9 +1775,9 @@ public class ManagedDownloader extends AbstractDownloader
         
         // and to the global collection
         if (good)
-            ProviderHacks.getAltLocManager().add(loc, this);
+            altLocManager.add(loc, this);
         else
-            ProviderHacks.getAltLocManager().remove(loc, this);
+            altLocManager.remove(loc, this);
 
         // add to the downloaders
         for(DownloadWorker worker : getActiveWorkers()) {
@@ -1947,7 +1962,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void finish() {
         if (downloadSHA1 != null)
-            ProviderHacks.getAltLocManager().removeListener(downloadSHA1, this);
+            altLocManager.removeListener(downloadSHA1, this);
         requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
@@ -2070,7 +2085,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                ProviderHacks.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                contentManager.request(downloadSHA1, new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
@@ -2214,10 +2229,10 @@ public class ManagedDownloader extends AbstractDownloader
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
-            ProviderHacks.getUrnCache().addUrns(file, urns);
+            urnCache.addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
-            SavedFileManager.instance().addSavedFile(file, urns);
+            savedFileManager.addSavedFile(file, urns);
             
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
@@ -2508,8 +2523,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Retrieves the appropriate source ranker (or returns the current one).
      */
     protected SourceRanker getSourceRanker(SourceRanker ranker) {
-        // DPINJ:  Use a passed in SourceRankerFactory!!!
-        return ProviderHacks.getSourceRankerFactory().getAppropriateRanker(ranker);
+        return sourceRankerFactory.getAppropriateRanker(ranker);
     }
     
     /**

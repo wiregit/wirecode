@@ -5,10 +5,16 @@ import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.SavedFileManager;
+import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 
+//DPINJ: get rid of this!  see: CORE-306
 public class DownloadReferences {
     
     private final DownloadManager downloadManager;
@@ -20,7 +26,16 @@ public class DownloadReferences {
     private final OnDemandUnicaster onDemandUnicaster;
     private final DownloadWorkerFactory downloadWorkerFactory;
     private final ManagedTorrentFactory managedTorrentFactory;
-    
+    private final AltLocManager altLocManager;
+    private final ContentManager contentManager;
+    private final SourceRankerFactory sourceRankerFactory;
+    private final UrnCache urnCache;
+    private final SavedFileManager savedFileManager;
+    private final VerifyingFileFactory verifyingFileFactory;
+    private final DiskController diskController;
+    private final IPFilter ipFilter;
+    private final RequeryManagerFactory requeryManagerFactory;
+
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
             NetworkManager networkManager,
@@ -28,7 +43,13 @@ public class DownloadReferences {
             QueryRequestFactory queryRequestFactory,
             OnDemandUnicaster onDemandUnicaster,
             DownloadWorkerFactory downloadWorkerFactory,
-            ManagedTorrentFactory managedTorrentFactory) {
+            ManagedTorrentFactory managedTorrentFactory,
+            AltLocManager altLocManager, ContentManager contentManager,
+            SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
+            SavedFileManager savedFileManager,
+            VerifyingFileFactory verifyingFileFactory,
+            DiskController diskController, IPFilter ipFilter,
+            RequeryManagerFactory requeryManagerFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -38,8 +59,17 @@ public class DownloadReferences {
         this.onDemandUnicaster = onDemandUnicaster;
         this.downloadWorkerFactory = downloadWorkerFactory;
         this.managedTorrentFactory = managedTorrentFactory;
+        this.altLocManager = altLocManager;
+        this.contentManager = contentManager;
+        this.sourceRankerFactory = sourceRankerFactory;
+        this.urnCache = urnCache;
+        this.savedFileManager = savedFileManager;
+        this.verifyingFileFactory = verifyingFileFactory;
+        this.diskController = diskController;
+        this.ipFilter = ipFilter;
+        this.requeryManagerFactory = requeryManagerFactory;
     }
-
+    
     public DownloadManager getDownloadManager() {
         return downloadManager;
     }
@@ -75,5 +105,40 @@ public class DownloadReferences {
     public ManagedTorrentFactory getManagedTorrentFactory() {
         return managedTorrentFactory;
     }
-    
+
+    public RequeryManagerFactory getRequeryManagerFactory() {
+        return requeryManagerFactory;
+    }
+
+    public AltLocManager getAltLocManager() {
+        return altLocManager;
+    }
+
+    public ContentManager getContentManager() {
+        return contentManager;
+    }
+
+    public SourceRankerFactory getSourceRankerFactory() {
+        return sourceRankerFactory;
+    }
+
+    public UrnCache getUrnCache() {
+        return urnCache;
+    }
+
+    public SavedFileManager getSavedFileManager() {
+        return savedFileManager;
+    }
+
+    public VerifyingFileFactory getVerifyingFileFactory() {
+        return verifyingFileFactory;
+    }
+
+    public DiskController getDiskController() {
+        return diskController;
+    }
+
+    public IPFilter getIpFilter() {
+        return ipFilter;
+    }
 }

@@ -16,7 +16,17 @@ public class DownloadProviderHacks {
                         .getQueryRequestFactory(),
                 ProviderHacks.getOnDemandUnicaster(), 
                 ProviderHacks.getDownloadWorkerFactory(),
-                ProviderHacks.getManagedTorrentFactory());
+                ProviderHacks.getManagedTorrentFactory(), 
+                ProviderHacks.getAltLocManager(),
+                ProviderHacks.getContentManager(),
+                ProviderHacks.getSourceRankerFactory(),
+                ProviderHacks.getUrnCache(),
+                ProviderHacks.getSavedFileManager(),
+                ProviderHacks.getVerifyingFileFactory(),
+                ProviderHacks.getDiskController(),
+                ProviderHacks.getIpFilter(),
+                ProviderHacks.getRequeryManagerFactory()
+                );
     }
 
 }

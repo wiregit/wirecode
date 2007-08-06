@@ -42,4 +42,6 @@ public interface FileManagerController {
 
     public Response createPureMetadataResponse();
 
+    public void loadFinishedPostSave();
+
 }

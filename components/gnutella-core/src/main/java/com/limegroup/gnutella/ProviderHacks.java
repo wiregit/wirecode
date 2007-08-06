@@ -18,8 +18,10 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
+import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
@@ -53,98 +55,103 @@ public class ProviderHacks {
     private static volatile boolean initialized = false;
     private static volatile boolean initializing = false;
     
-    private static LimeWireCore core;
+    private static LimeWireCore aReallyLongNameThatYouDontWantToTypeALot;
     
     public static void setLimeWireCore(LimeWireCore core) {
         if(initialized || initializing)
             throw new IllegalStateException("already initialized, or initializing!");
-        ProviderHacks.core = core;
+        ProviderHacks.aReallyLongNameThatYouDontWantToTypeALot = core;
         initialized = true;
     }
     
-    private static void i() {
+    private static LimeWireCore i() {
         if(initialized)
-            return;
+            return aReallyLongNameThatYouDontWantToTypeALot;
         if(initializing)
             throw new IllegalStateException("already initializing!");
         initializing = true;
-        core = Guice.createInjector(new LimeWireCoreModule(), new ModuleHacks()).getInstance(LimeWireCore.class);
+        aReallyLongNameThatYouDontWantToTypeALot = 
+            Guice.createInjector(new LimeWireCoreModule(), new ModuleHacks()).getInstance(LimeWireCore.class);
         initializing = false;
         initialized = true;
+        return aReallyLongNameThatYouDontWantToTypeALot;
     }
     
-    public static Acceptor getAcceptor() { i(); return core.getAcceptor(); }    
-    public static UDPService getUdpService() { i(); return core.getUdpService(); }    
-    public static NetworkManager getNetworkManager() { i(); return core.getNetworkManager(); }    
-    public static ConnectionManager getConnectionManager() { i(); return core.getConnectionManager(); }    
-    public static DHTManager getDHTManager() { i(); return core.getDhtManager(); }    
-    public static DHTControllerFactory getDHTControllerFactory() { i(); return core.getDhtControllerFactory(); }    
-    public static PingReplyFactory getPingReplyFactory() { i(); return core.getPingReplyFactory(); }    
-    public static PushProxiesValueFactory getPushProxiesValueFactory() { i(); return core.getPushProxiesValueFactory(); }    
-    public static HandshakeResponderFactory getHandshakeResponderFactory() { i(); return core.getHandshakeResponderFactory(); }   
-    public static HeadersFactory getHeadersFactory() { i(); return core.getHeadersFactory(); }    
-    public static PushEndpointFactory getPushEndpointFactory() { i(); return core.getPushEndpointFactory(); } 
-    public static ManagedTorrentFactory getManagedTorrentFactory() { i(); return core.getManagedTorrentFactory(); }    
-    public static TorrentManager getTorrentManager() { i(); return core.getTorrentManager(); }    
-    public static TrackerManagerFactory getTrackerManagerFactory() { i(); return core.getTrackerManagerFactory(); }
-    public static TrackerFactory getTrackerFactory() { i();  return core.getTrackerFactory(); }    
-    public static HTTPHeaderUtils getHTTPHeaderUtils() { i(); return core.getHttpHeaderUtils(); }    
-    public static FeaturesWriter getFeaturesWriter() { return core.getFeaturesWriter(); }
-    public static DownloadWorkerFactory getDownloadWorkerFactory() {i();  return core.getDownloadWorkerFactory(); } 
-    public static HeadPongFactory getHeadPongFactory() {i(); return core.getHeadPongFactory(); } 
-    public static UploadManager getUploadManager() {i();  return core.getUploadManager(); }
-    public static FileManager getFileManager() {i();  return core.getFileManager(); }
-    public static UploadSlotManager getUploadSlotManager() {i();  return core.getUploadSlotManager(); }
-    public static QueryHandlerFactory getQueryHandlerFactory() {i();  return core.getQueryHandlerFactory(); }    
-    public static QueryRequestFactory getQueryRequestFactory() {i();  return core.getQueryRequestFactory(); }    
-    public static ManagedConnectionFactory getManagedConnectionFactory() {i();  return core.getManagedConnectionFactory(); }       
-    public static HostDataFactory getHostDataFactory() {i();  return core.getHostDataFactory(); }
-    public static SourceRankerFactory getSourceRankerFactory() {i();  return core.getSourceRankerFactory(); }
-    public static SocketsManager getSocketsManager() {i();  return core.getSocketsManager(); }    
-    public static VerifyingFileFactory getVerifyingFileFactory() {i();  return core.getVerifyingFileFactory(); }    
-    public static DiskController getDiskController() {i();  return core.getDiskController(); }    
-    public static AltLocValueFactory getAltLocValueFactory() {i();  return core.getAltLocValueFactory(); }    
-    public static AlternateLocationFactory getAlternateLocationFactory() {i();  return core.getAlternateLocationFactory(); }      
-    public static LocalFileDetailsFactory getLocalFileDetailsFactory() {i();  return core.getLocalFileDetailsFactory(); }
-    public static HTTPDownloaderFactory getHTTPDownloaderFactory() {i();  return core.getHttpDownloaderFactory(); }
-    public static ForMeReplyHandler getForMeReplyHandler() {i();  return core.getForMeReplyHandler(); }
-    public static QueryUnicaster getQueryUnicaster() {i();  return core.getQueryUnicaster(); }
-    public static OnDemandUnicaster getOnDemandUnicaster() {i();  return core.getOnDemandUnicaster(); }
-    public static MessageRouter getMessageRouter() {i();  return core.getMessageRouter(); } // DPINJ: Figure out what's going on with RS.getMessageRouter
-    public static DownloadManager getDownloadManager() {i();  return core.getDownloadManager(); }
-    public static AltLocFinder getAltLocFinder() { i(); return core.getAltLocFinder(); }
-    public static ConnectionDispatcher getConnectionDispatcher() { i(); return core.getConnectionDispatcher(); }
-    public static HTTPAcceptor getHTTPAcceptor() { i(); return core.getHTTPAcceptor(); }
-    public static HostCatcher getHostCatcher() { i(); return core.getHostCatcher(); }
-    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { i(); return core.getHttpUploadAcceptor(); }
-    public static PushManager getPushManager() { i(); return core.getPushManager(); }
-    public static ResponseVerifier getResponseVerifier() { i(); return core.getResponseVerifier(); }
-    public static SearchResultHandler getSearchResultHandler() { i(); return core.getSearchResultHandler(); }
-    public static AltLocManager getAltLocManager() { i(); return core.getAltLocManager(); }
-    public static ContentManager getContentManager() { i(); return core.getContentManager(); }
-    public static IPFilter getIpFilter() { i(); return core.getIpFilter(); }
-    public static HostileFilter getHostileFilter() { i(); return core.getHostileFilter(); }
-    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { i(); return core.getNetworkUpdateSanityChecker(); }
-    public static BandwidthManager getBandwidthManager() { i(); return core.getBandwidthManager(); }
-    public static HttpExecutor getHttpExecutor() { i(); return core.getHttpExecutor(); }
-    public static QueryStats getQueryStats() { i(); return core.getQueryStats(); }
-    public static NodeAssigner getNodeAssigner() { i(); return core.getNodeAssigner(); }
-    public static SecureMessageVerifier getSecureMessageVerifier() { i(); return core.getSecureMessageVerifier(); }
-    public static UrnCache getUrnCache() { i(); return core.getUrnCache(); }
-    
-    // Cleaned up in all but message parsers & tests
-    public static QueryReplyFactory getQueryReplyFactory() { i(); return core.getQueryReplyFactory(); }    
+    public static Acceptor getAcceptor() { return i().getAcceptor(); }    
+    public static UDPService getUdpService() { return i().getUdpService(); }    
+    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }    
+    public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }    
+    public static DHTManager getDHTManager() { return i().getDhtManager(); }    
+    public static DHTControllerFactory getDHTControllerFactory() { return i().getDhtControllerFactory(); }    
+    public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
+    public static PushProxiesValueFactory getPushProxiesValueFactory() { return i().getPushProxiesValueFactory(); }    
+    public static HandshakeResponderFactory getHandshakeResponderFactory() { return i().getHandshakeResponderFactory(); }   
+    public static HeadersFactory getHeadersFactory() { return i().getHeadersFactory(); }    
+    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); } 
+    public static ManagedTorrentFactory getManagedTorrentFactory() { return i().getManagedTorrentFactory(); }    
+    public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }    
+    public static TrackerManagerFactory getTrackerManagerFactory() { return i().getTrackerManagerFactory(); }
+    public static TrackerFactory getTrackerFactory() { return i().getTrackerFactory(); }    
+    public static HTTPHeaderUtils getHTTPHeaderUtils() { return i().getHttpHeaderUtils(); }    
+    public static FeaturesWriter getFeaturesWriter() { return i().getFeaturesWriter(); }
+    public static DownloadWorkerFactory getDownloadWorkerFactory() { return i().getDownloadWorkerFactory(); } 
+    public static HeadPongFactory getHeadPongFactory() { return i().getHeadPongFactory(); } 
+    public static UploadManager getUploadManager() { return i().getUploadManager(); }
+    public static FileManager getFileManager() { return i().getFileManager(); }
+    public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
+    public static QueryHandlerFactory getQueryHandlerFactory() { return i().getQueryHandlerFactory(); }    
+    public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
+    public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }       
+    public static HostDataFactory getHostDataFactory() { return i().getHostDataFactory(); }
+    public static SourceRankerFactory getSourceRankerFactory() { return i().getSourceRankerFactory(); }
+    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
+    public static VerifyingFileFactory getVerifyingFileFactory() { return i().getVerifyingFileFactory(); }    
+    public static DiskController getDiskController() { return i().getDiskController(); }    
+    public static AltLocValueFactory getAltLocValueFactory() { return i().getAltLocValueFactory(); }    
+    public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }      
+    public static LocalFileDetailsFactory getLocalFileDetailsFactory() { return i().getLocalFileDetailsFactory(); }
+    public static HTTPDownloaderFactory getHTTPDownloaderFactory() { return i().getHttpDownloaderFactory(); }
+    public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
+    public static QueryUnicaster getQueryUnicaster() { return i().getQueryUnicaster(); }
+    public static OnDemandUnicaster getOnDemandUnicaster() { return i().getOnDemandUnicaster(); }
+    public static MessageRouter getMessageRouter() { return i().getMessageRouter(); } // DPINJ: Figure out what's going on with RS.getMessageRouter
+    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
+    public static AltLocFinder getAltLocFinder() { return i().getAltLocFinder(); }
+    public static ConnectionDispatcher getConnectionDispatcher() { return i().getConnectionDispatcher(); }
+    public static HTTPAcceptor getHTTPAcceptor() { return i().getHTTPAcceptor(); }
+    public static HostCatcher getHostCatcher() { return i().getHostCatcher(); }
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
+    public static PushManager getPushManager() { return i().getPushManager(); }
+    public static ResponseVerifier getResponseVerifier() { return i().getResponseVerifier(); }
+    public static SearchResultHandler getSearchResultHandler() { return i().getSearchResultHandler(); }
+    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
+    public static ContentManager getContentManager() { return i().getContentManager(); }
+    public static IPFilter getIpFilter() { return i().getIpFilter(); }
+    public static HostileFilter getHostileFilter() { return i().getHostileFilter(); }
+    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { return i().getNetworkUpdateSanityChecker(); }
+    public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
+    public static HttpExecutor getHttpExecutor() { return i().getHttpExecutor(); }
+    public static QueryStats getQueryStats() { return i().getQueryStats(); }
+    public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
+    public static SecureMessageVerifier getSecureMessageVerifier() { return i().getSecureMessageVerifier(); }
+
+      // Cleaned up in all but message parsers & tests
+    public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }    
     
     // Cleaned up in all but RS & tests
-    public static Statistics getStatistics() { i(); return core.getStatistics(); }
-    public static StaticMessages getStaticMessages() { i(); return core.getStaticMessages(); }
+    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
+    public static Statistics getStatistics() { return i().getStatistics(); }
+    public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
     
     // Cleaned up in all but tests
-    public static ResponseFactory getResponseFactory() { i(); return core.getResponseFactory(); }
-    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { i(); return core.getHttpRequestHandlerFactory(); }
-    public static FileManagerController getFileManagerController() { i(); return core.getFileManagerController(); }
-    public static CreationTimeCache getCreationTimeCache() { i(); return core.getCreationTimeCache(); }
+    public static UrnCache getUrnCache() { return i().getUrnCache(); }
+    public static ResponseFactory getResponseFactory() { return i().getResponseFactory(); }
+    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { return i().getHttpRequestHandlerFactory(); }
+    public static FileManagerController getFileManagerController() { return i().getFileManagerController(); }
+    public static CreationTimeCache getCreationTimeCache() { return i().getCreationTimeCache(); }
+    public static DownloadReferencesFactory getDownloadReferencesFactory() { return i().getDownloadReferencesFactory(); }
+    public static DownloadCallback getInNetworkCallback() { return i().getInNetworkCallback(); }
+    public static RequeryManagerFactory getRequeryManagerFactory() { return i().getRequeryManagerFactory(); }
 
-
-    
+     
 }

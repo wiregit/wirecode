@@ -16,7 +16,9 @@ public class DownloadManagerStub extends DownloadManager {
 	private final PushDownloadManager pdManager = new PushDownloadManagerStub();
 	
 	public DownloadManagerStub() {
-	    super(ProviderHacks.getNetworkManager());
+	    super(ProviderHacks.getNetworkManager(), 
+	          ProviderHacks.getDownloadReferencesFactory(),
+	          ProviderHacks.getInNetworkCallback());
 	}
 	
 	

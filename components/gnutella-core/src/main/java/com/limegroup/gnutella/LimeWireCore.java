@@ -4,7 +4,9 @@ import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
@@ -20,8 +22,10 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
+import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
@@ -325,6 +329,22 @@ public class LimeWireCore {
 
     public StaticMessages getStaticMessages() {
         return injector.getInstance(StaticMessages.class);
+    }
+
+    public SavedFileManager getSavedFileManager() {
+        return injector.getInstance(SavedFileManager.class);
+    }
+
+    public DownloadReferencesFactory getDownloadReferencesFactory() {
+        return injector.getInstance(DownloadReferencesFactory.class);
+    }
+    
+    public DownloadCallback getInNetworkCallback() {
+        return injector.getInstance(Key.get(DownloadCallback.class, Names.named("inNetwork")));
+    }
+
+    public RequeryManagerFactory getRequeryManagerFactory() {
+        return injector.getInstance(RequeryManagerFactory.class);
     }
 
 }
