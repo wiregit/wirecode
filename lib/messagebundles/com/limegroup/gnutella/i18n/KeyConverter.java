@@ -7,6 +7,7 @@ import java.util.Properties;
 
 public class KeyConverter {
 
+    @SuppressWarnings("unused")
     private final static Rule[] rules = new Rule[] {
             new ConcatenateAndInsertRule("DOWNLOAD_APPLY_NEW_THEME_START",
                     "DOWNLOAD_APPLY_NEW_THEME_END", "{0}",
