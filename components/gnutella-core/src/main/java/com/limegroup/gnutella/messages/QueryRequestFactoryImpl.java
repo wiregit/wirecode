@@ -588,15 +588,15 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         int metaFlag = 0;
         if (type == null)
             ;
-        else if (type.getDescriptionKey() == MediaType.AUDIO)
+        else if (type == MediaType.getAudioMediaType())
             metaFlag |= QueryRequest.AUDIO_MASK;
-        else if (type.getDescriptionKey() == MediaType.VIDEO)
+        else if (type == MediaType.getVideoMediaType())
             metaFlag |= QueryRequest.VIDEO_MASK;
-        else if (type.getDescriptionKey() == MediaType.IMAGES)
+        else if (type == MediaType.getImageMediaType())
             metaFlag |= QueryRequest.IMAGE_MASK;
-        else if (type.getDescriptionKey() == MediaType.DOCUMENTS)
+        else if (type == MediaType.getDocumentMediaType())
             metaFlag |= QueryRequest.DOC_MASK;
-        else if (type.getDescriptionKey() == MediaType.PROGRAMS) {
+        else if (type == MediaType.getProgramMediaType()) {
             if (OSUtils.isLinux() || OSUtils.isAnyMac())
                 metaFlag |= QueryRequest.LIN_PROG_MASK;
             else if (OSUtils.isWindows())

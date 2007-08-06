@@ -38,12 +38,12 @@ public class MediaType implements Serializable {
     public static final String SCHEMA_IMAGES = "image";
     
     // These are used as resource keys to retreive descriptions in the GUI
-    public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
-    public static final String DOCUMENTS = "MEDIA_DOCUMENTS";
-    public static final String PROGRAMS = "MEDIA_PROGRAMS";
-    public static final String AUDIO = "MEDIA_AUDIO";
-    public static final String VIDEO = "MEDIA_VIDEO";
-    public static final String IMAGES = "MEDIA_IMAGES";
+    public static final String ANY_TYPE = I18n.marktr("All Types");
+    public static final String DOCUMENTS = I18n.marktr("Documents");
+    public static final String PROGRAMS = I18n.marktr("Programs");
+    public static final String AUDIO = I18n.marktr("Audio");
+    public static final String VIDEO = I18n.marktr("Video");
+    public static final String IMAGES = I18n.marktr("Images");
 
     /**
      * Type for 'any file'
@@ -327,7 +327,6 @@ public class MediaType implements Serializable {
         if (obj instanceof MediaType) {
             MediaType type = (MediaType)obj;
             return schema.equals(type.schema) 
-            && areEqual(descriptionKey, type.descriptionKey)
             && exts.equals(type.exts)
             && isDefault == type.isDefault;
         }
