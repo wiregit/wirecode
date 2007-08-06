@@ -17,7 +17,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 public class HTTPDownloaderStub extends HTTPDownloader {
 
 	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {
-		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager());
+		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager());
 	}
 	
 	public void addFailedAltLoc(AlternateLocation loc) {

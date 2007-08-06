@@ -56,7 +56,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void setUp() {
-        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager());
+        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager());
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {

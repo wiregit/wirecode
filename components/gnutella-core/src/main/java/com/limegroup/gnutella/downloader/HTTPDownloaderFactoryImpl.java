@@ -4,25 +4,53 @@ import java.net.Socket;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.BandwidthManager;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 
 @Singleton
 public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
 
     private final NetworkManager networkManager;
+    private final AlternateLocationFactory alternateLocationFactory;
+    private final DownloadManager downloadManager;
+    private final CreationTimeCache creationTimeCache;
+    private final BandwidthManager bandwidthManager;
 
+
+    /**
+     * @param networkManager
+     * @param alternateLocationFactory
+     * @param downloadManager
+     * @param creationTimeCache
+     * @param bandwidthManager
+     */
     @Inject
-    public HTTPDownloaderFactoryImpl(NetworkManager networkManager) {
+    public HTTPDownloaderFactoryImpl(NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            DownloadManager downloadManager,
+            CreationTimeCache creationTimeCache,
+            BandwidthManager bandwidthManager) {
         this.networkManager = networkManager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.downloadManager = downloadManager;
+        this.creationTimeCache = creationTimeCache;
+        this.bandwidthManager = bandwidthManager;
     }
+    
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.HTTPDownloaderFactory#create(java.net.Socket, com.limegroup.gnutella.RemoteFileDesc, com.limegroup.gnutella.downloader.VerifyingFile, boolean)
      */
     public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork) {
-        return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork,
-                true, networkManager);
+        return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork, true,
+                networkManager, alternateLocationFactory, downloadManager,
+                creationTimeCache, bandwidthManager);
     }
+
+
 }

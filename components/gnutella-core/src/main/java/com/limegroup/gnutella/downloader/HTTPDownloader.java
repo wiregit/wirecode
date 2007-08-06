@@ -44,18 +44,20 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.AssertFailure;
+import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
@@ -274,16 +276,28 @@ public class HTTPDownloader implements BandwidthTracker {
     private final boolean _inNetwork;
     
     private final NetworkManager networkManager;
+    private final AlternateLocationFactory alternateLocationFactory;
+    private final DownloadManager downloadManager;
+    private final CreationTimeCache creationTimeCache;
+    private final BandwidthManager bandwidthManager;
     
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
-            boolean requireSocket, NetworkManager networkManager) {
+            boolean requireSocket, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            DownloadManager downloadManager,
+            CreationTimeCache creationTimeCache,
+            BandwidthManager bandwidthManager) {
         if (rfd == null)
             throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
         this.networkManager = networkManager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.downloadManager = downloadManager;
+        this.creationTimeCache = creationTimeCache;
+        this.bandwidthManager = bandwidthManager;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -389,7 +403,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(ProviderHacks.getBandwidthManager().getReadThrottle()));
+        _stateMachine.setReadChannel(new ThrottleReader(bandwidthManager.getReadThrottle()));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -468,7 +482,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //if I'm not firewalled or I can do FWT, say that I want pushlocs.
         //if I am firewalled, send the version of the FWT protocol I support.
         // (which implies that I want only altlocs that support FWT)
-        if (networkManager.acceptedIncomingConnection() || ProviderHacks.getUdpService().canDoFWT()) {
+        if (networkManager.acceptedIncomingConnection() || networkManager.canDoFWT()) {
             features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
             if (!networkManager.acceptedIncomingConnection())
                 features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
@@ -479,7 +493,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //if I'm firewalled add myself only if the other guy wants falts
         if( isPartialFileValid() && 
         	 (networkManager.acceptedIncomingConnection() || _wantsFalts)) {
-        		AlternateLocation me = ProviderHacks.getAlternateLocationFactory().create(_rfd.getSHA1Urn());
+        		AlternateLocation me = alternateLocationFactory.create(_rfd.getSHA1Urn());
         		if (me != null)
         			addSuccessfulAltLoc(me);
         }
@@ -1258,7 +1272,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException if we could not read 
      * the header
      */
-    private static void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
+    private void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
       throws IOException {
         long milliSeconds = 0;
         try {
@@ -1267,12 +1281,11 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new ProblemReadingHeaderException(e);
         }
         if (rfd.getSHA1Urn() != null && milliSeconds > 0) {
-            CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(rfd.getSHA1Urn());
+            synchronized (creationTimeCache) {
+                Long cTime = creationTimeCache.getCreationTime(rfd.getSHA1Urn());
                 // prefer older times....
                 if ((cTime == null) || (cTime.longValue() > milliSeconds))
-                    ctCache.addTime(rfd.getSHA1Urn(), milliSeconds);
+                    creationTimeCache.addTime(rfd.getSHA1Urn(), milliSeconds);
             }
         }
     }
@@ -1574,7 +1587,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		URN urn = _rfd.getSHA1Urn();
 		if (urn != null) {
 			ManagedDownloader myDownloader = (ManagedDownloader)
-			ProviderHacks.getDownloadManager().getDownloaderForURN(urn);
+			downloadManager.getDownloaderForURN(urn);
 			if (myDownloader == null)
 				allWorkers = "couldn't find my downloader???";
 			else
