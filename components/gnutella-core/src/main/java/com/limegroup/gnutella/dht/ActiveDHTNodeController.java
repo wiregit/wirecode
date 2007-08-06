@@ -19,15 +19,21 @@ import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.AltLocValueFactory;
+import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -45,11 +51,19 @@ public class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
-    ActiveDHTNodeController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher, NetworkManager networkManager) {
-        super(vendor, version, dispatcher, DHTMode.ACTIVE, networkManager);
+    ActiveDHTNodeController(Vendor vendor, Version version,
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            NetworkManager networkManager,
+            AltLocValueFactory altLocValueFactory,
+            PushProxiesValueFactory pushProxiesValueFactory,
+            MessageDispatcherFactory messageDispatcherFactory,
+            Provider<ConnectionManager> connectionManager,
+            Provider<IPFilter> ipFilter) {
+        super(vendor, version, dispatcher, DHTMode.ACTIVE, networkManager,
+                altLocValueFactory, pushProxiesValueFactory,
+                messageDispatcherFactory, connectionManager, ipFilter);
     }
-    
+
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);

@@ -60,7 +60,7 @@ public class UDPHostCacheTest extends LimeTestCase {
                 new Object[] { ds } ,
                 new Class[] { DatagramSocket.class });
                 
-        RouterService.getMessageRouter().initialize();
+        ProviderHacks.getMessageRouter().initialize();
     }
         
     
@@ -444,7 +444,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         PingReply pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)1);
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName(host), 6346);
         
-        RouterService.getMessageRouter().handleUDPMessage(pr, addr);
+        ProviderHacks.getMessageRouter().handleUDPMessage(pr, addr);
     }    
     
     private ExtendedEndpoint create(String host) {

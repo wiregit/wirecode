@@ -25,7 +25,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
@@ -163,7 +162,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // initialize the guid if we don't have one
         if (myGUID == null && meshHandler != null) {
             myGUID = new GUID(GUID.makeGuid());
-            RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
+            ProviderHacks.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
         }
         
         return ret;
@@ -396,7 +395,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     protected synchronized void clearState(){
         if (myGUID != null) {
-            RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
+            ProviderHacks.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
         }
     }

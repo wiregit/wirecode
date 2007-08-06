@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.security.PublicKey;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,10 +18,10 @@ import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.messages.FindNodeRequestWireImpl;
 import com.limegroup.gnutella.dht.messages.FindNodeResponseWireImpl;
 import com.limegroup.gnutella.dht.messages.FindValueRequestWireImpl;
@@ -41,48 +40,55 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
- * LimeMessageDispatcher re-routes DHTMessage(s) through the
- * LimeWire core so that all communcation can be done over
- * a single network port.
+ * LimeMessageDispatcher re-routes DHTMessage(s) through the LimeWire core so
+ * that all communcation can be done over a single network port.
  */
-public class LimeMessageDispatcherImpl extends MessageDispatcher 
-        implements MessageHandler {
-    
-    private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
-    
+public class LimeMessageDispatcherImpl extends MessageDispatcher implements
+        MessageHandler {
+
+    private static final Log LOG = LogFactory
+            .getLog(LimeMessageDispatcherImpl.class);
+
     /**
      * An array of Messages this MessageHandler supports
      */
     private static final Class[] UDP_MESSAGE_TYPES = {
-        PingRequestWireImpl.class,
-        PingResponseWireImpl.class,
-        StoreRequestWireImpl.class,
-        StoreResponseWireImpl.class,
-        FindNodeRequestWireImpl.class,
-        FindNodeResponseWireImpl.class,
-        FindValueRequestWireImpl.class,
-        FindValueResponseWireImpl.class,
-        StatsRequestWireImpl.class,
-        StatsResponseWireImpl.class
-    };
-    
+            PingRequestWireImpl.class, PingResponseWireImpl.class,
+            StoreRequestWireImpl.class, StoreResponseWireImpl.class,
+            FindNodeRequestWireImpl.class, FindNodeResponseWireImpl.class,
+            FindValueRequestWireImpl.class, FindValueResponseWireImpl.class,
+            StatsRequestWireImpl.class, StatsResponseWireImpl.class };
+
     private volatile boolean running = false;
-    
+
     private volatile boolean bound = false;
     
-    public LimeMessageDispatcherImpl(Context context) {
+    private final Provider<UDPService> udpService;
+    private final Provider<SecureMessageVerifier> secureMessageVerifier;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher;
+
+    public LimeMessageDispatcherImpl(Context context, Provider<UDPService> udpService,
+            Provider<SecureMessageVerifier> secureMessageVerifier,
+            Provider<MessageRouter> messageRouter,
+            Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher) {
         super(context);
-        
+
+        this.udpService = udpService;
+        this.secureMessageVerifier = secureMessageVerifier;
+        this.messageRouter = messageRouter;
+        this.messageDispatcher = messageDispatcher;
+
         // Get Context's MessageFactory and wrap it into a
         // MessageFactoryWire and set it as the MessageFactory
-        context.setMessageFactory(
-                new MessageFactoryWire(context.getMessageFactory()));
-        
+        context.setMessageFactory(new MessageFactoryWire(context
+                .getMessageFactory()));
+
         // Register the Message type
-        MessageParserDelegate parser = new MessageParserDelegate(
-                context.getMessageFactory());
-        
-        MessageFactory.setParser((byte)DHTMessage.F_DHT_MESSAGE, parser);
+        MessageParserDelegate parser = new MessageParserDelegate(context
+                .getMessageFactory());
+
+        MessageFactory.setParser((byte) DHTMessage.F_DHT_MESSAGE, parser);
     }
 
     @Override
@@ -96,7 +102,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         assert (!bound);
         bound = true;
     }
-    
+
     @Override
     public boolean isBound() {
         return bound;
@@ -105,28 +111,22 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     public synchronized void start() {
         // Install the Message handlers
-        MessageRouter messageRouter = RouterService.getMessageRouter();
-        if (messageRouter != null) {
-            for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
-                messageRouter.setUDPMessageHandler(clazz, this);
-            }
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+            messageRouter.get().setUDPMessageHandler(clazz, this);
         }
-        
+
         running = true;
         super.start();
     }
-    
+
     @Override
     public synchronized void stop() {
         running = false;
         super.stop();
-        
+
         // Remove the Message handlers
-        MessageRouter messageRouter = RouterService.getMessageRouter();
-        if (messageRouter != null) {
-            for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
-                messageRouter.setUDPMessageHandler(clazz, null);
-            }
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
+            messageRouter.get().setUDPMessageHandler(clazz, null);
         }
     }
 
@@ -136,20 +136,20 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         super.close();
     }
 
-    /* 
+    /*
      * Overwritten:
      * 
-     * Takes the payload of Tag and sends it via LimeWire's 
-     * UDPService
+     * Takes the payload of Tag and sends it via LimeWire's UDPService
      */
     @Override
     protected boolean submit(Tag tag) {
-        InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddress();
+        InetSocketAddress dst = (InetSocketAddress) tag.getSocketAddress();
         ByteBuffer data = tag.getData();
-        ProviderHacks.getUdpService().send(data, dst, true);
+        udpService.get().send(data, dst, true);
         register(tag);
-        SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message)tag.getMessage());
-        
+        SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message) tag
+                .getMessage());
+
         if (LOG.isInfoEnabled()) {
             LOG.info("Sent: " + tag);
         }
@@ -159,29 +159,31 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     /*
      * Implements:
      * 
-     * Takes the Message, fixes the source address and delegates
-     * it to MessageDispatcher's back-end
+     * Takes the Message, fixes the source address and delegates it to
+     * MessageDispatcher's back-end
      */
-    public void handleMessage(Message msg, InetSocketAddress addr, 
+    public void handleMessage(Message msg, InetSocketAddress addr,
             ReplyHandler handler) {
-        
+
         if (LOG.isInfoEnabled()) {
             LOG.info("Received message from " + addr + ", " + msg);
         }
-        
+
         if (!isRunning()) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping message from " + addr + " because DHT is not running");
+                LOG.info("Dropping message from " + addr
+                        + " because DHT is not running");
             }
             return;
         }
-        
+
         ReceivedMessageStatHandler.UDP_DHT_MESSAGE.addMessage(msg);
-        DHTMessage dhtMessage = (DHTMessage)msg;
-        ((RemoteContact)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
+        DHTMessage dhtMessage = (DHTMessage) msg;
+        ((RemoteContact) dhtMessage.getContact())
+                .fixSourceAndContactAddress(addr);
         handleMessage(dhtMessage);
     }
-    
+
     @Override
     public boolean isRunning() {
         return running;
@@ -190,25 +192,22 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     protected void process(Runnable runnable) {
         if (isRunning()) {
-            ExecutorService processingQueue 
-                = RouterService.getMessageDispatcher().getExecutorService();
-            
-            processingQueue.execute(runnable);
+            messageDispatcher.get().dispatch(runnable);
         }
     }
-    
+
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
         PublicKey pubKey = context.getPublicKey();
         if (pubKey == null) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping SecureMessage " 
-                        + secureMessage + " because PublicKey is not set");
+                LOG.info("Dropping SecureMessage " + secureMessage
+                        + " because PublicKey is not set");
             }
             return;
         }
-        
-        SecureMessageVerifier verifier = ProviderHacks.getSecureMessageVerifier();
-        verifier.verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
+
+        secureMessageVerifier.get().verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM,
+                secureMessage, smc);
     }
 }

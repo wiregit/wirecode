@@ -901,7 +901,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         MessageRouter.MAX_BUFFERED_REPLIES = MAX_BUFFERED_REPLIES;
 
         // clear stored results from other tests
-        Hashtable table = (Hashtable) PrivilegedAccessor.getValue(RouterService.getMessageRouter(), 
+        Hashtable table = (Hashtable) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(), 
                 "_outOfBandReplies");
         table.clear();
 

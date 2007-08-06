@@ -35,7 +35,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messages.GGEP;
@@ -215,7 +214,7 @@ public class InspectionTest extends ServerSideTestCase {
         
         // and handling it should also respond to the return address
         MessageSettings.INSPECTION_VERSION.setValue(1);
-        MessageRouter router = RouterService.getMessageRouter();
+        MessageRouter router = ProviderHacks.getMessageRouter();
         router.handleMessage(received, ProviderHacks.getConnectionManager().getInitializedClientConnections().get(0));
         pack = new DatagramPacket(new byte[1000],1000);
         socket2.receive(pack);

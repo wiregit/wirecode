@@ -824,7 +824,7 @@ public class HostCatcherTest extends LimeTestCase {
         // make it send udp pings
         ProviderHacks.getAcceptor().init();
         ProviderHacks.getAcceptor().start();
-        RouterService.getMessageRouter().initialize();
+        ProviderHacks.getMessageRouter().initialize();
         hc.expire();
         hc.sendUDPPings();
         

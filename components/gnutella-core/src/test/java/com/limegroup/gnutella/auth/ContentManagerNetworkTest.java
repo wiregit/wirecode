@@ -46,7 +46,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
-        RouterService.getMessageRouter().initialize();
+        ProviderHacks.getMessageRouter().initialize();
         
         new Acceptor(ProviderHacks.getNetworkManager()).setListeningPort(LISTEN_PORT);
         ProviderHacks.getUdpService().start();

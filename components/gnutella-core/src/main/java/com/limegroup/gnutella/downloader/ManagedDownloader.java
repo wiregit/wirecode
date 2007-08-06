@@ -44,6 +44,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.RouterService;
@@ -961,7 +962,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
             return false;
             
-        MessageRouter mr = RouterService.getMessageRouter();
+        MessageRouter mr = ProviderHacks.getMessageRouter();
         Set<GUESSEndpoint> guessLocs = mr.getQueryLocs(this.originalQueryGUID);
         if(guessLocs.isEmpty())
             return false;

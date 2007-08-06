@@ -347,4 +347,12 @@ public class LimeWireCore {
         return injector.getInstance(RequeryManagerFactory.class);
     }
 
+    public MessageDispatcher getMessageDispatcher() {
+        return injector.getInstance(MessageDispatcher.class);
+    }
+
+    public MulticastService getMulticastService() {
+        return injector.getInstance(MulticastService.class);
+    }
+
 }

@@ -169,7 +169,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             ss.bind(new InetSocketAddress(9000));
             // test that the client responds to a PushRequest
             PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                             RouterService.getMessageRouter()._clientGUID,
+                                             ProviderHacks.getMessageRouter()._clientGUID,
                                              0, 
                                              InetAddress.getLocalHost().getAddress(),
                                              9000,
@@ -193,7 +193,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 // confirm a GIV
                 currLine = reader.readLine();
                 GUID guid = new GUID(
-                        RouterService.getMessageRouter()._clientGUID);
+                        ProviderHacks.getMessageRouter()._clientGUID);
                 String givLine = "GIV 0:" + guid.toHexString();
                 assertTrue(currLine.startsWith(givLine));
             } finally {

@@ -786,7 +786,16 @@ public class ConnectionManagerTest extends LimeTestCase {
         private static int lastHost = 0;
 
         public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory(), ProviderHacks.getQueryReplyFactory() );
+            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, ProviderHacks
+                    .getConnectionManager(), ProviderHacks.getNetworkManager(),
+                    ProviderHacks.getQueryRequestFactory(), ProviderHacks
+                            .getHeadersFactory(), ProviderHacks
+                            .getHandshakeResponderFactory(), ProviderHacks
+                            .getQueryReplyFactory(), ProviderHacks
+                            .getMessageDispatcher(), ProviderHacks
+                            .getNetworkUpdateSanityChecker(), ProviderHacks
+                    .getUdpService(), ProviderHacks.getMessageRouter(),
+            ProviderHacks.getSearchResultHandler() );
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

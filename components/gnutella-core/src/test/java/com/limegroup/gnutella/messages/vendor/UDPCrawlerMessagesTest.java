@@ -141,7 +141,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
         
-        Object handler = RouterService.getMessageRouter().getUDPMessageHandler(UDPCrawlerPing.class);
+        Object handler = ProviderHacks.getMessageRouter().getUDPMessageHandler(UDPCrawlerPing.class);
         PrivilegedAccessor.setValue(handler,
 				"_UDPListRequestors",
 				new FixedSizeExpiringSet(200,200));

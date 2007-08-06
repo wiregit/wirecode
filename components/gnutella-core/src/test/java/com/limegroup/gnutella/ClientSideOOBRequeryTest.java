@@ -295,7 +295,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     }
 
     private void assertByPassedResultsCacheHasSize(byte[] guid, int size) {
-        Set<GUESSEndpoint> endpoints = RouterService.getMessageRouter().getQueryLocs(new GUID(guid));
+        Set<GUESSEndpoint> endpoints = ProviderHacks.getMessageRouter().getQueryLocs(new GUID(guid));
         assertEquals(size, endpoints.size());
     }
 

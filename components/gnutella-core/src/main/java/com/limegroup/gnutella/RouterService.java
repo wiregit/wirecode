@@ -128,13 +128,6 @@ public class RouterService {
 	 * Variable for the <tt>ActivityCallback</tt> instance.
 	 */
     private static ActivityCallback callback;
-
-	/**
-	 * Variable for the <tt>MessageRouter</tt> that routes Gnutella
-	 * messages.
-	 */
-    private static MessageRouter messageRouter;
-    
     
     /**
      * The UDPMultiplexor.
@@ -145,10 +138,7 @@ public class RouterService {
      * Selector provider for UDP selectors.
      */
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
-
-       
-    private static MessageDispatcher messageDispatcher;
-    
+           
     static {
         // Link the multiplexor & NIODispatcher together.
         UDPSelectorProviderFactory factory = new DefaultUDPSelectorProviderFactory(new LimeRUDPContext());
@@ -243,15 +233,12 @@ public class RouterService {
   	}
 
     public static void setMessageRouter(MessageRouter messageRouter) {
-        RouterService.messageRouter = messageRouter;
-        RouterService.messageDispatcher = new MessageDispatcher(messageRouter);
-        // allow incoming RUDP messages to be forwarded correctly.
+        if(messageRouter != ProviderHacks.getMessageRouter())
+            throw new IllegalStateException("fix your test!");
+        
+        //allow incoming RUDP messages to be forwarded correctly.
         LimeRUDPMessageHandler handler = new LimeRUDPMessageHandler(getUDPMultiplexor());
         handler.install(messageRouter);        
-    }
-    
-    public static MessageDispatcher getMessageDispatcher() {
-        return messageDispatcher;
     }
     
     /**
@@ -338,12 +325,12 @@ public class RouterService {
 
             LOG.trace("START MessageRouter");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER"));
-    		messageRouter.initialize();
+    		ProviderHacks.getMessageRouter().initialize();
     		LOG.trace("STOPMessageRouter");
 
             LOG.trace("START HTTPUploadManager");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER"));
-            ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), callback, messageRouter); 
+            ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), callback, ProviderHacks.getMessageRouter()); 
             LOG.trace("STOP HTTPUploadManager");
 
             LOG.trace("START HTTPUploadAcceptor");
@@ -573,18 +560,6 @@ public class RouterService {
     }
 
     /**
-	 * Accessor for the <tt>MessageRouter</tt> instance.
-	 *
-	 * @return the <tt>MessageRouter</tt> instance in use --
-	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
-	 *  will be <tt>null</tt> in the case where the <tt>RouterService</tt>
-	 *  has not been constructed
-	 */
-	public static MessageRouter getMessageRouter() {
-		return messageRouter;
-	}
-	
-	/**
 	 * Push uploads from firewalled clients.
 	 */
 	public static void acceptUpload(Socket socket, HTTPConnectionData data) {
@@ -1096,7 +1071,7 @@ public class RouterService {
         ProviderHacks.getQueryStats().recordQuery();
         ProviderHacks.getResponseVerifier().record(qr, type);
         ProviderHacks.getSearchResultHandler().addQuery(qr); // so we can leaf guide....
-        messageRouter.sendDynamicQuery(qr);
+        ProviderHacks.getMessageRouter().sendDynamicQuery(qr);
     }
 
 	/**
@@ -1116,7 +1091,7 @@ public class RouterService {
     public static void stopQuery(GUID guid) {
         ProviderHacks.getQueryUnicaster().purgeQuery(guid);
         ProviderHacks.getSearchResultHandler().removeQuery(guid);
-        messageRouter.queryKilled(guid);
+        ProviderHacks.getMessageRouter().queryKilled(guid);
         if(RouterService.isSupernode())
             QueryDispatcher.instance().addToRemove(guid);
         MutableGUIDFilter.instance().removeGUID(guid.bytes());

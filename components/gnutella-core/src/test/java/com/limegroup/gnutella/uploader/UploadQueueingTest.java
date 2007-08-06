@@ -146,7 +146,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         upManager = (HTTPUploadManager) ProviderHacks.getUploadManager();
-        upManager.start(ProviderHacks.getHTTPUploadAcceptor(), fm, RouterService.getCallback(), RouterService.getMessageRouter());
+        upManager.start(ProviderHacks.getHTTPUploadAcceptor(), fm, RouterService.getCallback(), ProviderHacks.getMessageRouter());
 
         ProviderHacks.getHTTPUploadAcceptor().start(ProviderHacks.getConnectionDispatcher());
         

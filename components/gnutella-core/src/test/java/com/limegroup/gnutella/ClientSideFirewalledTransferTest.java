@@ -168,7 +168,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                         RouterService.getMessageRouter()._clientGUID,
+                                         ProviderHacks.getMessageRouter()._clientGUID,
                                          PushRequest.FW_TRANS_INDEX, 
                                          InetAddress.getLocalHost().getAddress(),
                                          9000);

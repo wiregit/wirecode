@@ -154,7 +154,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
         VERIFIER.record(qr);
         
-        MessageRouter mr = RouterService.getMessageRouter();
+        MessageRouter mr = ProviderHacks.getMessageRouter();
         mr.sendDynamicQuery(qr);
         //mr.broadcastQueryRequest(qr);
     }

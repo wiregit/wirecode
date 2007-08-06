@@ -993,7 +993,7 @@ public class AltLocUploadTest extends LimeTestCase {
         int i = 0;
         for (; i < 20; i++) {
             QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery(FD.getSHA1Urn());
-            RouterService.getMessageRouter().handleMessage(request, handler);
+            ProviderHacks.getMessageRouter().handleMessage(request, handler);
             assertNotNull(handler.received);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             handler.received.write(baos);

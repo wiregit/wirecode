@@ -141,7 +141,7 @@ public final class QueryHandlerTest extends LimeTestCase {
      * expected.
      */
     public void testPublicSendQuery() throws Exception {
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
+        assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
@@ -249,7 +249,7 @@ public final class QueryHandlerTest extends LimeTestCase {
      * basics of query dispatching are working correctly.
      */
     public void testPrivateSendQuery() throws Exception {
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
+        assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "sendQuery",

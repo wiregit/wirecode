@@ -37,7 +37,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         cm.addStubOvrConnection(peer);
         cm.addStubOvrConnection(leaf);
         
-        mr=RouterService.getMessageRouter();
+        mr=ProviderHacks.getMessageRouter();
         PrivilegedAccessor.setValue( MessageRouter.class, "_manager", cm);
         PrivilegedAccessor.setValue( MessageRouter.class, "_fileManager", new FileManagerStub() );
         PrivilegedAccessor.setValue( RouterService.class, "manager", cm);

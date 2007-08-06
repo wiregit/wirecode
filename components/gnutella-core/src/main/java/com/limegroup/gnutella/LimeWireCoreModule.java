@@ -4,6 +4,7 @@ import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.AbstractModule;
@@ -31,6 +32,7 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
+import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
@@ -100,6 +102,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
         bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
         bind(DownloadReferencesFactory.class).to(DownloadReferencesFactoryImpl.class);
+        bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -147,6 +150,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);
         //bind(InNetworkCallback.class);
+        //bind(MessageDispatcher.class);
+        //bind(MulticastService.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);

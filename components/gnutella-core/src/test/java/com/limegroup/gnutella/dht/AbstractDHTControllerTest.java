@@ -25,6 +25,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindValueResult;
@@ -196,7 +197,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         
         public void setExternalPort(int port) {}
 
-        public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
+        public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
             return null;
         }
 

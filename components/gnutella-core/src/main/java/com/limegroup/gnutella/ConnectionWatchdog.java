@@ -130,7 +130,7 @@ public final class ConnectionWatchdog {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            RouterService.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
+            ProviderHacks.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
         }
         
         RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);

@@ -59,7 +59,7 @@ public final class ProbeQueryTest extends LimeTestCase {
      */
     public void testSendProbe() throws Exception {
         new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
+        assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 
                                          "sendProbe",

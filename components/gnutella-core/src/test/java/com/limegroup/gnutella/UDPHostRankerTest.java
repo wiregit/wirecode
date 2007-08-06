@@ -92,7 +92,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         // wait 20 seconds, make sure MessageRouter's map is clear
         Thread.sleep(20000);
         Map map = 
-        (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
+        (Map) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(),
                                           "_messageListeners");
         assertEquals(0, map.size());
         assertTrue(ml.unregistered);

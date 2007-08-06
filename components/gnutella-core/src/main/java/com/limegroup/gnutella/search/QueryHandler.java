@@ -19,7 +19,6 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -111,7 +110,7 @@ public final class QueryHandler implements Inspectable {
      * testing purposes.
 	 */
 	private static MessageRouter _messageRouter =
-		RouterService.getMessageRouter();
+		ProviderHacks.getMessageRouter();
 
 	/**
 	 * Handle to the <tt>ConnectionManager</tt> instance.  Non-final for
@@ -305,7 +304,7 @@ public final class QueryHandler implements Inspectable {
 
             _forwardedToLeaves = true;
             QueryRouteTable qrt = 
-                RouterService.getMessageRouter().getQueryRouteTable();
+                ProviderHacks.getMessageRouter().getQueryRouteTable();
 
             QueryRequest query = createQuery(QUERY, (byte)1);
 
@@ -314,7 +313,7 @@ public final class QueryHandler implements Inspectable {
             // send the query to our leaves if there's a hit and wait,
             // otherwise we'll move on to the probe
             if(qrt != null && qrt.contains(query)) {
-                RouterService.getMessageRouter().
+                ProviderHacks.getMessageRouter().
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
                 _nextQueryTime = 

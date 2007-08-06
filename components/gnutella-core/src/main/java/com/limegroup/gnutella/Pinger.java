@@ -52,7 +52,7 @@ public final class Pinger implements Runnable {
     public void run() {
         if(RouterService.isSupernode() &&
            PingPongSettings.PINGS_ACTIVE.getValue()) {
-            RouterService.getMessageRouter().
+            ProviderHacks.getMessageRouter().
                 broadcastPingRequest(new PingRequest((byte)3));
         }
     }

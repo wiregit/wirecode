@@ -19,6 +19,7 @@ import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
@@ -350,7 +351,7 @@ public class UDPHostCache {
                 // OPTIMIZATION: if we've gotten succesful responses from
                 // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
-                    RouterService.getMessageRouter().
+                    ProviderHacks.getMessageRouter().
 					  unregisterMessageListener(guid, this);
             }
         }

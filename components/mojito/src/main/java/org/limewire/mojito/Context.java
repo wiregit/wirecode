@@ -21,8 +21,6 @@ package org.limewire.mojito;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -58,7 +56,8 @@ import org.limewire.mojito.db.StorablePublisher;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
-import org.limewire.mojito.io.MessageDispatcherImpl;
+import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.mojito.io.MessageDispatcherFactoryImpl;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
@@ -368,33 +367,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setMessageDispatcher(java.lang.Class)
      */
-    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
+    public synchronized MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while " + getName() + " is running");
         }
 
-        if (clazz == null) {
-            clazz = MessageDispatcherImpl.class;
+        if (messageDispatcherFactory == null) {
+            messageDispatcherFactory = new MessageDispatcherFactoryImpl();
         }
         
-        try {
-            Constructor<? extends MessageDispatcher> c = clazz.getConstructor(Context.class);
-            c.setAccessible(true);
-            messageDispatcher = c.newInstance(this);
-            
-            messageDispatcher.addMessageDispatcherListener(
-                    new NetworkStatisticContainer.Listener(networkStats));
-            
-            return messageDispatcher;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        }
+        messageDispatcher = messageDispatcherFactory.create(this);
+        messageDispatcher.addMessageDispatcherListener(
+            new NetworkStatisticContainer.Listener(networkStats));
+        return messageDispatcher;
     }
     
     /**

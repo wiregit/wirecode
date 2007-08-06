@@ -21,6 +21,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -63,38 +64,33 @@ public class StandardMessageRouter extends MessageRouter {
     public StandardMessageRouter(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
-            OnDemandUnicaster onDemandUnicaster, 
-            HeadPongFactory headPongFactory,
-            PingReplyFactory pingReplyFactory,
-            ConnectionManager connectionManager,
-            @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler,
-            QueryUnicaster queryUnicaster,
-            FileManager fileManager,
-            ContentManager contentManager,
-            DHTManager dhtManager,
-            UploadManager uploadManager,
-            DownloadManager downloadManager,
-            UDPService udpService,
+            OnDemandUnicaster onDemandUnicaster,
+            HeadPongFactory headPongFactory, PingReplyFactory pingReplyFactory,
+            ConnectionManager connectionManager, @Named("forMeReplyHandler")
+            ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
+            FileManager fileManager, ContentManager contentManager,
+            DHTManager dhtManager, UploadManager uploadManager,
+            DownloadManager downloadManager, UDPService udpService,
             SearchResultHandler searchResultHandler,
-            SocketsManager socketsManager,
-            HostCatcher hostCatcher,
-            QueryReplyFactory queryReplyFactory,
-            StaticMessages staticMessages,
-            Statistics statistics) {
+            SocketsManager socketsManager, HostCatcher hostCatcher,
+            QueryReplyFactory queryReplyFactory, StaticMessages staticMessages,
+            Provider<MessageDispatcher> messageDispatcher,
+            MulticastService multicastService, Statistics statistics) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
                 fileManager, contentManager, dhtManager, uploadManager,
                 downloadManager, udpService, searchResultHandler,
-                socketsManager, hostCatcher, queryReplyFactory, staticMessages);
+                socketsManager, hostCatcher, queryReplyFactory, staticMessages,
+                messageDispatcher, multicastService);
         this.statistics = statistics;
     }
     
     /**
-     * Responds to a Gnutella ping with cached pongs.  This does special 
-     * handling for both "heartbeat" pings that were sent to ensure that
-     * the connection is still live as well as for pings from a crawler.
-     *
+     * Responds to a Gnutella ping with cached pongs. This does special handling
+     * for both "heartbeat" pings that were sent to ensure that the connection
+     * is still live as well as for pings from a crawler.
+     * 
      * @param ping the <tt>PingRequest</tt> to respond to
      * @param handler the <tt>ReplyHandler</tt> to send any pongs to
      */

@@ -181,7 +181,7 @@ public class UDPPinger {
         final byte[] messageGUID = message.getGUID();
         
         if (listener != null)
-            RouterService.getMessageRouter().registerMessageListener(messageGUID, listener);
+            ProviderHacks.getMessageRouter().registerMessageListener(messageGUID, listener);
 
         
         for(IpPort ipp : hosts) {
@@ -197,7 +197,7 @@ public class UDPPinger {
             // indefinitely in memory for no reason.
             Runnable udpMessagePurger = new Runnable() {
                     public void run() {
-                        RouterService.getMessageRouter().unregisterMessageListener(messageGUID, listener);
+                        ProviderHacks.getMessageRouter().unregisterMessageListener(messageGUID, listener);
                     }
                 };
          

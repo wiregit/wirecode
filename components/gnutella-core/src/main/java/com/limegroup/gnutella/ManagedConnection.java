@@ -304,6 +304,11 @@ public class ManagedConnection extends Connection
     private final HeadersFactory headersFactory;
     private final HandshakeResponderFactory handshakeResponderFactory;
     private final QueryReplyFactory queryReplyFactory;
+    private final MessageDispatcher messageDispatcher;
+    private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
+    private final UDPService udpService;
+    private final MessageRouter messageRouter;
+    private final SearchResultHandler searchResultHandler; 
     
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -319,7 +324,11 @@ public class ManagedConnection extends Connection
             QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory,
             HandshakeResponderFactory handshakeResponderFactory,
-            QueryReplyFactory queryReplyFactory) {
+            QueryReplyFactory queryReplyFactory,
+            MessageDispatcher messageDispatcher,
+            NetworkUpdateSanityChecker networkUpdateSanityChecker,
+            UDPService udService, MessageRouter messageRouter,
+            SearchResultHandler searchResultHandler) {
         super(host, port, type);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -327,6 +336,11 @@ public class ManagedConnection extends Connection
         this.headersFactory = headersFactory;
         this.handshakeResponderFactory = handshakeResponderFactory;
         this.queryReplyFactory = queryReplyFactory;
+        this.messageDispatcher = messageDispatcher;
+        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+        this.udpService = udService;
+        this.messageRouter = messageRouter;
+        this.searchResultHandler = searchResultHandler;
         
     }
 
@@ -344,7 +358,11 @@ public class ManagedConnection extends Connection
             QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory,
             HandshakeResponderFactory handshakeResponderFactory,
-            QueryReplyFactory queryReplyFactory) {
+            QueryReplyFactory queryReplyFactory,
+            MessageDispatcher messageDispatcher,
+            NetworkUpdateSanityChecker networkUpdateSanityChecker,
+            UDPService udService, MessageRouter messageRouter,
+            SearchResultHandler searchResultHandler) {
         super(socket);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -352,6 +370,11 @@ public class ManagedConnection extends Connection
         this.headersFactory = headersFactory;
         this.handshakeResponderFactory = handshakeResponderFactory;
         this.queryReplyFactory = queryReplyFactory;
+        this.messageDispatcher = messageDispatcher;
+        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+        this.udpService = udService;
+        this.messageRouter = messageRouter;
+        this.searchResultHandler = searchResultHandler;
     }
     
     /**
@@ -890,7 +913,7 @@ public class ManagedConnection extends Connection
         // we must run this in another thread, as manager.remove
         // obtains locks, but this can be called from the NIO thread
         if( connectionManager != null ) {
-            RouterService.getMessageDispatcher().dispatch(new Runnable() {
+            messageDispatcher.dispatch(new Runnable() {
                 public void run() {
                     connectionManager.remove(ManagedConnection.this);
                 }
@@ -938,7 +961,7 @@ public class ManagedConnection extends Connection
                 else if (m instanceof QueryStatusResponse)
                     m = morphToStopQuery((QueryStatusResponse) m);
             }
-            RouterService.getMessageDispatcher().dispatchTCP(m, this);
+            messageDispatcher.dispatchTCP(m, this);
         }
     }
     
@@ -1158,7 +1181,7 @@ public class ManagedConnection extends Connection
             // this connection can serve as a PushProxy, so note this....
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(),
-                              RouterService.getMessageRouter()._clientGUID)) {
+                              messageRouter._clientGUID)) {
                 myPushProxy = true;
             }
             // else mistake on the server side - the guid should be my client
@@ -1170,7 +1193,7 @@ public class ManagedConnection extends Connection
             int smpV = capVM.supportsSIMPP();
             if(smpV != -1 && (!receivedCapVM || smpV > SimppManager.instance().getVersion())) {
                 //request the simpp message
-                ProviderHacks.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.SIMPP);
+                networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
                 send(new SimppRequestVM());
             }
             
@@ -1178,7 +1201,7 @@ public class ManagedConnection extends Connection
             int latestId = UpdateHandler.instance().getLatestId();
             int currentId = capVM.supportsUpdate();
             if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
-                ProviderHacks.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.VERSION);
+                networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
                 send(new UpdateRequest());
             } else if(currentId == latestId) {
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
@@ -1197,9 +1220,7 @@ public class ManagedConnection extends Connection
             // on this connection.
             if(isClientSupernodeConnection() &&
                (remoteHostSupportsLeafGuidance() >= 0)) {
-                SearchResultHandler srh =
-                    ProviderHacks.getSearchResultHandler();
-                List<QueryRequest> queries = srh.getQueriesToReSend();
+                List<QueryRequest> queries = searchResultHandler.getQueriesToReSend();
                 for(QueryRequest qr : queries) {
                     send(qr);
                 }
@@ -1209,14 +1230,13 @@ public class ManagedConnection extends Connection
             // test incorporates my leaf status in it.....
             if (remoteHostSupportsPushProxy() > -1) {
                 // get the client GUID and send off a PushProxyRequest
-                GUID clientGUID =
-                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                GUID clientGUID = new GUID(messageRouter._clientGUID);
                 PushProxyRequest req = new PushProxyRequest(clientGUID);
                 send(req);
             }
 
             // do i need to send any ConnectBack messages????
-            if (!ProviderHacks.getUdpService().canReceiveUnsolicited() &&
+            if (!udpService.canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
                 GUID connectBackGUID = networkManager.getUDPConnectBackGUID();

@@ -11,7 +11,16 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
  */
 public class ManagedConnectionStub extends ManagedConnection {
     public ManagedConnectionStub() {
-        super("1.2.3.4", 6346, ConnectType.PLAIN, new ConnectionManagerStub(), ProviderHacks.getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks.getHeadersFactory(), ProviderHacks.getHandshakeResponderFactory(), ProviderHacks.getQueryReplyFactory());
+        super("1.2.3.4", 6346, ConnectType.PLAIN, new ConnectionManagerStub(),
+                ProviderHacks.getNetworkManager(), ProviderHacks
+                        .getQueryRequestFactory(), ProviderHacks
+                        .getHeadersFactory(), ProviderHacks
+                        .getHandshakeResponderFactory(), ProviderHacks
+                        .getQueryReplyFactory(), ProviderHacks
+                        .getMessageDispatcher(), ProviderHacks
+                        .getNetworkUpdateSanityChecker(), ProviderHacks
+                        .getUdpService(), ProviderHacks.getMessageRouter(),
+                ProviderHacks.getSearchResultHandler());
     }
 
     public void initialize() {

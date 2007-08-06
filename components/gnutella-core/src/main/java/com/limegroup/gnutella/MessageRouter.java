@@ -37,6 +37,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -322,6 +323,8 @@ public abstract class MessageRouter {
     protected final HostCatcher hostCatcher;
     protected final QueryReplyFactory queryReplyFactory;
     protected final StaticMessages staticMessages;
+    protected final Provider<MessageDispatcher> messageDispatcher;
+    protected final MulticastService multicastService;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -346,7 +349,9 @@ public abstract class MessageRouter {
             SocketsManager socketsManager,
             HostCatcher hostCatcher,
             QueryReplyFactory queryReplyFactory,
-            StaticMessages staticMessages
+            StaticMessages staticMessages,
+            Provider<MessageDispatcher> messageDispatcher,
+            MulticastService multicastService
             ) {
         _clientGUID = RouterService.getMyGUID();
         this.networkManager = networkManager;
@@ -369,6 +374,8 @@ public abstract class MessageRouter {
         this.hostCatcher = hostCatcher;
         this.queryReplyFactory = queryReplyFactory;
         this.staticMessages = staticMessages;
+        this.messageDispatcher = messageDispatcher;
+        this.multicastService = multicastService;
          
     }
     
@@ -1735,7 +1742,7 @@ public abstract class MessageRouter {
 		// record the stat
 		SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
-		MulticastService.instance().send(query);
+		multicastService.send(query);
 	}	
 
 
@@ -2296,7 +2303,7 @@ public abstract class MessageRouter {
         // must have a TTL of 1
         assert push.getTTL() == 1 : "multicast push ttl not 1";
         
-        MulticastService.instance().send(push);
+        multicastService.send(push);
         SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
@@ -2878,7 +2885,7 @@ public abstract class MessageRouter {
     /** Expires the UDP-Reply cache. */
     private class UDPReplyCleaner implements Runnable {
         public void run() {
-            RouterService.getMessageDispatcher().dispatch(new Runnable() {
+            messageDispatcher.get().dispatch(new Runnable() {
                 public void run() {
                     _udpReplyHandlerCache.clear();
                 }

@@ -20,8 +20,8 @@ import org.limewire.nio.observer.WriteObserver;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
@@ -153,7 +153,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
                 responses.add(iterable.next());
             }
             
-            Iterable<QueryReply> it = RouterService.getMessageRouter()
+            Iterable<QueryReply> it = ProviderHacks.getMessageRouter()
                     .responsesToQueryReplies(responses.toArray(new Response[0]), query);
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);

@@ -103,10 +103,10 @@ public class MulticastTest extends LimeTestCase {
         
         // Set these after RouterService is started & MessageRouter
         // is initialized, or else they'll be erased.
-        RouterService.getMessageRouter().addMulticastMessageHandler(PushRequest.class, M_HANDLER);
-        RouterService.getMessageRouter().addMulticastMessageHandler(QueryRequest.class, M_HANDLER);
-        RouterService.getMessageRouter().addUDPMessageHandler(QueryReply.class, U_HANDLER);
-        RouterService.getMessageRouter().addUDPMessageHandler(PushRequest.class, U_HANDLER);
+        ProviderHacks.getMessageRouter().addMulticastMessageHandler(PushRequest.class, M_HANDLER);
+        ProviderHacks.getMessageRouter().addMulticastMessageHandler(QueryRequest.class, M_HANDLER);
+        ProviderHacks.getMessageRouter().addUDPMessageHandler(QueryReply.class, U_HANDLER);
+        ProviderHacks.getMessageRouter().addUDPMessageHandler(PushRequest.class, U_HANDLER);
     }
 
     public void setUp() throws Exception {
@@ -413,7 +413,7 @@ public class MulticastTest extends LimeTestCase {
     
     private static void reroutePush(byte[] guid) throws Exception {
         RouteTable rt = (RouteTable)PrivilegedAccessor.getValue(
-            RouterService.getMessageRouter(), "_pushRouteTable");
+            ProviderHacks.getMessageRouter(), "_pushRouteTable");
         rt.routeReply(guid, ProviderHacks.getForMeReplyHandler());
     }
     

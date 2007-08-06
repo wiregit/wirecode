@@ -25,7 +25,9 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -148,11 +150,29 @@ public class UDPService implements ReadWriteObserver {
     private static final byte[] IN_HEADER_BUF = new byte[23];
     
     private final NetworkManager networkManager;
+    private final Provider<MessageDispatcher> messageDispatcher;
+    private final Provider<HostileFilter> hostileFilter;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<Acceptor> acceptor;
+    private final Provider<QueryUnicaster> queryUnicaster;
 
 	@Inject
-	protected UDPService(NetworkManager networkManager) {
-	    this.networkManager = networkManager;
-	    OUTGOING_MSGS = new LinkedList<SendBundle>();
+    public UDPService(NetworkManager networkManager,
+            Provider<MessageDispatcher> messageDispatcher,
+            Provider<HostileFilter> hostileFilter,
+            Provider<ConnectionManager> connectionManager,
+            Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
+            Provider<QueryUnicaster> queryUnicaster) {
+        this.networkManager = networkManager;
+        this.messageDispatcher = messageDispatcher;
+        this.hostileFilter = hostileFilter;
+        this.connectionManager = connectionManager;
+        this.messageRouter = messageRouter;
+        this.acceptor = acceptor;
+        this.queryUnicaster = queryUnicaster;
+
+        OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
         scheduleServices();
@@ -294,7 +314,7 @@ public class UDPService implements ReadWriteObserver {
                     continue;
 
                 // don't go further if filtered.
-                if (!ProviderHacks.getHostileFilter().allow(addr.getAddress()))
+                if (!hostileFilter.get().allow(addr.getAddress()))
                     return;
                 
                 byte[] data = BUFFER.array();
@@ -332,12 +352,12 @@ public class UDPService implements ReadWriteObserver {
 	 * Processes a single message.
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
-        if (!ProviderHacks.getHostileFilter().allow(message))
+        if (!hostileFilter.get().allow(message))
             return;
         if (message instanceof PingReply) 
             mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
         updateState(message, addr);
-        RouterService.getMessageDispatcher().dispatchUDP(message, addr);
+        messageDispatcher.get().dispatchUDP(message, addr);
     }
 	
 	/** Updates internal state of the UDP Service. */
@@ -402,7 +422,7 @@ public class UDPService implements ReadWriteObserver {
         //  OR
         //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         return
-                !ProviderHacks.getConnectionManager().isConnectedTo(host)
+                !connectionManager.get().isConnectedTo(host)
             &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
              ;
 
@@ -600,7 +620,7 @@ public class UDPService implements ReadWriteObserver {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
 	                    " our external port "+networkManager.getPort()+
-	                    " our non-forced port "+ProviderHacks.getAcceptor().getPort(false)+
+	                    " our non-forced port "+acceptor.get().getPort(false)+
 	                    " number of received IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
 	                            networkManager.getExternalAddress()));
@@ -612,7 +632,7 @@ public class UDPService implements ReadWriteObserver {
 	        
 	        if (_numReceivedIPPongs == 1){
 	            ret = ret &&
-	            	(_lastReportedPort == ProviderHacks.getAcceptor().getPort(false) ||
+	            	(_lastReportedPort == acceptor.get().getPort(false) ||
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
@@ -646,7 +666,7 @@ public class UDPService implements ReadWriteObserver {
 	 */
 	public int getStableUDPPort() {
 
-	    int localPort = ProviderHacks.getAcceptor().getPort(false);
+	    int localPort = acceptor.get().getPort(false);
 	    int forcedPort = networkManager.getPort();
 
 	    synchronized(this) {
@@ -717,11 +737,6 @@ public class UDPService implements ReadWriteObserver {
             // clear and revalidate if 1) we haven't had in incoming in an hour
             // or 2) we've never had incoming and we haven't checked in an hour
             final long currTime = System.currentTimeMillis();
-            final MessageRouter mr = RouterService.getMessageRouter();
-            final ConnectionManager cm = ProviderHacks.getConnectionManager();
-            // if these haven't been created yet, exit and wait till they have.
-            if(mr == null || cm == null)
-                return;
             if (
                 (_acceptedUnsolicitedIncoming && //1)
                  ((currTime - _lastUnsolicitedIncomingTime) > 
@@ -734,9 +749,9 @@ public class UDPService implements ReadWriteObserver {
                 
                 final GUID cbGuid = new GUID(GUID.makeGuid());
                 final MLImpl ml = new MLImpl();
-                mr.registerMessageListener(cbGuid.bytes(), ml);
+                messageRouter.get().registerMessageListener(cbGuid.bytes(), ml);
                 // send a connectback request to a few peers and clear
-                if(cm.sendUDPConnectBackRequests(cbGuid))  {
+                if(connectionManager.get().sendUDPConnectBackRequests(cbGuid))  {
                     _lastConnectBackTime = System.currentTimeMillis();
                     Runnable checkThread = new Runnable() {
                             public void run() {
@@ -747,7 +762,7 @@ public class UDPService implements ReadWriteObserver {
                                     _acceptedUnsolicitedIncoming = 
                                         ml._gotIncoming;
                                 }
-                                mr.unregisterMessageListener(cbGuid.bytes(), ml);
+                                messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
                     RouterService.schedule(checkThread, 
@@ -755,7 +770,7 @@ public class UDPService implements ReadWriteObserver {
                                            0);
                 }
                 else
-                    mr.unregisterMessageListener(cbGuid.bytes(), ml);
+                    messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);
             }
         }
     }
@@ -765,7 +780,7 @@ public class UDPService implements ReadWriteObserver {
             // straightforward - send a UDP ping to a host.  it doesn't really
             // matter who the guy is - we are just sending to open up any
             // potential firewall to UDP traffic
-            GUESSEndpoint ep = ProviderHacks.getQueryUnicaster().getUnicastEndpoint();
+            GUESSEndpoint ep = queryUnicaster.get().getUnicastEndpoint();
             if (ep == null) return;
             // only do this if you can receive some form of UDP traffic.
             if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;
@@ -778,5 +793,7 @@ public class UDPService implements ReadWriteObserver {
             send(pr, ep.getInetAddress(), ep.getPort());
         }
     }
+
+
 
 }

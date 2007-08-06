@@ -18,6 +18,7 @@ import org.limewire.security.AddressSecurityToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
@@ -176,7 +177,7 @@ public class OnDemandUnicaster {
         if(LOG.isDebugEnabled())
             LOG.debug("Sending query with GUID: " + qGUID + " for URN: " + urn + " to host: " + ipp);
         
-        RouterService.getMessageRouter().originateQueryGUID(query.getGUID());
+        ProviderHacks.getMessageRouter().originateQueryGUID(query.getGUID());
         udpService.send(query, ipp.getInetAddress(), ipp.getPort());
     }
 

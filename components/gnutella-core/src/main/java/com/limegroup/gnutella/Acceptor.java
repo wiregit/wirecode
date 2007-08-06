@@ -305,7 +305,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
 	public void start() {
-        MulticastService.instance().start();
+        ProviderHacks.getMulticastService().start();
         ProviderHacks.getUdpService().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
         ProviderHacks.getConnectionDispatcher().
@@ -405,7 +405,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             //Shut off UDPService also!
             ProviderHacks.getUdpService().setListeningSocket(null);
             //Shut off MulticastServier too!
-            MulticastService.instance().setListeningSocket(null);            
+            ProviderHacks.getMulticastService().setListeningSocket(null);            
 
             LOG.trace("service OFF.");
             return;
@@ -437,7 +437,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     ConnectionSettings.MULTICAST_ADDRESS.getValue()
                 );
                 mcastServiceSocket =                            
-                    MulticastService.instance().newListeningSocket(
+                    ProviderHacks.getMulticastService().newListeningSocket(
                         ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
                 LOG.trace("multicast service setup");
@@ -473,7 +473,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // Commit the MulticastService's new socket
             // if we were able to get it
             if (mcastServiceSocket != null) {
-                MulticastService.instance().setListeningSocket(mcastServiceSocket);
+                ProviderHacks.getMulticastService().setListeningSocket(mcastServiceSocket);
             }
 
             if(LOG.isDebugEnabled())

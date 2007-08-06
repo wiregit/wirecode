@@ -14,6 +14,9 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -29,12 +32,8 @@ import com.limegroup.gnutella.messages.Message.Network;
  * @see UDPService
  * @see MessageRouter
  */
+@Singleton
 public final class MulticastService implements Runnable {
-
-	/**
-	 * Constant for the single <tt>MulticastService</tt> instance.
-	 */
-	private final static MulticastService INSTANCE = new MulticastService();
 
 	/** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
@@ -77,25 +76,22 @@ public final class MulticastService implements Runnable {
 	 * The thread for listening of incoming messages.
 	 */
 	private final Thread MULTICAST_THREAD;
-
-	/**
-	 * Instance accessor.
-	 */
-	public static MulticastService instance() {
-		return INSTANCE;
-	}
-
-	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
-	 */
-	private MulticastService() {
-	    MULTICAST_THREAD = ThreadExecutor.newManagedThread(this, "MulticastService");
-		MULTICAST_THREAD.setDaemon(true);
-    }
 	
-	/**
-	 * Starts the Multicast service.
-	 */
+	private final Provider<UDPService> udpService;
+	private final Provider<MessageDispatcher> messageDispatcher;
+
+	@Inject
+    MulticastService(Provider<UDPService> udpService,
+            Provider<MessageDispatcher> messageDispatcher) {
+        this.udpService = udpService;
+        this.messageDispatcher = messageDispatcher;
+        MULTICAST_THREAD = ThreadExecutor.newManagedThread(this, "MulticastService");
+        MULTICAST_THREAD.setDaemon(true);
+    }
+
+    /**
+     * Starts the Multicast service.
+     */
 	public void start() {
         MULTICAST_THREAD.start();
     }
@@ -212,7 +208,7 @@ public final class MulticastService implements Runnable {
                     Message message = MessageFactory.read(in, HEADER_BUF, Network.MULTICAST);
                     if(message == null)
                         continue;
-                    RouterService.getMessageDispatcher().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
+                    messageDispatcher.get().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
                 catch (IOException e) {
                     continue;
@@ -236,7 +232,7 @@ public final class MulticastService implements Runnable {
     public synchronized void send(Message msg) {
         // only send the msg if we've initialized the port.
         if( _port != -1 ) {
-            ProviderHacks.getUdpService().send(msg, _group, _port);
+            udpService.get().send(msg, _group, _port);
         }
 	}
 

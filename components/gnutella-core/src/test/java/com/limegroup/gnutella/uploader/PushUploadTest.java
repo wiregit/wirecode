@@ -162,7 +162,7 @@ public class PushUploadTest extends LimeTestCase {
                 .setValue(RouterService.class, "uploadManager", upMan);
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, RouterService.getCallback(), RouterService.getMessageRouter());
+        upMan.start(httpAcceptor, fm, RouterService.getCallback(), ProviderHacks.getMessageRouter());
     }
 
     @Override

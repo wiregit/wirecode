@@ -16,9 +16,11 @@ import org.limewire.collection.IntWrapper;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
+import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -53,11 +55,28 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, GUID>(200));
     
     private final NetworkManager networkManager;
+    private final SecureMessageVerifier secureMessageVerifier;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<SearchResultHandler> searchResultHandler;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<Acceptor> acceptor;
+    private final Provider<PushManager> pushManager;
 
     @Inject
-	ForMeReplyHandler(NetworkManager networkManager) {
-	    this.networkManager = networkManager;
-	    
+    ForMeReplyHandler(NetworkManager networkManager,
+            SecureMessageVerifier secureMessageVerifier,
+            Provider<ConnectionManager> connectionManager,
+            Provider<SearchResultHandler> searchResultHandler,
+            Provider<DownloadManager> downloadManager,
+            Provider<Acceptor> acceptor, Provider<PushManager> pushManager) {
+        this.networkManager = networkManager;
+        this.secureMessageVerifier = secureMessageVerifier;
+        this.connectionManager = connectionManager;
+        this.searchResultHandler = searchResultHandler;
+        this.downloadManager = downloadManager;
+        this.acceptor = acceptor;
+        this.pushManager = pushManager;
+    	    
 	    //Clear push requests every 30 seconds.
 	    RouterService.schedule(new Runnable() {
 	        public void run() {
@@ -80,8 +99,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 				SharingSettings.FREELOADER_ALLOWED.getValue())
 			&& (handler instanceof ManagedConnection)
             && (handler.isStable())) {
-			ConnectionManager cm = ProviderHacks.getConnectionManager();
-            cm.remove((ManagedConnection)handler);
+            connectionManager.get().remove((ManagedConnection)handler);
         }
 	}
 	
@@ -110,7 +128,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         if(handler != null && handler.isPersonalSpam(reply)) return;
         
         if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
-            ProviderHacks.getSecureMessageVerifier().verify(reply, this);
+            secureMessageVerifier.verify(reply, this);
         } else {
             routeQueryReplyInternal(reply);
         }
@@ -124,11 +142,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     
     /** Passes the QueryReply off to where it should go. */
     private void routeQueryReplyInternal(QueryReply reply) {
-        SearchResultHandler resultHandler = ProviderHacks.getSearchResultHandler();
-        resultHandler.handleQueryReply(reply);
-
-        DownloadManager dm = ProviderHacks.getDownloadManager();
-        dm.handleQueryReply(reply);
+        searchResultHandler.get().handleQueryReply(reply);
+        downloadManager.get().handleQueryReply(reply);
     }
 	
 	/**
@@ -227,7 +242,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         }
         
         // if the IP is banned, don't accept it
-        if (ProviderHacks.getAcceptor().isBannedIP(ip))
+        if (acceptor.get().isBannedIP(ip))
             return;
 
         int port = pushRequest.getPort();
@@ -238,8 +253,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        ProviderHacks.getPushManager().
-            acceptPushUpload(h, port, req_guid_hexstring,
+        pushManager.get().acceptPushUpload(h, port, req_guid_hexstring,
                              pushRequest.isMulticast(), // force accept
                              pushRequest.isFirewallTransferPush(),
                              pushRequest.isTLSCapable());

@@ -1532,7 +1532,7 @@ public class HostCatcher {
                !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = PingRequest.createMulticastPing();
-                MulticastService.instance().send(pr);
+                ProviderHacks.getMulticastService().send(pr);
                 nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
                 return true;
             }

@@ -89,7 +89,7 @@ public class ServerSideHeadTest extends LimeTestCase {
   
     public void testGeneralBehavior() throws Exception{
     	
-    	MessageRouter router = RouterService.getMessageRouter();
+    	MessageRouter router = ProviderHacks.getMessageRouter();
     	router.handleUDPMessage(ping1,addr1);
     	Thread.sleep(100);
     	

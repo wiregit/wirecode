@@ -1676,7 +1676,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         c.close();
 
         // 3) Clean up route tables.
-        RouterService.getMessageRouter().removeConnection(c);
+        ProviderHacks.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this, 
