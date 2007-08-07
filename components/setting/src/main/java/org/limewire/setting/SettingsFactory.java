@@ -183,7 +183,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
                 }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError("ERROR_PROPS_CORRUPTED");
+                MessageService.showError(I18n.marktr("ERROR_PROPS_CORRUPTED"));
             }
         } catch(IOException e) {
             ErrorService.error(e);
