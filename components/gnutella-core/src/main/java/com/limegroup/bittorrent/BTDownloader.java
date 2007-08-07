@@ -70,7 +70,7 @@ public class BTDownloader extends AbstractDownloader
 	private IncompleteFileManager ifm;
 	
 	// TODO: figure out how to init this
-	private TorrentContext context;
+	private volatile TorrentContext context;
 	
 	private volatile long startTime, stopTime;
 	
@@ -80,8 +80,7 @@ public class BTDownloader extends AbstractDownloader
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
 	
-	public BTDownloader(BTMetaInfo info) {
-		context = new BTContext(info);
+	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory) {
 		_info = info;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
@@ -437,7 +436,6 @@ public class BTDownloader extends AbstractDownloader
 				String.class, Serializable.class, 
 				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
-		context = new BTContext(_info);
 		urn = _info.getURN();
 		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
@@ -447,6 +445,8 @@ public class BTDownloader extends AbstractDownloader
 	}
 
 	public void initialize(DownloadReferences downloadReferences) {
+        context = downloadReferences.getBTContextFactory().createBTContext(_info);
+	    
         this.manager = downloadReferences.getDownloadManager();
         ifm = manager.getIncompleteFileManager();
         _torrent = downloadReferences.getManagedTorrentFactory().create(context);

@@ -1,15 +1,17 @@
 package com.limegroup.gnutella;
 
+import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Guice;
+import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.choking.ChokerFactory;
-import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -128,10 +130,8 @@ public class ProviderHacks {
     public static ChatManager getChatManager() { return i().getChatManager(); }
     public static BTLinkManagerFactory getBTLinkManagerFactory() { return i().getBTLinkManagerFactory(); }
     public static ChokerFactory getChokerFactory() { return i().getChokerFactory(); }
-    public static DiskManagerFactory getDiskManagerFactory() { return i().getDiskManagerFactory(); }
     public static BTConnectionFetcherFactory getBTConnectionFetcherFactory() { return i().getBTConnectionFetcherFactory(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
-    public static ConnectionWatchdog getConnectionWatchdog() { return i().getConnectionWatchdog(); }
     public static Pinger getPinger() { return i().getPinger(); }
     public static PongCacher getPongCacher() { return i().getPongCacher(); }
     public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
@@ -157,6 +157,7 @@ public class ProviderHacks {
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
 
     // Cleaned up in all but RS
+    public static ConnectionWatchdog getConnectionWatchdog() { return i().getConnectionWatchdog(); }
     public static HTTPAcceptor getHTTPAcceptor() { return i().getHTTPAcceptor(); }
     public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
     public static ResponseVerifier getResponseVerifier() { return i().getResponseVerifier(); }
@@ -195,6 +196,9 @@ public class ProviderHacks {
     public static DownloadReferencesFactory getDownloadReferencesFactory() { return i().getDownloadReferencesFactory(); }
     public static DownloadCallback getInNetworkCallback() { return i().getInNetworkCallback(); }
     public static RequeryManagerFactory getRequeryManagerFactory() { return i().getRequeryManagerFactory(); }
+    public static RUDPContext getRUDPContext() { return i().getRUDPContext(); }
+    public static BTContextFactory getBTContextFactory() { return i().getBTContextFactory(); }
+    public static BTDownloaderFactory getBTDownloaderFactory() { return i().getBTDownloaderFactory(); }
 
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

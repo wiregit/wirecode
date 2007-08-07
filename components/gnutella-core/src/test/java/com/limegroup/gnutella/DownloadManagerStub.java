@@ -18,7 +18,8 @@ public class DownloadManagerStub extends DownloadManager {
 	public DownloadManagerStub() {
 	    super(ProviderHacks.getNetworkManager(), 
 	          ProviderHacks.getDownloadReferencesFactory(),
-	          ProviderHacks.getInNetworkCallback());
+	          ProviderHacks.getInNetworkCallback(), 
+	          ProviderHacks.getBTDownloaderFactory());
 	}
 	
 	

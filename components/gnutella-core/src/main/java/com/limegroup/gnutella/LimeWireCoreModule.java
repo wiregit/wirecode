@@ -24,6 +24,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTContextFactoryImpl;
+import com.limegroup.bittorrent.BTDownloaderFactory;
+import com.limegroup.bittorrent.BTDownloaderFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
 import com.limegroup.bittorrent.TorrentEvent;
@@ -132,7 +136,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RUDPMessageFactory.class).to(LimeRUDPMessageFactory.class);
         bind(RUDPSettings.class).to(LimeRUDPSettings.class);
         bind(RUDPMessageFactory.class).annotatedWith(Names.named("defaultRUDPMessageFactory")).to(DefaultMessageFactory.class);
-
+        bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
+        bind(BTDownloaderFactory.class).to(BTDownloaderFactoryImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

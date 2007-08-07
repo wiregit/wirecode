@@ -25,7 +25,8 @@ public class DownloadProviderHacks {
                 ProviderHacks.getVerifyingFileFactory(),
                 ProviderHacks.getDiskController(),
                 ProviderHacks.getIpFilter(),
-                ProviderHacks.getRequeryManagerFactory()
+                ProviderHacks.getRequeryManagerFactory(),
+                ProviderHacks.getBTContextFactory()
                 );
     }
 

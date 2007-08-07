@@ -3,8 +3,10 @@ package com.limegroup.gnutella.rudp;
 import junit.framework.Test;
 
 import org.limewire.nio.NIODispatcher;
+import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.messages.RUDPMessage;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageParser;
@@ -27,7 +29,7 @@ public class LimeRUDPContextTest extends LimeTestCase {
     public void testReferences() {
         // Make sure there's nothing linked up to RUDP beforehand
         assertNull(MessageFactory.getParser(RUDPMessage.F_RUDP_MESSAGE));
-        LimeRUDPContext context = new LimeRUDPContext();
+        RUDPContext context = ProviderHacks.getRUDPContext();
         assertEquals(LimeRUDPMessageFactory.class, context.getMessageFactory().getClass());
         assertEquals(LimeUDPService.class, context.getUDPService().getClass());
         assertEquals(LimeRUDPSettings.class, context.getRUDPSettings().getClass());

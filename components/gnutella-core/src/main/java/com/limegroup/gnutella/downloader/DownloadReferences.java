@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -35,6 +36,7 @@ public class DownloadReferences {
     private final DiskController diskController;
     private final IPFilter ipFilter;
     private final RequeryManagerFactory requeryManagerFactory;
+    private final BTContextFactory btContextFactory;
 
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
@@ -49,7 +51,8 @@ public class DownloadReferences {
             SavedFileManager savedFileManager,
             VerifyingFileFactory verifyingFileFactory,
             DiskController diskController, IPFilter ipFilter,
-            RequeryManagerFactory requeryManagerFactory) {
+            RequeryManagerFactory requeryManagerFactory,
+            BTContextFactory btContextFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -68,6 +71,7 @@ public class DownloadReferences {
         this.diskController = diskController;
         this.ipFilter = ipFilter;
         this.requeryManagerFactory = requeryManagerFactory;
+        this.btContextFactory = btContextFactory;
     }
     
     public DownloadManager getDownloadManager() {
@@ -140,5 +144,9 @@ public class DownloadReferences {
 
     public IPFilter getIpFilter() {
         return ipFilter;
+    }
+    
+    public BTContextFactory getBTContextFactory() {
+        return btContextFactory;
     }
 }

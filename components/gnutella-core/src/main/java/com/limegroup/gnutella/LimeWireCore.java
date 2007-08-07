@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
@@ -9,6 +10,8 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
@@ -479,6 +482,18 @@ public class LimeWireCore {
 
     public UDPSelectorProvider getUDPSelectorProvider() {
         return injector.getInstance(UDPSelectorProvider.class);
+    }
+
+    public RUDPContext getRUDPContext() {
+        return injector.getInstance(RUDPContext.class);
+    }
+
+    public BTContextFactory getBTContextFactory() {
+        return injector.getInstance(BTContextFactory.class);
+    }
+
+    public BTDownloaderFactory getBTDownloaderFactory() {
+        return injector.getInstance(BTDownloaderFactory.class);
     }
     
 

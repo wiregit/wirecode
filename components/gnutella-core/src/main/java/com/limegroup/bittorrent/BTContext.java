@@ -4,8 +4,8 @@ import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 
+import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
-import com.limegroup.gnutella.ProviderHacks;
 
 public class BTContext implements TorrentContext {
 
@@ -14,8 +14,10 @@ public class BTContext implements TorrentContext {
 	private final BitField fullBitField;
 	
 	private TorrentDiskManager diskManager;
+	private final DiskManagerFactory diskManagerFactory;
 	
-	public BTContext(BTMetaInfo info) {
+	BTContext(BTMetaInfo info, DiskManagerFactory diskManagerFactory) {
+	    this.diskManagerFactory = diskManagerFactory;
 		this.info = info;
 		info.setContext(this);
 		fullBitField = new BitFieldSet(fullSet, info.getNumBlocks());
@@ -43,8 +45,7 @@ public class BTContext implements TorrentContext {
 	}
 
 	public void initializeDiskManager(boolean complete) {
-		diskManager = ProviderHacks.getDiskManagerFactory().getManager(this, 
-				info.getDiskManagerData(), complete);
+		diskManager = diskManagerFactory.getManager(this, info.getDiskManagerData(), complete);
 	}
 
 	/**

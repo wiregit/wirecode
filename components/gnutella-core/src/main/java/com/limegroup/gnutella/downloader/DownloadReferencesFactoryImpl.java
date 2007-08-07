@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -42,6 +43,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
     private final Provider<DiskController> diskController;
     private final Provider<IPFilter> ipFilter;
     private final Provider<RequeryManagerFactory> requeryManagerFactory;
+    private final Provider<BTContextFactory> btContextFactory;
     
     @Inject
     public DownloadReferencesFactoryImpl(
@@ -63,7 +65,8 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
             Provider<VerifyingFileFactory> verifyingFileFactory,
             Provider<DiskController> diskController,
             Provider<IPFilter> ipFilter,
-            Provider<RequeryManagerFactory> requeryManagerFactory) {
+            Provider<RequeryManagerFactory> requeryManagerFactory,
+            Provider<BTContextFactory> btContextFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -83,6 +86,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
         this.diskController = diskController;
         this.ipFilter = ipFilter;
         this.requeryManagerFactory = requeryManagerFactory;
+        this.btContextFactory = btContextFactory;
     }
 
     public DownloadReferences create(Downloader downloader) {
@@ -95,7 +99,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
                 contentManager.get(), sourceRankerFactory.get(),
                 urnCache.get(), savedFileManager.get(), verifyingFileFactory
                         .get(), diskController.get(), ipFilter.get(),
-                requeryManagerFactory.get());
+                requeryManagerFactory.get(), btContextFactory.get());
     }
 
 }

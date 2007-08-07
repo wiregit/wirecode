@@ -33,7 +33,7 @@ import org.limewire.util.GenericsUtils.ScanMode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.BTDownloader;
+import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -151,14 +151,17 @@ public class DownloadManager implements BandwidthTracker {
     private final NetworkManager networkManager;
     private final DownloadReferencesFactory downloadReferencesFactory;
     private final DownloadCallback innetworkCallback;
+    private final BTDownloaderFactory btDownloaderFactory;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
             DownloadReferencesFactory downloadReferencesFactory,
-            @Named("inNetwork") DownloadCallback innetworkCallback) {
+            @Named("inNetwork") DownloadCallback innetworkCallback,
+            BTDownloaderFactory btDownloaderFactory) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
+        this.btDownloaderFactory = btDownloaderFactory;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -808,7 +811,7 @@ public class DownloadManager implements BandwidthTracker {
     		checkTargetLocation(system, overwrite);
     	else
     		ProviderHacks.getTorrentManager().killTorrentForFile(system.getCompleteFile());
-    	AbstractDownloader ret = new BTDownloader(info);
+    	AbstractDownloader ret = btDownloaderFactory.createBTDownloader(info);
     	initializeDownload(ret);
     	return ret;
     }
