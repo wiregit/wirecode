@@ -314,7 +314,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
 			if(_headersRead.supportsVendorMessages() > 0) {
-                send(MessagesSupportedVendorMessage.instance());
+                send(ProviderHacks.getMessagesSupportedVendorMessage());
                 send(CapabilitiesVM.instance());
 			}
         } catch (IOException ioe) {

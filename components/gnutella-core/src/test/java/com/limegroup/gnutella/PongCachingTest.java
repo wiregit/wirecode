@@ -244,10 +244,10 @@ public final class PongCachingTest extends LimeTestCase {
                     curPong.hop();
                 }
             }
-            PongCacher.instance().addPong(curPong);            
+            ProviderHacks.getPongCacher().addPong(curPong);            
         }
         
-        List pongs = PongCacher.instance()
+        List pongs = ProviderHacks.getPongCacher()
             .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
@@ -282,7 +282,7 @@ public final class PongCachingTest extends LimeTestCase {
                     curPong.hop();
                 }
             }
-            PongCacher.instance().addPong(curPong);            
+            ProviderHacks.getPongCacher().addPong(curPong);            
         }
         
         byte[] ip2 = { (byte)1, (byte)3, (byte)3, (byte)3 };
@@ -296,14 +296,14 @@ public final class PongCachingTest extends LimeTestCase {
                     curPong.hop();
                 }
             }
-            PongCacher.instance().addPong(curPong);            
+            ProviderHacks.getPongCacher().addPong(curPong);            
         }
 
         //check that all the pongs are in the PongCacher
-        List pongs = PongCacher.instance().getBestPongs("ja");
+        List pongs = ProviderHacks.getPongCacher().getBestPongs("ja");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
-        pongs = PongCacher.instance().getBestPongs("en");
+        pongs = ProviderHacks.getPongCacher().getBestPongs("en");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         //create a ja locale PingRequest
@@ -345,9 +345,9 @@ public final class PongCachingTest extends LimeTestCase {
                     curPong.hop();
                 }
             }
-            PongCacher.instance().addPong(curPong);            
+            ProviderHacks.getPongCacher().addPong(curPong);            
         }
-        pongs = PongCacher.instance().getBestPongs("sv");
+        pongs = ProviderHacks.getPongCacher().getBestPongs("sv");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );        
 
         //create a sv locale PingRequest

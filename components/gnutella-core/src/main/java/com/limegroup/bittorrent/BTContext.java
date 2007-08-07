@@ -4,8 +4,8 @@ import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 
-import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class BTContext implements TorrentContext {
 
@@ -43,7 +43,7 @@ public class BTContext implements TorrentContext {
 	}
 
 	public void initializeDiskManager(boolean complete) {
-		diskManager = DiskManagerFactory.instance().getManager(this, 
+		diskManager = ProviderHacks.getDiskManagerFactory().getManager(this, 
 				info.getDiskManagerData(), complete);
 	}
 

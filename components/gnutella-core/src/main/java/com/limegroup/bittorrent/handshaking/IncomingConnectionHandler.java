@@ -2,17 +2,11 @@ package com.limegroup.bittorrent.handshaking;
 
 import org.limewire.nio.AbstractNBSocket;
 
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.TorrentManager;
 
+@Singleton
 public class IncomingConnectionHandler {
-	private static IncomingConnectionHandler instance;
-	public static IncomingConnectionHandler instance() {
-		if (instance == null)
-			instance = new IncomingConnectionHandler();
-		return instance;
-	}
-	
-	protected IncomingConnectionHandler(){}
 	
 	public void handleIncoming(AbstractNBSocket s, TorrentManager t) {
 		IncomingBTHandshaker shaker = 

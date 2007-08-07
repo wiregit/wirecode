@@ -30,7 +30,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -242,7 +241,7 @@ public abstract class ClientSideTestCase
 
     /** Marks the Responses of QueryReply as NOT spam */
     protected void markAsNotSpam(QueryReply qr) throws Exception {
-        SpamManager.instance().clearFilterData(); // Start from scratch
+        ProviderHacks.getSpamManager().clearFilterData(); // Start from scratch
         
         Response[] resp = qr.getResultsArray();
         RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
@@ -251,11 +250,11 @@ public abstract class ClientSideTestCase
             //assertTrue(SpamManager.instance().isSpam(rfds[i]));
         }
         
-        SpamManager.instance().handleUserMarkedGood(rfds);
+        ProviderHacks.getSpamManager().handleUserMarkedGood(rfds);
         
         // Make sure they're not spam
         for(int i = 0; i < rfds.length; i++) {
-            assertFalse(SpamManager.instance().isSpam(rfds[i]));
+            assertFalse(ProviderHacks.getSpamManager().isSpam(rfds[i]));
         }
     }
     

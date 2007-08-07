@@ -22,6 +22,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
@@ -31,12 +32,8 @@ import com.limegroup.gnutella.URN;
  * 
  * This class maps SHA1_URNs to TigerTreeCache
  */
+@Singleton
 public final class TigerTreeCache {
-
-    /**
-     * TigerTreeCache instance variable.
-     */
-    private static TigerTreeCache instance = null;
     
     /**
      * The ProcessingQueue to do the hashing.
@@ -67,17 +64,6 @@ public final class TigerTreeCache {
      * Whether or not data dirtied since the last time we saved.
      */
     private static boolean dirty = false;        
-
-    /**
-     * Returns the <tt>TigerTreeCache</tt> instance.
-     * 
-     * @return the <tt>TigerTreeCache</tt> instance
-     */
-    public synchronized static TigerTreeCache instance() {
-        if(instance == null)
-            instance = new TigerTreeCache();
-        return instance;
-    }
 
     /**
      * If HashTree wasn't found, schedule file for hashing
@@ -144,6 +130,7 @@ public final class TigerTreeCache {
     /**
      * private constructor
      */
+    //DPINJ: Delay deserialization...
     private TigerTreeCache() {
         TREE_MAP = createMap();
     }
@@ -237,7 +224,7 @@ public final class TigerTreeCache {
             try {
                 URN sha1 = FD.getSHA1Urn();
                 // if it was scheduled multiple times, ignore latter times.
-                if(TigerTreeCache.instance().getHashTree(sha1) == null) {
+                if(ProviderHacks.getTigerTreeCache().getHashTree(sha1) == null) {
                     HashTree tree = HashTree.createHashTree(FD);
                     addHashTree(sha1, tree);
                 }

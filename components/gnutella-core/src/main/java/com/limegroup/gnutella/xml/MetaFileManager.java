@@ -21,6 +21,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -178,7 +179,7 @@ public class MetaFileManager extends FileManager {
     private List<LimeXMLDocument> resolveWriteableDocs(
             List<LimeXMLDocument> allDocs, LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
-        LimeXMLSchema audioSchema = LimeXMLSchemaRepository.instance()
+        LimeXMLSchema audioSchema = ProviderHacks.getLimeXMLSchemaRepository()
                 .getSchema(LimeXMLNames.AUDIO_SCHEMA);
 
         for (LimeXMLDocument doc : allDocs) {
@@ -227,8 +228,8 @@ public class MetaFileManager extends FileManager {
         if (fd == null)
             return null;
 
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper
-                .instance();
+        SchemaReplyCollectionMapper mapper = ProviderHacks
+                .getSchemaReplyCollectionMapper();
 
         // Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will
@@ -254,11 +255,11 @@ public class MetaFileManager extends FileManager {
         RouterService.getCallback().setAnnotateEnabled(false);
 
         // Load up new ReplyCollections.
-        LimeXMLSchemaRepository schemaRepository = LimeXMLSchemaRepository
-                .instance();
+        LimeXMLSchemaRepository schemaRepository = ProviderHacks
+                .getLimeXMLSchemaRepository();
         String[] schemas = schemaRepository.getAvailableSchemaURIs();
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper
-                .instance();
+        SchemaReplyCollectionMapper mapper = ProviderHacks
+                .getSchemaReplyCollectionMapper();
         for (int i = 0; i < schemas.length; i++)
             mapper.add(schemas[i], new LimeXMLReplyCollection(schemas[i]));
 
@@ -275,8 +276,8 @@ public class MetaFileManager extends FileManager {
             RouterService.schedule(saver, 60 * 1000, 60 * 1000);
         }
 
-        Collection<LimeXMLReplyCollection> replies = SchemaReplyCollectionMapper
-                .instance().getCollections();
+        Collection<LimeXMLReplyCollection> replies = ProviderHacks
+                .getSchemaReplyCollectionMapper().getCollections();
         for (LimeXMLReplyCollection col : replies)
             col.loadFinished();
 
@@ -293,8 +294,8 @@ public class MetaFileManager extends FileManager {
         super.loadFile(fd, file, metadata, urns);
         boolean added = false;
 
-        Collection<LimeXMLReplyCollection> replies = SchemaReplyCollectionMapper
-                .instance().getCollections();
+        Collection<LimeXMLReplyCollection> replies = ProviderHacks
+                .getSchemaReplyCollectionMapper().getCollections();
         for (LimeXMLReplyCollection col : replies)
             added |= col.initialize(fd, metadata) != null;
         for (LimeXMLReplyCollection col : replies)
@@ -310,8 +311,8 @@ public class MetaFileManager extends FileManager {
 
     protected void save() {
         if (isLoadFinished()) {
-            Collection<LimeXMLReplyCollection> replies = SchemaReplyCollectionMapper
-                    .instance().getCollections();
+            Collection<LimeXMLReplyCollection> replies = ProviderHacks
+                    .getSchemaReplyCollectionMapper().getCollections();
             for (LimeXMLReplyCollection col : replies)
                 col.writeMapToDisk();
         }
@@ -369,9 +370,9 @@ public class MetaFileManager extends FileManager {
     private List<String> getXMLKeyWords() {
         List<String> words = new ArrayList<String>();
         // Now get a list of keywords from each of the ReplyCollections
-        SchemaReplyCollectionMapper map = SchemaReplyCollectionMapper
-                .instance();
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        SchemaReplyCollectionMapper map = ProviderHacks
+                .getSchemaReplyCollectionMapper();
+        LimeXMLSchemaRepository rep = ProviderHacks.getLimeXMLSchemaRepository();
         String[] schemas = rep.getAvailableSchemaURIs();
         LimeXMLReplyCollection collection;
         int len = schemas.length;
@@ -390,9 +391,9 @@ public class MetaFileManager extends FileManager {
      */
     private List<String> getXMLIndivisibleKeyWords() {
         List<String> words = new ArrayList<String>();
-        SchemaReplyCollectionMapper map = SchemaReplyCollectionMapper
-                .instance();
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        SchemaReplyCollectionMapper map = ProviderHacks
+                .getSchemaReplyCollectionMapper();
+        LimeXMLSchemaRepository rep = ProviderHacks.getLimeXMLSchemaRepository();
         String[] schemas = rep.getAvailableSchemaURIs();
         LimeXMLReplyCollection collection;
         for (int i = 0; i < schemas.length; i++) {
@@ -412,8 +413,8 @@ public class MetaFileManager extends FileManager {
      */
     private Response[] query(LimeXMLDocument queryDoc) {
         String schema = queryDoc.getSchemaURI();
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper
-                .instance();
+        SchemaReplyCollectionMapper mapper = ProviderHacks
+                .getSchemaReplyCollectionMapper();
         LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
         if (replyCol == null)// no matching reply collection for schema
             return null;

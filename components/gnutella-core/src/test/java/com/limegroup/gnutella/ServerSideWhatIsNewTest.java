@@ -22,7 +22,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -121,7 +120,7 @@ public class ServerSideWhatIsNewTest
         Connection testUP = ClientSideTestCase.testUP[0];
 
         // send a MessagesSupportedMessage and capabilities VM
-        testUP.send(MessagesSupportedVendorMessage.instance());
+        testUP.send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP.send(CapabilitiesVM.instance());
         testUP.flush();
 

@@ -40,7 +40,7 @@ public class InstantMessengerTest extends BaseTestCase {
         receiver = new MyActivityCallback();
         new RouterService(receiver);
         //RouterService.getConnectionManager().initialize();
-        ChatManager.instance().initialize();
+        ProviderHacks.getChatManager().initialize();
         
         // start it up!
         acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
@@ -80,7 +80,7 @@ public class InstantMessengerTest extends BaseTestCase {
       
     public void testChatThroughAcceptor() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), callback);
+        messenger = new InstantMessenger("localhost", CHAT_PORT, ProviderHacks.getChatManager(), callback);
         messenger.start();
         callback.waitForConnect(1000);
         assertTrue(messenger.isConnected());
@@ -92,7 +92,7 @@ public class InstantMessengerTest extends BaseTestCase {
     
     public void testSendHugeMessage() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), callback);
+        messenger = new InstantMessenger("localhost", CHAT_PORT, ProviderHacks.getChatManager(), callback);
         messenger.start();
         callback.waitForConnect(1000);
         assertFalse(messenger.send(new String(new char[10000])));

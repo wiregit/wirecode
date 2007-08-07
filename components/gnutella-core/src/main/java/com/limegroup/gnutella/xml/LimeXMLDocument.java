@@ -18,6 +18,7 @@ import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
@@ -268,7 +269,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Returns the LimeXMLSchema associated with this XML document.
      */
     public LimeXMLSchema getSchema() {
-        return LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+        return ProviderHacks.getLimeXMLSchemaRepository().getSchema(schemaUri);
     }
     
     /**

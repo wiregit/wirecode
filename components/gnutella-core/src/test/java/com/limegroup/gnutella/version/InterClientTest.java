@@ -12,6 +12,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.PeerTestCase;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
@@ -65,7 +66,7 @@ public class InterClientTest extends PeerTestCase {
      * And that we don't request if someone doesn't send it.
      */
     public void testRequestIsSent() throws Exception {
-        assertEquals(0, UpdateHandler.instance().getLatestId());
+        assertEquals(0, ProviderHacks.getUpdateHandler().getLatestId());
         
         PEER.send(getCVM(1));
         PEER.flush();
@@ -76,7 +77,7 @@ public class InterClientTest extends PeerTestCase {
         assertInstanceof(UpdateRequest.class, m);
         
         setCurrentId(10);
-        assertEquals(10, UpdateHandler.instance().getLatestId());
+        assertEquals(10, ProviderHacks.getUpdateHandler().getLatestId());
         PEER.send(getCVM(5));
         PEER.flush();
         
@@ -96,7 +97,7 @@ public class InterClientTest extends PeerTestCase {
      * Tests that a response is sent in response to a rquest.
      */
     public void testResponseIsSent() throws Exception {
-        assertEquals(0, UpdateHandler.instance().getLatestId());
+        assertEquals(0, ProviderHacks.getUpdateHandler().getLatestId());
         
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
@@ -119,7 +120,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testValidVersion() throws Exception {
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Get the -10 file.
         byte[] b = readFile(-10);
@@ -128,7 +129,7 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-10, UpdateHandler.instance().getLatestId());
+        assertEquals(-10, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Make sure we got a new CapabilitiesVM.
         Message m = getFirstInstanceOfMessageType(PEER, CapabilitiesVM.class);
@@ -142,7 +143,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testOlderVersionsIgnored() throws Exception {
         setCurrentId(-9);
-        assertEquals(-9, UpdateHandler.instance().getLatestId());
+        assertEquals(-9, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Get the -10 file.
         byte[] b = readFile(-10);
@@ -151,7 +152,7 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-9, UpdateHandler.instance().getLatestId());        
+        assertEquals(-9, ProviderHacks.getUpdateHandler().getLatestId());        
     }
     
     /**
@@ -159,7 +160,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testInvalidSignaturesIgnored() throws Exception {
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Get the -10 file.
         byte[] b = readFile(-10);
@@ -169,7 +170,7 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
     }
     
     /**
@@ -177,7 +178,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testInvalidBytesIgnored() throws Exception {
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Get the -10 file.
         byte[] b = readFile(-10);
@@ -187,7 +188,7 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
     }
     
     /**
@@ -195,7 +196,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testInvalidXMLIgnored() throws Exception {
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
         // Get the -9 file.
         byte[] b = readFile(-9);
@@ -204,7 +205,7 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
     }
     
     /**
@@ -212,7 +213,7 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testUpdatesSentToGUI() throws Exception {
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
         MyActivityCallback cb = (MyActivityCallback)RouterService.getCallback();
         cb.lastUpdate = null;
@@ -224,13 +225,13 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-8, UpdateHandler.instance().getLatestId());
+        assertEquals(-8, ProviderHacks.getUpdateHandler().getLatestId());
         // since version still == @version@, it wasn't sent to the callback.
         assertNull(cb.lastUpdate);
         
         setEmpty();
         setCurrentId(-11);
-        assertEquals(-11, UpdateHandler.instance().getLatestId());
+        assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         setVersion("3.0.0");
 
         // Set the update style to zero to ensure the message is not ignored
@@ -243,12 +244,12 @@ public class InterClientTest extends PeerTestCase {
         
         Thread.sleep(1000); // let it process.
         
-        assertEquals(-8, UpdateHandler.instance().getLatestId());
+        assertEquals(-8, ProviderHacks.getUpdateHandler().getLatestId());
         assertNotNull(cb.lastUpdate);
     }    
     
     public void testCompressedResponse() throws Exception {
-        assertEquals(0, UpdateHandler.instance().getLatestId());
+        assertEquals(0, ProviderHacks.getUpdateHandler().getLatestId());
         
         // We should get no response, since we have no data to give.
         UpdateRequestStub request = new UpdateRequestStub(2,true,true);
@@ -271,7 +272,7 @@ public class InterClientTest extends PeerTestCase {
     }
     
     public void testUncompressedGGEPResponse() throws Exception {
-        assertEquals(0, UpdateHandler.instance().getLatestId());
+        assertEquals(0, ProviderHacks.getUpdateHandler().getLatestId());
         
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
@@ -297,7 +298,7 @@ public class InterClientTest extends PeerTestCase {
      * tests that a request with higher version w/o GGEP gets responded to properly
      */
     public void testHigherVersionNoGGEP() throws Exception {
-        assertEquals(0, UpdateHandler.instance().getLatestId());
+        assertEquals(0, ProviderHacks.getUpdateHandler().getLatestId());
         
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
@@ -315,15 +316,15 @@ public class InterClientTest extends PeerTestCase {
     }
     
     private static void setCurrentId(int i) throws Exception {
-        PrivilegedAccessor.setValue(UpdateHandler.instance(), "_lastId", new Integer(i));
+        PrivilegedAccessor.setValue(ProviderHacks.getUpdateHandler(), "_lastId", new Integer(i));
     }
     
     private static void setCurrentBytes(byte[] b) throws Exception {
-        PrivilegedAccessor.setValue(UpdateHandler.instance(), "_lastBytes", b);
+        PrivilegedAccessor.setValue(ProviderHacks.getUpdateHandler(), "_lastBytes", b);
     }
     
     private static void setCurrentInfo(UpdateInformation info) throws Exception {
-        PrivilegedAccessor.setValue(UpdateHandler.instance(), "_updateInfo", null);
+        PrivilegedAccessor.setValue(ProviderHacks.getUpdateHandler(), "_updateInfo", null);
     }
     
     private static byte[] setCurrent(int i) throws Exception {

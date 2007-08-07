@@ -25,6 +25,7 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -73,6 +74,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * After we discover a router or give up on trying to, we should call stop().
  * 
  */
+@Singleton
 public class UPnPManager extends ControlPoint implements DeviceChangeListener, Inspectable {
 
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
@@ -94,12 +96,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 	
 	/** amount of time to wait while looking for a NAT device. */
     private static final int WAIT_TIME = 3 * 1000; // 3 seconds
-	
-	private static final UPnPManager INSTANCE = new UPnPManager();
-
-	public static UPnPManager instance() {
-		return INSTANCE;
-	}
 	
 	/** 
 	 * the router we have and the sub-device necessary for port mapping 

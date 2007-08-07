@@ -18,11 +18,9 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.choking.Choker;
-import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
-import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.tracking.TrackerManager;
@@ -139,7 +137,7 @@ BTLinkListener {
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
-		linkManager = BTLinkManagerFactory.instance().getLinkManager();
+		linkManager = ProviderHacks.getBTLinkManagerFactory().getLinkManager();
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
 	}
 
@@ -447,10 +445,10 @@ BTLinkListener {
 	 */
 	private void initializeTorrent() {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
-		choker = ChokerFactory.instance().getChoker(linkManager, 
+		choker = ProviderHacks.getChokerFactory().getChoker(linkManager, 
 				networkInvoker, false);
 		_connectionFetcher = 
-			BTConnectionFetcherFactory.instance().getBTConnectionFetcher(this, networkInvoker);
+			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this, networkInvoker);
 	}
 
 	/**
@@ -681,7 +679,7 @@ BTLinkListener {
 		
 		// switch the choker logic and resume uploads
 		choker.shutdown();
-		choker = ChokerFactory.instance().getChoker(linkManager,
+		choker = ProviderHacks.getChokerFactory().getChoker(linkManager,
 				networkInvoker, true);
 		choker.start();
 		choker.rechoke();

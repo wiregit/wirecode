@@ -43,7 +43,7 @@ public final class PingerTest extends LimeTestCase {
         ConnectionManager cm = new UltrapeerConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
-        Pinger pinger = Pinger.instance();
+        Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
 
         synchronized(mr) {
@@ -67,7 +67,7 @@ public final class PingerTest extends LimeTestCase {
         ConnectionManager cm = new LeafConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
-        Pinger pinger = Pinger.instance();
+        Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
 
 

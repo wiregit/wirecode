@@ -162,7 +162,7 @@ public class InspectionTest extends ServerSideTestCase {
     
     public void testRouting() throws Exception {
         // one of the leafs supports inspections
-        LEAF[0].send(MessagesSupportedVendorMessage.instance());
+        LEAF[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         
         // create a request with a return address and one without
         String routedStr = "TJDZMNSU2BMQBE665ZF6V2EFAAYQCAEZAAAAATCJJVCR4AABADBSCSMBIR4JYJOHXME4AMAMAXAILAXWJBX5EC73EEGPUGCLZ36CS4W56UYNE2MQDVTZD6BJVAZBSMSZSD2MER3MXI6RO6WN6CDKY276YV4FQDZ6TO5RVYCCKJAUOAT7AECACICOQFLECAWDAJJUEQEDKNEUO3ZQFUBBKAET3DOHWUHCAUYMMHGNC3JX2SE2FZNQIKACCRYF4HPDK5WODOJ2N2EWPEAFHYEKJNGF5Q";

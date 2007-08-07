@@ -17,6 +17,7 @@ import org.limewire.util.CommonUtils;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 
@@ -367,7 +368,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
 
     private void clearDirectory() {
-        File dir = new File(LimeXMLProperties.instance().getXMLDocsDir());
+        File dir = new File(ProviderHacks.getLimeXMLProperties().getXMLDocsDir());
         if (dir.exists() && dir.isDirectory()) {
             // clear the files in the directory....
             File[] files = dir.listFiles();
@@ -417,8 +418,8 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
     private void populateDirectory() {
         File audioFile = CommonUtils.getResourceFile(fileLocation + "audio.collection");
         File videoFile = CommonUtils.getResourceFile(fileLocation + "video.collection");
-        File newAudio  = new File(LimeXMLProperties.instance().getXMLDocsDir(), "audio.sxml");
-        File newVideo  = new File(LimeXMLProperties.instance().getXMLDocsDir(), "video.sxml");
+        File newAudio  = new File(ProviderHacks.getLimeXMLProperties().getXMLDocsDir(), "audio.sxml");
+        File newVideo  = new File(ProviderHacks.getLimeXMLProperties().getXMLDocsDir(), "video.sxml");
         assertTrue("Necessary file audio.collection cannot be found!", audioFile.exists());
         assertTrue("Necessary file video.collection cannot be found!", videoFile.exists());
         audioFile.renameTo(newAudio);

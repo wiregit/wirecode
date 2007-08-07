@@ -15,7 +15,6 @@ import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -343,7 +342,7 @@ public class FileDesc implements StringLookup {
      * @return the <tt>TigerTree</tt> this class holds
      */
     public HashTree getHashTree() {
-        return TigerTreeCache.instance().getHashTree(this);
+        return ProviderHacks.getTigerTreeCache().getHashTree(this);
     }
       
     /**

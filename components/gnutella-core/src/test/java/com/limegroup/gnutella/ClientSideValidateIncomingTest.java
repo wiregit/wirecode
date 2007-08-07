@@ -16,7 +16,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -61,9 +60,9 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testConnectBackRequestsSent() throws Exception {
         // send a MessagesSupportedMessage
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
-        testUP[1].send(MessagesSupportedVendorMessage.instance());
+        testUP[1].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[1].flush();
 
         // we expect to get a TCPConnectBack request

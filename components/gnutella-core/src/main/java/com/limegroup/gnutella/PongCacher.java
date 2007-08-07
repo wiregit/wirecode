@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.limewire.collection.BucketQueue;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
@@ -17,12 +18,8 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
  * adequate host data, with Ultrapeers caching and responding to pings with
  * the best pongs available.  
  */
+@Singleton
 public final class PongCacher {
-
-    /**
-     * Single <tt>PongCacher</tt> instance, following the singleton pattern.
-     */
-    private static final PongCacher INSTANCE = new PongCacher();    
 
     /**
      * Constant for the number of pongs to store per hop.  Public to make
@@ -51,18 +48,6 @@ public final class PongCacher {
      */
     private static final Map<String, BucketQueue<PingReply>> PONGS =
         new HashMap<String, BucketQueue<PingReply>>();
-
-    /**
-     * Returns the single <tt>PongCacher</tt> instance.
-     */
-    public static PongCacher instance() {
-        return INSTANCE;
-    }    
-
-    /**
-     * Private constructor to ensure only one instance is created.
-     */
-    private PongCacher() {}
 
 
     /**

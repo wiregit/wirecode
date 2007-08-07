@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.limewire.collection.NameValue;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
  * Utility class that creates a <tt>LimeXMLDocument</tt> from a file.
@@ -30,7 +30,7 @@ public class MetaDataReader {
 			throw new IOException("invalid/no data.");
 		
 		String uri = data.getSchemaURI();
-		if(LimeXMLSchemaRepository.instance().getSchema(uri) == null)
+		if(ProviderHacks.getLimeXMLSchemaRepository().getSchema(uri) == null)
              throw new IOException("schema: " + uri + " doesn't exist");
 
 		return new LimeXMLDocument(nameValList, uri);

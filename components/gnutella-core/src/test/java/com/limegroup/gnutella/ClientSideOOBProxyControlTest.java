@@ -8,7 +8,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessageStubHelper;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -45,7 +44,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         drainAll();
         
         // send client a message that we support proxy control for OOB v3
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         
         // send client a message that we support leaf guidance and everything

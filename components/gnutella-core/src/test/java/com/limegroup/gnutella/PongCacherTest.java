@@ -25,7 +25,7 @@ public final class PongCacherTest extends LimeTestCase {
 
 
     
-    private static final PongCacher PC = PongCacher.instance();
+    private static final PongCacher PC = ProviderHacks.getPongCacher();
 
     public PongCacherTest(String name) {
         super(name);        
@@ -61,10 +61,10 @@ public final class PongCacherTest extends LimeTestCase {
         
         // Create a pong with the correct GGEP for our cacher to accept it.
         PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
-        PongCacher.instance().addPong(pr);
+        ProviderHacks.getPongCacher().addPong(pr);
         
         // Make sure we get the pong successfully.
-        List pongs = PongCacher.instance()
+        List pongs = ProviderHacks.getPongCacher()
             .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("should be 1 pong",1,pongs.size());
         Iterator iter = pongs.iterator();
@@ -72,7 +72,7 @@ public final class PongCacherTest extends LimeTestCase {
         assertEquals("unexpected pong", pr, retrievedPong);
 
         // Make sure we still get the pong successfully on a second pass.
-        pongs = PongCacher.instance()
+        pongs = ProviderHacks.getPongCacher()
             .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("should be 1 pong",1,pongs.size());
         iter = pongs.iterator();
@@ -83,10 +83,10 @@ public final class PongCacherTest extends LimeTestCase {
         // to accept it.
         PingReply pr2 = MessageTestUtils.createPongWithFreeLeafSlots();
         pr2.hop();
-        PongCacher.instance().addPong(pr2);
+        ProviderHacks.getPongCacher().addPong(pr2);
         
         // Make sure we get the 2 pongs successfully in the correct order.
-        pongs = PongCacher.instance().getBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue());
+        pongs = ProviderHacks.getPongCacher().getBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue());
         assertEquals("should be 2 pongs",2,pongs.size());
         assertContains("no p2", pongs, pr2);
         assertContains("no p", pongs, pr);
@@ -95,7 +95,7 @@ public final class PongCacherTest extends LimeTestCase {
         // Finally, make sure the pong expires on a sleep -- add a bit to the
         // sleep to avoid thread scheduling craziness.
         Thread.sleep(PongCacher.EXPIRE_TIME+800);
-        pongs = PongCacher.instance()
+        pongs = ProviderHacks.getPongCacher()
             .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("list should be empty", 0, pongs.size());
         
@@ -220,7 +220,7 @@ public final class PongCacherTest extends LimeTestCase {
         PrivilegedAccessor.setValue((Object)pr,
                                     "hops",
                                     new Byte((byte)1));
-        PongCacher.instance().addPong(pr);
+        ProviderHacks.getPongCacher().addPong(pr);
         
         PingReply prj = MessageTestUtils.createPongWithFreeLeafSlots();
         PrivilegedAccessor.setValue((Object)prj,
@@ -229,7 +229,7 @@ public final class PongCacherTest extends LimeTestCase {
         PrivilegedAccessor.setValue((Object)prj,
                                     "hops",
                                     new Byte((byte)1));
-        PongCacher.instance().addPong(prj);
+        ProviderHacks.getPongCacher().addPong(prj);
         
         PingReply prj2 = MessageTestUtils.createPongWithFreeLeafSlots();
         PrivilegedAccessor.setValue((Object)prj2,
@@ -238,10 +238,10 @@ public final class PongCacherTest extends LimeTestCase {
         PrivilegedAccessor.setValue((Object)prj2,
                                     "hops",
                                     new Byte((byte)2));
-        PongCacher.instance().addPong(prj2);
+        ProviderHacks.getPongCacher().addPong(prj2);
 
         //should only return en (en)
-        List pongs = PongCacher.instance().getBestPongs("en");
+        List pongs = ProviderHacks.getPongCacher().getBestPongs("en");
         assertEquals("unexpected size returned from PongCacher when asking for en locale pongs",
                      1, pongs.size());
         assertEquals("pong's locale doesn't match",
@@ -249,7 +249,7 @@ public final class PongCacherTest extends LimeTestCase {
                      "en");
         
         //should return "ja" pongs in the beggining (ja, ja, en)
-        pongs = PongCacher.instance().getBestPongs("ja");
+        pongs = ProviderHacks.getPongCacher().getBestPongs("ja");
         assertEquals("unexpected size returned from PongCacher when asking for ja locale pongs",
                      3, pongs.size());
         assertEquals("pong's locale doesn't match",
@@ -266,7 +266,7 @@ public final class PongCacherTest extends LimeTestCase {
         //expire default locale pong but the "ja" locale pongs should be
         //around
         Thread.sleep(PongCacher.EXPIRE_TIME+800);
-        pongs = PongCacher.instance().getBestPongs("ja");
+        pongs = ProviderHacks.getPongCacher().getBestPongs("ja");
         assertEquals("unexpected size returned from PongCacher when asking for ja locale pongs",
                      2, pongs.size());
         assertEquals("pong's locale doesn't match",

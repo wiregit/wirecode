@@ -14,11 +14,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ProviderHacks;
+
 /**
  * Stores and provides access to various XML schemas that me might have.
  * Singleton class
  * @author  asingla
  */
+@Singleton
 public class LimeXMLSchemaRepository
 {
     
@@ -28,11 +32,6 @@ public class LimeXMLSchemaRepository
     private Map<String, LimeXMLSchema> _uriSchemaMap 
         = new HashMap<String, LimeXMLSchema>();
     
-    /**
-     * An instance of this class
-     */
-    private static LimeXMLSchemaRepository _instance = 
-        new LimeXMLSchemaRepository();
     
     /** Creates new LimeXMLSchemaRepository */
     private LimeXMLSchemaRepository()
@@ -48,7 +47,7 @@ public class LimeXMLSchemaRepository
     {
         //get the schema files
         File[] schemaFiles = 
-                LimeXMLProperties.instance().getAllXMLSchemaFiles();
+                ProviderHacks.getLimeXMLProperties().getAllXMLSchemaFiles();
         
         //if there are some files there,initialize from those files
         if(schemaFiles != null) {
@@ -62,15 +61,6 @@ public class LimeXMLSchemaRepository
                 } catch(IOException ioe) {}
             }
         }
-    }
-    
-    /**
-     * Returns an instance of this class. Adheres to Singleton design pattern.
-     * So, only one instance of the class is created.
-     */
-    public static LimeXMLSchemaRepository instance()
-    {
-        return _instance;
     }
     
     /**

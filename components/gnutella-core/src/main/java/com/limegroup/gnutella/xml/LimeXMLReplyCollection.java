@@ -110,7 +110,7 @@ public class LimeXMLReplyCollection {
     public LimeXMLReplyCollection(String URI) {
         this.schemaURI = URI;
         this.trieMap = new HashMap<String, StringTrie<List<LimeXMLDocument>>>();
-        this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
+        this.dataFile = new File(ProviderHacks.getLimeXMLProperties().getXMLDocsDir(),
                                  LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap<URN, LimeXMLDocument>();
         this.oldMap = readMapFromDisk();

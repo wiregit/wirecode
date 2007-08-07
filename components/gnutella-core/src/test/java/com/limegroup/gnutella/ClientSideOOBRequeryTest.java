@@ -31,7 +31,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -99,7 +98,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 100);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
             testUP[i].flush();
         }
 

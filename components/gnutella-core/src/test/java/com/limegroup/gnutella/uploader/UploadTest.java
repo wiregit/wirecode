@@ -52,7 +52,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -1244,7 +1243,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testGetNonExistingTree() throws Exception {
         URN urn = URN.createSHA1Urn(hash);
-        TigerTreeCache.instance().purgeTree(urn);
+        ProviderHacks.getTigerTreeCache().purgeTree(urn);
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
             int response = client.executeMethod(method);

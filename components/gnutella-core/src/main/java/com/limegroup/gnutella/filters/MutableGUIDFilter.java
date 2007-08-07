@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -11,12 +12,10 @@ import com.limegroup.gnutella.messages.QueryReply;
  * Filter for query replies based on the GUID
  * of the reply, and other details.
  */
+@Singleton
 public final class MutableGUIDFilter extends SpamFilter {
     
-    private static final MutableGUIDFilter INSTANCE = new MutableGUIDFilter();
     private MutableGUIDFilter() { FILTER.disallowAdult(); }
-    public static MutableGUIDFilter instance() { return INSTANCE; }
-    
     /**
      * The Set of GUIDs to compare.
      *

@@ -63,7 +63,7 @@ public abstract class SpamFilter {
         buf.add(spf);
         
         //4. Mutable GUID-based filters.
-        MutableGUIDFilter mgf = MutableGUIDFilter.instance();
+        MutableGUIDFilter mgf = ProviderHacks.getMutableGUIDFilter();
         buf.add(mgf);
 
         return compose(buf);

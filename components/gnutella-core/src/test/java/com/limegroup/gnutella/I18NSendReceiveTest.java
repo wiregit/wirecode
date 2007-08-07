@@ -281,7 +281,7 @@ public class I18NSendReceiveTest
             new LimeXMLDocument(buildXMLString(xmlstr));
         
         SchemaReplyCollectionMapper map =
-            SchemaReplyCollectionMapper.instance();
+            ProviderHacks.getSchemaReplyCollectionMapper();
         String uri = newDoc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
         

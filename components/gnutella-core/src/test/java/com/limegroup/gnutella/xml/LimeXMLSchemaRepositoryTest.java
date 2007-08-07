@@ -4,6 +4,7 @@ import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.Expand;
 
@@ -42,7 +43,7 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
      */
     public void testAvailableSchemaURIs() {
         String[] availableSchemas 
-            = LimeXMLSchemaRepository.instance().getAvailableSchemaURIs();
+            = ProviderHacks.getLimeXMLSchemaRepository().getAvailableSchemaURIs();
             
         check( availableSchemas[0], "application");
         check( availableSchemas[1], "audio");

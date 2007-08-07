@@ -8,6 +8,7 @@ import org.limewire.util.ByteOrder;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 
@@ -30,7 +31,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
     
     public void testStaticConstructor() throws Exception {
         MessagesSupportedVendorMessage vmp = 
-            MessagesSupportedVendorMessage.instance();
+            ProviderHacks.getMessagesSupportedVendorMessage();
         assertGreaterThan(0, vmp.supportsTCPConnectBack());
         assertGreaterThan(0, vmp.supportsUDPConnectBack());
         assertGreaterThan(0, vmp.supportsTCPConnectBackRedirect());

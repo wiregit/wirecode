@@ -56,7 +56,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     
     /** the UPnPManager to use */
     private static final UPnPManager UPNP_MANAGER 
-        = (!ConnectionSettings.DISABLE_UPNP.getValue()) ? UPnPManager.instance() : null;
+        = (!ConnectionSettings.DISABLE_UPNP.getValue()) ? ProviderHacks.getUPnPManager() : null;
 
     /**
      * The socket that listens for incoming connections. Can be changed to

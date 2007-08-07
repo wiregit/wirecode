@@ -5,18 +5,12 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.NECallable;
 
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Chokable;
 
+@Singleton
 public class ChokerFactory {
-	private static ChokerFactory instance;
-	public static ChokerFactory instance() {
-		if (instance == null)
-			instance = new ChokerFactory();
-		return instance;
-	}
-	
-	protected ChokerFactory() {}
-	
+    
 	public Choker getChoker(NECallable<List<? extends Chokable>> chokables,
 			ScheduledExecutorService invoker,
 			boolean seed) {

@@ -18,11 +18,11 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Torrent.TorrentState;
-import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -185,7 +185,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		IncomingConnectionHandler.instance().handleIncoming(
+		ProviderHacks.getIncomingConnectionHandler().handleIncoming(
 				(AbstractNBSocket)sock, this);
 	}
 

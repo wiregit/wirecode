@@ -103,7 +103,6 @@ import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /**
@@ -231,7 +230,7 @@ public abstract class MessageRouter {
 	 * generated queries that adjust to the number of results received, the
 	 * number of connections, etc.
 	 */
-	private final QueryDispatcher DYNAMIC_QUERIER = QueryDispatcher.instance();
+	private final QueryDispatcher DYNAMIC_QUERIER = ProviderHacks.getQueryDispatcher();
 	
 	/**
 	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
@@ -1966,7 +1965,7 @@ public abstract class MessageRouter {
         boolean newAddress = hostCatcher.add(reply);
 
         if(newAddress && !reply.isUDPHostCache()) {
-            PongCacher.instance().addPong(reply);
+            ProviderHacks.getPongCacher().addPong(reply);
         }
 
         //First route to originator in usual manner.
@@ -2159,7 +2158,7 @@ public abstract class MessageRouter {
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
 
-        byte[] data = UpdateHandler.instance().getLatestBytes();
+        byte[] data = ProviderHacks.getUpdateHandler().getLatestBytes();
         if(data != null) {
             UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
             handler.reply(msg);
@@ -2175,7 +2174,7 @@ public abstract class MessageRouter {
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        UpdateHandler.instance().handleNewData(resp.getUpdate(), handler);
+        ProviderHacks.getUpdateHandler().handleNewData(resp.getUpdate(), handler);
     }
 
     /**

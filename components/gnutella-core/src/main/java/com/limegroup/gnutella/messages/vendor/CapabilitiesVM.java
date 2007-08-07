@@ -20,7 +20,6 @@ import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 /** 
  * The message that lets other know what capabilities you support.  Everytime 
@@ -133,7 +132,7 @@ public final class CapabilitiesVM extends VendorMessage {
         supported.add(smb);
         
         smb = new SupportedMessageBlock(LIME_UPDATE_BYTES,
-                                        UpdateHandler.instance().getLatestId());
+                                        ProviderHacks.getUpdateHandler().getLatestId());
         supported.add(smb);
         
         DHTManager manager = ProviderHacks.getDHTManager();

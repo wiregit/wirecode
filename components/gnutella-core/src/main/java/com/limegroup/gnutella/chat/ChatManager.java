@@ -7,6 +7,7 @@ import java.util.List;
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ProviderHacks;
@@ -22,31 +23,11 @@ import com.limegroup.gnutella.statistics.HTTPStat;
  *
  * @author rsoule
  */
+@Singleton
 public final class ChatManager implements ConnectionAcceptor {
 
-	/**
-	 * Constant for the <tt>ChatManager</tt> instance, following
-	 * singleton.
-	 */
-	private static final ChatManager CHAT_MANAGER = new ChatManager();
 
-	/** 
-	 * <tt>List</tt> of InstantMessenger objects.
-	 */
-//	private List<InstantMessenger> _chatsInProgress 
-//		= Collections.synchronizedList(new LinkedList<InstantMessenger>());
-
-	/**
-	 * Instance accessor for the <tt>ChatManager</tt>.
-	 */
-	public static ChatManager instance() {
-		return CHAT_MANAGER;
-	}
-
-	ChatManager() {
-	}
-
-    public void initialize() {
+	public void initialize() {
         ProviderHacks.getConnectionDispatcher().
         addConnectionAcceptor(this,
                 false,

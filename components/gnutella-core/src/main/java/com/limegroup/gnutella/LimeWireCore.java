@@ -7,14 +7,20 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.choking.ChokerFactory;
+import com.limegroup.bittorrent.disk.DiskManagerFactory;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
+import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -30,24 +36,36 @@ import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.HostDataFactory;
+import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.spam.RatingTable;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLProperties;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * Contains mostly all references to singletons within LimeWire.
@@ -354,5 +372,94 @@ public class LimeWireCore {
     public MulticastService getMulticastService() {
         return injector.getInstance(MulticastService.class);
     }
+    
+    public ChatManager getChatManager() {
+        return injector.getInstance(ChatManager.class);
+    }
+
+    public BTLinkManagerFactory getBTLinkManagerFactory() {
+        return injector.getInstance(BTLinkManagerFactory.class);
+    }
+
+    public ChokerFactory getChokerFactory() {
+        return injector.getInstance(ChokerFactory.class);
+    }
+
+    public DiskManagerFactory getDiskManagerFactory() {
+        return injector.getInstance(DiskManagerFactory.class);
+    }
+
+    public BTConnectionFetcherFactory getBTConnectionFetcherFactory() {
+        return injector.getInstance(BTConnectionFetcherFactory.class);
+    }
+
+    public IncomingConnectionHandler getIncomingConnectionHandler() {
+        return injector.getInstance(IncomingConnectionHandler.class);
+    }
+
+    public ConnectionWatchdog getConnectionWatchdog() {
+        return injector.getInstance(ConnectionWatchdog.class);
+    }
+
+    public Pinger getPinger() {
+        return injector.getInstance(Pinger.class);
+    }
+
+    public PongCacher getPongCacher() {
+        return injector.getInstance(PongCacher.class);
+    }
+
+    public UPnPManager getUPnPManager() {
+        return injector.getInstance(UPnPManager.class);
+    }
+
+    public MutableGUIDFilter getMutableGUIDFilter() {
+        return injector.getInstance(MutableGUIDFilter.class);
+    }
+
+    public LicenseCache getLicenseCache() {
+        return injector.getInstance(LicenseCache.class);
+    }
+
+    public MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() {
+        return injector.getInstance(MessagesSupportedVendorMessage.class);
+    }
+
+    public QueryDispatcher getQueryDispatcher() {
+        return injector.getInstance(QueryDispatcher.class);
+    }
+
+    public RatingTable getRatingTable() {
+        return injector.getInstance(RatingTable.class);
+    }
+
+    public SpamManager getSpamManager() {
+        return injector.getInstance(SpamManager.class);
+    }
+
+    public HashTreeNodeManager getHashTreeNodeManager() {
+        return injector.getInstance(HashTreeNodeManager.class);
+    }
+
+    public TigerTreeCache getTigerTreeCache() {
+        return injector.getInstance(TigerTreeCache.class);
+    }
+
+    public UpdateHandler getUpdateHandler() {
+        return injector.getInstance(UpdateHandler.class);
+    }
+
+    public LimeXMLProperties getLimeXMLProperties() {
+        return injector.getInstance(LimeXMLProperties.class);
+    }
+
+    public LimeXMLSchemaRepository getLimeXMLSchemaRepository() {
+        return injector.getInstance(LimeXMLSchemaRepository.class);
+    }
+
+    public SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() {
+        return injector.getInstance(SchemaReplyCollectionMapper.class);
+    }
+    
 
 }

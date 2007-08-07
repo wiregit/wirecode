@@ -58,7 +58,7 @@ public class SpamManagerTest extends LimeTestCase {
     
     static LimeXMLDocument doc1, doc2;
     
-    static SpamManager manager = SpamManager.instance();
+    static SpamManager manager = ProviderHacks.getSpamManager();
     
     public static void globalSetUp() {
         try {

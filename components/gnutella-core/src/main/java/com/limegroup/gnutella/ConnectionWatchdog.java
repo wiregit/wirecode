@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -17,36 +18,15 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.
  */
+@Singleton
 public final class ConnectionWatchdog {
     
     private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
-
-    /**
-     * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
-     * following the singleton pattern.
-     */
-    private static final ConnectionWatchdog INSTANCE = new ConnectionWatchdog();
 
     /** How long (in msec) a connection can be a dud (see below) before being booted. */
     private static final int EVALUATE_TIME=30000;
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=15000;
-
-    /**
-     * Singleton accessor for <tt>ConnectionWatchdog</tt> instance.
-     */
-    public static ConnectionWatchdog instance() {
-        return INSTANCE;
-    }
-
-    /** 
-	 * Creates a new <tt>ConnectionWatchdog</tt> instance to monitor
-	 * connections to make sure they are still up and responding well.
-	 *
-     * @param manager the <tt>ConnectionManager</tt> instance that provides
-	 *  access to the list of connections to monitor
-     */
-    private ConnectionWatchdog() {}
 
     /**
      * Starts the <tt>ConnectionWatchdog</tt>.

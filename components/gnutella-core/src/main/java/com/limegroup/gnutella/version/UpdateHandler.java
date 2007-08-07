@@ -29,6 +29,7 @@ import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.VersionUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
@@ -57,6 +58,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Handles queueing new data for parsing and keeping track of which current
  * version is stored in memory & on disk.
  */
+@Singleton
 public class UpdateHandler implements HttpClientListener {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
@@ -98,10 +100,7 @@ public class UpdateHandler implements HttpClientListener {
      */
     private static Clock clock = new Clock();
     
-    private static final UpdateHandler INSTANCE = new UpdateHandler();
     private UpdateHandler() { initialize(); }
-    public static UpdateHandler instance() { return INSTANCE; }
-    
     /**
      * The queue that handles all incoming data.
      */

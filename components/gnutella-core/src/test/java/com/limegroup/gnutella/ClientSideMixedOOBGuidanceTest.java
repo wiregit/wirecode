@@ -18,7 +18,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -68,12 +67,12 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
             assertTrue("not up->leaf", testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 500);
             if ((i==2)) { // i'll send 0 later....
-                testUP[i].send(MessagesSupportedVendorMessage.instance());
+                testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
                 testUP[i].flush();
             }
         }
         
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         
         // first we need to set up GUESS capability

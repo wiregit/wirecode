@@ -26,10 +26,12 @@ import org.limewire.statistic.StatsUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
 
+@Singleton
 public class RatingTable {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
@@ -38,17 +40,9 @@ public class RatingTable {
 	 * many entries...
 	 */
 	private static final int MAX_SIZE = 50000;
-
-	private static final RatingTable INSTANCE = new RatingTable();
     
-    public final Object inspectables = new RatingTableInspectables();
-
-	/**
-	 * @return single instance of this
-	 */
-	public static RatingTable instance() {
-		return INSTANCE;
-	}
+    @SuppressWarnings("unused")
+    private final Object inspectables = new RatingTableInspectables();
 
 	/**
 	 * a Map containing all tokens.
@@ -306,24 +300,25 @@ public class RatingTable {
 	private static File getSpamDat() {
 	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
 	}
-private static class RatingTableInspectables {
+    
+	private class RatingTableInspectables {
         
         private static final int VERSION = 1;
-        private static void addVersion(Map<String, Object> m) {
+        private void addVersion(Map<String, Object> m) {
             m.put("ver", VERSION);
         }
         
         /** Inspectable with some stats about tokens */
-        public static final Inspectable TOKEN_STAT = new Inspectable() {
+        public final Inspectable TOKEN_STAT = new Inspectable() {
             public Object inspect() {
-                synchronized(INSTANCE) {
+                synchronized(RatingTable.this) {
                     Map<String, Object> ret = new HashMap<String, Object>();
                     addVersion(ret);
-                    List<Double> ratings = new ArrayList<Double>(INSTANCE._tokenMap.size());
-                    List<Double> types = new ArrayList<Double>(INSTANCE._tokenMap.size());
-                    List<Double> importance = new ArrayList<Double>(INSTANCE._tokenMap.size());
-                    List<Double> ratingToType = new ArrayList<Double>(INSTANCE._tokenMap.size());
-                    for (Token t : INSTANCE._tokenMap.values()) {
+                    List<Double> ratings = new ArrayList<Double>(_tokenMap.size());
+                    List<Double> types = new ArrayList<Double>(_tokenMap.size());
+                    List<Double> importance = new ArrayList<Double>(_tokenMap.size());
+                    List<Double> ratingToType = new ArrayList<Double>(_tokenMap.size());
+                    for (Token t : _tokenMap.values()) {
                         ratings.add((double)t.getRating());
                         types.add((double)t.getType());
                         importance.add(t.getImportance());
@@ -340,9 +335,9 @@ private static class RatingTableInspectables {
         };
 
         /** Inspectable that returns a hash of the tokens */
-        public static final Inspectable TOKEN_HASH = new Inspectable() {
+        public final Inspectable TOKEN_HASH = new Inspectable() {
             public Object inspect() {
-                synchronized(INSTANCE) {
+                synchronized(RatingTable.this) {
                     Map<String, Object> ret = new HashMap<String, Object>();
                     addVersion(ret);
                     final float spamTreshold = Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
@@ -353,7 +348,7 @@ private static class RatingTableInspectables {
                             return -Float.compare(a.getRating(), b.getRating());
                         }
                     });
-                    spam.addAll(INSTANCE._tokenMap.values());
+                    spam.addAll(_tokenMap.values());
                     int written = 0;
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     DataOutputStream daos = new DataOutputStream(baos);

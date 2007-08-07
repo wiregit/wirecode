@@ -2155,7 +2155,7 @@ public class ManagedDownloader extends AbstractDownloader
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
-        TigerTreeCache.instance().purgeTree(downloadSHA1);
+        ProviderHacks.getTigerTreeCache().purgeTree(downloadSHA1);
         commonOutFile.setHashTree(null);
 
         // ask what to do next 
@@ -2169,7 +2169,7 @@ public class ManagedDownloader extends AbstractDownloader
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
+		HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(downloadSHA1); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2237,7 +2237,7 @@ public class ManagedDownloader extends AbstractDownloader
             
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                TigerTreeCache.instance(); 
+                ProviderHacks.getTigerTreeCache(); 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }

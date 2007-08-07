@@ -15,6 +15,7 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
 
@@ -26,6 +27,7 @@ import com.limegroup.gnutella.ReplyHandler;
  * Queries may be removed, for example, when a leaf node with an active query
  * disconnects from the Ultrapeer.
  */
+@Singleton
 public final class QueryDispatcher implements Runnable {
 
 	/**
@@ -52,11 +54,6 @@ public final class QueryDispatcher implements Runnable {
     @InspectableForSize
 	private final List<QueryHandler> NEW_QUERIES =
         Collections.synchronizedList(new LinkedList<QueryHandler>());
-
-	/**
-	 * <tt>QueryDispatcher</tt> instance following singleton.
-	 */
-	private static final QueryDispatcher INSTANCE = new QueryDispatcher();
     
     /**
      * The ProcessingQueue that handles sending queries out.
@@ -72,21 +69,6 @@ public final class QueryDispatcher implements Runnable {
     @InspectablePrimitive
     private boolean _active;
     
-
-	/**
-	 * Instance accessor for the <tt>QueryDispatcher</tt>.
-	 *
-	 * @return the <tt>QueryDispatcher</tt> instance
-	 */
-	public static QueryDispatcher instance() {
-		return INSTANCE;
-	}
-
-	/**
-	 * Creates a new <tt>QueryDispatcher</tt> instance.
-	 */
-	private QueryDispatcher() {}
-
 	/**
 	 * Adds the specified <tt>QueryHandler</tt> to the list of queries to
 	 * process.

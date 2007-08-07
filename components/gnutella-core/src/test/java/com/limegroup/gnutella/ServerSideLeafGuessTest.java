@@ -26,7 +26,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -73,7 +72,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             drain(testUP[i]);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
             testUP[i].flush();
         }
 

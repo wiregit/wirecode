@@ -85,7 +85,6 @@ import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -1198,13 +1197,13 @@ public class ManagedConnection extends Connection
             }
             
             // see if there's a new update message.
-            int latestId = UpdateHandler.instance().getLatestId();
+            int latestId = ProviderHacks.getUpdateHandler().getLatestId();
             int currentId = capVM.supportsUpdate();
             if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
                 networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
                 send(new UpdateRequest());
             } else if(currentId == latestId) {
-                UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+                ProviderHacks.getUpdateHandler().handleUpdateAvailable(this, currentId);
             }
             
             receivedCapVM = true;

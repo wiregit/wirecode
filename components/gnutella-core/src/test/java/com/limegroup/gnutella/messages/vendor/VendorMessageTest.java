@@ -487,7 +487,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
                                           InetAddress.getLocalHost(), 6346);
         hops = new HopsFlowVendorMessage((byte)4);
 
-        ms = MessagesSupportedVendorMessage.instance();
+        ms = ProviderHacks.getMessagesSupportedVendorMessage();
         
         tcp.write(baos);
         udp.write(baos);

@@ -10,7 +10,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -123,7 +122,7 @@ public final class ServerSideIntermediateRedirectTest
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
-        Message msvm = MessagesSupportedVendorMessage.instance();
+        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP.send(msvm);
         redirUP.flush();
 
@@ -174,7 +173,7 @@ public final class ServerSideIntermediateRedirectTest
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
-        Message msvm = MessagesSupportedVendorMessage.instance();
+        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP1.send(msvm);
         redirUP1.flush();
 
@@ -183,7 +182,7 @@ public final class ServerSideIntermediateRedirectTest
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 
-        msvm = MessagesSupportedVendorMessage.instance();
+        msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP2.send(msvm);
         redirUP2.flush();
 

@@ -3,12 +3,18 @@ package com.limegroup.gnutella;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Guice;
+import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.choking.ChokerFactory;
+import com.limegroup.bittorrent.disk.DiskManagerFactory;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
+import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -23,23 +29,35 @@ import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.spam.RatingTable;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLProperties;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * A collection of Providers that are hacks during the interim change towards
@@ -103,6 +121,28 @@ public class ProviderHacks {
     public static HttpExecutor getHttpExecutor() { return i().getHttpExecutor(); }
     public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
     public static MulticastService getMulticastService() { return i().getMulticastService(); }
+    public static ChatManager getChatManager() { return i().getChatManager(); }
+    public static BTLinkManagerFactory getBTLinkManagerFactory() { return i().getBTLinkManagerFactory(); }
+    public static ChokerFactory getChokerFactory() { return i().getChokerFactory(); }
+    public static DiskManagerFactory getDiskManagerFactory() { return i().getDiskManagerFactory(); }
+    public static BTConnectionFetcherFactory getBTConnectionFetcherFactory() { return i().getBTConnectionFetcherFactory(); }
+    public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
+    public static ConnectionWatchdog getConnectionWatchdog() { return i().getConnectionWatchdog(); }
+    public static Pinger getPinger() { return i().getPinger(); }
+    public static PongCacher getPongCacher() { return i().getPongCacher(); }
+    public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
+    public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
+    public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
+    public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
+    public static QueryDispatcher getQueryDispatcher() { return i().getQueryDispatcher(); }
+    public static RatingTable getRatingTable() { return i().getRatingTable(); }
+    public static SpamManager getSpamManager() { return i().getSpamManager(); }
+    public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
+    public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
+    public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
+    public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
+    public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
+    public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
@@ -147,6 +187,8 @@ public class ProviderHacks {
     public static DownloadReferencesFactory getDownloadReferencesFactory() { return i().getDownloadReferencesFactory(); }
     public static DownloadCallback getInNetworkCallback() { return i().getInNetworkCallback(); }
     public static RequeryManagerFactory getRequeryManagerFactory() { return i().getRequeryManagerFactory(); }
+
+  
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

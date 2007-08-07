@@ -25,7 +25,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 /**
  * The AltLocPublisher publishes the localhost as an alternate 
@@ -69,7 +68,7 @@ public class AltLocModel implements StorableModel {
                     KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
                         long fileSize = fd.getFileSize();
-                        HashTree hashTree = TigerTreeCache.instance().getHashTree(urn);
+                        HashTree hashTree = ProviderHacks.getTigerTreeCache().getHashTree(urn);
                         byte[] ttroot = null;
                         if (hashTree != null) {
                             ttroot = hashTree.getRootHashBytes();

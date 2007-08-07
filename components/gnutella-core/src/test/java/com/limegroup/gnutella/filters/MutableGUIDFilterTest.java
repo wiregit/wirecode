@@ -36,7 +36,7 @@ public class MutableGUIDFilterTest extends BaseTestCase {
      * for it are filterted. Also test removal.
      */
     public void testAddRemoveGUID() {
-        MutableGUIDFilter filter = MutableGUIDFilter.instance();
+        MutableGUIDFilter filter = ProviderHacks.getMutableGUIDFilter();
         
         GUID guid = new GUID();
         filter.addGUID(guid.bytes());

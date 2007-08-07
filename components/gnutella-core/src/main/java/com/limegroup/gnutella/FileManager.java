@@ -61,7 +61,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -776,7 +775,7 @@ public abstract class FileManager {
         fileManagerController.loadFinished();
         save();
         fileManagerController.loadFinishedPostSave();
-        UpdateHandler.instance().tryToDownloadUpdates();
+        ProviderHacks.getUpdateHandler().tryToDownloadUpdates();
         
         RouterService.getCallback().fileManagerLoaded();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));

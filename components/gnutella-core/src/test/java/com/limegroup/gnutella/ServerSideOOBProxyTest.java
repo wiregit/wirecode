@@ -23,7 +23,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
@@ -138,7 +137,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(LEAF[1], MessagesSupportedVendorMessage.instance());
+        sendF(LEAF[1], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
@@ -194,7 +193,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(LEAF[0], MessagesSupportedVendorMessage.instance());
+        sendF(LEAF[0], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
@@ -282,7 +281,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(ULTRAPEER[0], MessagesSupportedVendorMessage.instance());
+        sendF(ULTRAPEER[0], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");

@@ -23,7 +23,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
@@ -77,7 +76,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 500);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
             testUP[i].flush();
         }
 
@@ -167,13 +166,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
     public void testOOBv2Disabled() throws Exception {
         drainAll();
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         Thread.sleep(200);
         assertNull(getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         Thread.sleep(2000);
         OOBProxyControlVendorMessage m = getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class);

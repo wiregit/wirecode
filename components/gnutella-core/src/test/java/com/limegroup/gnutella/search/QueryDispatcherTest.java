@@ -43,7 +43,7 @@ public class QueryDispatcherTest extends LimeTestCase {
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
-        QueryDispatcher qd = QueryDispatcher.instance();
+        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
@@ -101,7 +101,7 @@ public class QueryDispatcherTest extends LimeTestCase {
      * removed correctly
      */
     public void testRemoveStoppedQuery() throws Exception {
-        QueryDispatcher qd = QueryDispatcher.instance();
+        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
         

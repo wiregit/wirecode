@@ -70,7 +70,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -225,7 +224,7 @@ public class DownloadTest extends LimeTestCase {
         
         callback.delCorrupt = false;
         callback.corruptChecked = false;
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
     }    
 
     public void tearDown() throws Exception {
@@ -449,7 +448,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         
-        TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
+        ProviderHacks.getTigerTreeCache().purgeTree(rfd.getSHA1Urn());
         RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete();
@@ -936,13 +935,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(false);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // the tree will fail, but it'll pick up the content-length
         // and discard the rest of the bad data.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -957,13 +956,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTree(false);
         uploader1.setSendContentLength(false);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // should pass after a bit because it retries the host
         // who gave it the bad length.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -977,13 +976,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNotNull(tree);
         assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
         
@@ -1003,7 +1002,7 @@ public class DownloadTest extends LimeTestCase {
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -1017,13 +1016,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setUseBadThexResponseHeader(true);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -1051,7 +1050,7 @@ public class DownloadTest extends LimeTestCase {
         waitForComplete();
 
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         assertTrue(callback.corruptChecked);
         
@@ -1085,7 +1084,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
         tGenericCorrupt( new RemoteFileDesc[] { rfd1}, new RemoteFileDesc[] {rfd2} );
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         assertTrue(callback.corruptChecked);
         
@@ -1135,14 +1134,14 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,badSha1, false);
         
         URN badURN = URN.createSHA1Urn(badSha1);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
-        TigerTreeCache.instance().purgeTree(badURN);
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(badURN);
         
         RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
         // even though the download completed, we ignore the tree 'cause the
         // URNs didn't match.
-        assertNull(TigerTreeCache.instance().getHashTree(TestFile.hash()));
-        assertNull(TigerTreeCache.instance().getHashTree(badURN));
+        assertNull(ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash()));
+        assertNull(ProviderHacks.getTigerTreeCache().getHashTree(badURN));
 
         waitForComplete(deleteCorrupt);
         assertTrue(callback.corruptChecked);

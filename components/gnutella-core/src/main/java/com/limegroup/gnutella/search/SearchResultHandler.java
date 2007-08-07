@@ -34,7 +34,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -100,7 +99,7 @@ public final class SearchResultHandler implements Inspectable {
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
-            SpamManager.instance().startedQuery(qr);
+            ProviderHacks.getSpamManager().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
     }
@@ -275,7 +274,7 @@ public final class SearchResultHandler implements Inspectable {
             Set<? extends IpPort> alts = response.getLocations();
             RouterService.getCallback().handleQueryResult(rfd, data, alts);
             
-            if (skipSpam || !SpamManager.instance().isSpam(rfd))
+            if (skipSpam || !ProviderHacks.getSpamManager().isSpam(rfd))
                 numGoodSentToFrontEnd++;
             else 
                 numBadSentToFrontEnd++;

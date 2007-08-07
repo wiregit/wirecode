@@ -12,6 +12,7 @@ import java.util.Set;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
@@ -19,13 +20,12 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  add a subclass of VendorMessage you should modify this class (assuming your
  *  message is delivered over TCP).
  */
+@Singleton
 public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     public static final int VERSION = 0;
 
     private final Set<SupportedMessageBlock> _messagesSupported = new HashSet<SupportedMessageBlock>();
-
-    private static MessagesSupportedVendorMessage _instance;
 
     /**
      * Constructs a new MSVM message with data from the network.
@@ -156,16 +156,6 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         hashSet.add(smp);
         
         return hashSet;
-    }
-
-
-    /** @return A MessagesSupportedVendorMessage with the set of messages 
-     *  this client supports.
-     */
-    public static MessagesSupportedVendorMessage instance() {
-        if (_instance == null)
-            _instance = new MessagesSupportedVendorMessage();
-        return _instance;
     }
 
 

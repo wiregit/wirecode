@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.WRMXML;
 import com.limegroup.gnutella.metadata.WeedInfo;
@@ -31,7 +32,7 @@ public final class LicenseFactory {
      */
     public static boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
-        return uri != null && LicenseCache.instance().isVerifiedAndValid(urn, uri);
+        return uri != null && ProviderHacks.getLicenseCache().isVerifiedAndValid(urn, uri);
     }
     
     /**
@@ -65,7 +66,7 @@ public final class LicenseFactory {
         
         // Try to get a cached version, first.
         if(uri != null)
-            license = LicenseCache.instance().getLicense(licenseString, uri);
+            license = ProviderHacks.getLicenseCache().getLicense(licenseString, uri);
         
         // If the cached version didn't exist, try to make one.
         if(license == null) {
@@ -107,7 +108,7 @@ public final class LicenseFactory {
      * Persists the cache.
      */
     public static void persistCache() {
-        LicenseCache.instance().persistCache();
+        ProviderHacks.getLicenseCache().persistCache();
     }
     
     /**

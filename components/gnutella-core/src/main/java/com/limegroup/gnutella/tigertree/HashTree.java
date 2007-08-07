@@ -21,6 +21,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -117,7 +118,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         assert(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         assert(NODES.size() * (long)nodeSize >= fileSize);
-        HashTreeNodeManager.instance().register(this, allNodes);
+        ProviderHacks.getHashTreeNodeManager().register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
@@ -423,7 +424,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * @return all nodes.
      */
     public List<List<byte[]>> getAllNodes() {
-        return HashTreeNodeManager.instance().getAllNodes(this);
+        return ProviderHacks.getHashTreeNodeManager().getAllNodes(this);
     }
 
     public ThexWriter createAsyncWriter() {

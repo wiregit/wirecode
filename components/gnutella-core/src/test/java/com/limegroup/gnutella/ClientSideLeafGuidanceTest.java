@@ -13,12 +13,10 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -63,7 +61,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         for (int i = 0; i < testUP.length; i++)
             // send a MessagesSupportedMessage
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
 
         // spawn a query and make sure all UPs get it
         GUID queryGuid = new GUID(RouterService.newQueryGUID());
@@ -332,8 +330,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                 "ALT",
                 Collections.EMPTY_SET, 0l, false);
         
-        SpamManager.instance().handleUserMarkedSpam(new RemoteFileDesc[]{anita});
-        assertTrue(SpamManager.instance().isSpam(anita));
+        ProviderHacks.getSpamManager().handleUserMarkedSpam(new RemoteFileDesc[]{anita});
+        assertTrue(ProviderHacks.getSpamManager().isSpam(anita));
         
         // now send back results and make sure that we do not get a QueryStatus
         // from the leaf

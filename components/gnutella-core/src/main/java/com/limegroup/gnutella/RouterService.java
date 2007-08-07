@@ -40,12 +40,10 @@ import org.limewire.util.FileUtils;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -53,7 +51,6 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
-import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -63,12 +60,9 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /**
@@ -400,7 +394,7 @@ public class RouterService {
             
             LOG.trace("START UpdateManager.instance");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER"));
-            UpdateHandler.instance();
+            ProviderHacks.getUpdateHandler();
             LOG.trace("STOP UpdateManager.instance");
 
             LOG.trace("START QueryUnicaster");
@@ -415,12 +409,12 @@ public class RouterService {
             
             LOG.trace("START Pinger");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_PINGER"));
-            Pinger.instance().start();
+            ProviderHacks.getPinger().start();
             LOG.trace("STOP Pinger");
             
             LOG.trace("START ConnectionWatchdog");
             callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG"));
-            ConnectionWatchdog.instance().start();
+            ProviderHacks.getConnectionWatchdog().start();
             LOG.trace("STOP ConnectionWatchdog");
             
             LOG.trace("START SavedFileManager");
@@ -430,11 +424,11 @@ public class RouterService {
 			
 			LOG.trace("START loading spam data");
 			callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SPAM"));
-			RatingTable.instance();
+			ProviderHacks.getRatingTable();
 			LOG.trace("START loading spam data");
             
             LOG.trace("START ChatManager");
-            ChatManager.instance().initialize();
+            ProviderHacks.getChatManager().initialize();
             LOG.trace("END ChatManager");
 
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -816,7 +810,7 @@ public class RouterService {
             // save limewire.props & other settings
             SettingsGroupManager.instance().save();
 			
-			RatingTable.instance().ageAndSave();
+			ProviderHacks.getRatingTable().ageAndSave();
             
             cleanupPreviewFiles();
             
@@ -828,7 +822,7 @@ public class RouterService {
             
             ProviderHacks.getFileManager().stop(); // Saves UrnCache and CreationTimeCache
 
-            TigerTreeCache.instance().persistCache();
+            ProviderHacks.getTigerTreeCache().persistCache();
 
             LicenseFactory.persistCache();
             
@@ -1056,7 +1050,7 @@ public class RouterService {
                 qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(guid, (byte)2, type);
 
             if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
-                MutableGUIDFilter.instance().addGUID(guid);
+                ProviderHacks.getMutableGUIDFilter().addGUID(guid);
     
             recordAndSendQuery(qr, type);
 		} catch(Throwable t) {
@@ -1093,8 +1087,8 @@ public class RouterService {
         ProviderHacks.getSearchResultHandler().removeQuery(guid);
         ProviderHacks.getMessageRouter().queryKilled(guid);
         if(RouterService.isSupernode())
-            QueryDispatcher.instance().addToRemove(guid);
-        MutableGUIDFilter.instance().removeGUID(guid.bytes());
+            ProviderHacks.getQueryDispatcher().addToRemove(guid);
+        ProviderHacks.getMutableGUIDFilter().removeGUID(guid.bytes());
     }
 
     /** 
@@ -1380,7 +1374,7 @@ public class RouterService {
      * <p>{@link Chatter#start()} needs to be invoked to initiate the connection. 
 	 */
 	public static Chatter createChat(String host, int port) {
-		Chatter chatter = ChatManager.instance().request(host, port);
+		Chatter chatter = ProviderHacks.getChatManager().request(host, port);
 		return chatter;
 	}
     

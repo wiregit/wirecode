@@ -142,7 +142,7 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
         
-        List<PingReply> pongs = PongCacher.instance().getBestPongs(ping.getLocale());
+        List<PingReply> pongs = ProviderHacks.getPongCacher().getBestPongs(ping.getLocale());
         byte[] guid = ping.getGUID();
         InetAddress pingerIP = handler.getInetAddress();
         for(PingReply pr : pongs) {

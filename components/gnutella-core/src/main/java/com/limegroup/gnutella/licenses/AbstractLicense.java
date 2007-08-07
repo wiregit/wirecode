@@ -21,6 +21,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -173,7 +174,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
             parseXML(body, true);
             lastVerifiedTime = System.currentTimeMillis();
             verified = VERIFIED;
-            LicenseCache.instance().addVerifiedLicense(AbstractLicense.this);
+            ProviderHacks.getLicenseCache().addVerifiedLicense(AbstractLicense.this);
             if(vc != null)
                 vc.licenseVerified(AbstractLicense.this);
         }
