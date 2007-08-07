@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.rudp.UDPMultiplexor;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Guice;
@@ -147,6 +149,8 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     public static SimppManager getSimppManager() { return i().getSimppManager(); }
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
+    public static UDPMultiplexor getUDPMultiplexor() { return i().getUdpMultiplexor(); }
+    public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }

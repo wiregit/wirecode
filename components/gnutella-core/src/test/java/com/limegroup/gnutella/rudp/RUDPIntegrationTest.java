@@ -96,7 +96,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     }
     
     public void testPacketsSentToMultiplexorAndGoesToProcessor() throws Exception {
-        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(RouterService.getUDPSelectorProvider().getContext());
+        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(ProviderHacks.getUDPSelectorProvider().getContext());
         SelectableChannel channel = createUDPSocketChannel(stub);
         assertEquals(0, stub.id);
         // This is done only to allow the multiplexor to learn about the processor.

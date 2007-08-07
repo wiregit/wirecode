@@ -8,16 +8,23 @@ import java.net.UnknownHostException;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.messages.RUDPMessage;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 
+@Singleton
 public class LimeUDPService implements org.limewire.rudp.UDPService {
     
     private final NetworkManager networkManager;
+    private final Provider<UDPService> udpService;
     
-    public LimeUDPService(NetworkManager networkManager) {
+    @Inject
+    public LimeUDPService(NetworkManager networkManager, Provider<UDPService> udpService) {
         this.networkManager = networkManager;
+        this.udpService = udpService;
     }
 
     public InetAddress getStableListeningAddress() {
@@ -36,19 +43,19 @@ public class LimeUDPService implements org.limewire.rudp.UDPService {
     }
 
     public int getStableListeningPort() {
-        return ProviderHacks.getUdpService().getStableUDPPort();
+        return udpService.get().getStableUDPPort();
     }
 
     public boolean isListening() {
-        return ProviderHacks.getUdpService().isListening();
+        return udpService.get().isListening();
     }
 
     public boolean isNATTraversalCapable() {
-        return ProviderHacks.getUdpService().canDoFWT();
+        return udpService.get().canDoFWT();
     }
 
     public void send(RUDPMessage message, SocketAddress address) {
-        ProviderHacks.getUdpService().send((Message)message, (InetSocketAddress)address);   
+        udpService.get().send((Message)message, (InetSocketAddress)address);   
     }
 
 }

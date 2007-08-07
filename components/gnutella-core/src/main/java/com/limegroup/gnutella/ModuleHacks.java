@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 
@@ -23,6 +24,7 @@ public class ModuleHacks extends AbstractModule {
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(SimppManager.class).toProvider(SimppManagerProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
+        bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundTimer")).toProvider(BackgroundTimerProvider.class);
     }
 
     @Singleton
@@ -77,5 +79,12 @@ public class ModuleHacks extends AbstractModule {
             return SimppManager.instance();
         }
     };
+    
+    @Singleton
+    private static class BackgroundTimerProvider implements Provider<ScheduledExecutorService> {
+        public ScheduledExecutorService get() {
+            return SimpleTimer.sharedTimer();
+        }
+    }
     
 }

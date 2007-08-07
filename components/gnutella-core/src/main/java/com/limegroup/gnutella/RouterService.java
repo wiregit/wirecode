@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.channels.SelectableChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,10 +28,6 @@ import org.limewire.io.IpPortSet;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
-import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
-import org.limewire.rudp.UDPMultiplexor;
-import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.rudp.UDPSelectorProviderFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
@@ -49,7 +44,6 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -121,29 +115,8 @@ public class RouterService {
 	 * Variable for the <tt>ActivityCallback</tt> instance.
 	 */
     private static ActivityCallback callback;
-    
-    /**
-     * The UDPMultiplexor.
-     */
-    private static UDPMultiplexor UDP_MULTIPLEXOR;
-    
-    /**
-     * Selector provider for UDP selectors.
-     */
-    private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
-           
-    static {
-        // Link the multiplexor & NIODispatcher together.
-        UDPSelectorProviderFactory factory = new DefaultUDPSelectorProviderFactory(new LimeRUDPContext());
-        UDPSelectorProvider.setDefaultProviderFactory(factory);
-        UDP_SELECTOR_PROVIDER = UDPSelectorProvider.defaultProvider();
-        UDP_MULTIPLEXOR = UDP_SELECTOR_PROVIDER.openSelector();
-        SelectableChannel socketChannel = UDP_SELECTOR_PROVIDER.openSocketChannel();
-        try {
-            socketChannel.close();
-        } catch(IOException ignored) {}
-        NIODispatcher.instance().registerSelector(UDP_MULTIPLEXOR, socketChannel.getClass());
-    }
+            
+  
     
     /**
      * A list of items that require running prior to shutting down LW.
@@ -230,7 +203,7 @@ public class RouterService {
             throw new IllegalStateException("fix your test!");
         
         //allow incoming RUDP messages to be forwarded correctly.
-        LimeRUDPMessageHandler handler = new LimeRUDPMessageHandler(getUDPMultiplexor());
+        LimeRUDPMessageHandler handler = new LimeRUDPMessageHandler(ProviderHacks.getUDPMultiplexor());
         handler.install(messageRouter);        
     }
     
@@ -559,17 +532,7 @@ public class RouterService {
 	    ProviderHacks.getHTTPUploadAcceptor().acceptConnection(socket, data);
 	}
 
-	/** Gets the UDP Multiplexor. */
-    public static UDPMultiplexor getUDPMultiplexor() {
-        return UDP_MULTIPLEXOR;
-    }
-    
-    /** Gets the SelectorProvider for UDPChannels */
-    public static UDPSelectorProvider getUDPSelectorProvider() {
-    	return UDP_SELECTOR_PROVIDER;
-    }
-    
-    public static byte [] getMyGUID() {
+	public static byte [] getMyGUID() {
 	    return MYGUID;
 	}
 	
@@ -656,7 +619,7 @@ public class RouterService {
         
         String host = addr.getHostAddress();
         return ProviderHacks.getConnectionManager().isConnectedTo(host) ||
-               UDP_MULTIPLEXOR.isConnectedTo(addr) ||
+               ProviderHacks.getUDPMultiplexor().isConnectedTo(addr) ||
                ProviderHacks.getUploadManager().isConnectedTo(addr); // ||
                // dloadManager.isConnectedTo(addr);
     }
