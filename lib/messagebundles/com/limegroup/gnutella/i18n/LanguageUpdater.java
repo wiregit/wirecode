@@ -22,7 +22,7 @@ import java.util.Properties;
  * Rebuilds the language files, based on the English one.
  */
 class LanguageUpdater {
-    private static final String MARKER = "# TRANSLATIONS START BELOW.";
+    static final String MARKER = "# TRANSLATIONS START BELOW.";
     private final File lib;
     private final Map/* <String, LanguageInfo> */langs;
     private final List/* <String> */englishList;
