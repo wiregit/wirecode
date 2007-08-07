@@ -272,7 +272,7 @@ public final class SearchResultHandler implements Inspectable {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
-            RouterService.getCallback().handleQueryResult(rfd, data, alts);
+            ProviderHacks.getActivityCallback().handleQueryResult(rfd, data, alts);
             
             if (skipSpam || !ProviderHacks.getSpamManager().isSpam(rfd))
                 numGoodSentToFrontEnd++;

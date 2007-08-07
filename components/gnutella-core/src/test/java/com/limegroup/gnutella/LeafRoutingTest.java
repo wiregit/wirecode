@@ -100,10 +100,10 @@ public class LeafRoutingTest extends LimeTestCase {
         doSettings();
 
         ActivityCallback callback=new ActivityCallbackStub();
-        rs=new RouterService(callback);
+       // rs=new RouterService(callback);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
         RouterService.connect();
         RouterService.clearHostCatcher();
         assertEquals("unexpected port",

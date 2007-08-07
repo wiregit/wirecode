@@ -5,18 +5,14 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Tests the important MessagesSupportedVendorMessage.
@@ -62,10 +58,10 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         CapabilitiesVM vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
         
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
-                rs, "DHT_MANAGER_REFERENCE");
-        PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
+       // RouterService rs = new RouterService(new ActivityCallbackStub());
+        //AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
+         //       rs, "DHT_MANAGER_REFERENCE");
+        //PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
         
         ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
         vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();

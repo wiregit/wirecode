@@ -17,7 +17,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -75,7 +74,7 @@ public final class PongCachingTest extends LimeTestCase {
 	/**
 	 * The central Ultrapeer used in the test.
 	 */
-	private static RouterService ROUTER_SERVICE = null;
+//	private static RouterService ROUTER_SERVICE = null;
 
     public PongCachingTest(String name) {
         super(name);
@@ -90,7 +89,7 @@ public final class PongCachingTest extends LimeTestCase {
 	}
 	
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+       // ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
     }
     
 	private void buildConnections() {
@@ -130,7 +129,7 @@ public final class PongCachingTest extends LimeTestCase {
         assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 
-		ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
 		RouterService.clearHostCatcher();
 		RouterService.connect();
         

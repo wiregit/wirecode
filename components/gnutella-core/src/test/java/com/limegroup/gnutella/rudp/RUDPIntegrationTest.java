@@ -17,7 +17,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
@@ -25,7 +24,6 @@ import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHelper;
 import com.limegroup.gnutella.rudp.messages.RUDPMessageHandlerHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RUDPIntegrationTest extends LimeTestCase {
@@ -62,8 +60,8 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
-        rs.start();
+       // RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getLifecycleManager().start();
         Thread.sleep(1000);
     }
     

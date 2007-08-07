@@ -776,7 +776,7 @@ public abstract class FileManager {
         fileManagerController.loadFinishedPostSave();
         ProviderHacks.getUpdateHandler().tryToDownloadUpdates();
         
-        RouterService.getCallback().fileManagerLoaded();
+        ProviderHacks.getActivityCallback().fileManagerLoaded();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
@@ -831,7 +831,7 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        RouterService.getCallback().fileManagerLoading();
+        ProviderHacks.getActivityCallback().fileManagerLoading();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
         
         // Update the FORCED_SHARE directory.
@@ -916,7 +916,7 @@ public abstract class FileManager {
             if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
+                if (!ProviderHacks.getActivityCallback().warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
@@ -2092,7 +2092,7 @@ public abstract class FileManager {
                 continue;
 
             desc.incrementHitCount();
-            RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
+            ProviderHacks.getActivityCallback().handleSharedFileUpdate(desc.getFile());
 
             Response resp = fileManagerController.createResponse(desc);
             if(includeXML) {

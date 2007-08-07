@@ -513,7 +513,7 @@ public abstract class MessageRouter {
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize() {
-		_callback = RouterService.getCallback();
+		_callback = ProviderHacks.getActivityCallback();
         
 		_bypassedResultsCache = new BypassedResultsCache(_callback, downloadManager);
         

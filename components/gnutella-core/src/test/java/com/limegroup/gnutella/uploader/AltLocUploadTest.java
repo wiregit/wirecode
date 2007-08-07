@@ -54,7 +54,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocUploadTest extends LimeTestCase {
@@ -112,7 +111,8 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE = new RouterService(new FManCallback());
+        if(true)throw new RuntimeException("fix me");
+        //ROUTER_SERVICE = new RouterService(new FManCallback());
         UPLOAD_MANAGER = new TestUploadManager();
 
         // Overwrite the original UploadManager with
@@ -169,7 +169,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
                 .length());
 
-        if (!RouterService.isLoaded()) {
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
             startAndWaitForLoad();
         }
 
@@ -1283,7 +1283,7 @@ public class AltLocUploadTest extends LimeTestCase {
     private static void startAndWaitForLoad() {
         synchronized (loaded) {
             try {
-                ROUTER_SERVICE.start();
+                ProviderHacks.getLifecycleManager().start();
                 loaded.wait();
             } catch (InterruptedException e) {
                 // good.
@@ -1321,12 +1321,13 @@ public class AltLocUploadTest extends LimeTestCase {
         }
     }
 
-    private static class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized (loaded) {
-                loaded.notify();
-            }
-        }
-    }
+    // DPINJ - testfix
+//    private static class FManCallback extends ActivityCallbackStub {
+//        public void fileManagerLoaded() {
+//            synchronized (loaded) {
+//                loaded.notify();
+//            }
+//        }
+//    }
 
 }

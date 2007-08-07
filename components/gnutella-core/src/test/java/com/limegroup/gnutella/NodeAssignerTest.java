@@ -19,7 +19,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
@@ -49,8 +48,6 @@ public class NodeAssignerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
         
         setSettings();
         launchAllBackends();
@@ -142,7 +139,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         //set up an ultrapeer capable host:
         setUltrapeerCapabilities();
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
         sleep();
         //the node assigner should have worked it's magic
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
@@ -159,7 +156,7 @@ public class NodeAssignerTest extends LimeTestCase {
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
-          ROUTER_SERVICE.start();
+          ProviderHacks.getLifecycleManager().start();
         connect();
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
         PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
@@ -177,7 +174,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
         setDHTCapabilities();
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
         sleep();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
         ULTRAPEER.setAcceptsUltrapeers(false);

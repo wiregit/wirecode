@@ -91,7 +91,7 @@ public class ProviderHacks {
             throw new IllegalStateException("already initializing!");
         initializing = true;
         aReallyLongNameThatYouDontWantToTypeALot = 
-            Guice.createInjector(new LimeWireCoreModule(), new ModuleHacks()).getInstance(LimeWireCore.class);
+            Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
         initializing = false;
         initialized = true;
         return aReallyLongNameThatYouDontWantToTypeALot;
@@ -149,14 +149,15 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     public static SimppManager getSimppManager() { return i().getSimppManager(); }
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
-    public static UDPMultiplexor getUDPMultiplexor() { return i().getUdpMultiplexor(); }
-    public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
+    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
+    public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
 
     // Cleaned up in all but RS
+    public static UDPMultiplexor getUDPMultiplexor() { return i().getUdpMultiplexor(); }
     public static ConnectionWatchdog getConnectionWatchdog() { return i().getConnectionWatchdog(); }
     public static HTTPAcceptor getHTTPAcceptor() { return i().getHTTPAcceptor(); }
     public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
@@ -199,7 +200,8 @@ public class ProviderHacks {
     public static RUDPContext getRUDPContext() { return i().getRUDPContext(); }
     public static BTContextFactory getBTContextFactory() { return i().getBTContextFactory(); }
     public static BTDownloaderFactory getBTDownloaderFactory() { return i().getBTDownloaderFactory(); }
-
+    public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
+    
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 
  

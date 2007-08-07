@@ -19,24 +19,12 @@ public class ModuleHacks extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ActivityCallback.class).toProvider(ActivityCallbackProvider.class);
         bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(SimppManager.class).toProvider(SimppManagerProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
-        bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundTimer")).toProvider(BackgroundTimerProvider.class);
+        bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toProvider(BackgroundTimerProvider.class);
     }
-
-    @Singleton
-    private static class ActivityCallbackProvider implements Provider<ActivityCallback> {
-        public ActivityCallback get() {
-            ActivityCallback callback = RouterService.getCallback();
-            // Guice can't deal with null values, and lots of tests leave this
-            // as null sometimes...
-            // This might cause some problems if stuff is constructed too early, but we'll find out in tests.
-            return callback != null ? callback : new ActivityCallbackAdapter();
-        }
-    };
     
     @Singleton
     private static class NIODispatcherProvider implements Provider<NIODispatcher> {

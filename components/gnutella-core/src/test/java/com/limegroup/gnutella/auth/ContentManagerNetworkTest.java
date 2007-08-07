@@ -14,12 +14,10 @@ import org.limewire.io.IpPortImpl;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
  
 public class ContentManagerNetworkTest extends LimeTestCase {
@@ -45,7 +43,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+      //  new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
         ProviderHacks.getMessageRouter().initialize();
         
         new Acceptor(ProviderHacks.getNetworkManager()).setListeningPort(LISTEN_PORT);

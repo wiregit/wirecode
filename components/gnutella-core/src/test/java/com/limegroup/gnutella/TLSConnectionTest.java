@@ -11,7 +11,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -19,6 +18,8 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 public class TLSConnectionTest extends LimeTestCase {
     
     private static final int PORT = 9999;
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static RouterService ROUTER;
     
     public TLSConnectionTest(String name) {
@@ -51,9 +52,9 @@ public class TLSConnectionTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        ROUTER = new RouterService(new ActivityCallbackStub());
+     //   ROUTER = new RouterService(new ActivityCallbackStub());
         assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
-        ROUTER.start();
+        ProviderHacks.getLifecycleManager().start();
     }
     
     public void setUp() throws Exception {

@@ -496,5 +496,12 @@ public class LimeWireCore {
         return injector.getInstance(BTDownloaderFactory.class);
     }
     
+    public ActivityCallback getActivityCallback() {
+        return injector.getInstance(ActivityCallback.class);
+    }
+    
+    public LifecycleManager getLifecycleManager() {
+        return injector.getInstance(LifecycleManager.class);
+    }
 
 }

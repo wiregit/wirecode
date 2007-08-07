@@ -15,12 +15,12 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
@@ -53,9 +53,9 @@ public abstract class DHTTestCase extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());*/
         
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+     //   ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
     }
     
     protected void setSettings() {
@@ -93,7 +93,7 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     public static void globalTearDown() throws Exception {
         close(DHT_LIST);
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {

@@ -52,7 +52,7 @@ public final class ChatManager implements ConnectionAcceptor {
             return;
         }
         
-        ActivityCallback callback = RouterService.getCallback();
+        ActivityCallback callback = ProviderHacks.getActivityCallback();
         InstantMessenger im = new InstantMessenger(socket, this, callback);
         im.start();
 	}
@@ -64,7 +64,7 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * the connection has died.
 	 */
 	public Chatter request(String host, int port) {
-        ActivityCallback callback = RouterService.getCallback();
+        ActivityCallback callback = ProviderHacks.getActivityCallback();
         InstantMessenger im = new InstantMessenger(host, port, this, callback);
         return im;
 	}

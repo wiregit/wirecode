@@ -30,7 +30,6 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -96,7 +95,7 @@ public class RequeryDownloadTest
         setSettings();
         
         _router=new TestMessageRouter();
-        new RouterService(new ActivityCallbackStub(), _router);  
+    //    new RouterService(new ActivityCallbackStub(), _router);  
         _router.initialize();
     }
 

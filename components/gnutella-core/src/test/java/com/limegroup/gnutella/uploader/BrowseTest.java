@@ -29,7 +29,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -81,7 +80,7 @@ public class BrowseTest extends LimeTestCase {
 
         doSettings();
 
-        rs = new RouterService(new ActivityCallbackStub());
+        //rs = new RouterService(new ActivityCallbackStub());
     }
 
     private static void doSettings() {
@@ -102,8 +101,8 @@ public class BrowseTest extends LimeTestCase {
 
         doSettings();
 
-        if (!RouterService.isLoaded()) {
-            rs.start();
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
+            ProviderHacks.getLifecycleManager().start();
         }
         ProviderHacks.getFileManager().loadSettingsAndWait(100000);
 

@@ -18,7 +18,6 @@ import java.util.zip.GZIPInputStream;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedSizeExpiringSet;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
@@ -31,7 +30,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -40,7 +38,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -69,8 +66,8 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     /**
 	 * The central Ultrapeer used in the test.
 	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
+	//private static final RouterService ROUTER_SERVICE = 
+	//	new RouterService(new ActivityCallbackStub());
 	/**
      * Ultrapeer 1 UDP connection.
      */
@@ -134,7 +131,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
         
         ProviderHacks.getNetworkManager().setListeningPort(PORT);
-		ROUTER_SERVICE.start();
+		ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
         RouterService.connect();	
 		connect();
@@ -583,9 +580,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     }
     
     public void testMsgDHTStatus() throws Exception {
-        AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
-                ROUTER_SERVICE, "DHT_MANAGER_REFERENCE");
-        PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
+    //    AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
+    //            ROUTER_SERVICE, "DHT_MANAGER_REFERENCE");
+     //   PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
         
         UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte) (0x1 << 6));
         UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTStatus);

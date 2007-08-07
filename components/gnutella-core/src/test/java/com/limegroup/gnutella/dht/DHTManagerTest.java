@@ -13,7 +13,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -42,7 +41,7 @@ public class DHTManagerTest extends DHTTestCase {
 
     public static void globalTearDown() throws Exception{
         //Ensure no more threads.
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
     
     public void testLimeDHTManager() throws Exception{

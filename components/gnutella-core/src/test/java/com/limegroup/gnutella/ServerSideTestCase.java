@@ -117,8 +117,8 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 
-		ROUTER_SERVICE = new RouterService(callback);
-		ROUTER_SERVICE.start();
+		//ROUTER_SERVICE = new RouterService(callback);
+		ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
         RouterService.connect();
         

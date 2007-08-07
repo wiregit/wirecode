@@ -91,10 +91,32 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
+/**
+ * The module that defines what implementations are used within
+ * LimeWire's core.  This class can be constructed with or without
+ * an ActivitiyCallback class.  If it is without, then another module
+ * must explicitly identify which class is going to define the
+ * ActivityCallback.
+ */
 public class LimeWireCoreModule extends AbstractModule {
+    
+    private final Class<? extends ActivityCallback> activityCallbackClass;
+    
+    public LimeWireCoreModule() {
+        this(null);
+    }
+    
+    public LimeWireCoreModule(Class<? extends ActivityCallback> activityCallbackClass) {
+        this.activityCallbackClass = activityCallbackClass;
+    }
+    
     @Override
     protected void configure() {
         bind(LimeWireCore.class);
+        
+        if(activityCallbackClass != null) {
+            bind(ActivityCallback.class).to(activityCallbackClass);
+        }
         
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
@@ -135,9 +157,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPService.class).to(LimeUDPService.class);
         bind(RUDPMessageFactory.class).to(LimeRUDPMessageFactory.class);
         bind(RUDPSettings.class).to(LimeRUDPSettings.class);
-        bind(RUDPMessageFactory.class).annotatedWith(Names.named("defaultRUDPMessageFactory")).to(DefaultMessageFactory.class);
+        bind(RUDPMessageFactory.class).annotatedWith(Names.named("delegate")).to(DefaultMessageFactory.class);
         bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
         bind(BTDownloaderFactory.class).to(BTDownloaderFactoryImpl.class);
+        bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

@@ -4,8 +4,6 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -17,27 +15,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -153,7 +141,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
         // MessageRouter.responsesToQueryReplies()
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), RouterService.getCallback(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
         try {
             Class[] paramTypes = new Class[] {
                     Response[].class, 
@@ -709,11 +697,12 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
-                rs, "DHT_MANAGER_REFERENCE");
-        PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
-        rs.start();
+        if(true)throw new RuntimeException("fix me");
+     //   RouterService rs = new RouterService(new ActivityCallbackStub());
+       // AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
+      //          rs, "DHT_MANAGER_REFERENCE");
+     //   PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
+        ProviderHacks.getLifecycleManager().start();
         
         Thread.sleep(300);
         //create the request
@@ -917,81 +906,82 @@ public final class MessageRouterTest extends LimeTestCase {
     	}
     }
     
-    private static class TestDHTManager implements DHTManager {
-
-        public List<IpPort> getActiveDHTNodes(int maxNodes){
-            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
-            for(int i = 0; i < maxNodes; i++) {
-                IpPort ipp;
-                try {
-                    ipp = new IpPortImpl("localhost", 3000+i);
-                    ipps.addFirst(ipp);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-            }
-            return ipps;
-        }
-
-        public void addActiveDHTNode(SocketAddress hostAddress) {}
-        
-        public void addPassiveDHTNode(SocketAddress hostAddress) {}
-
-        public void addressChanged() {}
-        
-        public boolean isWaitingForNodes() {
-            return false;
-        }
-
-        public MojitoDHT getMojitoDHT() { return null; }
-
-        public DHTMode getDHTMode() { 
-            return DHTMode.INACTIVE; 
-        }
-
-        public boolean isRunning() { 
-            return true; 
-        }
-
-        public void stop() {}
-
-        public void start(DHTMode mode) {}
-        
-        public boolean isBootstrapped() {
-            return false;
-        }
-
-        public boolean isMemberOfDHT() {
-            return isRunning() && isBootstrapped();
-        }
-
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
-        
-        public Vendor getVendor() {
-            return Vendor.UNKNOWN;
-        }
-        
-        public Version getVersion() {
-            return Version.ZERO;
-        }
-
-        public void addEventListener(DHTEventListener listener) {
-        }
-
-        public void dispatchEvent(DHTEvent event) {
-        }
-
-        public void removeEventListener(DHTEventListener listener) {
-        }
-
-        public void handleDHTContactsMessage(DHTContactsMessage msg) {
-        }
-
-        public boolean isEnabled() {
-            return true;
-        }
-
-        public void setEnabled(boolean enabled) {
-        }
-    }
+    // DPINJ - testfix
+//    private static class TestDHTManager implements DHTManager {
+//
+//        public List<IpPort> getActiveDHTNodes(int maxNodes){
+//            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
+//            for(int i = 0; i < maxNodes; i++) {
+//                IpPort ipp;
+//                try {
+//                    ipp = new IpPortImpl("localhost", 3000+i);
+//                    ipps.addFirst(ipp);
+//                } catch (UnknownHostException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            return ipps;
+//        }
+//
+//        public void addActiveDHTNode(SocketAddress hostAddress) {}
+//        
+//        public void addPassiveDHTNode(SocketAddress hostAddress) {}
+//
+//        public void addressChanged() {}
+//        
+//        public boolean isWaitingForNodes() {
+//            return false;
+//        }
+//
+//        public MojitoDHT getMojitoDHT() { return null; }
+//
+//        public DHTMode getDHTMode() { 
+//            return DHTMode.INACTIVE; 
+//        }
+//
+//        public boolean isRunning() { 
+//            return true; 
+//        }
+//
+//        public void stop() {}
+//
+//        public void start(DHTMode mode) {}
+//        
+//        public boolean isBootstrapped() {
+//            return false;
+//        }
+//
+//        public boolean isMemberOfDHT() {
+//            return isRunning() && isBootstrapped();
+//        }
+//
+//        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
+//        
+//        public Vendor getVendor() {
+//            return Vendor.UNKNOWN;
+//        }
+//        
+//        public Version getVersion() {
+//            return Version.ZERO;
+//        }
+//
+//        public void addEventListener(DHTEventListener listener) {
+//        }
+//
+//        public void dispatchEvent(DHTEvent event) {
+//        }
+//
+//        public void removeEventListener(DHTEventListener listener) {
+//        }
+//
+//        public void handleDHTContactsMessage(DHTContactsMessage msg) {
+//        }
+//
+//        public boolean isEnabled() {
+//            return true;
+//        }
+//
+//        public void setEnabled(boolean enabled) {
+//        }
+//    }
 }

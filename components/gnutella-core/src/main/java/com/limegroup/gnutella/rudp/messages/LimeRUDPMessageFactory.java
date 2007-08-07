@@ -20,7 +20,7 @@ public class LimeRUDPMessageFactory implements RUDPMessageFactory {
     private final RUDPMessageFactory delegate;
 
     @Inject
-    public LimeRUDPMessageFactory(@Named("defaultRUDPMessageFactory") RUDPMessageFactory delegate) {
+    public LimeRUDPMessageFactory(@Named("delegate") RUDPMessageFactory delegate) {
         if (delegate == null) {
             throw new NullPointerException("Delegate is null");
         } else if (delegate instanceof LimeRUDPMessageFactory) {

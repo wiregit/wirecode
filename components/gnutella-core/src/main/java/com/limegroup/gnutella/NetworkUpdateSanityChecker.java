@@ -125,7 +125,7 @@ public class NetworkUpdateSanityChecker {
                         finished = true;
                         requests.clear();
                         failures.clear();
-                        RouterService.getCallback().installationCorrupted();
+                        ProviderHacks.getActivityCallback().installationCorrupted();
                     }
                 }
             }

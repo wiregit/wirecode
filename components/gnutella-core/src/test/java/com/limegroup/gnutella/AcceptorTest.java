@@ -20,7 +20,6 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AcceptorTest extends LimeTestCase {
@@ -47,7 +46,8 @@ public class AcceptorTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         setSettings();
-        new RouterService(new ActivityCallbackStub());
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService(new ActivityCallbackStub());
         ProviderHacks.getConnectionManager().initialize();
         
         // start it up!

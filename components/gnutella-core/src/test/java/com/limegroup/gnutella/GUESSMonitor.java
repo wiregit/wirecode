@@ -17,7 +17,6 @@ import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.guess.GUESSStatistics;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Starts a BackEnd (which should have a .props file configured to be an
@@ -34,18 +33,21 @@ public class GUESSMonitor extends LimeTestCase {
         "? - Help; verbose - switch verbose on/off; connect - start the " +
         "backend; disconnect - stop the backend; stats - show stats";
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private RouterService _backend;
+    
     private MyMessageRouter _messageRouter;
 
     public GUESSMonitor() {
         super("GUESS MONITOR");
         setStandardSettings();
         // make my own MessageRouter....            
-        ActivityCallback stub = new ActivityCallbackStub();
+       // ActivityCallback stub = new ActivityCallbackStub();
         _messageRouter = new MyMessageRouter();
-        _backend = new RouterService(stub, _messageRouter);
+     //   _backend = new RouterService(stub, _messageRouter);
         //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
-        _backend.start();
+        ProviderHacks.getLifecycleManager().start();
         //RouterService.forceKeepAlive(8);
         //_backend.getRouterService().forceKeepAlive(5);
     }
@@ -53,7 +55,7 @@ public class GUESSMonitor extends LimeTestCase {
     public void shutdown() {
         _messageRouter.shutdown();
         _messageRouter.join();
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
 
     public void connect() {

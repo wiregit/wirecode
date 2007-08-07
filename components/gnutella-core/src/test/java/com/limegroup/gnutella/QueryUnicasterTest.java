@@ -26,8 +26,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 
 @SuppressWarnings("unchecked")
 public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -41,6 +39,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 
     private final int NUM_UDP_LOOPS = 25;
     
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static RouterService _rs;
 
     private boolean _shouldRun = true;
@@ -65,10 +65,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public static void globalSetUp() throws Exception {
-        _rs = new RouterService(new
-                ActivityCallbackStub(),
-                new MessageRouterStub());
-        _rs.start();
+       // _rs = new RouterService(new
+      //          ActivityCallbackStub(),
+       //         new MessageRouterStub());
+        ProviderHacks.getLifecycleManager().start();
     }
     
     public void setUp() throws Exception {

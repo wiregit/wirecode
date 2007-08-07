@@ -15,7 +15,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -23,7 +22,6 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -50,7 +48,8 @@ public class OOBHandlerTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         router = new MyMessageRouter();
-        new RouterService(new QueryAliveActivityCallback(), router);
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService(new QueryAliveActivityCallback(), router);
         router.initialize();
     }
 
@@ -608,12 +607,13 @@ public class OOBHandlerTest extends LimeTestCase {
         }
     }
     
-    private static class QueryAliveActivityCallback extends ActivityCallbackStub {
-        @Override
-        public boolean isQueryAlive(GUID guid) {
-            return true;
-        }
-    }
+    // DPINJ - testfix
+//    private static class QueryAliveActivityCallback extends ActivityCallbackStub {
+//        @Override
+//        public boolean isQueryAlive(GUID guid) {
+//            return true;
+//        }
+//    }
 
     private static class MyReplyHandler extends ReplyHandlerStub {
         volatile Message m;

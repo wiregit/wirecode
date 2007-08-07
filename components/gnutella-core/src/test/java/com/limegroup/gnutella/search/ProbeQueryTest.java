@@ -10,9 +10,7 @@ import junit.framework.Test;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
@@ -58,7 +56,7 @@ public final class ProbeQueryTest extends LimeTestCase {
      * with the proper TTL.
      */
     public void testSendProbe() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
         assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 

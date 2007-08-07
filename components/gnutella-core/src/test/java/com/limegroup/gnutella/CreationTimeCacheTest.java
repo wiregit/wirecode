@@ -34,8 +34,12 @@ public class CreationTimeCacheTest
     extends com.limegroup.gnutella.util.LimeTestCase {
     private static final int PORT=6669;
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static RouterService rs;
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static MyActivityCallback callback;
     private static MyFileManager fm;
 
@@ -108,11 +112,12 @@ public class CreationTimeCacheTest
 
         callback=new MyActivityCallback();
         fm = new MyFileManager();
-        rs= new RouterService(callback, ProviderHacks.getMessageRouter());
+        if(true)throw new RuntimeException("fix me");
+        //rs= new RouterService(callback, ProviderHacks.getMessageRouter());
 
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
         RouterService.connect();
         Thread.sleep(1000);

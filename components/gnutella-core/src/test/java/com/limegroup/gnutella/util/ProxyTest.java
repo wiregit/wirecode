@@ -12,11 +12,9 @@ import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.StubConnectObserver;
 
 public class ProxyTest extends LimeTestCase {
@@ -48,7 +46,7 @@ public class ProxyTest extends LimeTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
     }
 
     @Override

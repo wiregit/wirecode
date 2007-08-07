@@ -15,7 +15,6 @@ import java.util.concurrent.Future;
 
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
-import org.limewire.util.PrivilegedAccessor;
 
 public class LimeTestUtils {
 
@@ -60,11 +59,7 @@ public class LimeTestUtils {
 
     public static void setActivityCallBack(ActivityCallback cb)
             throws Exception {
-        if (RouterService.getCallback() == null) {
-            new RouterService(cb);
-        } else {
-            PrivilegedAccessor.setValue(RouterService.class, "callback", cb);
-        }
+        throw new RuntimeException("fix me");
     }
 
     public static void readBytes(InputStream in, long count) throws IOException {

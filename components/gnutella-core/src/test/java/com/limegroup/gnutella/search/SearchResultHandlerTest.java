@@ -40,7 +40,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public static void globalSetUp()  {
-        new RouterService(callback);
+        throw new RuntimeException("fix me");
+        //new RouterService(callback);
     }
     
     public void setUp() throws Exception {

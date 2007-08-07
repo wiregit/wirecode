@@ -105,10 +105,10 @@ public abstract class ClientSideTestCase
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                          "getActivityCallback");
-        rs=new RouterService(callback);
+      //  rs=new RouterService(callback);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
         RouterService.connect();
         //Thread.sleep(2000);

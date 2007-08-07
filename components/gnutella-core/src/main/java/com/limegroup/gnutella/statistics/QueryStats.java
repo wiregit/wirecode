@@ -11,8 +11,9 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.LifecycleManager;
 
 /**
  * Keeps track and reports some statistics about local queries.
@@ -21,6 +22,13 @@ import com.limegroup.gnutella.RouterService;
 public class QueryStats implements Inspectable {
     
     private NumericBuffer<Long> times = new NumericBuffer<Long>(200);
+    
+    private final LifecycleManager lifecycleManager;
+    
+    @Inject
+    public QueryStats(LifecycleManager lifecycleManager) {
+        this.lifecycleManager = lifecycleManager;
+    }
     
     public synchronized void recordQuery() {
         times.add(System.currentTimeMillis());
@@ -43,7 +51,7 @@ public class QueryStats implements Inspectable {
         if (times.getSize() <= 200) {
             byte[] b = new byte[times.getSize() * 4];
             for (int i = 0; i < times.getSize(); i++) {
-                int time = Float.floatToIntBits((times.get(i)-RouterService.startTime) / 1000f);
+                int time = Float.floatToIntBits((times.get(i)-lifecycleManager.getStartFinishedTime()) / 1000f);
                 ByteOrder.int2beb(time, b, i*4);
             }
                 
@@ -54,7 +62,7 @@ public class QueryStats implements Inspectable {
         // otherwise send the first 10 and some stats too
         List<Double> l = new ArrayList<Double>();
         for (long time : times)
-            l.add((double)(time - RouterService.startTime));
+            l.add((double)(time - lifecycleManager.getStartFinishedTime()));
         Collections.sort(l);
         ret.put("times",StatsUtils.quickStatsDouble(l).getMap()); // ~100 bytes
         ret.put("timesh", StatsUtils.getHistogram(l, 20)); // ~80 bytes

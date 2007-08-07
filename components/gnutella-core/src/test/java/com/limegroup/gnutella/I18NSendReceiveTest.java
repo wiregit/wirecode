@@ -22,7 +22,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
@@ -34,6 +33,8 @@ public class I18NSendReceiveTest
 
     private static Connection CONN_1;
     private static final int TEST_PORT = 6667;
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static RouterService ROUTER_SERVICE;
 
     //test file names that should be in the shared dir and returned as
@@ -109,8 +110,9 @@ public class I18NSendReceiveTest
 
     public static void globalSetUp() throws Exception {
         doSettings();
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-        ROUTER_SERVICE.start();
+        if(true)throw new RuntimeException("fix me");
+      //  ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        ProviderHacks.getLifecycleManager().start();
         RouterService.connect();
         connect();
     }

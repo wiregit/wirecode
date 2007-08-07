@@ -12,7 +12,6 @@ import org.limewire.util.CommonUtils;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -43,7 +42,8 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         callback = new TestActivityCallback();
-        new RouterService( callback );
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService( callback );
     }
     
     public void testLegacy() throws Exception {

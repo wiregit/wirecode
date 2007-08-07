@@ -27,7 +27,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -47,7 +46,7 @@ public class FWTDetectionTest extends LimeTestCase {
     }
 
     //make sure the RouterService class gets loaded before the UDPService class
-    static RouterService router = new RouterService(new ActivityCallbackStub());
+    //static RouterService router = new RouterService(new ActivityCallbackStub());
     
     static int REMOTE_PORT1 = 10000;
     static int REMOTE_PORT2 = 10001;
@@ -66,6 +65,7 @@ public class FWTDetectionTest extends LimeTestCase {
      * pongs.
      */
     public static void globalSetUp() {
+        if(true)throw new RuntimeException("fix me");
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
@@ -80,7 +80,7 @@ public class FWTDetectionTest extends LimeTestCase {
         }catch(Exception bad) {
             ErrorService.error(bad);
         }
-        router.start();
+        ProviderHacks.getLifecycleManager().start();
         
         cmStub.setConnected(true);
         assertTrue(RouterService.isConnected());

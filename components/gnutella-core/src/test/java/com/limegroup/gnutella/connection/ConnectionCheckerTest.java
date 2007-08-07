@@ -1,13 +1,12 @@
 package com.limegroup.gnutella.connection;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -32,7 +31,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
         PrivilegedAccessor.setValue(RouterService.class, "manager", MANAGER);
     }
     

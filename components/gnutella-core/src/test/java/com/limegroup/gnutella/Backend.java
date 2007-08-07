@@ -346,8 +346,9 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             preSetUp();
     		setStandardSettings(port);
             populateSharedDirectory();
-            ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-            ROUTER_SERVICE.start();
+            if(true)throw new RuntimeException("fix me");
+            //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+            ProviderHacks.getLifecycleManager().start();
             if (!reject) RouterService.connect();
 
             try {
@@ -445,7 +446,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
 	private void doShutdown(boolean reject, String msg) {
-		RouterService.shutdown();
+		ProviderHacks.getLifecycleManager().shutdown();
 		System.exit(0);
 	}
 

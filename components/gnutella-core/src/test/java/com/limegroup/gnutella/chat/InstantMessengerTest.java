@@ -10,7 +10,6 @@ import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -38,7 +37,8 @@ public class InstantMessengerTest extends BaseTestCase {
         doSettings();
         
         receiver = new MyActivityCallback();
-        new RouterService(receiver);
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService(receiver);
         //RouterService.getConnectionManager().initialize();
         ProviderHacks.getChatManager().initialize();
         

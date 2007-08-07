@@ -9,9 +9,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.TestResultCounter;
@@ -35,7 +33,7 @@ public class QueryDispatcherTest extends LimeTestCase {
     }    
     
     public static void globalSetUp()  {
-        new RouterService(new ActivityCallbackStub());
+        //new RouterService(new ActivityCallbackStub());
     }
 
     /**

@@ -21,12 +21,10 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -45,7 +43,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+   //     new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
         ProviderHacks.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(

@@ -178,7 +178,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     public void initialize() {
         initialize(
-                   RouterService.getCallback(),
+                   ProviderHacks.getActivityCallback(),
                    ProviderHacks.getMessageRouter(),
                    ProviderHacks.getFileManager()
                   );

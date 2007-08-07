@@ -7,7 +7,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GUIMediator;
@@ -72,7 +71,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         // otherwise the connection will be closed since there can only be
         // one chat frame per host
         InstantMessenger chat = new InstantMessenger("localhost", CHAT_PORT,
-                ProviderHacks.getChatManager(), RouterService.getCallback());
+                ProviderHacks.getChatManager(), ProviderHacks.getActivityCallback());
         outgoing = new ChatFrame(chat);
         chat.start();
         chat.waitForConnect(4000);

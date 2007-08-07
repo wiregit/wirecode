@@ -177,7 +177,7 @@ public class UpdateHandler implements HttpClientListener {
                 if (updateInfo != null && 
                 		updateInfo.getUpdateURN() != null &&
                 		isMyUpdateDownloaded(updateInfo))
-                    RouterService.getCallback().updateAvailable(updateInfo);
+                    ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
                 
                 downloadUpdates(_updatesToDownload, null);
             }
@@ -341,7 +341,7 @@ public class UpdateHandler implements HttpClientListener {
                     0);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
-            RouterService.getCallback().updateAvailable(updateInfo);
+            ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
         } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
     }
@@ -603,7 +603,7 @@ public class UpdateHandler implements HttpClientListener {
         UpdateInformation update = _updateInfo;
         assert(update != null);
         
-        RouterService.getCallback().updateAvailable(update);
+        ProviderHacks.getActivityCallback().updateAvailable(update);
     }
     
     /**
@@ -656,7 +656,7 @@ public class UpdateHandler implements HttpClientListener {
                         long delay = delay(clock.now(),_lastTimestamp);
                         RouterService.schedule(new NotificationFailover(_lastId),delay,0);
                     } else
-                        RouterService.getCallback().updateAvailable(updateInfo);
+                        ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
                 }
             }
         };

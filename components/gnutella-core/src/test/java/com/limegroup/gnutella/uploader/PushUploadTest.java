@@ -49,7 +49,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -93,11 +92,11 @@ public class PushUploadTest extends LimeTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+       // RouterService rs = new RouterService(new ActivityCallbackStub());
 
         doSettings();
 
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
         Thread.sleep(2000);
 
 // // TODO acceptor shutdown in globalTearDown()
@@ -162,7 +161,7 @@ public class PushUploadTest extends LimeTestCase {
                 .setValue(RouterService.class, "uploadManager", upMan);
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, RouterService.getCallback(), ProviderHacks.getMessageRouter());
+        upMan.start(httpAcceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
     }
 
     @Override

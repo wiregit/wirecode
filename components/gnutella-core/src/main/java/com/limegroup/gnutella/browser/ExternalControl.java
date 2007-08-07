@@ -130,7 +130,7 @@ public class ExternalControl {
 	}
 	
 	private static ActivityCallback restoreApplication() {
-		ActivityCallback callback = RouterService.getCallback();
+		ActivityCallback callback = ProviderHacks.getActivityCallback();
 		callback.restoreApplication();
 		callback.showDownloads();
 		return callback;

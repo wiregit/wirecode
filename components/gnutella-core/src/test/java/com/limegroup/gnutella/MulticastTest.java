@@ -30,6 +30,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
 @SuppressWarnings("unchecked")
 public class MulticastTest extends LimeTestCase {
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static ActivityCallback CALLBACK;
     
     private static final int DELAY = 1000;
@@ -87,14 +89,14 @@ public class MulticastTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
-        ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getMessageRouter());
+      //  ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getMessageRouter());
         FMAN = ProviderHacks.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
     
         setSettings();
                 
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
 		RouterService.clearHostCatcher();
 		RouterService.connect();
         

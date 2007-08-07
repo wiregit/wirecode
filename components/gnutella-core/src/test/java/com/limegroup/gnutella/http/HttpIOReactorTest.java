@@ -32,8 +32,6 @@ import org.limewire.util.BaseTestCase;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -54,7 +52,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
 
         acceptor = new Acceptor(ProviderHacks.getNetworkManager());
         acceptor.start();

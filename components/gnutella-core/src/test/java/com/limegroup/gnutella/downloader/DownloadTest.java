@@ -141,7 +141,7 @@ public class DownloadTest extends LimeTestCase {
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
-		RouterService rs = new RouterService(callback);
+	//	RouterService rs = new RouterService(callback);
         dm = ProviderHacks.getDownloadManager();
         dm.initialize();
 
@@ -171,7 +171,7 @@ public class DownloadTest extends LimeTestCase {
         };
 
         RouterService.schedule(click,0,NodeAssigner.TIMER_DELAY);
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
     } 
     
     public DownloadTest(String name) {

@@ -34,7 +34,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -114,17 +113,16 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         // LockTimeoutExceptions on the loopback then check this Setting!
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
         
-        if (!RouterService.isLoaded()) {
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
             // Start an instance of LimeWire in Ultrapeer mode
-            RouterService routerService 
-                = new RouterService(new ActivityCallbackStub());
-            routerService.start();
+            //RouterService routerService = new RouterService(new ActivityCallbackStub());
+            ProviderHacks.getLifecycleManager().start();
             
             RouterService.clearHostCatcher();
             RouterService.connect();
             
             // Make sure LimeWire is running as an Ultrapeer
-            assertTrue(RouterService.isStarted());
+            assertTrue(ProviderHacks.getLifecycleManager().isStarted());
             assertTrue(RouterService.isSupernode());
             assertFalse(RouterService.isActiveSuperNode());
             assertFalse(RouterService.isShieldedLeaf());
@@ -156,7 +154,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     }
     
     public static void globalTearDown() throws Exception {
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
     
     public void testForwardContacts() throws Exception {

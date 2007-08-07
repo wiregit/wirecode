@@ -9,6 +9,9 @@ import java.util.Vector;
 
 import org.limewire.io.IpPort;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -21,17 +24,11 @@ import com.limegroup.gnutella.version.UpdateInformation;
  */
 public class Main {
     public static void main(String args[]) {
-        ActivityCallback callback = new MainCallback();
+        Injector injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class), new ModuleHacks());
+        LimeWireCore core = injector.getInstance(LimeWireCore.class);
+        core.getLifecycleManager().start();        
+        NetworkManager networkManager = core.getNetworkManager();
         
-        //RouterService.setCallback(callback);
-        
-        RouterService service = new RouterService(callback);
-        service.start(); 
-        
-        // DPINJ: get from injector!
-        NetworkManager networkManager = ProviderHacks.getNetworkManager();
-
-
         System.out.println("For a command list type help.");
         BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
         for ( ; ;) {
@@ -106,7 +103,7 @@ public class Main {
             }
         }
         System.out.println("Good bye.");
-        RouterService.shutdown(); //write gnutella.net
+        core.getLifecycleManager().shutdown(); //write gnutella.net
     }
     
     /** Returns an array of strings containing the words of s, where
@@ -142,6 +139,7 @@ public class Main {
 
     
     
+    @Singleton
     private static class MainCallback implements ActivityCallback {
 
         /////////////////////////// ActivityCallback methods //////////////////////

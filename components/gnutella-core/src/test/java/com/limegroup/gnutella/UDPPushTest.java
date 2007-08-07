@@ -25,7 +25,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -76,9 +75,9 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket = new DatagramSocket(20000);
 		udpsocket.setSoTimeout(1000);
 				
-		ActivityCallback ac = new ActivityCallbackStub();
-		RouterService rs = new RouterService(ac);
-		rs.start();
+		//ActivityCallback ac = new ActivityCallbackStub();
+	//	RouterService rs = new RouterService(ac);
+		ProviderHacks.getLifecycleManager().start();
 		
 	}
 	

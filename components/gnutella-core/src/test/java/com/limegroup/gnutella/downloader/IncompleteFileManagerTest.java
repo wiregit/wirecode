@@ -11,20 +11,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 @SuppressWarnings( { "unchecked", "cast","null" } )
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -41,7 +39,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
     }
     
     public static void globalSetUp() {
-        new RouterService(new ActivityCallbackStub());
+       // new RouterService(new ActivityCallbackStub());
     }
     
     public void setUp() {

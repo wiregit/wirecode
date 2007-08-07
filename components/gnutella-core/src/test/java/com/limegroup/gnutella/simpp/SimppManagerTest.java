@@ -14,7 +14,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -70,12 +69,12 @@ public class SimppManagerTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        rs.start();
+      //  RouterService rs = new RouterService(new ActivityCallbackStub());
+        ProviderHacks.getLifecycleManager().start();
     }
 
     public static void globalShutdown() throws Exception {
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
         Thread.sleep(5000);
     }
     

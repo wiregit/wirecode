@@ -39,7 +39,6 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
@@ -51,7 +50,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -104,7 +102,7 @@ public class UploadTest extends LimeTestCase {
 
     protected String protocol;
 
-    private static RouterService ROUTER_SERVICE;
+  //  private static RouterService ROUTER_SERVICE;
 
     private static final Object loaded = new Object();
 
@@ -123,15 +121,16 @@ public class UploadTest extends LimeTestCase {
     }
 
     public static void globalSetUp() {
-        ROUTER_SERVICE = new RouterService(new FManCallback());
+        throw new RuntimeException("fix this test!");
+        //ROUTER_SERVICE = new RouterService(new FManCallback());
     }
 
     @Override
     protected void setUp() throws Exception {
         // allows to run single tests from Eclipse
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
+      //  if (ROUTER_SERVICE == null) {
+       //     globalSetUp();
+      //  }
 
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
@@ -165,7 +164,7 @@ public class UploadTest extends LimeTestCase {
         assertTrue("Copying resources failed", target.exists());
         assertGreaterThan("Expected file to contain data", 0, target.length());
 
-        if (!RouterService.isLoaded()) {
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
             startAndWaitForLoad();
             // Thread.sleep(2000);
         }
@@ -1303,19 +1302,20 @@ public class UploadTest extends LimeTestCase {
         }
         
     }
-    
-    private static class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized (loaded) {
-                loaded.notify();
-            }
-        }
-    }
+
+    // DPINJ - testfix
+//    private static class FManCallback extends ActivityCallbackStub {
+//        public void fileManagerLoaded() {
+//            synchronized (loaded) {
+//                loaded.notify();
+//            }
+//        }
+//    }
 
     private static void startAndWaitForLoad() {
         synchronized (loaded) {
             try {
-                ROUTER_SERVICE.start();
+                ProviderHacks.getLifecycleManager().start();
                 loaded.wait();
             } catch (InterruptedException e) {
                 // good.

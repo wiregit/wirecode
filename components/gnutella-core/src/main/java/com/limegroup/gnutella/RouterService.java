@@ -9,31 +9,22 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.ssl.SSLEngineTest;
-import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -41,18 +32,13 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.http.HTTPConnectionData;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -99,55 +85,15 @@ public class RouterService {
     //  UDPService was always init'd (which internally scheduled) immediately when RS was touched.
     //     It now is constructed lazily when needed.
     //     Check if this is a problem, and if so, fix it.
-    
-    private static final Log LOG = LogFactory.getLog(RouterService.class);
-    
-    static {
-        LimeCoreGlue.preinstall();
-    }
-        
-    /**
-     * isShuttingDown flag
-     */
-    private static boolean isShuttingDown;
-
-	/**
-	 * Variable for the <tt>ActivityCallback</tt> instance.
-	 */
-    private static ActivityCallback callback;
-            
-  
+     
     
     /**
-     * A list of items that require running prior to shutting down LW.
-     */
-    private static final List<Thread> SHUTDOWN_ITEMS = 
-        Collections.synchronizedList(new LinkedList<Thread>());
-
-    /**
-     * Variable for whether or not that backend threads have been started.
-     * 0 - nothing started
-     * 1 - pre/while gui tasks started
-     * 2 - everything started
-     * 3 - shutting down
-     * 4 - shut down
-     */
-    private static enum StartStatus {NOTHING, PRE_GUI, STARTING, STARTED, SHUTTING, SHUT};
-    private static volatile StartStatus _state = StartStatus.NOTHING;
-
-
-	
-	/**
 	 * Whether or not we are running at full power.
 	 */
     @InspectablePrimitive
 	private static boolean _fullPower = true;
     
-    /** The time when this finished starting. */
-    @InspectablePrimitive
-    public static long startTime;
-	
-	private static final byte [] MYGUID, MYBTGUID;
+    private static final byte [] MYGUID, MYBTGUID;
 	static {
 	    byte [] myguid=null;
 	    try {
@@ -167,276 +113,8 @@ public class RouterService {
 	    System.arraycopy(MYGUID,0,mybtguid,8,12);
 	    MYBTGUID = mybtguid;
 	}
-
-	/**
-	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
-	 * the backend.
-	 *
-	 * @param callback the <tt>ActivityCallback</tt> instance to use for
-	 *  making callbacks
-	 */
-  	public RouterService(ActivityCallback callback) {
-        this(callback, ProviderHacks.getMessageRouter());
-    }
-
-	/**
-	 * Creates a new <tt>RouterService</tt> instance with special message
-     * handling code.  Typically this constructor is only used for testing.
-	 *
-	 * @param callback the <tt>ActivityCallback</tt> instance to use for
-	 *  making callbacks
-     * @param router the <tt>MessageRouter</tt> instance to use for handling
-     *  all messages
-	 */
-  	public RouterService(ActivityCallback callback, MessageRouter router) {
-		RouterService.callback = callback;
-        ProviderHacks.getFileManager().addFileEventListener(callback);
-        RouterService.setMessageRouter(router);
-        
-        ProviderHacks.getConnectionManager().addEventListener(callback);
-        ProviderHacks.getConnectionManager().addEventListener(ProviderHacks.getDHTManager());
-        
-  	}
-
-    public static void setMessageRouter(MessageRouter messageRouter) {
-        if(messageRouter != ProviderHacks.getMessageRouter())
-            throw new IllegalStateException("fix your test!");
-        
-        //allow incoming RUDP messages to be forwarded correctly.
-        LimeRUDPMessageHandler handler = new LimeRUDPMessageHandler(ProviderHacks.getUDPMultiplexor());
-        handler.install(messageRouter);        
-    }
     
     /**
-  	 * Performs startup tasks that should happen while the GUI loads
-  	 */
-  	public static void asyncGuiInit() {
-  		
-  		synchronized(RouterService.class) {
-  			if (_state != StartStatus.NOTHING) // already did this?
-  				return;
-  			else
-  				_state = StartStatus.PRE_GUI;
-  		}
-  		
-        ThreadExecutor.startThread(new Initializer(), "async gui initializer");
-  	}
-  	
-  	/**
-  	 * performs the tasks usually run while the gui is initializing synchronously
-  	 * to be used for tests and when running only the core
-  	 */
-  	public void preGuiInit() {
-  		
-  		synchronized(RouterService.class) {
-  			if (_state != StartStatus.NOTHING) // already did this?
-  				return;
-  			else
-  				_state = StartStatus.PRE_GUI;
-  		}
-  		
-  	    (new Initializer()).run();
-  	}
-  	
-  	private static class Initializer implements Runnable {
-  	    public void run() {
-  	        //add more while-gui init tasks here
-            ProviderHacks.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
-                public void ipFiltersLoaded() {
-                    adjustSpamFilters();
-                }
-            });
-            ProviderHacks.getSimppManager().addListener(new SimppListener() {
-                public void simppUpdated(int newVersion) {
-                    reloadIPFilter();
-                }
-            });
-  	        ProviderHacks.getAcceptor().init();
-  	    }
-  	}
-  	
-	/**
-	 * Starts various threads and tasks once all core classes have
-	 * been constructed.
-	 */
-	public void start() {
-	    synchronized(RouterService.class) {
-    	    LOG.trace("START RouterService");
-    	    
-    	    if ( isLoaded() )
-    	        return;
-    	        
-            LimeCoreGlue.install();
-            preGuiInit();
-            _state = StartStatus.STARTING;
-            
-            HttpClientManager.initialize();
-            
-            LOG.trace("START SSL Test");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SSL_TEST"));
-            SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), NIODispatcher.instance().getBufferCache());
-            if(!sslTester.go()) {
-                Throwable t = sslTester.getLastFailureCause();
-                SSLSettings.disableTLS(t);
-                if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
-                    ErrorService.error(t);
-            }
-            LOG.trace("END SSL Test");
-    
-    		// Now, link all the pieces together, starting the various threads.            
-            LOG.trace("START ContentManager");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTENT_MANAGER"));
-            ProviderHacks.getContentManager().initialize();
-            LOG.trace("STOP ContentManager");
-
-            LOG.trace("START MessageRouter");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER"));
-    		ProviderHacks.getMessageRouter().initialize();
-    		LOG.trace("STOPMessageRouter");
-
-            LOG.trace("START HTTPUploadManager");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER"));
-            ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), callback, ProviderHacks.getMessageRouter()); 
-            LOG.trace("STOP HTTPUploadManager");
-
-            LOG.trace("START HTTPUploadAcceptor");
-            ProviderHacks.getHTTPUploadAcceptor().start(ProviderHacks.getConnectionDispatcher()); 
-            LOG.trace("STOP HTTPUploadAcceptor");
-
-            LOG.trace("START Acceptor");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR"));
-    		ProviderHacks.getAcceptor().start();
-    		LOG.trace("STOP Acceptor");
-    		
-            LOG.trace("START loading StaticMessages");
-            ProviderHacks.getStaticMessages().initialize();
-            LOG.trace("END loading StaticMessages");
-            
-    		LOG.trace("START ConnectionManager");
-    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER"));
-            ProviderHacks.getConnectionManager().initialize();
-    		LOG.trace("STOP ConnectionManager");
-    		
-    		LOG.trace("START DownloadManager");
-    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER"));
-    		ProviderHacks.getDownloadManager().initialize(); 
-    		LOG.trace("STOP DownloadManager");
-    		
-    		LOG.trace("START NodeAssigner");
-    		callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_NODE_ASSIGNER"));
-    		ProviderHacks.getNodeAssigner().start();
-    		LOG.trace("STOP NodeAssigner");
-			
-            LOG.trace("START HostCatcher.initialize");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER"));
-    		ProviderHacks.getHostCatcher().initialize();
-    		LOG.trace("STOP HostCatcher.initialize");
-    
-    		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
-    			// Make sure connections come up ultra-fast (beyond default keepAlive)		
-    			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
-    			if ( outgoing > 0 ) {
-    			    LOG.trace("START connect");
-    				connect();
-                    LOG.trace("STOP connect");
-                }
-    		}
-            // Asynchronously load files now that the GUI is up, notifying
-            // callback.
-            LOG.trace("START FileManager");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER"));
-            ProviderHacks.getFileManager().start();
-            LOG.trace("STOP FileManager");
-    
-            LOG.trace("START TorrentManager");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER"));
-			ProviderHacks.getTorrentManager().initialize(ProviderHacks.getFileManager(), ProviderHacks.getConnectionDispatcher(), SimpleTimer.sharedTimer());
-			LOG.trace("STOP TorrentManager");
-            
-            LOG.trace("START ControlRequestAcceptor");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR"));
-			(new ControlRequestAcceptor()).register(ProviderHacks.getConnectionDispatcher());
-			LOG.trace("STOP ControlRequestAcceptor");
-			
-            // Restore any downloads in progress.
-            LOG.trace("START DownloadManager.postGuiInit");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI"));
-            ProviderHacks.getDownloadManager().postGuiInit();
-            LOG.trace("STOP DownloadManager.postGuiInit");
-            
-            LOG.trace("START UpdateManager.instance");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER"));
-            ProviderHacks.getUpdateHandler();
-            LOG.trace("STOP UpdateManager.instance");
-
-            LOG.trace("START QueryUnicaster");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER"));
-    		ProviderHacks.getQueryUnicaster().start();
-    		LOG.trace("STOP QueryUnicaster");
-    		
-    		LOG.trace("START HTTPAcceptor");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR"));
-            ProviderHacks.getHTTPAcceptor().start();
-            LOG.trace("STOP HTTPAcceptor");
-            
-            LOG.trace("START Pinger");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_PINGER"));
-            ProviderHacks.getPinger().start();
-            LOG.trace("STOP Pinger");
-            
-            LOG.trace("START ConnectionWatchdog");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG"));
-            ProviderHacks.getConnectionWatchdog().start();
-            LOG.trace("STOP ConnectionWatchdog");
-            
-            LOG.trace("START SavedFileManager");
-            callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER"));
-            ProviderHacks.getSavedFileManager();
-            LOG.trace("STOP SavedFileManager");
-			
-			LOG.trace("START loading spam data");
-			callback.componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SPAM"));
-			ProviderHacks.getRatingTable();
-			LOG.trace("START loading spam data");
-            
-            LOG.trace("START ChatManager");
-            ProviderHacks.getChatManager().initialize();
-            LOG.trace("END ChatManager");
-
-            if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
-                startManualGCThread();
-            
-            LOG.trace("STOP RouterService.");
-            _state = StartStatus.STARTED;
-            
-            startTime = System.currentTimeMillis();
-        }
-	}
-	
-	/**
-	 * Starts a manual GC thread.
-	 */
-	private void startManualGCThread() {
-        Thread t = ThreadExecutor.newManagedThread(new Runnable() {
-            public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(5 * 60 * 1000);
-                    } catch(InterruptedException ignored) {}
-                    LOG.trace("Running GC");
-                    System.gc();
-                    LOG.trace("GC finished, running finalizers");
-                    System.runFinalization();
-                    LOG.trace("Finalizers finished.");
-                }
-            }
-        }, "ManualGC");
-        t.setDaemon(true);
-        t.start();
-        LOG.trace("Started manual GC thread.");
-    }
-	                
-	/**
      *  Returns the number of initialized messaging connections.
      */
     public static int getNumInitializedConnections() {
@@ -485,34 +163,6 @@ public class RouterService {
         }
     }
 
-    /**
-     * Used to determine whether or not the backend threads have been
-     * started.
-     *
-     * @return <tt>true</tt> if the backend threads have been started,
-     *  otherwise <tt>false</tt>
-     */
-    public static boolean isLoaded() {
-        return isStarted() || _state == StartStatus.STARTING; 
-    }
-    
-    public static boolean isStarted() {
-    	return _state == StartStatus.STARTED || _state == StartStatus.SHUTTING ||
-        _state == StartStatus.SHUT;
-    }
-
-    /**
-     * Returns the <tt>ActivityCallback</tt> passed to this' constructor.
-	 *
-	 * @return the <tt>ActivityCallback</tt> passed to this' constructor --
-	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
-	 *  will be <tt>null</tt> in the case where the <tt>RouterService</tt>
-	 *  has not been constructed
-     */ 
-    public static ActivityCallback getCallback() {
-        return RouterService.callback;
-    }
-    
     /**
      * Sets full power mode.
      */
@@ -687,132 +337,9 @@ public class RouterService {
     }
     
     /**
-     * Adds something that requires shutting down.
-     *
-     * TODO: Make this take a 'Service' or somesuch that
-     *       has a shutdown method, and run the method in its
-     *       own thread.
-     */
-    public static boolean addShutdownItem(Thread t) {
-        if(isShuttingDown() || isShutdown())
-            return false;
-
-        SHUTDOWN_ITEMS.add(t);
-        return true;
-    }
-    
-    /**
-     * Runs all shutdown items.
-     */
-    private static void runShutdownItems() {
-        if(!isShuttingDown())
-            return;
-        
-        // Start each shutdown item.
-        for(Thread t : SHUTDOWN_ITEMS)
-            t.start();
-        
-        // Now that we started them all, iterate back and wait for each one to finish.
-        for(Thread t : SHUTDOWN_ITEMS) {
-            try {
-                t.join();
-            } catch(InterruptedException ie) {}
-        }
-    }
-    
-    /**
-     * Determines if this is shutting down.
-     */
-    private static boolean isShuttingDown() {
-        return _state == StartStatus.SHUTTING || _state == StartStatus.SHUT;
-    }
-    
-    /**
-     * Determines if this is shut down.
-     */
-    private static boolean isShutdown() {
-        return _state == StartStatus.SHUT;
-    }
-
-    /**
-     * Shuts down the backend and writes the gnutella.net file.
-     *
-     * TODO: Make all of these things Shutdown Items.
-     */
-    public static synchronized void shutdown() {
-        try {
-            if(!isLoaded())
-                return;
-                
-            _state = StartStatus.SHUTTING;
-            
-            ProviderHacks.getNodeAssigner().stop();
-
-            ProviderHacks.getDHTManager().stop();
-            
-            ProviderHacks.getAcceptor().shutdown();
-            
-            //clean-up connections and record connection uptime for this session
-            ProviderHacks.getConnectionManager().disconnect(false);
-            
-            //Update fractional uptime statistics (before writing limewire.props)
-            ProviderHacks.getStatistics().shutdown();
-            
-			// start closing all active torrents
-			// torrentManager.shutdown();
-			
-            //Update firewalled status
-            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
-
-            //Write gnutella.net
-            try {
-                ProviderHacks.getHostCatcher().write();
-            } catch (IOException e) {}
-            
-            // save limewire.props & other settings
-            SettingsGroupManager.instance().save();
-			
-			ProviderHacks.getRatingTable().ageAndSave();
-            
-            cleanupPreviewFiles();
-            
-            cleanupTorrentMetadataFiles();
-            
-            ProviderHacks.getDownloadManager().writeSnapshot();
-            
-           // torrentManager.writeSnapshot();
-            
-            ProviderHacks.getFileManager().stop(); // Saves UrnCache and CreationTimeCache
-
-            ProviderHacks.getTigerTreeCache().persistCache();
-
-            LicenseFactory.persistCache();
-            
-            ProviderHacks.getContentManager().shutdown();
- 
-            
-            runShutdownItems();
-            
-            _state = StartStatus.SHUT;
-            
-        } catch(Throwable t) {
-            ErrorService.error(t);
-        }
-    }
-    
-    public static void shutdown(String toExecute) {
-        shutdown();
-        if (toExecute != null) {
-            try {
-                Runtime.getRuntime().exec(toExecute);
-            } catch (IOException tooBad) {}
-        }
-    }
-    
-    /**
      * Deletes all preview files.
      */
-    private static void cleanupPreviewFiles() {
+    static void cleanupPreviewFiles() {
         //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
         File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
@@ -831,7 +358,7 @@ public class RouterService {
         }
     }
     
-    private static void cleanupTorrentMetadataFiles() {
+    static void cleanupTorrentMetadataFiles() {
         if(!ProviderHacks.getFileManager().isLoadFinished()) {
             return;
         }
@@ -1354,7 +881,7 @@ public class RouterService {
 	public static BrowseHostHandler doAsynchronousBrowseHost(
 	  final Connectable host, GUID guid, GUID serventID, 
 	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
-        final BrowseHostHandler handler = new BrowseHostHandler(callback, 
+        final BrowseHostHandler handler = new BrowseHostHandler(ProviderHacks.getActivityCallback(), 
                                                           guid, serventID);
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
@@ -1425,29 +952,5 @@ public class RouterService {
      */
     public static int getNumFreeLimeWireNonLeafSlots() {
         return ProviderHacks.getConnectionManager().getNumFreeLimeWireNonLeafSlots();
-    }
-
-
-    /**
-     * Sets the flag for whether or not LimeWire is currently in the process of 
-	 * shutting down.
-	 *
-     * @param flag the shutting down state to set
-     */
-    public static void setIsShuttingDown(boolean flag) {
-		isShuttingDown = flag;
-    }
-
-	/**
-	 * Returns whether or not LimeWire is currently in the shutting down state,
-	 * meaning that a shutdown has been initiated but not completed.  This
-	 * is most often the case when there are active file transfers and the
-	 * application is set to shutdown after current file transfers are complete.
-	 *
-	 * @return <tt>true</tt> if the application is in the shutting down state,
-	 *  <tt>false</tt> otherwise
-	 */
-    public static boolean getIsShuttingDown() {
-		return isShuttingDown;
     }
 }

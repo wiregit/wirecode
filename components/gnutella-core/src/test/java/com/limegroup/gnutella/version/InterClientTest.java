@@ -13,7 +13,6 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -215,7 +214,7 @@ public class InterClientTest extends PeerTestCase {
         setCurrentId(-11);
         assertEquals(-11, ProviderHacks.getUpdateHandler().getLatestId());
         
-        MyActivityCallback cb = (MyActivityCallback)RouterService.getCallback();
+        MyActivityCallback cb = (MyActivityCallback)ProviderHacks.getActivityCallback();
         cb.lastUpdate = null;
         
         // Get the -8 file.

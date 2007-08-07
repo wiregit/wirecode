@@ -55,8 +55,8 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
+        if(true)throw new RuntimeException("fix me");
+        //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         CATCHER = new TestHostCatcher();
         LISTENER = new ConnectionListener();
         
@@ -70,7 +70,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_catcher",CATCHER);
              
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
     }
 

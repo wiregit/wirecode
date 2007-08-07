@@ -8,15 +8,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -72,8 +71,8 @@ public class ServerSideHeadTest extends LimeTestCase {
     	
     	FileManagerStub fmanager = new FileManagerStub();
     	
-    	RouterService service = new RouterService(new ActivityCallbackStub());
-    	service.start();
+    //	RouterService service = new RouterService(new ActivityCallbackStub());
+    	ProviderHacks.getLifecycleManager().start();
     	
     	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
     }

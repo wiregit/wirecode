@@ -26,7 +26,10 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 @SuppressWarnings("unchecked")
 public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static ActivityCallback CALLBACK;
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static TestMessageRouter MESSAGE_ROUTER;        
     private static RouterService ROUTER_SERVICE;
             
@@ -78,8 +81,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
         CALLBACK = new TestCallback();
         MESSAGE_ROUTER = new TestMessageRouter();
-        ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
-        ROUTER_SERVICE.start();
+     //   ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
+        ProviderHacks.getLifecycleManager().start();
         
         RouterService.connectToHostAsynchronously("localhost", 
             Backend.BACKEND_PORT, ConnectType.PLAIN);    

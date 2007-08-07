@@ -17,7 +17,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -89,8 +88,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 	/**
 	 * The central Ultrapeer used in the test.
 	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
+//	private static final RouterService ROUTER_SERVICE = 
+//		new RouterService(new ActivityCallbackStub());
 
     public UltrapeerRoutingTest(String name) {
         super(name);
@@ -138,7 +137,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 
-		ROUTER_SERVICE.start();
+		ProviderHacks.getLifecycleManager().start();
         RouterService.clearHostCatcher();
         RouterService.connect();	
 		connect();

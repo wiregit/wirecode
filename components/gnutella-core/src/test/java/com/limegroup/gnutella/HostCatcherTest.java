@@ -31,7 +31,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -53,7 +52,7 @@ public class HostCatcherTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     public static void globalSetUp() throws Exception {
-        new RouterService( new ActivityCallbackStub() );
+        //new RouterService( new ActivityCallbackStub() );
     }
     
     /**

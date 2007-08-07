@@ -424,7 +424,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		    }
 		};
 		
-        RouterService.addShutdownItem(waiter);
+        ProviderHacks.getLifecycleManager().addShutdownItem(waiter); 
 	}
 	
 	public void finalize() {

@@ -497,7 +497,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 		if (_acceptedIncoming == status)
 			return false;
 	    _acceptedIncoming = status;
-		RouterService.getCallback().acceptedIncomingChanged(status);
+		ProviderHacks.getActivityCallback().acceptedIncomingChanged(status);
 	    return true;
 	}
 	
