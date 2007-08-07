@@ -12,7 +12,6 @@ import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 import junit.framework.Test;
@@ -109,7 +108,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
     private static int simppVersion;
     private void triggerSimppUpdate() throws Exception {
         List<SimppListener> l = (List<SimppListener>) 
-            PrivilegedAccessor.getValue(SimppManager.instance(), "listeners");
+            PrivilegedAccessor.getValue(ProviderHacks.getSimppManager(), "listeners");
         for (SimppListener s : l)
             s.simppUpdated(simppVersion++);
     }

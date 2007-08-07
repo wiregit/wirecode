@@ -47,12 +47,14 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
@@ -459,6 +461,14 @@ public class LimeWireCore {
 
     public SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() {
         return injector.getInstance(SchemaReplyCollectionMapper.class);
+    }
+
+    public SimppManager getSimppManager() {
+        return injector.getInstance(SimppManager.class);
+    }
+
+    public CapabilitiesVMFactory getCapabilitiesVMFactory() {
+        return injector.getInstance(CapabilitiesVMFactory.class);
     }
     
 

@@ -88,7 +88,7 @@ public class LimeCoreGlue {
                 
         // Setup SIMPP to be the settings remote manager.
         SimppManager simppManager = SimppManager.instance();
-        SimppSettingsManager settingsManager = SimppSettingsManager.instance();
+        SimppSettingsManager settingsManager = simppManager.getSimppSettingsManager();
         LimeProps.instance().getFactory().setRemoteSettingManager(settingsManager);
         MojitoProps.instance().getFactory().setRemoteSettingManager(settingsManager);
         settingsManager.updateSimppSettings(simppManager.getPropsString());

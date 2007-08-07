@@ -10,6 +10,7 @@ import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -39,7 +40,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
     }
     
     public void testStaticConstructor() throws Exception {
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertGreaterThan(0, vmp.supportsFeatureQueries());
         assertTrue(vmp.supportsWhatIsNew());
         assertGreaterThan(0, vmp.supportsCapability("WHAT".getBytes()));
@@ -58,7 +59,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
     }
     
     public void testDHTCapability() throws Exception { 
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
         
         RouterService rs = new RouterService(new ActivityCallbackStub());
@@ -66,20 +67,20 @@ public class CapabilitiesVMTest  extends LimeTestCase {
                 rs, "DHT_MANAGER_REFERENCE");
         PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
         
-        CapabilitiesVM.reconstructInstance();
-        vmp = CapabilitiesVM.instance();
+        ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
+        vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertGreaterThan(-1, vmp.isActiveDHTNode());
     }
     
     public void testTLSCapability() throws Exception {
         SSLSettings.TLS_INCOMING.setValue(false);
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertEquals(-1, vmp.supportsTLS());
         assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
         
         SSLSettings.TLS_INCOMING.setValue(true);
-        CapabilitiesVM.reconstructInstance();
-        vmp = CapabilitiesVM.instance();
+        ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
+        vmp = ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
         assertEquals(1, vmp.supportsTLS());
         assertEquals(1, vmp.supportsCapability("TLS!".getBytes()));
     }

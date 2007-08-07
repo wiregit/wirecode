@@ -25,9 +25,9 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 
 class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
@@ -100,7 +100,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                 return;
             }
             
-            SimppManager.instance().addListener(this);
+            ProviderHacks.getSimppManager().addListener(this);
             
             if (hosts.isEmpty()) {
                 tryBootstrapFromRouteTable();
@@ -148,7 +148,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     public void stop() {
         synchronized (lock) {
-            SimppManager.instance().removeListener(this);
+            ProviderHacks.getSimppManager().removeListener(this);
             
             if (pingFuture != null) {
                 pingFuture.cancel(true);

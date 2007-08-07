@@ -6,7 +6,9 @@ import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.simpp.SimppManager;
 
@@ -16,19 +18,15 @@ public class ModuleHacks extends AbstractModule {
 
     @Override
     protected void configure() {
-        // DPINJ: Need to figure out what the hell to do with these.
-        //----------------------------------------------        
-        bind(ActivityCallback.class).toProvider(activityCallback);
-        bind(NIODispatcher.class).toProvider(nioDispatcher);
-        bind(ByteBufferCache.class).toProvider(byteBufferCache);
-        bind(SimppManager.class).toProvider(simppManager);
-        
-        // DPINJ: Need to create & inject the provider w/ NIODispatcher somehow...
-        //----------------------------------------------
-        bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(nioScheduledExecutorService);
+        bind(ActivityCallback.class).toProvider(ActivityCallbackProvider.class);
+        bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
+        bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
+        bind(SimppManager.class).toProvider(SimppManagerProvider.class);
+        bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
     }
 
-    private static final Provider<ActivityCallback> activityCallback = new Provider<ActivityCallback>() {
+    @Singleton
+    private static class ActivityCallbackProvider implements Provider<ActivityCallback> {
         public ActivityCallback get() {
             ActivityCallback callback = RouterService.getCallback();
             // Guice can't deal with null values, and lots of tests leave this
@@ -38,25 +36,43 @@ public class ModuleHacks extends AbstractModule {
         }
     };
     
-    private static final Provider<NIODispatcher> nioDispatcher = new Provider<NIODispatcher>() {
+    @Singleton
+    private static class NIODispatcherProvider implements Provider<NIODispatcher> {
         public NIODispatcher get() {
             return NIODispatcher.instance();
         }
     };      
 
-    private static final Provider<ByteBufferCache> byteBufferCache = new Provider<ByteBufferCache>() {
+    @Singleton
+    private static class ByteBufferCacheProvider implements Provider<ByteBufferCache> {
+        private final Provider<NIODispatcher> nioDispatcher;
+        
+        @Inject
+        public ByteBufferCacheProvider(Provider<NIODispatcher> nioDispatcher) {
+            this.nioDispatcher = nioDispatcher;
+        }
+        
         public ByteBufferCache get() {
             return nioDispatcher.get().getBufferCache();
         }
     };
     
-    private static final Provider<ScheduledExecutorService> nioScheduledExecutorService = new Provider<ScheduledExecutorService>() {
+    @Singleton
+    private static class NIOScheduledExecutorServiceProvider implements Provider<ScheduledExecutorService> {
+        private final Provider<NIODispatcher> nioDispatcher;
+        
+        @Inject
+        public NIOScheduledExecutorServiceProvider(Provider<NIODispatcher> nioDispatcher) {
+            this.nioDispatcher = nioDispatcher;
+        }
+        
         public ScheduledExecutorService get() {
             return nioDispatcher.get().getScheduledExecutorService();
         }
     };
     
-    private static final Provider<SimppManager> simppManager = new Provider<SimppManager>() {
+    @Singleton
+    private static class SimppManagerProvider implements Provider<SimppManager> {
         public SimppManager get() {
             return SimppManager.instance();
         }

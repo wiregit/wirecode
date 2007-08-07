@@ -11,13 +11,13 @@ import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * A message handler that responds to messages only to hosts
@@ -55,7 +55,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         this.networkManager = networkManager;
         allowed = new IPList();
         allowed.add("*.*.*.*");
-        SimppManager.instance().addListener(this);
+        ProviderHacks.getSimppManager().addListener(this);
         updateAllowed();
     }
     

@@ -13,7 +13,6 @@ import org.limewire.util.FileUtils;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -246,7 +245,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         drainAll();
 
         // send the CapabilitiesVM
-        LEAF.send(CapabilitiesVM.instance());
+        LEAF.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
         LEAF.flush();
 
         // send the query
@@ -314,7 +313,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         drainAll();
 
         // send the CapabilitiesVM
-        ULTRAPEER_1.send(CapabilitiesVM.instance());
+        ULTRAPEER_1.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
         ULTRAPEER_1.flush();
 
         // send the query

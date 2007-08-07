@@ -315,7 +315,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
 			if(_headersRead.supportsVendorMessages() > 0) {
                 send(ProviderHacks.getMessagesSupportedVendorMessage());
-                send(CapabilitiesVM.instance());
+                send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
 			}
         } catch (IOException ioe) {
         }
@@ -328,7 +328,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected void sendUpdatedCapabilities() {
         try {
             if(_headersRead.supportsVendorMessages() > 0)
-                send(CapabilitiesVM.instance());
+                send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
         } catch (IOException iox) { }
     }
 

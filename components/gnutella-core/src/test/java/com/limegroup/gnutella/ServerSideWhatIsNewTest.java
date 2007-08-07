@@ -121,7 +121,7 @@ public class ServerSideWhatIsNewTest
 
         // send a MessagesSupportedMessage and capabilities VM
         testUP.send(ProviderHacks.getMessagesSupportedVendorMessage());
-        testUP.send(CapabilitiesVM.instance());
+        testUP.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
         testUP.flush();
 
         Thread.sleep(100);

@@ -40,6 +40,7 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
@@ -51,7 +52,6 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesModel;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -394,7 +394,7 @@ public abstract class AbstractDHTController implements DHTController {
         
         LOG.debug("Sending updated capabilities to our connections");
         
-        CapabilitiesVM.reconstructInstance();
+        ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
         connectionManager.get().sendUpdatedCapabilities();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));

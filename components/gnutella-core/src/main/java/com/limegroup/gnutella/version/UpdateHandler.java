@@ -47,7 +47,6 @@ import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -282,7 +281,7 @@ public class UpdateHandler implements HttpClientListener {
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
             
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
-            CapabilitiesVM.reconstructInstance();
+            ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
             ProviderHacks.getConnectionManager().sendUpdatedCapabilities();
         }
 

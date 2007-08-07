@@ -55,12 +55,15 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactoryImpl;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactoryImpl;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
@@ -103,6 +106,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
         bind(DownloadReferencesFactory.class).to(DownloadReferencesFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
+        bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
+        
+        // DPINJ: statically injecting this for now...
+        requestStaticInjection(SimppManager.class);
        
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------

@@ -60,7 +60,6 @@ import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -441,7 +440,7 @@ public abstract class FileManager {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
-        SimppManager.instance().addListener(qrpUpdater);
+        ProviderHacks.getSimppManager().addListener(qrpUpdater);
     }
     
     /**
@@ -474,7 +473,7 @@ public abstract class FileManager {
     
     public void stop() {
         save();
-        SimppManager.instance().removeListener(qrpUpdater);
+        ProviderHacks.getSimppManager().removeListener(qrpUpdater);
         shutdown = true;
     }
 
@@ -2667,7 +2666,7 @@ public abstract class FileManager {
         private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
-            SimppManager.instance().addListener(this);
+            ProviderHacks.getSimppManager().addListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

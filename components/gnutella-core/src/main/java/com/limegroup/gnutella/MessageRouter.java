@@ -96,7 +96,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.LimeSentMessageStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
@@ -2131,7 +2130,7 @@ public abstract class MessageRouter {
                                                   final ReplyHandler handler ) {
         if(simppReq.getVersion() > SimppRequestVM.VERSION)
             return; //we are not going to deal with these types of requests. 
-        byte[] simppBytes = SimppManager.instance().getSimppBytes();
+        byte[] simppBytes = ProviderHacks.getSimppManager().getSimppBytes();
         if(simppBytes != null && simppBytes.length > 0 ) {
             SimppVM simppVM = new SimppVM(simppBytes);
             try {
@@ -2150,7 +2149,7 @@ public abstract class MessageRouter {
      * all connections.
      */
     private void handleSimppVM(SimppVM simppVM, ReplyHandler handler) {
-        SimppManager.instance().checkAndUpdate(handler, simppVM.getPayload());
+        ProviderHacks.getSimppManager().checkAndUpdate(handler, simppVM.getPayload());
     }
 
     /**

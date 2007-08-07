@@ -59,7 +59,6 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -274,7 +273,7 @@ public class RouterService {
                     adjustSpamFilters();
                 }
             });
-            SimppManager.instance().addListener(new SimppListener() {
+            ProviderHacks.getSimppManager().addListener(new SimppListener() {
                 public void simppUpdated(int newVersion) {
                     reloadIPFilter();
                 }

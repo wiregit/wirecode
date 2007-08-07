@@ -30,7 +30,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 
 @SuppressWarnings("all")
@@ -217,7 +216,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     private static int simppVersion;
     private void triggerSimppUpdate() throws Exception {
         List<SimppListener> l = (List<SimppListener>) 
-            PrivilegedAccessor.getValue(SimppManager.instance(), "listeners");
+            PrivilegedAccessor.getValue(ProviderHacks.getSimppManager(), "listeners");
         for (SimppListener s : l)
             s.simppUpdated(simppVersion++);
     }

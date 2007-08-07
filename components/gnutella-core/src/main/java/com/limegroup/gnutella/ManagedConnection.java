@@ -80,7 +80,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
@@ -1190,7 +1189,7 @@ public class ManagedConnection extends Connection
             //we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM)vm;
             int smpV = capVM.supportsSIMPP();
-            if(smpV != -1 && (!receivedCapVM || smpV > SimppManager.instance().getVersion())) {
+            if(smpV != -1 && (!receivedCapVM || smpV > ProviderHacks.getSimppManager().getVersion())) {
                 //request the simpp message
                 networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
                 send(new SimppRequestVM());

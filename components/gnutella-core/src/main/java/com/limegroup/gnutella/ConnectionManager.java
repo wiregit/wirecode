@@ -40,7 +40,6 @@ import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
@@ -49,7 +48,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.StrictIpPortSet;
@@ -336,9 +334,9 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
         
         // send new capabilities when simpp updates.
-        SimppManager.instance().addListener(new SimppListener() {
+        ProviderHacks.getSimppManager().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {
-                CapabilitiesVM.reconstructInstance();
+                ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
                 sendUpdatedCapabilities();
             }
         });

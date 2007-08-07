@@ -20,7 +20,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Inject;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
@@ -34,15 +35,8 @@ import com.limegroup.gnutella.settings.SimppSettingsManager;
 public class SimppManager {
     
     private static final Log LOG = LogFactory.getLog(SimppManager.class);
-
-    private static SimppManager INSTANCE;
-
-    private int _latestVersion;
-    
+   
     private static final String SIMPP_FILE = "simpp.xml";
-    
-    /** Listeners for simpp updates */
-    private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
     
     /**
      * The smallest version number of Simpp Messages. Any simpp message number
@@ -51,6 +45,11 @@ public class SimppManager {
      */
     private static int MIN_VERSION = 3;
     
+    private static SimppManager INSTANCE;
+    
+    /** Listeners for simpp updates */
+    private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
+   
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private byte[] _simppBytes;
 
@@ -58,7 +57,15 @@ public class SimppManager {
 
     private final ExecutorService _processingQueue;
     
+    private final SimppSettingsManager simppSettingsManager;
+    
+    private int _latestVersion;
+    
+    @Inject // DPINJ: GET RID OF STATIC INJECTION!
+    private static NetworkUpdateSanityChecker networkUpdateSanityChecker;
+    
     private SimppManager() {
+        this.simppSettingsManager = new SimppSettingsManager();
         boolean problem = false;
         RandomAccessFile raf = null;
         _processingQueue = ExecutorsHelper.newProcessingQueue("Simpp Handling Queue");
@@ -110,14 +117,19 @@ public class SimppManager {
         }
     }
     
+
     public static synchronized SimppManager instance() {
         if(INSTANCE==null) 
             INSTANCE = new SimppManager();
         return INSTANCE;
     }
-   
+    
     public int getVersion() {
         return _latestVersion;
+    }
+    
+    public SimppSettingsManager getSimppSettingsManager() {
+        return simppSettingsManager;
     }
     
     /**
@@ -136,7 +148,7 @@ public class SimppManager {
      */
     public void checkAndUpdate(final ReplyHandler handler, final byte[] simppPayload) { 
         if(simppPayload == null) {
-            ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
+            networkUpdateSanityChecker.handleInvalidResponse(handler, RequestType.SIMPP);
             return;
         }
         
@@ -147,10 +159,10 @@ public class SimppManager {
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 
                 if (!verifier.verifySource()) {
-                    ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
+                    networkUpdateSanityChecker.handleInvalidResponse(handler, RequestType.SIMPP);
                     return;
                 } else {
-                    ProviderHacks.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.SIMPP);
+                    networkUpdateSanityChecker.handleValidResponse(handler, RequestType.SIMPP);
                 }
                 
                 SimppParser parser=null;
@@ -167,13 +179,13 @@ public class SimppManager {
                 }
                 //OK. We have a new SimppMessage, take appropriate steps
                 //1. Cache local values. 
-                SimppManager.this._latestVersion = version;
-                SimppManager.this._simppBytes = simppPayload;
-                SimppManager.this._propsStream = parser.getPropsData();
+                _latestVersion = version;
+                _simppBytes = simppPayload;
+                _propsStream = parser.getPropsData();
                 // 2. get the props we just read
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
-                SimppSettingsManager.instance().updateSimppSettings(props);
+                simppSettingsManager.updateSimppSettings(props);
                 // 4. Save to disk, try 5 times
                 for (int i =0;i < 5; i++) {
                     if (save())
