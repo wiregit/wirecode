@@ -332,11 +332,7 @@ public class MediaType implements Serializable {
         }
         return false;
     }
-    
-    private final static boolean areEqual(Object o1, Object o2) {
-        return o1 == o2 || (o1 != null && o2 != null && o1.equals(o2));
-    }
-    
+        
     /*
      * We canoncialize the default mediatypes, but since MediaType has
      * a public constructor only 'equals' comparisons should be used.
