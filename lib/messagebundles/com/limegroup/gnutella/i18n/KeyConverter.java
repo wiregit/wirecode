@@ -34,6 +34,15 @@ public class KeyConverter {
 
     private static final Rule encodeMnemonics = new EncodeMnemonicAsAmpersAnd();
     
+    private static final Rule[] rules2 = new Rule[] {
+        new ConcatenateAndInsertRule("STATISTICS_SHARING_TOOLTIP",
+                "STATISTICS_FILES_TOOLTIP", " {0} ",
+        "STATISTICS_SHARING_TOOLTIP_NEW"),
+        new ConcatenateAndInsertRule("STATISTICS_SHARING_TOOLTIP", 
+                "STATISTICS_FILES_TOOLTIP_PENDING", " {0} ",
+                "STATISTICS_SHARING_TOOLTIP_PENDING_NEW"),
+    };
+    
     /**
      * Call this in lib/messagebundles.
      */
@@ -44,7 +53,7 @@ public class KeyConverter {
         
         // apply conversions
         for (LanguageInfo language : languages.values()) {
-            applyRules(language.getProperties(), encodeMnemonics);
+            applyRules(language.getProperties(), rules2);
         }
 
         LanguageUpdater updater = new LanguageUpdater(dir, languages, loader
