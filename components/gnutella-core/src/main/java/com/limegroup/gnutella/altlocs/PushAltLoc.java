@@ -11,7 +11,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -86,7 +85,7 @@ public class PushAltLoc extends AlternateLocation {
 	
 	public boolean isMe() {
 	    return Arrays.equals(_pushAddress.getClientGUID(),
-	            RouterService.getMyGUID());
+	            ProviderHacks.getApplicationServices().getMyGUID());
 	}
 	
 	/**

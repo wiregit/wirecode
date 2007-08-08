@@ -17,7 +17,6 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -94,7 +93,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, RouterService.getNumSharedFiles());
+        assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

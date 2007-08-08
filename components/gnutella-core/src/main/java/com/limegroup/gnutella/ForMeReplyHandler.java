@@ -421,7 +421,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
 
     public byte[] getClientGUID() {
-        return RouterService.getMyGUID();
+        return ProviderHacks.getApplicationServices().getMyGUID();
     }
 }
 

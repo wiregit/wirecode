@@ -205,7 +205,7 @@ public final class PushManager {
                 }
             }
 
-            RouterService.acceptUpload(socket, data);
+            ProviderHacks.getHTTPUploadAcceptor().acceptConnection(socket, data);
             return false;
         }
 

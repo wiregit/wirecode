@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -18,6 +20,7 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -28,6 +31,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
@@ -36,6 +40,7 @@ import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
@@ -440,9 +445,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		
 		ratingTable.get().ageAndSave();
         
-        RouterService.cleanupPreviewFiles();
+        cleanupPreviewFiles();
         
-        RouterService.cleanupTorrentMetadataFiles();
+        cleanupTorrentMetadataFiles();
         
         downloadManager.get().writeSnapshot();
         
@@ -515,12 +520,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //add more while-gui init tasks here
         ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {
-                RouterService.adjustSpamFilters();
+                ProviderHacks.getSpamServices().adjustSpamFilters();
             }
         });
         simppManager.get().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {
-                RouterService.reloadIPFilter();
+                ProviderHacks.getSpamServices().reloadIPFilter();
             }
         });
         acceptor.get().init();
@@ -558,6 +563,53 @@ public class LifecycleManagerImpl implements LifecycleManager {
         t.setDaemon(true);
         t.start();
         LOG.trace("Started manual GC thread.");
+    }
+
+    private void cleanupTorrentMetadataFiles() {
+        if(!ProviderHacks.getFileManager().isLoadFinished()) {
+            return;
+        }
+        
+        FileFilter filter = new FileFilter() {
+            public boolean accept(File f) {
+                return FileUtils.getFileExtension(f).equals("torrent");
+            }
+        };
+        
+        File[] file_list = FileManager.APPLICATION_SPECIAL_SHARE.listFiles(filter);
+        if(file_list == null) {
+            return;
+        }
+        long purgeLimit = System.currentTimeMillis() 
+            - SharingSettings.TORRENT_METADATA_PURGE_TIME.getValue()*24L*60L*60L*1000L;
+        File tFile;
+        for(int i = 0; i < file_list.length; i++) {
+            tFile = file_list[i];
+            if(!ProviderHacks.getFileManager().isFileShared(tFile) &&
+                    tFile.lastModified() < purgeLimit) {
+                tFile.delete();
+            }
+        }
+    }
+
+    /** Deletes all preview files. */
+    private void cleanupPreviewFiles() {
+        //Cleanup any preview files.  Note that these will not be deleted if
+        //your previewer is still open.
+        File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        if (incompleteDir == null)
+            return; // if we could not get the incomplete directory, simply return.
+        
+        
+        File[] files = incompleteDir.listFiles();
+        if(files == null)
+            return;
+        
+        for (int i=0; i<files.length; i++) {
+            String name = files[i].getName();
+            if (name.startsWith(IncompleteFileManager.PREVIEW_PREFIX))
+                files[i].delete();  //May or may not work; ignore return code.
+        }
     }
 
  

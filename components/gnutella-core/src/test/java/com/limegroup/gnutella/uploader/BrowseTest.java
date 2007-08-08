@@ -146,7 +146,7 @@ public class BrowseTest extends LimeTestCase {
                 }
             }
 
-            assertEquals(RouterService.getNumSharedFiles(), files.size());
+            assertEquals(ProviderHacks.getFileManager().getNumFiles(), files.size());
             
             for (Iterator<Response> it = ProviderHacks.getFileManager()
                     .getIndexingIterator(false); it.hasNext();) {

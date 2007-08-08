@@ -367,13 +367,13 @@ public class LeafRoutingTest extends LimeTestCase {
 
     public void testLeafAnswersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
-        RouterService.adjustSpamFilters();
+        ProviderHacks.getSpamServices().adjustSpamFilters();
         URNtest();
     }
     
     public void testLeafFiltersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
-        RouterService.adjustSpamFilters();
+        ProviderHacks.getSpamServices().adjustSpamFilters();
         try {
             URNtest();
             fail("did not filter URN query");

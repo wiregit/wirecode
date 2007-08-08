@@ -352,7 +352,7 @@ public abstract class MessageRouter {
             Provider<MessageDispatcher> messageDispatcher,
             MulticastService multicastService
             ) {
-        _clientGUID = RouterService.getMyGUID();
+        _clientGUID = ProviderHacks.getApplicationServices().getMyGUID();
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;

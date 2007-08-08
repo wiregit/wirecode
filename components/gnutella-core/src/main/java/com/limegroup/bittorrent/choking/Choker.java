@@ -13,7 +13,7 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 public abstract class Choker implements Runnable, Shutdownable {
 	
@@ -97,7 +97,7 @@ public abstract class Choker implements Runnable, Shutdownable {
 		if (uploads > 0)
 			return uploads;
 		
-		float rate = RouterService.getRequestedUploadSpeed();
+		float rate = ProviderHacks.getUploadServices().getRequestedUploadSpeed();
 		if (rate == Float.MAX_VALUE)
 			return 7; //"unlimited, just guess something here..." - Bram
 		else if (rate < 9000)

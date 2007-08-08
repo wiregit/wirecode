@@ -10,9 +10,9 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.RouterService;
 
 /**
  * An implementation of PushProxiesDHTValue for the localhost
@@ -50,7 +50,7 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     }
 
     public byte[] getGUID() {
-        return RouterService.getMyGUID();
+        return ProviderHacks.getApplicationServices().getMyGUID();
     }
     
     public byte getFeatures() {

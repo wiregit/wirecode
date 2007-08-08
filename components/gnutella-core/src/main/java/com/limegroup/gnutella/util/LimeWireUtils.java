@@ -11,7 +11,7 @@ import org.limewire.util.VersionUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 
@@ -398,7 +398,7 @@ public final class LimeWireUtils {
             url += "?";
         else
             url += "&";
-        url += "guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString())+ 
+        url += "guid=" + EncodingUtils.encode(new GUID(ProviderHacks.getApplicationServices().getMyGUID()).toHexString())+ 
             "&pro="   + LimeWireUtils.isPro() + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +

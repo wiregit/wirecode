@@ -42,7 +42,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -523,7 +522,7 @@ public abstract class AbstractDHTController implements DHTController {
 
         public void ban(SocketAddress addr) {
             ipFilter.get().ban(addr);
-            RouterService.reloadIPFilter();
+            ProviderHacks.getSpamServices().reloadIPFilter();
         }
     }
 }

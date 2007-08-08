@@ -26,7 +26,6 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {
@@ -101,7 +100,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		handshake.put(BITTORRENT_PROTOCOL_BYTES); // "BitTorrent protocol"
 		handshake.put(EXTENSION_BYTES);
 		handshake.put(_torrent.getInfoHash());
-		handshake.put(RouterService.getMyBTGUID());
+		handshake.put(ProviderHacks.getApplicationServices().getMyBTGUID());
 		handshake.flip();
 		// Note: with gathering writes everything but the info hash 
 		// can be shared.

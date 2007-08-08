@@ -44,7 +44,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         private final NetworkManager networkManager;
 
         private SelfEndpoint(NetworkManager networkManager) {
-            super(RouterService.getMyGUID(), IpPort.EMPTY_SET,
+            super(ProviderHacks.getApplicationServices().getMyGUID(), IpPort.EMPTY_SET,
                     PushEndpoint.PLAIN, UDPConnection.VERSION);
             this.networkManager = networkManager;
         }

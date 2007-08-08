@@ -521,4 +521,16 @@ public class LimeWireCore {
     public DownloadServices getDownloadServices() {
         return injector.getInstance(DownloadServices.class);
     }
+
+    public UploadServices getUploadServices() {
+        return injector.getInstance(UploadServices.class);
+    }
+
+    public ApplicationServices getApplicationServices() {
+        return injector.getInstance(ApplicationServices.class);
+    }
+
+    public SpamServices getSpamServices() {
+        return injector.getInstance(SpamServices.class);
+    }
 }

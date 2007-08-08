@@ -487,7 +487,7 @@ public class UploadQueueingTest extends BaseTestCase {
             fail("unable to create piped socket factory", e);
         }
         final Socket sa = psf.getSocketA();
-        RouterService.acceptUpload(sa, null);
+        ProviderHacks.getHTTPUploadAcceptor().acceptConnection(sa, null);
 //        Thread t = new Thread() {
 //            public void run() {
 //                try {
@@ -1125,7 +1125,7 @@ public class UploadQueueingTest extends BaseTestCase {
         //Socket A either has no limit or a limit of 1000 bytes to write.
         //Socket B has no limit
         final Socket sa=psf.getSocketA();
-        RouterService.acceptUpload(sa, null);
+        ProviderHacks.getHTTPUploadAcceptor().acceptConnection(sa, null);
 //        Thread runner=new Thread() {
 //            public void run() {
 //                try {

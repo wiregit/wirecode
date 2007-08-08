@@ -38,8 +38,8 @@ public class BandwidthManager {
 	}
 	
 	public void applyUploadRate() {
-		UP_TCP.setRate(RouterService.getRequestedUploadSpeed());
-		UP_UDP.setRate(RouterService.getRequestedUploadSpeed());
+		UP_TCP.setRate(ProviderHacks.getUploadServices().getRequestedUploadSpeed());
+		UP_UDP.setRate(ProviderHacks.getUploadServices().getRequestedUploadSpeed());
 	}
 	
 	public Throttle getReadThrottle() {

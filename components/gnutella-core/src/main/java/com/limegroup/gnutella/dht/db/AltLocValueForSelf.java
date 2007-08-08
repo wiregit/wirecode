@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.security.TigerTree;
 import com.limegroup.gnutella.settings.SSLSettings;
 
@@ -60,7 +60,7 @@ class AltLocValueForSelf extends AbstractAltLocValue {
     
     @Override
     public byte[] getGUID() {
-        return RouterService.getMyGUID();
+        return ProviderHacks.getApplicationServices().getMyGUID();
     }
     
     @Override

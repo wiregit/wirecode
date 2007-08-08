@@ -22,7 +22,6 @@ import org.limewire.util.OSUtils;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -232,7 +231,7 @@ public final class ConnectionChecker implements Runnable {
         
         // query the upload slot manager, because multicast
         // uploads do not use slots and we do not care about them.
-        return !RouterService.hasActiveUploads();
+        return !ProviderHacks.getUploadServices().hasActiveUploads();
     }
     
     /**

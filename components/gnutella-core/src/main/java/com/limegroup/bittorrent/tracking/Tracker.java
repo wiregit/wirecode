@@ -19,7 +19,7 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -142,7 +142,7 @@ class Tracker {
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
-					.encode(StringUtils.getASCIIString(RouterService.getMyBTGUID()),
+					.encode(StringUtils.getASCIIString(ProviderHacks.getApplicationServices().getMyBTGUID()),
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 

@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -89,7 +88,7 @@ public final class ChatManager implements ConnectionAcceptor {
 								 bannedIPs.length);
 				more_banned[bannedIPs.length] = host;
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
-                RouterService.reloadIPFilter();
+                ProviderHacks.getSpamServices().reloadIPFilter();
 			}
 		}
 	}
@@ -101,7 +100,7 @@ public final class ChatManager implements ConnectionAcceptor {
 			if (bannedList.remove(host) ) {
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.
                     setValue((String[])bannedList.toArray());
-				RouterService.reloadIPFilter();
+				ProviderHacks.getSpamServices().reloadIPFilter();
 			}
 		}
 	}

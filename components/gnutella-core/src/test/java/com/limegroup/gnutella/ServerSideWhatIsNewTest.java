@@ -140,12 +140,12 @@ public class ServerSideWhatIsNewTest
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
         int i = 0;
-        for (; (i < 15) && (RouterService.getNumSharedFiles() < 2); i++)
+        for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles() < 2); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue(false);
 
         // we should be sharing two files - two text files.
-        assertEquals(2, RouterService.getNumSharedFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
 
         CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
         FileManager fm = ProviderHacks.getFileManager();
@@ -315,10 +315,10 @@ public class ServerSideWhatIsNewTest
 
         ProviderHacks.getFileManager().loadSettings();
         int i = 0;
-        for (; (i < 15) && (RouterService.getNumSharedFiles() < 4); i++)
+        for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles() < 4); i++)
             Thread.sleep(1000);
         if (i == 15)
-            fail("num shared files? " + RouterService.getNumSharedFiles());
+            fail("num shared files? " + ProviderHacks.getFileManager().getNumFiles());
 
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         URN tempFile2URN = fm.getURNForFile(tempFile2);
@@ -568,7 +568,7 @@ public class ServerSideWhatIsNewTest
 
         fm.loadSettings();
         Thread.sleep(2000);
-        assertEquals("num shared files", 1, RouterService.getNumSharedFiles());
+        assertEquals("num shared files", 1, ProviderHacks.getFileManager().getNumFiles());
 
         URN susheelURN = fm.getURNForFile(susheel);
         {
@@ -613,8 +613,7 @@ public class ServerSideWhatIsNewTest
             if (sleeps > 320) assertTrue("download never completed", false);
         }
         
-        assertEquals("num shared files? " + RouterService.getNumSharedFiles(), 2,
-                RouterService.getNumSharedFiles());
+        assertEquals( 2, ProviderHacks.getFileManager().getNumFiles());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.exists());
@@ -646,8 +645,7 @@ public class ServerSideWhatIsNewTest
         File newFile = new File(_savedDir, "whatever.txt");
         fm.removeFileIfShared(newFile);
         newFile.delete();
-        assertEquals("num shared files? " + RouterService.getNumSharedFiles(), 1,
-                RouterService.getNumSharedFiles());
+        assertEquals(1, ProviderHacks.getFileManager().getNumFiles());
         
         final int UPLOADER_PORT = 20000;
         byte[] guid = GUID.makeGuid();
@@ -683,8 +681,7 @@ public class ServerSideWhatIsNewTest
             if (sleeps > 120) assertTrue("download never completed", false);
         }
         
-        assertEquals("num shared files? " + RouterService.getNumSharedFiles(), 2,
-                RouterService.getNumSharedFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
 
         {
             Map urnToLong = 
@@ -740,10 +737,10 @@ public class ServerSideWhatIsNewTest
         try {
             ProviderHacks.getFileManager().loadSettings();
             int i = 0;
-            for (; (i < 15) && (RouterService.getNumSharedFiles()+ProviderHacks.getFileManager().getNumForcedFiles() < 5); i++)
+            for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles()+ProviderHacks.getFileManager().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             if (i == 15)
-                fail("num shared files? " + RouterService.getNumSharedFiles());
+                fail("num shared files? " + ProviderHacks.getFileManager().getNumFiles());
     
             // we should be sharing two files - two text files and three installers
             // but the creation time cache should only have the two text files
@@ -751,7 +748,7 @@ public class ServerSideWhatIsNewTest
             //
             //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
             //      files don't count), and 3 forced shared files
-            assertEquals(2, RouterService.getNumSharedFiles());
+            assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
             assertEquals(3, ProviderHacks.getFileManager().getNumForcedFiles());
     
             {

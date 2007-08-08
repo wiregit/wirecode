@@ -11,7 +11,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -37,7 +37,7 @@ public class PushProxiesModel implements StorableModel {
         }
         
         if (localhost == null) {
-            GUID guid = new GUID(RouterService.getMyGUID());
+            GUID guid = new GUID(ProviderHacks.getApplicationServices().getMyGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
             
             localhost = new Storable(
