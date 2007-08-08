@@ -142,7 +142,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         assertTrue(!incoming.getChat().isConnected());
         GUITestUtils.waitForSwing();
         assertTrue(incoming.getText().indexOf(
-                GUIMediator.getStringResource("CHAT_HOST_UNAVAILABLE")) != -1);
+                GUIMediator.getStringResource("Host is unavailable")) != -1);
     }
 
     private ChatFrame getIncomingChat() {
