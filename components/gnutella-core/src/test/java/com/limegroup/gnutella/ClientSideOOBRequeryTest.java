@@ -122,8 +122,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -170,7 +170,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            RouterService.stopQuery(new GUID(qr.getGUID()));
+            ProviderHacks.getSearchServices().stopQuery(new GUID(qr.getGUID()));
             assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         ((MyCallback)getCallback()).clearGUID();
@@ -188,8 +188,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "berkeley");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -309,8 +309,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "berkeley");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -413,7 +413,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertByPassedResultsCacheHasSize(guid, 1);
         }
         
-        RouterService.stopQuery(new GUID(guid));
+        ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
 
         {
             // now we should make sure MessageRouter clears the map
@@ -435,8 +435,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -527,7 +527,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         UploadSettings.UPLOAD_SPEED.setValue(5);
 
-        RouterService.stopQuery(new GUID(guid));
+        ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
 
         {
@@ -563,8 +563,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -678,8 +678,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -862,8 +862,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -998,8 +998,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1120,8 +1120,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         

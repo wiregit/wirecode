@@ -508,4 +508,8 @@ public class LimeWireCore {
         return injector.getInstance(ConnectionServices.class);
     }
 
+    public SearchServices getSearchServices() {
+        return injector.getInstance(SearchServices.class);
+    }
+
 }

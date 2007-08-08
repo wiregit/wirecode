@@ -64,7 +64,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         drainAll();
         
         GUID guid = new GUID();
-        RouterService.queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
+        ProviderHacks.getSearchServices().queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
         
         assertQuery(testUP[0], guid);
         

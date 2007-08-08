@@ -261,7 +261,7 @@ public class NodeAssigner {
         // it up as an Ultrapeer -- it will just get forced to be one
         _isTooGoodUltrapeerToPassUp = isUltrapeerCapable &&
             networkManager.acceptedIncomingConnection() &&
-            (curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
+            (curTime - ProviderHacks.getSearchServices().getLastQueryTime() > 5*60*1000) &&
             (BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
         if(LOG.isDebugEnabled()) {

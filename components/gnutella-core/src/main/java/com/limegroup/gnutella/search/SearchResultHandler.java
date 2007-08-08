@@ -26,7 +26,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -246,17 +245,17 @@ public final class SearchResultHandler implements Inspectable {
             
         for(Response response : results) {
             if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                if (!RouterService.matchesType(data.getMessageGUID(), response)) {
+                if (!ProviderHacks.getSearchServices().matchesType(data.getMessageGUID(), response)) {
                     continue;
                 }
 
-                if (!RouterService.matchesQuery(data.getMessageGUID(), response)) {
+                if (!ProviderHacks.getSearchServices().matchesQuery(data.getMessageGUID(), response)) {
                     continue;
                 }
             }
 
             // Throw away results from Mandragore Worm
-            if (RouterService.isMandragoreWorm(data.getMessageGUID(), response)) {
+            if (ProviderHacks.getSearchServices().isMandragoreWorm(data.getMessageGUID(), response)) {
                 continue;
             }
             

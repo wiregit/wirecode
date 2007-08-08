@@ -222,7 +222,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "boalt.org");
+        ProviderHacks.getSearchServices().query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -367,7 +367,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "golf is awesome");
+        ProviderHacks.getSearchServices().query(guid, "golf is awesome");
 
         // the testUP[0] should get it
         Message m = null;
@@ -417,7 +417,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "berkeley.edu");
+        ProviderHacks.getSearchServices().query(guid, "berkeley.edu");
 
         // the testUP[0] should get it
         Message m = null;

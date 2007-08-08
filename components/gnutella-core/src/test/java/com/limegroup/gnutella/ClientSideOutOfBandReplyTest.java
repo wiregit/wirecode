@@ -99,11 +99,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
                 ProviderHacks.getNetworkManager().getAddress(), 
                 ProviderHacks.getNetworkManager().getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -186,11 +186,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // the user) we don't request OOB replies for it
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
                 ProviderHacks.getNetworkManager().getAddress(), 
                 ProviderHacks.getNetworkManager().getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -231,7 +231,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         assertEquals(10, ack.getNumResults());
 
         // now stop the query
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
         keepAllAlive(testUP);
         drainAll();
 
@@ -275,11 +275,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         keepAllAlive(testUP);
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
                 ProviderHacks.getNetworkManager().getAddress(), 
                 ProviderHacks.getNetworkManager().getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -468,11 +468,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     	drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
                 ProviderHacks.getNetworkManager().getAddress(), 
                 ProviderHacks.getNetworkManager().getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query

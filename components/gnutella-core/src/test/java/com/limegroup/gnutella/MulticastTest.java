@@ -142,8 +142,8 @@ public class MulticastTest extends LimeTestCase {
      * sent it.
      */
     public void testQueryIsSentAndReceived() {
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "sam");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "sam");
         
         // sleep to let the search go.
         sleep(DELAY);
@@ -168,8 +168,8 @@ public class MulticastTest extends LimeTestCase {
      * and other appropriate info.
      */
     public void testQueryReplies() throws Exception {
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata"); // search for the name
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata"); // search for the name
         
         // sleep to let the search process.
         sleep(DELAY);
@@ -214,8 +214,8 @@ public class MulticastTest extends LimeTestCase {
     public void testPushSentThroughMulticastWithTLS() throws Exception {
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());
@@ -280,8 +280,8 @@ public class MulticastTest extends LimeTestCase {
     public void testPushSentThroughMulticastWithoutTLS() throws Exception {
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());
@@ -345,8 +345,8 @@ public class MulticastTest extends LimeTestCase {
     
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());

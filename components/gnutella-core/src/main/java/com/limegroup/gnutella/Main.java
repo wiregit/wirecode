@@ -87,7 +87,7 @@ public class Main {
                     int i=command.indexOf(' ');
                     assert(i!=-1 && i<command.length());
                     String query=command.substring(i+1);
-                    RouterService.query(RouterService.newQueryGUID(), query);
+                    ProviderHacks.getSearchServices().query(ProviderHacks.getSearchServices().newQueryGUID(), query);
                 } else if (commands.length==2 && commands[0].equals("listen")) {
                     try {
                         int port=Integer.parseInt(commands[1]);

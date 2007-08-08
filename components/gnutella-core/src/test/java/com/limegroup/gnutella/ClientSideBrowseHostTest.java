@@ -70,7 +70,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "boalt.org");
+        ProviderHacks.getSearchServices().query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -101,7 +101,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in direct HTTP
             // request
-            RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     null, false);
 
@@ -137,7 +137,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "nyu.edu");
+        ProviderHacks.getSearchServices().query(guid, "nyu.edu");
 
         // the testUP[0] should get it
         Message m = null;
@@ -170,7 +170,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in PushProxy
             // request
-            RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     proxies, false);
 
@@ -251,7 +251,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "anita");
+        ProviderHacks.getSearchServices().query(guid, "anita");
 
         // the testUP[0] should get it
         Message m = null;
@@ -277,7 +277,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file,
-        RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+        ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies, false);
 

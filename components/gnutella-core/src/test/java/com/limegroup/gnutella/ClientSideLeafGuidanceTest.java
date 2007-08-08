@@ -64,8 +64,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
 
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
-        RouterService.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         for (int i = 0; i < testUP.length; i++) {
@@ -110,7 +110,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         }
 
         // shut off the query....
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {
@@ -128,8 +128,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
-        RouterService.query(queryGuid.bytes(), "susheel daswanu");
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel daswanu");
 
         for (int i = 0; i < testUP.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUP[i]);
@@ -199,8 +199,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
-        RouterService.query(queryGuid.bytes(), "anita kesavan");
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "anita kesavan");
 
         for (int i = 0; i < testUP.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUP[i]);
@@ -270,7 +270,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         }
 
         // shut off the query....
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {
@@ -312,8 +312,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
-        RouterService.query(queryGuid.bytes(), "anita kesavan");
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "anita kesavan");
 
         for (int i = 0; i < testUP.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUP[i]);

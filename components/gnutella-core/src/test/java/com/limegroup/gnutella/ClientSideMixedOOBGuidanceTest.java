@@ -116,11 +116,11 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
                 ProviderHacks.getNetworkManager().getAddress(), 
                 ProviderHacks.getNetworkManager().getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // some connected UPs should get a OOB query
@@ -172,7 +172,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         }
 
         // shut off the query....
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {

@@ -6,17 +6,12 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
-import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -27,14 +22,10 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.http.HTTPConnectionData;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 
@@ -278,183 +269,6 @@ public class RouterService {
         // TODO: notify DownloadManager & UploadManager about new banned IP ranges
     }
 
-    /** 
-     * Returns a new GUID for passing to query.
-     * This method is the central point of decision making for sending out OOB 
-     * queries.
-     */
-    public static byte[] newQueryGUID() {
-        byte []ret;
-        // DPINJ: Use passed in NetworkManager!!!
-        if (ProviderHacks.getNetworkManager().isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
-            ret = GUID.makeAddressEncodedGuid(ProviderHacks.getNetworkManager().getAddress(), ProviderHacks.getNetworkManager().getPort());
-        else
-            ret = GUID.makeGuid();
-        if (MessageSettings.STAMP_QUERIES.getValue())
-            GUID.timeStampGuid(ret);
-        return ret;
-    }
-
-    /**
-     * Searches the network for files of the given type with the given
-     * GUID, query string and minimum speed.  If type is null, any file type
-     * is acceptable.<p>
-     *
-     * ActivityCallback is notified asynchronously of responses.  These
-     * responses can be matched with requests by looking at their GUIDs.  (You
-     * may want to wrap the bytes with a GUID object for simplicity.)  An
-     * earlier version of this method returned the reply GUID instead of taking
-     * it as an argument.  Unfortunately this caused a race condition where
-     * replies were returned before the GUI was prepared to handle them.
-     * 
-     * @param guid the guid to use for the query.  MUST be a 16-byte
-     *  value as returned by newQueryGUID.
-     * @param query the query string to use
-     * @param minSpeed the minimum desired result speed
-     * @param type the desired type of result (e.g., audio, video), or
-     *  null if you don't care 
-     */
-    public static void query(byte[] guid, String query, MediaType type) {
-		query(guid, query, "", type);
-	}
-
-    /** 
-     * Searches the network for files with the given query string and 
-     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
-     *
-     * @see query(byte[], String, MediaType)
-     */
-    public static void query(byte[] guid, String query) {
-        query(guid, query, null);
-    }
-
-	/**
-	 * Searches the network for files with the given metadata.
-	 * 
-	 * @param richQuery metadata query to insert between the nulls,
-	 *  typically in XML format
-	 * @see query(byte[], String, MediaType)
-	 */
-	public static void query(final byte[] guid, 
-							 final String query, 
-							 final String richQuery, 
-							 final MediaType type) {
-
-		try {
-            QueryRequest qr = null;
-            // DPINJ: Use a passed in networkManager!!!
-            if (ProviderHacks.getNetworkManager().isIpPortValid() && (new GUID(guid)).addressesMatch(ProviderHacks.getNetworkManager().getAddress(), 
-                    ProviderHacks.getNetworkManager().getPort())) {
-                // if the guid is encoded with my address, mark it as needing out
-                // of band support.  note that there is a VERY small chance that
-                // the guid will be address encoded but not meant for out of band
-                // delivery of results.  bad things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of a 
-                // VERY long lived client
-                qr = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery(guid, query, richQuery,
-                                                       type);
-                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
-            }
-            else
-                qr = ProviderHacks.getQueryRequestFactory().createQuery(guid, query, richQuery, type);
-            recordAndSendQuery(qr, type);
-		} catch(Throwable t) {
-			ErrorService.error(t);
-		}
-	}
-
-
-	/**
-	 * Sends a 'What Is New' query on the network.
-	 */
-	public static void queryWhatIsNew(final byte[] guid, final MediaType type) {
-		try {
-            QueryRequest qr = null;
-            if (GUID.addressesMatch(guid, ProviderHacks.getNetworkManager().getAddress(), ProviderHacks.getNetworkManager().getPort())) {
-                // if the guid is encoded with my address, mark it as needing out
-                // of band support.  note that there is a VERY small chance that
-                // the guid will be address encoded but not meant for out of band
-                // delivery of results.  bad things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of a 
-                // VERY long lived client
-                qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewOOBQuery(guid, (byte)2, type);
-                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
-            }
-            else
-                qr = ProviderHacks.getQueryRequestFactory().createWhatIsNewQuery(guid, (byte)2, type);
-
-            if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
-                ProviderHacks.getMutableGUIDFilter().addGUID(guid);
-    
-            recordAndSendQuery(qr, type);
-		} catch(Throwable t) {
-			ErrorService.error(t);
-		}
-	}
-
-    /** Just aggregates some common code in query() and queryWhatIsNew().
-     */ 
-    private static void recordAndSendQuery(final QueryRequest qr, 
-                                           final MediaType type) {
-        ProviderHacks.getQueryStats().recordQuery();
-        ProviderHacks.getResponseVerifier().record(qr, type);
-        ProviderHacks.getSearchResultHandler().addQuery(qr); // so we can leaf guide....
-        ProviderHacks.getMessageRouter().sendDynamicQuery(qr);
-    }
-
-	/**
-	 * Accessor for the last time a query was originated from this host.
-	 *
-	 * @return a <tt>long</tt> representing the number of milliseconds since
-	 *  January 1, 1970, that the last query originated from this host
-	 */
-	public static long getLastQueryTime() {
-		return ProviderHacks.getQueryStats().getLastQueryTime();
-	}
-
-    /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
-     *  (which maintains query stats for the purpose of leaf guidance).
-     *  @param guid The GUID of the query you want to get rid of....
-     */
-    public static void stopQuery(GUID guid) {
-        ProviderHacks.getQueryUnicaster().purgeQuery(guid);
-        ProviderHacks.getSearchResultHandler().removeQuery(guid);
-        ProviderHacks.getMessageRouter().queryKilled(guid);
-        if(ProviderHacks.getConnectionServices().isSupernode())
-            ProviderHacks.getQueryDispatcher().addToRemove(guid);
-        ProviderHacks.getMutableGUIDFilter().removeGUID(guid.bytes());
-    }
-
-    /** 
-     * Returns true if the given response is of the same type as the the query
-     * with the given guid.  Returns 100 if guid is not recognized.
-     *
-     * @param guid the value returned by query(..).  MUST be 16 bytes long.
-     * @param resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#matchesType(byte[], Response) 
-     */
-    public static boolean matchesType(byte[] guid, Response response) {
-        return ProviderHacks.getResponseVerifier().matchesType(guid, response);
-    }
-
-    public static boolean matchesQuery(byte [] guid, Response response) {
-        return ProviderHacks.getResponseVerifier().matchesQuery(guid, response);
-    }
-    /** 
-     * Returns true if the given response for the query with the given guid is a
-     * result of the Madragore worm (8KB files of form "x.exe").  Returns false
-     * if guid is not recognized.  <i>Ideally this would be done by the normal
-     * filtering mechanism, but it is not powerful enough without the query
-     * string.</i>
-     *
-     * @param guid the value returned by query(..).  MUST be 16 byts long.
-     * @param resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
-     */
-    public static boolean isMandragoreWorm(byte[] guid, Response response) {
-        return ProviderHacks.getResponseVerifier().isMandragoreWorm(guid, response);
-    }
-    
     /**
      * Returns the number of files being shared locally.
      */
@@ -612,30 +426,5 @@ public class RouterService {
 	public static Chatter createChat(String host, int port) {
 		Chatter chatter = ProviderHacks.getChatManager().request(host, port);
 		return chatter;
-	}
-    
-    /**
-	 * Browses the passed host
-     * @param host The host to browse
-     * @param port The port at which to browse
-     * @param guid The guid to be used for the query replies received 
-     * while browsing host
-     * @param serventID The guid of the client to browse from.  I need this in
-     * case I need to push....
-     * @param proxies the list of PushProxies we can use - may be null.
-     * @param canDoFWTransfer true if the remote host supports fw transfer
-	 */
-	public static BrowseHostHandler doAsynchronousBrowseHost(
-	  final Connectable host, GUID guid, GUID serventID, 
-	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
-        final BrowseHostHandler handler = new BrowseHostHandler(ProviderHacks.getActivityCallback(), 
-                                                          guid, serventID);
-        ThreadExecutor.startThread(new Runnable() {
-            public void run() {
-                handler.browseHost(host, proxies, canDoFWTransfer);
-            }
-        }, "BrowseHoster" );
-        
-        return handler;
 	}
 }

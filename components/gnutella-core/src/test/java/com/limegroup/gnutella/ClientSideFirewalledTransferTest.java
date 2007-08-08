@@ -208,7 +208,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "boalt.org");
+        ProviderHacks.getSearchServices().query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;

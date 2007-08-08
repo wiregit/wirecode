@@ -206,8 +206,8 @@ public class LeafRoutingTest extends LimeTestCase {
 
     public void testLeafBroadcast() 
             throws IOException, BadPacketException {
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "crap");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "crap");
 
         while (true) {
             assertNotNull("ultrapeer1 is null", ultrapeer1);
