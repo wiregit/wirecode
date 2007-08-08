@@ -15,7 +15,6 @@ import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseVerifier;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -45,7 +44,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
+       // PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
     }
     
     public void testSecureActionSent() throws Exception {
@@ -134,6 +133,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         }
     }
     
+    @SuppressWarnings("all") // DPINJ: textfix
     private static class StubVerifier extends ResponseVerifier {
 
         public synchronized boolean matchesQuery(byte[] guid, Response response) {

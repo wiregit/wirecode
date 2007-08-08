@@ -42,7 +42,7 @@ public class MulticastTest extends LimeTestCase {
     
     private static UnicastedHandler U_HANDLER;
         
-    private static RouterService ROUTER_SERVICE;
+  //  private static RouterService ROUTER_SERVICE;
         
 	private static final String MP3_NAME =
         "com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
@@ -112,9 +112,9 @@ public class MulticastTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
+     //   if (ROUTER_SERVICE == null) {
+      //      globalSetUp();
+      //  }
         
         setSettings();
         

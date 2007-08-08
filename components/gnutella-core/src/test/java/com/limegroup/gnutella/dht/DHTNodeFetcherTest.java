@@ -21,7 +21,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -65,12 +64,13 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         }
         
         //fake a connection to the network
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+   //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
 

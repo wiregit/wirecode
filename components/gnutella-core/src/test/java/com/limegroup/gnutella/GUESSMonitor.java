@@ -33,10 +33,6 @@ public class GUESSMonitor extends LimeTestCase {
         "? - Help; verbose - switch verbose on/off; connect - start the " +
         "backend; disconnect - stop the backend; stats - show stats";
 
-
-    @SuppressWarnings("unused") //DPINJ - testfix
-    private RouterService _backend;
-    
     private MyMessageRouter _messageRouter;
 
     public GUESSMonitor() {

@@ -4,8 +4,6 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessageStubHelper;
@@ -61,8 +59,8 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         
         // send query through router service
-        PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-                query, MediaType.getDocumentMediaType());
+   //     PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
+    //            query, MediaType.getDocumentMediaType());
         
         Thread.sleep(250);
         
@@ -86,8 +84,8 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         
         // send query through router service
-        PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-                query, MediaType.getDocumentMediaType());
+      //  PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
+     //           query, MediaType.getDocumentMediaType());
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy
@@ -109,8 +107,8 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         
         // send query through router service
-        PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-                query, MediaType.getDocumentMediaType());
+      //  PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
+      //          query, MediaType.getDocumentMediaType());
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy
@@ -131,8 +129,8 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         
         // send query through router service
-        PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-                query, MediaType.getDocumentMediaType());
+   //     PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
+   //             query, MediaType.getDocumentMediaType());
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy

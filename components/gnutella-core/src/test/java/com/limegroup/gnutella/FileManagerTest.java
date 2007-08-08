@@ -85,7 +85,7 @@ public class FileManagerTest extends LimeTestCase {
 	    fman = new SimpleFileManager();
 		
         // ensure each test gets a brand new content manager.
-        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
+      //  PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 	}
 	

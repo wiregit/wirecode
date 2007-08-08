@@ -19,9 +19,7 @@ public class TLSConnectionTest extends LimeTestCase {
     
     private static final int PORT = 9999;
 
-    @SuppressWarnings("unused") //DPINJ - testfix
-    private static RouterService ROUTER;
-    
+   
     public TLSConnectionTest(String name) {
         super(name);
     }

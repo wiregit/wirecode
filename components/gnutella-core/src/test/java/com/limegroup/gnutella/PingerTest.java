@@ -1,13 +1,11 @@
 package com.limegroup.gnutella;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LeafConnectionManager;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 
 /**
@@ -40,9 +38,10 @@ public final class PingerTest extends LimeTestCase {
      */
     public void testPeriodicUltrapeerPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager cm = new UltrapeerConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
 
@@ -64,9 +63,10 @@ public final class PingerTest extends LimeTestCase {
      */
     public void testPeriodicLeafPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager cm = new LeafConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+      //  PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
 

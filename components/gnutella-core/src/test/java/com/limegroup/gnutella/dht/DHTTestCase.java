@@ -16,7 +16,6 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -27,7 +26,7 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     protected static final int PORT = 6667;
     
-    protected static RouterService ROUTER_SERVICE;
+    //protected static RouterService ROUTER_SERVICE;
     
     protected static MojitoDHT BOOTSTRAP_DHT;
     

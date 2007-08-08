@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 public class ConnectionManagerTest extends LimeTestCase {
 
     private static TestHostCatcher CATCHER;
-    private static RouterService ROUTER_SERVICE;
+  //  private static RouterService ROUTER_SERVICE;
     private static ConnectionListener LISTENER;
 
     public ConnectionManagerTest(String name) {
@@ -65,7 +65,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         setSettings();
         launchAllBackends();
                 
-        PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
+      //  PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
 
         PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_catcher",CATCHER);

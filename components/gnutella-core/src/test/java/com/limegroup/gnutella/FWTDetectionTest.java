@@ -75,8 +75,8 @@ public class FWTDetectionTest extends LimeTestCase {
         cmStub = new CMStub();
         
         try{
-            PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-            PrivilegedAccessor.setValue(RouterService.class,"catcher",catcher);
+       //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+       //     PrivilegedAccessor.setValue(RouterService.class,"catcher",catcher);
         }catch(Exception bad) {
             ErrorService.error(bad);
         }

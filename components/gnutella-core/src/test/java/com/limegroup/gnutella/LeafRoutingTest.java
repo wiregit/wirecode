@@ -58,7 +58,7 @@ public class LeafRoutingTest extends LimeTestCase {
     private static Connection ultrapeer1;
     private static Connection ultrapeer2;
     private static Connection old1;
-    private static RouterService rs;
+ //   private static RouterService rs;
 
     public LeafRoutingTest(String name) {
         super(name);

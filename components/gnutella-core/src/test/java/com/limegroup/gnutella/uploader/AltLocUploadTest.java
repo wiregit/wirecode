@@ -23,7 +23,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -34,7 +33,6 @@ import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -92,7 +90,7 @@ public class AltLocUploadTest extends LimeTestCase {
             HTTPHeaderName.FEATURES.httpStringValue(),
             ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue());
 
-    private static RouterService ROUTER_SERVICE;
+   // private static RouterService ROUTER_SERVICE;
 
     private static TestUploadManager UPLOAD_MANAGER;
 
@@ -118,22 +116,22 @@ public class AltLocUploadTest extends LimeTestCase {
         // Overwrite the original UploadManager with
         // our custom TestUploadManager. See latter
         // for more Info!
-        PrivilegedAccessor.setValue(ROUTER_SERVICE, "uploadManager", UPLOAD_MANAGER);
+    //    PrivilegedAccessor.setValue(ROUTER_SERVICE, "uploadManager", UPLOAD_MANAGER);
         
         hashURN = URN.createSHA1Urn(hash);
     }
 
     public static void globalTearDown() {
-        ROUTER_SERVICE = null;
+     //   ROUTER_SERVICE = null;
         UPLOAD_MANAGER = null;
     }
 
     @Override
     protected void setUp() throws Exception {
         // allows to run single tests from Eclipse
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
+      //  if (ROUTER_SERVICE == null) {
+       //     globalSetUp();
+     //   }
 
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES

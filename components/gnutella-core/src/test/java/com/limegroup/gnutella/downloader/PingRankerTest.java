@@ -26,7 +26,6 @@ import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.URN;
@@ -34,7 +33,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -73,7 +71,7 @@ public class PingRankerTest extends LimeTestCase {
         pinger.hosts.clear();
         ranker = new PingRanker(ProviderHacks.getNetworkManager());
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
-        PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
+      //  PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
         PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
         ranker.setMeshHandler(new MockMesh(ranker));
         DownloadSettings.WORKER_INTERVAL.setValue(-1);

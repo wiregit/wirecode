@@ -48,7 +48,6 @@ import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -152,13 +151,14 @@ public class DownloadTest extends LimeTestCase {
                 "_acceptedIncoming",new Boolean(true));
         assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
         
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+      //  PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         
         ProviderHacks.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
         

@@ -9,9 +9,7 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.KUID;
-import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -33,9 +31,9 @@ public class DHTManagerTest extends DHTTestCase {
     
     protected void setUp() throws Exception {
         //stop the nodeAssigner
-        NodeAssigner na = 
-            (NodeAssigner)PrivilegedAccessor.getValue(ROUTER_SERVICE, "nodeAssigner");
-        na.stop();
+      //  NodeAssigner na = 
+      //      (NodeAssigner)PrivilegedAccessor.getValue(ROUTER_SERVICE, "nodeAssigner");
+      //  na.stop();
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
     }
 

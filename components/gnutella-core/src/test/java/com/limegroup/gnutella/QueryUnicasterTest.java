@@ -40,9 +40,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     private final int NUM_UDP_LOOPS = 25;
     
 
-    @SuppressWarnings("unused") //DPINJ - testfix
-    private static RouterService _rs;
-
     private boolean _shouldRun = true;
     private boolean shouldRun() {
         return _shouldRun;

@@ -25,7 +25,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     private static NodeAssigner ASSIGNER;
     
-    private static RouterService ROUTER_SERVICE;
+   // private static RouterService ROUTER_SERVICE;
     
     private static TestUltrapeer ULTRAPEER = new TestUltrapeer();
     
@@ -121,7 +121,7 @@ public class NodeAssignerTest extends LimeTestCase {
         PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
         PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
        
-        PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
+    //    PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
     }
     
     public void connect() throws Exception {

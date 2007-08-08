@@ -16,14 +16,12 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.AddressSecurityToken;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.SSLSettings;
 
 @SuppressWarnings( { "unchecked", "cast" } )
@@ -69,7 +67,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         // Switch ConnectionManager to report different values for free leaf
         // and ultrapeer slots.
         ConnectionManager manager = new TestConnectionManager(7, 10);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", manager);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", manager);
         
         pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    

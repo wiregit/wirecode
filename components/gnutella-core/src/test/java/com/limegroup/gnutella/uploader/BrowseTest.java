@@ -22,7 +22,6 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -38,7 +37,7 @@ public class BrowseTest extends LimeTestCase {
 
     private static final int PORT = 6668;
 
-    private static RouterService rs;
+  //  private static RouterService rs;
 
     private static File sharedDirectory;
 
@@ -95,9 +94,9 @@ public class BrowseTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         // allow running single tests from Eclipse
-        if (rs == null) {
-            globalSetUp();
-        }
+     //   if (rs == null) {
+     //       globalSetUp();
+     //   }
 
         doSettings();
 

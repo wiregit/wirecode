@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.concurrent.SimpleProvider;
@@ -20,26 +22,19 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ManagedConnectionStub;
-import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -110,7 +105,7 @@ public class HeadTest extends LimeTestCase {
 	    
 	    MessageRouterStub mrStub = new MessageRouterStub();
 	    
-	    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",mrStub);
+	   // PrivilegedAccessor.setValue(RouterService.class,"messageRouter",mrStub);
 	    
 	    ManagedConnectionStub mStub = new ManagedConnectionStub();
 	    final Set conns = new HashSet();
@@ -122,7 +117,7 @@ public class HeadTest extends LimeTestCase {
 	        }
 	    };
 	    
-	    PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+	  //  PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
 		
 		int base=0;

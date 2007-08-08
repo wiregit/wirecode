@@ -73,7 +73,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	/**
 	 * The <tt>RouterService</tt> instance the constructs the backend.
 	 */
-	private RouterService ROUTER_SERVICE;
+//	private RouterService ROUTER_SERVICE;
     
     /**
      * The thread which is catching the error reports from the various

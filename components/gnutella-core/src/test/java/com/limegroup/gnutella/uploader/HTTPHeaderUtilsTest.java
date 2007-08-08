@@ -14,13 +14,11 @@ import org.apache.http.message.BasicHttpResponse;
 import org.limewire.collection.Function;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -31,6 +29,7 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
 public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     private StubConnectionManager stub;
+    @SuppressWarnings("all") // DPINJ: textfix
     private ConnectionManager oldCM;
 
 
@@ -46,11 +45,11 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub = new StubConnectionManager();
         stub.proxies = new StrictIpPortSet<Connectable>();
         oldCM = ProviderHacks.getConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
+       // PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
     }
     
     public void tearDown() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.class, "manager", oldCM);
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", oldCM);
     }
         
     public void testWritesAltsWhenEmpty() throws Exception {

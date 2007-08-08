@@ -6,8 +6,6 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -31,7 +29,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     private static ActivityCallback CALLBACK;
     @SuppressWarnings("unused") //DPINJ - testfix
     private static TestMessageRouter MESSAGE_ROUTER;        
-    private static RouterService ROUTER_SERVICE;
+ //   private static RouterService ROUTER_SERVICE;
             
 	/**
      * A filename that won't match.
@@ -154,8 +152,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * because QueryHandler creates new queries with appropriate TTLs.
      */
     private static void sendQuery(QueryRequest qr) throws Exception {
-        ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
-        VERIFIER.record(qr);
+      //  ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
+     //   VERIFIER.record(qr);
         
         MessageRouter mr = ProviderHacks.getMessageRouter();
         mr.sendDynamicQuery(qr);

@@ -93,7 +93,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testForwardQueryRequestToLeaves() throws Exception  {
         TestConnectionManager tcm = 
             TestConnectionManager.createManagerWithVariedLeaves();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] paramTypes = new Class[] {
             QueryRequest.class,
@@ -115,7 +115,7 @@ public final class MessageRouterTest extends LimeTestCase {
             UltrapeerSettings.MAX_LEAVES.getValue()/2, numQueries);
 
         tcm = TestConnectionManager.createManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+  //      PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
 
         m = PrivilegedAccessor.getMethod(ROUTER, 
@@ -205,7 +205,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testIntraUltrapeerForwardQueryRouteTables() throws Exception {
         TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
         FileManager fm = new TestFileManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
         Class[] params = new Class[] {};
@@ -231,7 +231,7 @@ public final class MessageRouterTest extends LimeTestCase {
      */
     public void testForwardLimitedQueryToUltrapeers() throws Exception {
         TestConnectionManager tcm = new TestConnectionManager(4);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -261,7 +261,7 @@ public final class MessageRouterTest extends LimeTestCase {
         TestConnectionManager tcm = 
             new TestConnectionManager(NUM_CONNECTIONS);
         FileManager fm = new TestFileManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);        
         PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
         Class[] params = new Class[] {};
@@ -283,7 +283,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // reset the connection manager
         TestConnectionManager tcm = 
             new TestConnectionManager(NUM_CONNECTIONS);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -314,7 +314,7 @@ public final class MessageRouterTest extends LimeTestCase {
 
         // reset the connection manager
         TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -344,7 +344,7 @@ public final class MessageRouterTest extends LimeTestCase {
 
         // reset the connection manager
         TestConnectionManager tcm = new TestConnectionManager(0);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -372,7 +372,7 @@ public final class MessageRouterTest extends LimeTestCase {
      */
     public void testForwardQueryToUltrapeers() throws Exception {
         TestConnectionManager tcm = new TestConnectionManager(4);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -400,7 +400,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testForwardQueryToAllNewUltrapeers() throws Exception {
         // reset the connection manager using all new connections
         TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -427,7 +427,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testForwardQueryToNoNewUltrapeers() throws Exception {
         // reset the connection manager using all old connections
         TestConnectionManager tcm = new TestConnectionManager(0);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -455,7 +455,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testForwardQueryToNewUltrapeersOnLastHop() throws Exception {
         // reset the connection manager using all new connections
         TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -486,7 +486,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testForwardQueryToOldUltrapeersOnLastHop() throws Exception {
         // reset the connection manager using all new connections
         TestConnectionManager tcm = new TestConnectionManager(0);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
 		Method m = 
@@ -521,7 +521,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // make sure that queries from leaves are simply sent to
         // the first three hosts
         TestConnectionManager tcm = new TestConnectionManager(2, false);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
 
@@ -563,7 +563,7 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
         ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
         cm.initialize();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
         StubRouter stub = new StubRouter();
         // send a PR that doesn't have SCP in it.
@@ -683,7 +683,7 @@ public final class MessageRouterTest extends LimeTestCase {
     public void testUDPPingReplyWithDHTIPPs() throws Exception{
         ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
         cm.initialize();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
         StubRouter stub = new StubRouter();
         //first set up a DHT node and add it to the manager

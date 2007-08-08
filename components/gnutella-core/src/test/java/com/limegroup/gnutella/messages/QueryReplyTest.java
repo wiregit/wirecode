@@ -39,7 +39,6 @@ import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Endpoint;
@@ -48,7 +47,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -122,7 +120,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         	    
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
-	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+	   // PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	
         byte[] data = new byte[16];
         new Random().nextBytes(data);
@@ -1419,6 +1417,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         }
     }        
     
+    @SuppressWarnings("all") // DPINJ: textfix
     private class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {
             synchronized(loaded) {

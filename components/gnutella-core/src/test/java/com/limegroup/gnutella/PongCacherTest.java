@@ -56,8 +56,8 @@ public final class PongCacherTest extends LimeTestCase {
      */
     public void testPongExpiring() throws Exception {
         // Trick us into thinking we're an Ultrapeer.
-        PrivilegedAccessor.setValue(RouterService.class, "manager",
-            new TestManager());
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager",
+      //      new TestManager());
         
         // Create a pong with the correct GGEP for our cacher to accept it.
         PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
@@ -105,8 +105,9 @@ public final class PongCacherTest extends LimeTestCase {
      * Tests the method for getting the best set of pongs.
      */
     public void testGetBestPongs() throws Exception {
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager cm = new UltrapeerConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
         
         List pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
 
@@ -177,8 +178,9 @@ public final class PongCacherTest extends LimeTestCase {
      * Tests the method for adding a pong to the cacher.
      */
     public void testAddPong() throws Exception {
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager cm = new UltrapeerConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
+    //    PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
 
         PingReply pong = ProviderHacks.getPingReplyFactory().create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);
@@ -209,8 +211,8 @@ public final class PongCacherTest extends LimeTestCase {
      */
     public void testLocalePong() throws Exception {
         // Trick us into thinking we're an Ultrapeer.
-        PrivilegedAccessor.setValue(RouterService.class, "manager",
-                                    new TestManager());
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager",
+      //                              new TestManager());
         
         // Create a pong with the correct GGEP for our cacher to accept it.
         PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
@@ -278,6 +280,7 @@ public final class PongCacherTest extends LimeTestCase {
     }
 
     
+    @SuppressWarnings("all") // DPINJ: textfix
     private static class TestManager extends ConnectionManager {
 
         public TestManager() {

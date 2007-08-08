@@ -35,10 +35,7 @@ public class CreationTimeCacheTest
     private static final int PORT=6669;
 
 
-    @SuppressWarnings("unused") //DPINJ - testfix
-    private static RouterService rs;
-
-
+    
     @SuppressWarnings("unused") //DPINJ - testfix
     private static MyActivityCallback callback;
     private static MyFileManager fm;

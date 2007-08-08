@@ -10,8 +10,6 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
@@ -69,12 +67,13 @@ public class ServerSideHeadTest extends LimeTestCase {
 
 
     	
+        @SuppressWarnings("all") // DPINJ: textfix
     	FileManagerStub fmanager = new FileManagerStub();
     	
     //	RouterService service = new RouterService(new ActivityCallbackStub());
     	ProviderHacks.getLifecycleManager().start();
     	
-    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
+    //	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
     }
     
     public void tearDown() throws Exception {

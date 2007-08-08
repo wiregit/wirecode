@@ -61,7 +61,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	/**
 	 * The central Ultrapeer used in the test.
 	 */
-	protected static RouterService ROUTER_SERVICE;
+	//protected static RouterService ROUTER_SERVICE;
 
     public ServerSideTestCase(String name) {
         super(name);

@@ -24,7 +24,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -37,6 +36,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
     private FileDesc fd = new FileDescStub("filename");
 
+    @SuppressWarnings("all") // DPINJ: textfix
     private ConnectionManager proxyManager = new ConnectionManagerStub() {
         @Override
         public Set<Connectable> getPushProxies() {
@@ -95,10 +95,11 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         boolean acceptsSolicited = ProviderHacks.getUdpService().canReceiveSolicited();
         boolean lastFWTState = ConnectionSettings.LAST_FWT_STATE.getValue();
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager manager = ProviderHacks.getConnectionManager();
 
-        PrivilegedAccessor.setValue(RouterService.class, "manager",
-                proxyManager);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager",
+     //           proxyManager);
         PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),
                 "_acceptedSolicitedIncoming", true);
         ConnectionSettings.LAST_FWT_STATE.setValue(false);
@@ -117,8 +118,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
                     .getStableUDPPort()
                     + "");
         } finally {
-            PrivilegedAccessor
-                    .setValue(RouterService.class, "manager", manager);
+        //    PrivilegedAccessor
+        //            .setValue(RouterService.class, "manager", manager);
             PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),
                     "_acceptedSolicitedIncoming", acceptsSolicited);
             ConnectionSettings.LAST_FWT_STATE.setValue(lastFWTState);

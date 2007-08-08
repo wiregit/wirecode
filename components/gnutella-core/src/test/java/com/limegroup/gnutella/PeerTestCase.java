@@ -40,7 +40,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    protected static RouterService rs;
+ //   protected static RouterService rs;
 
     private static ActivityCallback callback;
     protected static ActivityCallback getCallback() {

@@ -25,7 +25,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RequestCache;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.auth.StubContentAuthority;
@@ -139,7 +138,7 @@ public class UploadQueueingTest extends BaseTestCase {
         
         fm = new FileManagerStub(urns,descs);
         ProviderHacks.getContentManager().initialize();
-        PrivilegedAccessor.setValue(RouterService.class,"fileManager",fm);
+    //    PrivilegedAccessor.setValue(RouterService.class,"fileManager",fm);
         //PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
         //PrivilegedAccessor.setValue(rs,"uploadSlotManager", slotManager);
         fm.get(0);

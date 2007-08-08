@@ -2,14 +2,11 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -51,12 +48,13 @@ public class MagnetDownloaderTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception{
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+   //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
     
@@ -68,8 +66,8 @@ public class MagnetDownloaderTest extends LimeTestCase {
         callback = new ActivityCallbackStub();
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
-        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-        PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
+     //   PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+    //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
     }
 
     public void testInvalidMagnetDownloads() throws Exception {

@@ -101,7 +101,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	drain(testUP[0], 500);
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
-    	PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
+    	//PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
     	PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
     }
 

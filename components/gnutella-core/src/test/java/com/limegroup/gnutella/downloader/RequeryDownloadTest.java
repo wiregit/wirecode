@@ -24,13 +24,11 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouteTable;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -102,8 +100,8 @@ public class RequeryDownloadTest
     public void setUp() throws Exception {
         setSettings();
         ProviderHacks.getNetworkManager().setListeningPort(ConnectionSettings.PORT.getValue());
-        PrivilegedAccessor.setValue(
-            RouterService.class, "manager", new ConnectionManagerStub());
+     //   PrivilegedAccessor.setValue(
+     //       RouterService.class, "manager", new ConnectionManagerStub());
         _queryRouteTable = 
             (RouteTable) PrivilegedAccessor.getValue(_router, 
                                                      "_queryRouteTable");

@@ -34,8 +34,7 @@ public class I18NSendReceiveTest
     private static Connection CONN_1;
     private static final int TEST_PORT = 6667;
 
-    @SuppressWarnings("unused") //DPINJ - testfix
-    private static RouterService ROUTER_SERVICE;
+  
 
     //test file names that should be in the shared dir and returned as
     //replies

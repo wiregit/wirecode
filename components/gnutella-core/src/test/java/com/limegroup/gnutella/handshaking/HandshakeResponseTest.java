@@ -18,7 +18,6 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -314,8 +313,9 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * Tests the method for creating a response to the crawler.
 	 */
 	public void testCreateCrawlerResponse() throws Exception {
+	    @SuppressWarnings("all") // DPINJ: textfix
 		TestConnectionManager tcm = new TestConnectionManager();
-		PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+	//	PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
 		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse();
 		Properties headers = hr.props();
 		String leaves = headers.getProperty(HeaderNames.LEAVES);

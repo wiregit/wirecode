@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +30,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -160,7 +158,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testUDPCachesUsed() throws Exception {
         assertEquals(0, hc.getNumHosts());
-        PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
+ //       PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
         
         StubUDPBootstrapper udp = new StubUDPBootstrapper();
         PrivilegedAccessor.setValue(hc, "udpHostCache", udp);
@@ -803,22 +801,22 @@ public class HostCatcherTest extends LimeTestCase {
         out.close();
         DatagramSocket s = new DatagramSocket(6000);
         s.setSoTimeout(3000);
-        PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
-        PrivilegedAccessor.setValue(RouterService.class, "manager",new
-                ConnectionManagerStub() {
-            @Override
-            public boolean isFullyConnected() {
-                return false;
-            }
-            @Override
-            public List<ManagedConnection> getInitializedConnections() {
-                return Collections.emptyList();
-            }
-            @Override
-            public int getPreferredConnectionCount() {
-                return 1;
-            }
-        });
+        //PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
+//        PrivilegedAccessor.setValue(RouterService.class, "manager",new
+//                ConnectionManagerStub() {
+//            @Override
+//            public boolean isFullyConnected() {
+//                return false;
+//            }
+//            @Override
+//            public List<ManagedConnection> getInitializedConnections() {
+//                return Collections.emptyList();
+//            }
+//            @Override
+//            public int getPreferredConnectionCount() {
+//                return 1;
+//            }
+//        });
         
         // make it send udp pings
         ProviderHacks.getAcceptor().init();

@@ -22,7 +22,6 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.observer.Shutdownable;
@@ -43,7 +42,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -95,7 +93,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             }
         };
         
-        PrivilegedAccessor.setValue(RouterService.class,"manager", connectionManager);
+   //     PrivilegedAccessor.setValue(RouterService.class,"manager", connectionManager);
         
         assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
@@ -112,9 +110,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
         ProviderHacks.getAltLocManager().purge();
-        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-        PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
-        PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
+    //    PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+    //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
+    //    PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
         RequeryManager.NO_DELAY = false;
     }
 
@@ -146,7 +144,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     	FileManagerStub newFMStub = new FileManagerStub(urnMap,descList);
     	newFMStub.setFiles(fileMap);
     	
-    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",newFMStub);
+    //	PrivilegedAccessor.setValue(RouterService.class,"fileManager",newFMStub);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = 
@@ -724,12 +722,12 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     }
     
     private <T>void setLazyReference(String name, final T value) throws Exception{
-        PrivilegedAccessor.setValue(RouterService.class,name,
-                new AbstractLazySingletonProvider<T>() {
-            public T createObject() {
-                return value;
-            }
-        });
+//        PrivilegedAccessor.setValue(RouterService.class,name,
+//                new AbstractLazySingletonProvider<T>() {
+//            public T createObject() {
+//                return value;
+//            }
+//        });
     }
     
     /** Tests that the progress is not 0% when resume button is hit while

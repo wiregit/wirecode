@@ -36,7 +36,6 @@ import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -150,15 +149,15 @@ public class PushUploadTest extends LimeTestCase {
         // start services
         fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         fm.startAndWait(4000);
-        PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
+   //     PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 
         httpAcceptor = new HTTPAcceptor();
-        PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
-                httpAcceptor);
+   //     PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
+     //           httpAcceptor);
 
         upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
-        PrivilegedAccessor
-                .setValue(RouterService.class, "uploadManager", upMan);
+    //    PrivilegedAccessor
+    //            .setValue(RouterService.class, "uploadManager", upMan);
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
@@ -302,19 +301,21 @@ public class PushUploadTest extends LimeTestCase {
         establishPushConnection();
 
         // now try with some proxies
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManager original = ProviderHacks.getConnectionManager();
         try {
             final Set<Connectable> proxies = new TreeSet<Connectable>(IpPort.COMPARATOR);
             Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
             proxies.add(ppi);
 
+            @SuppressWarnings("all") // DPINJ: textfix
             ConnectionManagerStub cmStub = new ConnectionManagerStub() {
                 @Override
                 public Set<Connectable> getPushProxies() {
                     return proxies;
                 }
             };
-            PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
+      //      PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
 
             PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                     "_acceptedIncoming", new Boolean(false));
@@ -325,7 +326,7 @@ public class PushUploadTest extends LimeTestCase {
             HttpResponse response = sendRequest(request);
             UploadTestUtils.assertHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
         } finally {
-            PrivilegedAccessor.setValue(RouterService.class, "manager", original);
+      //      PrivilegedAccessor.setValue(RouterService.class, "manager", original);
         }
     }
 
