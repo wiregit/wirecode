@@ -604,7 +604,7 @@ public class ServerSideWhatIsNewTest
                                                 false, null, urns, false,
                                                 false, "LIME", new HashSet(), -1, false);
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         int sleeps = 0;
         while (downloader.getState() != DownloadStatus.COMPLETE) {
@@ -668,7 +668,7 @@ public class ServerSideWhatIsNewTest
                                          false, "LIME", new HashSet(), -1, false);
         }
 
-        Downloader downloader = RouterService.download(rfds, false, new GUID(guid));
+        Downloader downloader = ProviderHacks.getDownloadServices().download(rfds, false, new GUID(guid));
         
         Thread.sleep(2000);
         assertTrue(downloader.getState() != DownloadStatus.COMPLETE);

@@ -28,7 +28,6 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -186,7 +185,7 @@ public class ExternalControl {
                 MessageService.showError(I18n.marktr("ERROR_INVALID_URLS_IN_MAGNET"));
             
             try {
-            	RouterService.download(curOpt, false);
+            	ProviderHacks.getDownloadServices().download(curOpt, false);
             }
             catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);

@@ -517,4 +517,8 @@ public class LimeWireCore {
     public ScheduledExecutorService getBackgroundExecutor() {
         return injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
     }
+
+    public DownloadServices getDownloadServices() {
+        return injector.getInstance(DownloadServices.class);
+    }
 }

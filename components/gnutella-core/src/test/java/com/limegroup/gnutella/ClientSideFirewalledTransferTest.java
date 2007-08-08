@@ -246,7 +246,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             public void run() {
                 try {
                     Thread.sleep(2000);
-                    RouterService.download((new RemoteFileDesc[]{rfd}), 
+                    ProviderHacks.getDownloadServices().download((new RemoteFileDesc[]{rfd}), 
                                            true, fGuid);
                 }
                 catch (Exception damn) {

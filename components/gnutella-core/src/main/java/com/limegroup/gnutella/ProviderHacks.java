@@ -156,6 +156,7 @@ public class ProviderHacks {
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static SearchServices getSearchServices() { return i().getSearchServices(); }
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
+    public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }

@@ -275,7 +275,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
         
         // sleep to make sure the download starts 
@@ -398,7 +398,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         // sleep to make sure the download starts 
         Thread.sleep(5000);
@@ -524,7 +524,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         UploadSettings.UPLOAD_SPEED.setValue(5);
 
         ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
@@ -615,7 +615,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -733,7 +733,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -932,7 +932,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // confirm download will try to GUESS
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -1054,12 +1054,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         //  Don't try using the same default file 
         Downloader downloader2 = 
-            RouterService.download(new RemoteFileDesc[] { rfd2 }, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd2 }, 
                 new GUID(guid), false, null, "anotherFile" );
         
 
@@ -1172,7 +1172,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;

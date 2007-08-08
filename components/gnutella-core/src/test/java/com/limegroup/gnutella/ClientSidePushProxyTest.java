@@ -253,7 +253,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
             // tell the leaf to download the file, should result in push proxy
             // request
-            Downloader download = RouterService.download((new RemoteFileDesc[] 
+            Downloader download = ProviderHacks.getDownloadServices().download((new RemoteFileDesc[] 
                 { ((MyActivityCallback)getCallback()).getRFD() }), true, 
                     new GUID(m.getGUID()));
     
@@ -389,7 +389,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        Downloader downloader = RouterService.download(
+        Downloader downloader = ProviderHacks.getDownloadServices().download(
                 (new RemoteFileDesc[] { ((MyActivityCallback) getCallback())
                         .getRFD() }), true, new GUID(m.getGUID()));
 
@@ -450,7 +450,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
             // tell the leaf to download the file, should result in push proxy
             // request
-            RouterService
+            ProviderHacks.getDownloadServices()
                     .download(
                             (new RemoteFileDesc[] { ((MyActivityCallback) getCallback())
                                     .getRFD() }), true, new GUID((m.getGUID())));

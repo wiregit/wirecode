@@ -450,7 +450,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTree(true);
         
         ProviderHacks.getTigerTreeCache().purgeTree(rfd.getSHA1Urn());
-        RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        ProviderHacks.getDownloadServices().download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete();
         assertEquals(6,uploader1.getRequestsReceived());
@@ -730,7 +730,7 @@ public class DownloadTest extends LimeTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
+        download=ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] {rfd1}, false, null);
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete();
@@ -765,7 +765,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
+            ProviderHacks.getDownloadServices().download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         
@@ -798,7 +798,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
+            ProviderHacks.getDownloadServices().download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()/2);
         
@@ -853,7 +853,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         // at this point we should stall since we'll never get our 50 bytes
@@ -875,7 +875,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         md.addDownloadForced(rfd5,false);
@@ -897,7 +897,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         md.addDownloadForced(rfd5,false);
@@ -918,7 +918,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         // at this point we should stall since we'll never get our 10 bytes
@@ -1047,7 +1047,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
-        RouterService.download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete();
 
         
@@ -1138,7 +1138,7 @@ public class DownloadTest extends LimeTestCase {
         ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         ProviderHacks.getTigerTreeCache().purgeTree(badURN);
         
-        RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] {rfd1}, false, null);
         // even though the download completed, we ignore the tree 'cause the
         // URNs didn't match.
         assertNull(ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash()));
@@ -1451,7 +1451,7 @@ public class DownloadTest extends LimeTestCase {
 
         
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
+            (ManagedDownloader)ProviderHacks.getDownloadServices().download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(1000);
         download.addDownload(later,false);
 
@@ -1530,7 +1530,7 @@ public class DownloadTest extends LimeTestCase {
         
         // start download with rfd that needs udp push request
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
+            (ManagedDownloader)ProviderHacks.getDownloadServices().download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(2000);
         // also download from uploader1, so it gets the proxy headers from pusher2
         download.addDownload(openRFD,false);
@@ -1998,7 +1998,7 @@ public class DownloadTest extends LimeTestCase {
         // we must ensure that RFD1 is tried first, so the wait
         // is only set to 1 minute.
         
-        ManagedDownloader download= (ManagedDownloader) RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        ManagedDownloader download= (ManagedDownloader) ProviderHacks.getDownloadServices().download(rfds, Collections.EMPTY_LIST, null, false);
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         download.addDownload(rfd2,true);
         
@@ -2154,7 +2154,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, false);
         
         ManagedDownloader downloader = null;        
-        downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader=(ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getActiveWorkers().size();
         int queued = downloader.getQueuedHostCount();
@@ -2215,7 +2215,7 @@ public class DownloadTest extends LimeTestCase {
         
         ManagedDownloader downloader = null;
         
-        downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader=(ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         //Thread.sleep(1000);
         //downloader.addDownloadForced(rfd2,false);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
@@ -2288,7 +2288,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
         ManagedDownloader downloader = null;
-        downloader = (ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader = (ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
@@ -2361,7 +2361,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
         ManagedDownloader downloader = null;
-        downloader = (ManagedDownloader)RouterService.download(rfds,false,null);
+        downloader = (ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds,false,null);
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()*2 + 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
@@ -2403,7 +2403,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setPartial(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
-        Downloader downloader = RouterService.download(rfds,false,null);
+        Downloader downloader = ProviderHacks.getDownloadServices().download(rfds,false,null);
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
                 DownloadStatus.BUSY, downloader.getState());
@@ -2436,7 +2436,7 @@ public class DownloadTest extends LimeTestCase {
        UDPAcceptor l = new UDPAcceptor(PORT_2);
        
        ManagedDownloader download= (ManagedDownloader) 
-           RouterService.download(new RemoteFileDesc[]{rfd}, Collections.EMPTY_LIST, null, false);
+           ProviderHacks.getDownloadServices().download(new RemoteFileDesc[]{rfd}, Collections.EMPTY_LIST, null, false);
        LOG.debug("started download");
        
        // after a while clear the ranker and add the second host.
@@ -2473,7 +2473,7 @@ public class DownloadTest extends LimeTestCase {
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        RouterService.download(rfds,false,null);
+        ProviderHacks.getDownloadServices().download(rfds,false,null);
         Thread.sleep(1000);
         synchronized(COMPLETE_LOCK) {
         	ProviderHacks.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
@@ -2541,7 +2541,7 @@ public class DownloadTest extends LimeTestCase {
       List alts) throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, alts, null, false);
+        download=ProviderHacks.getDownloadServices().download(rfds, alts, null, false);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
@@ -2570,7 +2570,7 @@ public class DownloadTest extends LimeTestCase {
                                         throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, false, null);
+        download=ProviderHacks.getDownloadServices().download(rfds, false, null);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
@@ -2595,7 +2595,7 @@ public class DownloadTest extends LimeTestCase {
      * Performs a generic resume download test.
      */
     private static void tResume(File incFile) throws Exception {
-         RouterService.download(incFile);
+         ProviderHacks.getDownloadServices().download(incFile);
         
         waitForComplete();
         if (isComplete())

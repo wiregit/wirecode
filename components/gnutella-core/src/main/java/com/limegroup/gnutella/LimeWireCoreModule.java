@@ -166,6 +166,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
         bind(ConnectionServices.class).to(ConnectionServicesImpl.class);
         bind(SearchServices.class).to(SearchServicesImpl.class);
+        bind(DownloadServices.class).to(DownloadServicesImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
