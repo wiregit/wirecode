@@ -43,6 +43,12 @@ public class KeyConverter {
                 "STATISTICS_SHARING_TOOLTIP_PENDING_NEW"),
     };
     
+    private static final Rule[] rules3 = new Rule[] {
+        new ConcatenateAndInsertRule("DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START",
+                "DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END", " {0}",
+                "DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START")
+    };
+    
     /**
      * Call this in lib/messagebundles.
      */
@@ -53,7 +59,7 @@ public class KeyConverter {
         
         // apply conversions
         for (LanguageInfo language : languages.values()) {
-            applyRules(language.getProperties(), rules2);
+            applyRules(language.getProperties(), rules3);
         }
 
         LanguageUpdater updater = new LanguageUpdater(dir, languages, loader
