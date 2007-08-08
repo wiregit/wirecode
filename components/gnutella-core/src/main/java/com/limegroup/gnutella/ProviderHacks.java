@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.rudp.RUDPContext;
-import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -19,7 +18,6 @@ import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
@@ -55,7 +53,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
-import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -160,26 +157,17 @@ public class ProviderHacks {
     public static UploadServices getUploadServices() { return i().getUploadServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     public static SpamServices getSpamServices() { return i().getSpamServices(); }
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
+    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
-
-    // Cleaned up in all but RS
-    public static UDPMultiplexor getUDPMultiplexor() { return i().getUdpMultiplexor(); }
-    public static ConnectionWatchdog getConnectionWatchdog() { return i().getConnectionWatchdog(); }
-    public static HTTPAcceptor getHTTPAcceptor() { return i().getHTTPAcceptor(); }
-    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
-    public static ResponseVerifier getResponseVerifier() { return i().getResponseVerifier(); }
-    public static QueryStats getQueryStats() { return i().getQueryStats(); }
-    
-    // Cleaned up in all but RS & tests
-    public static SearchResultHandler getSearchResultHandler() { return i().getSearchResultHandler(); }
-    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
-    public static Statistics getStatistics() { return i().getStatistics(); }
-    public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
     
     // Cleaned up in all but tests
+    public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
+    public static Statistics getStatistics() { return i().getStatistics(); }
+    public static SearchResultHandler getSearchResultHandler() { return i().getSearchResultHandler(); }
     public static DHTControllerFactory getDHTControllerFactory() { return i().getDhtControllerFactory(); }
     public static HandshakeResponderFactory getHandshakeResponderFactory() { return i().getHandshakeResponderFactory(); } 
     public static HeadersFactory getHeadersFactory() { return i().getHeadersFactory(); }    
