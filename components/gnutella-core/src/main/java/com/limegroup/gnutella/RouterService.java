@@ -662,14 +662,6 @@ public class RouterService {
         return( ProviderHacks.getFileManager().getNumPendingFiles() );
     }
 
-	/**
-	 * Returns the size in bytes of shared files.
-	 *
-	 * @return the size in bytes of shared files on this host
-	 */
-	public static int getSharedFileSize() {
-		return ProviderHacks.getFileManager().getSize();
-	}
 	
     
     /** 
@@ -869,20 +861,5 @@ public class RouterService {
 	 */
     public static boolean isShieldedLeaf() {
         return ProviderHacks.getConnectionManager().isShieldedLeaf();
-    }    
-    
-    /**
-     * @return the number of free leaf slots available for limewires.
-     */
-    public static int getNumFreeLimeWireLeafSlots() {
-            return ProviderHacks.getConnectionManager().getNumFreeLimeWireLeafSlots();
-    }
-
-    
-    /**
-     * @return the number of free non-leaf slots available for limewires.
-     */
-    public static int getNumFreeLimeWireNonLeafSlots() {
-        return ProviderHacks.getConnectionManager().getNumFreeLimeWireNonLeafSlots();
     }
 }

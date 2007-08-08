@@ -19,7 +19,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -39,19 +38,23 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final ConnectionManager connectionManager;
     private final HostCatcher hostCatcher;
     private final DHTManager dhtManager;
+    private final LocalPongInfo localPongInfo;
 
     @Inject
+    // TODO: All these objects should be folded into LocalPongInfo
     public PingReplyFactoryImpl(NetworkManager networkManager,
             Statistics statistics, UDPService udpService,
             ConnectionManager connectionManager,
             HostCatcher hostCatcher,
-            DHTManager dhtManager) {
+            DHTManager dhtManager,
+            LocalPongInfo localPongInfo) {
         this.networkManager = networkManager;
         this.statistics = statistics;
         this.udpService = udpService;
         this.connectionManager = connectionManager;
         this.hostCatcher = hostCatcher;
         this.dhtManager = dhtManager;
+        this.localPongInfo = localPongInfo;
     }
 
     public PingReply create(byte[] guid, byte ttl,
@@ -62,9 +65,9 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 ttl,
                 networkManager.getPort(),
                 networkManager.getAddress(),
-                RouterService.getNumSharedFiles(),
-                RouterService.getSharedFileSize() / 1024,
-                RouterService.isSupernode(),
+                localPongInfo.getNumSharedFiles(),
+                localPongInfo.getSharedFileSize() / 1024,
+                localPongInfo.isSupernode(),
                 statistics.calculateDailyUptime(),
                 udpService.isGUESSCapable(),
                 ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
@@ -86,7 +89,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Collection<? extends IpPort> gnutHosts,
             Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(statistics.calculateDailyUptime(),
-                RouterService.isSupernode(), udpService
+                localPongInfo.isSupernode(), udpService
                         .isGUESSCapable());
 
         String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
@@ -100,15 +103,15 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         addPackedHosts(ggep, gnutHosts, dhtHosts);
 
         return create(guid, ttl, networkManager.getPort(), networkManager
-                .getAddress(), RouterService.getNumSharedFiles(), RouterService
-                .getSharedFileSize() / 1024, RouterService.isSupernode(), ggep);
+                .getAddress(), localPongInfo.getNumSharedFiles(), localPongInfo
+                .getSharedFileSize() / 1024, localPongInfo.isSupernode(), ggep);
     }
 
     public PingReply createQueryKeyReply(byte[] guid, byte ttl,
             AddressSecurityToken key) {
         return create(guid, ttl, networkManager.getPort(), networkManager
-                .getAddress(), RouterService.getNumSharedFiles(), RouterService
-                .getSharedFileSize() / 1024, RouterService.isSupernode(),
+                .getAddress(), localPongInfo.getNumSharedFiles(), localPongInfo
+                .getSharedFileSize() / 1024, localPongInfo.isSupernode(),
                 qkGGEP(key));
     }
 
@@ -489,8 +492,8 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         payload[0] = PingReply.convertToGUESSFormat(LimeWireUtils
                 .getUPMajorVersionNumber(), LimeWireUtils
                 .getUPMinorVersionNumber());
-        payload[1] = (byte) RouterService.getNumFreeLimeWireLeafSlots();
-        payload[2] = (byte) RouterService.getNumFreeLimeWireNonLeafSlots();
+        payload[1] = localPongInfo.getNumFreeLimeWireLeafSlots();
+        payload[2] = localPongInfo.getNumFreeLimeWireNonLeafSlots();
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);

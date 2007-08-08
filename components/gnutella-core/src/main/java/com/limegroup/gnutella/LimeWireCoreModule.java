@@ -66,6 +66,8 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.LocalPongInfo;
+import com.limegroup.gnutella.messages.LocalPongInfoImpl;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -161,6 +163,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
         bind(BTDownloaderFactory.class).to(BTDownloaderFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
+        bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -256,7 +259,6 @@ public class LimeWireCoreModule extends AbstractModule {
  
     }    
     
-    // DPINJ: Do i need the lazy-singleton-ness here?
     @Singleton
     private static class IPFilterProvider extends AbstractLazySingletonProvider<IPFilter> {
         @Override
