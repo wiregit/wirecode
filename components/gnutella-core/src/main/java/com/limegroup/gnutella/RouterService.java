@@ -44,40 +44,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
-/**
- * A facade for the entire LimeWire backend.  This is the GUI's primary way of
- * communicating with the backend.  RouterService constructs the backend 
- * components.  Typical use is as follows:
- *
- * <pre>
- * RouterService rs = new RouterService(ActivityCallback);
- * rs.start();
- * rs.query(...);
- * rs.download(...);
- * rs.shutdown();
- * </pre>
- *
- * The methods of this class are numerous, but they tend to fall into one of the
- * following categories:
- *
- * <ul> 
- * <li><b>Connecting and disconnecting</b>: connect, disconnect,
- *     connectToHostBlocking, connectToHostAsynchronously, 
- *     connectToGroup, removeConnection, getNumConnections
- * <li><b>Searching and downloading</b>: query, browse, score, matchesType,
- *     isMandragoreWorm, download
- * <li><b>Notification of SettingsManager changes</b>:
- *     setKeepAlive, setListeningPort, adjustSpamFilters, refreshBannedIPs
- * <li><b>HostCatcher and horizon</b>: clearHostCatcher, getHosts, removeHost,
- *     getNumHosts, getNumFiles, getTotalFileSize, setAlwaysNotifyKnownHost,
- *     updateHorizon.  <i>(HostCatcher has changed dramatically on
- *     pong-caching-branch and query-routing3-branch of CVS, so these methods
- *     will probably be obsolete in the future.)</i>
- * <li><b>Statistics</b>: getNumLocalSearches, getNumSharedFiles, 
- *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors,
- *      getNumPendingShared
- * </ul> 
- */
+// DPINJ: Going away...
 public class RouterService {
     
     /////-------------------------
@@ -704,25 +671,6 @@ public class RouterService {
 		return ProviderHacks.getFileManager().getSize();
 	}
 	
-	/** 
-	 * Returns a list of all incomplete shared file descriptors.
-	 */
-	public static FileDesc[] getIncompleteFileDescriptors() {
-	    return ProviderHacks.getFileManager().getIncompleteFileDescriptors();
-	}
-
-    /**
-     * Returns a list of all shared file descriptors in the given directory.
-     * All the file descriptors returned have already been passed to the gui
-     * via ActivityCallback.addSharedFile.  Note that if a file descriptor
-     * is added to the given directory after this method completes, 
-     * addSharedFile will be called for that file descriptor.<p>
-     *
-     * If directory is not a shared directory, returns null.
-     */
-    public static FileDesc[] getSharedFileDescriptors(File directory) {
-		return ProviderHacks.getFileManager().getSharedFileDescriptors(directory);
-    }
     
     /** 
      * Tries to "smart download" <b>any</b> [sic] of the given files.<p>  
@@ -922,23 +870,7 @@ public class RouterService {
     public static boolean isShieldedLeaf() {
         return ProviderHacks.getConnectionManager().isShieldedLeaf();
     }    
-
-
-    /**
-     * @return the number of free leaf slots.
-     */
-    public static int getNumFreeLeafSlots() {
-            return ProviderHacks.getConnectionManager().getNumFreeLeafSlots();
-    }
-
     
-    /**
-     * @return the number of free non-leaf slots.
-     */
-    public static int getNumFreeNonLeafSlots() {
-        return ProviderHacks.getConnectionManager().getNumFreeNonLeafSlots();
-    }
-
     /**
      * @return the number of free leaf slots available for limewires.
      */

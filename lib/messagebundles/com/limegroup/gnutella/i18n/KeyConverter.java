@@ -32,8 +32,10 @@ public class KeyConverter {
             new ConcatenateRule("SEARCH_VIRUS_MSG", "SEARCH_VIRUS_MSG_ONE",
                     "SEARCH_VIRUS_MSG_TWO", "SEARCH_VIRUS_MSG_THREE") };
 
+    @SuppressWarnings("unused")
     private static final Rule encodeMnemonics = new EncodeMnemonicAsAmpersAnd();
     
+    @SuppressWarnings("unused")
     private static final Rule[] rules2 = new Rule[] {
         new ConcatenateAndInsertRule("STATISTICS_SHARING_TOOLTIP",
                 "STATISTICS_FILES_TOOLTIP", " {0} ",
@@ -43,6 +45,7 @@ public class KeyConverter {
                 "STATISTICS_SHARING_TOOLTIP_PENDING_NEW"),
     };
     
+
     private static final Rule[] rules3 = new Rule[] {
         new ConcatenateAndInsertRule("DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START",
                 "DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END", " {0}",

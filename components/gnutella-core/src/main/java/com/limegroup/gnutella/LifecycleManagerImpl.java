@@ -46,11 +46,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
 public class LifecycleManagerImpl implements LifecycleManager {
     
     private static final Log LOG = LogFactory.getLog(LifecycleManagerImpl.class);
-    
-    static {
-        LimeCoreGlue.preinstall();
-    }
-    
+   
     private final AtomicBoolean preinitializeBegin = new AtomicBoolean(false);
     private final AtomicBoolean preinitializeDone = new AtomicBoolean(false);
     private final AtomicBoolean backgroundBegin = new AtomicBoolean(false);
@@ -62,14 +58,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     
     private final CountDownLatch startLatch = new CountDownLatch(1);
     
-    /** A list of items that require running prior to shutting down LW. */
-    private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
-    
     private static enum State { NONE, STARTING, STARTED, STOPPED };
-    
-    /** The time when this finished starting. */
-    @InspectablePrimitive private static long startFinishedTime;
-    
+
     private final Provider<IPFilter> ipFilter;
     private final Provider<SimppManager> simppManager;
     private final Provider<Acceptor> acceptor;
@@ -101,6 +91,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ScheduledExecutorService> backgroundExecutor;
     private final Provider<NetworkManager> networkManager;
     private final Provider<Statistics> statistics;
+    
+    /** A list of items that require running prior to shutting down LW. */
+    private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
+    /** The time when this finished starting. */
+    @InspectablePrimitive private long startFinishedTime;
     
     @Inject
     public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
@@ -195,6 +190,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     public void installListeners() {
         if(preinitializeBegin.getAndSet(true))
             return;
+        
+        LimeCoreGlue.preinstall();
         
         fileManager.get().addFileEventListener(activityCallback.get());
         //allow incoming RUDP messages to be forwarded correctly.
