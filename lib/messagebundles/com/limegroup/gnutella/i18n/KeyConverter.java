@@ -46,7 +46,7 @@ public class KeyConverter {
     private static final Rule[] rules3 = new Rule[] {
         new ConcatenateAndInsertRule("DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START",
                 "DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END", " {0}",
-                "DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START")
+                "DOWNLOAD_STATUS_WAITING_FOR_REQUERY")
     };
     
     /**
