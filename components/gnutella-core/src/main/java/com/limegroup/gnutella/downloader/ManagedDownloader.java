@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +48,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
@@ -2671,7 +2671,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         };
         
-        RouterService.schedule(r,0,0);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
 
     }
             

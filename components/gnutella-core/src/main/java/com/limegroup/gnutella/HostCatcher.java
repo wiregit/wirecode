@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -345,13 +346,13 @@ public class HostCatcher {
             } 
         };
         // Recover hosts on probation every minute.
-        RouterService.schedule(probationRestorer, 
-            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(probationRestorer, 
+            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME, TimeUnit.MILLISECONDS);
             
         // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
-        RouterService.schedule(FETCHER, 0, 2*1000);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(FETCHER, 0, 2*1000, TimeUnit.MILLISECONDS);
         LOG.trace("STOP scheduling");
     }
 
@@ -1297,13 +1298,13 @@ public class HostCatcher {
         
         // schedule new runnable to clear the set of endpoints that
         // were pinged while trying to connect
-        RouterService.schedule(
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(
                 new Runnable() {
                     public void run() {
                         pinger.resetData();
                     }
                 },
-                PONG_RANKING_EXPIRE_TIME,0);
+                PONG_RANKING_EXPIRE_TIME,0, TimeUnit.MILLISECONDS);
     }
 
     /**

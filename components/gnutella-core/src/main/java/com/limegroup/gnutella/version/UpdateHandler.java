@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.httpclient.HttpMethod;
@@ -38,7 +39,6 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -159,11 +159,11 @@ public class UpdateHandler implements HttpClientListener {
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
-        RouterService.schedule(new Runnable() {
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 QUEUE.execute(new Poller());
             }
-        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0);
+        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -336,9 +336,9 @@ public class UpdateHandler implements HttpClientListener {
             
             updateInfo.setUpdateCommand(null);
             
-            RouterService.schedule(new NotificationFailover(_lastId),
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
-                    0);
+                    0, TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
             ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
@@ -360,11 +360,11 @@ public class UpdateHandler implements HttpClientListener {
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             
-            RouterService.schedule(new Runnable() {
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     launchHTTPUpdate();
                 }
-            }, when, 0);
+            }, when, 0, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -654,7 +654,7 @@ public class UpdateHandler implements HttpClientListener {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        RouterService.schedule(new NotificationFailover(_lastId),delay,0);
+                        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new NotificationFailover(_lastId),delay,0, TimeUnit.MILLISECONDS);
                     } else
                         ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
                 }
@@ -737,11 +737,11 @@ public class UpdateHandler implements HttpClientListener {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            RouterService.schedule( new Runnable() {
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay( new Runnable() {
                 public void run() {
                     QUEUE.execute(new Poller());
                 }
-            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
+            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0, TimeUnit.MILLISECONDS);
         }
     }
     

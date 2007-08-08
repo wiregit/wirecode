@@ -6,11 +6,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.SimpleTimer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.FileUtils;
 
@@ -134,30 +130,7 @@ public class RouterService {
 	public static byte [] getMyBTGUID() {
 		return MYBTGUID;
 	}
-
-    /**
-     * Schedules the given task for repeated fixed-delay execution on this's
-     * backend thread.  <b>The task must not block for too long</b>, as 
-     * a single thread is shared among all the backend.
-     *
-     * @param task the task to run repeatedly
-     * @param delay the initial delay, in milliseconds
-     * @param period the delay between executions, in milliseconds
-     * @exception IllegalStateException this is cancelled
-     * @exception IllegalArgumentException delay or period negative
-     * @see org.limewire.concurrent.SimpleTimer#schedule(java.lang.Runnable,long,long)
-     */
-    public static ScheduledFuture<?> schedule(Runnable task, long delay, long period) {
-        return SimpleTimer.sharedTimer().scheduleWithFixedDelay(task, delay, period, TimeUnit.MILLISECONDS);
-    }
     
-    /**
-     * @return an object that can be used as a <tt>getScheduledExecutorService</tt>
-     */
-    public static ScheduledExecutorService getScheduledExecutorService() {
-    	return SimpleTimer.sharedTimer();
-    }
-
     /**
      * Returns the number of downloads in progress.
      */

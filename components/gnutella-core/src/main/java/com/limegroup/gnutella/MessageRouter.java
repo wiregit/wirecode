@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -520,18 +521,18 @@ public abstract class MessageRouter {
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
-        RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to clear guys we've connected back to
-        RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
-                               10 * CLEAR_TIME);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
+                               10 * CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to send hops-flow messages
-        RouterService.schedule(new HopsFlowManager(uploadManager, connectionManager), HOPS_FLOW_INTERVAL*10, 
-                               HOPS_FLOW_INTERVAL);
-        RouterService.schedule(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new HopsFlowManager(uploadManager, connectionManager), HOPS_FLOW_INTERVAL*10, 
+                               HOPS_FLOW_INTERVAL, TimeUnit.MILLISECONDS);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME, TimeUnit.MILLISECONDS);
         
         // runner to clean up OOB sessions
         OOBHandler oobHandler = new OOBHandler(this);
-        RouterService.schedule(oobHandler, CLEAR_TIME, CLEAR_TIME);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         
         // handler for inspection requests
         InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -150,7 +151,7 @@ public class NodeAssigner {
                 }
             }
         };            
-        timer = RouterService.schedule(task, 0, TIMER_DELAY);
+        timer = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(task, 0, TIMER_DELAY, TimeUnit.MILLISECONDS);
     }
     
     public void stop() {

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
@@ -130,7 +131,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    Collections.synchronizedMap(new WeakHashMap<GUID, GuidSetWrapper>());
     
     static {
-        RouterService.schedule(new WeakCleaner(),30*1000,30*1000);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new WeakCleaner(),30*1000,30*1000, TimeUnit.MILLISECONDS);
     }
     
     /** The maximum number of proxies to use. */

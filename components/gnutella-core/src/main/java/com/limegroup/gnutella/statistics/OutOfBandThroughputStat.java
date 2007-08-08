@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.statistics;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.statistic.BasicStatistic;
 import org.limewire.statistic.Statistic;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * This class contains a type-safe enumeration of statistics for
@@ -39,7 +41,9 @@ public class OutOfBandThroughputStat extends BasicStatistic {
             }
         };
         int thirtyMins = 30 * 60 * 1000;
-    	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+        
+        //DPINJ: Move this somewhere else!!
+    	ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(adjuster, thirtyMins, thirtyMins, TimeUnit.MILLISECONDS);
     }
     
 	/**

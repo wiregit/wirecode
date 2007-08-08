@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -202,7 +203,7 @@ public class UDPPinger {
                 };
          
             // Purge after 20 seconds.
-            RouterService.schedule(udpMessagePurger, expireTime, 0);
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(udpMessagePurger, expireTime, 0, TimeUnit.MILLISECONDS);
         }
     }
     

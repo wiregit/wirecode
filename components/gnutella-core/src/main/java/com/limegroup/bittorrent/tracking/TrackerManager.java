@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
@@ -14,7 +15,7 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class TrackerManager {
 	
@@ -153,7 +154,7 @@ public class TrackerManager {
 		LOG.debug("scheduling new tracker request");
 		if (scheduledAnnounce != null)
 			scheduledAnnounce.cancel(true);
-		scheduledAnnounce = RouterService.schedule(scheduled, minDelay, 0);
+		scheduledAnnounce = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(scheduled, minDelay, 0, TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	

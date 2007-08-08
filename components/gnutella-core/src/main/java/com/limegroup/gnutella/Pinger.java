@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.PingPongSettings;
@@ -27,7 +29,7 @@ public final class Pinger implements Runnable {
      * this node if it's an Ultrapeer.
      */
     public void start() {
-        RouterService.schedule(this, PING_INTERVAL, PING_INTERVAL);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, PING_INTERVAL, PING_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
 

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -463,7 +464,7 @@ public abstract class AbstractDHTController implements DHTController {
                 return;
             }
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
-            timerTask = RouterService.schedule(this, delay, delay);
+            timerTask = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, delay, delay, TimeUnit.MILLISECONDS);
             isRunning = true;
         }
         

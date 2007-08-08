@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,11 +79,11 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         this.pushManager = pushManager;
     	    
 	    //Clear push requests every 30 seconds.
-	    RouterService.schedule(new Runnable() {
+	    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
 	        public void run() {
 	            PUSH_REQUESTS.clear();
 	        }
-	    }, 30 * 1000, 30 * 1000);
+	    }, 30 * 1000, 30 * 1000, TimeUnit.MILLISECONDS);
     }
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {

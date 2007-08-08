@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +85,7 @@ public final class ConnectionWatchdog {
             snapshot.put(c, new ConnectionState(c));
         }
         
-        RouterService.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, 0);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new DudChecker(snapshot, false), EVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -113,7 +114,7 @@ public final class ConnectionWatchdog {
             ProviderHacks.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
         }
         
-        RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /** Returns an iterable of all initialized connections in this, including

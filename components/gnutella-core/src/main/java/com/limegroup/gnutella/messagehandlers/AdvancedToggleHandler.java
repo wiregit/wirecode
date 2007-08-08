@@ -6,8 +6,8 @@ import org.limewire.collection.Periodic;
 import org.limewire.statistic.StatisticsManager;
 
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -46,7 +46,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
                     }
                 }
             }
-        }, RouterService.getScheduledExecutorService());
+        }, ProviderHacks.getBackgroundExecutor());
     }
     
     @Override

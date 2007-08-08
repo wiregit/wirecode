@@ -2456,7 +2456,7 @@ public abstract class FileManager {
             buildInProgress = true;
             
             // schedule a rebuild sometime in the next hour
-            RouterService.schedule(new Runnable() {
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     synchronized(QRPUpdater.this) {
                         if (!buildInProgress)
@@ -2465,7 +2465,7 @@ public abstract class FileManager {
                         _needRebuild = true;
                     }
                 }
-            }, (int)(Math.random() * QRP_DELAY), 0);
+            }, (int)(Math.random() * QRP_DELAY), 0, TimeUnit.MILLISECONDS);
         }
         
         public synchronized void cancelRebuild() {

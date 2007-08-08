@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,7 +98,7 @@ public class BrowseHostHandler {
 
     static {
         Expirer expirer = new Expirer();
-        RouterService.schedule(expirer, 0, 5000);// every 5 seconds
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(expirer, 0, 5000, TimeUnit.MILLISECONDS);// every 5 seconds
     }
 
     /**

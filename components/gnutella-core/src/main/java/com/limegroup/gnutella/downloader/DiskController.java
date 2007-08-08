@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,7 +15,7 @@ import org.limewire.concurrent.ManagedThread;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 
 /** Manages writing / reading from / to disk. */
 @Singleton
@@ -50,7 +51,7 @@ public class DiskController {
     @Inject
     public DiskController() {
         // DPINJ: Change to using passed in scheduler!
-        RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000, TimeUnit.MILLISECONDS);
     }
     
     /** Adds a DelayedWrite to the queue of writers. */

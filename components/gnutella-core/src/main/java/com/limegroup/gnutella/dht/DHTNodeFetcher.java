@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -19,7 +20,6 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
@@ -217,7 +217,7 @@ public class DHTNodeFetcher {
                 }
             };
             
-            fetcherTask = RouterService.schedule(task, initialFetch, fetcherTime);
+            fetcherTask = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(task, initialFetch, fetcherTime, TimeUnit.MILLISECONDS);
         }
     }
     

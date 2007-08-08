@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -189,7 +190,7 @@ public final class QueryUnicaster {
             _querier.start();
             
             QueryKeyExpirer expirer = new QueryKeyExpirer();
-            RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(expirer, 0, 3 * ONE_HOUR, TimeUnit.MILLISECONDS);// every 3 hours
 
             _initialized = true;
         }

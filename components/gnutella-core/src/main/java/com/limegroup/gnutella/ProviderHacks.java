@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -153,6 +155,7 @@ public class ProviderHacks {
     public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static SearchServices getSearchServices() { return i().getSearchServices(); }
+    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
@@ -203,6 +206,7 @@ public class ProviderHacks {
     public static BTContextFactory getBTContextFactory() { return i().getBTContextFactory(); }
     public static BTDownloaderFactory getBTDownloaderFactory() { return i().getBTDownloaderFactory(); }
     public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
+
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

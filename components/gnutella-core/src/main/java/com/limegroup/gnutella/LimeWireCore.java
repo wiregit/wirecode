@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -512,4 +514,7 @@ public class LimeWireCore {
         return injector.getInstance(SearchServices.class);
     }
 
+    public ScheduledExecutorService getBackgroundExecutor() {
+        return injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
+    }
 }

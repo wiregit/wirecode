@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +22,6 @@ import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -629,7 +629,7 @@ public class DownloadWorker {
             _currentState.setState(DownloadState.QUEUED);
         }
 
-        RouterService.schedule(new Runnable() {
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 LOG.debug("Queue time up");
 
@@ -648,7 +648,7 @@ public class DownloadWorker {
                             }
                         });
             }
-        }, status.getQueuePollTime(), 0);
+        }, status.getQueuePollTime(), 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -781,12 +781,12 @@ public class DownloadWorker {
             _manager.registerPushObserver(observer, details);
             ProviderHacks.getDownloadManager().getPushManager().sendPush(_rfd,
                     observer);
-            RouterService.schedule(new Runnable() {
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     _manager.unregisterPushObserver(details, true);
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME
-                    : PUSH_CONNECT_TIME, 0);
+                    : PUSH_CONNECT_TIME, 0, TimeUnit.MILLISECONDS);
         } else {
             finishWorker();
         }

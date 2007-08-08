@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -307,7 +308,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	public void start() {
         ProviderHacks.getMulticastService().start();
         ProviderHacks.getUdpService().start();
-        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES, TimeUnit.MILLISECONDS);
         ProviderHacks.getConnectionDispatcher().
         addConnectionAcceptor(this,
         		false,
@@ -686,8 +687,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                                 networkManager.incomingStatusChanged();
                         }
                     };
-                    RouterService.schedule(resetter, 
-                                           WAIT_TIME_AFTER_REQUESTS, 0);
+                    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(resetter, 
+                                           WAIT_TIME_AFTER_REQUESTS, 0, TimeUnit.MILLISECONDS);
                 }
             }
         }

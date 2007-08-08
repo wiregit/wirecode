@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -182,10 +183,10 @@ public class UDPService implements ReadWriteObserver {
      * Schedules IncomingValidator & PeriodicPinger for periodic use.
      */
     protected void scheduleServices() {
-        RouterService.schedule(new IncomingValidator(), 
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
-                               Acceptor.TIME_BETWEEN_VALIDATES);
-        RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
+                               Acceptor.TIME_BETWEEN_VALIDATES, TimeUnit.MILLISECONDS);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new PeriodicPinger(), 0, PING_PERIOD, TimeUnit.MILLISECONDS);
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -765,9 +766,9 @@ public class UDPService implements ReadWriteObserver {
                                 messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
-                    RouterService.schedule(checkThread, 
+                    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(checkThread, 
                                            Acceptor.WAIT_TIME_AFTER_REQUESTS,
-                                           0);
+                                           0, TimeUnit.MILLISECONDS);
                 }
                 else
                     messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);

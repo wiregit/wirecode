@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -195,7 +196,7 @@ public class DownloadManager implements BandwidthTracker {
             }}, 
     		router,
     		ProviderHacks.getHttpExecutor(),
-    		RouterService.getScheduledExecutorService(),
+    		ProviderHacks.getBackgroundExecutor(),
     		ProviderHacks.getAcceptor(),
     		ProviderHacks.getNetworkManager()); // DPINJ: use passed-in version!
         pushManager.initialize(ProviderHacks.getConnectionDispatcher());
@@ -233,9 +234,9 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
         };
-        RouterService.schedule(checkpointer, 
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
-                               SNAPSHOT_CHECKPOINT_TIME);
+                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);
                                
         guiInit = true;
     }
@@ -328,9 +329,9 @@ public class DownloadManager implements BandwidthTracker {
                 pumpDownloads();
             }
         };
-        RouterService.schedule(_waitingPump,
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(_waitingPump,
                                1000,
-                               1000);
+                               1000, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -853,11 +854,11 @@ public class DownloadManager implements BandwidthTracker {
         md.initialize(downloadReferencesFactory.create(md));
 		waiting.add(md);
         callback(md).addDownload(md);
-        RouterService.schedule(new Runnable() {
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
         	public void run() {
         		writeSnapshot(); // Save state for crash recovery.
         	}
-        },0,0);
+        },0,0, TimeUnit.MILLISECONDS);
     }
     
     /**

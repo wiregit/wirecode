@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -273,7 +273,7 @@ public class MetaFileManager extends FileManager {
         // save ourselves to disk every minute
         if (saver == null) {
             saver = new Saver();
-            RouterService.schedule(saver, 60 * 1000, 60 * 1000);
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, TimeUnit.MILLISECONDS);
         }
 
         Collection<LimeXMLReplyCollection> replies = ProviderHacks

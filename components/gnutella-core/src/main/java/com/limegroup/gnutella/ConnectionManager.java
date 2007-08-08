@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -326,11 +327,11 @@ public class ConnectionManager implements ConnectionAcceptor,
         // the number of connections we're shooting for if
         // we're idle.
         if(SystemUtils.supportsIdleTime()) {
-            RouterService.schedule(new Runnable() {
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     setPreferredConnections();
                 }
-            }, 1000, 1000);
+            }, 1000, 1000, TimeUnit.MILLISECONDS);
         }
         
         // send new capabilities when simpp updates.
@@ -1872,7 +1873,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             };
             _needPrefInterrupterScheduled = true;
             // shut off this guy if he didn't have any luck
-            RouterService.schedule(interrupted, 15 * 1000, 0);
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(interrupted, 15 * 1000, 0, TimeUnit.MILLISECONDS);
         }
     }    
 
@@ -2476,7 +2477,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         
         // Try to reconnect in 10 seconds, and then every minute after
         // that.
-        RouterService.schedule(new Runnable() {
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 // If the last time the user disconnected is more recent
                 // than when we started automatically connecting, just
@@ -2493,7 +2494,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                     connect();
                 }
             }
-        }, 10*1000, 2*60*1000);
+        }, 10*1000, 2*60*1000, TimeUnit.MILLISECONDS);
         _automaticConnectTime = System.currentTimeMillis();
         _automaticallyConnecting = true;
         

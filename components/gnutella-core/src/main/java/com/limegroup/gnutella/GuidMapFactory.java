@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /** 
  * A factory to manage GuidMaps.
@@ -42,7 +43,7 @@ class GuidMapFactory {
     private static synchronized void addMapToExpire(GuidMapImpl expiree) {
         // schedule it on demand
         if (!scheduled) {
-            RouterService.schedule(new GuidExpirer(), 0, EXPIRE_POLL_TIME);
+            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new GuidExpirer(), 0, EXPIRE_POLL_TIME, TimeUnit.MILLISECONDS);
             scheduled = true;
         }
         toExpire.add(expiree);

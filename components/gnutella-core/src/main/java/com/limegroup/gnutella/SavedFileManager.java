@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,7 @@ public final class SavedFileManager implements Runnable {
         
         // DPINJ: move to an initialize method!
         // Run the task every three minutes, starting in 10 seconds.
-        RouterService.schedule(this, 10 * 1000, 3 * 60 * 1000);
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
     }
     
     /**
