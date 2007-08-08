@@ -78,7 +78,7 @@ public class HTTPAcceptor {
             }
             // no luck setting up? show user error message
             if(error) 
-                MessageService.showError(I18n.marktr("ERROR_NO_PORTS_AVAILABLE"));
+                MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
         }
     }
 

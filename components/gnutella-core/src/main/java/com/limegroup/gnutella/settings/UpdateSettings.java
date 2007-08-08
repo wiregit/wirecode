@@ -5,6 +5,7 @@ import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetSetting;
 
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -67,31 +68,34 @@ public class UpdateSettings extends LimeProps {
     public static final StringArraySetting PRO_ADS =
         FACTORY.createRemoteStringArraySetting("PRO_ADS",
                 new String[] {
-                "SUPPORT_LIMEWIRE_01",
+                I18n.marktr("For Turbo-Charged searches get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&21",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_02",
+                I18n
+                        .marktr("Support LimeWire\'s peer-to-peer development. Get PRO."),
                 "http://www.limewire.com/index.jsp/pro&22",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_03",
+                I18n
+                        .marktr("Purchase LimeWire PRO to help us make downloads faster."),
                 "http://www.limewire.com/index.jsp/pro&23",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_04",
+                I18n.marktr("For Turbo-Charged downloads get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&24",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_05",
+                I18n.marktr("Support open networks. Get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&25",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_06",
+                I18n
+                        .marktr("Support open source and open protocols. Get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&26",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_07",
+                I18n.marktr("For Turbo-Charged performance get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&27",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_08",
+                I18n.marktr("Keep the Internet open. Get LimeWire PRO."),
                 "http://www.limewire.com/index.jsp/pro&28",
                 "0.111111",
-                "SUPPORT_LIMEWIRE_09",
+                I18n.marktr("Developing LimeWire costs real money. Get PRO."),
                 "http://www.limewire.com/index.jsp/pro&29",
                 "0.111111"},
                 "UpdateSettings.proAds");

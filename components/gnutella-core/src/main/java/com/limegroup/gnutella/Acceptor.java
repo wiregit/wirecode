@@ -245,7 +245,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                MessageService.showError(I18n.marktr("ERROR_NO_PORTS_AVAILABLE"));
+                MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
             }
         }
         

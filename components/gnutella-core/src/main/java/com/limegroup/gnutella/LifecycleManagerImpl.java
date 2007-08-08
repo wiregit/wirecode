@@ -254,7 +254,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         HttpClientManager.initialize();
         
         LOG.trace("START SSL Test");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SSL_TEST"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading TLS Encryption..."));
         SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), byteBufferCache.get());
         if(!sslTester.go()) {
             Throwable t = sslTester.getLastFailureCause();
@@ -266,17 +266,17 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
 		// Now, link all the pieces together, starting the various threads.            
         LOG.trace("START ContentManager");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTENT_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Safe Content Management..."));
         contentManager.get().initialize();
         LOG.trace("STOP ContentManager");
 
         LOG.trace("START MessageRouter");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Message Router..."));
 		messageRouter.get().initialize();
 		LOG.trace("STOPMessageRouter");
 
         LOG.trace("START HTTPUploadManager");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPLOAD_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Upload Management..."));
         uploadManager.get().start(httpUploadAcceptor.get(), fileManager.get(), activityCallback.get(), messageRouter.get()); 
         LOG.trace("STOP HTTPUploadManager");
 
@@ -285,7 +285,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP HTTPUploadAcceptor");
 
         LOG.trace("START Acceptor");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Connection Listener..."));
 		acceptor.get().start();
 		LOG.trace("STOP Acceptor");
 		
@@ -294,22 +294,22 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("END loading StaticMessages");
         
 		LOG.trace("START ConnectionManager");
-		activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER"));
+		activityCallback.get().componentLoading(I18n.marktr("Loading Connection Management..."));
         connectionManager.get().initialize();
 		LOG.trace("STOP ConnectionManager");
 		
 		LOG.trace("START DownloadManager");
-		activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER"));
+		activityCallback.get().componentLoading(I18n.marktr("Loading Download Management..."));
 		downloadManager.get().initialize(); 
 		LOG.trace("STOP DownloadManager");
 		
 		LOG.trace("START NodeAssigner");
-		activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_NODE_ASSIGNER"));
+		activityCallback.get().componentLoading(I18n.marktr("Loading Ultrapeer/DHT Management..."));
 		nodeAssigner.get().start();
 		LOG.trace("STOP NodeAssigner");
 		
         LOG.trace("START HostCatcher.initialize");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER"));
+        activityCallback.get().componentLoading(I18n.marktr("Locating Peers..."));
 		hostCatcher.get().initialize();
 		LOG.trace("STOP HostCatcher.initialize");
 
@@ -325,58 +325,58 @@ public class LifecycleManagerImpl implements LifecycleManager {
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         LOG.trace("START FileManager");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Shared Files..."));
         fileManager.get().start();
         LOG.trace("STOP FileManager");
 
         LOG.trace("START TorrentManager");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading bittorrent Management..."));
 		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get());
 		LOG.trace("STOP TorrentManager");
         
         LOG.trace("START ControlRequestAcceptor");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading magnet Management..."));
 		(new ControlRequestAcceptor()).register(connectionDispatcher.get());
 		LOG.trace("STOP ControlRequestAcceptor");
 		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Old Downloads..."));
         downloadManager.get().postGuiInit();
         LOG.trace("STOP DownloadManager.postGuiInit");
         
         LOG.trace("START UpdateManager.instance");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Checking for Updates..."));
         updateHandler.get();
         LOG.trace("STOP UpdateManager.instance");
 
         LOG.trace("START QueryUnicaster");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Directed Querier..."));
 		queryUnicaster.get().start();
 		LOG.trace("STOP QueryUnicaster");
 		
 		LOG.trace("START HTTPAcceptor");
-		activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR"));
+		activityCallback.get().componentLoading(I18n.marktr("Loading Magnet Listener..."));
         httpAcceptor.get().start();
         LOG.trace("STOP HTTPAcceptor");
         
         LOG.trace("START Pinger");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_PINGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Peer Listener..."));
         pinger.get().start();
         LOG.trace("STOP Pinger");
         
         LOG.trace("START ConnectionWatchdog");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Stale Connection Management..."));
         connectionWatchdog.get().start();
         LOG.trace("STOP ConnectionWatchdog");
         
         LOG.trace("START SavedFileManager");
-        activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER"));
+        activityCallback.get().componentLoading(I18n.marktr("Loading Saved Files..."));
         savedFileManager.get();
         LOG.trace("STOP SavedFileManager");
 		
 		LOG.trace("START loading spam data");
-		activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_SPAM"));
+		activityCallback.get().componentLoading(I18n.marktr("Loading Spam Management..."));
 		ratingTable.get();
 		LOG.trace("START loading spam data");
         
