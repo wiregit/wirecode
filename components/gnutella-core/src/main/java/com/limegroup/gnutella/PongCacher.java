@@ -158,7 +158,7 @@ public final class PongCacher {
      */
     public void addPong(PingReply pr) {
         // if we're not an Ultrapeer, we don't care about caching the pong
-        if(!RouterService.isSupernode()) return;
+        if(!ProviderHacks.getConnectionServices().isSupernode()) return;
 
         // Make sure we don't cache pongs that aren't from Ultrapeers.
         if(!pr.isUltrapeer()) return;      

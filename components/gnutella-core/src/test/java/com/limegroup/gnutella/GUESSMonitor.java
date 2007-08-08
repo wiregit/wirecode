@@ -61,13 +61,13 @@ public class GUESSMonitor extends LimeTestCase {
     public void connect() {
         //_backend.getRouterService().connect();
         //_backend.getRouterService().forceKeepAlive(5);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         //RouterService.forceKeepAlive(5);
     }
 
     public void disconnect() {
     //_backend.getRouterService().disconnect();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
     }
 
     public static void main(String argv[]) throws Exception {

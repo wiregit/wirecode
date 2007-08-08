@@ -104,7 +104,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         ConnectionSettings.LAST_FWT_STATE.setValue(false);
 
         try {
-            assertFalse(RouterService.isConnected());
+            assertFalse(ProviderHacks.getConnectionServices().isConnected());
             assertTrue(ProviderHacks.getUdpService().canDoFWT());
 
             requestHandler.handleAccept(new HttpExecutionContext(null),

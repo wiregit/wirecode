@@ -9,7 +9,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -82,7 +81,7 @@ public class SimppManagerTest extends LimeTestCase {
         setSettings();
         
         //Make sure we have no remaining connections from previous tests
-        assertFalse(RouterService.isConnected());
+        assertFalse(ProviderHacks.getConnectionServices().isConnected());
     }
     
     private static void setSettings() throws Exception {
@@ -314,7 +313,7 @@ public class SimppManagerTest extends LimeTestCase {
                                                      MIDDLE, man.getVersion());
         
         //we should have been disconnected
-        assertFalse(RouterService.isConnected());
+        assertFalse(ProviderHacks.getConnectionServices().isConnected());
     }
 
     public void testTamperedSimppDataRejected() throws Exception  {
@@ -334,7 +333,7 @@ public class SimppManagerTest extends LimeTestCase {
                                                      MIDDLE, man.getVersion());
         
         //we should have been disconnected
-        assertFalse(RouterService.isConnected());
+        assertFalse(ProviderHacks.getConnectionServices().isConnected());
     }
 
     public void testBadSimppXMLRejected() throws Exception  {
@@ -370,7 +369,7 @@ public class SimppManagerTest extends LimeTestCase {
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         //we should have been disconnected
-        assertFalse(RouterService.isConnected());
+        assertFalse(ProviderHacks.getConnectionServices().isConnected());
     }
 
     public void testSimppTakesEffect() throws Exception {

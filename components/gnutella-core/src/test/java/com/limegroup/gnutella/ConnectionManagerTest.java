@@ -71,7 +71,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                                     "_catcher",CATCHER);
              
         ProviderHacks.getLifecycleManager().start();
-        RouterService.clearHostCatcher();
+        LimeTestUtils.clearHostCatcher();
     }
 
     public void setUp() throws Exception {
@@ -101,8 +101,8 @@ public class ConnectionManagerTest extends LimeTestCase {
 
     public void tearDown() throws Exception {
         //Kill all connections
-        RouterService.disconnect();
-        RouterService.clearHostCatcher();
+        ProviderHacks.getConnectionServices().disconnect();
+        LimeTestUtils.clearHostCatcher();
         Thread.sleep(500);
     }
     
@@ -415,7 +415,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testUnreachableHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("1.2.3.4", 5000);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -426,7 +426,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testWrongProtocolHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("www.yahoo.com", 80);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -436,7 +436,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testGoodHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
         
@@ -452,7 +452,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         SSLSettings.TLS_OUTGOING.setValue(true);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
@@ -468,7 +468,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         SSLSettings.TLS_OUTGOING.setValue(false);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
@@ -488,7 +488,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testRejectHost() throws Exception {
         CATCHER.endpoint =  new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
     }

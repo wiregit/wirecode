@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -56,7 +57,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
             }
         };
         PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
     
     public void setUp() throws Exception {

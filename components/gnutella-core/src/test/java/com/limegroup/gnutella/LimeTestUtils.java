@@ -134,4 +134,11 @@ public class LimeTestUtils {
 	    for(int i = 0; i < files.length; i++)
 	        files[i].delete();
 	}
+
+    /**
+     * Clears the hostcatcher.
+     */
+    public static void clearHostCatcher() {
+        ProviderHacks.getHostCatcher().clear();
+    }
 }

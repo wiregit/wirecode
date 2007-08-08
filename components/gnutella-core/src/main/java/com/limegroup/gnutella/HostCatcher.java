@@ -430,7 +430,7 @@ public class HostCatcher {
      * Determines if UDP Pongs need to be sent out.
      */
     private synchronized boolean needsPongRanking() {
-        if(RouterService.isFullyConnected())
+        if(ProviderHacks.getConnectionServices().isFullyConnected())
             return false;
         int have = ProviderHacks.getConnectionManager().
             getInitializedConnections().size();
@@ -442,7 +442,7 @@ public class HostCatcher {
             return false;
 
         int size;
-        if(RouterService.isSupernode()) {
+        if(ProviderHacks.getConnectionServices().isSupernode()) {
             synchronized(this) {
                 size = FREE_ULTRAPEER_SLOTS_SET.size();
             }
@@ -1106,13 +1106,13 @@ public class HostCatcher {
         //LOG.trace("entered getAnEndpointInternal");
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
-        if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+        if(ProviderHacks.getConnectionServices().isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
                                     
         } 
         // Otherwise, if we're already a leaf and we know about ultrapeers with
         // free leaf slots, try those.
-        else if(RouterService.isShieldedLeaf() && 
+        else if(ProviderHacks.getConnectionServices().isShieldedLeaf() && 
                 !FREE_LEAF_SLOTS_SET.isEmpty()) {
             return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
         } 
@@ -1504,7 +1504,7 @@ public class HostCatcher {
         private synchronized boolean needsHosts(long now) {
             synchronized(HostCatcher.this) { 
                 return getNumHosts() == 0 ||
-                    (!RouterService.isConnected() && _failures > 100);
+                    (!ProviderHacks.getConnectionServices().isConnected() && _failures > 100);
             }
         }
         

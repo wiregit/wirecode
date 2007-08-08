@@ -83,9 +83,9 @@ public class FWTDetectionTest extends LimeTestCase {
         ProviderHacks.getLifecycleManager().start();
         
         cmStub.setConnected(true);
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
         cmStub.setConnected(false);
-        assertFalse(RouterService.isConnected());
+        assertFalse(ProviderHacks.getConnectionServices().isConnected());
         
         gnet = new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
                 

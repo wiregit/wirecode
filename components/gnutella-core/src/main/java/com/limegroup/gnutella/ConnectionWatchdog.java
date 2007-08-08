@@ -171,7 +171,7 @@ public final class ConnectionWatchdog {
                         if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {
                             if(LOG.isWarnEnabled())
                                 LOG.warn("Killing connection: " + c);
-                            RouterService.removeConnection(c);
+                            ProviderHacks.getConnectionServices().removeConnection(c);
                         }
                     } else {
                         if(LOG.isWarnEnabled())

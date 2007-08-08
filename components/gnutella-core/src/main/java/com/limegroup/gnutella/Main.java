@@ -76,7 +76,7 @@ public class Main {
                         int port=6346;
                         if (commands.length>=3)
                             port=Integer.parseInt(commands[2]);
-                        RouterService.connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
+                        ProviderHacks.getConnectionServices().connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
                     } catch (IOException e) {
                         System.out.println("Couldn't establish connection.");
                     } catch (NumberFormatException e) {

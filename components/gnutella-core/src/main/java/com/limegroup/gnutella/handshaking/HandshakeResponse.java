@@ -11,7 +11,6 @@ import java.util.StringTokenizer;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -395,7 +394,7 @@ public class HandshakeResponse {
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, LimeWireUtils.getHttpServer());
-        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
+        headers.put(HeaderNames.X_ULTRAPEER, ""+ProviderHacks.getConnectionServices().isSupernode());
         
 		// add any leaves
         List<? extends IpPort> leaves =
@@ -565,7 +564,7 @@ public class HandshakeResponse {
      *  header set according to the incoming headers from the remote host
      */
     private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection<IpPort> hosts = RouterService.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
+        Collection<IpPort> hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
 
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;

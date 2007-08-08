@@ -119,8 +119,8 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 
 		//ROUTER_SERVICE = new RouterService(callback);
 		ProviderHacks.getLifecycleManager().start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
         
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -159,7 +159,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
 		sleep();
         for (int i = 0; i < LEAF.length; i++)
             LEAF[i].close();

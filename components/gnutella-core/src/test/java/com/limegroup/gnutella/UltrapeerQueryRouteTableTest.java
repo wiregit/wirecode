@@ -84,13 +84,13 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      //   ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
         ProviderHacks.getLifecycleManager().start();
         
-        RouterService.connectToHostAsynchronously("localhost", 
+        ProviderHacks.getConnectionServices().connectToHostAsynchronously("localhost", 
             Backend.BACKEND_PORT, ConnectType.PLAIN);    
         
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
         Thread.sleep(10 * 1000);
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
     }
 
 	public void setUp() throws Exception {
@@ -107,7 +107,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * Ultrapeer that doesn't have a hit.
      */
     public void testSentQueryIsNotTTL1() throws Exception {
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
         QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(noMatch, (byte)1);
         sendQuery(qr);        
         Thread.sleep(2000);
@@ -128,7 +128,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * table for that query.
      */
     public void testDynamicQueryingWithQRPHit() throws Exception {
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
                 
         QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(
             "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);

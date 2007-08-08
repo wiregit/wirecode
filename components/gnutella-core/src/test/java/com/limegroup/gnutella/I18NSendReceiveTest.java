@@ -113,14 +113,14 @@ public class I18NSendReceiveTest
         if(true)throw new RuntimeException("fix me");
       //  ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ProviderHacks.getLifecycleManager().start();
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         connect();
     }
 
     public static void globalTearDown() throws Exception {
         drain(CONN_1);
         CONN_1.close();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
     }
 
 

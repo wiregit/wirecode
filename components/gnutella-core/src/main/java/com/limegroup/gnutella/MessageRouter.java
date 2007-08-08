@@ -1119,7 +1119,7 @@ public abstract class MessageRouter {
                                                                       counter), 
 								 handler);
 			}
-		} else if(request.getTTL() > 0 && RouterService.isSupernode()) {
+		} else if(request.getTTL() > 0 && ProviderHacks.getConnectionServices().isSupernode()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
             if(handler.isGoodUltrapeer()) {
@@ -1550,7 +1550,7 @@ public abstract class MessageRouter {
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(query.getGUID(), 
 										forMeReplyHandler);
-		if(RouterService.isSupernode()) {
+		if(ProviderHacks.getConnectionServices().isSupernode()) {
 			sendDynamicQuery(queryHandlerFactory.createHandlerForMe(query, 
                                                              counter), 
 							 forMeReplyHandler);
@@ -1659,7 +1659,7 @@ public abstract class MessageRouter {
      */
 	public final void forwardQueryRequestToLeaves(QueryRequest query,
                                                   ReplyHandler handler) {
-		if(!RouterService.isSupernode()) return;
+		if(!ProviderHacks.getConnectionServices().isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
@@ -2611,7 +2611,7 @@ public abstract class MessageRouter {
 			// continue if I'm an Ultrapeer and the node on the
 			// other end doesn't support Ultrapeer-level query
 			// routing
-			if(RouterService.isSupernode()) { 
+			if(ProviderHacks.getConnectionServices().isSupernode()) { 
 				// only skip it if it's not an Ultrapeer query routing
 				// connection
 				if(!c.isUltrapeerQueryRoutingConnection()) { 
@@ -2693,7 +2693,7 @@ public abstract class MessageRouter {
         QueryRouteTable ret = fileManager.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
-        if(RouterService.isSupernode()) {
+        if(ProviderHacks.getConnectionServices().isSupernode()) {
             addQueryRoutingEntriesForLeaves(ret);
         }
         return ret;
@@ -2943,7 +2943,7 @@ public abstract class MessageRouter {
            
         public void run() {
             // only leafs should use HopsFlow
-            if (RouterService.isSupernode())
+            if (ProviderHacks.getConnectionServices().isSupernode())
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value

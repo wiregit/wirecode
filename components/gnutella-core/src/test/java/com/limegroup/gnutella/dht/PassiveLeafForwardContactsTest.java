@@ -21,9 +21,9 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -118,14 +118,14 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             //RouterService routerService = new RouterService(new ActivityCallbackStub());
             ProviderHacks.getLifecycleManager().start();
             
-            RouterService.clearHostCatcher();
-            RouterService.connect();
+            LimeTestUtils.clearHostCatcher();
+            ProviderHacks.getConnectionServices().connect();
             
             // Make sure LimeWire is running as an Ultrapeer
             assertTrue(ProviderHacks.getLifecycleManager().isStarted());
-            assertTrue(RouterService.isSupernode());
-            assertFalse(RouterService.isActiveSuperNode());
-            assertFalse(RouterService.isShieldedLeaf());
+            assertTrue(ProviderHacks.getConnectionServices().isSupernode());
+            assertFalse(ProviderHacks.getConnectionServices().isActiveSuperNode());
+            assertFalse(ProviderHacks.getConnectionServices().isShieldedLeaf());
         }
         
         // Start and bootstrap a bunch of DHT Nodes
@@ -172,7 +172,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);
@@ -272,7 +272,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);
@@ -333,7 +333,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);

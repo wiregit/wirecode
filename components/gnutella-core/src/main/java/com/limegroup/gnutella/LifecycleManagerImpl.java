@@ -315,7 +315,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
 			if ( outgoing > 0 ) {
 			    LOG.trace("START connect");
-				RouterService.connect();
+				ProviderHacks.getConnectionServices().connect();
                 LOG.trace("STOP connect");
             }
 		}

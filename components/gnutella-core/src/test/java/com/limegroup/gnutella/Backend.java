@@ -349,7 +349,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             if(true)throw new RuntimeException("fix me");
             //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
             ProviderHacks.getLifecycleManager().start();
-            if (!reject) RouterService.connect();
+            if (!reject) ProviderHacks.getConnectionServices().connect();
 
             try {
                 // sleep to let the file manager initialize

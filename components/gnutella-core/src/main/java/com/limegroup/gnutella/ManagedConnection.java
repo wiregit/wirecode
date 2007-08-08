@@ -399,7 +399,7 @@ public class ManagedConnection extends Connection
         
         if(isOutgoing()) {
             String host = getAddress();
-            if(RouterService.isSupernode()) {
+            if(ProviderHacks.getConnectionServices().isSupernode()) {
                 requestHeaders = headersFactory.createUltrapeerHeaders(host);
                 responder = handshakeResponderFactory
                         .createUltrapeerHandshakeResponder(host);
@@ -411,7 +411,7 @@ public class ManagedConnection extends Connection
         } else {
             String host = getSocket().getInetAddress().getHostAddress();
             requestHeaders = null;
-            if(RouterService.isSupernode()) {
+            if(ProviderHacks.getConnectionServices().isSupernode()) {
                 responder = handshakeResponderFactory
                         .createUltrapeerHandshakeResponder(host);
             } else {

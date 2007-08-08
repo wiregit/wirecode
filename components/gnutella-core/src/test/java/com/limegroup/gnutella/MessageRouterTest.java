@@ -586,8 +586,8 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
-        assertFalse(RouterService.isSupernode());
-        Collection hosts = RouterService.getPreferencedHosts(false, null,10);
+        assertFalse(ProviderHacks.getConnectionServices().isSupernode());
+        Collection hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 0, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -604,7 +604,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // add some hosts with free leaf slots (just 3), make sure we get'm back.
         addFreeLeafSlotHosts(3); // these 3 will be returned as 1
         addFreeLeafSlotHostsClassB(2);
-        hosts = RouterService.getPreferencedHosts(false, null,10);
+        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 3, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -618,7 +618,7 @@ public final class MessageRouterTest extends LimeTestCase {
         // add 20 more free leaf slots, make sure we only get as many we request.
         int requested = 10;
         addFreeLeafSlotHostsClassB(20);
-        hosts = RouterService.getPreferencedHosts(false, null,requested);
+        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -637,9 +637,9 @@ public final class MessageRouterTest extends LimeTestCase {
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        assertTrue(RouterService.isSupernode());
+        assertTrue(ProviderHacks.getConnectionServices().isSupernode());
         addFreeUltrapeerSlotHostsClassB(4);
-        hosts = RouterService.getPreferencedHosts(true, null,10);
+        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,10);
         assertEquals(hosts.toString(), 4, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -655,7 +655,7 @@ public final class MessageRouterTest extends LimeTestCase {
         requested = 15;
         int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
-        hosts = RouterService.getPreferencedHosts(true, null,requested);
+        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());

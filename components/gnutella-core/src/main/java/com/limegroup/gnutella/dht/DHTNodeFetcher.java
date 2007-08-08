@@ -101,7 +101,7 @@ public class DHTNodeFetcher {
         
         LOG.debug("Requesting DHT hosts");
         
-        if(!RouterService.isConnected()) {
+        if(!ProviderHacks.getConnectionServices().isConnected()) {
             return;
         }
         
@@ -170,7 +170,7 @@ public class DHTNodeFetcher {
      */
     public void requestDHTHosts(SocketAddress hostAddress) {
         
-        if(!RouterService.isConnected()) {
+        if(!ProviderHacks.getConnectionServices().isConnected()) {
             return;
         }   
         
@@ -295,12 +295,12 @@ public class DHTNodeFetcher {
             //OR timeout
             boolean cancel = (pingingSingleHost.get() 
                                 || delay > DHTSettings.MAX_DHT_NODE_FETCHER_TIME.getValue()
-                                || !RouterService.isConnected()
+                                || !ProviderHacks.getConnectionServices().isConnected()
                                 || !isRunning());
             if(cancel){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Cancelling UDP ping after "+delay+" ms, connected: "
-                            +RouterService.isConnected()+", waiting: "+bootstrapper.isWaitingForNodes());
+                            +ProviderHacks.getConnectionServices().isConnected()+", waiting: "+bootstrapper.isWaitingForNodes());
                 }
             }
             return cancel;

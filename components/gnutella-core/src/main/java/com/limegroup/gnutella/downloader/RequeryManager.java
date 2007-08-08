@@ -6,7 +6,7 @@ import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -234,8 +234,8 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         
         // Wait till your connections are stable enough to get the minimum 
         // number of messages
-        return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+        return ProviderHacks.getConnectionServices().countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
                     >= MIN_NUM_CONNECTIONS &&
-               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
+               ProviderHacks.getConnectionServices().getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 }

@@ -130,8 +130,8 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ProviderHacks.getLifecycleManager().start();
-		RouterService.clearHostCatcher();
-        RouterService.connect();	
+		LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -144,7 +144,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
 		sleep();
         if ((LEAF != null) && LEAF.isOpen())
             LEAF.close();

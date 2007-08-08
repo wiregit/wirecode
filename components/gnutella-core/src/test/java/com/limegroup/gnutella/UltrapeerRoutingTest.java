@@ -138,8 +138,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ProviderHacks.getLifecycleManager().start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();	
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -151,7 +151,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		LEAF.close();
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
 		sleep();
 	}
 

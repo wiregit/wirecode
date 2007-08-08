@@ -4,14 +4,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -151,7 +150,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         setPreferredConnections();
 
-        assertTrue(RouterService.isSupernode());
+        assertTrue(ProviderHacks.getConnectionServices().isSupernode());
 
         UltrapeerHandshakeResponder responder = 
             ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("23.3.4.5");
@@ -232,7 +231,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         setPreferredConnections();
 
-        assertTrue(RouterService.isSupernode());
+        assertTrue(ProviderHacks.getConnectionServices().isSupernode());
         
           
         // the ultrapeer we'll be testing against

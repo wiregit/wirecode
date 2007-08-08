@@ -97,8 +97,8 @@ public class MulticastTest extends LimeTestCase {
         setSettings();
                 
         ProviderHacks.getLifecycleManager().start();
-		RouterService.clearHostCatcher();
-		RouterService.connect();
+		LimeTestUtils.clearHostCatcher();
+		ProviderHacks.getConnectionServices().connect();
         
         // MUST SLEEP TO LET THE FILE MANAGER INITIALIZE
         sleep(2000);
@@ -127,7 +127,7 @@ public class MulticastTest extends LimeTestCase {
 	}
     
     public static void globalTearDown() throws Exception {
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
 	}
     
     private static void sleep(int time) {

@@ -202,7 +202,7 @@ public abstract class AbstractDHTController implements DHTController {
         
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact
-        if (RouterService.isActiveSuperNode()) {
+        if (ProviderHacks.getConnectionServices().isActiveSuperNode()) {
             dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
                 public void handleRouteTableEvent(RouteTableEvent event) {
                     switch(event.getEventType()) {
@@ -270,7 +270,7 @@ public abstract class AbstractDHTController implements DHTController {
      */
     public void start() {
         if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !RouterService.isConnected())) {
+                && !ProviderHacks.getConnectionServices().isConnected())) {
             return;
         }
         

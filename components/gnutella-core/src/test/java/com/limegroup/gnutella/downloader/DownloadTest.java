@@ -161,7 +161,7 @@ public class DownloadTest extends LimeTestCase {
         
         ProviderHacks.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
         
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {

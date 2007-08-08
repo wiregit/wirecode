@@ -21,7 +21,6 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -208,7 +207,7 @@ public class UDPHostCache {
             // cancel when connected -- don't send out any more pings
             new Cancellable() {
                 public boolean isCancelled() {
-                    return RouterService.isConnected();
+                    return ProviderHacks.getConnectionServices().isConnected();
                 }
             },
             getPing()

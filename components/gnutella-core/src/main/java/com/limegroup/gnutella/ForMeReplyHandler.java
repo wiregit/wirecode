@@ -302,7 +302,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	 *  <tt>false</tt>
 	 */
 	public boolean isLeafConnection() {
-		return !RouterService.isSupernode();
+		return !ProviderHacks.getConnectionServices().isSupernode();
 	}
 
 	/**

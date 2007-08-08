@@ -504,4 +504,8 @@ public class LimeWireCore {
         return injector.getInstance(LifecycleManager.class);
     }
 
+    public ConnectionServices getConnectionServices() {
+        return injector.getInstance(ConnectionServices.class);
+    }
+
 }

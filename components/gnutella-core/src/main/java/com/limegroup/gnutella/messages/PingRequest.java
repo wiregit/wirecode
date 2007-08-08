@@ -11,7 +11,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -164,7 +163,7 @@ public class PingRequest extends Message {
     
     private static byte[] getSCPData() {
         byte[] data = new byte[1];
-        if(RouterService.isSupernode())
+        if(ProviderHacks.getConnectionServices().isSupernode())
             data[0] = SCP_ULTRAPEER;
         else
             data[0] = SCP_LEAF;

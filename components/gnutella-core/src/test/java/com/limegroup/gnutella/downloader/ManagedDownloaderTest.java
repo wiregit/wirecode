@@ -97,7 +97,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         
         PrivilegedAccessor.setValue(RouterService.class,"manager", connectionManager);
         
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
     
     public void setUp() throws Exception {

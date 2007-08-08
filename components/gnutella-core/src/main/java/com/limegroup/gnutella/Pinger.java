@@ -35,7 +35,7 @@ public final class Pinger implements Runnable {
      * Broadcasts a ping to all connections.
      */
     public void run() {
-        if(RouterService.isSupernode() &&
+        if(ProviderHacks.getConnectionServices().isSupernode() &&
            PingPongSettings.PINGS_ACTIVE.getValue()) {
             ProviderHacks.getMessageRouter().
                 broadcastPingRequest(new PingRequest((byte)3));

@@ -356,7 +356,7 @@ public class UpdateHandler implements HttpClientListener {
                 UpdateSettings.LAST_HTTP_FAILOVER.getValue() < monthAgo &&  // and last failover too
                 !httpUpdate.getAndSet(true)) { // and we're not already doing a failover
             
-            long when = (RouterService.isConnected() ? 1 : 5 ) * 60 * 1000;
+            long when = (ProviderHacks.getConnectionServices().isConnected() ? 1 : 5 ) * 60 * 1000;
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             

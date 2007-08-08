@@ -12,9 +12,9 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -47,7 +47,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    
     	    boolean open;
     	    
-    	    if (RouterService.isConnected())
+    	    if (ProviderHacks.getConnectionServices().isConnected())
     	        open = networkManager.acceptedIncomingConnection();
     	    else
     	        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();

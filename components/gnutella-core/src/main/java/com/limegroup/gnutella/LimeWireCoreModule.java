@@ -164,6 +164,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BTDownloaderFactory.class).to(BTDownloaderFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
+        bind(ConnectionServices.class).to(ConnectionServicesImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

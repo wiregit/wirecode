@@ -1853,7 +1853,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         // we will create a dedicated preference fetcher
         // that tries to fetch a connection that matches the
         // clients locale
-        if (RouterService.isShieldedLeaf() && _needPref && !_needPrefInterrupterScheduled
+        if (ProviderHacks.getConnectionServices().isShieldedLeaf() && _needPref && !_needPrefInterrupterScheduled
                 && _dedicatedPrefFetcher == null) {
             _dedicatedPrefFetcher = new ConnectionFetcher(true);
             _dedicatedPrefFetcher.connect();
@@ -2486,7 +2486,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                     return;
                 }
                 
-                if(!RouterService.isConnected()) {
+                if(!ProviderHacks.getConnectionServices().isConnected()) {
                     // Try to re-connect.  Note this call resets the time
                     // for our last check for a live connection, so we may
                     // hit web servers again to check for a live connection.

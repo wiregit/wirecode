@@ -608,7 +608,7 @@ public class UDPService implements ReadWriteObserver {
 	    if (!canReceiveSolicited()) 
 	        return false;
 
-	    if (!RouterService.isConnected())
+	    if (!ProviderHacks.getConnectionServices().isConnected())
 	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
 	    
 	    boolean ret = true;

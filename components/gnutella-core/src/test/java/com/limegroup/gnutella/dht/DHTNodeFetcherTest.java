@@ -71,7 +71,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             }
         };
         PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
 
     public void testRequestDHTHostsFromSingleHost() throws Exception {

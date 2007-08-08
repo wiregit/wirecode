@@ -151,6 +151,7 @@ public class ProviderHacks {
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
+    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }

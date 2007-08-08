@@ -238,7 +238,7 @@ public class NodeAssigner {
         }
         
         // If we're already an Ultrapeer then don't bother
-        if (RouterService.isSupernode()) {
+        if (ProviderHacks.getConnectionServices().isSupernode()) {
             return;
         }
         
@@ -383,7 +383,7 @@ public class NodeAssigner {
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
         // we were connected as active node before, switch to passive mode
-        boolean isUltrapeer = RouterService.isActiveSuperNode();
+        boolean isUltrapeer = ProviderHacks.getConnectionServices().isActiveSuperNode();
         if (isUltrapeer) {
             mode = DHTMode.PASSIVE;
         } 

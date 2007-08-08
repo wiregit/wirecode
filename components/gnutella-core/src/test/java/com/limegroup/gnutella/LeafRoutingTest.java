@@ -104,8 +104,8 @@ public class LeafRoutingTest extends LimeTestCase {
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
-        RouterService.connect();
-        RouterService.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
+        LimeTestUtils.clearHostCatcher();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         connect();
@@ -130,7 +130,7 @@ public class LeafRoutingTest extends LimeTestCase {
     private static Connection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         RouterService.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
+         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          

@@ -615,7 +615,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
         
-        return !RouterService.isConnectedTo(addr) &&
+        return !ProviderHacks.getConnectionServices().isConnectedTo(addr) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
 

@@ -4,11 +4,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,7 +16,6 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortSet;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -41,7 +36,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 // DPINJ: Going away...
@@ -81,13 +75,6 @@ public class RouterService {
 	    MYBTGUID = mybtguid;
 	}
     
-    /**
-     *  Returns the number of initialized messaging connections.
-     */
-    public static int getNumInitializedConnections() {
-    	return ProviderHacks.getConnectionManager().getNumInitializedConnections();
-    }
-
     /**
      * Returns whether there are any active internet (non-multicast) transfers
      * going at speed greater than 0.
@@ -178,101 +165,6 @@ public class RouterService {
      */
     public static ScheduledExecutorService getScheduledExecutorService() {
     	return SimpleTimer.sharedTimer();
-    }
-
-    /**
-     * Creates a new outgoing messaging connection to the given host and port.
-     * Blocks until the connection established.  Throws IOException if
-     * the connection failed.
-     * @return a connection to the request host
-     * @exception IOException the connection failed
-     */
-    public static ManagedConnection connectToHostBlocking(String hostname, int portnum, ConnectType type)
-		throws IOException {
-        return ProviderHacks.getConnectionManager().createConnectionBlocking(hostname, portnum, type);
-    }
-
-    /**
-     * Creates a new outgoing messaging connection to the given host and port. 
-     * Returns immediately without blocking.  If hostname would connect
-     * us to ourselves, returns immediately.
-     */
-    public static void connectToHostAsynchronously(String hostname, int portnum, ConnectType type) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases for this machine.
-		
-        byte[] cIP = null;
-        InetAddress addr;
-        try {
-            addr = InetAddress.getByName(hostname);
-            cIP = addr.getAddress();
-        } catch(UnknownHostException e) {
-            return;
-        }
-        if ((cIP[0] == 127) && (portnum==ProviderHacks.getAcceptor().getPort(true)) &&
-			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
-			return;
-        } else {
-            byte[] managerIP=ProviderHacks.getAcceptor().getAddress(true);
-            if (Arrays.equals(cIP, managerIP)
-                && portnum==ProviderHacks.getAcceptor().getPort(true))
-                return;
-        }
-
-        if (!ProviderHacks.getAcceptor().isBannedIP(cIP)) {
-            ProviderHacks.getConnectionManager().createConnectionAsynchronously(hostname, portnum, type);
-		}
-    }
-    
-    /**
-     * Determines if you're connected to the given host.
-     */
-    public static boolean isConnectedTo(InetAddress addr) {
-        // ideally we would check download sockets too, but
-        // because of the way ManagedDownloader is built, it isn't
-        // too practical.
-        // TODO: rewrite ManagedDownloader
-        
-        String host = addr.getHostAddress();
-        return ProviderHacks.getConnectionManager().isConnectedTo(host) ||
-               ProviderHacks.getUDPMultiplexor().isConnectedTo(addr) ||
-               ProviderHacks.getUploadManager().isConnectedTo(addr); // ||
-               // dloadManager.isConnectedTo(addr);
-    }
-
-    /**
-     * Connects to the network.  Ensures the number of messaging connections
-     * (keep-alive) is non-zero and recontacts the pong server as needed.  
-     */
-    public static void connect() {
-        adjustSpamFilters();
-        
-        //delegate to connection manager
-        ProviderHacks.getConnectionManager().connect();
-    }
-
-    /**
-     * Disconnects from the network.  Closes all connections and sets
-     * the number of connections to zero.
-     */
-    public static void disconnect() {
-		// Delegate to connection manager
-        ProviderHacks.getConnectionManager().disconnect(false);
-    }
-
-    /**
-     * Closes and removes the given connection.
-     */
-    public static void removeConnection(ManagedConnection c) {
-        ProviderHacks.getConnectionManager().remove(c);
-    }
-
-    /**
-     * Clears the hostcatcher.
-     */
-    public static void clearHostCatcher() {
-        ProviderHacks.getHostCatcher().clear();
     }
 
     /**
@@ -386,20 +278,6 @@ public class RouterService {
         // TODO: notify DownloadManager & UploadManager about new banned IP ranges
     }
 
-    /**
-     * Count up all the messages on active connections
-     */
-    public static int getActiveConnectionMessages() {
-		return ProviderHacks.getConnectionManager().getActiveConnectionMessages();
-    }
-
-    /**
-     * Count how many connections have already received N messages
-     */
-    public static int countConnectionsWithNMessages(int messageThreshold) {
-		return ProviderHacks.getConnectionManager().countConnectionsWithNMessages(messageThreshold);
-    }
-    
     /** 
      * Returns a new GUID for passing to query.
      * This method is the central point of decision making for sending out OOB 
@@ -542,7 +420,7 @@ public class RouterService {
         ProviderHacks.getQueryUnicaster().purgeQuery(guid);
         ProviderHacks.getSearchResultHandler().removeQuery(guid);
         ProviderHacks.getMessageRouter().queryKilled(guid);
-        if(RouterService.isSupernode())
+        if(ProviderHacks.getConnectionServices().isSupernode())
             ProviderHacks.getQueryDispatcher().addToRemove(guid);
         ProviderHacks.getMutableGUIDFilter().removeGUID(guid.bytes());
     }
@@ -577,77 +455,6 @@ public class RouterService {
         return ProviderHacks.getResponseVerifier().isMandragoreWorm(guid, response);
     }
     
-    /**
-     * Returns a collection of IpPorts, preferencing hosts with open slots.
-     * If isUltrapeer is true, this preferences hosts with open ultrapeer slots,
-     * otherwise it preferences hosts with open leaf slots.
-     *
-     * Preferences via locale, also.
-     * 
-     * @param num How many endpoints to try to get
-     */
-    public static Collection<IpPort> getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
-        
-        Set<IpPort> hosts = new IpPortSet();
-        
-        if(isUltrapeer)
-            hosts.addAll(ProviderHacks.getHostCatcher().getUltrapeersWithFreeUltrapeerSlots(locale,num));
-        else
-            hosts.addAll(ProviderHacks.getHostCatcher().getUltrapeersWithFreeLeafSlots(locale,num));
-        
-        // If we don't have enough hosts, add more.
-        
-        if(hosts.size() < num) {
-            //we first try to get the connections that match the locale.
-            for(IpPort ipp : ProviderHacks.getConnectionManager().getInitializedConnectionsMatchLocale(locale)) {
-                if(hosts.size() >= num)
-                    break;
-                hosts.add(ipp);
-            }
-            
-            //if we still don't have enough hosts, get them from the list
-            //of all initialized connection
-            if(hosts.size() < num) {
-                for(IpPort ipp : ProviderHacks.getConnectionManager().getInitializedConnections()) {
-                    if(hosts.size() >= num)
-                        break;
-                    hosts.add(ipp);
-                }
-            }
-        }
-        
-        return hosts;
-    }
-
-    /**
-	 * Returns whether or not this client currently has any initialized 
-	 * connections.
-	 *
-	 * @return <tt>true</tt> if the client does have initialized connections,
-	 *  <tt>false</tt> otherwise
-	 */
-	public static boolean isFullyConnected() {
-		return ProviderHacks.getConnectionManager().isFullyConnected();
-	}    
-
-	/**
-	 * Returns whether or not this client currently has any initialized 
-	 * connections.
-	 *
-	 * @return <tt>true</tt> if the client does have initialized connections,
-	 *  <tt>false</tt> otherwise
-	 */
-	public static boolean isConnected() {
-		return ProviderHacks.getConnectionManager().isConnected();
-	}
-	
-	/**
-	 * Returns whether or not this client is attempting to connect.
-	 */
-	public static boolean isConnecting() {
-	    return ProviderHacks.getConnectionManager().isConnecting();
-	}
-
     /**
      * Returns the number of files being shared locally.
      */
@@ -831,35 +638,4 @@ public class RouterService {
         
         return handler;
 	}
-
-    /**
-     * Tells whether the node is a supernode or not.
-     * NOTE: This will return true if this node is capable
-     * of being a supernode but is not yet connected to 
-     * the network as one (and is not a shielded leaf either).
-     * 
-     * @return true, if supernode, false otherwise
-     */
-    public static boolean isSupernode() {
-        return ProviderHacks.getConnectionManager().isSupernode();
-    }
-    
-    /**
-     * Tells whether the node is currently connected to the network
-     * as a supernode or not.
-     * @return true, if active supernode, false otherwise
-     */
-    public static boolean isActiveSuperNode() {
-        return ProviderHacks.getConnectionManager().isActiveSupernode();
-    }
-    
-	/**
-	 * Accessor for whether or not this node is a shielded leaf.
-	 *
-	 * @return <tt>true</tt> if this node is a shielded leaf, 
-	 *  <tt>false</tt> otherwise
-	 */
-    public static boolean isShieldedLeaf() {
-        return ProviderHacks.getConnectionManager().isShieldedLeaf();
-    }
 }

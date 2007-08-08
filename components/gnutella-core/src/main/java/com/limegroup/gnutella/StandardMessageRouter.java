@@ -198,7 +198,7 @@ public class StandardMessageRouter extends MessageRouter {
             int dhtFraction = ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.getValue();
             int maxDHTHosts = Math.round(((float)dhtFraction/100)*maxHosts);
             
-            gnuthosts = RouterService.getPreferencedHosts(
+            gnuthosts = ProviderHacks.getConnectionServices().getPreferencedHosts(
                         isUltrapeer, 
                         request.getLocale(),
                         maxHosts - Math.min(numDHTHosts, maxDHTHosts));
@@ -284,7 +284,7 @@ public class StandardMessageRouter extends MessageRouter {
         // Run the local query
         Response[] responses = fileManager.query(queryRequest);
         
-        if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
+        if( ProviderHacks.getConnectionServices().isShieldedLeaf() && queryRequest.isTCP() ) {
             if( responses != null && responses.length > 0 )
                 RoutedQueryStat.LEAF_HIT.incrementStat();
             else

@@ -130,8 +130,8 @@ public final class PongCachingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
         ProviderHacks.getLifecycleManager().start();
-		RouterService.clearHostCatcher();
-		RouterService.connect();
+		LimeTestUtils.clearHostCatcher();
+		ProviderHacks.getConnectionServices().connect();
         
 		connect();
 		assertEquals("unexpected port", SERVER_PORT, 
@@ -147,7 +147,7 @@ public final class PongCachingTest extends LimeTestCase {
         ULTRAPEER_3.close();
         ULTRAPEER_4.close();        
         ConnectionSettings.SEND_QRP.setValue(true);
-		RouterService.disconnect();
+		ProviderHacks.getConnectionServices().disconnect();
 		sleep();
 	}
 

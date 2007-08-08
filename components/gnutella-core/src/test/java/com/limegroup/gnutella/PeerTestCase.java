@@ -81,8 +81,8 @@ public abstract class PeerTestCase extends LimeTestCase {
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
         Thread.sleep(2000);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
@@ -98,7 +98,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          ServerSocket ss=new ServerSocket();
          ss.setReuseAddress(true);
          ss.bind(new InetSocketAddress(0));
-         RouterService.connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
+         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          

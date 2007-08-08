@@ -183,9 +183,9 @@ public final class ConnectionChecker implements Runnable {
                     LOG.debug("Connection exists.");
                     
                     // if we did disconnect as an attempt to work around SP2, connect now.
-                    if (_triedSP2Workaround && !RouterService.isConnected() && !RouterService.isConnecting()) {
+                    if (_triedSP2Workaround && !ProviderHacks.getConnectionServices().isConnected() && !ProviderHacks.getConnectionServices().isConnecting()) {
                         LOG.debug("Reconnecting RouterService");
-                        RouterService.connect();
+                        ProviderHacks.getConnectionServices().connect();
                     }
                     return;
                 }
@@ -240,7 +240,7 @@ public final class ConnectionChecker implements Runnable {
      */
     private boolean udpIsDead() {
         PingRequest ping = PingRequest.createUDPPing();
-        Collection<IpPort> hosts = RouterService.getPreferencedHosts(false,"en",50);
+        Collection<IpPort> hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false,"en",50);
         UDPPinger myPinger = ProviderHacks.getHostCatcher().getPinger();
         UDPChecker checker = new UDPChecker();
         
@@ -268,7 +268,7 @@ public final class ConnectionChecker implements Runnable {
      * Terminates all attempts to open new sockets
      */
     private void killAndSleep() {
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
         numWorkarounds++;
         try {
             Thread.sleep(5*1000);

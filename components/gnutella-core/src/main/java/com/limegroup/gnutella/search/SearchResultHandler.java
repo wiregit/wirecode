@@ -325,7 +325,7 @@ public final class SearchResultHandler implements Inspectable {
             gc.increment(numGoodSentToFrontEnd);
 
             // inform proxying Ultrapeers....
-            if (RouterService.isShieldedLeaf()) {
+            if (ProviderHacks.getConnectionServices().isShieldedLeaf()) {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
                     LOG.trace("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
