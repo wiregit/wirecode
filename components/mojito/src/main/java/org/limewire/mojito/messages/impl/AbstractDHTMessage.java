@@ -35,7 +35,6 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
@@ -115,13 +114,16 @@ abstract class AbstractDHTMessage implements DHTMessage {
         int instanceId = in.readUnsignedByte();
         int flags = in.readUnsignedByte();
         
-        this.contact = ContactFactory.createLiveContact(src, vendor, version, 
+        this.contact = createContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, flags);
         
         int extensionsLength = in.readUnsignedShort();
         in.skip(extensionsLength);
     }
     
+    protected abstract Contact createContact(SocketAddress src, Vendor vendor, Version version,
+            KUID nodeId, SocketAddress contactAddress, int instanceId, int flags);
+        
     public Context getContext() {
         return context;
     }
