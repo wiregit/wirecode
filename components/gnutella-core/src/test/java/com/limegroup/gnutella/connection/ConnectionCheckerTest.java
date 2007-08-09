@@ -43,7 +43,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
     public void testForLiveConnection() throws Exception {
 
         // We should quickly connect to one of our hosts.
-        ConnectionChecker checker = ConnectionChecker.checkForLiveConnection();
+        ConnectionChecker checker = ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
         Thread.sleep(10000);
         assertTrue("should have successfully connected", 
             checker.hasConnected());
@@ -62,7 +62,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
 
         PrivilegedAccessor.setValue(ConnectionChecker.class, 
             "STANDARD_HOSTS", dummyHosts);    
-        checker = ConnectionChecker.checkForLiveConnection();
+        checker = ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
         synchronized(LOCK) {
             LOCK.wait(10000);
         }

@@ -31,7 +31,6 @@ import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
@@ -2447,7 +2446,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 _connectionAttempts = 0;
                 _lastConnectionCheck = curTime;
                 LOG.debug("checking for live connection");
-                ConnectionChecker.checkForLiveConnection();
+                ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
             }
         }
     }

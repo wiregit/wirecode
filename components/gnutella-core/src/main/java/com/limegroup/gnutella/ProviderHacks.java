@@ -19,6 +19,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -154,7 +155,7 @@ public class ProviderHacks {
     public static SearchServices getSearchServices() { return i().getSearchServices(); }
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
-    public static UploadServices getUploadServices() { return i().getUploadServices(); }
+    public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
 
     // Requires some factories...
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }

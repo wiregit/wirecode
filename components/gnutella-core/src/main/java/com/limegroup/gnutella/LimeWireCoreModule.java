@@ -33,12 +33,18 @@ import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
 import com.limegroup.bittorrent.TorrentEvent;
 import com.limegroup.bittorrent.TorrentEventListener;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.choking.ChokerFactory;
+import com.limegroup.bittorrent.choking.ChokerFactoryImpl;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactoryImpl;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerFactoryImpl;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactoryImpl;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
+import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
@@ -173,6 +179,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ApplicationServices.class).to(ApplicationServicesImpl.class);
         bind(SpamServices.class).to(SpamServicesImpl.class);
         bind(DHTControllerFacade.class).to(DHTControllerFacadeImpl.class);
+        bind(ChokerFactory.class).to(ChokerFactoryImpl.class);
+        bind(BTConnectionFetcherFactory.class).to(BTConnectionFetcherFactoryImpl.class);
+        bind(ConnectionCheckerManager.class).to(ConnectionCheckerManagerImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

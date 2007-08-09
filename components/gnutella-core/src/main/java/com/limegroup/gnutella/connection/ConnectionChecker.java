@@ -9,22 +9,29 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageListener;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -32,6 +39,8 @@ import com.limegroup.gnutella.messages.PingRequest;
  * to the Internet.
  */
 public final class ConnectionChecker implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(ConnectionChecker.class);    
 
     /**
      * Flag for whether or not we know for sure that we're connected from
@@ -48,12 +57,6 @@ public final class ConnectionChecker implements Runnable {
      * Whether we have tried to work around SP2 cutting us off.
      */
     private boolean _triedSP2Workaround;
-
-    /**
-     * Log for logging this class.
-     */
-    private static final Log LOG =
-        LogFactory.getLog(ConnectionChecker.class);
         
 
     /**
@@ -118,96 +121,73 @@ public final class ConnectionChecker implements Runnable {
         "www.comcast.com",
     };
     
-    /**
-     * Private constructor ensures that only this class can create instances of
-     * itself.
-     */
-    private ConnectionChecker() {}
-
-    private static ConnectionChecker current;
+    private final ConnectionServices connectionServices;
+    private final UploadServices uploadServices;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<HostCatcher> hostCatcher;
+    private final Provider<UDPService> udpService;
+    private final SocketsManager socketsManager;
     
-    private static volatile int numWorkarounds;
+    private final AtomicInteger numWorkarounds;
     
-    public static int getNumWorkarounds() {
-        return numWorkarounds;
-    }
-    
-    /**
-     * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
-     * internet connection.  If the checker determines that there is no active 
-     * connection, it will notify the <tt>ConnectionManager</tt> to take
-     * appropriate action.
-     * 
-     * @return a new <tt>ConnectionChecker</tt> instance
-     */
-    public static ConnectionChecker checkForLiveConnection() {
-        LOG.trace("checking for live connection");
-
-        ConnectionChecker checker;
-        boolean startThread = false;
-        synchronized(ConnectionChecker.class) {
-            if (current == null) {
-                startThread = true;
-                current = new ConnectionChecker();
-            }
-            checker = current;
-        }
+    public ConnectionChecker(AtomicInteger numWorkarounds,
+            ConnectionServices connectionServices,
+            UploadServices uploadServices,
+            Provider<ConnectionManager> connectionManager,
+            Provider<DownloadManager> downloadManager,
+            Provider<HostCatcher> hostCatcher, Provider<UDPService> udpService,
+            SocketsManager socketsManager) {
+        this.connectionServices = connectionServices;
+        this.uploadServices = uploadServices;
+        this.connectionManager = connectionManager;
+        this.downloadManager = downloadManager;
+        this.hostCatcher = hostCatcher;
+        this.udpService = udpService;
+        this.socketsManager = socketsManager;
         
-        // Only create a new thread if one isn't alive.
-        if(startThread) {
-            LOG.debug("Starting a new connection-checker thread");
-            ThreadExecutor.startThread(checker, "check for live connection");
-        }
-        
-        return checker;
+        this.numWorkarounds = numWorkarounds;
     }
 
     /**
      * Checks for a live internet connection.
      */
     public synchronized void run() {
-        try {
-            List<String> hostList = Arrays.asList(STANDARD_HOSTS);
+        List<String> hostList = Arrays.asList(STANDARD_HOSTS);
+        
+        // Add some randomization.
+        Collections.shuffle(hostList);
+        
+        for(String curHost : hostList) {
+            connectToHost(curHost);
             
-            // Add some randomization.
-            Collections.shuffle(hostList);
-            
-            for(String curHost : hostList) {
-                connectToHost(curHost);
+            // Break out of the loop if we've already discovered that we're 
+            // connected -- we only need to successfully connect to one host
+            // to know for sure that we're up.
+            if(_connected) {
+                LOG.debug("Connection exists.");
                 
-                // Break out of the loop if we've already discovered that we're 
-                // connected -- we only need to successfully connect to one host
-                // to know for sure that we're up.
-                if(_connected) {
-                    LOG.debug("Connection exists.");
-                    
-                    // if we did disconnect as an attempt to work around SP2, connect now.
-                    if (_triedSP2Workaround && !ProviderHacks.getConnectionServices().isConnected() && !ProviderHacks.getConnectionServices().isConnecting()) {
-                        LOG.debug("Reconnecting RouterService");
-                        ProviderHacks.getConnectionServices().connect();
-                    }
-                    return;
+                // if we did disconnect as an attempt to work around SP2, connect now.
+                if (_triedSP2Workaround && !connectionServices.isConnected() && !connectionServices.isConnecting()) {
+                    LOG.debug("Reconnecting RouterService");
+                    connectionServices.connect();
                 }
-                
-                // Stop if we've failed to connect to more than 2 of the hosts
-                // that should be up all of the time.  We do this to make extra
-                // sure the user's connection is down.  If it is down, trying
-                // multiple times adds no load to the test servers.
-                if(_unsuccessfulAttempts > 2) {
-                    LOG.debug("Failed connection check more than twice.");
-                    if (_triedSP2Workaround || !OSUtils.isSocketChallengedWindows()) {
-                        ProviderHacks.getConnectionManager().noInternetConnection();
-                        return;
-                    } else {
-                        _triedSP2Workaround = true;
-                        trySP2Workaround();
-                    }
-                }
+                return;
             }
             
-        } finally {
-            synchronized(ConnectionChecker.class) {
-                current = null;
+            // Stop if we've failed to connect to more than 2 of the hosts
+            // that should be up all of the time.  We do this to make extra
+            // sure the user's connection is down.  If it is down, trying
+            // multiple times adds no load to the test servers.
+            if(_unsuccessfulAttempts > 2) {
+                LOG.debug("Failed connection check more than twice.");
+                if (_triedSP2Workaround || !OSUtils.isSocketChallengedWindows()) {
+                    connectionManager.get().noInternetConnection();
+                    return;
+                } else {
+                    _triedSP2Workaround = true;
+                    trySP2Workaround();
+                }
             }
         }
     }
@@ -223,15 +203,15 @@ public final class ConnectionChecker implements Runnable {
      * @return true if we don't have any transfers going at non-zero speed
      */
     private boolean hasNoTransfers(){
-        ProviderHacks.getDownloadManager().measureBandwidth();
-        float down = ProviderHacks.getDownloadManager().getMeasuredBandwidth();
+        downloadManager.get().measureBandwidth();
+        float down = downloadManager.get().getMeasuredBandwidth();
         
         if (down != 0)
             return false;
         
         // query the upload slot manager, because multicast
         // uploads do not use slots and we do not care about them.
-        return !ProviderHacks.getUploadServices().hasActiveUploads();
+        return !uploadServices.hasActiveUploads();
     }
     
     /**
@@ -239,8 +219,8 @@ public final class ConnectionChecker implements Runnable {
      */
     private boolean udpIsDead() {
         PingRequest ping = PingRequest.createUDPPing();
-        Collection<IpPort> hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false,"en",50);
-        UDPPinger myPinger = ProviderHacks.getHostCatcher().getPinger();
+        Collection<IpPort> hosts = connectionServices.getPreferencedHosts(false,"en",50);
+        UDPPinger myPinger = hostCatcher.get().getPinger();
         UDPChecker checker = new UDPChecker();
         
         // send some hosts to be ranked
@@ -253,7 +233,7 @@ public final class ConnectionChecker implements Runnable {
                 // cancel the hosts we sent.
                 for (int i = 0; i < 5; i++) {
                     checker.wait(1000);
-                    if (ProviderHacks.getUdpService().getLastReceivedTime() > now) {
+                    if (udpService.get().getLastReceivedTime() > now) {
                         checker.received = true;
                         return false;
                     }
@@ -267,8 +247,8 @@ public final class ConnectionChecker implements Runnable {
      * Terminates all attempts to open new sockets
      */
     private void killAndSleep() {
-        ProviderHacks.getConnectionServices().disconnect();
-        numWorkarounds++;
+        connectionServices.disconnect();
+        numWorkarounds.incrementAndGet();
         try {
             Thread.sleep(5*1000);
         } catch (InterruptedException ignored){}
@@ -300,7 +280,7 @@ public final class ConnectionChecker implements Runnable {
             Observer observer = new Observer();
             synchronized(observer) {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                Socket s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host, 80), 6000, observer);
+                Socket s = socketsManager.connect(new InetSocketAddress(host, 80), 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {
                     observer.wait(12000);
@@ -309,7 +289,7 @@ public final class ConnectionChecker implements Runnable {
                     LOG.debug("No response!");
                     // only consider unsuccesful if we were able to remove it
                     // 'cause if it couldn't be removed, a response is still pending...
-                    if(ProviderHacks.getSocketsManager().removeConnectObserver(observer)) {
+                    if(socketsManager.removeConnectObserver(observer)) {
                         LOG.debug("Removed observer");
                         _unsuccessfulAttempts++;
                         IOUtils.close(s);

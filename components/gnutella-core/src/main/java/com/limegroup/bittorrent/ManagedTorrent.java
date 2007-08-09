@@ -446,7 +446,7 @@ BTLinkListener {
 	private void initializeTorrent() {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
 		choker = ProviderHacks.getChokerFactory().getChoker(linkManager, 
-				networkInvoker, false);
+				false);
 		_connectionFetcher = 
 			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this);
 	}
@@ -680,7 +680,7 @@ BTLinkListener {
 		// switch the choker logic and resume uploads
 		choker.shutdown();
 		choker = ProviderHacks.getChokerFactory().getChoker(linkManager,
-				networkInvoker, true);
+				true);
 		choker.start();
 		choker.rechoke();
 		

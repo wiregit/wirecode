@@ -28,6 +28,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -532,5 +533,9 @@ public class LimeWireCore {
 
     public SpamServices getSpamServices() {
         return injector.getInstance(SpamServices.class);
+    }
+    
+    public ConnectionCheckerManager getConnectionCheckerManager() {
+        return injector.getInstance(ConnectionCheckerManager.class);
     }
 }
