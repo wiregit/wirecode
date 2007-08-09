@@ -54,7 +54,7 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
     protected final Contact createContact(SocketAddress src, Vendor vendor, Version version,
             KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
         if (RouteTableSettings.INCOMING_REQUESTS_UNKNOWN.getValue())
-            return ContactFactory.createUnknownContact(vendor, version, nodeId, src);
+            return ContactFactory.createUnknownContact(src, vendor, version, nodeId, contactAddress, instanceId, flags);
         else
             return ContactFactory.createLiveContact(src, vendor, version, nodeId, contactAddress, instanceId, flags);
     }
