@@ -47,12 +47,16 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
+import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
+import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
 import com.limegroup.gnutella.dht.DHTControllerFacadeImpl;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactoryImpl;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
+import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
@@ -182,6 +186,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ChokerFactory.class).to(ChokerFactoryImpl.class);
         bind(BTConnectionFetcherFactory.class).to(BTConnectionFetcherFactoryImpl.class);
         bind(ConnectionCheckerManager.class).to(ConnectionCheckerManagerImpl.class);
+        bind(DHTBootstrapperFactory.class).to(DHTBootstrapperFactoryImpl.class);
+        bind(DHTNodeFetcherFactory.class).to(DHTNodeFetcherFactoryImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

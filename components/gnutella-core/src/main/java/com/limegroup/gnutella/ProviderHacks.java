@@ -21,8 +21,10 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
@@ -152,9 +154,10 @@ public class ProviderHacks {
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
-    public static SearchServices getSearchServices() { return i().getSearchServices(); }
-    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
 
+    // Requires some major reworking -- used statically in a lot of places
+    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
+    
     // Requires some factories...
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
@@ -163,6 +166,9 @@ public class ProviderHacks {
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Cleaned up in all but tests
+    public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return i().getDHTNodeFetcherFactory(); }
+    public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return i().getDHTBootstrapperFactory(); }
+    public static SearchServices getSearchServices() { return i().getSearchServices(); }
     public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
     public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
     public static SpamServices getSpamServices() { return i().getSpamServices(); }

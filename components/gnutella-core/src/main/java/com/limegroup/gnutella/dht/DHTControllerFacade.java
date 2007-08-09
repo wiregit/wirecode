@@ -46,4 +46,6 @@ public interface DHTControllerFacade {
 
     void reloadIPFilter();
 
+    DHTBootstrapper getDHTBootstrapper(DHTController dhtController);
+
 }

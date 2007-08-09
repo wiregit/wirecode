@@ -76,7 +76,9 @@ public class Main {
                         int port=6346;
                         if (commands.length>=3)
                             port=Integer.parseInt(commands[2]);
-                        ProviderHacks.getConnectionServices().connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
+                        System.out.println("Connecting...");
+                        core.getConnectionServices().connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
+                        System.out.println("Connected");
                     } catch (IOException e) {
                         System.out.println("Couldn't establish connection.");
                     } catch (NumberFormatException e) {
@@ -87,7 +89,8 @@ public class Main {
                     int i=command.indexOf(' ');
                     assert(i!=-1 && i<command.length());
                     String query=command.substring(i+1);
-                    ProviderHacks.getSearchServices().query(ProviderHacks.getSearchServices().newQueryGUID(), query);
+                    SearchServices searchServices = core.getSearchServices();
+                    searchServices.query(searchServices.newQueryGUID(), query);
                 } else if (commands.length==2 && commands[0].equals("listen")) {
                     try {
                         int port=Integer.parseInt(commands[1]);

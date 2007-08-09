@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,13 +31,19 @@ import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.VersionUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.SaveLocationException;
@@ -47,6 +54,8 @@ import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
+import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -99,7 +108,6 @@ public class UpdateHandler implements HttpClientListener {
      */
     private static Clock clock = new Clock();
     
-    private UpdateHandler() { initialize(); }
     /**
      * The queue that handles all incoming data.
      */
@@ -142,10 +150,39 @@ public class UpdateHandler implements HttpClientListener {
     /** If an HTTP failover update is in progress */
     private final AtomicBoolean httpUpdate = new AtomicBoolean(false);
     
-    /**
-     * The time we'll notify the gui about an update with URL
-     */
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<ActivityCallback> activityCallback;
+    private final ConnectionServices connectionServices;
+    private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<FileManager> fileManager;
     
+    @Inject
+    public UpdateHandler(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<ActivityCallback> activityCallback,
+            ConnectionServices connectionServices,
+            Provider<HttpExecutor> httpExecutor,
+            Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<ConnectionManager> connectionManager,
+            Provider<DownloadManager> downloadManager,
+            Provider<FileManager> fileManager) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.activityCallback = activityCallback;
+        this.connectionServices = connectionServices;
+        this.httpExecutor = httpExecutor;
+        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.connectionManager = connectionManager;
+        this.downloadManager = downloadManager;
+        this.fileManager = fileManager;
+        
+        initialize(); // DPINJ: move to an initializer
+    }
+
     /**
      * Initializes data as read from disk.
      */
@@ -159,7 +196,7 @@ public class UpdateHandler implements HttpClientListener {
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 QUEUE.execute(new Poller());
             }
@@ -177,7 +214,7 @@ public class UpdateHandler implements HttpClientListener {
                 if (updateInfo != null && 
                 		updateInfo.getUpdateURN() != null &&
                 		isMyUpdateDownloaded(updateInfo))
-                    ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
+                    activityCallback.get().updateAvailable(updateInfo);
                 
                 downloadUpdates(_updatesToDownload, null);
             }
@@ -240,7 +277,7 @@ public class UpdateHandler implements HttpClientListener {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
                 if(!fromDisk && handler != null)
-                    ProviderHacks.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
+                    networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
                 if (fromDisk || uc.getId() <= _lastId)
                     doHttpFailover(uc);
@@ -248,12 +285,12 @@ public class UpdateHandler implements HttpClientListener {
                     storeAndUpdate(data, uc, fromDisk);
             } else {
                 if(!fromDisk && handler != null)
-                    ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+                    networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
             if(!fromDisk && handler != null)
-                ProviderHacks.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
         }
     }
@@ -281,8 +318,8 @@ public class UpdateHandler implements HttpClientListener {
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
             
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
-            ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
-            ProviderHacks.getConnectionManager().sendUpdatedCapabilities();
+            capabilitiesVMFactory.updateCapabilities();
+            connectionManager.get().sendUpdatedCapabilities();
         }
 
         Version limeV;
@@ -336,12 +373,12 @@ public class UpdateHandler implements HttpClientListener {
             
             updateInfo.setUpdateCommand(null);
             
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new NotificationFailover(_lastId),
+            backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
                     0, TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
-            ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
+            activityCallback.get().updateAvailable(updateInfo);
         } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
     }
@@ -356,11 +393,11 @@ public class UpdateHandler implements HttpClientListener {
                 UpdateSettings.LAST_HTTP_FAILOVER.getValue() < monthAgo &&  // and last failover too
                 !httpUpdate.getAndSet(true)) { // and we're not already doing a failover
             
-            long when = (ProviderHacks.getConnectionServices().isConnected() ? 1 : 5 ) * 60 * 1000;
+            long when = (connectionServices.isConnected() ? 1 : 5 ) * 60 * 1000;
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     launchHTTPUpdate();
                 }
@@ -379,7 +416,7 @@ public class UpdateHandler implements HttpClientListener {
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         get.setFollowRedirects(true);
-        ProviderHacks.getHttpExecutor().execute(get,this, 10000);
+        httpExecutor.get().execute(get,this, 10000);
     }
 
     public boolean requestComplete(HttpMethod method) {
@@ -403,7 +440,7 @@ public class UpdateHandler implements HttpClientListener {
             LOG.warn("couldn't fetch data ",failed);
             return false;
         } finally {
-            ProviderHacks.getHttpExecutor().releaseResources(method);
+            httpExecutor.get().releaseResources(method);
         }
         
         handleNewData(inflated, null);
@@ -414,7 +451,7 @@ public class UpdateHandler implements HttpClientListener {
     public boolean requestFailed(HttpMethod m, IOException exc) {
         LOG.warn("http failover failed",exc);
         httpUpdate.set(false);
-        ProviderHacks.getHttpExecutor().releaseResources(m);
+        httpExecutor.get().releaseResources(m);
         // nothing we can do.
         return false;
     }
@@ -471,14 +508,12 @@ public class UpdateHandler implements HttpClientListener {
         for(DownloadInformation next : toDownload) {
             if (isHopeless(next))
                 continue; 
-
-            DownloadManager dm = ProviderHacks.getDownloadManager();
-            FileManager fm = ProviderHacks.getFileManager();
-            if(dm.isGUIInitd() && fm.isLoadFinished()) {
+            
+            if(downloadManager.get().isGUIInitd() && fileManager.get().isLoadFinished()) {
                 
-                FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
+                FileDesc shared = fileManager.get().getFileDescForUrn(next.getUpdateURN());
                 //TODO: remove the cast
-                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
+                ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
                     LOG.debug("Looking for: " + next + ", got: " + shared);
                 
@@ -492,10 +527,10 @@ public class UpdateHandler implements HttpClientListener {
                 // If we don't have an existing download ...
                 // and there's no existing InNetwork downloads & 
                 // we're allowed to start a new one.
-                if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
+                if(md == null && !downloadManager.get().hasInNetworkDownload() && canStartDownload()) {
                     LOG.debug("Starting a new InNetwork Download");
                     try {
-                        md = (ManagedDownloader)dm.download(next, clock.now());
+                        md = (ManagedDownloader)downloadManager.get().download(next, clock.now());
                     } catch(SaveLocationException sle) {
                         LOG.error("Unable to construct download", sle);
                     }
@@ -516,24 +551,22 @@ public class UpdateHandler implements HttpClientListener {
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	DownloadManager dm = ProviderHacks.getDownloadManager();
-    	FileManager fm = ProviderHacks.getFileManager();
-    	if (!dm.isGUIInitd() || !fm.isLoadFinished())
+    	if (!downloadManager.get().isGUIInitd() || !fileManager.get().isLoadFinished())
     		return;
     	
         if (_killingObsoleteNecessary) {
             _killingObsoleteNecessary = false;
-            dm.killDownloadersNotListed(toDownload);
+            downloadManager.get().killDownloadersNotListed(toDownload);
             
             Set<URN> urns = new HashSet<URN>(toDownload.size());
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            FileDesc [] shared = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
+            FileDesc [] shared = fileManager.get().getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
             for (int i = 0; i < shared.length; i++) {
             	if (shared[i].getSHA1Urn() != null &&
             			!urns.contains(shared[i].getSHA1Urn())) {
-            		fm.removeFileIfShared(shared[i].getFile());
+            	    fileManager.get().removeFileIfShared(shared[i].getFile());
             		shared[i].getFile().delete();
             	}
 			}
@@ -544,7 +577,7 @@ public class UpdateHandler implements HttpClientListener {
      * Adds all current connections that have the right update ID as a source for this download.
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
-        for(ManagedConnection mc : ProviderHacks.getConnectionManager().getConnections()) {
+        for(ManagedConnection mc : connectionManager.get().getConnections()) {
             if(mc.getRemoteHostUpdateVersion() == _lastId) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
@@ -603,7 +636,7 @@ public class UpdateHandler implements HttpClientListener {
         UpdateInformation update = _updateInfo;
         assert(update != null);
         
-        ProviderHacks.getActivityCallback().updateAvailable(update);
+        activityCallback.get().updateAvailable(update);
     }
     
     /**
@@ -654,9 +687,9 @@ public class UpdateHandler implements HttpClientListener {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new NotificationFailover(_lastId),delay,0, TimeUnit.MILLISECONDS);
+                        backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),delay,0, TimeUnit.MILLISECONDS);
                     } else
-                        ProviderHacks.getActivityCallback().updateAvailable(updateInfo);
+                        activityCallback.get().updateAvailable(updateInfo);
                 }
             }
         };
@@ -667,17 +700,16 @@ public class UpdateHandler implements HttpClientListener {
     /**
      * @return whether we killed any hopeless update downloads
      */
-    private static void killHopelessUpdates(List<? extends DownloadInformation> updates) {
+    private void killHopelessUpdates(List<? extends DownloadInformation> updates) {
         if (updates == null)
             return;
         
-        DownloadManager dm = ProviderHacks.getDownloadManager();
-        if (!dm.hasInNetworkDownload())
+        if (!downloadManager.get().hasInNetworkDownload())
             return;
         
         long now = clock.now();
         for(DownloadInformation info : updates) {
-            Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
+            Downloader downloader = downloadManager.get().getDownloaderForURN(info.getUpdateURN());
             if (downloader != null && downloader instanceof InNetworkDownloader) {
                 InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
                 if (isHopeless(iDownloader, now))  
@@ -690,7 +722,7 @@ public class UpdateHandler implements HttpClientListener {
      * @param now what time is it now
      * @return whether the in-network downloader is considered hopeless
      */
-    private static boolean isHopeless(InNetworkDownloader downloader, long now) {
+    private boolean isHopeless(InNetworkDownloader downloader, long now) {
         if (now - downloader.getStartTime() < 
                 UpdateSettings.UPDATE_GIVEUP_FACTOR.getValue() * 
                 UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
@@ -706,16 +738,15 @@ public class UpdateHandler implements HttpClientListener {
      * @return true if the update for our specific machine is downloaded or
      * there was nothing to download
      */
-    private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        FileManager fm = ProviderHacks.getFileManager();
-        if (!fm.isLoadFinished())
+    private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+        if (!fileManager.get().isLoadFinished())
             return false;
         
         URN myUrn = myInfo.getUpdateURN();
         if (myUrn == null)
             return true;
         
-        FileDesc desc = fm.getFileDescForUrn(myUrn);
+        FileDesc desc = fileManager.get().getFileDescForUrn(myUrn);
         
         if (desc == null)
             return false;
@@ -737,7 +768,7 @@ public class UpdateHandler implements HttpClientListener {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay( new Runnable() {
+            backgroundExecutor.scheduleWithFixedDelay( new Runnable() {
                 public void run() {
                     QUEUE.execute(new Poller());
                 }

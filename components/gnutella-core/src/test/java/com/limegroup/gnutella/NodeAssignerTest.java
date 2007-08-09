@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -59,7 +60,14 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void setUp() throws Exception {
         setSettings();
-        ASSIGNER = new NodeAssigner(BW, BW, ProviderHacks.getConnectionManager(), ProviderHacks.getNetworkManager());
+        ASSIGNER = new NodeAssigner(Providers.of((BandwidthTracker) BW),
+                Providers.of((BandwidthTracker) BW), Providers.of(ProviderHacks
+                        .getConnectionManager()), ProviderHacks
+                        .getNetworkManager(),
+                ProviderHacks.getSearchServices(), Providers.of(ProviderHacks
+                        .getDHTManager()), ProviderHacks
+                        .getBackgroundExecutor(), ProviderHacks
+                        .getConnectionServices(), Providers.of(ProviderHacks.getUdpService()));
 
     }
     

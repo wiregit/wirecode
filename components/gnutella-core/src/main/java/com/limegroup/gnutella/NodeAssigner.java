@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +12,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -103,10 +105,15 @@ public class NodeAssigner {
     private ScheduledFuture<?>  timer;
     
 
-    private final BandwidthTracker uploadTracker;
-    private final BandwidthTracker downloadTracker;
-    private final ConnectionManager connectionManager;
+    private final Provider<BandwidthTracker> uploadTracker;
+    private final Provider<BandwidthTracker> downloadTracker;
+    private final Provider<ConnectionManager> connectionManager;
     private final NetworkManager networkManager;
+    private final SearchServices searchServices;
+    private final Provider<DHTManager> dhtManager;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ConnectionServices connectionServices;
+    private final Provider<UDPService> udpService;
     
 
     /** 
@@ -119,14 +126,24 @@ public class NodeAssigner {
      * @param connectionManager Reference to the ConnectionManager for this node
      */
     @Inject
-    public NodeAssigner(@Named("uploadTracker") BandwidthTracker uploadTracker, 
-                        @Named("downloadTracker") BandwidthTracker downloadTracker,
-                        ConnectionManager connectionManager,
-                        NetworkManager networkManager) {
+    public NodeAssigner(@Named("uploadTracker") Provider<BandwidthTracker>uploadTracker, 
+                        @Named("downloadTracker") Provider<BandwidthTracker> downloadTracker,
+                        Provider<ConnectionManager> connectionManager,
+                        NetworkManager networkManager,
+                        SearchServices searchServices,
+                        Provider<DHTManager> dhtManager,
+                        @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                        ConnectionServices connectionServices,
+                        Provider<UDPService> udpService) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;  
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
+        this.searchServices = searchServices;
+        this.dhtManager = dhtManager;
+        this.backgroundExecutor = backgroundExecutor;
+        this.connectionServices = connectionServices;
+        this.udpService = udpService;
     }
     
     /**
@@ -151,7 +168,7 @@ public class NodeAssigner {
                 }
             }
         };            
-        timer = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(task, 0, TIMER_DELAY, TimeUnit.MILLISECONDS);
+        timer = backgroundExecutor.scheduleWithFixedDelay(task, 0, TIMER_DELAY, TimeUnit.MILLISECONDS);
     }
     
     public void stop() {
@@ -166,27 +183,27 @@ public class NodeAssigner {
      */
     private void collectBandwidthData() {
         _currentUptime += TIMER_DELAY_IN_SECONDS;
-        uploadTracker.measureBandwidth();
-        downloadTracker.measureBandwidth();
-        connectionManager.measureBandwidth();
+        uploadTracker.get().measureBandwidth();
+        downloadTracker.get().measureBandwidth();
+        connectionManager.get().measureBandwidth();
         float bandwidth = 0;
         try {
-            bandwidth = uploadTracker.getMeasuredBandwidth();
+            bandwidth = uploadTracker.get().getMeasuredBandwidth();
         }catch(InsufficientDataException ide) {
             bandwidth = 0;
         }
         int newUpstreamBytesPerSec = 
             (int)bandwidth
-           +(int)connectionManager.getMeasuredUpstreamBandwidth();
+           +(int)connectionManager.get().getMeasuredUpstreamBandwidth();
         bandwidth = 0;
         try {
-            bandwidth = downloadTracker.getMeasuredBandwidth();
+            bandwidth = downloadTracker.get().getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             bandwidth = 0;
         }
         int newDownstreamBytesPerSec = 
             (int)bandwidth
-           +(int)connectionManager.getMeasuredDownstreamBandwidth();
+           +(int)connectionManager.get().getMeasuredDownstreamBandwidth();
         if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
             _maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
             UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
@@ -239,7 +256,7 @@ public class NodeAssigner {
         }
         
         // If we're already an Ultrapeer then don't bother
-        if (ProviderHacks.getConnectionServices().isSupernode()) {
+        if (connectionServices.isSupernode()) {
             return;
         }
         
@@ -262,7 +279,7 @@ public class NodeAssigner {
         // it up as an Ultrapeer -- it will just get forced to be one
         _isTooGoodUltrapeerToPassUp = isUltrapeerCapable &&
             networkManager.acceptedIncomingConnection() &&
-            (curTime - ProviderHacks.getSearchServices().getLastQueryTime() > 5*60*1000) &&
+            (curTime - searchServices.getLastQueryTime() > 5*60*1000) &&
             (BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
         if(LOG.isDebugEnabled()) {
@@ -289,7 +306,7 @@ public class NodeAssigner {
             Runnable ultrapeerRunner = new Runnable() {
                 public void run() {
                     NodeAssignerStat.ULTRAPEER_ASSIGNMENTS.incrementStat();
-                    ProviderHacks.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
+                    connectionManager.get().tryToBecomeAnUltrapeer(demotes);
                 }
             };
                 
@@ -327,7 +344,7 @@ public class NodeAssigner {
         
         // If I'm not a DHT Node running in ACTIVE mode then
         // try to become an Ultrapeer
-        if (ProviderHacks.getDHTManager().getDHTMode() != DHTMode.ACTIVE) {
+        if (dhtManager.get().getDHTMode() != DHTMode.ACTIVE) {
             return true;
         }
         
@@ -366,8 +383,7 @@ public class NodeAssigner {
         
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
-        DHTManager manager = ProviderHacks.getDHTManager();
-        final DHTMode current = manager.getDHTMode();
+        final DHTMode current = dhtManager.get().getDHTMode();
         assert (current != null) : "Current DHTMode is null, fix your DHTManager-Stub!";
         
         // Initial mode is to turn off the DHT
@@ -375,7 +391,7 @@ public class NodeAssigner {
         
         // Check if the DHT was disabled by somebody. If so shut it
         // down and return
-        if (!manager.isEnabled()) {
+        if (!dhtManager.get().isEnabled()) {
             if (current != mode) {
                 switchDHTMode(current, mode);
             }
@@ -384,7 +400,7 @@ public class NodeAssigner {
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
         // we were connected as active node before, switch to passive mode
-        boolean isUltrapeer = ProviderHacks.getConnectionServices().isActiveSuperNode();
+        boolean isUltrapeer = connectionServices.isActiveSuperNode();
         if (isUltrapeer) {
             mode = DHTMode.PASSIVE;
         } 
@@ -398,7 +414,7 @@ public class NodeAssigner {
             assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L) 
                     > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
                     
-            final long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
+            final long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
                     ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
             
             // This is the minimum requirement to connect to the DHT in passive mode
@@ -495,9 +511,9 @@ public class NodeAssigner {
         Runnable init = new Runnable() {
             public void run() {
                 if (to != DHTMode.INACTIVE) {
-                    ProviderHacks.getDHTManager().start(to);
+                    dhtManager.get().start(to);
                 } else {
-                    ProviderHacks.getDHTManager().stop();
+                    dhtManager.get().stop();
                 }
                 
                 DHTSettings.DHT_MODE.setValue(to.toString());
@@ -511,7 +527,7 @@ public class NodeAssigner {
      * Returns whether ot not a Node is PASSIVE_LEAF capable
      */
     private boolean isPassiveLeafDHTCapable() {
-        long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
+        long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
         // TODO: I'm not sure if it's really necessary to be an ULTRAPEER_OS
@@ -519,14 +535,14 @@ public class NodeAssigner {
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
-                && ProviderHacks.getUdpService().canReceiveSolicited();
+                && udpService.get().canReceiveSolicited();
     }
     
     /**
      * Returns whether ot not a Node is ACTIVE capable
      */
     private boolean isActiveDHTCapable() {
-        long averageTime = Math.max(ProviderHacks.getConnectionManager().getCurrentAverageUptime(),
+        long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         
         return _isHardcoreCapable

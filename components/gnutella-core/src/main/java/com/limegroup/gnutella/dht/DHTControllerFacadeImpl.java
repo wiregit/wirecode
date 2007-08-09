@@ -41,6 +41,7 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     private final Provider<AltLocModel> altLocModel;
     private final Provider<PushProxiesModel> pushProxyModel;
     private final Provider<MessageDispatcherFactory> messageDispatcherFactory;
+    private final DHTBootstrapperFactory dhtBootstrapperFactory;
         
     @Inject
     public DHTControllerFacadeImpl(NetworkManager networkManager,
@@ -53,7 +54,8 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
             Provider<PushProxiesValueFactory> pushProxyValueFactory,
             Provider<AltLocModel> altLocModel,
             Provider<PushProxiesModel> pushProxyModel,
-            Provider<MessageDispatcherFactory> messageDispatcherFactory) {
+            Provider<MessageDispatcherFactory> messageDispatcherFactory,
+            DHTBootstrapperFactory dhtBootstrapperFactory) {
         this.networkManager = networkManager;
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
@@ -66,6 +68,7 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         this.altLocModel = altLocModel;
         this.pushProxyModel = pushProxyModel;
         this.messageDispatcherFactory = messageDispatcherFactory;
+        this.dhtBootstrapperFactory = dhtBootstrapperFactory;
     }
     
     public boolean allow(SocketAddress addr) {
@@ -130,6 +133,10 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     
     public void updateCapabilities() {
         capabilitiesVMFactory.updateCapabilities();
+    }
+
+    public DHTBootstrapper getDHTBootstrapper(DHTController dhtController) {
+        return dhtBootstrapperFactory.createBootstrapper(dhtController);
     }
 
 }

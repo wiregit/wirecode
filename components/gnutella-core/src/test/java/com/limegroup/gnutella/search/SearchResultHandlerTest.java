@@ -48,7 +48,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testSecureActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
+        SearchResultHandler handler = ProviderHacks.getSearchResultHandler();
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
@@ -65,7 +65,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureActionNotSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
@@ -78,7 +78,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
@@ -96,7 +96,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testFailedReplyNotForwarded() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler(ProviderHacks.getNetworkManager());
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));

@@ -179,7 +179,7 @@ public abstract class AbstractDHTController implements DHTController {
                     AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyModel());
         }
         
-        this.bootstrapper = new DHTBootstrapperImpl(this);
+        this.bootstrapper = dhtControllerFacade.getDHTBootstrapper(this);
         
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact

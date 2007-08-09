@@ -75,7 +75,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
 
     public void testRequestDHTHostsFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         nodeFetcher.start();
         //request hosts
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[0].getLocalPort());
@@ -130,7 +130,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
     
     public void testRequestMultipleTimesFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
 //      try to send a ping, unregister it and send another ping
         nodeFetcher.setPingExpireTime(100);
         //wait: LISTEN_EXPIRE_TIME is not volatile and a wrong value may be read otherwise
@@ -158,7 +158,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         
         ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {
@@ -180,7 +180,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         
         ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {

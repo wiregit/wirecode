@@ -156,7 +156,7 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
         
-        List<PingReply> pongs = ProviderHacks.getPongCacher().getBestPongs(ping.getLocale());
+        List<PingReply> pongs = pongCacher.get().getBestPongs(ping.getLocale());
         byte[] guid = ping.getGUID();
         InetAddress pingerIP = handler.getInetAddress();
         for(PingReply pr : pongs) {
@@ -212,7 +212,7 @@ public class StandardMessageRouter extends MessageRouter {
             int dhtFraction = ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.getValue();
             int maxDHTHosts = Math.round(((float)dhtFraction/100)*maxHosts);
             
-            gnuthosts = ProviderHacks.getConnectionServices().getPreferencedHosts(
+            gnuthosts = connectionServices.getPreferencedHosts(
                         isUltrapeer, 
                         request.getLocale(),
                         maxHosts - Math.min(numDHTHosts, maxDHTHosts));
@@ -298,7 +298,7 @@ public class StandardMessageRouter extends MessageRouter {
         // Run the local query
         Response[] responses = fileManager.query(queryRequest);
         
-        if( ProviderHacks.getConnectionServices().isShieldedLeaf() && queryRequest.isTCP() ) {
+        if( connectionServices.isShieldedLeaf() && queryRequest.isTCP() ) {
             if( responses != null && responses.length > 0 )
                 RoutedQueryStat.LEAF_HIT.incrementStat();
             else

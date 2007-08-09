@@ -25,9 +25,10 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
@@ -77,8 +78,15 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     private final Object lock = new Object();
     
-    public DHTBootstrapperImpl(DHTController controller) {
+    private final Provider<SimppManager> simppManager;
+    private final DHTNodeFetcherFactory dhtNodeFetcherFactory;
+    
+    public DHTBootstrapperImpl(DHTController controller,
+            Provider<SimppManager> simppManager,
+            DHTNodeFetcherFactory dhtNodeFetcherFactory) {
         this.controller = controller;
+        this.simppManager = simppManager;
+        this.dhtNodeFetcherFactory = dhtNodeFetcherFactory;
     }
     
     /**
@@ -100,7 +108,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                 return;
             }
             
-            ProviderHacks.getSimppManager().addListener(this);
+            simppManager.get().addListener(this);
             
             if (hosts.isEmpty()) {
                 tryBootstrapFromRouteTable();
@@ -148,7 +156,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     public void stop() {
         synchronized (lock) {
-            ProviderHacks.getSimppManager().removeListener(this);
+            simppManager.get().removeListener(this);
             
             if (pingFuture != null) {
                 pingFuture.cancel(true);
@@ -386,7 +394,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             // will restart the bootstrapping. Otherwise see
             // if there are entries in the hosts Set
             if (nodeFetcher == null) {
-                nodeFetcher = new DHTNodeFetcher(DHTBootstrapperImpl.this);
+                nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(DHTBootstrapperImpl.this);
                 nodeFetcher.start();
             } else {
                 bootstrap();

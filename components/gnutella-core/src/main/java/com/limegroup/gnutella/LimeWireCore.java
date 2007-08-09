@@ -32,8 +32,10 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
@@ -547,5 +549,13 @@ public class LimeWireCore {
     
     public NIODispatcher getNIODispatcher() {
         return injector.getInstance(NIODispatcher.class);
+    }
+
+    public DHTBootstrapperFactory getDHTBootstrapperFactory() {
+        return injector.getInstance(DHTBootstrapperFactory.class);
+    }
+
+    public DHTNodeFetcherFactory getDHTNodeFetcherFactory() {
+        return injector.getInstance(DHTNodeFetcherFactory.class);
     }
 }
