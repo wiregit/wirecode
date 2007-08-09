@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
@@ -60,6 +62,8 @@ import org.limewire.security.SecurityToken;
  * class for alternative message formats!
  */
 public class MessageInputStream extends DataInputStream {
+    
+    private static final Log LOG = LogFactory.getLog(MessageInputStream.class);
     
     public MessageInputStream(InputStream in) {
         super(in);
@@ -110,6 +114,9 @@ public class MessageInputStream extends DataInputStream {
         Contact creator = readContact();
         KUID primaryKey = readKUID();
         DHTValue value = readDHTValue(factoryManager);
+        // if the creator has the same KUID as the sender, use the sender as we have its external addr.
+        if (creator.getNodeID().equals(sender.getNodeID()))
+            creator = sender;
         
         return DHTValueEntity.createFromRemote(creator, sender, primaryKey, value);
     }
@@ -221,7 +228,8 @@ public class MessageInputStream extends DataInputStream {
         
         byte[] address = new byte[length];
         readFully(address);
-        
+        if (LOG.isDebugEnabled())
+            LOG.debug("read byte addr "+(address[0] & 0xFFFF)+"."+(address[1] & 0xFFFF));
         return InetAddress.getByAddress(address);
     }
     
@@ -240,9 +248,11 @@ public class MessageInputStream extends DataInputStream {
         if (addr == null) {
             return null;
         }
-        
         int port = readPort();
-        return new InetSocketAddress(addr, port);
+        InetSocketAddress ret = new InetSocketAddress(addr,port);
+        if (LOG.isDebugEnabled())
+            LOG.debug("returning "+addr+":"+port+" = "+ret);
+        return ret;
     }
     
     /**
