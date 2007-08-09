@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,7 +94,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in) throws BadPacketException,
             IOException {
-        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, SOFT_MAX);
+        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, SOFT_MAX, null);
     }
 
     /**
@@ -111,7 +112,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, byte softMax)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, softMax);
+        return MessageFactory.read(in, new byte[23], Network.UNKNOWN, softMax, null);
     }
 
     /**
@@ -129,7 +130,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, Network network)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, new byte[23], network, SOFT_MAX);
+        return MessageFactory.read(in, new byte[23], network, SOFT_MAX, null);
     }
 
     /**
@@ -142,16 +143,16 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, byte[] buf, byte softMax)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, buf, Network.UNKNOWN, softMax);
+        return MessageFactory.read(in, buf, Network.UNKNOWN, softMax, null);
     }
 
     /**
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public static Message read(InputStream in, byte[] buf, Network network)
+    public static Message read(InputStream in, byte[] buf, Network network, SocketAddress socketAddress)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, buf, network, SOFT_MAX);
+        return MessageFactory.read(in, buf, network, SOFT_MAX, socketAddress);
     }
 
     /**
@@ -165,7 +166,7 @@ public class MessageFactory {
      *          useful data.
      */
     public static Message read(InputStream in, byte[] buf, Network network,
-            byte softMax) throws BadPacketException, IOException {
+            byte softMax, SocketAddress socketAddress) throws BadPacketException, IOException {
 
         // 1. Read header bytes from network. If we timeout before any
         // data has been read, return null instead of throwing an
@@ -215,9 +216,9 @@ public class MessageFactory {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
         }
 
-        return createMessage(buf, payload, softMax, network);
+        return createMessage(buf, payload, softMax, network, socketAddress);
     }
-
+    
     /**
      * Creates a message based on the header & payload. The header, starting at
      * headerOffset, MUST be >= 19 bytes. Additional headers bytes will be
@@ -227,7 +228,7 @@ public class MessageFactory {
      * byte[].
      */
     public static Message createMessage(byte[] header, byte[] payload,
-            byte softMax, Network network) throws BadPacketException, IOException {
+            byte softMax, Network network, SocketAddress socketAddress) throws BadPacketException, IOException {
         if (header.length < 19) {
             throw new IllegalArgumentException("header must be >= 19 bytes.");
         }
@@ -241,7 +242,7 @@ public class MessageFactory {
             throw new BadPacketException("Unrecognized function code: " + func);
         }
         
-        return parser.parse(header, payload, softMax, network);
+        return parser.parse(header, payload, softMax, network, socketAddress);
     }
     
     /**
@@ -249,7 +250,7 @@ public class MessageFactory {
      */
     public static interface MessageParser {
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network) throws BadPacketException, IOException;
+                byte softMax, Network network, SocketAddress socketAddress) throws BadPacketException, IOException;
     }
     
     /**
@@ -258,7 +259,7 @@ public class MessageFactory {
     public static abstract class GnutellaMessageParser implements MessageParser {
         
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network) throws BadPacketException, IOException {
+                byte softMax, Network network, SocketAddress socketAddress) throws BadPacketException, IOException {
             
             // 4. Check values. These are based on the recommendations from the
             // GnutellaDev page. This also catches those TTLs and hops whose

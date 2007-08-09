@@ -209,7 +209,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = MessageFactory.read(in, HEADER_BUF, Network.MULTICAST);
+                    Message message = MessageFactory.read(in, HEADER_BUF, Network.MULTICAST, datagram.getSocketAddress());
                     if(message == null)
                         continue;
                     RouterService.getMessageDispatcher().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());

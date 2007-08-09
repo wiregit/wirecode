@@ -560,7 +560,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Network.TCP);
+        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Network.TCP, null);
         assertNotNull(m2);
     }
     

@@ -138,7 +138,7 @@ public class MessageReader implements ChannelReadObserver {
             // Yay, we've got a full message.
             try {
                 Message m = MessageFactory.createMessage(header.array(), payload.array(), 
-                                                  receiver.getSoftMax(), receiver.getNetwork());
+                                                  receiver.getSoftMax(), receiver.getNetwork(), null);
                 receiver.processReadMessage(m);
             } catch(BadPacketException ignored) {
             }

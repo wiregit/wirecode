@@ -309,7 +309,7 @@ public class UDPService implements ReadWriteObserver {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Network.UDP);
+                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Network.UDP, addr);
                     if (message == null)
                         continue;
 
