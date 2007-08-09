@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import org.limewire.concurrent.SimpleProvider;
+import org.limewire.concurrent.Providers;
 
 public class HackMessageRouter extends StandardMessageRouter {
 
@@ -21,16 +21,16 @@ public class HackMessageRouter extends StandardMessageRouter {
                         .getSearchResultHandler(), ProviderHacks
                         .getSocketsManager(), ProviderHacks.getHostCatcher(),
                 ProviderHacks.getQueryReplyFactory(), ProviderHacks
-                        .getStaticMessages(), SimpleProvider.of(ProviderHacks
+                        .getStaticMessages(), Providers.of(ProviderHacks
                         .getMessageDispatcher()), ProviderHacks
                         .getMulticastService(), ProviderHacks
-                        .getQueryDispatcher(), SimpleProvider.of(ProviderHacks
+                        .getQueryDispatcher(), Providers.of(ProviderHacks
                         .getActivityCallback()), ProviderHacks
                         .getConnectionServices(), ProviderHacks
                         .getApplicationServices(), ProviderHacks
-                        .getBackgroundExecutor(), SimpleProvider
-                        .of(ProviderHacks.getPongCacher()), SimpleProvider
-                        .of(ProviderHacks.getSimppManager()), SimpleProvider
+                        .getBackgroundExecutor(), Providers
+                        .of(ProviderHacks.getPongCacher()), Providers
+                        .of(ProviderHacks.getSimppManager()), Providers
                         .of(ProviderHacks.getUpdateHandler()),
 
                 ProviderHacks.getStatistics()

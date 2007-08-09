@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -26,6 +27,7 @@ import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
@@ -537,5 +539,13 @@ public class LimeWireCore {
     
     public ConnectionCheckerManager getConnectionCheckerManager() {
         return injector.getInstance(ConnectionCheckerManager.class);
+    }
+    
+    public ExternalControl getExternalControl() {
+        return injector.getInstance(ExternalControl.class);
+    }
+    
+    public NIODispatcher getNIODispatcher() {
+        return injector.getInstance(NIODispatcher.class);
     }
 }

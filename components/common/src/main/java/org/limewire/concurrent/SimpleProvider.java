@@ -13,9 +13,5 @@ public class SimpleProvider<T> implements Provider<T> {
     public T get() {
         return t;
     }
-    
-    public static <T> Provider<T> of(T instance) {
-        return new SimpleProvider<T>(instance);
-    }
 
 }

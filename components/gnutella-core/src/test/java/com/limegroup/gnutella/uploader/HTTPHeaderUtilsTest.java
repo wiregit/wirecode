@@ -17,6 +17,7 @@ import org.limewire.io.ConnectableImpl;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
@@ -189,10 +190,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     
     /** A fake ConnectionManager with custom proxies. */
-    private static class StubConnectionManager extends ConnectionManager {
-        public StubConnectionManager() {
-            super(ProviderHacks.getNetworkManager());
-        }
+    private static class StubConnectionManager extends HackConnectionManager {
         private Set<Connectable> proxies;
         @Override
         public Set<? extends Connectable> getPushProxies() {

@@ -21,6 +21,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.SSLSettings;
 
@@ -1076,12 +1077,12 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
      * Utility class that overrides ConnectionManager methods for getting the
      * number of free leaf and ultrapeer slots.
      */
-    private static class TestConnectionManager extends ConnectionManager {
+    private static class TestConnectionManager extends HackConnectionManager {
         private final int NUM_FREE_NON_LEAF_SLOTS;
         private final int NUM_FREE_LEAF_SLOTS;
 
         TestConnectionManager(int numFreeNonLeafSlots, int numFreeLeafSlots) {
-            super(ProviderHacks.getNetworkManager());
+            super();
             NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
             NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
         }

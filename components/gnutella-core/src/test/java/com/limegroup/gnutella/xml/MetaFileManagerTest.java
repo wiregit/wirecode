@@ -9,7 +9,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.SimpleProvider;
+import org.limewire.concurrent.Providers;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.FileManagerControllerImpl;
@@ -54,13 +54,13 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
-        fman = new MetaFileManager(new FileManagerControllerImpl(SimpleProvider
-                .of(ProviderHacks.getUrnCache()), SimpleProvider
-                .of(ProviderHacks.getDownloadManager()), SimpleProvider
-                .of(ProviderHacks.getCreationTimeCache()), SimpleProvider
-                .of(new ContentManager()), SimpleProvider.of(ProviderHacks
-                .getAltLocManager()), SimpleProvider.of(ProviderHacks
-                .getResponseFactory()), SimpleProvider.of(ProviderHacks.getSavedFileManager())));
+        fman = new MetaFileManager(new FileManagerControllerImpl(Providers
+                .of(ProviderHacks.getUrnCache()), Providers
+                .of(ProviderHacks.getDownloadManager()), Providers
+                .of(ProviderHacks.getCreationTimeCache()), Providers
+                .of(new ContentManager()), Providers.of(ProviderHacks
+                .getAltLocManager()), Providers.of(ProviderHacks
+                .getResponseFactory()), Providers.of(ProviderHacks.getSavedFileManager())));
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 
     }

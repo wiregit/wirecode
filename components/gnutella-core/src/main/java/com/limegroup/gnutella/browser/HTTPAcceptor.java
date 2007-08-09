@@ -14,6 +14,8 @@ import org.limewire.nio.SocketFactory;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
@@ -51,6 +53,12 @@ public class HTTPAcceptor {
 	private static String         _lastRequest     = null;
 	private static long           _lastRequestTime = 0;
 
+	private final Provider<ExternalControl> externalControl;
+
+	@Inject
+    public HTTPAcceptor(Provider<ExternalControl> externalControl) {
+        this.externalControl = externalControl;
+    }
 
     /**
      * Starts listening to incoming connections.
@@ -177,9 +185,9 @@ public class HTTPAcceptor {
                 if (word.equals("GET")) {
                     handleHTTPRequest(_socket);
                 } else if (word.equals("MAGNET")) {
-                    ExternalControl.fireControlThread(_socket, true);
+                    externalControl.get().fireControlThread(_socket, true);
                 } else if (word.equals("TORRENT")) {
-                	ExternalControl.fireControlThread(_socket, false);
+                    externalControl.get().fireControlThread(_socket, false);
                 }
             } catch (IOException e) {
             } finally {
@@ -252,7 +260,7 @@ public class HTTPAcceptor {
 			   (curTime - _lastRequestTime) < 1500l) ) {
 			
             // trigger an operation
-            ExternalControl.handleMagnetRequest(command);
+		    externalControl.get().handleMagnetRequest(command);
 			_lastRequest     = command;
 			_lastRequestTime = curTime;
 		} 

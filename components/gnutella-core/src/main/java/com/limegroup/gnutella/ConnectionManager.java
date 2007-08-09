@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -30,16 +31,22 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
@@ -48,8 +55,10 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -90,26 +99,35 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 @Singleton
 public class ConnectionManager implements ConnectionAcceptor, 
         EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener> {
+    
+    private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
+    /** The number of connections leaves should maintain to Ultrapeers. */
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    /** How many connect back requests to send if we have a single connection */
+    public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
+    /** The minimum amount of idle time before we switch to using 1 connection. */
+    private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
     /**
-     * Timestamp for the last time the user selected to disconnect.
+     * The number of leaf connections reserved for non LimeWire clients.
+     * This is done to ensure that the network is not solely LimeWire centric.
      */
+    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
+    
+    // for inspection...
+    @SuppressWarnings("unused") private final Inspectable LEAF = new LegacyConnectionStats(true);
+    @SuppressWarnings("unused") private final Inspectable UP = new LegacyConnectionStats(false);
+    
+    /** Timestamp for the last time the user selected to disconnect. */
     @InspectablePrimitive
     private volatile long _disconnectTime = -1;
-    
-    /**
-     * Timestamp for the last time we started trying to connect
-     */
+    /** Timestamp for the last time we started trying to connect */
     @InspectablePrimitive
     private volatile long _connectTime = Long.MAX_VALUE;
-    
-    /**
-     * Timestamp for the last time we reached our preferred connections
-     */
+    /** Timestamp for the last time we reached our preferred connections */
     @InspectablePrimitive
     @SuppressWarnings("unused")
     private volatile long _lastFullConnectTime;
-
     /**
      * Timestamp for the time we began automatically connecting.  We stop
      * trying to automatically connect if the user has disconnected since that
@@ -117,67 +135,22 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     @InspectablePrimitive
     private volatile long _automaticConnectTime = 0;
-
-    /**
-     * Flag for whether or not the auto-connection process is in effect.
-     */
+    /** Flag for whether or not the auto-connection process is in effect. */
     @InspectablePrimitive
     private volatile boolean _automaticallyConnecting;
-
-    /**
-     * Timestamp of our last successful connection.
-     */
+    /** Timestamp of our last successful connection. */
     @InspectablePrimitive
     private volatile long _lastSuccessfulConnect = 0;
-
-    /**
-     * Timestamp of the last time we checked to verify that the user has a live
-     * Internet connection.
-     */
+    /** Timestamp of the last time we checked to verify that the user has a live Internet connection. */
     @InspectablePrimitive
     private volatile long _lastConnectionCheck = 0;
-
-
-    /**
-     * Counter for the number of connection attempts we've made.
-     */
+    /** Counter for the number of connection attempts we've made. */
     @InspectablePrimitive
-    private volatile static int _connectionAttempts;
-
-    private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
-
-    /**
-     * The number of connections leaves should maintain to Ultrapeers.
-     */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
-
-    /**
-     * How many connect back requests to send if we have a single connection
-     */
-    public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
-
-    /**
-     * The minimum amount of idle time before we switch to using 1 connection.
-     */
-    private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
-
-    /**
-     * The number of leaf connections reserved for non LimeWire clients.
-     * This is done to ensure that the network is not solely LimeWire centric.
-     */
-    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
-
-    /**
-     * The current number of connections we want to maintain.
-     */
+    private volatile int _connectionAttempts;
+    /** The current number of connections we want to maintain. */
     @InspectablePrimitive
     private volatile int _preferredConnections = -1;
-
-    /**
-     * Reference to the <tt>HostCatcher</tt> for retrieving host data as well
-     * as adding host data.
-     */
-    private HostCatcher _catcher;
+    
 
     /** Threads trying to maintain the NUM_CONNECTIONS.
      *  LOCKING: obtain this. */
@@ -207,9 +180,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     private ConnectionFetcher _dedicatedPrefFetcher;
 
-    /**
-     * boolean to check if a locale matching connection is needed.
-     */
+    /** boolean to check if a locale matching connection is needed. */
     private volatile boolean _needPref = true;
     
     /**
@@ -252,12 +223,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      *   much slower.
      */
     //TODO:: why not use sets here??
-    private volatile List<ManagedConnection>
-        _connections = Collections.emptyList();
-    private volatile List<ManagedConnection>
-        _initializedConnections = Collections.emptyList();
-    private volatile List<ManagedConnection>
-        _initializedClientConnections = Collections.emptyList();
+    private volatile List<ManagedConnection> _connections = Collections.emptyList();
+    private volatile List<ManagedConnection> _initializedConnections = Collections.emptyList();
+    private volatile List<ManagedConnection> _initializedClientConnections = Collections.emptyList();
 
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;
@@ -281,41 +249,66 @@ public class ConnectionManager implements ConnectionAcceptor,
     @InspectablePrimitive
 	private volatile int _demotionLimit = 0;
 
-    /**
-     * The current measured upstream bandwidth in kbytes/sec.
-     */
+    /** The current measured upstream bandwidth in kbytes/sec. */
     private volatile float _measuredUpstreamBandwidth = 0.f;
-
-    /**
-     * The current measured downstream bandwidth in kbytes/sec.
-     */
+    /** The current measured downstream bandwidth in kbytes/sec. */
     private volatile float _measuredDownstreamBandwidth = 0.f;
-    
-    /**
-     * List of event listeners for ConnectionLifeCycleEvents.
-     */
+    /** List of event listeners for ConnectionLifeCycleEvents. */
     private final CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
         new CopyOnWriteArrayList<ConnectionLifecycleListener>();
 
     private final NetworkManager networkManager;
+    private final Provider<HostCatcher> hostCatcher;
+    private final Provider<ConnectionDispatcher> connectionDispatcher;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<SimppManager> simppManager;
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final ManagedConnectionFactory managedConnectionFactory;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<QueryUnicaster> queryUnicaster;
+    private final SocketsManager socketsManager;
+    private final ConnectionServices connectionServices;
+    private final Provider<NodeAssigner> nodeAssigner;
+    private final Provider<IPFilter> ipFilter;
+    private final ConnectionCheckerManager connectionCheckerManager;
     
-    /**
-     * Constructs a ConnectionManager.  Must call initialize before using
-     * other methods of this class.
-     */
     @Inject
-    public ConnectionManager(NetworkManager networkManager) { 
+    public ConnectionManager(NetworkManager networkManager,
+            Provider<HostCatcher> hostCatcher,
+            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<SimppManager> simppManager,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            ManagedConnectionFactory managedConnectionFactory,
+            Provider<MessageRouter> messageRouter,
+            Provider<QueryUnicaster> queryUnicaster,
+            SocketsManager socketsManager,
+            ConnectionServices connectionServices,
+            Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
+            ConnectionCheckerManager connectionCheckerManager) {
         this.networkManager = networkManager;
+        this.hostCatcher = hostCatcher;
+        this.connectionDispatcher = connectionDispatcher;
+        this.backgroundExecutor = backgroundExecutor;
+        this.simppManager = simppManager;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.managedConnectionFactory = managedConnectionFactory;
+        this.messageRouter = messageRouter;
+        this.queryUnicaster = queryUnicaster;
+        this.socketsManager = socketsManager;
+        this.connectionServices = connectionServices;
+        this.nodeAssigner = nodeAssigner;
+        this.ipFilter = ipFilter;
+        this.connectionCheckerManager = connectionCheckerManager;
     }
+
 
     /**
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
     public void initialize() {
-        _catcher = ProviderHacks.getHostCatcher();
-
-        ProviderHacks.getConnectionDispatcher().
+        connectionDispatcher.get().
         addConnectionAcceptor(this,
         		false,
         		false,
@@ -326,7 +319,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         // the number of connections we're shooting for if
         // we're idle.
         if(SystemUtils.supportsIdleTime()) {
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     setPreferredConnections();
                 }
@@ -334,9 +327,9 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
         
         // send new capabilities when simpp updates.
-        ProviderHacks.getSimppManager().addListener(new SimppListener() {
+        simppManager.get().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {
-                ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
+                capabilitiesVMFactory.updateCapabilities();
                 sendUpdatedCapabilities();
             }
         });
@@ -353,7 +346,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                         }
                     }
                     for (Endpoint e : filtered)
-                        _catcher.add(e, false);
+                        hostCatcher.get().add(e, false);
                 }
             }
         });
@@ -365,8 +358,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * a new thread to do the message loop.
      */
     public ManagedConnection createConnectionBlocking(String hostname, int portnum, ConnectType type) throws IOException {
-        // DPINJ: Use passed in factory!
-        ManagedConnection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection(hostname, portnum,
+        ManagedConnection c = managedConnectionFactory.createManagedConnection(hostname, portnum,
                 type);
 
         // Initialize synchronously
@@ -380,8 +372,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
     public void createConnectionAsynchronously(String hostname, int portnum, ConnectType type) {
-        // DPINJ: Use passed in factory!
-        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection(hostname, portnum,
+        ManagedConnection mc = managedConnectionFactory.createManagedConnection(hostname, portnum,
                 type);
         try {
             initializeExternallyGeneratedConnection(mc, new IncomingGNetObserver(mc));
@@ -411,8 +402,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * and then loops for messages (it will return when the connection dies).
      */
      void acceptConnection(Socket socket) {
-         // DPINJ: Use passed in factory!
-         ManagedConnection connection = ProviderHacks.getManagedConnectionFactory().createManagedConnection(socket);
+         ManagedConnection connection = managedConnectionFactory.createManagedConnection(socket);
          
          GnetConnectObserver listener = null;
          
@@ -1515,7 +1505,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 ExtendedEndpoint ee = new ExtendedEndpoint(c.getInetAddress().getHostAddress(),
                                                            c.getPort(), c.getLocalePref());
                 ee.setTLSCapable(c.isTLSCapable());
-                _catcher.add(ee, true);
+                hostCatcher.get().add(ee, true);
             }
         }
         
@@ -1558,7 +1548,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         // Ignore this call if we're already connected
         // or not initialized yet.
-        if(isConnected() || _catcher == null) {
+        if(isConnected() || hostCatcher == null) {
             return;
         }
         
@@ -1568,13 +1558,13 @@ public class ConnectionManager implements ConnectionAcceptor,
 
 
         // Notify HostCatcher that we've connected.
-        _catcher.expire();
+        hostCatcher.get().expire();
         
         // Set the number of connections we want to maintain
         setPreferredConnections();
         
         // tell the catcher to start pinging people.
-        _catcher.sendUDPPings();
+        hostCatcher.get().sendUDPPings();
     }
 
     /**
@@ -1664,7 +1654,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             List<Endpoint> l = classCNetworks.remove(NetworkUtils.getClassC(InetAddress.getByName(c.getAddress())));
             if (l != null) {
                 for (Endpoint ip : l)
-                    _catcher.add(ip, false);
+                    hostCatcher.get().add(ip, false);
             }
         } catch (UnknownHostException ignore){}
 
@@ -1674,7 +1664,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         c.close();
 
         // 3) Clean up route tables.
-        ProviderHacks.getMessageRouter().removeConnection(c);
+        messageRouter.get().removeConnection(c);
 
         // 4) Notify the listener
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this, 
@@ -1682,7 +1672,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 c));
 
         // 5) Clean up Unicaster
-        ProviderHacks.getQueryUnicaster().purgeQuery(c);
+        queryUnicaster.get().purgeQuery(c);
     }
     
     /**
@@ -1792,8 +1782,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                  - _initializingFetchedConnections.size();
 
         // do not open more sockets than we can
-        // DPINJ: Change to using passed-in SocketsManager!!!
-        need = Math.min(need, ProviderHacks.getSocketsManager().getNumAllowedSockets());
+        need = Math.min(need, socketsManager.getNumAllowedSockets());
         
         // Build up lists of what we need to connect to & remove from connecting.
         
@@ -1853,7 +1842,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         // we will create a dedicated preference fetcher
         // that tries to fetch a connection that matches the
         // clients locale
-        if (ProviderHacks.getConnectionServices().isShieldedLeaf() && _needPref && !_needPrefInterrupterScheduled
+        if (connectionServices.isShieldedLeaf() && _needPref && !_needPrefInterrupterScheduled
                 && _dedicatedPrefFetcher == null) {
             _dedicatedPrefFetcher = new ConnectionFetcher(true);
             _dedicatedPrefFetcher.connect();
@@ -1872,7 +1861,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             };
             _needPrefInterrupterScheduled = true;
             // shut off this guy if he didn't have any luck
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(interrupted, 15 * 1000, 0, TimeUnit.MILLISECONDS);
+            backgroundExecutor.scheduleWithFixedDelay(interrupted, 15 * 1000, 0, TimeUnit.MILLISECONDS);
         }
     }    
 
@@ -1994,7 +1983,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-        else if(ProviderHacks.getNodeAssigner().isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
+        else if(nodeAssigner.get().isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
 			return false;
         else
 		    return true;
@@ -2043,7 +2032,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 continue;
             }
         }
-        _catcher.add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
+        hostCatcher.get().add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
                 NetworkUtils.filterOnePerClassC(hosts) :
                     hosts); ;        
     }
@@ -2252,7 +2241,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
 		if(conn.isGUESSUltrapeer())
-			ProviderHacks.getQueryUnicaster().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
+			queryUnicaster.get().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Looping for messages with conn: " + conn);
@@ -2332,7 +2321,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 
         /** Starts the process of connecting to an arbitary endpoint. */
         public void connect() {
-            _catcher.getAnEndpoint(this);
+            hostCatcher.get().getAnEndpoint(this);
         }
         
         /** 
@@ -2342,7 +2331,7 @@ public class ConnectionManager implements ConnectionAcceptor,
          */
         public void stopConnecting() {
             stoppedEarly = true;
-            _catcher.removeEndpointObserver(this);
+            hostCatcher.get().removeEndpointObserver(this);
         }
         
         /** Returns whether or not we were told to stop early. */
@@ -2356,7 +2345,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         
         /** Returns true if we are able to make a connection attempt to this host. */
         private boolean isConnectableHost(IpPort host) {
-            return ProviderHacks.getIpFilter().allow(host)
+            return ipFilter.get().allow(host)
                 && !isConnectedTo(host.getAddress()) 
                 && !isConnectingTo(host);
         }
@@ -2369,7 +2358,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             while(!isConnectableHost(incoming) || attemptClassC(incoming)) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Ignoring unconnectable host: " + incoming);
-                incoming = _catcher.getAnEndpointImmediate(this);
+                incoming = hostCatcher.get().getAnEndpointImmediate(this);
                 if(incoming == null) {
                     LOG.debug("No hosts available, waiting on a new one...");
                     return; // if we didn't get one immediate, the callback is scheduled
@@ -2382,8 +2371,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() && SSLSettings.isOutgoingTLSEnabled() ? 
                                         ConnectType.TLS : ConnectType.PLAIN;
-            // DPINJ: Use passed in factory!
-            connection = ProviderHacks.getManagedConnectionFactory().createManagedConnection(endpoint.getAddress(),
+            connection = managedConnectionFactory.createManagedConnection(endpoint.getAddress(),
                     endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();
@@ -2396,7 +2384,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             boolean stillOpen = completeConnectionInitialization(connection, true);
             processConnectionHeaders(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
-            _catcher.doneWithConnect(endpoint, true);
+            hostCatcher.get().doneWithConnect(endpoint, true);
             if(_pref)
                 _needPref = false;
             
@@ -2409,8 +2397,8 @@ public class ConnectionManager implements ConnectionAcceptor,
         /** Callback that a connect failed. */
         public void shutdown() {
             cleanupBrokenFetchedConnection(connection);            
-            _catcher.doneWithConnect(endpoint, false);
-            _catcher.expireHost(endpoint);
+            hostCatcher.get().doneWithConnect(endpoint, false);
+            hostCatcher.get().expireHost(endpoint);
         }
         
         /** Callback that handshaking failed. */
@@ -2424,10 +2412,10 @@ public class ConnectionManager implements ConnectionAcceptor,
             _lastSuccessfulConnect = System.currentTimeMillis();
             if (code == HandshakeResponse.LOCALE_NO_MATCH) {
                 // Failures because of locale aren't really a failure.
-                _catcher.add(endpoint, true, connection.getLocalePref());
+                hostCatcher.get().add(endpoint, true, connection.getLocalePref());
             } else {
-                _catcher.doneWithConnect(endpoint, true);
-                _catcher.putHostOnProbation(endpoint);
+                hostCatcher.get().doneWithConnect(endpoint, true);
+                hostCatcher.get().putHostOnProbation(endpoint);
             }
         }
 
@@ -2446,7 +2434,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 _connectionAttempts = 0;
                 _lastConnectionCheck = curTime;
                 LOG.debug("checking for live connection");
-                ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
+                connectionCheckerManager.checkForLiveConnection();
             }
         }
     }
@@ -2476,7 +2464,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         
         // Try to reconnect in 10 seconds, and then every minute after
         // that.
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 // If the last time the user disconnected is more recent
                 // than when we started automatically connecting, just
@@ -2486,7 +2474,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                     return;
                 }
                 
-                if(!ProviderHacks.getConnectionServices().isConnected()) {
+                if(!connectionServices.isConnected()) {
                     // Try to re-connect.  Note this call resets the time
                     // for our last check for a live connection, so we may
                     // hit web servers again to check for a live connection.
@@ -2509,8 +2497,8 @@ public class ConnectionManager implements ConnectionAcceptor,
         // Notify the HostCatcher that it should keep any hosts it has already
         // used instead of discarding them.
         // The HostCatcher can be null in testing.
-        if(_catcher != null && _catcher.getNumHosts() < 100) {
-            _catcher.recoverHosts();
+        if(hostCatcher != null && hostCatcher.get().getNumHosts() < 100) {
+            hostCatcher.get().recoverHosts();
         }
     }
 
@@ -2586,37 +2574,32 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
         return count;
     }
-    
-}
 
-/** 
- * a class that uses the Inspection framework to provide the same functionality
- * as the former GetStatsVM.
- */
-class LegacyConnectionStats implements Inspectable {
-    public static final Object LEAF = new LegacyConnectionStats(true);
-    public static final Object UP = new LegacyConnectionStats(false);
-    
-    /** Whether to report only leaf connections or only up connections */
-    private final boolean leaf;
-    private LegacyConnectionStats(boolean leaf) {
-        this.leaf = leaf;
-    }
-    
-    public Object inspect() {
-        List<ManagedConnection> conns = 
-            ProviderHacks.getConnectionManager().getConnections();
-        
-        Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
-        for(ManagedConnection mc : conns) {
-            if (ProviderHacks.getConnectionManager().isSupernode()) {
-                if (leaf && mc.isSupernodeSupernodeConnection())
-                    continue;
-                if (!leaf && mc.isSupernodeClientConnection())
-                    continue;
-            }
-            ret.put(mc.getAddress()+":"+mc.getPort(), mc.inspect());
+    /** 
+     * a class that uses the Inspection framework to provide the same functionality
+     * as the former GetStatsVM.
+     */
+    class LegacyConnectionStats implements Inspectable {
+        /** Whether to report only leaf connections or only up connections */
+        private final boolean leaf;
+        private LegacyConnectionStats(boolean leaf) {
+            this.leaf = leaf;
         }
-        return ret;
+        
+        public Object inspect() {
+            List<ManagedConnection> conns = getConnections();
+            
+            Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
+            for(ManagedConnection mc : conns) {
+                if (isSupernode()) {
+                    if (leaf && mc.isSupernodeSupernodeConnection())
+                        continue;
+                    if (!leaf && mc.isSupernodeClientConnection())
+                        continue;
+                }
+                ret.put(mc.getAddress()+":"+mc.getPort(), mc.inspect());
+            }
+            return ret;
+        }
     }
 }

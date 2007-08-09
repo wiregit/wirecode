@@ -154,8 +154,6 @@ public class ProviderHacks {
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static SearchServices getSearchServices() { return i().getSearchServices(); }
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
-    public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
-    public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
 
     // Requires some factories...
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
@@ -165,6 +163,8 @@ public class ProviderHacks {
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Cleaned up in all but tests
+    public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
+    public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
     public static SpamServices getSpamServices() { return i().getSpamServices(); }
     public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
     public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }

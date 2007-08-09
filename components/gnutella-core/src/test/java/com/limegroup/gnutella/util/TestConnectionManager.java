@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -16,7 +16,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
  * Helper class that supplies the list of connections for searching.
  */
 @SuppressWarnings("unchecked")
-public final class TestConnectionManager extends ConnectionManager {
+public final class TestConnectionManager extends HackConnectionManager {
     
     /**
      * The list of ultrapeer <tt>Connection</tt> instances
@@ -164,7 +164,7 @@ public final class TestConnectionManager extends ConnectionManager {
     public TestConnectionManager(int numNewConnections, boolean ultrapeer,
                                  int numConnections, int numLeafConnections,
                                  String[] myKeywords, boolean useVaried) {
-        super(ProviderHacks.getNetworkManager());
+        super();
         NUM_CONNECTIONS = numConnections;
         NUM_LEAF_CONNECTIONS = numLeafConnections;
         MY_KEYWORDS = myKeywords;

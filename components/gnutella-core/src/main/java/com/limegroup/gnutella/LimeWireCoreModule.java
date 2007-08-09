@@ -256,7 +256,9 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(UpdateHandler.class);
         //bind(LimeXMLProperties.class);
         //bind(LimeXMLSchemaRepository.class);
-        //bind(SchemaReplyCollectionMapper.class);        
+        //bind(SchemaReplyCollectionMapper.class);      
+        //bind(ExternalControl.class);
+        //bind(ControlRequestAcceptor.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);

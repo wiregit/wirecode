@@ -561,7 +561,7 @@ public final class MessageRouterTest extends LimeTestCase {
     
     public void testUDPPingReplies() throws Exception {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
+        ConnectionManager cm = new HackConnectionManager();
         cm.initialize();
      //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
@@ -681,7 +681,7 @@ public final class MessageRouterTest extends LimeTestCase {
     }
     
     public void testUDPPingReplyWithDHTIPPs() throws Exception{
-        ConnectionManager cm = new ConnectionManager(ProviderHacks.getNetworkManager());
+        ConnectionManager cm = new HackConnectionManager();
         cm.initialize();
      //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         

@@ -7,6 +7,7 @@ import org.limewire.collection.NECallable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.gnutella.UploadServices;
 
@@ -17,7 +18,7 @@ public class ChokerFactoryImpl implements ChokerFactory {
     private final UploadServices uploadServices;
     
     @Inject    
-	public ChokerFactoryImpl(ScheduledExecutorService scheduledExecutorService,
+	public ChokerFactoryImpl(@Named("nioExecutor") ScheduledExecutorService scheduledExecutorService,
             UploadServices uploadServices) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.uploadServices = uploadServices;

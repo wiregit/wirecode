@@ -281,11 +281,8 @@ public final class PongCacherTest extends LimeTestCase {
 
     
     @SuppressWarnings("all") // DPINJ: textfix
-    private static class TestManager extends ConnectionManager {
+    private static class TestManager extends HackConnectionManager {
 
-        public TestManager() {
-            super(ProviderHacks.getNetworkManager());
-        }
 
         public boolean isSupernode() {
             return true;

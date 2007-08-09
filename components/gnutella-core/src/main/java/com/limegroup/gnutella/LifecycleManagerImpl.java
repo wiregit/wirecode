@@ -98,6 +98,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<Statistics> statistics;
     private final Provider<ConnectionServices> connectionServices;
     private final Provider<SpamServices> spamServices;
+    private final Provider<ControlRequestAcceptor> controlRequestAcceptor;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -136,7 +137,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<NetworkManager> networkManager,
             Provider<Statistics> statistics,
             Provider<ConnectionServices> connectionServices,
-            Provider<SpamServices> spamServices) {
+            Provider<SpamServices> spamServices,
+            Provider<ControlRequestAcceptor> controlRequestAcceptor) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -170,6 +172,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.statistics = statistics;
         this.connectionServices = connectionServices;
         this.spamServices = spamServices;
+        this.controlRequestAcceptor = controlRequestAcceptor;
     }
     
     /* (non-Javadoc)
@@ -344,7 +347,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         LOG.trace("START ControlRequestAcceptor");
         activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_CONTROL_REQUEST_ACCEPTOR"));
-		(new ControlRequestAcceptor()).register(connectionDispatcher.get());
+		controlRequestAcceptor.get().register();
 		LOG.trace("STOP ControlRequestAcceptor");
 		
         // Restore any downloads in progress.

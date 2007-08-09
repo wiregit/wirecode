@@ -4,7 +4,7 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -77,13 +77,10 @@ public class ConnectionCheckerTest extends LimeTestCase {
      * Helper class that receives the callback notifying us when there's no
      * available internet connection.
      */
-    private static class TestManager extends ConnectionManager {
+    private static class TestManager extends HackConnectionManager {
 
         private boolean _receivedCallback;
 
-        public TestManager() {
-            super(ProviderHacks.getNetworkManager());
-        }
         
         public void noInternetConnection() {
             _receivedCallback = true;
