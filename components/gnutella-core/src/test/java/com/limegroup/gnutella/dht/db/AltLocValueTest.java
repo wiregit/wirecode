@@ -34,7 +34,7 @@ public class AltLocValueTest extends DHTTestCase {
         int port = 1234;
         boolean firewalled = true;
         
-        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager()).createAltLocValue(
+        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager(), ProviderHacks.getApplicationServices()).createAltLocValue(
                 Version.ZERO, guid, port, -1L, null, firewalled);
         
         assertEquals(guid, value1.getGUID());
@@ -78,7 +78,7 @@ public class AltLocValueTest extends DHTTestCase {
         Random random = new Random();
         random.nextBytes(ttroot);
         
-        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager()).createAltLocValue(
+        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager(), ProviderHacks.getApplicationServices()).createAltLocValue(
             AbstractAltLocValue.VERSION_ONE, guid, port, fileSize, ttroot, firewalled);
         
         assertEquals(guid, value1.getGUID());

@@ -96,6 +96,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ScheduledExecutorService> backgroundExecutor;
     private final Provider<NetworkManager> networkManager;
     private final Provider<Statistics> statistics;
+    private final Provider<ConnectionServices> connectionServices;
+    private final Provider<SpamServices> spamServices;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -132,7 +134,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<ByteBufferCache> byteBufferCache,
             @Named("backgroundExecutor") Provider<ScheduledExecutorService> backgroundExecutor,
             Provider<NetworkManager> networkManager,
-            Provider<Statistics> statistics) {
+            Provider<Statistics> statistics,
+            Provider<ConnectionServices> connectionServices,
+            Provider<SpamServices> spamServices) {
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -164,6 +168,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.backgroundExecutor = backgroundExecutor;
         this.networkManager = networkManager;
         this.statistics = statistics;
+        this.connectionServices = connectionServices;
+        this.spamServices = spamServices;
     }
     
     /* (non-Javadoc)
@@ -320,7 +326,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
 			if ( outgoing > 0 ) {
 			    LOG.trace("START connect");
-				ProviderHacks.getConnectionServices().connect();
+				connectionServices.get().connect();
                 LOG.trace("STOP connect");
             }
 		}
@@ -520,12 +526,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //add more while-gui init tasks here
         ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {
-                ProviderHacks.getSpamServices().adjustSpamFilters();
+                spamServices.get().adjustSpamFilters();
             }
         });
         simppManager.get().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {
-                ProviderHacks.getSpamServices().reloadIPFilter();
+                spamServices.get().reloadIPFilter();
             }
         });
         acceptor.get().init();
@@ -566,7 +572,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     }
 
     private void cleanupTorrentMetadataFiles() {
-        if(!ProviderHacks.getFileManager().isLoadFinished()) {
+        if(!fileManager.get().isLoadFinished()) {
             return;
         }
         
@@ -585,7 +591,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(!ProviderHacks.getFileManager().isFileShared(tFile) &&
+            if(!fileManager.get().isFileShared(tFile) &&
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }

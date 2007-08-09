@@ -17,9 +17,9 @@ import org.limewire.util.StringUtils;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -73,9 +73,13 @@ class Tracker {
     private final String key;
     
     private final NetworkManager networkManager;
+    private final ApplicationServices applicationServices;
 	
-	Tracker(URI uri, TorrentContext context, ManagedTorrent torrent, NetworkManager networkManager) {
+	Tracker(URI uri, TorrentContext context, ManagedTorrent torrent,
+            NetworkManager networkManager,
+            ApplicationServices applicationServices) {
 	    this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
 		this.uri = uri;
 		this.context = context;
 		this.torrent = torrent;
@@ -142,7 +146,7 @@ class Tracker {
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
-					.encode(StringUtils.getASCIIString(ProviderHacks.getApplicationServices().getMyBTGUID()),
+					.encode(StringUtils.getASCIIString(applicationServices.getMyBTGUID()),
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 

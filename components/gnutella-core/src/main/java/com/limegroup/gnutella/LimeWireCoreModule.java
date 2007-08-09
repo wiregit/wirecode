@@ -41,6 +41,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
+import com.limegroup.gnutella.dht.DHTControllerFacade;
+import com.limegroup.gnutella.dht.DHTControllerFacadeImpl;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactoryImpl;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -170,6 +172,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UploadServices.class).to(UploadServicesImpl.class);
         bind(ApplicationServices.class).to(ApplicationServicesImpl.class);
         bind(SpamServices.class).to(SpamServicesImpl.class);
+        bind(DHTControllerFacade.class).to(DHTControllerFacadeImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -206,14 +209,14 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(SearchResultHandler.class);
         //bind(AltLocManager.class);
         //bind(ContentManager.class);
-        bind(IPFilter.class).toProvider(new IPFilterProvider());
+        bind(IPFilter.class).toProvider(IPFilterProvider.class);
         //bind(HostileFilter.class);
         //bind(NetworkUpdateSanityChecker.class);
         //bind(BandwidthManager.class);
         //bind(QueryStats.class);
         //bind(NodeAssigner.class);
         bind(Statistics.class).asEagerSingleton(); // DPINJ: need to move time-capture to initialization
-        bind(SecureMessageVerifier.class).toProvider(new SecureMessageVerifierProvider());
+        bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
         //bind(CreationTimeCache.class);
         //bind(UrnCache.class);
         //bind(StaticMessages.class);
@@ -252,6 +255,8 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(FreeLoaderRequestHandler.class);
         //bind(LimitReachedRequestHandler.class); // Not really bound, because factory creates it
         //bind(PushProxyRequestHandler.class);
+        //bind(AltLocModel.class);
+        //bind(PushProxiesModel.class);
         
         
         // For NodeAssigner...

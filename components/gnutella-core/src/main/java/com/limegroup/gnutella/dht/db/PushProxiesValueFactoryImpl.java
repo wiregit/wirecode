@@ -11,6 +11,7 @@ import org.limewire.mojito.routing.Version;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
 
@@ -23,19 +24,22 @@ public class PushProxiesValueFactoryImpl implements PushProxiesValueFactory {
     private final NetworkManager networkManager;
     private final PushEndpointFactory pushEndpointFactory;
     private final Provider<PushProxiesValue> lazySelf;
+    private final ApplicationServices applicationServices;
 
     @Inject
     public PushProxiesValueFactoryImpl(NetworkManager networkManager,
-            PushEndpointFactory pushEndpointFactory) {
+            PushEndpointFactory pushEndpointFactory, ApplicationServices applicationServices) {
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.applicationServices = applicationServices;
 
         lazySelf = new AbstractLazySingletonProvider<PushProxiesValue>() {
             @Override
             protected PushProxiesValue createObject() {
                 return new PushProxiesValueForSelf(
                         PushProxiesValueFactoryImpl.this.networkManager,
-                        PushProxiesValueFactoryImpl.this.pushEndpointFactory);
+                        PushProxiesValueFactoryImpl.this.pushEndpointFactory,
+                        PushProxiesValueFactoryImpl.this.applicationServices);
             }
         };
     }

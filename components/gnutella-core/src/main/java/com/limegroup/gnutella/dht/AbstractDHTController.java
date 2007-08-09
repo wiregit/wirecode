@@ -25,7 +25,6 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -37,21 +36,12 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
-import com.google.inject.Provider;
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
 import com.limegroup.gnutella.dht.db.AbstractPushProxiesValue;
-import com.limegroup.gnutella.dht.db.AltLocModel;
-import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesModel;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -126,22 +116,13 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final int routeTableVersion;
     
-    private final NetworkManager networkManager;
-    private final Provider<ConnectionManager> connectionManager;
-    private final Provider<IPFilter> ipFilter;
-
+    private final DHTControllerFacade dhtControllerFacade;
+    
     public AbstractDHTController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
-            DHTMode mode, NetworkManager networkManager,
-            AltLocValueFactory altLocValueFactory,
-            PushProxiesValueFactory pushProxiesValueFactory,
-            MessageDispatcherFactory messageDispatcherFactory,
-            Provider<ConnectionManager> connectionManager,
-            Provider<IPFilter> ipFilter) {
+            DHTMode mode, DHTControllerFacade dhtControllerFacade) {
 
-        this.networkManager = networkManager;
-        this.connectionManager = connectionManager;
-        this.ipFilter = ipFilter;
+        this.dhtControllerFacade = dhtControllerFacade;
         
         switch(mode) {
             case ACTIVE:
@@ -160,7 +141,7 @@ public abstract class AbstractDHTController implements DHTController {
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
-        dht.setMessageDispatcher(messageDispatcherFactory);
+        dht.setMessageDispatcher(dhtControllerFacade.getMessageDispatcherFactory());
         dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
                 return new ManagedThread(runnable);
@@ -170,10 +151,10 @@ public abstract class AbstractDHTController implements DHTController {
         dht.setHostFilter(new FilterDelegate());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                AbstractAltLocValue.ALT_LOC, altLocValueFactory);
+                AbstractAltLocValue.ALT_LOC, dhtControllerFacade.getAltLocValueFactory());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                AbstractPushProxiesValue.PUSH_PROXIES, pushProxiesValueFactory);
+                AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -188,21 +169,21 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         dht.getStorableModelManager().addStorableModel(
-                AbstractAltLocValue.ALT_LOC, new AltLocModel(altLocValueFactory));
+                AbstractAltLocValue.ALT_LOC, dhtControllerFacade.getAltLocModel());
         
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
         if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
-                    AbstractPushProxiesValue.PUSH_PROXIES, new PushProxiesModel(networkManager, pushProxiesValueFactory));
+                    AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyModel());
         }
         
         this.bootstrapper = new DHTBootstrapperImpl(this);
         
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact
-        if (ProviderHacks.getConnectionServices().isActiveSuperNode()) {
+        if (dhtControllerFacade.isActiveSupernode()) {
             dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
                 public void handleRouteTableEvent(RouteTableEvent event) {
                     switch(event.getEventType()) {
@@ -239,7 +220,7 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         DHTContactsMessage msg = new DHTContactsMessage(node);
-        List<ManagedConnection> list = connectionManager.get().getInitializedClientConnections();
+        List<ManagedConnection> list = dhtControllerFacade.getInitializedClientConnections();
         for (ManagedConnection mc : list) {
             if (mc.isPushProxyFor()
                     && mc.remoteHostIsPassiveLeafNode() > -1) {
@@ -270,7 +251,7 @@ public abstract class AbstractDHTController implements DHTController {
      */
     public void start() {
         if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !ProviderHacks.getConnectionServices().isConnected())) {
+                && !dhtControllerFacade.isConnected())) {
             return;
         }
         
@@ -279,8 +260,8 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         try {
-            InetAddress addr = InetAddress.getByAddress(networkManager.getAddress());
-            int port = networkManager.getPort();
+            InetAddress addr = InetAddress.getByAddress(dhtControllerFacade.getAddress());
+            int port = dhtControllerFacade.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             
@@ -394,8 +375,8 @@ public abstract class AbstractDHTController implements DHTController {
         
         LOG.debug("Sending updated capabilities to our connections");
         
-        ProviderHacks.getCapabilitiesVMFactory().updateCapabilities();
-        connectionManager.get().sendUpdatedCapabilities();
+        dhtControllerFacade.updateCapabilities();
+        dhtControllerFacade.sendUpdatedCapabilities();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
@@ -463,7 +444,7 @@ public abstract class AbstractDHTController implements DHTController {
                 return;
             }
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
-            timerTask = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, delay, delay, TimeUnit.MILLISECONDS);
+            timerTask = dhtControllerFacade.scheduleWithFixedDelay(this, delay, delay, TimeUnit.MILLISECONDS);
             isRunning = true;
         }
         
@@ -517,12 +498,13 @@ public abstract class AbstractDHTController implements DHTController {
     private class FilterDelegate implements HostFilter {
         
         public boolean allow(SocketAddress addr) {
-            return ipFilter.get().allow(addr);
+            return dhtControllerFacade.allow(addr);
         }
 
         public void ban(SocketAddress addr) {
-            ipFilter.get().ban(addr);
-            ProviderHacks.getSpamServices().reloadIPFilter();
+            dhtControllerFacade.ban(addr);
+            dhtControllerFacade.reloadIPFilter();
         }
     }
+
 }

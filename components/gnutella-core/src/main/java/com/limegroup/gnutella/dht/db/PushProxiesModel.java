@@ -9,9 +9,11 @@ import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.DatabaseUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -19,16 +21,22 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * The PushProxiesPublisher publishes Push Proxy information for 
  * the localhost in the DHT
  */
+@Singleton
 public class PushProxiesModel implements StorableModel {
     
     private Storable localhost = null;
     
     private final NetworkManager networkManager;
     private final PushProxiesValueFactory pushProxiesValueFactory;
+    private final ApplicationServices applicationServices;
     
-    public PushProxiesModel(NetworkManager networkManager, PushProxiesValueFactory pushProxiesValueFactory) {
+    @Inject
+    public PushProxiesModel(NetworkManager networkManager,
+            PushProxiesValueFactory pushProxiesValueFactory,
+            ApplicationServices applicationServices) {
         this.networkManager = networkManager;
         this.pushProxiesValueFactory = pushProxiesValueFactory;
+        this.applicationServices = applicationServices;
     }
     
     private synchronized Storable getPushProxyForSelf() {
@@ -37,7 +45,7 @@ public class PushProxiesModel implements StorableModel {
         }
         
         if (localhost == null) {
-            GUID guid = new GUID(ProviderHacks.getApplicationServices().getMyGUID());
+            GUID guid = new GUID(applicationServices.getMyGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
             
             localhost = new Storable(

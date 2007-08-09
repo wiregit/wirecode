@@ -17,6 +17,8 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -34,6 +36,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
  * the number of query hits instead of upload attempts or even
  * keeping track of the file activities over multiple sessions.
  */
+@Singleton
 public class AltLocModel implements StorableModel {
     
     private final Map<KUID, Storable> values 
@@ -41,6 +44,7 @@ public class AltLocModel implements StorableModel {
     
     private final AltLocValueFactory altLocValueFactory;
     
+    @Inject
     public AltLocModel(AltLocValueFactory altLocValueFactory) {
         this.altLocValueFactory = altLocValueFactory;
     }

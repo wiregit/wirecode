@@ -7,10 +7,14 @@ import java.util.List;
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.ConnectionDispatcher;
+import com.limegroup.gnutella.SpamServices;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -25,12 +29,23 @@ import com.limegroup.gnutella.statistics.HTTPStat;
 @Singleton
 public final class ChatManager implements ConnectionAcceptor {
 
+    private final Provider<ConnectionDispatcher> connectionDispatcher;
+    private final SpamServices spamServices;
+    private final Provider<IPFilter> ipFilter;
+    private final Provider<ActivityCallback> activityCallback;
+        
+    @Inject
+	public ChatManager(Provider<ConnectionDispatcher> connectionDispatcher,
+            SpamServices spamServices, Provider<IPFilter> ipFilter,
+            Provider<ActivityCallback> activityCallback) {
+        this.connectionDispatcher = connectionDispatcher;
+        this.spamServices = spamServices;
+        this.ipFilter = ipFilter;
+        this.activityCallback = activityCallback;
+    }
 
-	public void initialize() {
-        ProviderHacks.getConnectionDispatcher().
-        addConnectionAcceptor(this,
-                false,
-                false,
+    public void initialize() {
+        connectionDispatcher.get().addConnectionAcceptor(this, false, false,
                 "CHAT");
     }
     
@@ -46,13 +61,12 @@ public final class ChatManager implements ConnectionAcceptor {
 			return;
 		}
 
-        if(!ProviderHacks.getIpFilter().allow(socket.getInetAddress())) {
+        if(!ipFilter.get().allow(socket.getInetAddress())) {
             IOUtils.close(socket);
             return;
         }
         
-        ActivityCallback callback = ProviderHacks.getActivityCallback();
-        InstantMessenger im = new InstantMessenger(socket, this, callback);
+        InstantMessenger im = new InstantMessenger(socket, this, activityCallback.get());
         im.start();
 	}
 
@@ -63,8 +77,7 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * the connection has died.
 	 */
 	public Chatter request(String host, int port) {
-        ActivityCallback callback = ProviderHacks.getActivityCallback();
-        InstantMessenger im = new InstantMessenger(host, port, this, callback);
+        InstantMessenger im = new InstantMessenger(host, port, this, activityCallback.get());
         return im;
 	}
 
@@ -88,7 +101,7 @@ public final class ChatManager implements ConnectionAcceptor {
 								 bannedIPs.length);
 				more_banned[bannedIPs.length] = host;
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
-                ProviderHacks.getSpamServices().reloadIPFilter();
+                spamServices.reloadIPFilter();
 			}
 		}
 	}
@@ -100,7 +113,7 @@ public final class ChatManager implements ConnectionAcceptor {
 			if (bannedList.remove(host) ) {
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.
                     setValue((String[])bannedList.toArray());
-				ProviderHacks.getSpamServices().reloadIPFilter();
+				spamServices.reloadIPFilter();
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
 import org.limewire.rudp.UDPConnection;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -14,8 +15,13 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 public class BandwidthManager {
 
 	private final Throttle UP_TCP, DOWN_TCP, UP_UDP;
+    
+    private final UploadServices uploadServices;
 	
-	public BandwidthManager() {
+    @Inject
+	public BandwidthManager(UploadServices uploadServices) {
+        this.uploadServices = uploadServices;
+        
 		UP_TCP = new NBThrottle(true,0);
 		DOWN_TCP = new NBThrottle(false,0);
 		UP_UDP = new NBThrottle(true, 0);
@@ -38,8 +44,8 @@ public class BandwidthManager {
 	}
 	
 	public void applyUploadRate() {
-		UP_TCP.setRate(ProviderHacks.getUploadServices().getRequestedUploadSpeed());
-		UP_UDP.setRate(ProviderHacks.getUploadServices().getRequestedUploadSpeed());
+		UP_TCP.setRate(uploadServices.getRequestedUploadSpeed());
+		UP_UDP.setRate(uploadServices.getRequestedUploadSpeed());
 	}
 	
 	public Throttle getReadThrottle() {

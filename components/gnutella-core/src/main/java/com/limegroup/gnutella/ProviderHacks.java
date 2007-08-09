@@ -155,16 +155,18 @@ public class ProviderHacks {
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
     public static UploadServices getUploadServices() { return i().getUploadServices(); }
+
+    // Requires some factories...
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
-    public static SpamServices getSpamServices() { return i().getSpamServices(); }
-    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
-    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
     
     // Cleaned up in all but message parsers & tests
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Cleaned up in all but tests
+    public static SpamServices getSpamServices() { return i().getSpamServices(); }
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
+    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
     public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
     public static Statistics getStatistics() { return i().getStatistics(); }
     public static SearchResultHandler getSearchResultHandler() { return i().getSearchResultHandler(); }

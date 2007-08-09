@@ -18,15 +18,30 @@ import com.google.inject.Singleton;
 public class PushEndpointFactoryImpl implements PushEndpointFactory {
     
     private final NetworkManager networkManager;
+    private final Provider<UDPService> udpService;
+    private final Provider<ConnectionManager> connectionManager;
+    private final ApplicationServices applicationServices;
+    
+
     private final Provider<PushEndpoint> selfProvider;
     
     @Inject
-    public PushEndpointFactoryImpl(NetworkManager networkManager) {
+    public PushEndpointFactoryImpl(NetworkManager networkManager,
+            Provider<UDPService> udpService,
+            Provider<ConnectionManager> connectionManager,
+            ApplicationServices applicationServices) {
         this.networkManager = networkManager;
+        this.udpService = udpService;
+        this.connectionManager = connectionManager;
+        this.applicationServices = applicationServices;
         this.selfProvider = new AbstractLazySingletonProvider<PushEndpoint>() {
             @Override
             protected PushEndpoint createObject() {
-                return new SelfEndpoint(PushEndpointFactoryImpl.this.networkManager);
+                return new SelfEndpoint(
+                        PushEndpointFactoryImpl.this.networkManager,
+                        PushEndpointFactoryImpl.this.applicationServices,
+                        PushEndpointFactoryImpl.this.connectionManager,
+                        PushEndpointFactoryImpl.this.udpService);
             }
             
         };
@@ -42,11 +57,18 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     
     private static class SelfEndpoint extends PushEndpoint {
         private final NetworkManager networkManager;
-
-        private SelfEndpoint(NetworkManager networkManager) {
-            super(ProviderHacks.getApplicationServices().getMyGUID(), IpPort.EMPTY_SET,
+        private final Provider<ConnectionManager> connectionManager;
+        private final Provider<UDPService> udpService;
+        
+        private SelfEndpoint(NetworkManager networkManager,
+                ApplicationServices applicationServices,
+                Provider<ConnectionManager> connectionManager,
+                Provider<UDPService> udpService) {
+            super(applicationServices.getMyGUID(), IpPort.EMPTY_SET,
                     PushEndpoint.PLAIN, UDPConnection.VERSION);
             this.networkManager = networkManager;
+            this.connectionManager = connectionManager;
+            this.udpService = udpService;
         }
 
         /**
@@ -54,7 +76,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
          */
         @Override
         public Set<? extends IpPort> getProxies() {
-            return ProviderHacks.getConnectionManager().getPushProxies();
+            return connectionManager.get().getPushProxies();
         }
 
         /**
@@ -108,7 +130,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         public int getPort() {
             if (networkManager.canDoFWT()
                     && !networkManager.acceptedIncomingConnection())
-                return ProviderHacks.getUdpService().getStableUDPPort();
+                return udpService.get().getStableUDPPort();
             return networkManager.getPort();
         }
 

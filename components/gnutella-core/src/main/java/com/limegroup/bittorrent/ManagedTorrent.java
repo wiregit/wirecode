@@ -448,7 +448,7 @@ BTLinkListener {
 		choker = ProviderHacks.getChokerFactory().getChoker(linkManager, 
 				networkInvoker, false);
 		_connectionFetcher = 
-			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this, networkInvoker);
+			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this);
 	}
 
 	/**

@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -97,12 +98,14 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.LimeSentMessageStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /**
@@ -226,19 +229,6 @@ public abstract class MessageRouter {
         ExecutorsHelper.newProcessingQueue("TCPConnectBack");
     
 	/**
-	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
-	 * generated queries that adjust to the number of results received, the
-	 * number of connections, etc.
-	 */
-	private final QueryDispatcher DYNAMIC_QUERIER = ProviderHacks.getQueryDispatcher();
-	
-	/**
-	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
-	 * display.
-	 */
-	private ActivityCallback _callback;
-    
-	/**
 	 * A handle to the thread that deals with QRP Propagation
 	 */
 	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
@@ -324,11 +314,19 @@ public abstract class MessageRouter {
     protected final StaticMessages staticMessages;
     protected final Provider<MessageDispatcher> messageDispatcher;
     protected final MulticastService multicastService;
+    protected final QueryDispatcher queryDispatcher;
+    protected final Provider<ActivityCallback> activityCallback;
+    protected final ConnectionServices connectionServices;
+    protected final ScheduledExecutorService backgroundExecutor;
+    protected final Provider<PongCacher> pongCacher;
+    protected final Provider<SimppManager> simppManager;
+    protected final Provider<UpdateHandler> updateHandler;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
      */
     @Inject
+    // DPINJ: Create a MessageRouterController instead of passing all of these...
     protected MessageRouter(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
@@ -350,9 +348,15 @@ public abstract class MessageRouter {
             QueryReplyFactory queryReplyFactory,
             StaticMessages staticMessages,
             Provider<MessageDispatcher> messageDispatcher,
-            MulticastService multicastService
-            ) {
-        _clientGUID = ProviderHacks.getApplicationServices().getMyGUID();
+            MulticastService multicastService,
+            QueryDispatcher queryDispatcher,
+            Provider<ActivityCallback> activityCallback,
+            ConnectionServices connectionServices,
+            ApplicationServices applicationServices,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<PongCacher> pongCacher,
+            Provider<SimppManager> simppManager,
+            Provider<UpdateHandler> updateHandler) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -375,6 +379,15 @@ public abstract class MessageRouter {
         this.staticMessages = staticMessages;
         this.messageDispatcher = messageDispatcher;
         this.multicastService = multicastService;
+        this.queryDispatcher = queryDispatcher;
+        this.activityCallback = activityCallback;
+        this.connectionServices = connectionServices;
+        this.backgroundExecutor = backgroundExecutor;
+        this.pongCacher = pongCacher;
+        this.simppManager = simppManager;
+        this.updateHandler = updateHandler;
+
+        _clientGUID = applicationServices.getMyGUID();
          
     }
     
@@ -514,25 +527,23 @@ public abstract class MessageRouter {
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize() {
-		_callback = ProviderHacks.getActivityCallback();
-        
-		_bypassedResultsCache = new BypassedResultsCache(_callback, downloadManager);
+		_bypassedResultsCache = new BypassedResultsCache(activityCallback.get(), downloadManager);
         
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to clear guys we've connected back to
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
+        backgroundExecutor.scheduleWithFixedDelay(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to send hops-flow messages
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new HopsFlowManager(uploadManager, connectionManager), HOPS_FLOW_INTERVAL*10, 
+        backgroundExecutor.scheduleWithFixedDelay(new HopsFlowManager(uploadManager, connectionManager), HOPS_FLOW_INTERVAL*10, 
                                HOPS_FLOW_INTERVAL, TimeUnit.MILLISECONDS);
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME, TimeUnit.MILLISECONDS);
         
         // runner to clean up OOB sessions
         OOBHandler oobHandler = new OOBHandler(this);
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         
         // handler for inspection requests
         InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager);
@@ -637,7 +648,7 @@ public abstract class MessageRouter {
      * the routing tables when the connection is closed.
      */
     public void removeConnection(ReplyHandler rh) {
-        DYNAMIC_QUERIER.removeReplyHandler(rh);
+        queryDispatcher.removeReplyHandler(rh);
         _pingRouteTable.removeReplyHandler(rh);
         _queryRouteTable.removeReplyHandler(rh);
         _pushRouteTable.removeReplyHandler(rh);
@@ -1069,7 +1080,7 @@ public abstract class MessageRouter {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
-            _callback.handleQueryString(request.getQuery());
+            activityCallback.get().handleQueryString(request.getQuery());
         }
         
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
@@ -1120,7 +1131,7 @@ public abstract class MessageRouter {
                                                                       counter), 
 								 handler);
 			}
-		} else if(request.getTTL() > 0 && ProviderHacks.getConnectionServices().isSupernode()) {
+		} else if(request.getTTL() > 0 && connectionServices.isSupernode()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
             if(handler.isGoodUltrapeer()) {
@@ -1230,7 +1241,7 @@ public abstract class MessageRouter {
         int numResults = searchResultHandler.getNumResultsForQuery(qGUID);
     	
         if (numResults < 0) // this may be a proxy query
-    		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
+    		numResults = queryDispatcher.getLeafResultsForQuery(qGUID);
 
         if (numResults < 0 || numResults > QueryHandler.ULTRAPEER_RESULTS) {
             return -1;
@@ -1485,7 +1496,7 @@ public abstract class MessageRouter {
         int numResults = resp.getNumResults();
         
         // get the QueryHandler and update the stats....
-        DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults);
+        queryDispatcher.updateLeafResultsForQuery(queryGUID, numResults);
     }
 
 
@@ -1551,7 +1562,7 @@ public abstract class MessageRouter {
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(query.getGUID(), 
 										forMeReplyHandler);
-		if(ProviderHacks.getConnectionServices().isSupernode()) {
+		if(connectionServices.isSupernode()) {
 			sendDynamicQuery(queryHandlerFactory.createHandlerForMe(query, 
                                                              counter), 
 							 forMeReplyHandler);
@@ -1599,7 +1610,7 @@ public abstract class MessageRouter {
 		} else if(handler == null) {
 			throw new NullPointerException("null ReplyHandler");
 		} 
-		DYNAMIC_QUERIER.addQuery(qh);
+        queryDispatcher.addQuery(qh);
 	}
 
     /**
@@ -1660,7 +1671,7 @@ public abstract class MessageRouter {
      */
 	public final void forwardQueryRequestToLeaves(QueryRequest query,
                                                   ReplyHandler handler) {
-		if(!ProviderHacks.getConnectionServices().isSupernode()) return;
+		if(!connectionServices.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
@@ -1965,7 +1976,7 @@ public abstract class MessageRouter {
         boolean newAddress = hostCatcher.add(reply);
 
         if(newAddress && !reply.isUDPHostCache()) {
-            ProviderHacks.getPongCacher().addPong(reply);
+            pongCacher.get().addPong(reply);
         }
 
         //First route to originator in usual manner.
@@ -2131,7 +2142,7 @@ public abstract class MessageRouter {
                                                   final ReplyHandler handler ) {
         if(simppReq.getVersion() > SimppRequestVM.VERSION)
             return; //we are not going to deal with these types of requests. 
-        byte[] simppBytes = ProviderHacks.getSimppManager().getSimppBytes();
+        byte[] simppBytes = simppManager.get().getSimppBytes();
         if(simppBytes != null && simppBytes.length > 0 ) {
             SimppVM simppVM = new SimppVM(simppBytes);
             try {
@@ -2150,7 +2161,7 @@ public abstract class MessageRouter {
      * all connections.
      */
     private void handleSimppVM(SimppVM simppVM, ReplyHandler handler) {
-        ProviderHacks.getSimppManager().checkAndUpdate(handler, simppVM.getPayload());
+        simppManager.get().checkAndUpdate(handler, simppVM.getPayload());
     }
 
     /**
@@ -2158,7 +2169,7 @@ public abstract class MessageRouter {
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
 
-        byte[] data = ProviderHacks.getUpdateHandler().getLatestBytes();
+        byte[] data = updateHandler.get().getLatestBytes();
         if(data != null) {
             UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
             handler.reply(msg);
@@ -2174,7 +2185,7 @@ public abstract class MessageRouter {
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        ProviderHacks.getUpdateHandler().handleNewData(resp.getUpdate(), handler);
+        updateHandler.get().handleNewData(resp.getUpdate(), handler);
     }
 
     /**
@@ -2612,7 +2623,7 @@ public abstract class MessageRouter {
 			// continue if I'm an Ultrapeer and the node on the
 			// other end doesn't support Ultrapeer-level query
 			// routing
-			if(ProviderHacks.getConnectionServices().isSupernode()) { 
+			if(connectionServices.isSupernode()) { 
 				// only skip it if it's not an Ultrapeer query routing
 				// connection
 				if(!c.isUltrapeerQueryRoutingConnection()) { 
@@ -2694,7 +2705,7 @@ public abstract class MessageRouter {
         QueryRouteTable ret = fileManager.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
-        if(ProviderHacks.getConnectionServices().isSupernode()) {
+        if(connectionServices.isSupernode()) {
             addQueryRoutingEntriesForLeaves(ret);
         }
         return ret;
@@ -2923,7 +2934,7 @@ public abstract class MessageRouter {
         }
     }
 
-    static class HopsFlowManager implements Runnable {
+    private static class HopsFlowManager implements Runnable {
         private final UploadManager uploadManager;
         private final ConnectionManager connectionManager;
         
@@ -2944,7 +2955,7 @@ public abstract class MessageRouter {
            
         public void run() {
             // only leafs should use HopsFlow
-            if (ProviderHacks.getConnectionServices().isSupernode())
+            if (connectionManager.isSupernode())
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value

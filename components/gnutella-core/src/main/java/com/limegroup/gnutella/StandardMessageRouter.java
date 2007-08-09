@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,14 +40,17 @@ import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -75,14 +79,24 @@ public class StandardMessageRouter extends MessageRouter {
             SocketsManager socketsManager, HostCatcher hostCatcher,
             QueryReplyFactory queryReplyFactory, StaticMessages staticMessages,
             Provider<MessageDispatcher> messageDispatcher,
-            MulticastService multicastService, Statistics statistics) {
+            MulticastService multicastService, QueryDispatcher queryDispatcher,
+            Provider<ActivityCallback> activityCallback,
+            ConnectionServices connectionServices,
+            ApplicationServices applicationServices,
+            @Named("backgroundExecutor")
+            ScheduledExecutorService backgroundExecutor,
+            Provider<PongCacher> pongCacher,
+            Provider<SimppManager> simppManager,
+            Provider<UpdateHandler> updateHandler, Statistics statistics) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
                 fileManager, contentManager, dhtManager, uploadManager,
                 downloadManager, udpService, searchResultHandler,
                 socketsManager, hostCatcher, queryReplyFactory, staticMessages,
-                messageDispatcher, multicastService);
+                messageDispatcher, multicastService, queryDispatcher,
+                activityCallback, connectionServices, applicationServices,
+                backgroundExecutor, pongCacher, simppManager, updateHandler);
         this.statistics = statistics;
     }
     

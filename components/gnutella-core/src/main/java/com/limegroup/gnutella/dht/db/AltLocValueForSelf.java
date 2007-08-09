@@ -3,8 +3,8 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.security.TigerTree;
 import com.limegroup.gnutella.settings.SSLSettings;
 
@@ -19,9 +19,12 @@ class AltLocValueForSelf extends AbstractAltLocValue {
     
     private final byte[] ttroot;
     
-    private final NetworkManager networkManager;    
+    private final NetworkManager networkManager; 
+    private final ApplicationServices applicationServices;
     
-    public AltLocValueForSelf(long fileSize, byte[] ttroot, NetworkManager networkManager) {
+    public AltLocValueForSelf(long fileSize, byte[] ttroot,
+            NetworkManager networkManager,
+            ApplicationServices applicationServices) {
         super(AbstractAltLocValue.VERSION);
         
         if (fileSize < 0L) {
@@ -35,6 +38,7 @@ class AltLocValueForSelf extends AbstractAltLocValue {
         this.fileSize = fileSize;
         this.ttroot = ttroot;
         this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
     }
     
     /*
@@ -60,7 +64,7 @@ class AltLocValueForSelf extends AbstractAltLocValue {
     
     @Override
     public byte[] getGUID() {
-        return ProviderHacks.getApplicationServices().getMyGUID();
+        return applicationServices.getMyGUID();
     }
     
     @Override

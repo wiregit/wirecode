@@ -6,6 +6,7 @@ import org.limewire.mojito.routing.Version;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 
 
@@ -16,10 +17,13 @@ import com.limegroup.gnutella.NetworkManager;
 public class AltLocValueFactoryImpl implements AltLocValueFactory {
     
     private final NetworkManager networkManager;
+    private final ApplicationServices applicationServices;
     
     @Inject
-    public AltLocValueFactoryImpl(NetworkManager networkManager) {
+    public AltLocValueFactoryImpl(NetworkManager networkManager,
+            ApplicationServices applicationServices) {
         this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
     }
     
 
@@ -39,7 +43,7 @@ public class AltLocValueFactoryImpl implements AltLocValueFactory {
      * @return
      */
     public AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot) {
-        return new AltLocValueForSelf(fileSize, ttroot, networkManager);
+        return new AltLocValueForSelf(fileSize, ttroot, networkManager, applicationServices);
     }
 
     /**

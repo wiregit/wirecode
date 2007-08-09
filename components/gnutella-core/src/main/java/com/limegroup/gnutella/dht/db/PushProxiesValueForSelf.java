@@ -9,8 +9,8 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 
@@ -22,11 +22,15 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     private static final long serialVersionUID = -3222117316287224578L;
     private final PushEndpoint self;
     private final NetworkManager networkManager;
-    
-    public PushProxiesValueForSelf(NetworkManager networkManager, PushEndpointFactory pushEndpointFactory) {
+    private final ApplicationServices applicationServices;
+
+    public PushProxiesValueForSelf(NetworkManager networkManager,
+            PushEndpointFactory pushEndpointFactory,
+            ApplicationServices applicationServices) {
         super(AbstractPushProxiesValue.VERSION);
         this.networkManager = networkManager;
         this.self = pushEndpointFactory.createForSelf();
+        this.applicationServices = applicationServices;
     }
 
     public boolean isEmpty() {
@@ -50,7 +54,7 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     }
 
     public byte[] getGUID() {
-        return ProviderHacks.getApplicationServices().getMyGUID();
+        return applicationServices.getMyGUID();
     }
     
     public byte getFeatures() {

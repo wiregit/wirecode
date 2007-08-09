@@ -48,7 +48,8 @@ public class PushProxiesValueTest extends DHTTestCase {
         
         AbstractPushProxiesValue value1 = new PushProxiesValueFactoryImpl(
                 ProviderHacks.getNetworkManager(), ProviderHacks
-                        .getPushEndpointFactory()).createPushProxiesValue(
+                        .getPushEndpointFactory(), ProviderHacks
+                        .getApplicationServices()).createPushProxiesValue(
                 Version.ZERO, guid, features, fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
@@ -77,7 +78,8 @@ public class PushProxiesValueTest extends DHTTestCase {
         try {
             value2 = new PushProxiesValueFactoryImpl(ProviderHacks
                     .getNetworkManager(), ProviderHacks
-                    .getPushEndpointFactory()).createFromData(Version.ZERO,
+                    .getPushEndpointFactory(), ProviderHacks
+                    .getApplicationServices()).createFromData(Version.ZERO,
                     serialized);
         } catch (DHTValueException err) {
             fail("DHTValueException", err);

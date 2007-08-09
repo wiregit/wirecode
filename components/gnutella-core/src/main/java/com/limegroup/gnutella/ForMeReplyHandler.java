@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -23,6 +24,7 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -62,6 +64,9 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final Provider<DownloadManager> downloadManager;
     private final Provider<Acceptor> acceptor;
     private final Provider<PushManager> pushManager;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ApplicationServices applicationServices;
+    private final ConnectionServices connectionServices;
 
     @Inject
     ForMeReplyHandler(NetworkManager networkManager,
@@ -69,7 +74,10 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             Provider<ConnectionManager> connectionManager,
             Provider<SearchResultHandler> searchResultHandler,
             Provider<DownloadManager> downloadManager,
-            Provider<Acceptor> acceptor, Provider<PushManager> pushManager) {
+            Provider<Acceptor> acceptor, Provider<PushManager> pushManager,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            ApplicationServices applicationServices,
+            ConnectionServices connectionServices) {
         this.networkManager = networkManager;
         this.secureMessageVerifier = secureMessageVerifier;
         this.connectionManager = connectionManager;
@@ -77,9 +85,13 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         this.downloadManager = downloadManager;
         this.acceptor = acceptor;
         this.pushManager = pushManager;
+        this.backgroundExecutor = backgroundExecutor;
+        this.applicationServices = applicationServices;
+        this.connectionServices = connectionServices;
     	    
 	    //Clear push requests every 30 seconds.
-	    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+        //DPINJ: move to initializer
+	    this.backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
 	        public void run() {
 	            PUSH_REQUESTS.clear();
 	        }
@@ -303,7 +315,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	 *  <tt>false</tt>
 	 */
 	public boolean isLeafConnection() {
-		return !ProviderHacks.getConnectionServices().isSupernode();
+		return !connectionServices.isSupernode();
 	}
 
 	/**
@@ -421,7 +433,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
 
     public byte[] getClientGUID() {
-        return ProviderHacks.getApplicationServices().getMyGUID();
+        return applicationServices.getMyGUID();
     }
 }
 

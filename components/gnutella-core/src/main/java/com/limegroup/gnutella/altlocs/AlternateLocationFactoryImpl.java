@@ -11,9 +11,11 @@ import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -23,10 +25,16 @@ import com.limegroup.gnutella.settings.SSLSettings;
 public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     
     private final NetworkManager networkManager;
+    private final PushEndpointFactory pushEndpointFactory;
+    private final ApplicationServices applicationServices;
     
     @Inject
-    public AlternateLocationFactoryImpl(NetworkManager networkManager) {
+    public AlternateLocationFactoryImpl(NetworkManager networkManager,
+            PushEndpointFactory pushEndpointFactory,
+            ApplicationServices applicationServices) {
         this.networkManager = networkManager;
+        this.pushEndpointFactory = pushEndpointFactory;
+        this.applicationServices = applicationServices;
     }
 
     /* (non-Javadoc)
@@ -60,7 +68,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     		                SSLSettings.isIncomingTLSEnabled())
     		            , urn);
     		} else { 
-    			return new PushAltLoc(urn);
+    			return new PushAltLoc(pushEndpointFactory.createForSelf(), urn, applicationServices);
     		}
     		
     	}catch(IOException bad) {
@@ -89,7 +97,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
                 copy = rfd.getPushAddr();
             else 
                 copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,PushEndpoint.PLAIN,0,null);
-    	    return new PushAltLoc(copy,urn);
+    	    return new PushAltLoc(copy,urn, applicationServices);
     	} 
     }
 
@@ -97,7 +105,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createPushAltLoc(com.limegroup.gnutella.PushEndpoint, com.limegroup.gnutella.URN)
      */
     public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) throws IOException {
-        return new PushAltLoc(pe, urn);
+        return new PushAltLoc(pe, urn, applicationServices);
     }
 
     /* (non-Javadoc)
@@ -134,7 +142,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
         
         //Case 2. Push Alt loc
         PushEndpoint pe = new PushEndpoint(location);
-        return new PushAltLoc(pe,urn);
+        return new PushAltLoc(pe,urn, applicationServices);
     }
 
     /* (non-Javadoc)

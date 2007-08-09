@@ -24,8 +24,9 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {
@@ -92,15 +93,21 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 * The number of connection attempts.
 	 */
 	private volatile int _triedHosts;
+    
+    private final SocketsManager socketsManager;
 	
-	BTConnectionFetcher(ManagedTorrent torrent, ScheduledExecutorService scheduler) {
-		_torrent = torrent;
-		ByteBuffer handshake = ByteBuffer.allocate(68);
+	BTConnectionFetcher(ManagedTorrent torrent,
+            ScheduledExecutorService scheduler,
+            ApplicationServices applicationServices,
+            SocketsManager socketsManager) {
+        this.socketsManager = socketsManager;
+        _torrent = torrent;
+        ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19
 		handshake.put(BITTORRENT_PROTOCOL_BYTES); // "BitTorrent protocol"
 		handshake.put(EXTENSION_BYTES);
 		handshake.put(_torrent.getInfoHash());
-		handshake.put(ProviderHacks.getApplicationServices().getMyBTGUID());
+		handshake.put(applicationServices.getMyBTGUID());
 		handshake.flip();
 		// Note: with gathering writes everything but the info hash 
 		// can be shared.
@@ -127,14 +134,14 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		 // DPINJ: Change to using passed-in SocketsManager!!!
 		
 		while (_torrent.needsMoreConnections() &&
-				connecting.size() < ProviderHacks.getSocketsManager().getNumAllowedSockets() &&
+				connecting.size() < socketsManager.getNumAllowedSockets() &&
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 		}
 		
 		// we didn't start enough fetchers - see if there 
 		// are any busy hosts we could retry later.
-		if (connecting.size() < ProviderHacks.getSocketsManager().getNumAllowedSockets())
+		if (connecting.size() < socketsManager.getNumAllowedSockets())
 			fetch();
 	}
 
@@ -158,8 +165,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		connecting.add(connector);
 		++_triedHosts;
 		try {
-            // DPINJ: Change to using passed-in SocketsManager!!!
-			connector.toCancel = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
+			connector.toCancel = socketsManager.connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
                                                  Constants.TIMEOUT, connector);
 		} catch (IOException impossible) {
 			connecting.remove(connector); // remove just in case
