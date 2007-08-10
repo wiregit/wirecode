@@ -58,7 +58,10 @@ public class SimppManager {
 
     private final ExecutorService _processingQueue;
     
+    private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;
+    
     private SimppManager() {
+        this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         boolean problem = false;
         RandomAccessFile raf = null;
         _processingQueue = ExecutorsHelper.newProcessingQueue("Simpp Handling Queue");
@@ -173,7 +176,8 @@ public class SimppManager {
                 // 2. get the props we just read
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
-                SimppSettingsManager.instance().updateSimppSettings(props);
+                for(SimppSettingsManager ssm : simppSettingsManagers)
+                    ssm.updateSimppSettings(props);
                 // 4. Save to disk, try 5 times
                 for (int i =0;i < 5; i++) {
                     if (save())
@@ -185,6 +189,14 @@ public class SimppManager {
             }
         };
         _processingQueue.execute(simppHandler);
+    }
+        
+    public void addSimppSettingsManager(SimppSettingsManager simppSettingsManager) {
+        simppSettingsManagers.add(simppSettingsManager);
+    }
+    
+    public List<SimppSettingsManager> getSimppSettingsManagers() {
+        return simppSettingsManagers;
     }
     
     /**

@@ -25,8 +25,6 @@ public class SimppSettingsManager implements RemoteSettingManager {
 
     private static final Log LOG = LogFactory.getLog(SimppSettingsManager.class);
 
-    /**  The instance */
-    private static SimppSettingsManager INSTANCE = new SimppSettingsManager();
     
     /** 
      * The properties we crete from the string we get via simpp message
@@ -44,10 +42,6 @@ public class SimppSettingsManager implements RemoteSettingManager {
     
     /** The controller used to set remote settings. */
     private volatile RemoteSettingController _remoteController;
-    
-    public static final SimppSettingsManager instance() {
-        return INSTANCE;
-    }
     
     /**
      * Call this method with the verified simppSettings which are used to
