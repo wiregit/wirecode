@@ -44,7 +44,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         ProviderHacks.getChatManager().initialize();
 
         // start it up!
-        acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
+        acceptThread = ProviderHacks.getAcceptor();
         acceptThread.start();
         acceptThread.setListeningPort(CHAT_PORT);
     }

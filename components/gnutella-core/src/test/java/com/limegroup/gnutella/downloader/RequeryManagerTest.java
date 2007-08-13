@@ -49,7 +49,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     private RequeryManager createRM () {
-        return new RequeryManager(managedDownloader, downloadManager, altLocFinder, dhtManager);
+        return new RequeryManager(managedDownloader, downloadManager, altLocFinder, dhtManager, ProviderHacks.getConnectionServices());
     }
     
     private void setPro(boolean pro) throws Exception {

@@ -12,7 +12,6 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
-import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
@@ -46,7 +45,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
       //  new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
         ProviderHacks.getMessageRouter().initialize();
         
-        new Acceptor(ProviderHacks.getNetworkManager()).setListeningPort(LISTEN_PORT);
+        ProviderHacks.getAcceptor().setListeningPort(LISTEN_PORT);
         ProviderHacks.getUdpService().start();
         
         URN_1 = URN.createSHA1Urn(S_URN_1);

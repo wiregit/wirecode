@@ -5,8 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -70,14 +70,18 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      */
     private volatile Shutdownable dhtQuery;
     
+    private final ConnectionServices connectionServices;
+    
     RequeryManager(ManagedDownloader downloader, 
             DownloadManager manager,
             AltLocFinder finder,
-            DHTManager dhtManager) {
+            DHTManager dhtManager,
+            ConnectionServices connectionServices) {
         this.downloader = downloader;
         this.manager = manager;
         this.finder = finder;
         this.dhtManager = dhtManager;
+        this.connectionServices = connectionServices;
         dhtManager.addEventListener(this);
     }
     
@@ -234,8 +238,8 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         
         // Wait till your connections are stable enough to get the minimum 
         // number of messages
-        return ProviderHacks.getConnectionServices().countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+        return connectionServices.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
                     >= MIN_NUM_CONNECTIONS &&
-               ProviderHacks.getConnectionServices().getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
+                    connectionServices.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 }

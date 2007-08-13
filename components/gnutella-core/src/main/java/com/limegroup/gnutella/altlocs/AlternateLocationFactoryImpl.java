@@ -12,8 +12,8 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -27,14 +27,17 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     private final NetworkManager networkManager;
     private final PushEndpointFactory pushEndpointFactory;
     private final ApplicationServices applicationServices;
+    private final ConnectionServices connectionServices;
     
     @Inject
     public AlternateLocationFactoryImpl(NetworkManager networkManager,
             PushEndpointFactory pushEndpointFactory,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            ConnectionServices connectionServices) {
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
         this.applicationServices = applicationServices;
+        this.connectionServices = connectionServices;
     }
 
     /* (non-Javadoc)
@@ -55,7 +58,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    
     	    boolean open;
     	    
-    	    if (ProviderHacks.getConnectionServices().isConnected())
+    	    if (connectionServices.isConnected())
     	        open = networkManager.acceptedIncomingConnection();
     	    else
     	        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();

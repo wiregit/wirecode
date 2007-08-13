@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -28,6 +32,23 @@ public final class ConnectionWatchdog {
     private static final int EVALUATE_TIME=30000;
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=15000;
+    
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<ConnectionManager> connectionManager;
+    private final ConnectionServices connectionServices;
+    
+    @Inject
+    public ConnectionWatchdog(
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<ConnectionManager> connectionManager,
+            ConnectionServices connectionServices) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
+    }
 
     /**
      * Starts the <tt>ConnectionWatchdog</tt>.
@@ -85,7 +106,7 @@ public final class ConnectionWatchdog {
             snapshot.put(c, new ConnectionState(c));
         }
         
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new DudChecker(snapshot, false), EVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, false), EVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -111,17 +132,17 @@ public final class ConnectionWatchdog {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            ProviderHacks.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
+            messageRouter.get().sendPingRequest(new PingRequest((byte)1), c);
         }
         
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /** Returns an iterable of all initialized connections in this, including
      *  leaf connecions. */
     private Iterable<ManagedConnection> allConnections() {
-        List<ManagedConnection> normal = ProviderHacks.getConnectionManager().getInitializedConnections();
-        List<ManagedConnection> leaves =  ProviderHacks.getConnectionManager().getInitializedClientConnections();
+        List<ManagedConnection> normal = connectionManager.get().getInitializedConnections();
+        List<ManagedConnection> leaves = connectionManager.get().getInitializedClientConnections();
 
         List<ManagedConnection> buf = new ArrayList<ManagedConnection>(normal.size() + leaves.size());
         buf.addAll(normal);
@@ -172,7 +193,7 @@ public final class ConnectionWatchdog {
                         if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {
                             if(LOG.isWarnEnabled())
                                 LOG.warn("Killing connection: " + c);
-                            ProviderHacks.getConnectionServices().removeConnection(c);
+                            connectionServices.removeConnection(c);
                         }
                     } else {
                         if(LOG.isWarnEnabled())

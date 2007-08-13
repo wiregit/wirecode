@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.limewire.collection.BucketQueue;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -49,6 +50,13 @@ public final class PongCacher {
     private static final Map<String, BucketQueue<PingReply>> PONGS =
         new HashMap<String, BucketQueue<PingReply>>();
 
+
+    private final ConnectionServices connectionServices;
+    
+    @Inject
+    public PongCacher(ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
+    }
 
     /**
      * Accessor for the <tt>Set</tt> of cached pongs.  This <tt>List</tt>
@@ -158,7 +166,8 @@ public final class PongCacher {
      */
     public void addPong(PingReply pr) {
         // if we're not an Ultrapeer, we don't care about caching the pong
-        if(!ProviderHacks.getConnectionServices().isSupernode()) return;
+        if (!connectionServices.isSupernode())
+            return;
 
         // Make sure we don't cache pongs that aren't from Ultrapeers.
         if(!pr.isUltrapeer()) return;      

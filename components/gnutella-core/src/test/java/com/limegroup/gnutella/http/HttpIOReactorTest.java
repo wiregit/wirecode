@@ -54,7 +54,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
       //  new RouterService(new ActivityCallbackStub());
 
-        acceptor = new Acceptor(ProviderHacks.getNetworkManager());
+        acceptor = ProviderHacks.getAcceptor();
         acceptor.start();
         acceptor.setListeningPort(ACCEPTOR_PORT);
 

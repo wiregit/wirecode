@@ -43,7 +43,7 @@ public class InstantMessengerTest extends BaseTestCase {
         ProviderHacks.getChatManager().initialize();
         
         // start it up!
-        acceptThread = new Acceptor(ProviderHacks.getNetworkManager());
+        acceptThread = ProviderHacks.getAcceptor();
         acceptThread.start();
     }
 

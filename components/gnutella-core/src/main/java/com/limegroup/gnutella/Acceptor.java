@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +32,10 @@ import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BufferUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -55,10 +59,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
     
-    /** the UPnPManager to use */
-    private static final UPnPManager UPNP_MANAGER 
-        = (!ConnectionSettings.DISABLE_UPNP.getValue()) ? ProviderHacks.getUPnPManager() : null;
-
     /**
      * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
@@ -92,14 +92,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      *
      * LOCKING: obtain Acceptor.class' lock 
      */
-    private static byte[] _address = new byte[4];
+    private byte[] _address = new byte[4];
     
     /**
      * The external address.  This is the address as visible from other peers.
      *
      * LOCKING: obtain Acceptor.class' lock
      */
-    private static byte[] _externalAddress = new byte[4];
+    private byte[] _externalAddress = new byte[4];
     
 	/**
 	 * Variable for whether or not we have accepted an incoming connection --
@@ -127,13 +127,50 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     private volatile boolean _started;
     
     private final NetworkManager networkManager;
+    private final Provider<UDPService> udpService;
+    private final Provider<MulticastService> multicastService;
+    private final Provider<ConnectionDispatcher> connectionDispatcher;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<ActivityCallback> activityCallback;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<IPFilter> ipFilter;
+    private final ConnectionServices connectionServices;
+    private final Provider<UPnPManager> upnpManager;
+    
+    private final boolean upnpEnabled; 
     
     @Inject
-    public Acceptor(NetworkManager networkManager) {
+    public Acceptor(NetworkManager networkManager,
+            Provider<UDPService> udpService,
+            Provider<MulticastService> multicastService,
+            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<ActivityCallback> activityCallback,
+            Provider<ConnectionManager> connectionManager,
+            Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
+            Provider<UPnPManager> upnpManager) {
         this.networkManager = networkManager;
+        this.udpService = udpService;
+        this.multicastService = multicastService;
+        this.connectionDispatcher = connectionDispatcher;
+        this.backgroundExecutor = backgroundExecutor;
+        this.activityCallback = activityCallback;
+        this.connectionManager = connectionManager;
+        this.ipFilter = ipFilter;
+        this.connectionServices = connectionServices;
+        this.upnpManager = upnpManager;
+        
+        // capture UPnP setting on construction, so start/stop can
+        // work even if setting changes between the two.
+        upnpEnabled = !ConnectionSettings.DISABLE_UPNP.getValue();
+    }
+    
+    /** Returns true if UPnP was enabled when Acceptor was constructed. */
+    private boolean isUPnPEnabled() {
+        return upnpEnabled;
     }
 
-	/**
+    /**
      * @modifes this
      * @effects sets the IP address to use in pongs and query replies.
      *  If addr is invalid or a local address, this is not modified.
@@ -204,9 +241,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         //   block under certain conditions.
         //   See the notes for _address.
         try {
-            setAddress(UPNP_MANAGER != null ? 
-                    NetworkUtils.getLocalAddress() : 
-                        InetAddress.getLocalHost());
+            if(isUPnPEnabled())
+                setAddress(NetworkUtils.getLocalAddress());
+            else
+                setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }
@@ -256,16 +294,20 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             networkManager.addressChanged();
         }
 
+        setupUPnP();
+	}
+	
+	private void setupUPnP() {
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
-        if (_socket != null && UPNP_MANAGER != null) {
+        if (_socket != null && isUPnPEnabled()) {
             // wait a bit for the device.
-            UPNP_MANAGER.waitForDevice();
+            upnpManager.get().waitForDevice();
             
         	// if we haven't discovered the router by now, its not there
-        	UPNP_MANAGER.stop();
+            upnpManager.get().stop();
         	
-        	boolean natted = UPNP_MANAGER.isNATPresent();
+        	boolean natted = upnpManager.get().isNATPresent();
         	boolean validPort = NetworkUtils.isValidPort(_port);
         	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
 				!ConnectionSettings.UPNP_IN_USE.getValue();
@@ -274,13 +316,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
         	if(natted && validPort && !forcedIP) {
-        		int mappedPort = UPNP_MANAGER.mapPort(_port);
+        		int mappedPort = upnpManager.get().mapPort(_port);
         		if(LOG.isDebugEnabled())
         		    LOG.debug("UPNP port mapped: " + mappedPort);
         		
 			    //if we created a mapping successfully, update the forced port
 			    if (mappedPort != 0 ) {
-			        UPNP_MANAGER.clearMappingsOnShutdown();
+			        upnpManager.get().clearMappingsOnShutdown();
 			        
 			        //  mark UPNP as being on so that if LimeWire shuts
 			        //  down prematurely, we know the FORCE_IP was from UPnP
@@ -296,7 +338,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         	        // This will not help with already established connections, but if 
         	        // we establish new ones in the near future
         		    resetLastConnectBackTime();
-        		    ProviderHacks.getUdpService().resetLastConnectBackTime();
+        		    udpService.get().resetLastConnectBackTime();
 			    }			        
         	}
         }
@@ -306,14 +348,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
 	public void start() {
-        ProviderHacks.getMulticastService().start();
-        ProviderHacks.getUdpService().start();
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES, TimeUnit.MILLISECONDS);
-        ProviderHacks.getConnectionDispatcher().
-        addConnectionAcceptor(this,
-        		false,
-        		false,
-        		"CONNECT","\n\n");
+        multicastService.get().start();
+        udpService.get().start();
+        backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
+                TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES,
+                TimeUnit.MILLISECONDS);
+        connectionDispatcher.get().addConnectionAcceptor(this, false, false,
+                "CONNECT", "\n\n");
         _started = true;
     }
 	
@@ -404,9 +445,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             _port=0;
 
             //Shut off UDPService also!
-            ProviderHacks.getUdpService().setListeningSocket(null);
+            udpService.get().setListeningSocket(null);
             //Shut off MulticastServier too!
-            ProviderHacks.getMulticastService().setListeningSocket(null);            
+            multicastService.get().setListeningSocket(null);            
 
             LOG.trace("service OFF.");
             return;
@@ -428,7 +469,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             if(LOG.isDebugEnabled())
                 LOG.debug("changing port to " + port);
 
-            DatagramSocket udpServiceSocket = ProviderHacks.getUdpService().newListeningSocket(port);
+            DatagramSocket udpServiceSocket = udpService.get().newListeningSocket(port);
 
             LOG.trace("UDP Service is ready.");
             
@@ -438,7 +479,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     ConnectionSettings.MULTICAST_ADDRESS.getValue()
                 );
                 mcastServiceSocket =                            
-                    ProviderHacks.getMulticastService().newListeningSocket(
+                    multicastService.get().newListeningSocket(
                         ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
                 LOG.trace("multicast service setup");
@@ -470,11 +511,11 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             LOG.trace("Acceptor ready..");
 
             // Commit UDPService's new socket
-            ProviderHacks.getUdpService().setListeningSocket(udpServiceSocket);
+            udpService.get().setListeningSocket(udpServiceSocket);
             // Commit the MulticastService's new socket
             // if we were able to get it
             if (mcastServiceSocket != null) {
-                ProviderHacks.getMulticastService().setListeningSocket(mcastServiceSocket);
+                multicastService.get().setListeningSocket(mcastServiceSocket);
             }
 
             if(LOG.isDebugEnabled())
@@ -498,7 +539,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 		if (_acceptedIncoming == status)
 			return false;
 	    _acceptedIncoming = status;
-		ProviderHacks.getActivityCallback().acceptedIncomingChanged(status);
+		activityCallback.get().acceptedIncomingChanged(status);
 	    return true;
 	}
 	
@@ -616,7 +657,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
         
-        return !ProviderHacks.getConnectionServices().isConnectedTo(addr) &&
+        return !connectionServices.isConnectedTo(addr) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
 
@@ -627,7 +668,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(byte[] addr) {        
-        return !ProviderHacks.getIpFilter().allow(addr);
+        return !ipFilter.get().allow(addr);
     }
     
     /**
@@ -643,9 +684,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * any relevant settings.
      */
     public void shutdown() {
-        if(UPNP_MANAGER != null &&
-           UPNP_MANAGER.isNATPresent() &&
-           UPNP_MANAGER.mappingsExist() &&
+        shutdownUPnP();
+    }
+    
+    private void shutdownUPnP() {
+        if(isUPnPEnabled() &&
+           upnpManager.get().isNATPresent() &&
+           upnpManager.get().mappingsExist() &&
            ConnectionSettings.UPNP_IN_USE.getValue()) {
         	// reset the forced port values - must happen before we save them to disk
         	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
@@ -663,7 +708,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // clear and revalidate if 1) we haven't had in incoming 
             // or 2) we've never had incoming and we haven't checked
             final long currTime = System.currentTimeMillis();
-            final ConnectionManager cm = ProviderHacks.getConnectionManager();
             if (
                 (_acceptedIncoming && //1)
                  ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 
@@ -673,7 +717,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 ) {
                 // send a connectback request to a few peers and clear
                 // _acceptedIncoming IF some requests were sent.
-                if(cm.sendTCPConnectBackRequests())  {
+                if(connectionManager.get().sendTCPConnectBackRequests())  {
                     _lastConnectBackTime = System.currentTimeMillis();
                     Runnable resetter = new Runnable() {
                         public void run() {
@@ -687,7 +731,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                                 networkManager.incomingStatusChanged();
                         }
                     };
-                    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(resetter, 
+                    backgroundExecutor.scheduleWithFixedDelay(resetter, 
                                            WAIT_TIME_AFTER_REQUESTS, 0, TimeUnit.MILLISECONDS);
                 }
             }
@@ -697,14 +741,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     /**
      * A ConnectionDispatcher that reads asynchronously from the socket.
      */
-    private static class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
+    private class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
         private final Socket client;
         private final String allowedWord;
         private boolean finished = false;
         
         AsyncConnectionDispatcher(Socket client, String allowedWord) {
             // + 1 for whitespace
-            super(ProviderHacks.getConnectionDispatcher().getMaximumWordSize() + 1);
+            super(connectionDispatcher.get().getMaximumWordSize() + 1);
             
             this.client = client;
             this.allowedWord = allowedWord;
@@ -730,9 +774,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // See if we have a full word.
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
-                    ConnectionDispatcher dispatcher = ProviderHacks.getConnectionDispatcher();
                     String word = new String(buffer.array(), 0, i);
-                    if(dispatcher.isValidProtocolWord(word)) {
+                    if(connectionDispatcher.get().isValidProtocolWord(word)) {
                         if(allowedWord != null && !allowedWord.equals(word)) {
                             if(LOG.isDebugEnabled())
                                 LOG.debug("Legal but wrong word: " + word);
@@ -743,7 +786,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                             LOG.debug("Dispatching word: " + word);
                         buffer.limit(buffer.position()).position(i+1);
                         source.interestRead(false);
-                        ProviderHacks.getConnectionDispatcher().dispatch(word, client, true);
+                        connectionDispatcher.get().dispatch(word, client, true);
                     } else {
                         startTLS();
                     }
@@ -802,7 +845,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     /**
      * A ConnectionDispatcher that blocks while reading.
      */
-    private static class BlockingConnectionDispatcher implements Runnable {
+    private class BlockingConnectionDispatcher implements Runnable {
         private final Socket client;
         private final String allowedWord;
         
@@ -827,11 +870,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     throw new IOException(e.getMessage());
                 }
                 
-                ConnectionDispatcher dispatcher = ProviderHacks.getConnectionDispatcher();
-                String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
+                String word = IOUtils.readLargestWord(in, connectionDispatcher.get().getMaximumWordSize());
                 if(allowedWord != null && !allowedWord.equals(word))
                     throw new IOException("wrong word!");
-                dispatcher.dispatch(word, client, false);
+                connectionDispatcher.get().dispatch(word, client, false);
             } catch (IOException iox) {
                 HTTPStat.CLOSED_REQUESTS.incrementStat();
                 IOUtils.close(client);

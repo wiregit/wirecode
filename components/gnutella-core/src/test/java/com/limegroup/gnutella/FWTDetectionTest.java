@@ -70,7 +70,7 @@ public class FWTDetectionTest extends LimeTestCase {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
         // the catcher in RouterService points elsewhere 
-        HostCatcher catcher = new HostCatcher(); 
+        HostCatcher catcher = ProviderHacks.getHostCatcher(); 
         
         cmStub = new CMStub();
         

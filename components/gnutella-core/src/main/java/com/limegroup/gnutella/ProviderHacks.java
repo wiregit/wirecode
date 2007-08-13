@@ -138,12 +138,12 @@ public class ProviderHacks {
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
-    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
 
     // Requires some major reworking -- used statically in a lot of places
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     
     // Requires some factories...
+    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
     // Cleaned up in all but message parsers & tests

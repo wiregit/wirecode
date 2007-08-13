@@ -1,8 +1,12 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.PingPongSettings;
 
@@ -22,6 +26,20 @@ public final class Pinger implements Runnable {
      * broadcasts.  Public to make testing easier.
      */
     public static final int PING_INTERVAL = 3000;
+    
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ConnectionServices connectionServices;
+    private final Provider<MessageRouter> messageRouter;
+        
+    @Inject
+    public Pinger(
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            ConnectionServices connectionServices,
+            Provider<MessageRouter> messageRouter) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.connectionServices = connectionServices;
+        this.messageRouter = messageRouter;
+    }
 
 
     /**
@@ -29,7 +47,7 @@ public final class Pinger implements Runnable {
      * this node if it's an Ultrapeer.
      */
     public void start() {
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, PING_INTERVAL, PING_INTERVAL, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(this, PING_INTERVAL, PING_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
 
@@ -37,10 +55,8 @@ public final class Pinger implements Runnable {
      * Broadcasts a ping to all connections.
      */
     public void run() {
-        if(ProviderHacks.getConnectionServices().isSupernode() &&
-           PingPongSettings.PINGS_ACTIVE.getValue()) {
-            ProviderHacks.getMessageRouter().
-                broadcastPingRequest(new PingRequest((byte)3));
+        if (connectionServices.isSupernode() && PingPongSettings.PINGS_ACTIVE.getValue()) {
+            messageRouter.get().broadcastPingRequest(new PingRequest((byte) 3));
         }
     }
 }

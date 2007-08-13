@@ -30,6 +30,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -63,7 +64,7 @@ public class HostCatcherTest extends LimeTestCase {
 
         HostCatcher.DEBUG = true;
 
-        hc = new HostCatcher();
+        hc = new HackHostCatcher();
         hc.initialize();		
     }
     
@@ -73,7 +74,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testPutHostOnProbation() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.PROBATION_HOSTS_SIZE; i++) {
@@ -116,7 +117,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testExpireHosts() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.EXPIRED_HOSTS_SIZE; i++) {
@@ -192,7 +193,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreExpiredHosts() throws Exception {
         Endpoint expiredHost = new Endpoint("20.4.5.7", 6346);
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         catcher.initialize();
         catcher.add(expiredHost,true);
         assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
@@ -212,7 +213,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreProbatedHosts() throws Exception {
         Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         catcher.initialize();
         catcher.add(probatedHost,true);
         assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
@@ -232,7 +233,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if any error occurs
      */
     public void testRecoveryOfHostsOnProbation() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         long waitTime = 100;
         PrivilegedAccessor.setValue(HostCatcher.class, 
             "PROBATION_RECOVERY_WAIT_TIME", new Long(waitTime));

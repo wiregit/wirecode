@@ -29,6 +29,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -689,7 +690,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      * specify when our test framework requests endpoints to connect
      * to.
      */
-    private static class TestHostCatcher extends HostCatcher {
+    private static class TestHostCatcher extends HackHostCatcher {
         private volatile ExtendedEndpoint endpoint;
         private volatile CountDownLatch successLatch;
         private volatile CountDownLatch failureLatch;

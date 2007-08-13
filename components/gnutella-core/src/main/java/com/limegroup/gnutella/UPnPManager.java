@@ -122,16 +122,18 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 	private final Provider<Acceptor> acceptor;
 	
 	@Inject
-	private UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
+	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
 	    this.acceptor = acceptor;
-        addDeviceChangeListener(this);
     }
     
     public boolean start() {
 	    LOG.debug("Starting UPnP Manager.");
 	    
-
+	    //DPINJ: move from constructor to start, since it's constructed now
+	    //       even if DISABLE_UPNP is turned off -- is this right?
+        addDeviceChangeListener(this);
+	    
         synchronized(DEVICE_LOCK) {
             try {
     	        return super.start();
