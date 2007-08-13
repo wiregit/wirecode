@@ -22,6 +22,7 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.ApplicationServices;
@@ -95,12 +96,16 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	private volatile int _triedHosts;
     
     private final SocketsManager socketsManager;
+    
+    private final BTConnectionFactory btcFactory;
 	
 	BTConnectionFetcher(ManagedTorrent torrent,
             ScheduledExecutorService scheduler,
             ApplicationServices applicationServices,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager,
+            BTConnectionFactory btcFactory) {
         this.socketsManager = socketsManager;
+        this.btcFactory = btcFactory;
         _torrent = torrent;
         ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19
@@ -265,7 +270,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 				return;
 			}
 			
-			BTHandshaker shaker = new OutgoingBTHandshaker(destination, _torrent, (AbstractNBSocket)sock);
+			BTHandshaker shaker = new OutgoingBTHandshaker(destination, _torrent, (AbstractNBSocket)sock,btcFactory);
 			handshaking.add(shaker);
 			shaker.startHandshaking();
 			fetch();

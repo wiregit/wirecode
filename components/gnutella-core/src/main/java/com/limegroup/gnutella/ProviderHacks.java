@@ -105,7 +105,6 @@ public class ProviderHacks {
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
     public static UploadManager getUploadManager() { return i().getUploadManager(); }
     public static FileManager getFileManager() { return i().getFileManager(); }
-    public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }   
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }  
@@ -152,6 +151,7 @@ public class ProviderHacks {
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Cleaned up in all but tests
+    public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
     public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return i().getDHTNodeFetcherFactory(); }
     public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return i().getDHTBootstrapperFactory(); }
     public static SearchServices getSearchServices() { return i().getSearchServices(); }

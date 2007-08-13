@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.AbstractNBSocket;
 
+import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
 
@@ -20,10 +21,10 @@ class IncomingBTHandshaker extends BTHandshaker {
 	
 	private final TorrentManager manager;
 	
-	public IncomingBTHandshaker(AbstractNBSocket sock, TorrentManager manager) {
+	public IncomingBTHandshaker(AbstractNBSocket sock, TorrentManager manager, BTConnectionFactory factory) {
 		super(new TorrentLocation((InetSocketAddress)sock.getRemoteSocketAddress(), 
 				new byte[20],
-				new byte[8]), sock);
+				new byte[8]), sock, factory);
 		this.manager = manager;
 	}
 	

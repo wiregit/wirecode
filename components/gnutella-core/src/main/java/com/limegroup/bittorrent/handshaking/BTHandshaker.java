@@ -20,6 +20,7 @@ import org.limewire.nio.channel.InterestScatteringByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 
 import com.limegroup.bittorrent.BTConnection;
+import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 
@@ -44,10 +45,13 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	
 	protected final TorrentLocation loc;
 	protected final AbstractNBSocket sock;
+    
+    private final BTConnectionFactory btcFactory;
 	
-	protected BTHandshaker(TorrentLocation loc, AbstractNBSocket sock) {
+	protected BTHandshaker(TorrentLocation loc, AbstractNBSocket sock, BTConnectionFactory btcFactory) {
 		this.loc = loc;
 		this.sock = sock;
+        this.btcFactory = btcFactory;
 	}
 	
 	public abstract void startHandshaking();
@@ -120,7 +124,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			finishingHandshakes = true;
 			
 			if (torrent.shouldAddConnection(loc)) {
-				BTConnection btc = new BTConnection(torrent.getContext(), 
+				BTConnection btc = btcFactory.createBTConnection(torrent.getContext(), 
 						loc);
 
 				if (LOG.isDebugEnabled())

@@ -24,6 +24,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.limegroup.bittorrent.BTConnectionFactory;
+import com.limegroup.bittorrent.BTConnectionFactoryImpl;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
 import com.limegroup.bittorrent.BTDownloaderFactory;
@@ -188,6 +190,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionCheckerManager.class).to(ConnectionCheckerManagerImpl.class);
         bind(DHTBootstrapperFactory.class).to(DHTBootstrapperFactoryImpl.class);
         bind(DHTNodeFetcherFactory.class).to(DHTNodeFetcherFactoryImpl.class);
+        bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

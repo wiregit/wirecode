@@ -34,9 +34,10 @@ import com.limegroup.bittorrent.messages.BTUnchoke;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
+import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
  * Class wrapping a Bittorrent connection.
@@ -111,6 +112,10 @@ PieceSendListener, PieceReadListener {
 	 * the id of the remote client
 	 */
 	private final TorrentLocation _endpoint;
+    
+    private final BandwidthManager bwManager;
+    
+    private final UploadSlotManager usManager;
 
 	/**
 	 * whether we choke them: if we are choking, all requests from the remote
@@ -179,9 +184,12 @@ PieceSendListener, PieceReadListener {
 	 * @param torrent
 	 * 			  the ManagedTorrent to whom this connection belongs.
 	 */
-	public BTConnection(TorrentContext context, TorrentLocation ep) {
+	public BTConnection(TorrentContext context, TorrentLocation ep, 
+            BandwidthManager bwManager, UploadSlotManager usManager) {
 		_endpoint = ep;
 		this.context = context;
+        this.bwManager = bwManager;
+        this.usManager = usManager;
 		_availableRanges = new BitSet(context.getMetaInfo().getNumBlocks());
 		_available = new BitFieldSet(_availableRanges, context.getMetaInfo().getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
@@ -227,7 +235,7 @@ PieceSendListener, PieceReadListener {
 		_writer.init(invoker, CONNECTION_TIMEOUT - 5000);
 		
 		ThrottleReader readThrottle = new ThrottleReader(
-				ProviderHacks.getBandwidthManager().getReadThrottle());
+				bwManager.getReadThrottle());
 		_reader.setReadChannel(readThrottle);
 		readThrottle.interestRead(true);
 		_socket.setReadObserver(_reader);
@@ -315,7 +323,7 @@ PieceSendListener, PieceReadListener {
 		if (usingSlot) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this+" cancelling slot request");
-			ProviderHacks.getUploadSlotManager().cancelRequest(this);
+			usManager.cancelRequest(this);
 		}
 		usingSlot = false;
 	}
@@ -502,7 +510,7 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
 		usingSlot = false;
-		ProviderHacks.getUploadSlotManager().requestDone(this);
+		usManager.requestDone(this);
 		readyForWriting();
 	}
 	
@@ -515,7 +523,7 @@ PieceSendListener, PieceReadListener {
 			return;
 		
 		usingSlot = true;
-		int proceed = ProviderHacks.getUploadSlotManager().requestSlot(
+		int proceed = usManager.requestSlot(
 					this,
 					!context.getDiskManager().isComplete());
 		
@@ -547,7 +555,7 @@ PieceSendListener, PieceReadListener {
 	 * @see com.limegroup.bittorrent.PieceReadListener#pieceRead(com.limegroup.bittorrent.BTInterval, byte[])
 	 */
 	public void pieceRead(final BTInterval in, final byte [] data) {
-		ProviderHacks.getBandwidthManager().applyUploadRate();
+		bwManager.applyUploadRate();
 		Runnable pieceSender = new Runnable() {
 			public void run() {
 				if (LOG.isDebugEnabled())
