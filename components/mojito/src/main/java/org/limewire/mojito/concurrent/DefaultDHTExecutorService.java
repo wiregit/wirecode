@@ -24,13 +24,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ThreadPoolExecutor;
+import org.limewire.concurrent.ExecutorsHelper;
 
 /**
  * A default implementation of DHTExecutorService
@@ -117,18 +116,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
             }
         };
         
-        cachedExecutor = newThreadPoolExecutor(factory);
-        //cachedExecutor = Executors.newCachedThreadPool(factory);
-    }
-    
-    private org.limewire.concurrent.ThreadPoolExecutor newThreadPoolExecutor(ThreadFactory factory) {
-        ThreadPoolExecutor tpe = new org.limewire.concurrent.ThreadPoolExecutor(
-                1, Integer.MAX_VALUE,
-                5L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                factory);
-        tpe.allowCoreThreadTimeOut(true);
-        return tpe;
+        cachedExecutor = ExecutorsHelper.newThreadPool(factory);
     }
     
     /*
