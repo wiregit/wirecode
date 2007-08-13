@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -21,7 +23,9 @@ public class ManagedConnectionStub extends ManagedConnection {
                         .getNetworkUpdateSanityChecker(), ProviderHacks
                         .getUdpService(), ProviderHacks.getMessageRouter(),
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
-                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+                Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+                Providers.of(ProviderHacks.getConnectionServices()));
     }
 
     public void initialize() {

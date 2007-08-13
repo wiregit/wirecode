@@ -29,6 +29,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -81,11 +82,13 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -309,6 +312,9 @@ public class ManagedConnection extends Connection
     private final UDPService udpService;
     private final MessageRouter messageRouter;
     private final SearchResultHandler searchResultHandler;
+    private final Provider<SimppManager> simppManager;
+    private final Provider<UpdateHandler> updateHandler;
+    private final Provider<ConnectionServices> connectionServices;
     
     
     /**
@@ -332,7 +338,9 @@ public class ManagedConnection extends Connection
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
-            MessagesSupportedVendorMessage supportedVendorMessage) {
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+            Provider<ConnectionServices> connectionServices) {
         super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -345,6 +353,9 @@ public class ManagedConnection extends Connection
         this.udpService = udService;
         this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
+        this.simppManager = simppManager;
+        this.updateHandler = updateHandler;
+        this.connectionServices = connectionServices;
     }
 
     /**
@@ -367,7 +378,9 @@ public class ManagedConnection extends Connection
             UDPService udService, MessageRouter messageRouter,
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
-            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage) {
+            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+            Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+            Provider<ConnectionServices> connectionServices) {
         super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -380,6 +393,9 @@ public class ManagedConnection extends Connection
         this.udpService = udService;
         this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
+        this.simppManager = simppManager;
+        this.updateHandler = updateHandler;
+        this.connectionServices = connectionServices;
     }
     
     /**
@@ -406,7 +422,7 @@ public class ManagedConnection extends Connection
         
         if(isOutgoing()) {
             String host = getAddress();
-            if(ProviderHacks.getConnectionServices().isSupernode()) {
+            if(connectionServices.get().isSupernode()) {
                 requestHeaders = headersFactory.createUltrapeerHeaders(host);
                 responder = handshakeResponderFactory
                         .createUltrapeerHandshakeResponder(host);
@@ -418,7 +434,7 @@ public class ManagedConnection extends Connection
         } else {
             String host = getSocket().getInetAddress().getHostAddress();
             requestHeaders = null;
-            if(ProviderHacks.getConnectionServices().isSupernode()) {
+            if(connectionServices.get().isSupernode()) {
                 responder = handshakeResponderFactory
                         .createUltrapeerHandshakeResponder(host);
             } else {
@@ -1196,20 +1212,20 @@ public class ManagedConnection extends Connection
             //we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM)vm;
             int smpV = capVM.supportsSIMPP();
-            if(smpV != -1 && (!receivedCapVM || smpV > ProviderHacks.getSimppManager().getVersion())) {
+            if(smpV != -1 && (!receivedCapVM || smpV > simppManager.get().getVersion())) {
                 //request the simpp message
                 networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
                 send(new SimppRequestVM());
             }
             
             // see if there's a new update message.
-            int latestId = ProviderHacks.getUpdateHandler().getLatestId();
+            int latestId = updateHandler.get().getLatestId();
             int currentId = capVM.supportsUpdate();
             if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
                 networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
                 send(new UpdateRequest());
             } else if(currentId == latestId) {
-                ProviderHacks.getUpdateHandler().handleUpdateAvailable(this, currentId);
+                updateHandler.get().handleUpdateAvailable(this, currentId);
             }
             
             receivedCapVM = true;

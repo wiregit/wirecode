@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
@@ -796,7 +797,9 @@ public class ConnectionManagerTest extends LimeTestCase {
                             .getNetworkUpdateSanityChecker(), ProviderHacks
                     .getUdpService(), ProviderHacks.getMessageRouter(),
             ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
-            ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
+            ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+            Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+            Providers.of(ProviderHacks.getConnectionServices()));
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

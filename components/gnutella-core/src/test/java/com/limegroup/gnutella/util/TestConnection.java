@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -44,7 +46,9 @@ public abstract class TestConnection extends ManagedConnection {
                 .getNetworkUpdateSanityChecker(), ProviderHacks
                 .getUdpService(), ProviderHacks.getMessageRouter(),
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
-                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+                Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+                Providers.of(ProviderHacks.getConnectionServices()));
         CONNECTIONS = connections;
     }
     

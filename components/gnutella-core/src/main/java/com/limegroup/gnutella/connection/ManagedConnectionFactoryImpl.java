@@ -7,6 +7,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.MessageRouter;
@@ -20,8 +21,10 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 @Singleton
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
@@ -41,6 +44,9 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final Provider<SocketsManager> socketsManager;
     private final Provider<Acceptor> acceptor;
     private final MessagesSupportedVendorMessage supportedVendorMessage;
+    private final Provider<SimppManager> simppManager;
+    private final Provider<UpdateHandler> updateHandler;
+    private final Provider<ConnectionServices> connectionServices;
 
     @Inject
     public ManagedConnectionFactoryImpl(
@@ -58,7 +64,9 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<SocketsManager> socketsManager,
             Provider<Acceptor> acceptor,
-            MessagesSupportedVendorMessage supportedVendorMessage) {
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+            Provider<ConnectionServices> connectionServices) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -74,6 +82,9 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.socketsManager = socketsManager;
         this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
+        this.simppManager = simppManager;
+        this.updateHandler = updateHandler;
+        this.connectionServices = connectionServices;
     }
 
     /*
@@ -99,7 +110,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher
                         .get(), networkUpdateSanityChecker.get(), udpService
                         .get(), messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
-                        socketsManager.get(), acceptor.get(), supportedVendorMessage);
+                        socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager, updateHandler, connectionServices);
     }
 
     /*
@@ -113,7 +124,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), udpService.get(),
                 messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
-                acceptor.get(), supportedVendorMessage);
+                acceptor.get(), supportedVendorMessage, simppManager, updateHandler, connectionServices);
     }
 
 }
