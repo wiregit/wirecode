@@ -211,12 +211,36 @@ public class SharingSettings extends LimeProps {
     
     /**
      * Sets the directory to save the purchased songs from the LWS
+     *  
+     * @param   saveDir  A <tt>File</tt> instance denoting the
+     *                   abstract pathname of the directory for
+     *                   saving files.
+     *
+     * @throws  <tt>IOException</tt>
+     *          If the directory denoted by the directory pathname
+     *          String parameter did not exist prior to this method
+     *          call and could not be created, or if the canonical
+     *          path could not be retrieved from the file system.
+     *
+     * @throws  <tt>NullPointerException</tt>
+     *          If the "dir" parameter is null.
      */
     public static final void setSaveLWSDirectory(File storeDir) throws IOException { 
         if(storeDir == null) throw new NullPointerException();
         if(!storeDir.isDirectory()) {
             if(!storeDir.mkdirs()) throw new IOException("could not create save dir");
         }
+        
+        FileUtils.setWriteable(storeDir);
+
+        if(!storeDir.canRead() || !storeDir.canWrite()) {
+            throw new IOException("could not write to selected directory");
+        }
+        
+        // Canonicalize the files ... 
+        try {
+            storeDir = FileUtils.getCanonicalFile(storeDir);
+        } catch(IOException ignored) {}
         
         DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
     }
