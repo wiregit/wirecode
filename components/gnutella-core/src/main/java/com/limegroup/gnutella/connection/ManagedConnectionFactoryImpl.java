@@ -5,6 +5,7 @@ import java.net.Socket;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
@@ -16,7 +17,10 @@ import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 @Singleton
@@ -33,6 +37,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final Provider<UDPService> udpService;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<SearchResultHandler> searchResultHandler;
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final Provider<SocketsManager> socketsManager;
+    private final Provider<Acceptor> acceptor;
+    private final MessagesSupportedVendorMessage supportedVendorMessage;
 
     @Inject
     public ManagedConnectionFactoryImpl(
@@ -46,7 +54,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             Provider<UDPService> udpService,
             Provider<MessageRouter> messageRouter,
-            Provider<SearchResultHandler> searchResultHandler) {
+            Provider<SearchResultHandler> searchResultHandler,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SocketsManager> socketsManager,
+            Provider<Acceptor> acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -58,6 +70,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.udpService = udpService;
         this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.socketsManager = socketsManager;
+        this.acceptor = acceptor;
+        this.supportedVendorMessage = supportedVendorMessage;
     }
 
     /*
@@ -82,7 +98,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher
                         .get(), networkUpdateSanityChecker.get(), udpService
-                        .get(), messageRouter.get(), searchResultHandler.get());
+                        .get(), messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                        socketsManager.get(), acceptor.get(), supportedVendorMessage);
     }
 
     /*
@@ -95,7 +112,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), udpService.get(),
-                messageRouter.get(), searchResultHandler.get());
+                messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                acceptor.get(), supportedVendorMessage);
     }
 
 }

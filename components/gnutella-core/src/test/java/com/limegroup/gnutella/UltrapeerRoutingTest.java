@@ -104,9 +104,9 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 	}
 	
 	private void buildConnections() {
-	    LEAF = new Connection("localhost", PORT);
-        ULTRAPEER_1 = new Connection("localhost", PORT);
-        ULTRAPEER_2 = new Connection("localhost", PORT); 
+	    LEAF = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        ULTRAPEER_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        ULTRAPEER_2 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT); 
     }
 
 	public void setUp() throws Exception {

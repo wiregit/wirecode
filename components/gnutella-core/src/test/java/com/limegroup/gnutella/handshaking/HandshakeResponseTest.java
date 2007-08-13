@@ -175,9 +175,9 @@ public final class HandshakeResponseTest extends LimeTestCase {
         String leafAddress = "10.254.0.";
         String ultrapeerAddress = "20.23.0.";
         for(int i=0; i<10; i++) {
-            Connection conn = new Connection(leafAddress+i, 6346);
+            Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
             leaves.add(conn);
-            conn = new Connection(ultrapeerAddress+i, 6346);
+            conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
             ultrapeers.add(conn);
         }
         Method m = 
@@ -211,9 +211,9 @@ public final class HandshakeResponseTest extends LimeTestCase {
 		String leafAddress = "10.254.0.";
 		String ultrapeerAddress = "20.23.0.";
 		for(int i=0; i<30; i++) {
-			Connection conn = new Connection(leafAddress+i, 6346);
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
 			leaves.add(conn);
-			conn = new Connection(ultrapeerAddress+i, 6346);
+			conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
 			ultrapeers.add(conn);
 		}
 		Method m = 
@@ -287,7 +287,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 		while(st.hasMoreTokens()) {
 			String ipPort = st.nextToken();
 			StringTokenizer ipPortST = new StringTokenizer(ipPort, ":");
-			Connection conn = new Connection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
 			list.add(conn);
 		}
 		return list;

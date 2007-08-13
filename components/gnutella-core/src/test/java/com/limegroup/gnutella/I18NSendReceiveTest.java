@@ -23,6 +23,7 @@ import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
@@ -126,7 +127,7 @@ public class I18NSendReceiveTest
     private static void connect() throws Exception {
         UltrapeerHeaders headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
-        CONN_1 = new Connection("localhost", TEST_PORT);
+        CONN_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
         drain(CONN_1);
     }

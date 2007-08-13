@@ -37,13 +37,14 @@ public abstract class TestConnection extends ManagedConnection {
         super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks
                 .getConnectionManager(), ProviderHacks.getNetworkManager(),
                 ProviderHacks.getQueryRequestFactory(), ProviderHacks
-                        .getHeadersFactory(), ProviderHacks
-                        .getHandshakeResponderFactory(), ProviderHacks
-                        .getQueryReplyFactory(), ProviderHacks
-                        .getMessageDispatcher(), ProviderHacks
-                        .getNetworkUpdateSanityChecker(), ProviderHacks
-                        .getUdpService(), ProviderHacks.getMessageRouter(),
-                ProviderHacks.getSearchResultHandler());
+                .getHeadersFactory(), ProviderHacks
+                .getHandshakeResponderFactory(), ProviderHacks
+                .getQueryReplyFactory(), ProviderHacks
+                .getMessageDispatcher(), ProviderHacks
+                .getNetworkUpdateSanityChecker(), ProviderHacks
+                .getUdpService(), ProviderHacks.getMessageRouter(),
+                ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
         CONNECTIONS = connections;
     }
     

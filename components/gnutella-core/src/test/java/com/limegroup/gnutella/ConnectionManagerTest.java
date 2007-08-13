@@ -795,7 +795,8 @@ public class ConnectionManagerTest extends LimeTestCase {
                             .getMessageDispatcher(), ProviderHacks
                             .getNetworkUpdateSanityChecker(), ProviderHacks
                     .getUdpService(), ProviderHacks.getMessageRouter(),
-            ProviderHacks.getSearchResultHandler() );
+            ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+            ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

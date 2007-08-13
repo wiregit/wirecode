@@ -61,6 +61,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
@@ -83,6 +84,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -306,7 +308,8 @@ public class ManagedConnection extends Connection
     private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
     private final UDPService udpService;
     private final MessageRouter messageRouter;
-    private final SearchResultHandler searchResultHandler; 
+    private final SearchResultHandler searchResultHandler;
+    
     
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -326,8 +329,11 @@ public class ManagedConnection extends Connection
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
             UDPService udService, MessageRouter messageRouter,
-            SearchResultHandler searchResultHandler) {
-        super(host, port, type);
+            SearchResultHandler searchResultHandler,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            SocketsManager socketsManager, Acceptor acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage) {
+        super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -339,7 +345,6 @@ public class ManagedConnection extends Connection
         this.udpService = udService;
         this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
-        
     }
 
     /**
@@ -360,8 +365,10 @@ public class ManagedConnection extends Connection
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
             UDPService udService, MessageRouter messageRouter,
-            SearchResultHandler searchResultHandler) {
-        super(socket);
+            SearchResultHandler searchResultHandler,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage) {
+        super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;

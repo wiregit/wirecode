@@ -129,7 +129,7 @@ public class UnicastSimulator {
                 sock.setSoTimeout(0);
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    Connection conn = new Connection(sock);
+                    Connection conn = ProviderHacks.getConnectionFactory().createConnection(sock);
                     conn.initialize(null, null, 1000);
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);

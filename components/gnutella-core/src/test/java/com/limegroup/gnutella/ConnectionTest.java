@@ -16,6 +16,7 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class ConnectionTest extends LimeTestCase {
     
@@ -48,7 +49,7 @@ public class ConnectionTest extends LimeTestCase {
     }
     
     public void testBlockingConnectFailing() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", LISTEN_PORT+1, ConnectType.PLAIN);
         try {
             c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), 1000);
             fail("shouldn't have initialized");
@@ -58,7 +59,7 @@ public class ConnectionTest extends LimeTestCase {
     }
     
     public void testNonBlockingConnectFailing() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", LISTEN_PORT+1, ConnectType.PLAIN);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(3000);
@@ -86,7 +87,7 @@ public class ConnectionTest extends LimeTestCase {
     
     public void testNonBlockingNoGOK() throws Exception {
         ACCEPTOR.getObserver().setNoGOK(true);
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", LISTEN_PORT, ConnectType.PLAIN);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
@@ -99,7 +100,7 @@ public class ConnectionTest extends LimeTestCase {
     
     public void testNonBlockingBadHandshake() throws Exception {
         ACCEPTOR.getObserver().setBadHandshake(true);
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", LISTEN_PORT, ConnectType.PLAIN);
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(new Properties(), ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
@@ -154,7 +155,7 @@ public class ConnectionTest extends LimeTestCase {
                             return;
                         }
                         
-                        final Connection con = new Connection(socket);
+                        final Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
                         con.initialize(null, ProviderHacks.getHandshakeResponderFactory()
                                 .createUltrapeerHandshakeResponder("127.0.0.1"), 1000);
                     } catch (Exception e) {

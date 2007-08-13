@@ -150,7 +150,6 @@ public class ProviderHacks {
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     public static SimppManager getSimppManager() { return i().getSimppManager(); }
-    public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
@@ -207,7 +206,8 @@ public class ProviderHacks {
     public static BTContextFactory getBTContextFactory() { return i().getBTContextFactory(); }
     public static BTDownloaderFactory getBTDownloaderFactory() { return i().getBTDownloaderFactory(); }
     public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
-
+    public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
+    public static ConnectionFactory getConnectionFactory() { return i().getConnectionFactory(); };
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

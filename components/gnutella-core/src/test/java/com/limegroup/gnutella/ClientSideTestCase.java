@@ -167,7 +167,7 @@ public abstract class ClientSideTestCase
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket);
+         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
          con.initialize(null, responder, 1000);
          Boolean shouldReply = Boolean.TRUE;
          try {

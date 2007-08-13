@@ -20,7 +20,8 @@ public class ManagedConnectionStub extends ManagedConnection {
                         .getMessageDispatcher(), ProviderHacks
                         .getNetworkUpdateSanityChecker(), ProviderHacks
                         .getUdpService(), ProviderHacks.getMessageRouter(),
-                ProviderHacks.getSearchResultHandler());
+                ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage());
     }
 
     public void initialize() {

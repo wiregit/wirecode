@@ -373,7 +373,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
                             return;
                         }
 
-                        final Connection con = new Connection(socket);
+                        final Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
                         con.initialize(null, new StubHandshakeResponder(), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);

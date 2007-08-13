@@ -558,4 +558,8 @@ public class LimeWireCore {
     public DHTNodeFetcherFactory getDHTNodeFetcherFactory() {
         return injector.getInstance(DHTNodeFetcherFactory.class);
     }
+
+    public ConnectionFactory getConnectionFactory() {
+        return injector.getInstance(ConnectionFactory.class);
+    }
 }

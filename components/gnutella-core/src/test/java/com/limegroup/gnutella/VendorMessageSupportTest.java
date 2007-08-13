@@ -71,7 +71,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         qrt.add("foosball");
 
         // Set up a connection to the host....
-        _leaf1=new Connection(_remoteHost, _remotePort);
+        _leaf1=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
         _leaf1.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
@@ -80,7 +80,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         // you support any vendor message....
         
         // Set up another connection to the host....
-        _leaf2=new Connection(_remoteHost, _remotePort);
+        _leaf2=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
         _leaf2.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());

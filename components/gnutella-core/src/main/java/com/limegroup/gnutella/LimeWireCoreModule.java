@@ -285,6 +285,9 @@ public class LimeWireCoreModule extends AbstractModule {
         //----------------------------------------------
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
  
+        
+        // DPINJ: only needed in tests, so move there eventually
+        bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
     }    
     
     @Singleton

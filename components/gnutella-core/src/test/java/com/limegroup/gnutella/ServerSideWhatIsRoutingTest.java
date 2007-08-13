@@ -92,10 +92,10 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	}
 	
 	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = new Connection("localhost", PORT);
+        ULTRAPEER_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-        ULTRAPEER_2 = new Connection("localhost", PORT);
+        ULTRAPEER_2 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
     }
 
     public static void setSettings() {
@@ -196,7 +196,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 
-	    LEAF = new Connection("localhost", PORT);
+	    LEAF = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         //3. routed leaf, with route table for "test"
         LEAF.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         qrt = new QueryRouteTable();

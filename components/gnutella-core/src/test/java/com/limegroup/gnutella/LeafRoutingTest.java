@@ -147,7 +147,7 @@ public class LeafRoutingTest extends LimeTestCase {
              responder = new EmptyResponder();
          }
          
-         Connection con = new Connection(socket);
+         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -253,7 +253,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         props.put(HeaderNames.X_ULTRAPEER, "True");
         //props.put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
-        Connection c = new Connection("127.0.0.1", SERVER_PORT);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", SERVER_PORT);
 
         try {
             c.initialize(props, new EmptyResponder(), 1000);
@@ -335,7 +335,7 @@ public class LeafRoutingTest extends LimeTestCase {
      * Tests to make sure that connections to old hosts are not allowed
      */
     public void testConnectionToOldDisallowed() {
-        Connection c= new Connection("127.0.0.1", SERVER_PORT);
+        Connection c= ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", SERVER_PORT);
         try {
             c.initialize(new Properties(), new EmptyResponder(), 1000);
             fail("handshake should not have succeeded");

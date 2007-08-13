@@ -63,7 +63,7 @@ public class TLSConnectionTest extends LimeTestCase {
     }
 
     public void testTLSConnectionBlockingConnect() throws Exception {
-        Connection c = new Connection("localhost", PORT, ConnectType.TLS);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT, ConnectType.TLS);
         assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());
@@ -102,7 +102,7 @@ public class TLSConnectionTest extends LimeTestCase {
     }
     
     public void testTLSConnectionNonBlockingConnect() throws Exception {
-        Connection c = new Connection("localhost", PORT, ConnectType.TLS);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());

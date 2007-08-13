@@ -265,7 +265,7 @@ public class NodeAssignerTest extends LimeTestCase {
                     socket = ss.accept();
                     ss.close();
                     socket.setSoTimeout(1000);
-                    UP = new Connection(socket);
+                    UP = ProviderHacks.getConnectionFactory().createConnection(socket);
                     if(acceptsUltrapeers) {
                         UP.initialize(null, new UltrapeerResponder());
                     } else {

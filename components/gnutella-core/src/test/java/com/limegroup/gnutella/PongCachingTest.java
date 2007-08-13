@@ -93,11 +93,11 @@ public final class PongCachingTest extends LimeTestCase {
     }
     
 	private void buildConnections() {
-	    LEAF = new Connection("localhost", SERVER_PORT);
-        ULTRAPEER_1 = new Connection("localhost", SERVER_PORT);
-        ULTRAPEER_2 = new Connection("localhost", SERVER_PORT);
-        ULTRAPEER_3 = new Connection("localhost", SERVER_PORT);
-        ULTRAPEER_4 = new Connection("localhost", SERVER_PORT);
+	    LEAF = ProviderHacks.getConnectionFactory().createConnection("localhost", SERVER_PORT);
+        ULTRAPEER_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", SERVER_PORT);
+        ULTRAPEER_2 = ProviderHacks.getConnectionFactory().createConnection("localhost", SERVER_PORT);
+        ULTRAPEER_3 = ProviderHacks.getConnectionFactory().createConnection("localhost", SERVER_PORT);
+        ULTRAPEER_4 = ProviderHacks.getConnectionFactory().createConnection("localhost", SERVER_PORT);
     }
 
 	public void setUp() throws Exception {

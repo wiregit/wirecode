@@ -335,7 +335,7 @@ public class PushUploadTest extends LimeTestCase {
      * than once.
      */
     public void testDuplicatePushes() throws Exception {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         try {
             connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
@@ -395,7 +395,7 @@ public class PushUploadTest extends LimeTestCase {
      */
     private static Socket getSocketFromPush() throws IOException,
             BadPacketException {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         try {
             connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);

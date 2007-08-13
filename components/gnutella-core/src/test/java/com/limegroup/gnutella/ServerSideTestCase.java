@@ -69,12 +69,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
 	private static void buildConnections() throws Exception {
         for (int i = 0; i < LEAF.length; i++) {
-            LEAF[i] = new Connection("localhost", PORT);
+            LEAF[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
             assertTrue(LEAF[i].isOpen());
         }
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
-            ULTRAPEER[i] = new Connection("localhost", PORT);
+            ULTRAPEER[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
             assertTrue(ULTRAPEER[i].isOpen());
         }
     }
@@ -217,7 +217,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = new Connection("localhost", PORT);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         assertTrue(c.isOpen());
         return c;
