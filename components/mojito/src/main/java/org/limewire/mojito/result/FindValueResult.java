@@ -22,6 +22,7 @@ package org.limewire.mojito.result;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -58,8 +59,8 @@ public class FindValueResult extends LookupResult {
         this.path = path;
         this.time = time;
         this.hop = hop;
-        this.entities = entities;
-        this.entityKeys = entityKeys;
+        this.entities = new CopyOnWriteArrayList<DHTValueEntity>(entities);
+        this.entityKeys = new CopyOnWriteArrayList<EntityKey>(entityKeys);
     }
     
     /**
