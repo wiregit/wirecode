@@ -11,11 +11,12 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 public class UDPCrawlerPingHandler extends RestrictedResponder {
     
-    public UDPCrawlerPingHandler(NetworkManager networkManager) {
-        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager);
+    public UDPCrawlerPingHandler(NetworkManager networkManager, SimppManager simppManager) {
+        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager, simppManager);
     }
     
 	protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {

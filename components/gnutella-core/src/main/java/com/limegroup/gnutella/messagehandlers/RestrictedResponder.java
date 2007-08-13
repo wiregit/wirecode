@@ -11,13 +11,13 @@ import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * A message handler that responds to messages only to hosts
@@ -35,8 +35,8 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     
     private final NetworkManager networkManager;
     
-    public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager) {
-        this(setting, null, null, networkManager);
+    public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager, SimppManager simppManager) {
+        this(setting, null, null, networkManager, simppManager);
     }
     
     /**
@@ -45,17 +45,20 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
      * @param verifier the <tt>SignatureVerifier</tt> to use.  Null if we
      * want to process all messages.
      */
+    // TODO cleanup: SimmpManager registration should be done in extra initialize method
+    // and also cleaned up
     public RestrictedResponder(StringArraySetting setting, 
             SecureMessageVerifier verifier,
             LongSetting lastRoutedVersion,
-            NetworkManager networkManager) {
+            NetworkManager networkManager,
+            SimppManager simppManager) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
         this.networkManager = networkManager;
         allowed = new IPList();
         allowed.add("*.*.*.*");
-        ProviderHacks.getSimppManager().addListener(this);
+        simppManager.addListener(this);
         updateAllowed();
     }
     

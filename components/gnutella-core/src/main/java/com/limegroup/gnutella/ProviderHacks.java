@@ -51,7 +51,6 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -133,17 +132,12 @@ public class ProviderHacks {
     public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
     public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
-    public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
-    public static QueryDispatcher getQueryDispatcher() { return i().getQueryDispatcher(); }
-    public static RatingTable getRatingTable() { return i().getRatingTable(); }
-    public static SpamManager getSpamManager() { return i().getSpamManager(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
     public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
-    public static SimppManager getSimppManager() { return i().getSimppManager(); }
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
 
@@ -202,6 +196,11 @@ public class ProviderHacks {
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
     public static ConnectionFactory getConnectionFactory() { return i().getConnectionFactory(); };
     public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
+    public static SimppManager getSimppManager() { return i().getSimppManager(); }
+    public static QueryDispatcher getQueryDispatcher() { return i().getQueryDispatcher(); }
+    public static SpamManager getSpamManager() { return i().getSpamManager(); }
+    public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
+    
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

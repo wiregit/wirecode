@@ -227,7 +227,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager());
+            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager());
         }
 
         @Override

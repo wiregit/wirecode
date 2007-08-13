@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * Handles an incoming InspectionRequest, sending a response
@@ -35,10 +36,10 @@ public class InspectionRequestHandler extends RestrictedResponder {
                 "TJRPIU4UA24I", null);
     
     private final MessageRouter router;
-    public InspectionRequestHandler(MessageRouter router, NetworkManager networkManager) {
+    public InspectionRequestHandler(MessageRouter router, NetworkManager networkManager, SimppManager simppManager) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION, networkManager);
+                MessageSettings.INSPECTION_VERSION, networkManager, simppManager);
         this.router = router;
     }
     

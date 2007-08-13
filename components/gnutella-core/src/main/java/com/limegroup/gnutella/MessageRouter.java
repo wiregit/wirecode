@@ -546,7 +546,7 @@ public abstract class MessageRouter {
         backgroundExecutor.scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         
         // handler for inspection requests
-        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager);
+        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager, simppManager.get());
         
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
@@ -578,12 +578,12 @@ public abstract class MessageRouter {
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
-        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler(networkManager));
+        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler(networkManager, simppManager.get()));
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager));
+        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager, simppManager.get()));
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());

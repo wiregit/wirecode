@@ -7,6 +7,7 @@ import java.util.Set;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.simpp.SimppListener;
 
 public interface FileManagerController {
 
@@ -44,4 +45,7 @@ public interface FileManagerController {
 
     public void loadFinishedPostSave();
 
+    public void addSimppListener(SimppListener listener);
+    
+    public void removeSimppListener(SimppListener listener);
 }

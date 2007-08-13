@@ -440,7 +440,8 @@ public abstract class FileManager {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
-        ProviderHacks.getSimppManager().addListener(qrpUpdater);
+		fileManagerController.addSimppListener(qrpUpdater);
+		fileManagerController.addSimppListener(rareDefinition);
     }
     
     /**
@@ -473,7 +474,9 @@ public abstract class FileManager {
     
     public void stop() {
         save();
-        ProviderHacks.getSimppManager().removeListener(qrpUpdater);
+        fileManagerController.removeSimppListener(qrpUpdater);
+        // TODO cleanup this was not before DPINJ, listener just stayed registered
+        fileManagerController.removeSimppListener(rareDefinition);
         shutdown = true;
     }
 
@@ -2666,7 +2669,6 @@ public abstract class FileManager {
         private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
-            ProviderHacks.getSimppManager().addListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

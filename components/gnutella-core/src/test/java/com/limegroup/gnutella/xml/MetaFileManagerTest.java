@@ -60,7 +60,8 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
                 .of(ProviderHacks.getCreationTimeCache()), Providers
                 .of(new ContentManager()), Providers.of(ProviderHacks
                 .getAltLocManager()), Providers.of(ProviderHacks
-                .getResponseFactory()), Providers.of(ProviderHacks.getSavedFileManager())));
+                .getResponseFactory()), Providers.of(ProviderHacks.getSavedFileManager()),
+                Providers.of(ProviderHacks.getSimppManager())));
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 
     }

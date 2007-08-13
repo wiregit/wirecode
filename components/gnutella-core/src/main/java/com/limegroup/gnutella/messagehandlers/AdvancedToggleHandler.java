@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * Handles incoming toggles for advanced stats and takes care
@@ -34,8 +35,8 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     /** Utility that will perform the shutting off. */
     private final Periodic shutOff;
     
-    public AdvancedToggleHandler(NetworkManager networkManager) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager);
+    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){

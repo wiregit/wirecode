@@ -12,6 +12,8 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 
 @Singleton
@@ -24,6 +26,7 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<AltLocManager> altLocManager;
     private final Provider<ResponseFactory> responseFactory;
     private final Provider<SavedFileManager> savedFileManager;
+    private final Provider<SimppManager> simppManager;
     
     /**
      * @param urnCache
@@ -39,7 +42,8 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
             Provider<ResponseFactory> responseFactory,
-            Provider<SavedFileManager> savedFileManager) {
+            Provider<SavedFileManager> savedFileManager,
+            Provider<SimppManager> simppManager) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
@@ -47,6 +51,7 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.altLocManager = altLocManager;
         this.responseFactory = responseFactory;
         this.savedFileManager = savedFileManager;
+        this.simppManager = simppManager;
     }
     
     /* (non-Javadoc)
@@ -175,6 +180,14 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public void loadFinishedPostSave() {
         savedFileManager.get().run();
+    }
+
+    public void addSimppListener(SimppListener listener) {
+        simppManager.get().addListener(listener);
+    }
+
+    public void removeSimppListener(SimppListener listener) {
+        simppManager.get().removeListener(listener);
     }
 
 }

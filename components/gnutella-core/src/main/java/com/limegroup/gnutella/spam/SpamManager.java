@@ -2,8 +2,8 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Locale;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -31,6 +31,13 @@ public class SpamManager {
 	 */
 	private static final float INCOMPLETE_FILE_RATING = 0.2f;
 
+	private final RatingTable ratingTable;
+	
+	@Inject
+	private SpamManager(RatingTable ratingTable) {
+	    this.ratingTable = ratingTable;
+	}
+	
 	/**
 	 * informs the SpamManager of any query that was started and clears bad
 	 * ratings for the keywords in the query
@@ -40,7 +47,7 @@ public class SpamManager {
 	 */
 	public void startedQuery(QueryRequest qr) {
 		if (SearchSettings.ENABLE_SPAM_FILTER.getValue())
-			ProviderHacks.getRatingTable().mark(qr, Token.RATING_CLEARED);
+			ratingTable.mark(qr, Token.RATING_CLEARED);
 	}
 
 	/**
@@ -69,7 +76,7 @@ public class SpamManager {
 		}
 
 		// apply bayesian filter
-		rating = 1 - (1 - rating) * (1 - ProviderHacks.getRatingTable().getRating(rfd));
+		rating = 1 - (1 - rating) * (1 - ratingTable.getRating(rfd));
 		rfd.setSpamRating(rating);
 		return rating >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
                 SearchSettings.QUERY_SPAM_CUTOFF.getValue());
@@ -85,7 +92,7 @@ public class SpamManager {
 		for (int i = 0; i < rfds.length; i++)
 			rfds[i].setSpamRating(1.f);
 
-		ProviderHacks.getRatingTable().mark(rfds, Token.RATING_USER_MARKED_SPAM);
+		ratingTable.mark(rfds, Token.RATING_USER_MARKED_SPAM);
 	}
 
 	/**
@@ -98,14 +105,14 @@ public class SpamManager {
 		for (int i = 0; i < rfds.length; i++)
 			rfds[i].setSpamRating(0.f);
 
-		ProviderHacks.getRatingTable().mark(rfds, Token.RATING_USER_MARKED_GOOD);
+		ratingTable.mark(rfds, Token.RATING_USER_MARKED_GOOD);
 	}
 
 	/**
 	 * clears all collected filter data
 	 */
 	public void clearFilterData() {
-		ProviderHacks.getRatingTable().clear();
+		ratingTable.clear();
 	}
     
 	/**
