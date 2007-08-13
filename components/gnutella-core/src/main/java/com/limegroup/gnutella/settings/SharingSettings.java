@@ -132,19 +132,13 @@ public class SharingSettings extends LimeProps {
 		if(!saveDir.isDirectory()) {
 			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
 		}
-        
-                
+                    
 		String parentDir = saveDir.getParent();
 		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
-        
-        File storeDir = new File(parentDir, "LimeWire Store");
-        if(!storeDir.isDirectory()) {
-            if(!storeDir.mkdirs()) throw new IOException("could not create store dir");
-        }
-        
+               
         FileUtils.setWriteable(saveDir);
         FileUtils.setWriteable(incDir);
 
@@ -171,7 +165,6 @@ public class SharingSettings extends LimeProps {
 		
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
         INCOMPLETE_DIRECTORY.setValue(incDir);
-        DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
         DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
         DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
     }
@@ -215,6 +208,18 @@ public class SharingSettings extends LimeProps {
         }  
         return set;  
     }  
+    
+    /**
+     * Sets the directory to save the purchased songs from the LWS
+     */
+    public static final void setSaveLWSDirectory(File storeDir) throws IOException { 
+        if(storeDir == null) throw new NullPointerException();
+        if(!storeDir.isDirectory()) {
+            if(!storeDir.mkdirs()) throw new IOException("could not create save dir");
+        }
+        
+        DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
+    }
     
     /**
      * @return directory of where to save songs purchased from LimeWireStore
