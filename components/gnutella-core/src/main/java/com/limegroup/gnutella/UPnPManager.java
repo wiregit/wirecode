@@ -25,6 +25,8 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -115,10 +117,14 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 	 * Lock that everything uses.
 	 */
 	private final Object DEVICE_LOCK = new Object();
+
+	private final LifecycleManager lifecycleManager;
+	private final Provider<Acceptor> acceptor;
 	
-	private UPnPManager() {
-	    super();
-	    
+	@Inject
+	private UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
+	    this.lifecycleManager = lifecycleManager;	
+	    this.acceptor = acceptor;
         addDeviceChangeListener(this);
     }
     
@@ -266,8 +272,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		
 		Random gen=null;
 		
-		String localAddress = NetworkUtils.ip2string(
-				ProviderHacks.getAcceptor().getAddress(false));
+		String localAddress = NetworkUtils.ip2string(acceptor.get().getAddress(false));
 		int localPort = port;
 	
 		// try adding new mappings with the same port
@@ -424,7 +429,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		    }
 		};
 		
-        ProviderHacks.getLifecycleManager().addShutdownItem(waiter); 
+        lifecycleManager.addShutdownItem(waiter); 
 	}
 	
 	public void finalize() {

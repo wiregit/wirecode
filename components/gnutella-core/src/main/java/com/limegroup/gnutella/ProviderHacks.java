@@ -151,7 +151,6 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
     public static SimppManager getSimppManager() { return i().getSimppManager(); }
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
-    public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
 
     // Requires some major reworking -- used statically in a lot of places
@@ -208,6 +207,7 @@ public class ProviderHacks {
     public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
     public static ConnectionFactory getConnectionFactory() { return i().getConnectionFactory(); };
+    public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 
