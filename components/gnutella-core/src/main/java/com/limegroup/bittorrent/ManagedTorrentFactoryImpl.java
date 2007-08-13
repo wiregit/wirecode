@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.choking.ChokerFactory;
@@ -23,9 +24,9 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     private final ChokerFactory chokerFactory;
     private final BTLinkManagerFactory linkManagerFactory;
     private final BTConnectionFetcherFactory connectionFetcherFactory;
-    private final ContentManager contentManager;
-    private final IPFilter ipFilter;
-    private final TorrentManager torrentManager;
+    private final Provider<ContentManager> contentManager;
+    private final Provider<IPFilter> ipFilter;
+    private final Provider<TorrentManager> torrentManager;
 
     @Inject
     public ManagedTorrentFactoryImpl(
@@ -36,9 +37,9 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
             ChokerFactory chokerFactory,
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory,
-            ContentManager contentManager,
-            IPFilter ipFilter,
-            TorrentManager torrentManager) {
+            Provider<ContentManager> contentManager,
+            Provider<IPFilter> ipFilter,
+            Provider<TorrentManager> torrentManager) {
         this.eventDispatcher = eventDispatcher;
         this.scheduledExecutorService = scheduledExecutorService;
         this.networkManager = networkManager;
@@ -57,7 +58,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     public ManagedTorrent create(TorrentContext context) {
         return new ManagedTorrent(context, eventDispatcher, scheduledExecutorService,
                 networkManager, trackerManagerFactory, chokerFactory, linkManagerFactory,
-                connectionFetcherFactory, contentManager, ipFilter, torrentManager);
+                connectionFetcherFactory, contentManager.get(), ipFilter.get(), torrentManager.get());
     }
 
 
