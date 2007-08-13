@@ -39,7 +39,6 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
-import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -48,6 +47,7 @@ import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -102,34 +102,20 @@ public class ProviderHacks {
     public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }    
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }    
     public static DHTManager getDHTManager() { return i().getDhtManager(); }    
-    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); } 
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
-    public static UploadManager getUploadManager() { return i().getUploadManager(); }
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
-    public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }   
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }  
     public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }    
     public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
-    public static QueryUnicaster getQueryUnicaster() { return i().getQueryUnicaster(); }
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
-    public static ConnectionDispatcher getConnectionDispatcher() { return i().getConnectionDispatcher(); }
-    public static HostCatcher getHostCatcher() { return i().getHostCatcher(); }
     public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static IPFilter getIpFilter() { return i().getIpFilter(); }
     public static HostileFilter getHostileFilter() { return i().getHostileFilter(); }
-    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { return i().getNetworkUpdateSanityChecker(); }
     public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
-    public static HttpExecutor getHttpExecutor() { return i().getHttpExecutor(); }
-    public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
-    public static MulticastService getMulticastService() { return i().getMulticastService(); }
-    public static ChatManager getChatManager() { return i().getChatManager(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
-    public static Pinger getPinger() { return i().getPinger(); }
-    public static PongCacher getPongCacher() { return i().getPongCacher(); }
-    public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
     public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
@@ -137,7 +123,8 @@ public class ProviderHacks {
     public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
-    public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
+    public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
+    public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }    
 
     // Requires some major reworking -- used statically in a lot of places
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
@@ -152,6 +139,19 @@ public class ProviderHacks {
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Cleaned up in all but tests
+    public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
+    public static PongCacher getPongCacher() { return i().getPongCacher(); }
+    public static Pinger getPinger() { return i().getPinger(); }
+    public static ChatManager getChatManager() { return i().getChatManager(); }
+    public static MulticastService getMulticastService() { return i().getMulticastService(); }
+    public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
+    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { return i().getNetworkUpdateSanityChecker(); }
+    public static HostCatcher getHostCatcher() { return i().getHostCatcher(); }
+    public static ConnectionDispatcher getConnectionDispatcher() { return i().getConnectionDispatcher(); }
+    public static QueryUnicaster getQueryUnicaster() { return i().getQueryUnicaster(); }
+    public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }
+    public static UploadManager getUploadManager() { return i().getUploadManager(); }
+    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
     public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
     public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return i().getDHTNodeFetcherFactory(); }
     public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return i().getDHTBootstrapperFactory(); }

@@ -17,7 +17,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
@@ -258,7 +257,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    new ReplyNumberVendorMessageFactory().create(
+                    ProviderHacks.getReplyNumberVendorMessageFactory().create(
                         new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 
@@ -279,7 +278,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    new ReplyNumberVendorMessageFactory().create(
+                    ProviderHacks.getReplyNumberVendorMessageFactory().create(
                         new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 

@@ -101,26 +101,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         
         // test old versions are no longer accepted 
         try {
-            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 1, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 1 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         try {
-            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 2, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 2 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         
-        vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                 (byte) 1, (byte) 0, 3, new byte[2]);
         
         testWrite(vm);
         // test other constructor....
-        vm = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
 
         // Push Proxy Request

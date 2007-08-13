@@ -19,12 +19,12 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     }
     
     public void testNumResults() {
-        ReplyNumberVendorMessage msg = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), 10);
+        ReplyNumberVendorMessage msg = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), 10);
         assertEquals(10, msg.getNumResults());
         
         for (int illegalResultNum : new int[] { 256, 0, -1 }) {
             try { 
-                msg = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), illegalResultNum);
+                msg = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), illegalResultNum);
                 fail("Expected illegal argument exception for result: " + illegalResultNum);
             }
             catch (IllegalArgumentException iae) {
@@ -33,10 +33,10 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     }
     
     public void testVersion3AllowsLargerMessagesFromNetwork() throws BadPacketException {
-        new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+        ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                 (byte)1, (byte)1, 3, new byte[11]);
         try {
-            new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte)1, (byte)1, 2, new byte[11]);
             fail("BadPacketException expected, message too large");
         }
@@ -46,7 +46,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     
     public void testOldVersionIsNotAcceptedFromNetwork() {
         try {
-            new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte)0x01, (byte)0x01, 1, new byte[2]);
             fail("Old message versions should not be accpeted");            
         }
@@ -57,18 +57,18 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     public void testReplyNumber() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 0);
+            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
-            new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 256);
+            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
 
         for (int i = 1; i < 256; i++) {
             GUID guid = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(guid,
+            ReplyNumberVendorMessage vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(guid,
                                                                        i);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
             assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
@@ -91,7 +91,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         // first test that it needs a payload of at least size 1
         payload = new byte[0];
         try {
-            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 0, payload);
             assertTrue(false);
         }
@@ -100,7 +100,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         // first test that version 1 needs a payload of only size 1
         payload = new byte[2];
         try {
-            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 1, payload);
             assertTrue(false);
         }
@@ -109,7 +109,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         //test that it can handle versions other than 1
         payload = new byte[3];
         try {
-            vm = new ReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 3, payload);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
         }
@@ -122,7 +122,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         PrivilegedAccessor.setValue(
                 service,"_acceptedUnsolicitedIncoming",new Boolean(false));
         
-        vm = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
         assertFalse(vm.canReceiveUnsolicited());
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -134,7 +134,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         PrivilegedAccessor.setValue(
                 service,"_acceptedUnsolicitedIncoming",new Boolean(true));
         
-        vm = new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
         assertTrue(vm.canReceiveUnsolicited());
         
         baos = new ByteArrayOutputStream();

@@ -32,7 +32,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -151,7 +150,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -248,7 +247,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -371,7 +370,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -497,7 +496,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -597,7 +596,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -714,7 +713,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // just do it for 1 UDP guy
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -898,7 +897,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back ReplyNumberVMs that should be bypassed
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1036,7 +1035,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         { // bypass 1 result only
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1154,7 +1153,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 

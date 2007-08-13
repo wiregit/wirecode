@@ -26,7 +26,6 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -116,7 +115,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-           new ReplyNumberVendorMessageFactory().create(queryGuid, 10);
+           ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
@@ -203,7 +202,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-            new ReplyNumberVendorMessageFactory().create(queryGuid, 10);
+            ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
@@ -236,7 +235,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         drainAll();
 
         // send another ReplyNumber
-        vm = new ReplyNumberVendorMessageFactory().create(queryGuid, 5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 5);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
@@ -292,7 +291,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-            new ReplyNumberVendorMessageFactory().create(queryGuid, 10);
+            ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
@@ -336,7 +335,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         Thread.sleep(2000); // lets process these results...
 
         // send another ReplyNumber
-        vm = new ReplyNumberVendorMessageFactory().create(queryGuid, 5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 5);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 

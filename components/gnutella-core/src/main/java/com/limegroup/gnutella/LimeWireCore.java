@@ -60,6 +60,7 @@ import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -555,5 +556,9 @@ public class LimeWireCore {
 
     public PushDownloadManager getPushDownloadManager() {
         return injector.getInstance(PushDownloadManager.class);
+    }
+
+    public ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() {
+        return injector.getInstance(ReplyNumberVendorMessageFactory.class);
     }
 }

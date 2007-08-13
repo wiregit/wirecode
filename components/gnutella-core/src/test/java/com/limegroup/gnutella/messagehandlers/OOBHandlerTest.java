@@ -20,7 +20,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
@@ -63,7 +62,7 @@ public class OOBHandlerTest extends LimeTestCase {
     public void testDropsLargeResponses() throws Exception {
 
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -95,7 +94,7 @@ public class OOBHandlerTest extends LimeTestCase {
     
     public void testMessagesWithoutEchoedTokenAreHandled(boolean disableOOBV2) {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -129,7 +128,7 @@ public class OOBHandlerTest extends LimeTestCase {
     public void testMessagesWithDifferentTokenAreHandled(boolean disableOOBV2)
             throws InvalidSecurityTokenException {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -184,7 +183,7 @@ public class OOBHandlerTest extends LimeTestCase {
         }
             
         // send an RNVM now
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -201,7 +200,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testSessionsExpireBecauseOfAliveQuery() throws Exception {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -250,7 +249,7 @@ public class OOBHandlerTest extends LimeTestCase {
         router.reply = null;
 
         // send reply number message
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -280,9 +279,9 @@ public class OOBHandlerTest extends LimeTestCase {
     public void testAddsRNVMs() throws Exception {
 
         // a host claims to have 10 results at first
-        ReplyNumberVendorMessage first = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage first = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         // and then 20 afterwards
-        ReplyNumberVendorMessage second = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage second = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
 
         // we would like to get 10
         router.numToRequest = 10;
@@ -313,7 +312,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testDiscardedWithoutAliveQuery() throws InterruptedException {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -355,7 +354,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testDuplicatePacketsIgnored() {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -382,7 +381,7 @@ public class OOBHandlerTest extends LimeTestCase {
         
         // 1. case there's no route back
         GUID guid = new GUID();
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(guid, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(guid, 10);
         assertTrue(rnvm.canReceiveUnsolicited());
         router.numToRequest = 10;
         router.isAlive = false;
@@ -400,7 +399,7 @@ public class OOBHandlerTest extends LimeTestCase {
         
         // 2. case we received enough results, i.e, it's more than 150 results
         guid = new GUID();
-        rnvm = new ReplyNumberVendorMessageFactory().create(guid, 10);
+        rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(guid, 10);
         assertTrue(rnvm.canReceiveUnsolicited());
         router.numToRequest = -1; // signals enough results have been received
         router.isAlive = true;
@@ -418,7 +417,7 @@ public class OOBHandlerTest extends LimeTestCase {
         
         // 3. case the first query reply comes in but the query is not alive
         guid = new GUID();
-        rnvm = new ReplyNumberVendorMessageFactory().create(guid, 10);
+        rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(guid, 10);
         router.numToRequest = 10;
         router.isAlive = true;
         router.reply = null;
@@ -458,7 +457,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPublicAddressIsOverwritten() throws Exception {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().create(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -484,7 +483,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPrivateAddressIsOverwrittenForNeedsPush() throws Exception {
         router.numToRequest = 10;
-        handler.handleMessage(new ReplyNumberVendorMessageFactory().create(g, 10), null, replyHandler);
+        handler.handleMessage(ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10), null, replyHandler);
         
         SecurityToken token = assertACKSent(replyHandler, 10);
         
@@ -505,7 +504,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPrivateAddressIsNotOverwrittenForNoPush() throws Exception {
         router.numToRequest = 10;
-        handler.handleMessage(new ReplyNumberVendorMessageFactory().create(g, 10), null, replyHandler);
+        handler.handleMessage(ProviderHacks.getReplyNumberVendorMessageFactory().create(g, 10), null, replyHandler);
         
         SecurityToken token = assertACKSent(replyHandler, 10);
         
@@ -526,7 +525,7 @@ public class OOBHandlerTest extends LimeTestCase {
      *  Tests that the mismatching address of v2 replies is overwritten. 
      */
     public void testOOBv2MismatchingPublicAddressIsOverwritten() throws Exception {
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = ProviderHacks.getReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
         

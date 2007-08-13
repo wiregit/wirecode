@@ -26,9 +26,9 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -46,6 +46,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     private final NetworkManager networkManager;
     private final Provider<UploadManager> uploadManager;
     private final Provider<FileManager> fileManager;
+    private final Provider<AltLocManager> altLocManager;
 
     /** The real packet size. */
     public static final int DEFAULT_PACKET_SIZE = 1380;
@@ -57,10 +58,12 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     @Inject
     public HeadPongFactoryImpl(NetworkManager networkManager,
             Provider<UploadManager> uploadManager,
-            Provider<FileManager> fileManager) {
+            Provider<FileManager> fileManager,
+            Provider<AltLocManager> altLocManager) {
         this.networkManager = networkManager;
         this.uploadManager = uploadManager;
         this.fileManager = fileManager;
+        this.altLocManager = altLocManager;
     }
 
     /* (non-Javadoc)
@@ -95,7 +98,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
                                         int written, boolean includeSize) {
         //now add any non-firewalled altlocs in case they were requested. 
         if (ping.requestsAltlocs()) {
-            AlternateLocationCollection<DirectAltLoc> col = ProviderHacks.getAltLocManager().getDirect(urn);
+            AlternateLocationCollection<DirectAltLoc> col = altLocManager.get().getDirect(urn);
             synchronized(col) {
                 try {
                     return !writeLocs(out, col.iterator(), tlsIndexes, written, includeSize);
@@ -117,7 +120,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         try {
             boolean FWTOnly = ping.requestsFWTOnlyPushLocs();           
             if (FWTOnly) {
-                AlternateLocationCollection<PushAltLoc> push = ProviderHacks.getAltLocManager().getPushFWT(urn);
+                AlternateLocationCollection<PushAltLoc> push = altLocManager.get().getPushFWT(urn);
                 synchronized(push) {
                     return !writePushLocs(out,
                                           push.iterator(),
@@ -126,8 +129,8 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
                                           includeSize);
                 }
             } else {
-                AlternateLocationCollection<PushAltLoc> push = ProviderHacks.getAltLocManager().getPushNoFWT(urn);
-                AlternateLocationCollection<PushAltLoc> fwt = ProviderHacks.getAltLocManager().getPushFWT(urn);
+                AlternateLocationCollection<PushAltLoc> push = altLocManager.get().getPushNoFWT(urn);
+                AlternateLocationCollection<PushAltLoc> fwt = altLocManager.get().getPushFWT(urn);
                 synchronized(push) {
                     synchronized(fwt) {
                         return !writePushLocs(out,

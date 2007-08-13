@@ -26,7 +26,6 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage.Control;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -602,7 +601,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             // send a ReplyNumberVM
             ReplyNumberVendorMessage replyNum = 
-                new ReplyNumberVendorMessageFactory().create(new GUID(proxiedGuid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().create(new GUID(proxiedGuid), 1);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             replyNum.write(baos);
@@ -699,7 +698,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     private SecurityToken exchangeRNVMACK(byte[] guid) throws Exception {
     	// send a ReplyNumberVM
     	ReplyNumberVendorMessage replyNum = 
-    	    new ReplyNumberVendorMessageFactory().create(new GUID(guid), 1);
+    	    ProviderHacks.getReplyNumberVendorMessageFactory().create(new GUID(guid), 1);
 
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	replyNum.write(baos);

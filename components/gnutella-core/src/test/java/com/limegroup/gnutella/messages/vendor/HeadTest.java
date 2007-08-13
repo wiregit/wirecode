@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.concurrent.Providers;
 import org.limewire.concurrent.SimpleProvider;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -35,6 +36,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -188,7 +190,7 @@ public class HeadTest extends LimeTestCase {
         _um = new UploadManagerStub();
         _fm = new FileManagerStub(urns,descs);
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm));
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()));
         
         assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
         assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));

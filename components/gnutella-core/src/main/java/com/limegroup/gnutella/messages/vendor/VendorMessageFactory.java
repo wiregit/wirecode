@@ -197,7 +197,7 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
             // DPINJ: Use a passed in RPVMF !!!
-            return new ReplyNumberVendorMessageFactory().createFromNetwork(guid, ttl,
+            return ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(guid, ttl,
                     hops, version, restOf);
         }
     }

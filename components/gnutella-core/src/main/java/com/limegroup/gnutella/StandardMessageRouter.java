@@ -39,7 +39,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -362,8 +361,9 @@ public class StandardMessageRouter extends MessageRouter {
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
                     ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
-                            new ReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
-                                new ReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
+                            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
+                                ProviderHacks
+                                        .getReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
                     udpService.send(vm, addr, port);
                     return true;
                 }
