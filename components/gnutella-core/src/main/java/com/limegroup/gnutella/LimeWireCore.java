@@ -15,11 +15,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
-import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
-import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
@@ -390,16 +388,8 @@ public class LimeWireCore {
         return injector.getInstance(ChatManager.class);
     }
 
-    public BTLinkManagerFactory getBTLinkManagerFactory() {
-        return injector.getInstance(BTLinkManagerFactory.class);
-    }
-
     public DiskManagerFactory getDiskManagerFactory() {
         return injector.getInstance(DiskManagerFactory.class);
-    }
-
-    public BTConnectionFetcherFactory getBTConnectionFetcherFactory() {
-        return injector.getInstance(BTConnectionFetcherFactory.class);
     }
 
     public IncomingConnectionHandler getIncomingConnectionHandler() {

@@ -9,10 +9,8 @@ import org.limewire.security.SecureMessageVerifier;
 import com.google.inject.Guice;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
-import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
@@ -129,8 +127,6 @@ public class ProviderHacks {
     public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
     public static MulticastService getMulticastService() { return i().getMulticastService(); }
     public static ChatManager getChatManager() { return i().getChatManager(); }
-    public static BTLinkManagerFactory getBTLinkManagerFactory() { return i().getBTLinkManagerFactory(); }
-    public static BTConnectionFetcherFactory getBTConnectionFetcherFactory() { return i().getBTConnectionFetcherFactory(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static Pinger getPinger() { return i().getPinger(); }
     public static PongCacher getPongCacher() { return i().getPongCacher(); }

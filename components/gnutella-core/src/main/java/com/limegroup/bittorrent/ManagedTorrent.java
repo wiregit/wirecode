@@ -22,15 +22,17 @@ import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SyncWrapper;
@@ -85,8 +87,13 @@ BTLinkListener {
 	/**
 	 * The manager of tracker requests.
 	 */
-	private TrackerManager trackerManager;
+	private final TrackerManager trackerManager;
 	
+    /**
+     * Factory for our connection fetcher
+     */
+    private final BTConnectionFetcherFactory connectionFetcherFactory;
+    
 	/**
 	 * The fetcher of connections.
 	 */
@@ -119,6 +126,12 @@ BTLinkListener {
 	
 	private final NetworkManager networkManager;
 	
+    private final ContentManager contentManager;
+    
+    private final IPFilter ipFilter;
+    
+    private final TorrentManager torrentManager;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -134,16 +147,25 @@ BTLinkListener {
 			ScheduledExecutorService networkInvoker,
 			NetworkManager networkManager,
 			TrackerManagerFactory trackerManagerFactory,
-            ChokerFactory chokerFactory) {
+            ChokerFactory chokerFactory,
+            BTLinkManagerFactory linkManagerFactory,
+            BTConnectionFetcherFactory connectionFetcherFactory,
+            ContentManager contentManager,
+            IPFilter ipFilter,
+            TorrentManager torrentManager) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
 		this.networkManager = networkManager;
         this.chokerFactory = chokerFactory;
+        this.connectionFetcherFactory = connectionFetcherFactory;
+        this.contentManager = contentManager;
+        this.ipFilter = ipFilter;
+        this.torrentManager = torrentManager;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
-		linkManager = ProviderHacks.getBTLinkManagerFactory().getLinkManager();
+		linkManager = linkManagerFactory.getLinkManager(); 
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
 	}
 
@@ -246,7 +268,7 @@ BTLinkListener {
                  }
              }
 		};
-		ProviderHacks.getContentManager().request(context.getMetaInfo().getURN(),
+		contentManager.request(context.getMetaInfo().getURN(),
 				observer, 5000);
 	}
 	
@@ -453,8 +475,7 @@ BTLinkListener {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
 		choker = chokerFactory.getChoker(linkManager, 
 				false);
-		_connectionFetcher = 
-			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this);
+		_connectionFetcher = connectionFetcherFactory.getBTConnectionFetcher(this);
 	}
 
 	/**
@@ -545,7 +566,7 @@ BTLinkListener {
 	public void addEndpoint(TorrentLocation to) {
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
-		if (!ProviderHacks.getIpFilter().allow(to.getAddress()))
+		if (!ipFilter.allow(to.getAddress()))
 			return;
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;
@@ -583,7 +604,7 @@ BTLinkListener {
 			return false;
 		
 		// if we are complete, do not open any sockets - the active torrents will need them.
-		if (isComplete() && ProviderHacks.getTorrentManager().hasNonSeeding())
+		if (isComplete() && torrentManager.hasNonSeeding())
 			return false;
 		
 		// provision some slots for incoming connections unless we're firewalled
