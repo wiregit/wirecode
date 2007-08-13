@@ -40,6 +40,7 @@ import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
@@ -546,5 +547,13 @@ public class LimeWireCore {
 
     public ConnectionFactory getConnectionFactory() {
         return injector.getInstance(ConnectionFactory.class);
+    }
+
+    public DownloadCallback getDownloadCallback() {
+        return injector.getInstance(DownloadCallback.class);
+    }
+
+    public PushDownloadManager getPushDownloadManager() {
+        return injector.getInstance(PushDownloadManager.class);
     }
 }

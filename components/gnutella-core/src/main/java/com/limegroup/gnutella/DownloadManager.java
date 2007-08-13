@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -32,11 +33,13 @@ import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -85,10 +88,6 @@ public class DownloadManager implements BandwidthTracker {
      * greater the chance that downloads.dat itself is corrupt.  */
     private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
 
-    /** The callback for notifying the GUI of major changes. */
-    private DownloadCallback callback;
-    /** The message router to use for pushes. */
-    private MessageRouter router;
     /** The repository of incomplete files 
      *  INVARIANT: incompleteFileManager is same as those of all downloaders */
     private IncompleteFileManager incompleteFileManager
@@ -142,27 +141,35 @@ public class DownloadManager implements BandwidthTracker {
      */
     private Runnable _waitingPump;
     
-    /**
-     * The controller for push downloads.  This will handle sending
-     * out pushes (using proxies, UDP, etc..) and handle incoming GIVs.
-     * Only valid pushes will be sent back here.
-     */
-    private PushDownloadManager pushManager;
-    
     private final NetworkManager networkManager;
     private final DownloadReferencesFactory downloadReferencesFactory;
     private final DownloadCallback innetworkCallback;
     private final BTDownloaderFactory btDownloaderFactory;
+    private final Provider<DownloadCallback> downloadCallback;
+    private final Provider<MessageRouter> messageRouter;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<TorrentManager> torrentManager;
+    private final Provider<PushDownloadManager> pushDownloadManager;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
             DownloadReferencesFactory downloadReferencesFactory,
             @Named("inNetwork") DownloadCallback innetworkCallback,
-            BTDownloaderFactory btDownloaderFactory) {
+            BTDownloaderFactory btDownloaderFactory,
+            Provider<DownloadCallback> downloadCallback,
+            Provider<MessageRouter> messageRouter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<TorrentManager> torrentManager,
+            Provider<PushDownloadManager> pushDownloadManager) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
         this.btDownloaderFactory = btDownloaderFactory;
+        this.downloadCallback = downloadCallback;
+        this.messageRouter = messageRouter;
+        this.backgroundExecutor = backgroundExecutor;
+        this.torrentManager = torrentManager;
+        this.pushDownloadManager = pushDownloadManager;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -178,28 +185,8 @@ public class DownloadManager implements BandwidthTracker {
      *       to check if files exist
      */
     public void initialize() {
-        initialize(
-                   ProviderHacks.getActivityCallback(),
-                   ProviderHacks.getMessageRouter(),
-                   ProviderHacks.getFileManager()
-                  );
-    }
-    
-    protected void initialize(DownloadCallback guiCallback, MessageRouter router,
-                              FileManager fileManager) {
-        this.callback = guiCallback;
-        this.router = router;
         scheduleWaitingPump();
-        pushManager = new PushDownloadManager(new PushedSocketHandler() {
-            public void acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
-                handleIncomingPush(file, index, clientGUID, socket);
-            }}, 
-    		router,
-    		ProviderHacks.getHttpExecutor(),
-    		ProviderHacks.getBackgroundExecutor(),
-    		ProviderHacks.getAcceptor(),
-    		ProviderHacks.getNetworkManager()); // DPINJ: use passed-in version!
-        pushManager.initialize(ProviderHacks.getConnectionDispatcher());
+        pushDownloadManager.get().initialize();
     }
 
     /**
@@ -234,7 +221,7 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
         };
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(checkpointer, 
+        backgroundExecutor.scheduleWithFixedDelay(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
                                SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);
                                
@@ -287,7 +274,7 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     public PushDownloadManager getPushManager() {
-    	return pushManager;
+    	return pushDownloadManager.get();
     }
 
     /**
@@ -316,6 +303,16 @@ public class DownloadManager implements BandwidthTracker {
          IOUtils.close(socket);
     }
     
+    public PushedSocketHandler getPushedSocketHandler() {
+        return new PushedSocketHandler() {
+            public void acceptPushedSocket(String file, int index,
+                    byte[] clientGUID, Socket socket) {
+                handleIncomingPush(file, index, clientGUID, socket);
+            }
+            
+        };
+    }
+    
     
     /**
      * Schedules the runnable that pumps through waiting downloads.
@@ -329,7 +326,7 @@ public class DownloadManager implements BandwidthTracker {
                 pumpDownloads();
             }
         };
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(_waitingPump,
+        backgroundExecutor.scheduleWithFixedDelay(_waitingPump,
                                1000,
                                1000, TimeUnit.MILLISECONDS);
     }
@@ -811,7 +808,7 @@ public class DownloadManager implements BandwidthTracker {
     	if (!overwrite)
     		checkTargetLocation(system, overwrite);
     	else
-    		ProviderHacks.getTorrentManager().killTorrentForFile(system.getCompleteFile());
+    		torrentManager.get().killTorrentForFile(system.getCompleteFile());
     	AbstractDownloader ret = btDownloaderFactory.createBTDownloader(info);
     	initializeDownload(ret);
     	return ret;
@@ -854,7 +851,7 @@ public class DownloadManager implements BandwidthTracker {
         md.initialize(downloadReferencesFactory.create(md));
 		waiting.add(md);
         callback(md).addDownload(md);
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
         	public void run() {
         		writeSnapshot(); // Save state for crash recovery.
         	}
@@ -865,7 +862,7 @@ public class DownloadManager implements BandwidthTracker {
      * Returns the callback that should be used for the given md.
      */
     private DownloadCallback callback(Downloader md) {
-        return (md instanceof InNetworkDownloader) ? innetworkCallback : callback;
+        return (md instanceof InNetworkDownloader) ? innetworkCallback : downloadCallback.get();
     }
         
 	/**
@@ -1068,7 +1065,7 @@ public class DownloadManager implements BandwidthTracker {
         }
         dl.finish();
         if (dl.getQueryGUID() != null)
-            router.downloadFinished(dl.getQueryGUID());
+            messageRouter.get().downloadFinished(dl.getQueryGUID());
         callback(dl).removeDownload(dl);
         
         //Save this' state to disk for crash recovery.
@@ -1130,7 +1127,7 @@ public class DownloadManager implements BandwidthTracker {
             LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
 //        lastGnutellaRequeryTime = System.currentTimeMillis();
-        router.sendDynamicQuery(query);
+        messageRouter.get().sendDynamicQuery(query);
         return true;
     }
 

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -48,4 +49,14 @@ public interface FileManagerController {
     public void addSimppListener(SimppListener listener);
     
     public void removeSimppListener(SimppListener listener);
+
+    public void fileManagerLoading();
+
+    public boolean warnAboutSharingSensitiveDirectory(File directory);
+
+    public void handleSharedFileUpdate(File file);
+
+    public void scheduleWithFixedDelay(Runnable command, int initialDelay, int delay, TimeUnit unit);
+
+    public void setAnnotateEnabled(boolean enabled);
 }

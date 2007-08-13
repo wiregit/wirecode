@@ -38,7 +38,6 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -54,12 +53,10 @@ import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @SuppressWarnings("unchecked")
@@ -71,7 +68,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     private DownloadManagerStub manager;
     private FileManager fileman;
     private ActivityCallback callback;
-    private MessageRouter router;
+//    private MessageRouter router;
     private static ConnectionManager connectionManager;
 
     public ManagedDownloaderTest(String name) {
@@ -105,10 +102,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
-        fileman = new FileManagerStub();
-        callback = new ActivityCallbackStub();
-        router = new MessageRouterStub();
-        manager.initialize(callback, router, fileman);
+//        fileman = new FileManagerStub();
+//        callback = new ActivityCallbackStub();
+//        router = new MessageRouterStub();
+        manager.initialize();
         ProviderHacks.getAltLocManager().purge();
     //    PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
     //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);

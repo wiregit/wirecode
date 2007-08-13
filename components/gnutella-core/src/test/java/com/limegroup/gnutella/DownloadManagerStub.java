@@ -1,32 +1,32 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.net.Socket;
 
+import org.limewire.concurrent.Providers;
 
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.MultiShutdownable;
 
 
 public class DownloadManagerStub extends DownloadManager {
-	private final PushDownloadManager pdManager = new PushDownloadManagerStub();
-	
-	public DownloadManagerStub() {
-	    super(ProviderHacks.getNetworkManager(), 
-	          ProviderHacks.getDownloadReferencesFactory(),
-	          ProviderHacks.getInNetworkCallback(), 
-	          ProviderHacks.getBTDownloaderFactory());
-	}
+    public DownloadManagerStub() {
+        super(ProviderHacks.getNetworkManager(), ProviderHacks
+                .getDownloadReferencesFactory(), ProviderHacks
+                .getInNetworkCallback(),
+                ProviderHacks.getBTDownloaderFactory(), Providers
+                        .of(ProviderHacks.getDownloadCallback()), Providers
+                        .of(ProviderHacks.getMessageRouter()), ProviderHacks
+                        .getBackgroundExecutor(), Providers.of(ProviderHacks
+                        .getTorrentManager()), Providers.of(ProviderHacks
+                        .getPushDownloadManager()));
+    }
 	
 	
     @Override
-    public void initialize(DownloadCallback callback, MessageRouter router,
-                           FileManager fileManager) {
-        super.initialize(callback, router, fileManager);
+    public void initialize() {
         postGuiInit();
     }
 
@@ -64,25 +64,8 @@ public class DownloadManagerStub extends DownloadManager {
     @Override
     public IncompleteFileManager getIncompleteFileManager() { return null; }
     
-    public PushDownloadManager getPushManager() {return pdManager;}
+    public PushDownloadManager getPushManager() {return ProviderHacks.getPushDownloadManager();}
     
-    private static class PushDownloadManagerStub extends PushDownloadManager {
-    	PushDownloadManagerStub() {
-    		super(null, null, null, null, null, null);
-    	}
-		@Override
-		public void acceptConnection(String word, Socket socket) {}
-
-		@Override
-		public void initialize(ConnectionDispatcher dispatcher) {}
-
-		@Override
-		public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {}
-
-		@Override
-		public void sendPush(RemoteFileDesc file) {}
-    	
-    }
     
     public final Object pump = new Object();
     

@@ -252,7 +252,7 @@ public class MetaFileManager extends FileManager {
      * Notification that FileManager loading is starting.
      */
     protected void loadStarted(int revision) {
-        ProviderHacks.getActivityCallback().setAnnotateEnabled(false);
+        fileManagerController.setAnnotateEnabled(false);
 
         // Load up new ReplyCollections.
         LimeXMLSchemaRepository schemaRepository = ProviderHacks
@@ -273,7 +273,7 @@ public class MetaFileManager extends FileManager {
         // save ourselves to disk every minute
         if (saver == null) {
             saver = new Saver();
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, TimeUnit.MILLISECONDS);
+            fileManagerController.scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, TimeUnit.MILLISECONDS);
         }
 
         Collection<LimeXMLReplyCollection> replies = ProviderHacks
@@ -281,7 +281,7 @@ public class MetaFileManager extends FileManager {
         for (LimeXMLReplyCollection col : replies)
             col.loadFinished();
 
-        ProviderHacks.getActivityCallback().setAnnotateEnabled(true);
+        fileManagerController.setAnnotateEnabled(true);
 
         super.loadFinished(revision);
     }
@@ -442,8 +442,7 @@ public class MetaFileManager extends FileManager {
                 } else { // we found a file with the right name
                     res = fileManagerController.createResponse(fd);
                     fd.incrementHitCount();
-                    ProviderHacks.getActivityCallback().handleSharedFileUpdate(
-                            fd.getFile());
+                    fileManagerController.handleSharedFileUpdate(fd.getFile());
                 }
             }
 

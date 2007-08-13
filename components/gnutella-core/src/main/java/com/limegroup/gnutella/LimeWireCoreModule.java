@@ -21,6 +21,7 @@ import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
@@ -71,6 +72,7 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
+import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -191,6 +193,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DHTBootstrapperFactory.class).to(DHTBootstrapperFactoryImpl.class);
         bind(DHTNodeFetcherFactory.class).to(DHTNodeFetcherFactoryImpl.class);
         bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
+        bind(SocketProcessor.class).to(Acceptor.class);
+        bind(PushedSocketHandler.class).toProvider(PushedSocketHandlerProvider.class);
                 
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -268,6 +272,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(SchemaReplyCollectionMapper.class);      
         //bind(ExternalControl.class);
         //bind(ControlRequestAcceptor.class);
+        //bind(PushDownloadManager.class);
         
         //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);
@@ -342,7 +347,20 @@ public class LimeWireCoreModule extends AbstractModule {
             nioDispatcher.registerSelector(multiplexor, socketChannel.getClass());
             return multiplexor;
         }
-        
     }
+    
+    @Singleton
+    private static class PushedSocketHandlerProvider implements Provider<PushedSocketHandler> {
+        private final Provider<DownloadManager> downloadManager;
         
+        @Inject
+        public PushedSocketHandlerProvider(Provider<DownloadManager> downloadManager) {
+            this.downloadManager = downloadManager;
+        }
+        
+        public PushedSocketHandler get() {
+            return downloadManager.get().getPushedSocketHandler();
+        }
+    };
+
 }

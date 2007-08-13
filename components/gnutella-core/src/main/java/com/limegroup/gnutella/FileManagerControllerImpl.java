@@ -3,10 +3,13 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
@@ -14,6 +17,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 
 @Singleton
@@ -27,6 +31,9 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<ResponseFactory> responseFactory;
     private final Provider<SavedFileManager> savedFileManager;
     private final Provider<SimppManager> simppManager;
+    private final Provider<UpdateHandler> updateHandler;
+    private final Provider<ActivityCallback> activityCallback;
+    private final ScheduledExecutorService backgroundExecutor;
     
     /**
      * @param urnCache
@@ -43,7 +50,10 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<AltLocManager> altLocManager,
             Provider<ResponseFactory> responseFactory,
             Provider<SavedFileManager> savedFileManager,
-            Provider<SimppManager> simppManager) {
+            Provider<SimppManager> simppManager,
+            Provider<UpdateHandler> updateHandler,
+            Provider<ActivityCallback> activityCallback,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
@@ -52,6 +62,9 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.responseFactory = responseFactory;
         this.savedFileManager = savedFileManager;
         this.simppManager = simppManager;
+        this.updateHandler = updateHandler;
+        this.activityCallback = activityCallback;
+        this.backgroundExecutor = backgroundExecutor;
     }
     
     /* (non-Javadoc)
@@ -180,6 +193,8 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public void loadFinishedPostSave() {
         savedFileManager.get().run();
+        updateHandler.get().tryToDownloadUpdates();
+        activityCallback.get().fileManagerLoaded();
     }
 
     public void addSimppListener(SimppListener listener) {
@@ -188,6 +203,26 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public void removeSimppListener(SimppListener listener) {
         simppManager.get().removeListener(listener);
+    }
+
+    public void fileManagerLoading() {
+        activityCallback.get().fileManagerLoading();
+    }
+
+    public void handleSharedFileUpdate(File file) {
+        activityCallback.get().handleSharedFileUpdate(file);
+    }
+
+    public void scheduleWithFixedDelay(Runnable command, int initialDelay, int delay, TimeUnit unit) {
+        backgroundExecutor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+    }
+
+    public void setAnnotateEnabled(boolean enabled) {
+        activityCallback.get().setAnnotateEnabled(enabled);
+    }
+
+    public boolean warnAboutSharingSensitiveDirectory(File directory) {
+        return activityCallback.get().warnAboutSharingSensitiveDirectory(directory);
     }
 
 }

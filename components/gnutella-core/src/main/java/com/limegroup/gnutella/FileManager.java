@@ -777,9 +777,6 @@ public abstract class FileManager {
         fileManagerController.loadFinished();
         save();
         fileManagerController.loadFinishedPostSave();
-        ProviderHacks.getUpdateHandler().tryToDownloadUpdates();
-        
-        ProviderHacks.getActivityCallback().fileManagerLoaded();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
@@ -834,7 +831,7 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        ProviderHacks.getActivityCallback().fileManagerLoading();
+        fileManagerController.fileManagerLoading();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
         
         // Update the FORCED_SHARE directory.
@@ -919,7 +916,7 @@ public abstract class FileManager {
             if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!ProviderHacks.getActivityCallback().warnAboutSharingSensitiveDirectory(directory))
+                if (!fileManagerController.warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
@@ -2095,7 +2092,7 @@ public abstract class FileManager {
                 continue;
 
             desc.incrementHitCount();
-            ProviderHacks.getActivityCallback().handleSharedFileUpdate(desc.getFile());
+            fileManagerController.handleSharedFileUpdate(desc.getFile());
 
             Response resp = fileManagerController.createResponse(desc);
             if(includeXML) {
@@ -2459,7 +2456,7 @@ public abstract class FileManager {
             buildInProgress = true;
             
             // schedule a rebuild sometime in the next hour
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+            fileManagerController.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     synchronized(QRPUpdater.this) {
                         if (!buildInProgress)

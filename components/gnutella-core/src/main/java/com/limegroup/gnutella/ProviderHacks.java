@@ -28,6 +28,7 @@ import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
@@ -137,12 +138,12 @@ public class ProviderHacks {
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }    
-    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
 
     // Requires some major reworking -- used statically in a lot of places
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     
     // Requires some factories...
+    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
@@ -200,7 +201,8 @@ public class ProviderHacks {
     public static QueryDispatcher getQueryDispatcher() { return i().getQueryDispatcher(); }
     public static SpamManager getSpamManager() { return i().getSpamManager(); }
     public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
-    
+    public static DownloadCallback getDownloadCallback() { return i().getDownloadCallback(); }
+    public static PushDownloadManager getPushDownloadManager() { return i().getPushDownloadManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 
