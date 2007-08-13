@@ -559,7 +559,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Stores whether or not an action or CC license are in this LimeXMLDocument.
      */
     private void setFields(String prefix) {
-        // store action.
+         // store action.
         action = fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
         actionDetail = fieldToValue.get(prefix + XML_ACTION_INFO);
 
@@ -577,6 +577,8 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         licenseType = LicenseType.determineLicenseType(license, type);
         if (licenseType == LicenseType.CC_LICENSE)
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+        if( licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE )
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Fields after setting: " + fieldToValue);

@@ -242,7 +242,7 @@ public class FileDesc implements FileDetails, StringLookup {
 	 * Adds a LimeXMLDocument to this FileDesc.
 	 */
 	public void addLimeXMLDocument(LimeXMLDocument doc) {
-        
+
         _limeXMLDocs.add(doc);
         
 	    doc.initIdentifier(FILE);

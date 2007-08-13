@@ -179,7 +179,7 @@ public class MetaFileManager extends FileManager {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
         LimeXMLSchemaRepository.instance().getSchema(LimeXMLNames.AUDIO_SCHEMA);
-        
+
         for(LimeXMLDocument doc : allDocs) {
             if(doc.getSchema() == audioSchema) {
                 audioDoc = doc;

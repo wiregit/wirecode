@@ -49,6 +49,7 @@ import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
+import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -973,6 +974,7 @@ public abstract class FileManager {
             
     }
     
+    //TODO: finish this
     private void updateStoreDirectories(File directory, File parent, int revision) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
@@ -1190,9 +1192,9 @@ public abstract class FileManager {
 	 * Always shares the given file.
 	 */
 	public void addFileAlways(File file) {
-		addFileAlways(file, EMPTY_DOCUMENTS, null);
-	}
-	
+		addFileAlways(file, EMPTY_DOCUMENTS, null);	
+    }
+    
 	/**
 	 * Always shares a file, notifying the given callback when shared.
 	 */
@@ -1285,7 +1287,7 @@ public abstract class FileManager {
             LOG.debug("Attempting to share file: " + file);
         if(callback == null)
             callback = EMPTY_CALLBACK;
-
+      
         if(revision != _revision) {
             callback.handleFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, file));
             return;
@@ -1326,6 +1328,21 @@ public abstract class FileManager {
 		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
+    public boolean isShareable(final List<? extends LimeXMLDocument> metadata, File file ) { 
+        if( metadata == null )
+            return true;
+        for( LimeXMLDocument doc : metadata ) {
+            if( doc != null && doc.getLicenseString() != null && 
+                    doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()) )
+            {
+                System.out.println("not adding " + doc.getLicenseString());
+                removeFileIfShared(file);
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * Constructs a new UrnCallback that will possibly load the file with the given URNs.
      */
@@ -1335,7 +1352,7 @@ public abstract class FileManager {
 		    public void urnsCalculated(File f, Set<? extends URN> urns) {
 //		        if(LOG.isDebugEnabled())
 //		            LOG.debug("URNs calculated for file: " + f);
-		        
+
 		        FileDesc fd = null;
 		        synchronized(FileManager.this) {
     		        if(revision != _revision) {
@@ -1355,6 +1372,11 @@ public abstract class FileManager {
                     
                 if(fd != null) {
                     loadFile(fd, file, metadata, urns);
+
+					// test the license type to see if it can be shared
+                    boolean shareable = isShareable(fd.getLimeXMLDocuments(), file);
+                    if( !shareable )
+                        return;
                     
                     FileManagerEvent evt = new FileManagerEvent(FileManager.this, Type.ADD_FILE, fd);
                     if(notify) // sometimes notify the GUI
@@ -1399,7 +1421,7 @@ public abstract class FileManager {
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-    private synchronized FileDesc addFile(File file, Set<? extends URN> urns) {
+    private synchronized FileDesc addFile(File file, Set<? extends URN> urns) { 
         if(LOG.isDebugEnabled())
             LOG.debug("Sharing file: " + file);
         

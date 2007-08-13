@@ -20,7 +20,7 @@ public class MetaDataReader {
 	/**
 	 * Generates a LimeXMLDocument from this file, only parsing it if it's the given schemaURI.
 	 */
-	public static LimeXMLDocument readDocument(File file) throws IOException {
+	public static LimeXMLDocument readDocument(File file) throws IOException { 
 	    MetaData data = MetaData.parse(file);
 		if(data == null)
 		    throw new IOException("unable to parse file");
