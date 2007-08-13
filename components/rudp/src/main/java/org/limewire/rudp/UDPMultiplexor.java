@@ -199,7 +199,7 @@ public class UDPMultiplexor extends AbstractSelector {
 
             UDPSelectionKey key = (UDPSelectionKey)channel.keyFor(this);
             if (key != null) {
-                if (key.isValid()) {
+                if (key.isValid() && channel.isOpen()) {
                     int currentOps = channel.getProcessor().readyOps();
                     int readyOps = currentOps & key.interestOps();
                     if (readyOps != 0) {
@@ -207,6 +207,9 @@ public class UDPMultiplexor extends AbstractSelector {
                         selectedKeys.add(key);
                     }
                 } else {
+                    if(key.isValid())
+                        LOG.warn("Channel closed, but key is valid.");
+                    
                     if (removed == null)
                         removed = new UDPSocketChannel[array.length];
                     removed[i] = channel;
