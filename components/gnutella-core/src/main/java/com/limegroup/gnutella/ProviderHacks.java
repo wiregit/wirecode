@@ -12,7 +12,6 @@ import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -131,7 +130,6 @@ public class ProviderHacks {
     public static MulticastService getMulticastService() { return i().getMulticastService(); }
     public static ChatManager getChatManager() { return i().getChatManager(); }
     public static BTLinkManagerFactory getBTLinkManagerFactory() { return i().getBTLinkManagerFactory(); }
-    public static ChokerFactory getChokerFactory() { return i().getChokerFactory(); }
     public static BTConnectionFetcherFactory getBTConnectionFetcherFactory() { return i().getBTConnectionFetcherFactory(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static Pinger getPinger() { return i().getPinger(); }

@@ -18,6 +18,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.choking.Choker;
+import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
@@ -94,6 +95,9 @@ BTLinkListener {
 	/** Manager of the BT links of this torrent */
 	private final BTLinkManager linkManager;
 	
+    /** Factory for our chokers */
+    private final ChokerFactory chokerFactory;
+    
 	/** 
 	 * The manager of choking logic
 	 */
@@ -129,11 +133,13 @@ BTLinkListener {
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher,
 			ScheduledExecutorService networkInvoker,
 			NetworkManager networkManager,
-			TrackerManagerFactory trackerManagerFactory) {
+			TrackerManagerFactory trackerManagerFactory,
+            ChokerFactory chokerFactory) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
 		this.networkManager = networkManager;
+        this.chokerFactory = chokerFactory;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
@@ -445,7 +451,7 @@ BTLinkListener {
 	 */
 	private void initializeTorrent() {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
-		choker = ProviderHacks.getChokerFactory().getChoker(linkManager, 
+		choker = chokerFactory.getChoker(linkManager, 
 				false);
 		_connectionFetcher = 
 			ProviderHacks.getBTConnectionFetcherFactory().getBTConnectionFetcher(this);
@@ -679,7 +685,7 @@ BTLinkListener {
 		
 		// switch the choker logic and resume uploads
 		choker.shutdown();
-		choker = ProviderHacks.getChokerFactory().getChoker(linkManager,
+		choker = chokerFactory.getChoker(linkManager,
 				true);
 		choker.start();
 		choker.rechoke();

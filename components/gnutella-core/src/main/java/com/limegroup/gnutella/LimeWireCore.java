@@ -18,7 +18,6 @@ import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTLinkManagerFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
@@ -393,10 +392,6 @@ public class LimeWireCore {
 
     public BTLinkManagerFactory getBTLinkManagerFactory() {
         return injector.getInstance(BTLinkManagerFactory.class);
-    }
-
-    public ChokerFactory getChokerFactory() {
-        return injector.getInstance(ChokerFactory.class);
     }
 
     public DiskManagerFactory getDiskManagerFactory() {
