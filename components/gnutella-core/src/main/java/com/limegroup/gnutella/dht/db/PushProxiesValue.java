@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
@@ -242,7 +243,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
             this.features = features;
             this.fwtVersion = fwtVersion;
             this.port = port;
-            this.proxies = proxies;
+            this.proxies = new CopyOnWriteArraySet<IpPort>(proxies);
             this.data = serialize(this);
             this.tlsInfo = getNumbersFromProxies(proxies);
         }
@@ -450,7 +451,7 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
     }
     
     private static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
-        BitNumbers tlsInfo = new BitNumbers(proxies.size());
+        BitNumbers tlsInfo = BitNumbers.synchronizedBitNumbers(new BitNumbers(proxies.size()));
         int i = 0;
         for (IpPort proxy : proxies) {
             if (proxy instanceof Connectable) {
