@@ -22,6 +22,7 @@ import org.limewire.util.Decorator;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
@@ -130,6 +131,8 @@ public class HeadPong extends VendorMessage {
     private boolean _tlsCapable;
     /** True if this came from a routed ping. */
     private boolean _routingBroken;
+    
+    private final PushEndpointFactory pushEndpointFactory;
 	
 	/**
 	 * Creates a message object with data from the network.
@@ -137,9 +140,13 @@ public class HeadPong extends VendorMessage {
      * This will correctly set the fields of this HeadPong, as opposed
      * to the other constructor.
 	 */
-	HeadPong(byte[] guid, byte ttl, byte hops, int version, byte[] payload) throws BadPacketException {
+	HeadPong(byte[] guid, byte ttl, byte hops, int version, byte[] payload, PushEndpointFactory pushEndpointFactory) throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
 		
+        // This isn't really used later on -- it's just used deep within the setFieldsFromXXX methods.
+        // Maybe this constructor should go away and should be made with all fields passed in.
+        this.pushEndpointFactory = pushEndpointFactory;
+        
 		//we should have some payload
 		if (payload==null || payload.length<2)
 			throw new BadPacketException("bad payload");
@@ -169,6 +176,7 @@ public class HeadPong extends VendorMessage {
 	protected HeadPong(GUID guid, int version, byte[] payload) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
 		setGUID(guid);
+        pushEndpointFactory = null;
 	}
     
 
@@ -503,7 +511,7 @@ public class HeadPong extends VendorMessage {
         List<PushEndpoint> ret = new LinkedList<PushEndpoint>();
         DataInputStream dais = new DataInputStream(is);
         while (dais.available() > 0) 
-            ret.add(PushEndpoint.fromBytes(dais));
+            ret.add(pushEndpointFactory.createFromBytes(dais));
         
         return Collections.unmodifiableList(ret);
     }    

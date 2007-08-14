@@ -349,7 +349,7 @@ public class AltLocFinder {
             byte features = pushProxies.getFeatures();
             int fwtVersion = pushProxies.getFwtVersion();
             IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
-            PushEndpoint pe = new PushEndpoint(guid, proxies, features, fwtVersion, ipp);
+            PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid, proxies, features, fwtVersion, ipp);
             
             try {
                 AlternateLocation location = alternateLocationFactory.createPushAltLoc(pe, urn);

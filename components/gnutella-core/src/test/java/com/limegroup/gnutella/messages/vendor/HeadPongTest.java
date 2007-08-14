@@ -69,7 +69,7 @@ public class HeadPongTest extends LimeTestCase {
         fileManager = new FileManagerStub();
         uploadManager = new UploadManagerStub();
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()));
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory());
         
         SSLSettings.TLS_INCOMING.setValue(false);
         ProviderHacks.getAltLocManager().purge();
@@ -99,11 +99,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         ByteOrder.short2beb((short)(p1b.length + p2b.length), out); // length of forthcoming push locations.
         out.write(p1b);                                // push locations...
@@ -181,11 +181,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         byte[] pushbytes = new byte[p1b.length + p2b.length];
         System.arraycopy(p1b, 0, pushbytes, 0, p1b.length);
@@ -271,11 +271,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         byte[] pushbytes = new byte[p1b.length + p2b.length];
         System.arraycopy(p1b, 0, pushbytes, 0, p1b.length);
@@ -1076,9 +1076,9 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
-        PushEndpoint pe1 = PushEndpoint.fromBytes(in);
-        PushEndpoint pe2 = PushEndpoint.fromBytes(in);
-        PushEndpoint pe3 = PushEndpoint.fromBytes(in);
+        PushEndpoint pe1 = ProviderHacks.getPushEndpointFactory().createFromBytes(in);
+        PushEndpoint pe2 = ProviderHacks.getPushEndpointFactory().createFromBytes(in);
+        PushEndpoint pe3 = ProviderHacks.getPushEndpointFactory().createFromBytes(in);
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         
@@ -1212,7 +1212,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
-        PushEndpoint pe1 = PushEndpoint.fromBytes(in);
+        PushEndpoint pe1 = ProviderHacks.getPushEndpointFactory().createFromBytes(in);
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -47,6 +48,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     private final Provider<UploadManager> uploadManager;
     private final Provider<FileManager> fileManager;
     private final Provider<AltLocManager> altLocManager;
+    private final PushEndpointFactory pushEndpointFactory; 
 
     /** The real packet size. */
     public static final int DEFAULT_PACKET_SIZE = 1380;
@@ -59,11 +61,13 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     public HeadPongFactoryImpl(NetworkManager networkManager,
             Provider<UploadManager> uploadManager,
             Provider<FileManager> fileManager,
-            Provider<AltLocManager> altLocManager) {
+            Provider<AltLocManager> altLocManager,
+            PushEndpointFactory pushEndpointFactory) {
         this.networkManager = networkManager;
         this.uploadManager = uploadManager;
         this.fileManager = fileManager;
         this.altLocManager = altLocManager;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
 
     /* (non-Javadoc)
@@ -71,7 +75,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
      */
     public HeadPong createFromNetwork(byte[] guid, byte ttl, byte hops,
             int version, byte[] payload) throws BadPacketException {
-        return new HeadPong(guid, ttl, hops, version, payload);
+        return new HeadPong(guid, ttl, hops, version, payload, pushEndpointFactory);
     }
 
     /* (non-Javadoc)

@@ -144,7 +144,7 @@ public class PingRankerTest extends LimeTestCase {
         alts.add(ip);
         
         //and one push loc
-        PushEndpoint pe =new PushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
+        PushEndpoint pe =ProviderHacks.getPushEndpointFactory().createPushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
         Set push = new HashSet();
         push.add(pe);
         
@@ -185,7 +185,7 @@ public class PingRankerTest extends LimeTestCase {
 
         // make one of the hosts send an altloc of itself (spammer?) and the pushloc 
         IpPort ip = new IpPortImpl("1.2.3.4",1);
-        PushEndpoint pe = new PushEndpoint(g.toHexString()+";7:1.2.3.6;4.4.4.4:4");
+        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g.toHexString()+";7:1.2.3.6;4.4.4.4:4");
         Set alts = new HashSet();
         alts.add(ip);
         Set push = new HashSet();
@@ -504,7 +504,7 @@ public class PingRankerTest extends LimeTestCase {
             host = "1.1.1.1";
          s =s+ ";"+proxy;
         
-        PushEndpoint pe = new PushEndpoint(s);
+        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(s);
         RemoteFileDesc ret = newRFDWithURN(host,3);
         ret = new RemoteFileDesc(ret,pe);
         return ret;

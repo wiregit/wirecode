@@ -43,6 +43,7 @@ import org.limewire.nio.statemachine.ReadState;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.BandwidthTracker;
@@ -52,7 +53,7 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
@@ -280,6 +281,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private final DownloadManager downloadManager;
     private final CreationTimeCache creationTimeCache;
     private final BandwidthManager bandwidthManager;
+    private final Provider<PushEndpointCache> pushEndpointCache;
     
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -287,7 +289,8 @@ public class HTTPDownloader implements BandwidthTracker {
             AlternateLocationFactory alternateLocationFactory,
             DownloadManager downloadManager,
             CreationTimeCache creationTimeCache,
-            BandwidthManager bandwidthManager) {
+            BandwidthManager bandwidthManager,
+            Provider<PushEndpointCache> pushEndpointCache) {
         if (rfd == null)
             throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
@@ -298,6 +301,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
+        this.pushEndpointCache = pushEndpointCache;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -1331,7 +1335,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // try to update the FWT version and external address we know for this host
             	try {
             	    updatePEAddress();
-            	    PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
+                    pushEndpointCache.get().setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
                 } catch (IOException ignored) {}
             }
         }
@@ -1378,7 +1382,7 @@ public class HTTPDownloader implements BandwidthTracker {
             return;
         
         try {
-            PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
+            pushEndpointCache.get().overwriteProxies(_rfd.getClientGUID(),str);
             updatePEAddress();
         }catch(IOException tooBad) {
             // invalid header - ignore it.
@@ -1395,7 +1399,7 @@ public class HTTPDownloader implements BandwidthTracker {
             int port = Integer.parseInt(str);
             if (NetworkUtils.isValidPort(port)) {
                 IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), port);
-                PushEndpoint.setAddr(_rfd.getClientGUID(), newAddr);
+                pushEndpointCache.get().setAddr(_rfd.getClientGUID(), newAddr);
             }
         }
         catch (NumberFormatException nfe) {
@@ -1407,7 +1411,7 @@ public class HTTPDownloader implements BandwidthTracker {
         if (_socket instanceof UDPConnection) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
             if (NetworkUtils.isValidExternalIpPort(newAddr))
-                PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+                pushEndpointCache.get().setAddr(_rfd.getClientGUID(),newAddr);
         }
     }
     

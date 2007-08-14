@@ -24,6 +24,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -56,7 +57,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void setUp() {
-        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager());
+        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {

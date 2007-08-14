@@ -115,7 +115,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 		Set proxies = new IpPortSet();
 		proxies.add(ppi);
 		
-        new PushEndpoint(GUID.makeGuid(),proxies);
+        ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
@@ -168,7 +168,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 		Set proxies = new HashSet();
 		proxies.add(ppi);
 		
-        new PushEndpoint(GUID.makeGuid(),proxies);
+        ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
@@ -192,7 +192,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 		Set proxies = new HashSet();
 		proxies.add(ppi);
 		
-        new PushEndpoint(GUID.makeGuid(),proxies);
+        ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 

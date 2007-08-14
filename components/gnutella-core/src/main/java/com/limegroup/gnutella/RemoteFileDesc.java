@@ -411,9 +411,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 _pushAddr = pe;
             else {
                 try {
-                    _pushAddr = new PushEndpoint(clientGUID,proxies,
-                        PushEndpoint.PLAIN, FWTVersion, 
-                        new IpPortImpl(_host,_port));
+                    _pushAddr = ProviderHacks.getPushEndpointFactory().createPushEndpoint(clientGUID, proxies, PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(_host,_port));
                 }catch (UnknownHostException uhe) {
                     throw new IllegalArgumentException(uhe);
                 }
@@ -491,7 +489,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 http = (String)propertiesMap.get("_pushAddr");
             if (http != null) {
                 try {
-                    _pushAddr = new PushEndpoint(http);
+                    _pushAddr = ProviderHacks.getPushEndpointFactory().createPushEndpoint(http);
                     if (!_firewalled) {
                         ErrorService.error(new IllegalStateException(
                                 "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));

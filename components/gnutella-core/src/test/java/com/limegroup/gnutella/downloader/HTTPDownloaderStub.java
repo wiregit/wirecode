@@ -3,6 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -17,7 +19,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 public class HTTPDownloaderStub extends HTTPDownloader {
 
 	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {
-		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager());
+		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
 	}
 	
 	public void addFailedAltLoc(AlternateLocation loc) {

@@ -119,8 +119,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		
 		GUID g1 = new GUID(GUID.makeGuid());
 		GUID g2 = new GUID(GUID.makeGuid());
-        PushEndpoint pe = new PushEndpoint(g1.bytes(),proxies);
-        PushEndpoint pe2 = new PushEndpoint(g2.bytes(),proxies2);
+        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1.bytes(), proxies);
+        PushEndpoint pe2 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g2.bytes(), proxies2);
         
         //test an rfd with push proxies
 		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
@@ -150,7 +150,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		 
 		 //now create an rfd which claims to be firewalled but has no push proxies
 		 GUID g3 = new GUID(GUID.makeGuid());
-		 PushEndpoint noProxies = new PushEndpoint(g3.bytes());
+		 PushEndpoint noProxies = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g3.bytes());
 
 		 RemoteFileDesc fwalledNotGood = 
 		 	new RemoteFileDesc(fwalled, noProxies);

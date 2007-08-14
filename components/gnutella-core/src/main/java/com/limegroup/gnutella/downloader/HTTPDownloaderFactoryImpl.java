@@ -3,11 +3,13 @@ package com.limegroup.gnutella.downloader;
 import java.net.Socket;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 
@@ -19,6 +21,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
     private final DownloadManager downloadManager;
     private final CreationTimeCache creationTimeCache;
     private final BandwidthManager bandwidthManager;
+    private final Provider<PushEndpointCache> pushEndpointCache;
 
 
     /**
@@ -33,12 +36,14 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             AlternateLocationFactory alternateLocationFactory,
             DownloadManager downloadManager,
             CreationTimeCache creationTimeCache,
-            BandwidthManager bandwidthManager) {
+            BandwidthManager bandwidthManager,
+            Provider<PushEndpointCache> pushEndpointCache) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
+        this.pushEndpointCache = pushEndpointCache;
     }
     
 
@@ -49,7 +54,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork, true,
                 networkManager, alternateLocationFactory, downloadManager,
-                creationTimeCache, bandwidthManager);
+                creationTimeCache, bandwidthManager, pushEndpointCache);
     }
 
 

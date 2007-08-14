@@ -126,8 +126,6 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }
     
-    // Requires some major reworking -- used statically in a lot of places
-    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     
     // Requires some factories...
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
@@ -138,7 +136,11 @@ public class ProviderHacks {
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
+    // Requires cleaning up RemoteFileDesc deserialization, or doing something else
+    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
+    
     // Cleaned up in all but tests
+    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
     public static PongCacher getPongCacher() { return i().getPongCacher(); }
     public static Pinger getPinger() { return i().getPinger(); }
@@ -151,7 +153,7 @@ public class ProviderHacks {
     public static QueryUnicaster getQueryUnicaster() { return i().getQueryUnicaster(); }
     public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }
     public static UploadManager getUploadManager() { return i().getUploadManager(); }
-    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
+
     public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
     public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return i().getDHTNodeFetcherFactory(); }
     public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return i().getDHTBootstrapperFactory(); }
@@ -208,6 +210,7 @@ public class ProviderHacks {
     public static ScheduledExecutorService getNIOExecutor() { return i().getNIOExecutor(); }
     public static GuidMapManager getGuidMapManager() { return i().getGuidMapManager(); }
     public static BrowseHostHandlerManager getBrowseHostHandlerManager() { return i().getBrowseHostHandlerManager(); }
+    public static PushEndpointCache getPushEndpointCache() { return i().getPushEndpointCache(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

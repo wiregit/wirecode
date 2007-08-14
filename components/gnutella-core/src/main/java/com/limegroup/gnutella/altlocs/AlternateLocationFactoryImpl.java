@@ -99,7 +99,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
             if (rfd.getPushAddr() != null) 
                 copy = rfd.getPushAddr();
             else 
-                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,PushEndpoint.PLAIN,0,null);
+                copy = pushEndpointFactory.createPushEndpoint(rfd.getClientGUID(), IpPort.EMPTY_SET, PushEndpoint.PLAIN, 0, null);
     	    return new PushAltLoc(copy,urn, applicationServices);
     	} 
     }
@@ -144,7 +144,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
         }
         
         //Case 2. Push Alt loc
-        PushEndpoint pe = new PushEndpoint(location);
+        PushEndpoint pe = pushEndpointFactory.createPushEndpoint(location);
         return new PushAltLoc(pe,urn, applicationServices);
     }
 

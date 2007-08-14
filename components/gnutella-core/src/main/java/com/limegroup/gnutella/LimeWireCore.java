@@ -581,4 +581,8 @@ public class LimeWireCore {
     public BrowseHostHandlerManager getBrowseHostHandlerManager() {
         return injector.getInstance(BrowseHostHandlerManager.class);
     }
+
+    public PushEndpointCache getPushEndpointCache() {
+        return injector.getInstance(PushEndpointCache.class);
+    }
 }

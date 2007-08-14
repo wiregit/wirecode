@@ -1507,7 +1507,7 @@ public class DownloadTest extends LimeTestCase {
         pusher2.setFWTPort(FWTPort);
         
         // create a set of the expected proxies and keep a ref to it
-        PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
+        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
         
         Set expectedProxies = new IpPortSet();
         expectedProxies.addAll(pe.getProxies());

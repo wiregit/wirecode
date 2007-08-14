@@ -1016,7 +1016,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		
 		Set ppis = new TreeSet(IpPort.COMPARATOR);ppis.add(ppi);
 		
-    	PushEndpoint pe = new PushEndpoint(guid,ppis);
+    	PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid, ppis);
     	pe.updateProxies(true);
     	
     	return new RemoteFileDesc(newRFD(name,hash),pe);
