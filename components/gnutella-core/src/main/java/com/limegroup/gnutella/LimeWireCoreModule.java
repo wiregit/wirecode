@@ -107,6 +107,7 @@ import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.spam.AddressToken;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
@@ -213,7 +214,8 @@ public class LimeWireCoreModule extends AbstractModule {
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        
+        requestStaticInjection(AddressToken.class);
+                
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
         bind(Statistics.class).asEagerSingleton();

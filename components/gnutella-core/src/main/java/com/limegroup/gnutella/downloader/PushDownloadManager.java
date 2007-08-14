@@ -42,7 +42,6 @@ import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
@@ -97,6 +96,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<PushedSocketHandler> downloadAcceptor;
+    private final Provider<IPFilter> ipFilter;
+    private final Provider<UDPService> udpService;
   
     @Inject
     public PushDownloadManager(
@@ -106,7 +107,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		Provider<ConnectionDispatcher> connectionDispatcher) {
+    		Provider<ConnectionDispatcher> connectionDispatcher,
+    		Provider<IPFilter> ipFilter,
+    		Provider<UDPService> udpService) {
     	this.downloadAcceptor = downloadAcceptor;
     	this.messageRouter = router;
     	this.httpExecutor = executor;
@@ -114,6 +117,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	this.socketProcessor = processor;
     	this.networkManager = networkManager;
     	this.connectionDispatcher = connectionDispatcher;
+        this.ipFilter = ipFilter;
+        this.udpService = udpService;
     }
     
     /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
@@ -177,7 +182,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // using the TCP push proxy, which will do fw-fw transfers.
         if (!networkManager.acceptedIncomingConnection()) {
             // if we can do FWT, offload a TCP pusher.
-            if (ProviderHacks.getUdpService().canDoFWT())
+            if (udpService.get().canDoFWT())
                 sendPushTCP(file, guid, observer);
             else if (observer != null)
                 observer.shutdown();
@@ -251,7 +256,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
-        UDPService udpService = ProviderHacks.getUdpService();
+        UDPService udpService = this.udpService.get();
         //and send the push to the node 
         try {
             InetAddress address = InetAddress.getByName(file.getHost());
@@ -264,10 +269,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
             }
         } catch(UnknownHostException notCritical) {}
     
-        IPFilter filter = ProviderHacks.getIpFilter();
         //make sure we send it to the proxies, if any
         for(IpPort ppi : file.getPushProxies()) {
-            if (filter.allow(ppi.getAddress())) {
+            if (ipFilter.get().allow(ppi.getAddress())) {
                 udpService.send(pr, ppi.getInetSocketAddress());
             }
         }
@@ -284,7 +288,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         ProviderHacks.getUdpService().canDoFWT() &&
+                         udpService.get().canDoFWT() &&
                         !networkManager.acceptedIncomingConnection();
 
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);
@@ -376,10 +380,10 @@ public class PushDownloadManager implements ConnectionAcceptor {
 
         // the methods to execute
         final List<HeadMethod> methods = new ArrayList<HeadMethod>();
-        IPFilter filter = ProviderHacks.getIpFilter();
+
         // try to contact each proxy
         for(IpPort ppi : proxies) {
-            if (!filter.allow(ppi.getAddress()))
+            if (!ipFilter.get().allow(ppi.getAddress()))
                 continue;
             String protocol = "http://";
             if(ppi instanceof Connectable) {

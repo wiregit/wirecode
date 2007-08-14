@@ -117,7 +117,6 @@ public class ProviderHacks {
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
-    public static IPFilter getIpFilter() { return i().getIpFilter(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
@@ -222,6 +221,7 @@ public class ProviderHacks {
     public static FileResponseEntityFactory getFileResponseEntityFactory() { return i().getFileRepsoneEntityFactory(); }
     public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
     public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
+    public static IPFilter getIpFilter() { return i().getIpFilter(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 
