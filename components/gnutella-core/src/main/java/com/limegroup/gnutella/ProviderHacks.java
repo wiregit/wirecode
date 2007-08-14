@@ -33,7 +33,6 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
-import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -119,9 +118,7 @@ public class ProviderHacks {
     public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static IPFilter getIpFilter() { return i().getIpFilter(); }
-    public static HostileFilter getHostileFilter() { return i().getHostileFilter(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
-    public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
@@ -224,6 +221,7 @@ public class ProviderHacks {
     public static Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() { return i().getAdvancedToggleHandlerFactory(); }
     public static FileResponseEntityFactory getFileResponseEntityFactory() { return i().getFileRepsoneEntityFactory(); }
     public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
+    public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 
