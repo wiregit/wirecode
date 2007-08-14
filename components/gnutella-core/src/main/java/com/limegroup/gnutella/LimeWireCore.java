@@ -76,6 +76,7 @@ import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -614,5 +615,9 @@ public class LimeWireCore {
     
     public Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() {
         return injector.getProvider(AdvancedToggleHandler.class);
+    }
+
+    public FileResponseEntityFactory getFileRepsoneEntityFactory() {
+        return injector.getInstance(FileResponseEntityFactory.class);
     }
 }

@@ -61,17 +61,20 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final HTTPHeaderUtils httpHeaderUtils;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
     private final CreationTimeCache creationTimeCache;
+
+    private final FileResponseEntityFactory fileResponseEntityFactory;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
             FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
-            CreationTimeCache creationTimeCache) {
+            CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.creationTimeCache = creationTimeCache;
+        this.fileResponseEntityFactory = fileResponseEntityFactory;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -296,7 +299,8 @@ public class FileRequestHandler implements HttpRequestHandler {
                     .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
         }
 
-        response.setEntity(new FileResponseEntity(uploader, fd.getFile()));
+        response.setEntity(fileResponseEntityFactory.createFileResponseEntity(uploader,
+                fd.getFile()));
         uploader.setState(UploadStatus.UPLOADING);
 
         if (uploader.isPartial()) {

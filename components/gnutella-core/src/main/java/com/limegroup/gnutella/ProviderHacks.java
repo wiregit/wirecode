@@ -60,6 +60,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -119,7 +120,6 @@ public class ProviderHacks {
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static IPFilter getIpFilter() { return i().getIpFilter(); }
     public static HostileFilter getHostileFilter() { return i().getHostileFilter(); }
-    public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
@@ -222,6 +222,8 @@ public class ProviderHacks {
     public static Provider<InspectionRequestHandler> getInspectionRequestHandlerFactory() { return i().getInspectionRequestHandlerFactory(); }
     public static Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() { return i().getUDPCrawlerPingHandlerFactory(); }
     public static Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() { return i().getAdvancedToggleHandlerFactory(); }
+    public static FileResponseEntityFactory getFileResponseEntityFactory() { return i().getFileRepsoneEntityFactory(); }
+    public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

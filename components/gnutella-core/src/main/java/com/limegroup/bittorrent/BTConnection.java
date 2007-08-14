@@ -232,7 +232,7 @@ PieceSendListener, PieceReadListener {
 		this.invoker = invoker;
 		_startTime = System.currentTimeMillis();
 		
-		_writer.init(invoker, CONNECTION_TIMEOUT - 5000);
+		_writer.init(invoker, CONNECTION_TIMEOUT - 5000, bwManager);
 		
 		ThrottleReader readThrottle = new ThrottleReader(
 				bwManager.getReadThrottle());

@@ -107,6 +107,8 @@ import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
+import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
@@ -206,6 +208,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
         bind(PushEndpointCache.class).to(PushEndpointCacheImpl.class);
+        bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

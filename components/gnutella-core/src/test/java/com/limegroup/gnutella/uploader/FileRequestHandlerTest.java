@@ -81,7 +81,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         requestHandler = new FileRequestHandler(sessionManager, fileManager,
                 ProviderHacks.getHTTPHeaderUtils(), ProviderHacks
                         .getHttpRequestHandlerFactory(), ProviderHacks
-                        .getCreationTimeCache());        
+                        .getCreationTimeCache(), ProviderHacks.getFileResponseEntityFactory());        
     }
     
     public void testHandleAccept() throws Exception {
