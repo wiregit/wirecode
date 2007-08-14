@@ -116,7 +116,7 @@ public class MetaFileManager extends FileManager {
      * that the existing metadata is the one that's added, short-circuiting
      * any infinite loops.
      */
-    public void fileChanged(File f) {
+    public void fileChanged(File f) { 
         if(LOG.isTraceEnabled())
             LOG.debug("File Changed: " + f);
         

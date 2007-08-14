@@ -30,12 +30,12 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.store.StoreDescriptor;
 
 /**
- *  Allows the rest of LimeWire to treat this as a regular download
+ *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
+ *  an item purchased off of the LimeWire Store website
  */
 public class StoreDownloader extends ManagedDownloader implements Serializable { 
     
@@ -67,6 +67,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * overrides ManagedDownloader to ensure that we issue requests to the known
      * locations until we find out enough information to start the download 
      */
+    @Override
     protected DownloadStatus initializeDownload() {
         
         if (!hasRFD()) {
@@ -125,7 +126,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
                 port,
                 0l,             //index--doesn't matter since we won't push
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
-                size,//contentLength(url),
+                size <= 0 ? contentLength(url) : size,
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
                 false,          //no chat support
@@ -140,46 +141,14 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
                 0);         //assume no firewall transfer
     } 
     
-    /** Returns the length of the content at the given URL. 
-     *  @exception IOException couldn't find the length for some reason */
-    private static long contentLength(URL url) throws IOException {
-        try {
-            // Verify that the URL is valid.
-            new URI(url.toExternalForm().toCharArray());
-        } catch(URIException e) {
-            //invalid URI, don't allow this URL.
-            throw new IOException("invalid url: " + url);
-        }
-
-        HttpClient client = HttpClientManager.getNewClient();
-        HttpMethod head = new HeadMethod(url.toExternalForm());
-        head.addRequestHeader("User-Agent",
-                              LimeWireUtils.getHttpServer());
-        try {
-            client.executeMethod(head);
-            //Extract Content-length, but only if the response was 200 OK.
-            //Generally speaking any 2xx response is ok, but in this situation
-            //we expect only 200.
-            if (head.getStatusCode() != HttpStatus.SC_OK)
-                throw new IOException("Got " + head.getStatusCode() +
-                                      " instead of 200");
-            
-            long length = head.getResponseContentLength();
-            if (length<0)
-                throw new IOException("No content length");
-            return length;
-        } finally {
-            head.releaseConnection();
-        }
-    }
-    
     
     ////////////////////////////// Requery Logic ///////////////////////////
     
     /** 
-     * Overrides ManagedDownloader to use the query words 
-     * specified by the MAGNET URI.
+     * Overrides ManagedDownloader to return quickly
+     * since we can't require the store
      */
+    @Override
     protected QueryRequest newRequery(int numRequeries)
         throws CantResumeException {
             return null;
@@ -189,13 +158,16 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * Overrides ManagedDownloader to never allow new sources to be
      * added
      */
+    @Override
     protected boolean allowAddition(RemoteFileDesc other) {        
         return false;
     }
     
     /**
-     * Never send requires since there is only one location to download from.
+     * Never send requires since there is only one location to download from,
+     * the LWS.
      */
+    @Override
     protected boolean canSendRequeryNow() {
         return false;
     }
@@ -205,31 +177,15 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * Overridden to make sure it calls the super method only if 
      * the filesize is known.
      */
+    @Override
     protected void initializeIncompleteFile() throws IOException {
         if (getContentLength() != -1) {
             super.initializeIncompleteFile();
         }
     }
-    
-//    private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
-//        if (LOG.isDebugEnabled())
-//            LOG.debug("adding queued worker " + queued +" at position "+position+
-//                    " current queued workers:\n"+_queuedWorkers);
-//        
-//        if(!_workers.contains(queued))
-//            throw new IllegalStateException("attempting to queue invalid worker: " + queued);
-//        
-//        if ( position < queuePosition ) {
-//            queuePosition = position;
-//            queuedVendor = queued.getDownloader().getVendor();
-//        }
-//        Map<DownloadWorker, Integer> m = new HashMap<DownloadWorker, Integer>(getQueuedWorkers());
-//        m.put(queued, new Integer(position));
-//        _queuedWorkers = Collections.unmodifiableMap(m);
-//    }
-    
+       
     /**
-     * Can never chat with LWS
+     * Can never chat with LWS, return immediately
      */
     @Override
     public synchronized Endpoint getChatEnabledHost() {
@@ -237,7 +193,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     }
 
     /**
-     * Can never chat with LWS
+     * Can never chat with LWS, always return false
      */
     @Override
     public synchronized boolean hasChatEnabledHost() {
@@ -245,7 +201,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     }
 
     /**
-     * Can never browse the LWS
+     * Can never browse the LWS, return immediately
      */
     @Override
     public synchronized RemoteFileDesc getBrowseEnabledHost() {
@@ -253,7 +209,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     }
 
     /**
-     * Can never browse the LWS
+     * Can never browse the LWS, return immediately
      */
     @Override
     public synchronized boolean hasBrowseEnabledHost() {
@@ -277,9 +233,12 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     }
     
 
-
-
-    private DownloadStatus saveFile(URN fileHash){
+    /**
+     * Override the save file to keep the file from being added to the
+     * shared folder directory
+     */
+    @Override
+    protected DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( DownloadStatus.SAVING );
         
@@ -313,15 +272,13 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
             return DownloadStatus.DISK_PROBLEM;
         }
             
-        //Add file to library.
-        // first check if it conflicts with the saved dir....
-        if (saveFile.exists())
-            fileManager.removeFileIfShared(saveFile);
+        //try removing the file from being shared in case it was added
+        fileManager.removeFileIfShared(saveFile);
 
         //Add the URN of this file to the cache so that it won't
         //be hashed again when added to the library -- reduces
         //the time of the 'Saving File' state.
-        if(fileHash != null) {
+        if(fileHash != null) { 
             Set<URN> urns = new UrnSet(fileHash);
             File file = saveFile;
             try {
@@ -333,17 +290,41 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
             // Notify the SavedFileManager that there is a new saved
             // file.
             SavedFileManager.instance().addSavedFile(file, urns);
-            
-            // save the trees!
-            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                TigerTreeCache.instance(); 
-                TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
-            }
+        }
+        return DownloadStatus.COMPLETE;
+    }
+    
+    /** Returns the length of the content at the given URL. 
+     *  @exception IOException couldn't find the length for some reason */
+    private static long contentLength(URL url) throws IOException {
+        try {
+            // Verify that the URL is valid.
+            new URI(url.toExternalForm().toCharArray());
+        } catch(URIException e) {
+            //invalid URI, don't allow this URL.
+            throw new IOException("invalid url: " + url);
         }
 
-        fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
-
-        return DownloadStatus.COMPLETE;
+        HttpClient client = HttpClientManager.getNewClient();
+        HttpMethod head = new HeadMethod(url.toExternalForm());
+        head.addRequestHeader("User-Agent",
+                              LimeWireUtils.getHttpServer());
+        try {
+            client.executeMethod(head);
+            //Extract Content-length, but only if the response was 200 OK.
+            //Generally speaking any 2xx response is ok, but in this situation
+            //we expect only 200.
+            if (head.getStatusCode() != HttpStatus.SC_OK)
+                throw new IOException("Got " + head.getStatusCode() +
+                                      " instead of 200");
+            
+            long length = head.getResponseContentLength();
+            if (length<0)
+                throw new IOException("No content length");
+            return length;
+        } finally {
+            head.releaseConnection();
+        }
     }
 
 

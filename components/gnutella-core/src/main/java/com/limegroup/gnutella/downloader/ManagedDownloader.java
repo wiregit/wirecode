@@ -2148,7 +2148,7 @@ public class ManagedDownloader extends AbstractDownloader
     /**
      * Saves the file to disk.
      */
-    private DownloadStatus saveFile(URN fileHash){
+    protected DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( DownloadStatus.SAVING );
         

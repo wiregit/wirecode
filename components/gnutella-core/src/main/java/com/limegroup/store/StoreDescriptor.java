@@ -37,19 +37,19 @@ public class StoreDescriptor implements Serializable {
     public StoreDescriptor( URL url, URN urn, String fileName, long size ){
       
         if( url == null ) {
-            throw new NullPointerException("null url");
+            throw new NullPointerException("URL cannot be null");
         }
         if( urn == null ) {
-            throw new NullPointerException("null sha hash");
+            throw new NullPointerException("URN sha hash cannot be null");
         }
         if(fileName == null) {
-            throw new NullPointerException("null filename");
+            throw new NullPointerException("Filename cannot be null");
         }
-        if(fileName.equals("")) {
-            throw new IllegalArgumentException("cannot accept empty string file name");
+        if(fileName.length() == 0 ) {
+            throw new IllegalArgumentException("Cannot accept empty string file name");
         }
         if((size < 0 || size > MAX_FILE_SIZE) ) {
-            throw new IllegalArgumentException("invalid size: "+size);
+            throw new IllegalArgumentException("Invalid file size: "+size);
         }
         
         this.url = url;

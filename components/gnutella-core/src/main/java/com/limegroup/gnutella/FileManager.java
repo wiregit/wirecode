@@ -891,6 +891,7 @@ public abstract class FileManager {
     private void updateSharedDirectories(File directory, File parent, int revision) {
 //        if(LOG.isDebugEnabled())
 //            LOG.debug("Attempting to share directory: " + directory);
+
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
@@ -994,18 +995,9 @@ public abstract class FileManager {
 
         
         synchronized (this) {
-//            // if it was already added, ignore.
-//            if (_completelySharedDirectories.contains(directory))
-//                return;
-
-//            if(LOG.isDebugEnabled())
-//                LOG.debug("Adding completely shared directory: " + directory);
-
-//            _completelySharedDirectories.add(directory);
-//            if (!isForcedShare) {
-                dispatchFileEvent(
+            // if it was already added, ignore.
+            dispatchFileEvent(
                     new FileManagerEvent(this, Type.ADD_STORE_FOLDER, directory, parent));
-//            }
         }
         
         // STEP 2:
@@ -1221,7 +1213,7 @@ public abstract class FileManager {
 		_data.FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
 			_data.SPECIAL_FILES_TO_SHARE.add(file);
-			
+
 		addFileIfShared(file, list, true, _revision, callback);
 	}
 	 
@@ -1329,13 +1321,14 @@ public abstract class FileManager {
     }
     
     public boolean isShareable(final List<? extends LimeXMLDocument> metadata, File file ) { 
+        if( file == null )
+        	throw new IllegalArgumentException("File can't be null");
         if( metadata == null )
             return true;
         for( LimeXMLDocument doc : metadata ) {
             if( doc != null && doc.getLicenseString() != null && 
                     doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()) )
             {
-                System.out.println("not adding " + doc.getLicenseString());
                 removeFileIfShared(file);
                 return false;
             }
