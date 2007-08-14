@@ -7,6 +7,7 @@ import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Guice;
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
@@ -35,11 +36,15 @@ import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.licenses.LicenseCache;
+import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
+import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -211,6 +216,12 @@ public class ProviderHacks {
     public static GuidMapManager getGuidMapManager() { return i().getGuidMapManager(); }
     public static BrowseHostHandlerManager getBrowseHostHandlerManager() { return i().getBrowseHostHandlerManager(); }
     public static PushEndpointCache getPushEndpointCache() { return i().getPushEndpointCache(); }
+    public static SpamFilterFactory getSpamFilterFactory() { return i().getSpamFilterFactory(); };
+    public static UDPReplyHandlerFactory getUDPReplyHandlerFactory() { return i().getUDPReplyHandlerFactory(); }
+    public static UDPReplyHandlerCache getUDPReplyHandlerCache() { return i().getUDPReplyHandlerCache(); }
+    public static Provider<InspectionRequestHandler> getInspectionRequestHandlerFactory() { return i().getInspectionRequestHandlerFactory(); }
+    public static Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() { return i().getUDPCrawlerPingHandlerFactory(); }
+    public static Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() { return i().getAdvancedToggleHandlerFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

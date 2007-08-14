@@ -13,7 +13,7 @@ import com.limegroup.gnutella.messages.QueryReply;
  * of the reply, and other details.
  */
 @Singleton
-public final class MutableGUIDFilter extends SpamFilter {
+public final class MutableGUIDFilter implements SpamFilter {
     
     private MutableGUIDFilter() { FILTER.disallowAdult(); }
     /**

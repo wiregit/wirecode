@@ -11,6 +11,7 @@ import org.limewire.security.SecureMessageVerifier;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
@@ -47,12 +48,16 @@ import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseCache;
+import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
+import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -549,7 +554,8 @@ public class LimeWireCore {
     public ConnectionFactory getConnectionFactory() {
         return injector.getInstance(ConnectionFactory.class);
     }
-
+    
+    
     public DownloadCallback getDownloadCallback() {
         return injector.getInstance(DownloadCallback.class);
     }
@@ -584,5 +590,29 @@ public class LimeWireCore {
 
     public PushEndpointCache getPushEndpointCache() {
         return injector.getInstance(PushEndpointCache.class);
+    }
+    
+    public SpamFilterFactory getSpamFilterFactory() {
+        return injector.getInstance(SpamFilterFactory.class);
+    }
+
+    public UDPReplyHandlerFactory getUDPReplyHandlerFactory() {
+        return injector.getInstance(UDPReplyHandlerFactory.class);
+    }
+
+    public UDPReplyHandlerCache getUDPReplyHandlerCache() {
+        return injector.getInstance(UDPReplyHandlerCache.class);
+    }
+    
+    public Provider<InspectionRequestHandler> getInspectionRequestHandlerFactory() {
+        return injector.getProvider(InspectionRequestHandler.class);
+    }
+    
+    public Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() {
+        return injector.getProvider(UDPCrawlerPingHandler.class);
+    }
+    
+    public Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() {
+        return injector.getProvider(AdvancedToggleHandler.class);
     }
 }

@@ -5,8 +5,11 @@ import java.net.InetSocketAddress;
 
 import org.limewire.collection.FixedSizeExpiringSet;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPReplyHandlerCache;
+import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
@@ -15,8 +18,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
 
 public class UDPCrawlerPingHandler extends RestrictedResponder {
     
-    public UDPCrawlerPingHandler(NetworkManager networkManager, SimppManager simppManager) {
-        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager, simppManager);
+    @Inject
+    public UDPCrawlerPingHandler(NetworkManager networkManager, SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
+        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
     }
     
 	protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 /** 
  * Filter for replies that are abusing the network.
  */
-public class SpamReplyFilter extends SpamFilter {
+public class SpamReplyFilter implements SpamFilter {
 
     public boolean allow(Message m) {
         if (! (m instanceof QueryReply))

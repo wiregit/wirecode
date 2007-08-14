@@ -800,7 +800,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
             ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
             Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
-            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager());
+            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory());
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

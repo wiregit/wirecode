@@ -30,7 +30,7 @@ public class RequeryFilterTest extends LimeTestCase {
 	public void testLegacy() throws Exception {
 	    FilterSettings.FILTER_DUPLICATES.setValue(false);
 	    FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
-        SpamFilter filter=SpamFilter.newRouteFilter();
+        SpamFilter filter = ProviderHacks.getSpamFilterFactory().createRouteFilter();
         assertTrue(filter.allow(new PingRequest((byte)3)));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));

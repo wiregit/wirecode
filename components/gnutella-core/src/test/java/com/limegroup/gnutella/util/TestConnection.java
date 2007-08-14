@@ -48,7 +48,7 @@ public abstract class TestConnection extends ManagedConnection {
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
                 ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
                 Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
-                Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager());
+                Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory());
         CONNECTIONS = connections;
     }
     

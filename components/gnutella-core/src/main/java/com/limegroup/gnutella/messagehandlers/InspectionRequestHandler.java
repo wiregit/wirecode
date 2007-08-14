@@ -4,9 +4,13 @@ import java.net.InetSocketAddress;
 
 import org.limewire.security.SecureMessageVerifier;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPReplyHandlerCache;
+import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
@@ -35,11 +39,15 @@ public class InspectionRequestHandler extends RestrictedResponder {
                 "T6HW3OQNG2DPVGCIIWTCK6XMW3SK6PEQBWH6MIAL4FX3OYVWRG2ZKVBHBMJ564CKEPYDW3" +
                 "TJRPIU4UA24I", null);
     
-    private final MessageRouter router;
-    public InspectionRequestHandler(MessageRouter router, NetworkManager networkManager, SimppManager simppManager) {
+    private final Provider<MessageRouter> router;
+    
+    @Inject
+    public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
+            SimppManager simppManager, 
+            UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION, networkManager, simppManager);
+                MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
         this.router = router;
     }
     
@@ -50,6 +58,6 @@ public class InspectionRequestHandler extends RestrictedResponder {
         InspectionResponse r = new InspectionResponse(ir);
         if (r.shouldBeSent())
             handler.reply(r);
-        router.forwardInspectionRequestToLeaves(ir);
+        router.get().forwardInspectionRequestToLeaves(ir);
     }
 }

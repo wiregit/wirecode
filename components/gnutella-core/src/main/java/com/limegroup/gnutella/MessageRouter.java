@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -131,8 +130,6 @@ public abstract class MessageRouter {
      */
     protected byte[] _clientGUID;
 
-
-		
     /**
      * The maximum size for <tt>RouteTable</tt>s.
      */
@@ -285,10 +282,6 @@ public abstract class MessageRouter {
     /** How long to remember cached udp reply handlers. */
     private static final int UDP_REPLY_CACHE_TIME = 60 * 1000;
     
-    /** A mapping of UDPReplyHandlers, to prevent creation of them over-and-over. */
-    private static final FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler> _udpReplyHandlerCache =
-        new FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler>(500);
-    
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
     protected final QueryHandlerFactory queryHandlerFactory;
@@ -318,8 +311,11 @@ public abstract class MessageRouter {
     protected final Provider<PongCacher> pongCacher;
     protected final Provider<SimppManager> simppManager;
     protected final Provider<UpdateHandler> updateHandler;
-    
+    protected final UDPReplyHandlerCache udpReplyHandlerCache;
     protected final GuidMap multicastGuidMap;
+    private final Provider<InspectionRequestHandler> inspectionRequestHandlerFactory;
+    private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
+    private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -356,7 +352,11 @@ public abstract class MessageRouter {
             Provider<PongCacher> pongCacher,
             Provider<SimppManager> simppManager,
             Provider<UpdateHandler> updateHandler,
-            GuidMapManager guidMapManager) {
+            GuidMapManager guidMapManager,	
+            UDPReplyHandlerCache udpReplyHandlerCache,
+            Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
+            Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
+            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -386,10 +386,13 @@ public abstract class MessageRouter {
         this.pongCacher = pongCacher;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
+        this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
+        this.advancedToggleHandlerFactory = advancedToggleHandlerFactory;
         this.multicastGuidMap = guidMapManager.getMap();
+        this.udpReplyHandlerCache = udpReplyHandlerCache;
+        this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
 
         _clientGUID = applicationServices.getMyGUID();
-         
     }
     
     /** Sets a new handler to the given handlerMap, for the given class. */
@@ -547,7 +550,7 @@ public abstract class MessageRouter {
         backgroundExecutor.scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         
         // handler for inspection requests
-        InspectionRequestHandler inspectionHandler = new InspectionRequestHandler(this, networkManager, simppManager.get());
+        InspectionRequestHandler inspectionHandler = inspectionRequestHandlerFactory.get();
         
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
@@ -579,12 +582,12 @@ public abstract class MessageRouter {
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
-        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler(networkManager, simppManager.get()));
+        setUDPMessageHandler(UDPCrawlerPing.class, udpCrawlerPingHandlerFactory.get());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager, simppManager.get(), backgroundExecutor));
+        setUDPMessageHandler(AdvancedStatsToggle.class, advancedToggleHandlerFactory.get());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
@@ -720,11 +723,7 @@ public abstract class MessageRouter {
             }
         }
         
-        UDPReplyHandler replyHandler = _udpReplyHandlerCache.get(addr);
-        if(replyHandler == null)
-            replyHandler = new UDPReplyHandler(addr);
-        _udpReplyHandlerCache.put(addr, replyHandler); // renew it
-        
+        UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
         MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
@@ -770,11 +769,8 @@ public abstract class MessageRouter {
             return;
         }
 
-        UDPReplyHandler replyHandler = _udpReplyHandlerCache.get(addr);
-        if(replyHandler == null)
-            replyHandler = new UDPReplyHandler(addr);
-        _udpReplyHandlerCache.put(addr, replyHandler); // renew it
-
+        UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
+        
         MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
@@ -2898,7 +2894,7 @@ public abstract class MessageRouter {
         public void run() {
             messageDispatcher.get().dispatch(new Runnable() {
                 public void run() {
-                    _udpReplyHandlerCache.clear();
+                    udpReplyHandlerCache.clear();
                 }
             });
         }

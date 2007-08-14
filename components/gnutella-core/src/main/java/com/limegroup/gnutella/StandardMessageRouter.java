@@ -28,6 +28,9 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
+import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
@@ -87,7 +90,12 @@ public class StandardMessageRouter extends MessageRouter {
             Provider<PongCacher> pongCacher,
             Provider<SimppManager> simppManager,
             Provider<UpdateHandler> updateHandler,
-            GuidMapManager guidMapManager, Statistics statistics) {
+            GuidMapManager guidMapManager, 
+            UDPReplyHandlerCache udpReplyHandlerCache,
+            Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
+            Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
+            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
+            Statistics statistics) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -96,7 +104,8 @@ public class StandardMessageRouter extends MessageRouter {
                 socketsManager, hostCatcher, queryReplyFactory, staticMessages,
                 messageDispatcher, multicastService, queryDispatcher,
                 activityCallback, connectionServices, applicationServices,
-                backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager);
+                backgroundExecutor, pongCacher, simppManager, updateHandler,
+                guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory);
         this.statistics = statistics;
     }
     

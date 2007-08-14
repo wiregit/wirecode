@@ -6,8 +6,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.collection.Periodic;
 import org.limewire.statistic.StatisticsManager;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPReplyHandlerCache;
+import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -35,8 +39,9 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     /** Utility that will perform the shutting off. */
     private final Periodic shutOff;
     
-    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, ScheduledExecutorService backgroundExecutor) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager);
+    @Inject
+    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){

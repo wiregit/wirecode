@@ -38,29 +38,21 @@ public final class UDPReplyHandler implements ReplyHandler {
      * Uses one static instance instead of creating a new
      * filter for every single UDP message.
      */
-    private static volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    private final SpamFilter personalFilter;
 	
 	/** Creates a new UDPReplyHandler for the given address. */
-	public UDPReplyHandler(InetSocketAddress addr) {
+	UDPReplyHandler(InetSocketAddress addr, SpamFilter personalFilter) {
 	    if(!NetworkUtils.isValidSocketAddress(addr))
 	        throw new IllegalArgumentException("invalid addr: " + addr);
 	       
 		this.addr = addr;
+		this.personalFilter = personalFilter;
 	}
     
-    public UDPReplyHandler(InetAddress addr, int port) {
-        this(new InetSocketAddress(addr, port));
+    UDPReplyHandler(InetAddress addr, int port, SpamFilter personalFilter) {
+        this(new InetSocketAddress(addr, port), personalFilter);
     }
     
-    /**
-     * Sets the new personal spam filter to be used for all UDPReplyHandlers.
-     */
-    public static void setPersonalFilter(SpamFilter filter) {
-        _personalFilter = filter;
-    }
-
-	
 	/**
 	 * Sends the <tt>PingReply</tt> via a UDP datagram to the IP and port
 	 * for this handler.<p>
@@ -106,7 +98,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	public void countDroppedMessage() {}
 
 	public boolean isPersonalSpam(Message m) {
-        return !_personalFilter.allow(m);
+        return !personalFilter.allow(m);
 	}
 
 	public boolean isOpen() {

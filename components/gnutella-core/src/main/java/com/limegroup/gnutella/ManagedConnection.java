@@ -43,6 +43,7 @@ import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -165,9 +166,8 @@ public class ManagedConnection extends Connection
 
 	/** Filter for filtering out messages that are considered spam.
 	 */
-    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
-    private volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    private volatile SpamFilter _routeFilter;
+    private volatile SpamFilter _personalFilter;
 
     /*
      * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
@@ -338,8 +338,7 @@ public class ManagedConnection extends Connection
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices,
-            GuidMapManager guidMapManager) {
+            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory) {
         super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -357,6 +356,8 @@ public class ManagedConnection extends Connection
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
         this.guidMap = guidMapManager.getMap();
+        this._routeFilter = spamFilterFactory.createRouteFilter();
+        this._personalFilter = spamFilterFactory.createPersonalFilter();
     }
 
     /**
@@ -381,8 +382,7 @@ public class ManagedConnection extends Connection
             CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices,
-            GuidMapManager guidMapManager) {
+            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory) {
         super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -400,6 +400,8 @@ public class ManagedConnection extends Connection
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
         this.guidMap = guidMapManager.getMap();
+	    this._routeFilter = spamFilterFactory.createRouteFilter();
+        this._personalFilter = spamFilterFactory.createPersonalFilter();
     }
     
     /**

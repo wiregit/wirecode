@@ -8,6 +8,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessage;
@@ -227,7 +228,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager());
+            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         }
 
         @Override

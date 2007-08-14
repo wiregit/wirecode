@@ -391,7 +391,7 @@ public abstract class FileManager {
     public final FMInspectables inspectables = new FMInspectables();
     
     /** Contains the definition of a rare file */
-    private final RareFileDefinition rareDefinition = new RareFileDefinition();
+    private final RareFileDefinition rareDefinition;
     
     protected final FileManagerController fileManagerController;
     
@@ -405,6 +405,7 @@ public abstract class FileManager {
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
+        rareDefinition = new RareFileDefinition();
         resetVariables();
     }
     
@@ -441,7 +442,6 @@ public abstract class FileManager {
         cleanIndividualFiles();
 		loadSettings();
 		fileManagerController.addSimppListener(qrpUpdater);
-		fileManagerController.addSimppListener(rareDefinition);
     }
     
     /**
@@ -475,8 +475,6 @@ public abstract class FileManager {
     public void stop() {
         save();
         fileManagerController.removeSimppListener(qrpUpdater);
-        // TODO cleanup this was not before DPINJ, listener just stayed registered
-        fileManagerController.removeSimppListener(rareDefinition);
         shutdown = true;
     }
 
@@ -2661,11 +2659,13 @@ public abstract class FileManager {
         
     }
     
-    private static class RareFileDefinition implements SimppListener {
+    private class RareFileDefinition implements SimppListener {
         
         private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
+            // TODO cleanup listener leaking
+            fileManagerController.addSimppListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

@@ -25,7 +25,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
         guid=new byte[16];
         FilterSettings.FILTER_DUPLICATES.setValue(false);
         FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
-        filter=SpamFilter.newRouteFilter();
+        filter = ProviderHacks.getSpamFilterFactory().createRouteFilter();
     }
 
     public void testDisallow() {
