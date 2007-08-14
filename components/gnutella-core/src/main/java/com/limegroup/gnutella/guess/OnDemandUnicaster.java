@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +19,7 @@ import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UDPService;
@@ -57,7 +59,7 @@ public class OnDemandUnicaster {
     private final UDPService udpService;
 
     @Inject
-    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService) {
+    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.queryRequestFactory = queryRequestFactory;
         this.udpService = udpService;
         
@@ -68,8 +70,8 @@ public class OnDemandUnicaster {
         
         // DPINJ: move scheduling to an initializer
         // schedule a runner to clear various data structures
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME, TimeUnit.MILLISECONDS);
      }        
 
     /** Feed me AddressSecurityToken pongs so I can query people....

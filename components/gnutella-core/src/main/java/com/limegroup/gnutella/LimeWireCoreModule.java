@@ -198,10 +198,16 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SocketProcessor.class).to(Acceptor.class);
         bind(PushedSocketHandler.class).toProvider(PushedSocketHandlerProvider.class);
         bind(ReplyNumberVendorMessageFactory.class).to(ReplyNumberVendorMessageFactoryImpl.class);
-                
+        bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
+        bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
+        
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
+        
+        // DPINJ: This is odd -- move to initialize & LifecycleManager?
+        bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
+        bind(Statistics.class).asEagerSingleton();
         
         // DPINJ: Need to add interface to these classes
         //----------------------------------------------
@@ -240,7 +246,6 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(BandwidthManager.class);
         //bind(QueryStats.class);
         //bind(NodeAssigner.class);
-        bind(Statistics.class).asEagerSingleton(); // DPINJ: need to move time-capture to initialization
         bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
         //bind(CreationTimeCache.class);
         //bind(UrnCache.class);

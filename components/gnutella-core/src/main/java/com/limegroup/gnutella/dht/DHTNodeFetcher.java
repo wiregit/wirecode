@@ -91,14 +91,17 @@ public class DHTNodeFetcher {
     private final ConnectionServices connectionServices;
     private final Provider<HostCatcher> hostCatcher;
     private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<UDPPinger> udpPingerFactory;
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper,
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
-            ScheduledExecutorService backgroundExecutor) {
+            ScheduledExecutorService backgroundExecutor,
+            Provider<UDPPinger> udpPingerFactory) {
         this.connectionServices = connectionServices;
         this.hostCatcher = hostCatcher;
         this.backgroundExecutor = backgroundExecutor;
+        this.udpPingerFactory = udpPingerFactory;
 
         this.bootstrapper = bootstrapper;
     }
@@ -206,7 +209,7 @@ public class DHTNodeFetcher {
             Message m = PingRequest.createUDPingWithDHTIPPRequest();
             
             if(pinger == null) {
-                pinger = new UDPPinger();
+                pinger = udpPingerFactory.get();
             }
             
             pinger.rank(Arrays.asList(ipp), 

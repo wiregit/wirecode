@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
@@ -26,7 +28,10 @@ public class DownloadProviderHacks {
                 ProviderHacks.getDiskController(),
                 ProviderHacks.getIpFilter(),
                 ProviderHacks.getRequeryManagerFactory(),
-                ProviderHacks.getBTContextFactory()
+                ProviderHacks.getBTContextFactory(),
+                ProviderHacks.getBackgroundExecutor(),
+                Providers.of(ProviderHacks.getMessageRouter()),
+                Providers.of(ProviderHacks.getTigerTreeCache())
                 );
     }
 

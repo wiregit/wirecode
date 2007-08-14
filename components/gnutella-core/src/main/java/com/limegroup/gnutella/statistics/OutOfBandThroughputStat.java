@@ -1,13 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.statistic.BasicStatistic;
 import org.limewire.statistic.Statistic;
-
-import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * This class contains a type-safe enumeration of statistics for
@@ -18,34 +12,12 @@ import com.limegroup.gnutella.ProviderHacks;
  * from LimeWires.
  */
 public class OutOfBandThroughputStat extends BasicStatistic {
-
-	private static final Log LOG = LogFactory.getLog(OutOfBandThroughputStat.class);
 	
-    public static int MIN_SAMPLE_SIZE = 500;
+    public static volatile int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
     public static final int TERRIBLE_SUCCESS_RATE = 40;
-    
-    static {
-        Runnable adjuster = new Runnable() {
-            public void run() {
-            	if (LOG.isDebugEnabled())
-            		LOG.debug("current success rate "+ getSuccessRate()+
-            				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
-    						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
-                if (!isSuccessRateGreat() &&
-                    !isSuccessRateTerrible()) {
-                	LOG.debug("boosting sample size by 500");
-                    MIN_SAMPLE_SIZE += 500;
-                }
-            }
-        };
-        int thirtyMins = 30 * 60 * 1000;
-        
-        //DPINJ: Move this somewhere else!!
-    	ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(adjuster, thirtyMins, thirtyMins, TimeUnit.MILLISECONDS);
-    }
-    
+   
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */

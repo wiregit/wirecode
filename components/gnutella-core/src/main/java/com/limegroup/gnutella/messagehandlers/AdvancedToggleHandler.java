@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.Periodic;
 import org.limewire.statistic.StatisticsManager;
 
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
@@ -35,7 +35,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     /** Utility that will perform the shutting off. */
     private final Periodic shutOff;
     
-    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager) {
+    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, ScheduledExecutorService backgroundExecutor) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager);
         
         shutOff = new Periodic(new Runnable() {
@@ -47,7 +47,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
                     }
                 }
             }
-        }, ProviderHacks.getBackgroundExecutor());
+        }, backgroundExecutor);
     }
     
     @Override

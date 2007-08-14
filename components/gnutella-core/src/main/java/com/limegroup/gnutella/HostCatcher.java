@@ -221,12 +221,7 @@ public class HostCatcher {
      */
     private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
         new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
-    
-    /**
-     * The pinger that will send the messages
-     */
-    private UniqueHostPinger pinger;
-        
+            
     /** The UDPHostCache bootstrap system. */
     private UDPHostCache udpHostCache;
     
@@ -325,6 +320,7 @@ public class HostCatcher {
     private final Provider<QueryUnicaster> queryUnicaster;
     private final Provider<IPFilter> ipFilter;
     private final Provider<MulticastService> multicastService;
+    private final UniqueHostPinger uniqueHostPinger;
     
     @Inject
 	public HostCatcher(
@@ -334,7 +330,8 @@ public class HostCatcher {
             Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
             Provider<QueryUnicaster> queryUnicaster,
             Provider<IPFilter> ipFilter,
-            Provider<MulticastService> multicastService) {
+            Provider<MulticastService> multicastService,
+            UniqueHostPinger uniqueHostPinger) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -343,9 +340,8 @@ public class HostCatcher {
         this.queryUnicaster = queryUnicaster;
         this.ipFilter = ipFilter;
         this.multicastService = multicastService;
-        
-        pinger = new UniqueHostPinger();
-        udpHostCache = new UDPHostCache(pinger);
+        this.uniqueHostPinger = uniqueHostPinger;
+        udpHostCache = new UDPHostCache(uniqueHostPinger);
     }
 
     /**
@@ -403,7 +399,7 @@ public class HostCatcher {
      */
     private void rank(Collection<? extends IpPort> hosts) {
         if(needsPongRanking()) {
-            pinger.rank(
+            uniqueHostPinger.rank(
                 hosts,
                 // cancel when connected -- don't send out any more pings
                 new Cancellable() {
@@ -417,7 +413,7 @@ public class HostCatcher {
     
     
     public void sendMessageToAllHosts(Message m, MessageListener listener, Cancellable c) {
-        pinger.rank(getAllHosts(), listener, c, m);
+        uniqueHostPinger.rank(getAllHosts(), listener, c, m);
     }
     
     private synchronized Collection<ExtendedEndpoint> getAllHosts() {
@@ -1324,7 +1320,7 @@ public class HostCatcher {
         backgroundExecutor.scheduleWithFixedDelay(
                 new Runnable() {
                     public void run() {
-                        pinger.resetData();
+                        uniqueHostPinger.resetData();
                     }
                 },
                 PONG_RANKING_EXPIRE_TIME,0, TimeUnit.MILLISECONDS);
@@ -1342,7 +1338,7 @@ public class HostCatcher {
     }
     
     public UDPPinger getPinger() {
-        return pinger;
+        return uniqueHostPinger;
     }
 
     /** Enable very slow rep checking?  Package access for use by
@@ -1421,7 +1417,7 @@ public class HostCatcher {
             FETCHER.resetFetchTime();
             udpHostCache.resetData();
             restoredHosts.clear();
-            pinger.resetData();
+            uniqueHostPinger.resetData();
         }
         
         // Read the hosts file again.  This will also notify any waiting 

@@ -34,7 +34,7 @@ public class SpamManager {
 	private final RatingTable ratingTable;
 	
 	@Inject
-	private SpamManager(RatingTable ratingTable) {
+	SpamManager(RatingTable ratingTable) {
 	    this.ratingTable = ratingTable;
 	}
 	

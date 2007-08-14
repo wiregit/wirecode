@@ -5,54 +5,63 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /** 
  * A factory to manage GuidMaps.
  * This will ensure that the guids are expired in an appropriate timeframe.
  */
-class GuidMapFactory {
+@Singleton
+class GuidMapManagerImpl implements GuidMapManager {
     
     /* The time which expired GUIDs will be purged. */
     private static long EXPIRE_POLL_TIME = 2 * 60 * 1000;
     
     /** A listing of all GuidMaps that have atleast one GUID that needs expiry. */
-    private static List<GuidMapImpl> toExpire = new LinkedList<GuidMapImpl>();
+    private List<GuidMapImpl> toExpire = new LinkedList<GuidMapImpl>();
     /** Whether or not we've scheduled our cleaner. */
-    private static boolean scheduled = false;
-
-    private GuidMapFactory() {};
+    private boolean scheduled = false;
     
-    /**
-     * Constructs a new GuidMap.
-     * Returned GuidMaps will expire within 4 minutes of the expected expiry time.
+    private final ScheduledExecutorService backgroundExecutor;
+    
+    @Inject
+    public GuidMapManagerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        this.backgroundExecutor = backgroundExecutor;
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.GuidMapFactory#getMap()
      */
-    public static GuidMap getMap() {
+    public GuidMap getMap() {
         return new GuidMapImpl();
     }
     
-    /**
-     * Removes a map from our accounting.
-     * @param expiree
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.GuidMapFactory#removeMap(com.limegroup.gnutella.GuidMap)
      */
-    public static synchronized void removeMap(GuidMap expiree) {
+    public synchronized void removeMap(GuidMap expiree) {
         toExpire.remove(expiree);
     }
 
     /** Adds the GuidMapImpl to the list of maps that need to be expired. */
-    private static synchronized void addMapToExpire(GuidMapImpl expiree) {
+    private synchronized void addMapToExpire(GuidMapImpl expiree) {
         // schedule it on demand
         if (!scheduled) {
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new GuidExpirer(), 0, EXPIRE_POLL_TIME, TimeUnit.MILLISECONDS);
+            backgroundExecutor.scheduleWithFixedDelay(new GuidExpirer(), 0, EXPIRE_POLL_TIME, TimeUnit.MILLISECONDS);
             scheduled = true;
         }
         toExpire.add(expiree);
     }
     
     /** Runnable that iterates through potential expirations and expires them. */
-    private static class GuidExpirer implements Runnable {
+    private class GuidExpirer implements Runnable {
         public void run() {
-            synchronized (GuidMapFactory.class) {
+            synchronized (GuidMapManagerImpl.class) {
                 // iterator through all the maps....
                 for(Iterator<GuidMapImpl> i = toExpire.iterator(); i.hasNext(); ) {
                     GuidMapImpl next = i.next();
@@ -73,9 +82,9 @@ class GuidMapFactory {
     /**
      * Implementation of GuidMap that delegates to the factory to expire things.
      */
-    private static class GuidMapImpl implements GuidMap {
+    private class GuidMapImpl implements GuidMap {
         /** The default lifetime of the GUID (10 minutes). */
-        private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+        private long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
         
         /** Mapping between new & old GUID.  Lazily constructed. */
         private Map<GUID.TimedGUID, GUID> map;
@@ -107,7 +116,7 @@ class GuidMapFactory {
             }
             
             if(created)
-                GuidMapFactory.addMapToExpire(this);
+                addMapToExpire(this);
         }
 
         public synchronized byte[] getOriginalGUID(byte[] newGUID) {

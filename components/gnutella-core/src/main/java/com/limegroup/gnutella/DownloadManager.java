@@ -150,6 +150,7 @@ public class DownloadManager implements BandwidthTracker {
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<TorrentManager> torrentManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
+    private final BrowseHostHandlerManager browseHostHandlerManager;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
@@ -160,7 +161,8 @@ public class DownloadManager implements BandwidthTracker {
             Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<TorrentManager> torrentManager,
-            Provider<PushDownloadManager> pushDownloadManager) {
+            Provider<PushDownloadManager> pushDownloadManager,
+            BrowseHostHandlerManager browseHostHandlerManager) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
@@ -170,6 +172,7 @@ public class DownloadManager implements BandwidthTracker {
         this.backgroundExecutor = backgroundExecutor;
         this.torrentManager = torrentManager;
         this.pushDownloadManager = pushDownloadManager;
+        this.browseHostHandlerManager = browseHostHandlerManager;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -289,7 +292,7 @@ public class DownloadManager implements BandwidthTracker {
      * @param socket
      */
     private synchronized void handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
-    	 if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
+    	 if (browseHostHandlerManager.handlePush(index, new GUID(clientGUID), socket))
              return;
          for (AbstractDownloader md : activeAndWaiting) {
          	if (! (md instanceof ManagedDownloader))

@@ -31,7 +31,7 @@ public class HackMessageRouter extends StandardMessageRouter {
                         .getBackgroundExecutor(), Providers
                         .of(ProviderHacks.getPongCacher()), Providers
                         .of(ProviderHacks.getSimppManager()), Providers
-                        .of(ProviderHacks.getUpdateHandler()),
+                        .of(ProviderHacks.getUpdateHandler()), ProviderHacks.getGuidMapManager(),
 
                 ProviderHacks.getStatistics()
 

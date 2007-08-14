@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -157,6 +159,8 @@ public class UDPService implements ReadWriteObserver {
     private final Provider<MessageRouter> messageRouter;
     private final Provider<Acceptor> acceptor;
     private final Provider<QueryUnicaster> queryUnicaster;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ConnectionServices connectionServices;
 
 	@Inject
     public UDPService(NetworkManager networkManager,
@@ -164,7 +168,9 @@ public class UDPService implements ReadWriteObserver {
             Provider<HostileFilter> hostileFilter,
             Provider<ConnectionManager> connectionManager,
             Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
-            Provider<QueryUnicaster> queryUnicaster) {
+            Provider<QueryUnicaster> queryUnicaster,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            ConnectionServices connectionServices) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -172,6 +178,8 @@ public class UDPService implements ReadWriteObserver {
         this.messageRouter = messageRouter;
         this.acceptor = acceptor;
         this.queryUnicaster = queryUnicaster;
+        this.backgroundExecutor = backgroundExecutor;
+        this.connectionServices = connectionServices;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -183,10 +191,10 @@ public class UDPService implements ReadWriteObserver {
      * Schedules IncomingValidator & PeriodicPinger for periodic use.
      */
     protected void scheduleServices() {
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new IncomingValidator(), 
+        backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES, TimeUnit.MILLISECONDS);
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new PeriodicPinger(), 0, PING_PERIOD, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new PeriodicPinger(), 0, PING_PERIOD, TimeUnit.MILLISECONDS);
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -609,7 +617,7 @@ public class UDPService implements ReadWriteObserver {
 	    if (!canReceiveSolicited()) 
 	        return false;
 
-	    if (!ProviderHacks.getConnectionServices().isConnected())
+	    if (!connectionServices.isConnected())
 	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
 	    
 	    boolean ret = true;
@@ -766,7 +774,7 @@ public class UDPService implements ReadWriteObserver {
                                 messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
-                    ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(checkThread, 
+                    backgroundExecutor.scheduleWithFixedDelay(checkThread, 
                                            Acceptor.WAIT_TIME_AFTER_REQUESTS,
                                            0, TimeUnit.MILLISECONDS);
                 }

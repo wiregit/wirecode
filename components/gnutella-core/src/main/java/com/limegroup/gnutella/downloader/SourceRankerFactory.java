@@ -1,18 +1,23 @@
 package com.limegroup.gnutella.downloader;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
 @Singleton
 public class SourceRankerFactory {
     
     private final NetworkManager networkManager;
+    private final Provider<UDPPinger> udpPingerFactory;
     
     @Inject
-    public SourceRankerFactory(NetworkManager networkManager) {
+    public SourceRankerFactory(NetworkManager networkManager,
+                               Provider<UDPPinger> udpPingerFactory) {
         this.networkManager = networkManager;
+        this.udpPingerFactory = udpPingerFactory;
     }
 
     /**
@@ -21,7 +26,7 @@ public class SourceRankerFactory {
     public SourceRanker getAppropriateRanker() {
         if (networkManager.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue())
-            return new PingRanker(networkManager);
+            return new PingRanker(networkManager, udpPingerFactory.get());
         else 
             return new LegacyRanker();
     }
@@ -40,7 +45,7 @@ public class SourceRankerFactory {
                 DownloadSettings.USE_HEADPINGS.getValue()) {
             if (original instanceof PingRanker)
                 return original;
-            better = new PingRanker(networkManager);
+            better = new PingRanker(networkManager, udpPingerFactory.get());
         }else {
             if (original instanceof LegacyRanker)
                 return original;

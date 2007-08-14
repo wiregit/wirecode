@@ -22,7 +22,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -465,7 +464,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         private boolean doRealDecrement = false;
         
         public StubCache() {
-            super(EXPIRY_TIME,new UniqueHostPinger());
+            super(EXPIRY_TIME, ProviderHacks.getUniqueHostPinger());
         }
         
         protected boolean fetch(Collection hosts) {

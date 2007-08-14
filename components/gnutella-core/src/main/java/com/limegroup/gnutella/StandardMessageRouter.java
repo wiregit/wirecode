@@ -86,7 +86,8 @@ public class StandardMessageRouter extends MessageRouter {
             ScheduledExecutorService backgroundExecutor,
             Provider<PongCacher> pongCacher,
             Provider<SimppManager> simppManager,
-            Provider<UpdateHandler> updateHandler, Statistics statistics) {
+            Provider<UpdateHandler> updateHandler,
+            GuidMapManager guidMapManager, Statistics statistics) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -95,7 +96,7 @@ public class StandardMessageRouter extends MessageRouter {
                 socketsManager, hostCatcher, queryReplyFactory, staticMessages,
                 messageDispatcher, multicastService, queryDispatcher,
                 activityCallback, connectionServices, applicationServices,
-                backgroundExecutor, pongCacher, simppManager, updateHandler);
+                backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager);
         this.statistics = statistics;
     }
     

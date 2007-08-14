@@ -21,7 +21,7 @@ public class DownloadManagerStub extends DownloadManager {
                         .of(ProviderHacks.getMessageRouter()), ProviderHacks
                         .getBackgroundExecutor(), Providers.of(ProviderHacks
                         .getTorrentManager()), Providers.of(ProviderHacks
-                        .getPushDownloadManager()));
+                        .getPushDownloadManager()), ProviderHacks.getBrowseHostHandlerManager());
     }
 	
 	

@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.tracking;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +16,6 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.ProviderHacks;
 
 public class TrackerManager {
 	
@@ -45,9 +45,12 @@ public class TrackerManager {
 	private volatile ScheduledFuture<?> scheduledAnnounce;
     
     private volatile String lastFailureReason;
+    
+    private final ScheduledExecutorService backgroundExecutor;
 	
-	TrackerManager(ManagedTorrent torrent, TrackerFactory trackerFactory) {
+	TrackerManager(ManagedTorrent torrent, TrackerFactory trackerFactory, ScheduledExecutorService backgroundExecutor) {
 		this.torrent = torrent;
+        this.backgroundExecutor = backgroundExecutor;
 		TorrentContext context = torrent.getContext();
 		for (URI uri : context.getMetaInfo().getTrackers())
 			trackers.add(trackerFactory.create(uri, context, torrent));
@@ -154,7 +157,7 @@ public class TrackerManager {
 		LOG.debug("scheduling new tracker request");
 		if (scheduledAnnounce != null)
 			scheduledAnnounce.cancel(true);
-		scheduledAnnounce = ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(scheduled, minDelay, 0, TimeUnit.MILLISECONDS);
+		scheduledAnnounce = backgroundExecutor.scheduleWithFixedDelay(scheduled, minDelay, 0, TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	

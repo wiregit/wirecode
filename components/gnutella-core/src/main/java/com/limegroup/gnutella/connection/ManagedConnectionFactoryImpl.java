@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.MessageRouter;
@@ -47,6 +48,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
     private final Provider<ConnectionServices> connectionServices;
+    private final GuidMapManager guidMapManager;
 
     @Inject
     public ManagedConnectionFactoryImpl(
@@ -66,7 +68,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             Provider<Acceptor> acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices) {
+            Provider<ConnectionServices> connectionServices,
+            GuidMapManager guidMapManager) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -85,6 +88,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
+        this.guidMapManager = guidMapManager;
     }
 
     /*
@@ -110,7 +114,9 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher
                         .get(), networkUpdateSanityChecker.get(), udpService
                         .get(), messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
-                        socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager, updateHandler, connectionServices);
+                        socketsManager.get(), acceptor.get(),
+                supportedVendorMessage, simppManager, updateHandler,
+                connectionServices, guidMapManager);
     }
 
     /*
@@ -122,9 +128,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         return new ManagedConnection(socket, connectionManager.get(),
                 networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), udpService.get(),
-                messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
-                acceptor.get(), supportedVendorMessage, simppManager, updateHandler, connectionServices);
+                messageDispatcher
+                        .get(), networkUpdateSanityChecker.get(), udpService
+                        .get(), messageRouter.get(), searchResultHandler.get(),
+                capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
+                simppManager, updateHandler, connectionServices, guidMapManager);
     }
 
 }

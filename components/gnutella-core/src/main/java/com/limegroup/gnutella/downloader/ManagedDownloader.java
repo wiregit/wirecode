@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -45,7 +47,6 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.SaveLocationException;
@@ -472,6 +473,9 @@ public class ManagedDownloader extends AbstractDownloader
     protected VerifyingFileFactory verifyingFileFactory;
     protected DiskController diskController;
     protected IPFilter ipFilter;
+    protected ScheduledExecutorService backgroundExecutor;
+    protected Provider<MessageRouter> messageRouter;
+    protected Provider<TigerTreeCache> tigerTreeCache;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -636,6 +640,9 @@ public class ManagedDownloader extends AbstractDownloader
         this.verifyingFileFactory = downloadReferences.getVerifyingFileFactory();
         this.diskController = downloadReferences.getDiskController();
         this.ipFilter = downloadReferences.getIpFilter();
+        this.backgroundExecutor = downloadReferences.getBackgroundExecutor();
+        this.messageRouter = downloadReferences.getMessageRouter();
+        this.tigerTreeCache = downloadReferences.getTigerTreeCache();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -962,8 +969,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
             return false;
             
-        MessageRouter mr = ProviderHacks.getMessageRouter();
-        Set<GUESSEndpoint> guessLocs = mr.getQueryLocs(this.originalQueryGUID);
+        Set<GUESSEndpoint> guessLocs = messageRouter.get().getQueryLocs(this.originalQueryGUID);
         if(guessLocs.isEmpty())
             return false;
 
@@ -2155,7 +2161,7 @@ public class ManagedDownloader extends AbstractDownloader
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
-        ProviderHacks.getTigerTreeCache().purgeTree(downloadSHA1);
+        tigerTreeCache.get().purgeTree(downloadSHA1);
         commonOutFile.setHashTree(null);
 
         // ask what to do next 
@@ -2169,7 +2175,7 @@ public class ManagedDownloader extends AbstractDownloader
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(downloadSHA1); 
+		HashTree tree = tigerTreeCache.get().getHashTree(downloadSHA1); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2237,7 +2243,7 @@ public class ManagedDownloader extends AbstractDownloader
             
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                ProviderHacks.getTigerTreeCache(); 
+                tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
@@ -2671,7 +2677,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         };
         
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
 
     }
             

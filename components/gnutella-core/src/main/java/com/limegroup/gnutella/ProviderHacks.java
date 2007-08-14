@@ -124,8 +124,8 @@ public class ProviderHacks {
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
-    public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }    
-
+    public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }
+    
     // Requires some major reworking -- used statically in a lot of places
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     
@@ -203,6 +203,11 @@ public class ProviderHacks {
     public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
     public static DownloadCallback getDownloadCallback() { return i().getDownloadCallback(); }
     public static PushDownloadManager getPushDownloadManager() { return i().getPushDownloadManager(); }
+    public static UniqueHostPinger getUniqueHostPinger() { return i().getUniqueHostPinger(); }
+    public static UDPPinger getUDPPinger() { return i().getUDPPinger(); }
+    public static ScheduledExecutorService getNIOExecutor() { return i().getNIOExecutor(); }
+    public static GuidMapManager getGuidMapManager() { return i().getGuidMapManager(); }
+    public static BrowseHostHandlerManager getBrowseHostHandlerManager() { return i().getBrowseHostHandlerManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 

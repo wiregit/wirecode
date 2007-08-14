@@ -273,11 +273,6 @@ public class ManagedConnection extends Connection
     private QueryRouteTable _lastQRPTableSent;
 
     /**
-     * Holds the mappings of GUIDs that are being proxied.
-     */
-    private GuidMap _guidMap = GuidMapFactory.getMap();
-
-    /**
      * Whether or not this was a supernode <-> client connection when message
      * looping started.
      */
@@ -315,6 +310,9 @@ public class ManagedConnection extends Connection
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
     private final Provider<ConnectionServices> connectionServices;
+    private final GuidMapManager guidMapManager;
+    
+    private final GuidMap guidMap;
     
     
     /**
@@ -340,7 +338,8 @@ public class ManagedConnection extends Connection
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices) {
+            Provider<ConnectionServices> connectionServices,
+            GuidMapManager guidMapManager) {
         super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -356,6 +355,8 @@ public class ManagedConnection extends Connection
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
+        this.guidMapManager = guidMapManager;
+        this.guidMap = guidMapManager.getMap();
     }
 
     /**
@@ -380,7 +381,8 @@ public class ManagedConnection extends Connection
             CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices) {
+            Provider<ConnectionServices> connectionServices,
+            GuidMapManager guidMapManager) {
         super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -396,6 +398,8 @@ public class ManagedConnection extends Connection
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
+        this.guidMapManager = guidMapManager;
+        this.guidMap = guidMapManager.getMap();
     }
     
     /**
@@ -880,7 +884,7 @@ public class ManagedConnection extends Connection
         super.close();
         
         // release pointer to our _guidMap so it can be gc()'ed
-        GuidMapFactory.removeMap(_guidMap);
+        guidMapManager.removeMap(guidMap);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1048,14 +1052,14 @@ public class ManagedConnection extends Connection
         query = queryRequestFactory.createProxyQuery(query, oobGUID);
         
         // 2) set up mappings between the guids
-        _guidMap.addMapping(origGUID, oobGUID);
+        guidMap.addMapping(origGUID, oobGUID);
 
         OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
         return query;
     }
 
     private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
-        GUID oobGUID = _guidMap.getNewGUID(resp.getQueryGUID());
+        GUID oobGUID = guidMap.getNewGUID(resp.getQueryGUID());
         // if we had a match, then just construct a new one....
         if (oobGUID != null)
             return new QueryStatusResponse(oobGUID, resp.getNumResults());
@@ -1143,8 +1147,8 @@ public class ManagedConnection extends Connection
                                  ReplyHandler receivingConnection) {
     	
     	boolean checkOOB = true;
-        if (_guidMap != null) {
-            byte[] origGUID = _guidMap.getOriginalGUID(queryReply.getGUID());
+        if (guidMap != null) {
+            byte[] origGUID = guidMap.getOriginalGUID(queryReply.getGUID());
             if (origGUID != null) {
             	checkOOB = false;
                 byte prevHops = queryReply.getHops();

@@ -561,4 +561,24 @@ public class LimeWireCore {
     public ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() {
         return injector.getInstance(ReplyNumberVendorMessageFactory.class);
     }
+
+    public UDPPinger getUDPPinger() {
+        return injector.getInstance(UDPPinger.class);
+    }
+
+    public UniqueHostPinger getUniqueHostPinger() {
+        return injector.getInstance(UniqueHostPinger.class);
+    }
+
+    public ScheduledExecutorService getNIOExecutor() {
+        return injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("nioExecutor")));
+    }
+
+    public GuidMapManager getGuidMapManager() {
+        return injector.getInstance(GuidMapManager.class);
+    }
+
+    public BrowseHostHandlerManager getBrowseHostHandlerManager() {
+        return injector.getInstance(BrowseHostHandlerManager.class);
+    }
 }

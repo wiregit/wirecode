@@ -39,10 +39,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();    
     private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
-    /**
-     * the pinger to send the pings
-     */
-    private UDPPinger pinger;
     
     /**
      * new hosts (as RFDs) that we've learned about
@@ -89,10 +85,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private long lastPingTime;
     
     private final NetworkManager networkManager;
+    private final UDPPinger udpPinger;
     
-    protected PingRanker(NetworkManager networkManager) {
+    protected PingRanker(NetworkManager networkManager, UDPPinger udpPinger) {
         this.networkManager = networkManager; 
-        pinger = new UDPPinger();
+        this.udpPinger = udpPinger;
         pingedHosts = new TreeMap<IpPort, RemoteFileDesc>(IpPort.COMPARATOR);
         testedLocations = new HashSet<RemoteFileDesc>();
         newHosts = new HashSet<RemoteFileDesc>();
@@ -260,7 +257,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     "\npinging hosts: "+sent);
         }
         
-        pinger.rank(toSend,null,this,ping);
+        udpPinger.rank(toSend,null,this,ping);
         lastPingTime = now;
     }
     
@@ -285,7 +282,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             if (LOG.isDebugEnabled())
                 LOG.debug("pinging push location "+rfd.getPushAddr());
             
-            pinger.rank(rfd.getPushProxies(),null,this,pushPing);
+            udpPinger.rank(rfd.getPushProxies(),null,this,pushPing);
         }
         
     }

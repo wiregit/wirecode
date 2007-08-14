@@ -278,10 +278,7 @@ public abstract class MessageRouter {
     /** Handler for TCP messages. */
     private ConcurrentMap<Class<? extends Message>, MessageHandler> multicastMessageHandlers =
         new ConcurrentHashMap<Class<? extends Message>, MessageHandler>(5, 0.75f, 3);
-    
-    /** Map for Multicast morphed GUIDs. */
-    private GuidMap _multicastGuidMap = GuidMapFactory.getMap();
-    
+        
     /** The length of time a multicast guid should stay alive. */
     private static final long MULTICAST_GUID_EXPIRE_TIME = 60 * 1000;
     
@@ -322,6 +319,8 @@ public abstract class MessageRouter {
     protected final Provider<SimppManager> simppManager;
     protected final Provider<UpdateHandler> updateHandler;
     
+    protected final GuidMap multicastGuidMap;
+    
     /**
      * Creates a MessageRouter. Must call initialize before using.
      */
@@ -356,7 +355,8 @@ public abstract class MessageRouter {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<PongCacher> pongCacher,
             Provider<SimppManager> simppManager,
-            Provider<UpdateHandler> updateHandler) {
+            Provider<UpdateHandler> updateHandler,
+            GuidMapManager guidMapManager) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -386,6 +386,7 @@ public abstract class MessageRouter {
         this.pongCacher = pongCacher;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
+        this.multicastGuidMap = guidMapManager.getMap();
 
         _clientGUID = applicationServices.getMyGUID();
          
@@ -583,7 +584,7 @@ public abstract class MessageRouter {
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager, simppManager.get()));
+        setUDPMessageHandler(AdvancedStatsToggle.class, new AdvancedToggleHandler(networkManager, simppManager.get(), backgroundExecutor));
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
@@ -712,7 +713,7 @@ public abstract class MessageRouter {
 
         if(msg instanceof QueryReply) {
             // check to see if it was from the multicast map.
-            byte[] origGUID = _multicastGuidMap.getOriginalGUID(msg.getGUID());
+            byte[] origGUID = multicastGuidMap.getOriginalGUID(msg.getGUID());
             if(origGUID != null) {
                 msg = queryReplyFactory.createQueryReply(origGUID, (QueryReply)msg);
                 ((QueryReply)msg).setMulticastAllowed(true);
@@ -1586,7 +1587,7 @@ public abstract class MessageRouter {
     protected void originateMulticastQuery(QueryRequest query) {
         byte[] newGUID = GUID.makeGuid();
         QueryRequest mquery = queryRequestFactory.createMulticastQuery(newGUID, query);
-        _multicastGuidMap.addMapping(query.getGUID(), newGUID, MULTICAST_GUID_EXPIRE_TIME);
+        multicastGuidMap.addMapping(query.getGUID(), newGUID, MULTICAST_GUID_EXPIRE_TIME);
 		multicastQueryRequest(mquery);
 	}
 

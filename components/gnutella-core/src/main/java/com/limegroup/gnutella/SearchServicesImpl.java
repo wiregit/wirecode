@@ -33,7 +33,7 @@ public class SearchServicesImpl implements SearchServices {
     private final Provider<QueryStats> queryStats;
     private final Provider<NetworkManager> networkManager;
     private final Provider<QueryRequestFactory> queryRequestFactory;
-    private final Provider<ActivityCallback> activityCallback;
+    private final BrowseHostHandlerManager browseHostHandlerManager;
     
     @Inject
     public SearchServicesImpl(Provider<ResponseVerifier> responseVerifier,
@@ -46,7 +46,7 @@ public class SearchServicesImpl implements SearchServices {
             Provider<QueryStats> queryStats,
             Provider<NetworkManager> networkManager,
             Provider<QueryRequestFactory> queryRequestFactory,
-            Provider<ActivityCallback> activityCallback) {
+            BrowseHostHandlerManager browseHostHandlerManager) {
         this.responseVerifier = responseVerifier;
         this.queryUnicaster = queryUnicaster;
         this.searchResultHandler = searchResultHandler;
@@ -57,7 +57,7 @@ public class SearchServicesImpl implements SearchServices {
         this.queryStats = queryStats;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
-        this.activityCallback = activityCallback;
+        this.browseHostHandlerManager = browseHostHandlerManager;
     }
 
     /* (non-Javadoc)
@@ -66,8 +66,7 @@ public class SearchServicesImpl implements SearchServices {
     public BrowseHostHandler doAsynchronousBrowseHost(
       final Connectable host, GUID guid, GUID serventID, 
       final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
-        final BrowseHostHandler handler = new BrowseHostHandler(activityCallback.get(), 
-                                                          guid, serventID);
+        final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid, serventID);
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 handler.browseHost(host, proxies, canDoFWTransfer);

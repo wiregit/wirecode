@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.concurrent.ScheduledExecutorService;
+
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.UrnCache;
@@ -14,6 +18,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 //DPINJ: get rid of this!  see: CORE-306
 public class DownloadReferences {
@@ -37,6 +42,9 @@ public class DownloadReferences {
     private final IPFilter ipFilter;
     private final RequeryManagerFactory requeryManagerFactory;
     private final BTContextFactory btContextFactory;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<TigerTreeCache> tigerTreeCache;
 
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
@@ -52,7 +60,10 @@ public class DownloadReferences {
             VerifyingFileFactory verifyingFileFactory,
             DiskController diskController, IPFilter ipFilter,
             RequeryManagerFactory requeryManagerFactory,
-            BTContextFactory btContextFactory) {
+            BTContextFactory btContextFactory,
+            ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<TigerTreeCache> tigerTreeCache) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -72,6 +83,9 @@ public class DownloadReferences {
         this.ipFilter = ipFilter;
         this.requeryManagerFactory = requeryManagerFactory;
         this.btContextFactory = btContextFactory;
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.tigerTreeCache = tigerTreeCache;
     }
     
     public DownloadManager getDownloadManager() {
@@ -148,5 +162,17 @@ public class DownloadReferences {
     
     public BTContextFactory getBTContextFactory() {
         return btContextFactory;
+    }
+
+    public ScheduledExecutorService getBackgroundExecutor() {
+        return backgroundExecutor;
+    }
+
+    public Provider<MessageRouter> getMessageRouter() {
+        return messageRouter;
+    }
+
+    public Provider<TigerTreeCache> getTigerTreeCache() {
+        return tigerTreeCache;
     }
 }

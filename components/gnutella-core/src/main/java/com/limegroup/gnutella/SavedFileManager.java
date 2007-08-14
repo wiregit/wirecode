@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -15,6 +16,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
@@ -34,12 +36,13 @@ public final class SavedFileManager implements Runnable {
     private final UrnCache urnCache;
     
     @Inject
-    SavedFileManager(UrnCache urnCache) {
+    SavedFileManager(UrnCache urnCache,
+                     @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.urnCache = urnCache;
         
         // DPINJ: move to an initialize method!
         // Run the task every three minutes, starting in 10 seconds.
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
     }
     
     /**

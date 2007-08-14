@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +22,9 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -115,11 +118,21 @@ public final class QueryUnicaster {
 		
 	private final NetworkManager networkManager;
 	private final QueryRequestFactory queryRequestFactory;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<UDPService> udpService;
 
 	@Inject
-    public QueryUnicaster(NetworkManager networkManager, QueryRequestFactory queryRequestFactory) {
+    public QueryUnicaster(NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<UDPService> udpService) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.udpService = udpService;
         
         _queries = new Hashtable<GUID, QueryBundle>();
         _queryHosts = new LinkedList<GUESSEndpoint>();
@@ -190,7 +203,7 @@ public final class QueryUnicaster {
             _querier.start();
             
             QueryKeyExpirer expirer = new QueryKeyExpirer();
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(expirer, 0, 3 * ONE_HOUR, TimeUnit.MILLISECONDS);// every 3 hours
+            backgroundExecutor.scheduleWithFixedDelay(expirer, 0, 3 * ONE_HOUR, TimeUnit.MILLISECONDS);// every 3 hours
 
             _initialized = true;
         }
@@ -202,8 +215,6 @@ public final class QueryUnicaster {
      * it.  Then sleep and try some more later...
      */
     private void queryLoop() {
-        UDPService udpService = ProviderHacks.getUdpService();
-
         while (true) {
             try {
                 waitForQueries();
@@ -212,7 +223,7 @@ public final class QueryUnicaster {
                 if (!_queryKeys.containsKey(toQuery)) {
                     // send a AddressSecurityToken Request
                     PingRequest pr = PingRequest.createQueryKeyRequest();
-                    udpService.send(pr,toQuery.getInetAddress(), toQuery.getPort());
+                    udpService.get().send(pr,toQuery.getInetAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // AddressSecurityToken Reply!!
@@ -234,7 +245,7 @@ public final class QueryUnicaster {
 							QueryRequest qrToSend = 
 							    queryRequestFactory.createQueryKeyQuery(currQB._qr, 
 																 addressSecurityToken);
-                            udpService.send(qrToSend, 
+                            udpService.get().send(qrToSend, 
                                             ip, toQuery.getPort());
 							currentHostUsed = true;
 							SentMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(qrToSend);
@@ -350,16 +361,16 @@ public final class QueryUnicaster {
 				_queryHosts.removeLast(); // evict a old guy...
 			_queryHosts.addFirst(endpoint);
 			_queryHosts.notify();
-			if(ProviderHacks.getUdpService().isListening() &&
+			if(udpService.get().isListening() &&
 			   !networkManager.isGUESSCapable() &&
 			   (_testUDPPingsSent < 10) &&
                !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
                  NetworkUtils.isCloseIP(networkManager.getAddress(),
                                         endpoint.getInetAddress().getAddress())) ) {
 				PingRequest pr = 
-                new PingRequest(ProviderHacks.getUdpService().getSolicitedGUID().bytes(),
+                new PingRequest(udpService.get().getSolicitedGUID().bytes(),
                                 (byte)1, (byte)0);
-                ProviderHacks.getUdpService().send(pr, endpoint.getInetAddress(), 
+                udpService.get().send(pr, endpoint.getInetAddress(), 
                                            endpoint.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
@@ -478,7 +489,7 @@ public final class QueryUnicaster {
                     // first send a Ping, hopefully we'll get some pongs....
                     PingRequest pr = 
                     new PingRequest(ConnectionSettings.TTL.getValue());
-                    ProviderHacks.getMessageRouter().broadcastPingRequest(pr);
+                    messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }
 
@@ -496,7 +507,7 @@ public final class QueryUnicaster {
                 if (!_pingList.contains(toReturn)) {
                     PingRequest pr = new PingRequest((byte)1);
                     InetAddress ip = toReturn.getInetAddress();
-                    ProviderHacks.getUdpService().send(pr, ip, toReturn.getPort());
+                    udpService.get().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
 					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }

@@ -84,8 +84,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     public static void setSettings() throws Exception {
         // we want to test the expirer so make the expire period small
-        PrivilegedAccessor.setValue(GuidMapFactory.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
-        Class clazz = PrivilegedAccessor.getClass(GuidMapFactory.class, "GuidMapImpl");
+        PrivilegedAccessor.setValue(GuidMapManagerImpl.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
+        Class clazz = PrivilegedAccessor.getClass(GuidMapManagerImpl.class, "GuidMapImpl");
         PrivilegedAccessor.setValue(clazz, "TIMED_GUID_LIFETIME", new Long(EXPIRE_TIME));
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
         UDP_ACCESS = new DatagramSocket();
@@ -731,11 +731,11 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     // tests that the expirer works
     public void testExpirer() throws Exception {
         // see if anything is going to be expired
-        List expireList = (List) PrivilegedAccessor.getValue(GuidMapFactory.class, 
+        List expireList = (List) PrivilegedAccessor.getValue(GuidMapManagerImpl.class, 
                                                              "toExpire");
         assertNotNull(expireList);
         Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
-        synchronized (GuidMapFactory.class) {
+        synchronized (GuidMapManagerImpl.class) {
             assertEquals(1, expireList.size());
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
@@ -768,7 +768,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         Thread.sleep(EXPIRE_TIME*2);
         
-        synchronized (GuidMapFactory.class) {
+        synchronized (GuidMapManagerImpl.class) {
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();

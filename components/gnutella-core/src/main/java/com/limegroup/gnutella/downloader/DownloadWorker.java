@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -14,13 +15,12 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -31,6 +31,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
@@ -229,10 +230,22 @@ public class DownloadWorker {
     private volatile boolean _stealing;
     
     private final HTTPDownloaderFactory httpDownloaderFactory;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ScheduledExecutorService nioExecutor;
+    private final Provider<PushDownloadManager> pushDownloadManager;
+    private final SocketsManager socketsManager;
 
     protected DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd,
-            VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory) {
+            VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
+            ScheduledExecutorService backgroundExecutor,
+            ScheduledExecutorService nioExecutor,
+            Provider<PushDownloadManager> pushDownloadManager,
+            SocketsManager socketsManager) {
         this.httpDownloaderFactory = httpDownloaderFactory;
+        this.backgroundExecutor = backgroundExecutor;
+        this.nioExecutor = nioExecutor;
+        this.pushDownloadManager = pushDownloadManager;
+        this.socketsManager = socketsManager;
         _manager = manager;
         _rfd = rfd;
         _commonOutFile = vf;
@@ -629,7 +642,7 @@ public class DownloadWorker {
             _currentState.setState(DownloadState.QUEUED);
         }
 
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 LOG.debug("Queue time up");
 
@@ -641,7 +654,7 @@ public class DownloadWorker {
                     }
                 }
 
-                NIODispatcher.instance().getScheduledExecutorService().execute(
+                nioExecutor.execute(
                         new Runnable() {
                             public void run() {
                                 incrementState(null);
@@ -749,7 +762,7 @@ public class DownloadWorker {
             _connectObserver = observer;
             try {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                Socket socket = ProviderHacks.getSocketsManager().connect(
+                Socket socket = socketsManager.connect(
                         new InetSocketAddress(_rfd.getHost(), _rfd.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
@@ -779,9 +792,9 @@ public class DownloadWorker {
                     _rfd.getHost());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
-            ProviderHacks.getDownloadManager().getPushManager().sendPush(_rfd,
+            pushDownloadManager.get().sendPush(_rfd,
                     observer);
-            ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new Runnable() {
+            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     _manager.unregisterPushObserver(details, true);
                 }

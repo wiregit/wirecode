@@ -17,6 +17,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.IntervalSet;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
@@ -69,7 +70,7 @@ public class PingRankerTest extends LimeTestCase {
     public void setUp() throws Exception {
         pinger.messages.clear();
         pinger.hosts.clear();
-        ranker = new PingRanker(ProviderHacks.getNetworkManager());
+        ranker = new PingRanker(ProviderHacks.getNetworkManager(), ProviderHacks.getUDPPinger());
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
       //  PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
         PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
@@ -514,6 +515,12 @@ public class PingRankerTest extends LimeTestCase {
      * but we don't care because they will never be used.
      */
     static class MockPinger extends UDPPinger {
+        
+        public MockPinger() {
+            super(Providers.of(ProviderHacks.getMessageRouter()), 
+                  ProviderHacks.getBackgroundExecutor(),
+                  Providers.of(ProviderHacks.getUdpService()));
+        }
 
         /**
          * the list of messages that was sent

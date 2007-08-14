@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ import org.limewire.concurrent.ManagedThread;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.name.Named;
 
 /** Manages writing / reading from / to disk. */
 @Singleton
@@ -49,9 +50,9 @@ public class DiskController {
     private final Object SCHEDULE_LOCK = new Object();
     
     @Inject
-    public DiskController() {
+    public DiskController(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         // DPINJ: Change to using passed in scheduler!
-        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000, TimeUnit.MILLISECONDS);
     }
     
     /** Adds a DelayedWrite to the queue of writers. */
