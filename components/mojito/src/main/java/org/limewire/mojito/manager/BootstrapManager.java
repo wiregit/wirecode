@@ -73,11 +73,14 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         return future != null;
     }
     
-    public synchronized void stop() {
-        if (future != null) {
-            future.cancel(true);
+    public void stop() {
+        BootstrapFuture f;
+        synchronized(this) {
+            f = future;
             future = null;
         }
+        if (f != null)
+            f.cancel(true);
     }
     
     /**
