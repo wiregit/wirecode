@@ -46,7 +46,7 @@ public class AddressToken extends AbstractToken {
     
     private final int _hashCode;
 
-    private transient Provider<IPFilter> ipFilter;
+    private volatile transient Provider<IPFilter> ipFilter;
     
     @Inject
     private static Provider<IPFilter> globalIpFilter;
