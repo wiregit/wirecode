@@ -18,11 +18,11 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Torrent.TorrentState;
+import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -79,14 +79,18 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
     private ScheduledExecutorService threadPool;
+
+    private IncomingConnectionHandler incomingConnectionHandler;
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
 	public void initialize(FileManager fileManager
             , ConnectionDispatcher dispatcher
-            , ScheduledExecutorService threadPool) {
-		if (LOG.isDebugEnabled())
+            , ScheduledExecutorService threadPool,
+            IncomingConnectionHandler incomingConnectionHandler) {
+		this.incomingConnectionHandler = incomingConnectionHandler;
+        if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
 		// register ourselves as an acceptor.
@@ -185,7 +189,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		ProviderHacks.getIncomingConnectionHandler().handleIncoming(
+		incomingConnectionHandler.handleIncoming(
 				(AbstractNBSocket)sock, this);
 	}
 

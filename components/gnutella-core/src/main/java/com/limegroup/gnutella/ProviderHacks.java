@@ -12,7 +12,6 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -117,7 +116,6 @@ public class ProviderHacks {
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
-    public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }

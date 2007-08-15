@@ -27,6 +27,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -104,6 +105,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
     /** The time when this finished starting. */
     @InspectablePrimitive private long startFinishedTime;
+
+    private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
     
     @Inject
     public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
@@ -138,7 +141,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<Statistics> statistics,
             Provider<ConnectionServices> connectionServices,
             Provider<SpamServices> spamServices,
-            Provider<ControlRequestAcceptor> controlRequestAcceptor) { 
+            Provider<ControlRequestAcceptor> controlRequestAcceptor,
+            Provider<IncomingConnectionHandler> incomingConnectionHandler) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -173,6 +177,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.connectionServices = connectionServices;
         this.spamServices = spamServices;
         this.controlRequestAcceptor = controlRequestAcceptor;
+        this.incomingConnectionHandler = incomingConnectionHandler;
     }
     
     /* (non-Javadoc)
@@ -342,7 +347,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START TorrentManager");
         activityCallback.get().componentLoading(I18n.marktr("SPLASH_STATUS_COMPONENT_LOADING_TORRENT_MANAGER"));
-		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get());
+		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
 		LOG.trace("STOP TorrentManager");
         
         LOG.trace("START ControlRequestAcceptor");
