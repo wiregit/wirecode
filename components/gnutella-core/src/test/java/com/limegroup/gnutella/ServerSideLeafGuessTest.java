@@ -21,7 +21,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -259,7 +258,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = MessageFactory.read(in);		
+        Message message = ProviderHacks.getMessageFactory().read(in);		
         return message;
     }
 

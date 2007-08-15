@@ -23,7 +23,6 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -84,7 +83,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
         UDP_ACCESS[0].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = MessageFactory.read(in);
+        Message m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -122,7 +121,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[1].receive(pack);
         in = new ByteArrayInputStream(pack.getData());
-        m = MessageFactory.read(in);
+        m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         ping = (PingRequest)m;
@@ -146,7 +145,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[2].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = MessageFactory.read(in);
+        Message m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -203,7 +202,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
           pack = new DatagramPacket(datagramBytes, 1000);
           UDP_ACCESS[i].receive(pack);
           in = new ByteArrayInputStream(pack.getData());
-          m = MessageFactory.read(in);
+          m = ProviderHacks.getMessageFactory().read(in);
           m.hop();
           assertInstanceof(PingRequest.class, m);
           ping = (PingRequest)m;

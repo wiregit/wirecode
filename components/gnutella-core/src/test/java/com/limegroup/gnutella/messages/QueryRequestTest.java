@@ -341,7 +341,7 @@ public final class QueryRequestTest extends LimeTestCase {
         qr.write(baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qrRead = (QueryRequest) MessageFactory.read(bais);
+        QueryRequest qrRead = (QueryRequest) ProviderHacks.getMessageFactory().read(bais);
         assertNotNull(qrRead);
     }
 
@@ -633,7 +633,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
 		QueryRequest qrTest = null;
 		try {
-			qrTest = (QueryRequest)MessageFactory.read(bais);
+			qrTest = (QueryRequest)ProviderHacks.getMessageFactory().read(bais);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);
@@ -894,7 +894,7 @@ public final class QueryRequestTest extends LimeTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) MessageFactory.read(bais);
+            inQuery = (QueryRequest) ProviderHacks.getMessageFactory().read(bais);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -905,7 +905,7 @@ public final class QueryRequestTest extends LimeTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) MessageFactory.read(bais);
+            inQuery = (QueryRequest) ProviderHacks.getMessageFactory().read(bais);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -1006,7 +1006,7 @@ public final class QueryRequestTest extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         query.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qr = (QueryRequest) MessageFactory.read(bais);
+        QueryRequest qr = (QueryRequest) ProviderHacks.getMessageFactory().read(bais);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
             assertTrue(qr.desiresAudio());

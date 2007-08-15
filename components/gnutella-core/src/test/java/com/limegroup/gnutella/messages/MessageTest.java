@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     
@@ -42,7 +43,7 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         byte[] b = new byte[40];
         try {
-            MessageFactory.read(bais,b,(byte)4);
+            ProviderHacks.getMessageFactory().read(bais,b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }

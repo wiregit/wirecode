@@ -29,7 +29,6 @@ import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -570,7 +569,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
                 return null;
             try {
                 socket.setSoTimeout(timeout);
-                Message m=MessageFactory.read(socket.getInputStream(), Network.TCP);
+                Message m=ProviderHacks.getMessageFactory().read(socket.getInputStream(), Network.TCP);
                 if(type.isInstance(m))
                     return (T)m;
                 else if(m == null) //interruptedIOException thrown

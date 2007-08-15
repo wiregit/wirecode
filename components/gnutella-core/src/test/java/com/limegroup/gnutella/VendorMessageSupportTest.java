@@ -12,7 +12,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -306,7 +305,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         try {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
-            MessageFactory.read(bais);
+            ProviderHacks.getMessageFactory().read(bais);
             fail("Did recieve UDP ConnectBack!!");
         } catch (InterruptedIOException good) {
         }

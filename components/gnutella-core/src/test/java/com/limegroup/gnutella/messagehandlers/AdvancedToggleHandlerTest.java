@@ -12,7 +12,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -47,7 +46,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     
     static AdvancedStatsToggle getToggle(String source) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(source));
-        return (AdvancedStatsToggle) MessageFactory.read(bais);
+        return (AdvancedStatsToggle) ProviderHacks.getMessageFactory().read(bais);
     }
     /**
      * Tests that if the usage stats setting is off, the message does nothing.

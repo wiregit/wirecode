@@ -29,7 +29,6 @@ import org.limewire.util.Base32;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -187,7 +186,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = MessageFactory.read(in);
+            Message syn = ProviderHacks.getMessageFactory().read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -316,7 +315,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = MessageFactory.read(in);
+            Message syn = ProviderHacks.getMessageFactory().read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -370,7 +369,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            MessageFactory.read(in);
+            ProviderHacks.getMessageFactory().read(in);
         }
     }
 }

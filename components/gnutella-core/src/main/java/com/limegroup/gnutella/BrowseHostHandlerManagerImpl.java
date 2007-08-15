@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
@@ -35,17 +36,21 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<ForMeReplyHandler> forMeReplyHandler;
 
+    private final MessageFactory messageFactory;
+
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
     ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
             SocketsManager socketsManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            Provider<ForMeReplyHandler> forMeReplyHandler) {
+            Provider<ForMeReplyHandler> forMeReplyHandler,
+            MessageFactory messageFactory) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
+        this.messageFactory = messageFactory;
 
         // DPINJ: move an an initializer
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);
@@ -67,7 +72,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                         }
                     },
                 activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler);
+                forMeReplyHandler, messageFactory);
     }
 
     /** @return true if the Push was handled by me. */

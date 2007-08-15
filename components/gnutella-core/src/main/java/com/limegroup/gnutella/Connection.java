@@ -246,6 +246,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
 
+    private final MessageFactory messageFactory;
+
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties that may use TLS.
@@ -260,8 +262,10 @@ public class Connection implements IpPort, Inspectable, Connectable {
     Connection(String host, int port, ConnectType connectType, 
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
-            MessagesSupportedVendorMessage supportedVendorMessage) {
-		if(host == null)
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
+        if(host == null)
 			throw new NullPointerException("null host");
 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("illegal port: "+port);
@@ -291,7 +295,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
 	 *  <tt>null</tt>
      */
     Connection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
-            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage) {
+            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory) {
 		if(socket == null)
 			throw new NullPointerException("null socket");
         
@@ -309,6 +314,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
 		this.socketsManager = null;
 		this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
+        this.messageFactory = messageFactory;
     }
 
 
@@ -718,7 +724,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = MessageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
+        Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
         updateReadStatistics(msg);
         return msg;
     }

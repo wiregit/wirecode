@@ -162,6 +162,9 @@ public class UDPService implements ReadWriteObserver {
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
 
+
+    private final MessageFactory messageFactory;
+
 	@Inject
     public UDPService(NetworkManager networkManager,
             Provider<MessageDispatcher> messageDispatcher,
@@ -170,7 +173,8 @@ public class UDPService implements ReadWriteObserver {
             Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
             Provider<QueryUnicaster> queryUnicaster,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            MessageFactory messageFactory) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -180,6 +184,7 @@ public class UDPService implements ReadWriteObserver {
         this.queryUnicaster = queryUnicaster;
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
+        this.messageFactory = messageFactory;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -331,7 +336,7 @@ public class UDPService implements ReadWriteObserver {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Network.UDP);
+                    Message message = messageFactory.read(in, IN_HEADER_BUF, Network.UDP);
                     if (message == null)
                         continue;
 

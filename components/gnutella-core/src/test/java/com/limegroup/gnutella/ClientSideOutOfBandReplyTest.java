@@ -18,7 +18,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -135,7 +134,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -222,7 +221,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -257,7 +256,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }
@@ -311,7 +310,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -357,7 +356,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }

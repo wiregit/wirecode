@@ -80,11 +80,15 @@ public final class MulticastService implements Runnable {
 	private final Provider<UDPService> udpService;
 	private final Provider<MessageDispatcher> messageDispatcher;
 
+    private final MessageFactory messageFactory;
+
 	@Inject
     MulticastService(Provider<UDPService> udpService,
-            Provider<MessageDispatcher> messageDispatcher) {
+            Provider<MessageDispatcher> messageDispatcher,
+            MessageFactory messageFactory) {
         this.udpService = udpService;
         this.messageDispatcher = messageDispatcher;
+        this.messageFactory = messageFactory;
         MULTICAST_THREAD = ThreadExecutor.newManagedThread(this, "MulticastService");
         MULTICAST_THREAD.setDaemon(true);
     }
@@ -205,7 +209,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = MessageFactory.read(in, HEADER_BUF, Network.MULTICAST);
+                    Message message = messageFactory.read(in, HEADER_BUF, Network.MULTICAST);
                     if(message == null)
                         continue;
                     messageDispatcher.get().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());

@@ -71,7 +71,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
     public LimeMessageDispatcherImpl(Context context, Provider<UDPService> udpService,
             Provider<SecureMessageVerifier> secureMessageVerifier,
             Provider<MessageRouter> messageRouter,
-            Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher) {
+            Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher,
+            MessageFactory messageFactory) {
         super(context);
 
         this.udpService = udpService;
@@ -88,7 +89,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
         MessageParserDelegate parser = new MessageParserDelegate(context
                 .getMessageFactory());
 
-        MessageFactory.setParser((byte) DHTMessage.F_DHT_MESSAGE, parser);
+        messageFactory.setParser((byte) DHTMessage.F_DHT_MESSAGE, parser);
     }
 
     @Override

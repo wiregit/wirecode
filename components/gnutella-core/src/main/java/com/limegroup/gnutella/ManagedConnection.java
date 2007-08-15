@@ -37,6 +37,7 @@ import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.MessageQueue;
 import com.limegroup.gnutella.connection.MessageReader;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.MessageReceiver;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
@@ -55,6 +56,7 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -313,6 +315,8 @@ public class ManagedConnection extends Connection
     private final GuidMapManager guidMapManager;
     
     private final GuidMap guidMap;
+
+    private final MessageReaderFactory messageReaderFactory;
     
     
     /**
@@ -338,8 +342,10 @@ public class ManagedConnection extends Connection
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory) {
-        super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage);
+            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
+            MessageReaderFactory messageReaderFactory,
+            MessageFactory messageFactory) {
+        super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -355,6 +361,7 @@ public class ManagedConnection extends Connection
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
+        this.messageReaderFactory = messageReaderFactory;
         this.guidMap = guidMapManager.getMap();
         this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
@@ -382,8 +389,10 @@ public class ManagedConnection extends Connection
             CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory) {
-        super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage);
+            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
+            MessageReaderFactory messageReaderFactory,
+            MessageFactory messageFactory) {
+        super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage, messageFactory);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -399,6 +408,7 @@ public class ManagedConnection extends Connection
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
+        this.messageReaderFactory = messageReaderFactory;
         this.guidMap = guidMapManager.getMap();
 	    this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
@@ -925,7 +935,7 @@ public class ManagedConnection extends Connection
             LOG.debug("Starting asynchronous connection");
             _socket.setSoTimeout(0); // no timeout for reading.
             
-            MessageReader reader = new MessageReader(ManagedConnection.this);
+            MessageReader reader = messageReaderFactory.createMessageReader(ManagedConnection.this);
             if(isReadDeflated())
                 reader.setReadChannel(new InflaterReader(_inflater));
                 

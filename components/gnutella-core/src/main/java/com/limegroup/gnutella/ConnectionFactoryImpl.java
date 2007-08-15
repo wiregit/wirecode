@@ -4,6 +4,7 @@ import java.net.Socket;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.util.SocketsManager;
@@ -15,17 +16,20 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
     private final Provider<SocketsManager> socketsManager;
     private final Provider<Acceptor> acceptor;
     private final MessagesSupportedVendorMessage supportedVendorMessage;
+    private final MessageFactory messageFactory;
     
 
     @Inject
     public ConnectionFactoryImpl(CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<SocketsManager> socketsManager,
             Provider<Acceptor> acceptor,
-            MessagesSupportedVendorMessage supportedVendorMessage) {
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory) {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.socketsManager = socketsManager;
         this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
+        this.messageFactory = messageFactory;
     }
 
     /* (non-Javadoc)
@@ -33,7 +37,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
      */
     public Connection createConnection(Socket socket) {
         return new Connection(socket, capabilitiesVMFactory, acceptor.get(),
-                supportedVendorMessage);
+                supportedVendorMessage, messageFactory);
     }
     
     /* (non-Javadoc)
@@ -49,7 +53,8 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
     public Connection createConnection(String host, int port,
             ConnectType connectType) {
         return new Connection(host, port, connectType, capabilitiesVMFactory,
-                socketsManager.get(), acceptor.get(), supportedVendorMessage);
+                socketsManager.get(), acceptor.get(), supportedVendorMessage,
+                messageFactory);
     }
 
 }

@@ -2,19 +2,17 @@ package com.limegroup.gnutella;
 
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactoryImpl;
-import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-
-import junit.framework.Test;
 
 @SuppressWarnings("all")
 public class LimeResponsesTest extends ClientSideTestCase {

@@ -11,7 +11,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -45,7 +44,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmpRead = (CapabilitiesVM) MessageFactory.read(bais);
+        CapabilitiesVM vmpRead = (CapabilitiesVM) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vmp, vmpRead);
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
@@ -104,7 +103,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         CapabilitiesVM vmp = 
-           (CapabilitiesVM) MessageFactory.read(bais);
+           (CapabilitiesVM) ProviderHacks.getMessageFactory().read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
         assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));

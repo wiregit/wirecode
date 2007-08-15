@@ -10,7 +10,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.MessageFactory;
 
 public class ReplyNumberVendorMessageTest extends BaseTestCase {
 
@@ -77,7 +76,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             ReplyNumberVendorMessage vmRead = 
-                (ReplyNumberVendorMessage) MessageFactory.read(bais);
+                (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
@@ -128,7 +127,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
+        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertFalse(vm2.canReceiveUnsolicited());
         
         PrivilegedAccessor.setValue(
@@ -140,7 +139,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
+        vm2 = (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertTrue(vm2.canReceiveUnsolicited());
         
         

@@ -3,9 +3,6 @@ package com.limegroup.gnutella.gui;
 import java.io.File;
 import java.util.Locale;
 
-import com.limegroup.gnutella.gui.DefaultErrorCatcher;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.ResourceManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 

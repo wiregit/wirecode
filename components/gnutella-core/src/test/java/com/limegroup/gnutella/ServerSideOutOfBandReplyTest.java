@@ -27,7 +27,6 @@ import com.limegroup.gnutella.messagehandlers.OOBSecurityToken;
 import com.limegroup.gnutella.messagehandlers.OOBSecurityToken.OOBTokenData;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -161,7 +160,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
 
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
@@ -213,7 +212,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
 
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
@@ -253,7 +252,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
 
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
@@ -294,7 +293,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
@@ -321,7 +320,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
@@ -344,7 +343,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 pack = new DatagramPacket(new byte[1000], 1000);
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
                 assertTrue(!((message instanceof QueryReply) &&
                              (Arrays.equals(message.getGUID(), 
                                             ack.getGUID()))));
@@ -398,7 +397,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
             ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
             
-            QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+            QueryRequest query = (QueryRequest)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(rawMessage));
             assertTrue(query.desiresOutOfBandReplies());
             assertTrue(query.desiresOutOfBandRepliesV2());
             assertFalse(query.desiresOutOfBandRepliesV3());
@@ -424,7 +423,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 }
                 InputStream in = new ByteArrayInputStream(pack.getData());
                 // as long as we don't get a ClassCastException we are good to go
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
             }
             
             // make sure the GUID is correct
@@ -456,7 +455,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 }
                 InputStream in = new ByteArrayInputStream(pack.getData());
                 // as long as we don't get a ClassCastException we are good to go
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
             }
             
             QueryReply qReply = (QueryReply)message;
@@ -482,7 +481,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         
         DatagramPacket pack = null;
 
-        QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+        QueryRequest query = (QueryRequest)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(rawMessage));
         assertTrue(query.desiresOutOfBandReplies());
         assertTrue(query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
@@ -508,7 +507,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
 
         // make sure the GUID is correct
@@ -540,7 +539,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
 
         QueryReply qReply = (QueryReply)message;
@@ -565,7 +564,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         
         DatagramPacket pack = null;
 
-        QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+        QueryRequest query = (QueryRequest)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(rawMessage));
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
@@ -591,7 +590,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
 
         // make sure the GUID is correct
@@ -624,7 +623,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
 
         QueryReply qReply = (QueryReply)message;
@@ -664,7 +663,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
                          (Arrays.equals(message.getGUID(), query.getGUID()))));
@@ -701,7 +700,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
@@ -728,7 +727,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 pack = new DatagramPacket(new byte[1000], 1000);
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
                 assertTrue(!((message instanceof QueryReply) &&
                              (Arrays.equals(message.getGUID(), 
                                             ack.getGUID()))));
@@ -768,7 +767,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
                          (Arrays.equals(message.getGUID(), query.getGUID()))));
@@ -801,7 +800,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 pack = new DatagramPacket(new byte[1000], 1000);
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
                 assertTrue(!((message instanceof QueryReply) &&
                              (Arrays.equals(message.getGUID(), 
                                             ack.getGUID()))));
@@ -843,7 +842,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            message = MessageFactory.read(in);
+            message = ProviderHacks.getMessageFactory().read(in);
         }
 
         // make sure the GUID is correct
@@ -874,7 +873,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 pack = new DatagramPacket(new byte[1000], 1000);
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                message = MessageFactory.read(in);
+                message = ProviderHacks.getMessageFactory().read(in);
                 assertTrue(!((message instanceof QueryReply) &&
                              (Arrays.equals(ack.getGUID(), message.getGUID()))));
             }
@@ -933,7 +932,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                         pack = new DatagramPacket(new byte[1000], 1000);
                         UDP_ACCESS.receive(pack);
                         InputStream in = new ByteArrayInputStream(pack.getData());
-                        Message message = MessageFactory.read(in);
+                        Message message = ProviderHacks.getMessageFactory().read(in);
                         if (message instanceof ReplyNumberVendorMessage)
                             numReplyNumberVMs++;
                     }
@@ -963,7 +962,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                     pack = new DatagramPacket(new byte[1000], 1000);
                     UDP_ACCESS.receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    Message message = MessageFactory.read(in);
+                    Message message = ProviderHacks.getMessageFactory().read(in);
                     assertNotInstanceof( ReplyNumberVendorMessage.class, message );
                 }
             }

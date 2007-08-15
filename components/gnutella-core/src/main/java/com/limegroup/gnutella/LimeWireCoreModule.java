@@ -50,6 +50,8 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.connection.MessageReaderFactoryImpl;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
@@ -86,6 +88,10 @@ import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.LocalPongInfo;
 import com.limegroup.gnutella.messages.LocalPongInfoImpl;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.MessageFactoryImpl;
+import com.limegroup.gnutella.messages.MessageParserBinder;
+import com.limegroup.gnutella.messages.MessageParserBinderImpl;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -210,6 +216,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
         bind(PushEndpointCache.class).to(PushEndpointCacheImpl.class);
         bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
+        bind(MessageFactory.class).to(MessageFactoryImpl.class);
+        bind(MessageReaderFactory.class).to(MessageReaderFactoryImpl.class);
+        bind(MessageParserBinder.class).to(MessageParserBinderImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

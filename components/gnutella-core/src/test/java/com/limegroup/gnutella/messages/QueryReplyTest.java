@@ -504,7 +504,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -550,7 +550,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -601,7 +601,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -659,7 +659,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -1021,7 +1021,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
+            QueryReply readQR = (QueryReply) ProviderHacks.getMessageFactory().read(bais);
 
             // test read from network            
             Set retProxies = readQR.getPushProxies();
@@ -1070,7 +1070,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
         // Make sure we can deserialize it too.
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        qr = (QueryReply)MessageFactory.read(in);
+        qr = (QueryReply)ProviderHacks.getMessageFactory().read(in);
         assertEquals(4, qr.getPushProxies().size());
         int tls = 0;
         IpPort nonTLS = null;
@@ -1133,7 +1133,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
+            QueryReply readQR = (QueryReply) ProviderHacks.getMessageFactory().read(bais);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());
@@ -1189,7 +1189,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
+            QueryReply readQR = (QueryReply) ProviderHacks.getMessageFactory().read(bais);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());

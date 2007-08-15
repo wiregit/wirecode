@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,7 +9,6 @@ import java.net.InetAddress;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.Inflater;
 
@@ -20,7 +18,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.IpPort.IpPortComparator;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -31,17 +28,12 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -93,7 +85,7 @@ public class InspectionTest extends ServerSideTestCase {
     
     private InspectionRequest getRequest(String base32) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(base32));
-        return (InspectionRequest) MessageFactory.read(bais);
+        return (InspectionRequest) ProviderHacks.getMessageFactory().read(bais);
     }
     public void testInspection() throws Exception {
         inspectedValue = "a";

@@ -8,21 +8,18 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.Verifier;
-import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.BadPacketException;

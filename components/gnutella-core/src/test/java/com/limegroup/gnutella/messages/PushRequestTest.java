@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message.Network;
 
 public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -54,7 +55,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read big push
-        PushRequest pr=(PushRequest)MessageFactory.read(in);     
+        PushRequest pr=(PushRequest)ProviderHacks.getMessageFactory().read(in);     
         assertEquals("unexpected push index", 3, pr.getIndex());
         assertEquals("unexpected total length", bytes.length,
             pr.getTotalLength() );
@@ -95,7 +96,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read ggep push
-        PushRequest pr=(PushRequest)MessageFactory.read(in);     
+        PushRequest pr=(PushRequest)ProviderHacks.getMessageFactory().read(in);     
         assertEquals("unexpected push index", 3, pr.getIndex());
         assertEquals("unexpected total length", bytes.length,
             pr.getTotalLength() );
@@ -138,7 +139,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[23+16]=(byte)3;  //index
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            MessageFactory.read(in);
+            ProviderHacks.getMessageFactory().read(in);
             fail("No exception thrown");
         } catch (BadPacketException expected) {}
         
@@ -162,7 +163,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        PushRequest pr2 = (PushRequest)MessageFactory.read(bais);
+        PushRequest pr2 = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
         assertNotNull(pr2);
         assertFalse(pr.isTLSCapable());
     }

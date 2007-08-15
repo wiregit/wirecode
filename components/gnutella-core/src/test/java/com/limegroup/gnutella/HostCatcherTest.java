@@ -25,7 +25,6 @@ import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -835,7 +834,7 @@ public class HostCatcherTest extends LimeTestCase {
         // receive the ping
         DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
         s.receive(p);
-        PingRequest ping = (PingRequest) MessageFactory.read(new ByteArrayInputStream(p.getData()));
+        PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(p.getData()));
         assertNotNull(ping);
 
         

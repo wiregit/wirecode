@@ -17,7 +17,6 @@ import org.limewire.security.AddressSecurityToken;
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -183,7 +182,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = MessageFactory.read(in);		
+        Message message = ProviderHacks.getMessageFactory().read(in);		
         return message;
     }
 

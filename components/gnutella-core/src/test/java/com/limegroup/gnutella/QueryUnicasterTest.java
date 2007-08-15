@@ -20,7 +20,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -348,7 +347,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in);		
+                    Message message = ProviderHacks.getMessageFactory().read(in);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {
                         PingRequest pr = (PingRequest)message;

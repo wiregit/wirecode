@@ -17,7 +17,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
@@ -249,7 +248,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    	HeadPing ping2 = (HeadPing) MessageFactory.read(bais);
+    	HeadPing ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
@@ -263,7 +262,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
-    	ping2 = (HeadPing) MessageFactory.read(bais);
+    	ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
     	
     	assertEquals(g,ping2.getClientGuid());
     	
@@ -273,7 +272,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
     	try {
-    	ping2 = (HeadPing) MessageFactory.read(bais);
+    	ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
     		fail("parsed a ping which claimed to have a clientguid but didn't");
     	}catch(BadPacketException expected) {}
     }
@@ -299,7 +298,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) MessageFactory.read(bais);
+        VendorMessage vmRead = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm, vmRead);
     }
 
@@ -307,7 +306,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) MessageFactory.read(bais);
+        VendorMessage vmRead = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,vmRead);
     }
 
@@ -499,22 +498,22 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        VendorMessage vm = (VendorMessage) MessageFactory.read(bais);
+        VendorMessage vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(tcp));
 
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(udp));
 
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(tcpR));
 
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(udpR));
 
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(ms));
         
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vm,(hops));
     }
 
@@ -531,7 +530,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        vm = (VendorMessage) MessageFactory.read(bais);
+        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
         
     }
 
@@ -560,7 +559,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Network.TCP);
+        Message m2 = ProviderHacks.getMessageFactory().createMessage(header, payload, (byte)4, Network.TCP);
         assertNotNull(m2);
     }
     

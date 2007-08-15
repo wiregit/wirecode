@@ -20,7 +20,6 @@ import org.limewire.io.IpPort;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.search.HostData;
@@ -76,7 +75,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) MessageFactory.read(in);
+            PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(in);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PingReply pong = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1);
             pong.write(baos);

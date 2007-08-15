@@ -47,20 +47,22 @@ public class MessageReader implements ChannelReadObserver {
     
     /** whether or not this reader has been shut down yet. */
     private boolean shutdown = false;
+    private final MessageFactory messageFactory;
     
     /**
      * Constructs a new MessageReader without an underlying source.
      * Prior to handleRead() being called, setReadChannel(ReadableByteChannel)
      * MUST be called.
      */    
-    public MessageReader(MessageReceiver receiver) {
-        this(null, receiver);
+    MessageReader(MessageReceiver receiver, MessageFactory messageFactory) {
+        this(null, receiver, messageFactory);
     }
     
     /**
      * Constructs a new MessageReader with the given source channel & receiver.
      */
-    public MessageReader(InterestReadableByteChannel channel, MessageReceiver receiver) {
+    MessageReader(InterestReadableByteChannel channel, MessageReceiver receiver, MessageFactory messageFactory) {
+        this.messageFactory = messageFactory;
         if(receiver == null)
             throw new NullPointerException("null receiver");
             
@@ -137,8 +139,8 @@ public class MessageReader implements ChannelReadObserver {
                 
             // Yay, we've got a full message.
             try {
-                Message m = MessageFactory.createMessage(header.array(), payload.array(), 
-                                                  receiver.getSoftMax(), receiver.getNetwork());
+                Message m = messageFactory.createMessage(header.array(), payload.array(), 
+                        receiver.getSoftMax(), receiver.getNetwork());
                 receiver.processReadMessage(m);
             } catch(BadPacketException ignored) {
             }

@@ -30,6 +30,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -58,6 +59,7 @@ import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -619,5 +621,13 @@ public class LimeWireCore {
 
     public FileResponseEntityFactory getFileRepsoneEntityFactory() {
         return injector.getInstance(FileResponseEntityFactory.class);
+    }
+
+    public MessageFactory getMessageFactory() {
+        return injector.getInstance(MessageFactory.class);
+    }
+
+    public MessageReaderFactory getMessageReaderFactory() {
+        return injector.getInstance(MessageReaderFactory.class);
     }
 }

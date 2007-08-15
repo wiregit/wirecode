@@ -26,7 +26,6 @@ import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -636,7 +635,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -752,7 +751,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = MessageFactory.read(in);
+                m = ProviderHacks.getMessageFactory().read(in);
                 m.hop();
                 if (m instanceof PingRequest)
                     gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -797,7 +796,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = MessageFactory.read(in);
+                m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof QueryRequest) {
                     QueryRequest qReq = (QueryRequest) m;
                     Set queryURNs = qReq.getQueryUrns();
@@ -952,7 +951,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     if (m instanceof QueryRequest) {
                         QueryRequest qReq = (QueryRequest) m;
                         Set queryURNs = qReq.getQueryUrns();
@@ -1193,7 +1192,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();

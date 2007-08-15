@@ -334,7 +334,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] bytes=baos.toByteArray(); 
 
         //Decode and check contents.
-        Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -354,7 +354,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos.reset();
         pr.write(baos);
         bytes=baos.toByteArray();
-        m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        m=ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         pong=(PingReply)m;
         assertFalse(pong.isTLSCapable());
         // make sure it's still off if we turn our settings on.
@@ -432,7 +432,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -506,7 +506,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -573,7 +573,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=MessageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(bytes));
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -594,7 +594,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[19]=(byte)13;    //payload length
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            MessageFactory.read(in);
+            ProviderHacks.getMessageFactory().read(in);
             fail("No exception thrown");
         } catch (BadPacketException pass) { 
             //Pass!
@@ -617,7 +617,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pr.write(baos);
         ByteArrayInputStream bais = 
              new ByteArrayInputStream(baos.toByteArray());
-        PingReply prStreamed = (PingReply) MessageFactory.read(bais);
+        PingReply prStreamed = (PingReply) ProviderHacks.getMessageFactory().read(bais);
         assertTrue(prStreamed.getQueryKey().equals(qk));
             
     }
@@ -632,7 +632,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         p.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        PingReply fromNet = (PingReply)MessageFactory.read(bais);
+        PingReply fromNet = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertEquals("1.2.3.4",fromNet.getMyInetAddress().getHostAddress());
         assertEquals(5,fromNet.getMyPort());
@@ -648,7 +648,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)MessageFactory.read(bais);
+        fromNet = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -659,7 +659,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)MessageFactory.read(bais);
+        fromNet = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -669,7 +669,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)MessageFactory.read(bais);
+        fromNet = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -689,7 +689,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pr.write(out);
         byte[] b = out.toByteArray();
         
-        PingReply read = (PingReply)MessageFactory.read(new ByteArrayInputStream(b));
+        PingReply read = (PingReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(b));
         assertTrue(read.isUDPHostCache());
         assertEquals("1.1.1.1", read.getUDPCacheAddress());
         
@@ -705,7 +705,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         pr.write(out);
         b = out.toByteArray();
         
-        read = (PingReply)MessageFactory.read(new ByteArrayInputStream(b));
+        read = (PingReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(b));
         assertTrue(read.isUDPHostCache());
         assertEquals("www.nowhere.org", read.getUDPCacheAddress());
     }
@@ -808,7 +808,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         out = new ByteArrayOutputStream();
         pr.write(out);
         
-        pr = (PingReply)MessageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        pr = (PingReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(out.toByteArray()));
         assertTrue(pr.isUDPHostCache());
         l = pr.getPackedIPPorts();
         assertEquals(4, l.size());
@@ -934,7 +934,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         //  and make sure we can read from network data.
         out = new ByteArrayOutputStream();
         pr.write(out);
-        pr = (PingReply)MessageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        pr = (PingReply)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(out.toByteArray()));
         l = pr.getPackedIPPorts();
         assertEquals(4, l.size());
         ipp = (IpPort)l.get(0);

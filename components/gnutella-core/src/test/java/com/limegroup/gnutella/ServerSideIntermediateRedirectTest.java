@@ -9,7 +9,6 @@ import java.net.ServerSocket;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -108,7 +107,7 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.setSoTimeout(TIMEOUT);
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-            MessageFactory.read(bais);
+            ProviderHacks.getMessageFactory().read(bais);
             fail("Got a message");
         } catch (InterruptedIOException expected) {}
     }

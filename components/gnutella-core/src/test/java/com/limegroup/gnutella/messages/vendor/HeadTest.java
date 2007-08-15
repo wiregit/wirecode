@@ -35,8 +35,6 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -699,7 +697,7 @@ public class HeadTest extends LimeTestCase {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		original.write(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		return (HeadPong) MessageFactory.read(bais);
+		return (HeadPong) ProviderHacks.getMessageFactory().read(bais);
 	}
     
     /** Constructs a new HeadPing exactly the same, but with a different version. */
@@ -708,7 +706,7 @@ public class HeadTest extends LimeTestCase {
         ping.write(baos);
         byte[] out = baos.toByteArray();
         ByteOrder.short2leb(version, out, 29); // location of the version of a VM
-        HeadPing p2 = (HeadPing)MessageFactory.read(new ByteArrayInputStream(out));
+        HeadPing p2 = (HeadPing)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(out));
         assertEquals(version, p2.getVersion());
         return p2;
     }

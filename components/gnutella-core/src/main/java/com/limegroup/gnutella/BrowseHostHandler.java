@@ -76,6 +76,8 @@ public class BrowseHostHandler {
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<ForMeReplyHandler> forMeReplyHandler;
 
+    private final MessageFactory messageFactory;
+
     /**
      * @param callback A instance of a ActivityCallback, so I can notify it of
      *        incoming QReps...
@@ -89,7 +91,8 @@ public class BrowseHostHandler {
             BrowseHostHandlerManager.BrowseHostCallback browseHostCallback,
             ActivityCallback activityCallback, SocketsManager socketsManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            Provider<ForMeReplyHandler> forMeReplyHandler) {
+            Provider<ForMeReplyHandler> forMeReplyHandler,
+            MessageFactory messageFactory) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -97,6 +100,7 @@ public class BrowseHostHandler {
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
+        this.messageFactory = messageFactory;
     }
 
     /** 
@@ -318,7 +322,7 @@ public class BrowseHostHandler {
         	try {
         		m = null;
         		LOG.debug("reading message");
-        		m = MessageFactory.read(in);
+        		m = messageFactory.read(in);
         	} catch (BadPacketException bpe) {
                 LOG.debug("BPE while reading", bpe);
         	} catch (IOException expected){

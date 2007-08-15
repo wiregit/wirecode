@@ -14,7 +14,6 @@ import junit.framework.Test;
 import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
@@ -136,7 +135,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = MessageFactory.read(in);
+                Message m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
@@ -284,7 +283,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = MessageFactory.read(in);
+                Message m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);

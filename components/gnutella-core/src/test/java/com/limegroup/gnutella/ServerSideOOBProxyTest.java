@@ -18,7 +18,6 @@ import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -617,7 +616,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                     pack = new DatagramPacket(new byte[1000], 1000);
                     UDP_ACCESS.receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    Message mTemp = MessageFactory.read(in);
+                    Message mTemp = ProviderHacks.getMessageFactory().read(in);
                     if (mTemp instanceof LimeACKVendorMessage)
                         fail("Should not get ACK!!!");
                 }
@@ -719,7 +718,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     			fail("Did not get ack", bad);
     		}
     		InputStream in = new ByteArrayInputStream(pack.getData());
-    		Message mTemp = MessageFactory.read(in);
+    		Message mTemp = ProviderHacks.getMessageFactory().read(in);
     		if (mTemp instanceof LimeACKVendorMessage)
     			ack = (LimeACKVendorMessage) mTemp;
     	}

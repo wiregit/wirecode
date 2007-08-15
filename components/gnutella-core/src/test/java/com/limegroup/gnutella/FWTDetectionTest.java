@@ -23,7 +23,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -438,7 +437,7 @@ public class FWTDetectionTest extends LimeTestCase {
         
         ByteArrayInputStream bais = new ByteArrayInputStream(read.getData());
         
-        PingReply replyWith = (PingReply)MessageFactory.read(bais);
+        PingReply replyWith = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertNotNull(replyWith.getMyInetAddress());
         assertEquals(InetAddress.getLocalHost(),replyWith.getMyInetAddress());
@@ -459,7 +458,7 @@ public class FWTDetectionTest extends LimeTestCase {
         sock.receive(read);
         bais = new ByteArrayInputStream(read.getData());
         
-        PingReply replyWithout = (PingReply)MessageFactory.read(bais);
+        PingReply replyWithout = (PingReply)ProviderHacks.getMessageFactory().read(bais);
         
         assertNull(replyWithout.getMyInetAddress());
         assertEquals(0,replyWithout.getMyPort());
@@ -498,7 +497,7 @@ public class FWTDetectionTest extends LimeTestCase {
                 _lastAddress = pack.getSocketAddress();
                 
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-                PingRequest ret = (PingRequest) MessageFactory.read(bais);
+                PingRequest ret = (PingRequest) ProviderHacks.getMessageFactory().read(bais);
                 lastReceived = ret.getGUID();
                 return ret;
         }

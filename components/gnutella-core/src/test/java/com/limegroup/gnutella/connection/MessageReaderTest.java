@@ -26,7 +26,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public final class MessageReaderTest extends LimeTestCase {
     
     private StubMessageReceiver STUB = new StubMessageReceiver();
-    private MessageReader READER = new MessageReader(STUB);
+    private MessageReader READER = ProviderHacks.getMessageReaderFactory().createMessageReader(STUB);
     
     private static final byte[] IP = new byte[] { (byte)127, 0, 0, 1 };
 
@@ -313,14 +313,14 @@ public final class MessageReaderTest extends LimeTestCase {
         assertSame(channel, READER.getReadChannel());
         
         try {
-            new MessageReader(null);
+            new MessageReader(null, ProviderHacks.getMessageFactory());
             fail("expected NPE");
         } catch(NullPointerException expected) {}
             
-        READER = new MessageReader(channel, STUB);
+        READER = ProviderHacks.getMessageReaderFactory().createMessageReader(channel, STUB);
         assertSame(channel, READER.getReadChannel());
         
-        READER = new MessageReader(null, STUB);
+        READER = ProviderHacks.getMessageReaderFactory().createMessageReader(null, STUB);
         assertNull(READER.getReadChannel());
     }
     

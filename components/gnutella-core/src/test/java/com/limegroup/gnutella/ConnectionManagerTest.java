@@ -28,7 +28,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -800,7 +799,8 @@ public class ConnectionManagerTest extends LimeTestCase {
             ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
             ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
             Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
-            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory());
+            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
+            ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory());
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;

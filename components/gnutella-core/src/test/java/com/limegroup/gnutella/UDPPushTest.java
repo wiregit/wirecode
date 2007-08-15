@@ -21,7 +21,6 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -147,7 +146,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -178,7 +177,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -207,7 +206,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
@@ -254,12 +253,12 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)MessageFactory.read(bais);
+		pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);
@@ -302,12 +301,12 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)MessageFactory.read(bais);
+		pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);
@@ -345,13 +344,13 @@ public class UDPPushTest extends LimeTestCase {
         udpsocket.receive(push);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-        PushRequest pr = (PushRequest)MessageFactory.read(bais);
+        PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
         assertEquals(rfd1.getIndex(),pr.getIndex());
         assertFalse(pr.isTLSCapable());
         
         udpsocket.receive(push);
         bais = new ByteArrayInputStream(push.getData());
-        pr = (PushRequest)MessageFactory.read(bais);
+        pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
         assertEquals(rfd2.getIndex(),pr.getIndex());
         assertTrue(pr.isTLSCapable());
         

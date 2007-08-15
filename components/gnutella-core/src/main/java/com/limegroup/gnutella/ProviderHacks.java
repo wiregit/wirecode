@@ -19,6 +19,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -44,6 +45,7 @@ import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -133,9 +135,6 @@ public class ProviderHacks {
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
-    // Cleaned up in all but message parsers & tests
-    public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
-    public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }    
     
     // Requires cleaning up RemoteFileDesc deserialization, or doing something else
     public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
@@ -222,9 +221,11 @@ public class ProviderHacks {
     public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
     public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
     public static IPFilter getIpFilter() { return i().getIpFilter(); }
+    public static MessageFactory getMessageFactory() { return i().getMessageFactory(); }
+    public static MessageReaderFactory getMessageReaderFactory() { return i().getMessageReaderFactory(); }
+    public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }
+    public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
-
- 
      
 }

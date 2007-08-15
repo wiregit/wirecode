@@ -29,13 +29,13 @@ public class LimeRUDPContext implements RUDPContext {
      */
     @Inject
     public LimeRUDPContext(UDPService udpService,
-            RUDPMessageFactory rudpMessageFactory, RUDPSettings rudpSettings) {
+            RUDPMessageFactory rudpMessageFactory, RUDPSettings rudpSettings, MessageFactory messageFactory) {
         this.udpService = udpService;
         this.rudpMessageFactory = rudpMessageFactory;
         this.rudpSettings = rudpSettings;
         
         MessageParser parser = new LimeRUDPMessageParser(rudpMessageFactory);
-        MessageFactory.setParser(RUDPMessage.F_RUDP_MESSAGE, parser);
+        messageFactory.setParser(RUDPMessage.F_RUDP_MESSAGE, parser);
     }
 
     public RUDPMessageFactory getMessageFactory() {

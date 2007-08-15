@@ -42,7 +42,6 @@ import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -970,7 +969,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 DatagramPacket rcv = new DatagramPacket(recv, recv.length);
                 sock.receive(rcv);
                 ByteArrayInputStream bais = new ByteArrayInputStream(recv, 0, rcv.getLength());
-                HeadPong pong = (HeadPong) MessageFactory.read(bais);
+                HeadPong pong = (HeadPong) ProviderHacks.getMessageFactory().read(bais);
                 if (pong.getAltLocs() == null || pong.getAltLocs().isEmpty())
                     break;
             } finally {
@@ -997,7 +996,7 @@ public class AltLocUploadTest extends LimeTestCase {
             handler.received.write(baos);
             ByteArrayInputStream bais = new ByteArrayInputStream(baos
                     .toByteArray());
-            QueryReply reply = (QueryReply) MessageFactory.read(bais);
+            QueryReply reply = (QueryReply) ProviderHacks.getMessageFactory().read(bais);
             Response resp = reply.getResultsArray()[0];
             if (resp.getLocations().isEmpty())
                 break;

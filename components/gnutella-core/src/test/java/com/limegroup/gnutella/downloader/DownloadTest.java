@@ -57,7 +57,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -2830,7 +2829,7 @@ public class DownloadTest extends LimeTestCase {
                 while(true) {
                     sock.receive(p);
                     ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
-                    m = MessageFactory.read(bais);
+                    m = ProviderHacks.getMessageFactory().read(bais);
                     LOG.debug("received "+m.getClass()+ " no file? "+noFile);
                     if (noFile) {
                         if (m instanceof HeadPing) 
