@@ -1270,7 +1270,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     private static class InNetworkCallback implements DownloadCallback {
         public void addDownload(Downloader d) {}
-        public void removeDownload(Downloader d) {
+        public void removeDownload(Downloader d) { 
             InNetworkDownloader downloader = (InNetworkDownloader)d;
             UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
                     downloader.getState() == DownloadStatus.COMPLETE);
