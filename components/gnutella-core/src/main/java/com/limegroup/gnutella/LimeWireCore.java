@@ -68,6 +68,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -634,5 +635,9 @@ public class LimeWireCore {
 
     public VendorMessageFactory getVendorMessageFactory() {
         return injector.getInstance(VendorMessageFactory.class);
+    }
+
+    public UDPCrawlerPongFactory getUDPCrawlerPongFactory() {
+        return injector.getInstance(UDPCrawlerPongFactory.class);
     }
 }

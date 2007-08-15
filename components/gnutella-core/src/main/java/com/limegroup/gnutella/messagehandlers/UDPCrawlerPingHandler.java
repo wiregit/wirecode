@@ -13,14 +13,31 @@ import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 
 public class UDPCrawlerPingHandler extends RestrictedResponder {
     
+    /**
+     * keeps a list of the people who have requested our connection lists. 
+     * used to make sure we don't get ping-flooded. 
+     * not final so that tests won't take forever.
+     */
+    private FixedSizeExpiringSet<InetAddress> _UDPListRequestors 
+        = new FixedSizeExpiringSet<InetAddress>(2000, 10*60 * 1000); //10 minutes.
+    
+    private final UDPCrawlerPongFactory udpCrawlerPongFactory;
+    
     @Inject
-    public UDPCrawlerPingHandler(NetworkManager networkManager, SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
-        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+    public UDPCrawlerPingHandler(NetworkManager networkManager,
+            SimppManager simppManager,
+            UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache,
+            UDPCrawlerPongFactory udpCrawlerPongFactory) {
+        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager,
+                simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+        this.udpCrawlerPongFactory = udpCrawlerPongFactory;
     }
     
 	protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -28,15 +45,8 @@ public class UDPCrawlerPingHandler extends RestrictedResponder {
 		if (!_UDPListRequestors.add(handler.getInetAddress()))
 			return;
 		
-		UDPCrawlerPong pong = new UDPCrawlerPong((UDPCrawlerPing)msg);
+		UDPCrawlerPong pong = udpCrawlerPongFactory.createUDPCrawlerPong((UDPCrawlerPing)msg);
 		handler.reply(pong);
 	}
-	/**
-	 * keeps a list of the people who have requested our connection lists. 
-	 * used to make sure we don't get ping-flooded. 
-	 * not final so that tests won't take forever.
-	 */
-	private FixedSizeExpiringSet<InetAddress> _UDPListRequestors 
-		= new FixedSizeExpiringSet<InetAddress>(2000, 10*60 * 1000); //10 minutes.
 	
 }

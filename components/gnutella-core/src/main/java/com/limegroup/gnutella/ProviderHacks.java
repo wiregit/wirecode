@@ -54,6 +54,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -109,7 +110,6 @@ public class ProviderHacks {
     public static UDPService getUdpService() { return i().getUdpService(); }    
     public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }    
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }    
-    public static DHTManager getDHTManager() { return i().getDhtManager(); }    
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
@@ -228,6 +228,8 @@ public class ProviderHacks {
     public static VendorMessageFactory getVendorMessageFactory() { return i().getVendorMessageFactory(); }
     public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }
     public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
+    public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return i().getUDPCrawlerPongFactory(); }
+    public static DHTManager getDHTManager() { return i().getDhtManager(); }    
     
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
