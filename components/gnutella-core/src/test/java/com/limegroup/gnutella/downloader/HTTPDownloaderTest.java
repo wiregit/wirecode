@@ -1,0 +1,433 @@
+package com.limegroup.gnutella.downloader;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import junit.framework.Test;
+
+import org.limewire.collection.BitNumbers;
+import org.limewire.collection.Function;
+import org.limewire.collection.Interval;
+import org.limewire.collection.MultiIterable;
+import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+import org.limewire.nio.NIOSocket;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.http.SimpleReadHeaderState;
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.stubs.StubIOStateObserver;
+import com.limegroup.gnutella.util.StrictIpPortSet;
+
+@SuppressWarnings("unchecked")
+public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
+
+    public HTTPDownloaderTest(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(HTTPDownloaderTest.class);
+    }
+    
+    public void testWrittenAltHeadersWithTLS() throws Exception {
+        final Set<IpPort> sT, fT, sN, fN;
+        sT = new IpPortSet(); fT = new IpPortSet(); sN = new IpPortSet(); fN = new IpPortSet();
+        
+        Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
+            public Void apply(HTTPDownloader dl) {
+                try {
+                    // Add some alternate locations (succesful & not, TLS & not).
+                    // Do it randomly, but force atleast 1 TLS in both failed & success
+                    // (Go from 20 -> 40 so we all have the same # of digits.)
+                    for(int i = 20; i < 40; i++) {
+                        boolean tls = false;
+                        boolean failed = false;
+                        AlternateLocation loc;            
+                        if(i == 25 || i == 30 || Math.random() < 0.5) {
+                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], true);
+                            tls = true;
+                        } else {
+                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], false);
+                        }
+                        
+                        if(i != 30 && (i == 25 || Math.random() < 0.5)) {
+                            failed = true;
+                            dl.addFailedAltLoc(loc);
+                        } else {
+                            dl.addSuccessfulAltLoc(loc);
+                        }
+                        
+                        IpPort host = ((DirectAltLoc)loc).getHost();
+                        if(tls && failed)
+                            fT.add(host);
+                        else if(tls)
+                            sT.add(host);
+                        else if(failed)
+                            fN.add(host);
+                        else
+                            sN.add(host);
+                    }
+                } catch(IOException iox) {
+                    throw new RuntimeException(iox);
+                }
+                
+                return null;
+            }
+        });
+        
+        // Verify NAlts has all the correct IPs.
+        String nalts = headers.get("X-NAlt");
+        assertFalse("shouldn't have tls indexes!", nalts.contains("tls"));
+        for(IpPort ipp : new MultiIterable<IpPort>(fT, fN)) {
+            assertTrue("couldn't find: " + ipp + ", in: " + nalts, nalts.contains(ipp.getInetAddress().getHostAddress()));
+            nalts = nalts.replace(ipp.getInetAddress().getHostAddress(), "");
+        }
+        // Remove all commas too...
+        String removedCommas = nalts.replace(",", "").trim();
+        assertEquals("wrong nalts leftover! " + nalts, "", removedCommas);
+
+        // Verify Alts has all the correct IPs
+        String originalAlts = headers.get("X-Alt");
+        assertTrue("no tls indexes!", originalAlts.startsWith("tls="));    
+        // Remove the TLS= index for right now..
+        String alts = originalAlts.substring(originalAlts.indexOf(",")+1);
+        // verify all the IPs exist
+        for(IpPort ipp : new MultiIterable<IpPort>(sT, sN)) {
+            assertTrue("couldn't find: " + ipp + ", in: " + originalAlts, alts.contains(ipp.getInetAddress().getHostAddress()));
+            alts = alts.replace(ipp.getInetAddress().getHostAddress(), "");
+        }
+        // Remove all commas too...
+        removedCommas = alts.replace(",", "").trim();
+        assertEquals("wrong alts leftover! " + alts, "", removedCommas);        
+        
+        // Verify the tls= index is correct...
+        alts = originalAlts.substring(originalAlts.indexOf(",")+1);
+        StringTokenizer tokenizer = new StringTokenizer(alts, ",");
+        List<IpPort> ips = new ArrayList<IpPort>();
+        while(tokenizer.hasMoreTokens()) {
+            String ip = tokenizer.nextToken();
+            ips.add(new IpPortImpl(ip, 6346));
+        }        
+        BitNumbers bn = new BitNumbers(ips.size());
+        for(int i = 0; i < ips.size(); i++) {
+            if(sT.contains(ips.get(i)))
+                bn.set(i);
+        }        
+        assertTrue(originalAlts.startsWith("tls=" + bn.toHexString()));
+    }
+    
+    public void testReadXAltsWithTLS() throws Exception {
+        String str;        
+        HTTPDownloader dl;
+        Collection<RemoteFileDesc> receivedLocations;
+                
+        str = "HTTP/1.1 200 OK\r\n" + 
+              "X-Alt: tls=AB8,1.2.3.4:5,4.3.2.1,2.3.4.5:6,5.4.3.2:1,3.4.5.6:7,6.5.4.3:2,4.5.6.7:8,7.6.5.4:3,5.6.7.8:9,8.7.6.5:4\r\n"; 
+        dl = newHTTPDownloaderWithHeader(str);
+        assertEquals(0, dl.getLocationsReceived().size());
+        
+        readHeaders(dl);
+        
+        receivedLocations = dl.getLocationsReceived();
+        assertEquals(10, receivedLocations.size());        
+        dl.stop();
+        
+        Set<IpPort> tlsExpected = new IpPortSet(new IpPortImpl("1.2.3.4:5"), new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7"), new IpPortImpl("4.5.6.7:8"), new IpPortImpl("7.6.5.4:3"), new IpPortImpl("5.6.7.8:9"));
+        Set<IpPort> normalExpected = new IpPortSet(new IpPortImpl("4.3.2.1:6346"), new IpPortImpl("5.4.3.2:1"), new IpPortImpl("6.5.4.3:2"), new IpPortImpl("8.7.6.5:4"));
+
+        Set<Connectable> allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.retainAll(tlsExpected);
+        assertEquals(allLocs, tlsExpected);
+        for(Connectable c : allLocs)
+            assertTrue(c.isTLSCapable());
+        
+        allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.retainAll(normalExpected);
+        assertEquals(normalExpected, allLocs);
+        for(Connectable c : allLocs)
+            assertFalse(c.isTLSCapable());
+        
+        allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
+        allLocs.removeAll(tlsExpected);
+        allLocs.removeAll(normalExpected);
+        assertTrue(allLocs.isEmpty());
+    }
+    
+    
+    public void testParseContentRange() throws Throwable {
+        int length = 1000;
+        RemoteFileDesc rfd= new RemoteFileDesc("1.2.3.4", 1, 1, "file",
+                                            length, new byte[16], 1,
+                                            false, 2, false, null,
+                                            null, false, false, "LIME",
+                                            null, -1, false);
+        File f = new File("sam");
+        VerifyingFile vf = new VerifyingFile(length);
+        vf.open(f);
+        HTTPDownloader dl = new HTTPDownloader(rfd, vf, false);
+        
+        PrivilegedAccessor.setValue(dl, "_amountToRead", new Integer(rfd.getSize()));
+        
+        
+        assertEquals(new Interval(1, 9), 
+                    parseContentRange(dl, "Content-range: bytes 1-9/10"));
+                        
+        assertEquals(new Interval(1, 9),
+                    parseContentRange(dl, "Content-range:bytes=1-9/10"));
+                        
+        // should this work?  the server says the size is 10, we think it's 
+        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
+        assertEquals(new Interval(0, 999),
+                    parseContentRange(dl, "Content-range:bytes */10"));
+                        
+        assertEquals(new Interval(0, 999),
+                    parseContentRange(dl, "Content-range:bytes */*"));
+                    
+        assertEquals(new Interval(1, 9),
+                    parseContentRange(dl, "Content-range:bytes 1-9/*"));
+                    
+        // should this work?  the server says the size is 10, we think it's
+        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
+        // Putting aside the "should it work" question, this is the faulty
+        // header from LimeWire 0.5, in which we subtract 1 from the
+        // sizes (they send exclusive instead of inclusive values).
+        assertEquals(new Interval(0, 9),
+                    parseContentRange(dl, "Content-range:bytes 1-10/10"));
+                    
+        Interval iv = null;        
+        try {
+            iv = parseContentRange(dl, "Content-range:bytes 1 10 10");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch (ProblemReadingHeaderException ignored) {}
+        
+        // low is less than high
+        try {
+            iv = parseContentRange(dl, "Content-range:bytes 10-9/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+        
+        // negative values.
+        try {
+            iv = parseContentRange(dl, "Content-range: bytes -10--5/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+        
+        // negative high.
+        try {
+            iv = parseContentRange(dl, "Content-range:bytes 0--10/*");
+            fail("Parsed invalid content range.  Got: " + iv);
+        } catch(ProblemReadingHeaderException ignored) {}
+    }
+    
+    public void testLegacy() throws Throwable {
+        //readHeaders tests
+		String str;
+		HTTPDownloader down;
+
+		str = "HTTP/1.1 200 OK\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		readHeaders(down);
+        down.stop();
+		
+		
+		str = "HTTP/1.1 301 Moved Permanently\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (IOException e) {}
+
+        str = "HTTP/1.1 300 Multiple Choices\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (IOException e) {}
+
+		str = "HTTP/1.1 404 File Not Found \r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (FileNotFoundException e) {}
+
+		str = "HTTP/1.1 410 Not Sharing \r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (NotSharingException e) {}
+
+		str = "HTTP/1.1 412 \r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (IOException e) {}
+
+		str = "HTTP/1.1 503 \r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown");
+		} catch (TryAgainLaterException e) {}
+
+		str = "HTTP/1.1 210 \r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		readHeaders(down);
+		down.stop();
+
+		str = "HTTP/1.1 204 Partial Content\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+        readHeaders(down);
+        down.stop();
+
+
+		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		readHeaders(down);
+		down.stop();
+		
+		str = "200 OK\r\n";
+		down = newHTTPDownloaderWithHeader(str);
+		try {
+			readHeaders(down);
+			down.stop();
+			fail("exception should have been thrown.");
+		} catch (NoHTTPOKException e) {}
+	}
+	
+	private static Interval parseContentRange(HTTPDownloader dl,
+                                              String s) throws Throwable {
+	    try {
+            return (Interval)PrivilegedAccessor.invokeMethod(
+                dl , "parseContentRange", new Object[] {s});
+        } catch(Exception e) {
+            if ( e.getCause() != null ) 
+                throw e.getCause();
+            else throw e;
+        }
+    }
+    
+    private Map<String, String> getWrittenHeaders(Function<HTTPDownloader, Void> func) throws Exception {
+        ServerSocket server = new ServerSocket();
+        server.setReuseAddress(true);
+        server.bind(new InetSocketAddress(0));
+        
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1",
+                                                server.getLocalPort(),
+                                                1,
+                                                "file",
+                                                1000,
+                                                new byte[16],
+                                                1,
+                                                false,
+                                                1,
+                                                false,
+                                                null,
+                                                HugeTestUtils.URN_SETS[0],
+                                                false,
+                                                false,
+                                                "TEST",
+                                                Collections.EMPTY_SET,
+                                                -1,
+                                                0,
+                                                false);
+                                                
+        VerifyingFile vf = new VerifyingFile(1000);
+        
+        Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
+        Socket accept = server.accept();
+        
+        HTTPDownloader dl = new HTTPDownloader(socket, rfd, vf, false);
+        func.apply(dl);
+        
+        dl.initializeTCP();
+        StubIOStateObserver observer = new StubIOStateObserver();
+        dl.connectHTTP(0, 500, true, observer);
+        observer.waitForFinish();
+        
+        InputStream in = accept.getInputStream();
+        byte[] read = new byte[5000];
+        int amtRead = in.read(read);
+        assertGreaterThan(0, amtRead);
+        
+        String headers = new String(read, 0, amtRead);
+        return parseHeaders(headers, "GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1");
+    }
+    
+    private Map<String, String> parseHeaders(String headers, String firstLine) throws Exception {
+        BufferedReader reader = new BufferedReader(new StringReader(headers));
+        String line = reader.readLine();
+        Map map = new HashMap();
+        assertEquals("GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1", line);
+        while( (line = reader.readLine()) != null && line.length() != 0) {
+            int colon = line.indexOf(":");
+            assertNotEquals("couldn't find colon, line is: " + line, -1, colon);
+            map.put(line.substring(0, colon).trim(), line.substring(colon+1).trim());
+        }
+        return map;
+    }
+    
+    
+    private static HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
+        s += "\r\n";
+        SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
+        reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1",
+                                                1,
+                                                1,
+                                                "file",
+                                                1000,
+                                                new byte[16],
+                                                1,
+                                                false,
+                                                1,
+                                                false,
+                                                null,
+                                                HugeTestUtils.URN_SETS[0],
+                                                false,
+                                                false,
+                                                "TEST",
+                                                Collections.EMPTY_SET,
+                                                -1,
+                                                0,
+                                                false);
+        HTTPDownloader d = new HTTPDownloader(rfd, null, false);
+        PrivilegedAccessor.setValue(d, "_headerReader", reader);
+        return d;
+    }
+    
+    private static void readHeaders(HTTPDownloader d) throws Exception {
+        d.parseHeaders();
+    }
+}
