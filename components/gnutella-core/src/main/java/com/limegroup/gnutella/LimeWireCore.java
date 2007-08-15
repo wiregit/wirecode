@@ -268,6 +268,10 @@ public class LimeWireCore {
     public DownloadManager getDownloadManager() {
         return injector.getInstance(DownloadManager.class);
     }
+    
+    public Provider<DownloadManager> getDownloadManagerFactory() {
+        return injector.getProvider(DownloadManager.class);
+    }
 
     public AltLocFinder getAltLocFinder() {
         return injector.getInstance(AltLocFinder.class);

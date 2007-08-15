@@ -69,7 +69,7 @@ public class HeadPongTest extends LimeTestCase {
         fileManager = new FileManagerStub();
         uploadManager = new UploadManagerStub();
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory());
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), ProviderHacks.getDownloadManagerFactory());
         
         SSLSettings.TLS_INCOMING.setValue(false);
         ProviderHacks.getAltLocManager().purge();
@@ -673,7 +673,8 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fd.setActivelyDownloading(true);
+        // DPINJ this was moved to DownloadManager 
+        //fd.setActivelyDownloading(true);
         fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         

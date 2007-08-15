@@ -23,8 +23,9 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -162,16 +163,15 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static void removeOldEntries(Map <URN, HashTree> map) {
+    private static void removeOldEntries(Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
         // discard outdated info
         Iterator<URN> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
             if (map.get(sha1) != BUSH) {
-                if (ProviderHacks.getFileManager().getFileDescForUrn(sha1) != null)
+                if (fileManager.getFileDescForUrn(sha1) != null)
                     continue;
-                else if (ProviderHacks.getDownloadManager()
-                        .getIncompleteFileManager().getFileForUrn(sha1) != null)
+                else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null)
                     continue;
                 else if (Math.random() > map.size() / 200)
                     // lazily removing entries if we don't have
@@ -187,14 +187,14 @@ public final class TigerTreeCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    public synchronized void persistCache(FileManager fileManager, DownloadManager downloadManager) {
         if(!dirty)
             return;
         
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
-        removeOldEntries(TREE_MAP);
+        removeOldEntries(TREE_MAP, fileManager, downloadManager);
 
         ObjectOutputStream oos = null;
         try {
@@ -213,7 +213,8 @@ public final class TigerTreeCache {
     /**
      * Simple runnable that processes the hash of a FileDesc.
      */
-    private static class HashRunner implements Runnable {
+    private class HashRunner implements Runnable {
+        
         private final FileDesc FD;
 
         HashRunner(FileDesc fd) {
@@ -224,7 +225,7 @@ public final class TigerTreeCache {
             try {
                 URN sha1 = FD.getSHA1Urn();
                 // if it was scheduled multiple times, ignore latter times.
-                if(ProviderHacks.getTigerTreeCache().getHashTree(sha1) == null) {
+                if (TigerTreeCache.this.getHashTree(sha1) == null) {
                     HashTree tree = HashTree.createHashTree(FD);
                     addHashTree(sha1, tree);
                 }

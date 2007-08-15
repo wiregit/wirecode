@@ -464,7 +464,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         fileManager.get().stop(); // Saves UrnCache and CreationTimeCache
 
-        tigerTreeCache.get().persistCache();
+        tigerTreeCache.get().persistCache(fileManager.get(), downloadManager.get());
 
         LicenseFactory.persistCache();
         

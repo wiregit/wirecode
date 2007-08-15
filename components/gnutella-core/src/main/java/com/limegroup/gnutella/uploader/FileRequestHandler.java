@@ -18,7 +18,9 @@ import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -69,6 +71,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final AltLocManager altLocManager;
 
     private final AlternateLocationFactory alternateLocationFactory;
+
+    private final Provider<DownloadManager> downloadManager;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
@@ -76,7 +80,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             HttpRequestHandlerFactory httpRequestHandlerFactory,
             CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
             AltLocManager altLocManager,
-            AlternateLocationFactory alternateLocationFactory) {
+            AlternateLocationFactory alternateLocationFactory,
+            Provider<DownloadManager> downloadManager) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -85,6 +90,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.fileResponseEntityFactory = fileResponseEntityFactory;
         this.altLocManager = altLocManager;
         this.alternateLocationFactory = alternateLocationFactory;
+        this.downloadManager = downloadManager;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -365,8 +371,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         httpHeaderUtils.addProxyHeader(response);
 
         if (fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (!ifd.isActivelyDownloading()) {
+            if (!downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
                 response.addHeader(HTTPHeaderName.RETRY_AFTER
                         .create(INACTIVE_RETRY_AFTER));
             }

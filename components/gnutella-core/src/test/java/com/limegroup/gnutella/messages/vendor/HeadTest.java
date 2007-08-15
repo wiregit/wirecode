@@ -188,7 +188,7 @@ public class HeadTest extends LimeTestCase {
         _um = new UploadManagerStub();
         _fm = new FileManagerStub(urns,descs);
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory());
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), ProviderHacks.getDownloadManagerFactory());
         
         assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
         assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));
@@ -316,8 +316,9 @@ public class HeadTest extends LimeTestCase {
 	/**
 	 * tests whether the downloading flag is set properly.
 	 */
-	public void testActivelyDownloading() throws Exception {	
-		_partial.setActivelyDownloading(true);
+	public void testActivelyDownloading() throws Exception {
+	    // DPINJ this was moved to DownloadManager
+		//_partial.setActivelyDownloading(true);
 		HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -325,8 +326,9 @@ public class HeadTest extends LimeTestCase {
 		assertTrue(pong.isDownloading());
     }
     
-    public void testNotActivelyDownloading() throws Exception {		
-		_partial.setActivelyDownloading(false);
+    public void testNotActivelyDownloading() throws Exception {
+        // DPINJ this was moved to DownloadManager
+		//_partial.setActivelyDownloading(false);
         HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();

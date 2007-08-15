@@ -74,36 +74,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public HashTree getHashTree() {
         return null;
     }
-
-    private Downloader getMyDownloader() {
-        return ProviderHacks.getDownloadManager().getDownloaderForURN(getSHA1Urn());
-    }
     
-	/**
-	 * Returns whether or not we are actively downloading this file.
-	 */
-	public boolean isActivelyDownloading() {
-        
-        Downloader md = getMyDownloader();
-	    
-	    if(md == null)
-	        return false;
-	        
-        switch(md.getState()) {
-        case QUEUED:
-        case BUSY:
-        case ABORTED:
-        case GAVE_UP:
-        case DISK_PROBLEM:
-        case CORRUPT_FILE:
-        case REMOTE_QUEUED:
-        case WAITING_FOR_USER:
-            return false;
-        default:
-            return true;
-        }
-    }
-    public IntervalSet.ByteIntervals getRangesAsByte() {
+	public IntervalSet.ByteIntervals getRangesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**

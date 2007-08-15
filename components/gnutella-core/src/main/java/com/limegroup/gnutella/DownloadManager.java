@@ -381,6 +381,30 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Returns whether or not we are actively downloading this file.
+     */
+    public boolean isActivelyDownloading(URN urn) {
+        Downloader md = getDownloaderForURN(urn);
+        
+        if(md == null)
+            return false;
+            
+        switch(md.getState()) {
+        case QUEUED:
+        case BUSY:
+        case ABORTED:
+        case GAVE_UP:
+        case DISK_PROBLEM:
+        case CORRUPT_FILE:
+        case REMOTE_QUEUED:
+        case WAITING_FOR_USER:
+            return false;
+        default:
+            return true;
+        }
+    }
+    
+    /**
      * Returns the IncompleteFileManager used by this DownloadManager
      * and all ManagedDownloaders.
      */
@@ -1206,5 +1230,5 @@ public class DownloadManager implements BandwidthTracker {
 		}
 		return fileName;
 	}
-	
+
 }

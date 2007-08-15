@@ -21,6 +21,7 @@ import org.limewire.util.ByteOrder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -56,18 +57,22 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     /** The packet size used by this class -- non-final for testing. */
     // DPINJ: Should either be a parameter in the constructor, or changed by a setter
     private static /*final*/ int PACKET_SIZE = DEFAULT_PACKET_SIZE;
+
+    private final Provider<DownloadManager> downloadManager;
     
     @Inject
     public HeadPongFactoryImpl(NetworkManager networkManager,
             Provider<UploadManager> uploadManager,
             Provider<FileManager> fileManager,
             Provider<AltLocManager> altLocManager,
-            PushEndpointFactory pushEndpointFactory) {
+            PushEndpointFactory pushEndpointFactory,
+            Provider<DownloadManager> downloadManager) {
         this.networkManager = networkManager;
         this.uploadManager = uploadManager;
         this.fileManager = fileManager;
         this.altLocManager = altLocManager;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.downloadManager = downloadManager;
     }
 
     /* (non-Javadoc)
@@ -175,8 +180,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         if(fd instanceof IncompleteFileDesc) {
             code |= HeadPong.PARTIAL_FILE;
             
-            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            if(ifd.isActivelyDownloading())
+            if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn()))
                 code |= HeadPong.DOWNLOADING;
         } else {
             code |= HeadPong.COMPLETE_FILE;
