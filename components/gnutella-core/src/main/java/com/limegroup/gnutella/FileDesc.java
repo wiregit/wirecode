@@ -14,7 +14,6 @@ import org.limewire.util.RPNParser.StringLookup;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -337,14 +336,6 @@ public class FileDesc implements StringLookup {
         return URNS.contains(urn);
     }
     
-    /**
-     * Returns TIGER_TREE
-     * @return the <tt>TigerTree</tt> this class holds
-     */
-    public HashTree getHashTree() {
-        return ProviderHacks.getTigerTreeCache().getHashTree(this);
-    }
-      
     /**
      * Increase & return the new hit count.
      * @return the new hit count

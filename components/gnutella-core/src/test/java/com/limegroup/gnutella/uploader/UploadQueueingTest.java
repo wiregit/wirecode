@@ -401,7 +401,7 @@ public class UploadQueueingTest extends BaseTestCase {
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         
         for(int i = 0;i<5;i++)
-        	fm.get(i).getHashTree();
+        	ProviderHacks.getTigerTreeCache().getHashTree(fm.get(i));
         
         Thread.sleep(5000);
         
@@ -1171,7 +1171,7 @@ public class UploadQueueingTest extends BaseTestCase {
     
     private static void addThexHeader(HTTPDownloader dl) throws Exception {
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader",
-                fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
+                ProviderHacks.getTigerTreeCache().getHashTree(fm.get((int)dl.getIndex())).httpStringValue());
     }
     
     private static void kill(HTTPDownloader downloader) {

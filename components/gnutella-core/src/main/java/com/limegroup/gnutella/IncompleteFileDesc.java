@@ -8,7 +8,6 @@ import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, 
@@ -65,15 +64,6 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	public String getFileName() {
 		return _name;
 	}
-    
-    /**
-     * Returns null, overrides super.getHashTree to prevent us from offering
-     * HashTrees for incomplete files.
-     * @return null
-     */
-    public HashTree getHashTree() {
-        return null;
-    }
     
 	public IntervalSet.ByteIntervals getRangesAsByte() {
     	return _verifyingFile.toBytes();

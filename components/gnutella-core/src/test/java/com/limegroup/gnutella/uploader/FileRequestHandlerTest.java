@@ -85,7 +85,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
                         .getCreationTimeCache(), ProviderHacks.getFileResponseEntityFactory(),
                         ProviderHacks.getAltLocManager(),
                         ProviderHacks.getAlternateLocationFactory(),
-                        Providers.of(ProviderHacks.getDownloadManager()));        
+                        Providers.of(ProviderHacks.getDownloadManager()),
+                        Providers.of(ProviderHacks.getTigerTreeCache()));        
     }
     
     public void testHandleAccept() throws Exception {

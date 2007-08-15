@@ -26,6 +26,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -75,6 +76,10 @@ public final class TigerTreeCache {
      * @return HashTree for File
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
+        if (fd instanceof IncompleteFileDesc) {
+            return null;
+        }
+        
         HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
         if (tree != null && tree == BUSH)
             return null;

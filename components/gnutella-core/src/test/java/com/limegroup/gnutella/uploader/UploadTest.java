@@ -208,10 +208,10 @@ public class UploadTest extends LimeTestCase {
     private void initThexTree() throws Exception {
         FD = ProviderHacks.getFileManager().getFileDescForFile(
                 new File(_sharedDir, fileName));
-        while (FD.getHashTree() == null) {
+        while (ProviderHacks.getTigerTreeCache().getHashTree(FD) == null) {
             Thread.sleep(300);
         }
-        ROOT32 = FD.getHashTree().getRootHash();
+        ROOT32 = ProviderHacks.getTigerTreeCache().getHashTree(FD).getRootHash();
     }
 
     public void testHTTP10Download() throws Exception {
@@ -1218,7 +1218,7 @@ public class UploadTest extends LimeTestCase {
             parser.nextRecord(); // xml
             DIMERecord tree = parser.nextRecord();
             assertFalse(parser.hasNext());
-            List<List<byte[]>> allNodes = FD.getHashTree().getAllNodes();
+            List<List<byte[]>> allNodes = ProviderHacks.getTigerTreeCache().getHashTree(FD).getAllNodes();
             byte[] data = tree.getData();
             int offset = 0;
             for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter

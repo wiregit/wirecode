@@ -37,6 +37,7 @@ import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
@@ -73,6 +74,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final AlternateLocationFactory alternateLocationFactory;
 
     private final Provider<DownloadManager> downloadManager;
+
+    private final Provider<TigerTreeCache> tigerTreeCache;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
@@ -81,7 +84,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
             AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
-            Provider<DownloadManager> downloadManager) {
+            Provider<DownloadManager> downloadManager,
+            Provider<TigerTreeCache> tigerTreeCache) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -91,6 +95,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.altLocManager = altLocManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
+        this.tigerTreeCache = tigerTreeCache;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -310,9 +315,9 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // write X-Thex-URI header with root hash if we have already
         // calculated the tigertree
-        if (fd.getHashTree() != null) {
-            response
-                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
+        if (tree != null) {
+            response.addHeader(HTTPHeaderName.THEX_URI.create(tree));
         }
 
         response.setEntity(fileResponseEntityFactory.createFileResponseEntity(uploader,
@@ -339,7 +344,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // do not count THEX transfers towards the total amount 
         uploader.setIgnoreTotalAmountUploaded(true);
         
-        HashTree tree = fd.getHashTree();
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
         if (tree == null) {
             // tree was requested before hashing completed
             uploader.setState(UploadStatus.FILE_NOT_FOUND);
@@ -406,9 +411,9 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // write X-Thex-URI header with root hash if we have already
         // calculated the tigertree
-        if (fd.getHashTree() != null) {
-            response
-                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
+        if (tree != null) {
+            response.addHeader(HTTPHeaderName.THEX_URI.create(tree));
         }
 
         response.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
@@ -462,7 +467,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         // handling THEX Requests
-        if (thexRequest && fd.getHashTree() == null) {
+        if (thexRequest && tigerTreeCache.get().getHashTree(fd) == null) {
             return false;
         }
 
