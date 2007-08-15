@@ -61,7 +61,6 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.SpamManager;
-import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -117,7 +116,6 @@ public class ProviderHacks {
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
-    public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
