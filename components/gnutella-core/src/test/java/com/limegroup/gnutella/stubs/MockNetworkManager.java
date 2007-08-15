@@ -91,4 +91,8 @@ public class MockNetworkManager implements NetworkManager {
         
     }
 
+    public int getStableUDPPort() {
+        return 0;
+    }
+
 }

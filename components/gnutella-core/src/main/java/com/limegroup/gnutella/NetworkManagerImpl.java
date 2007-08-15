@@ -200,4 +200,8 @@ public class NetworkManagerImpl implements NetworkManager {
     public boolean canDoFWT() {
         return udpService.get().canDoFWT();
     }
+    
+    public int getStableUDPPort() {
+        return udpService.get().getStableUDPPort();
+    }
 }

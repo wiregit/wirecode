@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.search;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -28,51 +31,49 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
 
     private final ForMeReplyHandler forMeReplyHandler;
 
+    private final Provider<ConnectionManager> connectionManager;
+
+    private final Provider<MessageRouter> messageRouter;
+
     @Inject
-    public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory, ForMeReplyHandler forMeReplyHandler) {
+    public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory,
+            ForMeReplyHandler forMeReplyHandler,
+            Provider<ConnectionManager> connectionManager,
+            Provider<MessageRouter> messageRouter) {
         this.queryRequestFactory = queryRequestFactory;
         this.forMeReplyHandler = forMeReplyHandler;
+        this.connectionManager = connectionManager;
+        this.messageRouter = messageRouter;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.search.QueryHandlerFactory#createHandler(com.limegroup.gnutella.messages.QueryRequest, com.limegroup.gnutella.ReplyHandler, com.limegroup.gnutella.search.ResultCounter)
-     */
     public QueryHandler createHandler(QueryRequest query, ReplyHandler handler,
             ResultCounter counter) {
         return new QueryHandler(query, QueryHandler.ULTRAPEER_RESULTS, handler,
-                counter, queryRequestFactory);
+                counter, queryRequestFactory, connectionManager.get(), messageRouter.get());
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.search.QueryHandlerFactory#createHandlerForMe(com.limegroup.gnutella.messages.QueryRequest, com.limegroup.gnutella.search.ResultCounter)
-     */
     public QueryHandler createHandlerForMe(QueryRequest query,
             ResultCounter counter) {
         // because UPs seem to get less results, give them more than usual
         return new QueryHandler(
                 query,
                 (int) (QueryHandler.ULTRAPEER_RESULTS * QueryHandler.UP_RESULT_BUMP),
-                forMeReplyHandler, counter, queryRequestFactory);
+                forMeReplyHandler, counter, queryRequestFactory, connectionManager.get(),
+                messageRouter.get());
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.search.QueryHandlerFactory#createHandlerForOldLeaf(com.limegroup.gnutella.messages.QueryRequest, com.limegroup.gnutella.ReplyHandler, com.limegroup.gnutella.search.ResultCounter)
-     */
     public QueryHandler createHandlerForOldLeaf(QueryRequest query,
             ReplyHandler handler, ResultCounter counter) {
         return new QueryHandler(query,
                 QueryHandlerFactoryImpl.OLD_LEAF_RESULTS, handler, counter,
-                queryRequestFactory);
+                queryRequestFactory, connectionManager.get(), messageRouter.get());
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.search.QueryHandlerFactory#createHandlerForNewLeaf(com.limegroup.gnutella.messages.QueryRequest, com.limegroup.gnutella.ReplyHandler, com.limegroup.gnutella.search.ResultCounter)
-     */
     public QueryHandler createHandlerForNewLeaf(QueryRequest query,
             ReplyHandler handler, ResultCounter counter) {
         return new QueryHandler(query,
                 QueryHandlerFactoryImpl.NEW_LEAF_RESULTS, handler, counter,
-                queryRequestFactory);
+                queryRequestFactory, connectionManager.get(), messageRouter.get());
     }
 
 }

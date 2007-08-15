@@ -78,11 +78,11 @@ final class ProbeQuery {
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
         for(ManagedConnection mc : TTL_1_PROBES)
-            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
+            hosts += QUERY_HANDLER.sendQueryToHost(query, mc);
         
         query = QUERY_HANDLER.createQuery((byte)2);
         for(ManagedConnection mc : TTL_2_PROBES)
-            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
+            hosts += QUERY_HANDLER.sendQueryToHost(query, mc);
         
         TTL_1_PROBES.clear();
         TTL_2_PROBES.clear();

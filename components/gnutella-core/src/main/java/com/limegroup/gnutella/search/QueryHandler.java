@@ -17,7 +17,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -106,20 +105,6 @@ public final class QueryHandler implements Inspectable {
 
 
 	/**
-	 * Handle to the <tt>MessageRouter</tt> instance.  Non-final for
-     * testing purposes.
-	 */
-	private static MessageRouter _messageRouter =
-		ProviderHacks.getMessageRouter();
-
-	/**
-	 * Handle to the <tt>ConnectionManager</tt> instance.  Non-final for
-     * testing purposes.
-	 */
-	private static ConnectionManager _connectionManager =
-		ProviderHacks.getConnectionManager();
-
-    /**
      * Variable for the number of results the leaf reports it has.
      */
     private volatile int _numResultsReportedByLeaf = 0;
@@ -192,6 +177,10 @@ public final class QueryHandler implements Inspectable {
     
     private final QueryRequestFactory queryRequestFactory;
 
+    private final ConnectionManager connectionManager;
+
+    private final MessageRouter messageRouter;
+
 	/**
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
@@ -206,7 +195,11 @@ public final class QueryHandler implements Inspectable {
      *  many results have been returned for this query
 	 */
 	QueryHandler(QueryRequest query, int results, ReplyHandler handler,
-                         ResultCounter counter, QueryRequestFactory queryRequestFactory) {
+                         ResultCounter counter, QueryRequestFactory queryRequestFactory,
+                         ConnectionManager connectionManager,
+                         MessageRouter messageRouter) {
+        this.connectionManager = connectionManager;
+        this.messageRouter = messageRouter;
         if( query == null )
             throw new IllegalArgumentException("null query");
         if( handler == null )
@@ -303,8 +296,7 @@ public final class QueryHandler implements Inspectable {
         if(!_forwardedToLeaves) {
 
             _forwardedToLeaves = true;
-            QueryRouteTable qrt = 
-                ProviderHacks.getMessageRouter().getQueryRouteTable();
+            QueryRouteTable qrt = messageRouter.getQueryRouteTable();
 
             QueryRequest query = createQuery(QUERY, (byte)1);
 
@@ -313,7 +305,7 @@ public final class QueryHandler implements Inspectable {
             // send the query to our leaves if there's a hit and wait,
             // otherwise we'll move on to the probe
             if(qrt != null && qrt.contains(query)) {
-                ProviderHacks.getMessageRouter().
+                messageRouter.
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
                 _nextQueryTime = 
@@ -325,7 +317,7 @@ public final class QueryHandler implements Inspectable {
         // 2) If we haven't sent the probe query, send it
         if(!_probeQuerySent) {
             ProbeQuery pq = 
-                new ProbeQuery(_connectionManager.getInitializedConnections(),
+                new ProbeQuery(connectionManager.getInitializedConnections(),
                                this);
             long timeToWait = pq.getTimeToWait();            
             _theoreticalHostsQueried += pq.sendProbe();
@@ -342,7 +334,7 @@ public final class QueryHandler implements Inspectable {
             int newHosts = 
                 sendQuery(
                     new ArrayList<ManagedConnection>(
-                            _connectionManager.getInitializedConnections()));
+                            connectionManager.getInitializedConnections()));
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
                 // connections to potentially appear
@@ -400,7 +392,7 @@ public final class QueryHandler implements Inspectable {
 
         //we want to try to use all connections in ultrapeersLocale first.
         List<? extends ManagedConnection> ultrapeers = // method returns a copy
-            _connectionManager.getInitializedConnectionsMatchLocale
+            connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
             
         QUERIED_CONNECTIONS.retainAll(ultrapeersAll);
@@ -506,7 +498,7 @@ public final class QueryHandler implements Inspectable {
 
         // send out the query on the network, returning the number of new
         // hosts theoretically reached
-        return sendQueryToHost(query, mc, this);        
+        return sendQueryToHost(query, mc);        
 	}
     
 
@@ -515,16 +507,13 @@ public final class QueryHandler implements Inspectable {
      *
      * @param query the <tt>QueryRequest</tt> to send
      * @param mc the <tt>ManagedConnection</tt> to send the query to
-     * @param handler the <tt>QueryHandler</tt> 
      * @return the number of new hosts theoretically hit by this query
      */
-    static int sendQueryToHost(QueryRequest query, 
-                               ManagedConnection mc, 
-                               QueryHandler handler) {
+    int sendQueryToHost(QueryRequest query, ManagedConnection mc) {
         
         // send the query directly along the connection, but if the query didn't
         // go through send back 0....
-        if (!_messageRouter.originateQuery(query, mc)) return 0;
+        if (!messageRouter.originateQuery(query, mc)) return 0;
         
         byte ttl = query.getTTL();
 
@@ -535,20 +524,20 @@ public final class QueryHandler implements Inspectable {
         // a TTL=1 query to a connection that supports probe extensions,
         // otherwise add it to the list of connections we've queried
         if(ttl == 1 && mc.supportsProbeQueries()) {
-            handler.QUERIED_PROBE_CONNECTIONS.add(mc);
+            this.QUERIED_PROBE_CONNECTIONS.add(mc);
         } else {
-            handler.QUERIED_CONNECTIONS.add(mc);
+            this.QUERIED_CONNECTIONS.add(mc);
             if (LOG.isTraceEnabled())
                 LOG.trace("QUERIED_CONNECTIONS.size() = " +
-                          handler.QUERIED_CONNECTIONS.size());
+                        this.QUERIED_CONNECTIONS.size());
         }
 
         if (LOG.isTraceEnabled())
             LOG.trace("Querying host " + mc.getAddress() + " with ttl " +
                       query.getTTL());
         
-        handler._nextQueryTime = System.currentTimeMillis() + 
-            (ttl * handler._timeToWaitPerHop);
+        this._nextQueryTime = System.currentTimeMillis() + 
+            (ttl * this._timeToWaitPerHop);
 
         return calculateNewHosts(mc, ttl);
     }

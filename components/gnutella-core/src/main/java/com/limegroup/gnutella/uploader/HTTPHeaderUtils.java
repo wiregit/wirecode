@@ -11,11 +11,12 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -33,11 +34,13 @@ public class HTTPHeaderUtils {
 
     private final NetworkManager networkManager;
     private final FeaturesWriter featuresWriter;
+    private final Provider<ConnectionManager> connectionManager;
     
     @Inject
-    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager) {
+    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager, Provider<ConnectionManager> connectionManager) {
         this.networkManager = networkManager;
         this.featuresWriter = featuresWriter;
+        this.connectionManager = connectionManager;
     }
     
     /**
@@ -63,8 +66,7 @@ public class HTTPHeaderUtils {
         if (networkManager.acceptedIncomingConnection())
             return;
 
-        Set<? extends Connectable> proxies = ProviderHacks.getConnectionManager()
-                .getPushProxies();
+        Set<? extends Connectable> proxies = connectionManager.get().getPushProxies();
 
         StringBuilder buf = new StringBuilder();
         int proxiesWritten = 0;
@@ -97,7 +99,7 @@ public class HTTPHeaderUtils {
         // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
         // for future fw-fw transfers
         if (networkManager.canDoFWT()) {
-            response.addHeader(HTTPHeaderName.FWTPORT.create(ProviderHacks.getUdpService().getStableUDPPort() + ""));
+            response.addHeader(HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + ""));
         }
     }
 

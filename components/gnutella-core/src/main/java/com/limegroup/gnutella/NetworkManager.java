@@ -89,4 +89,6 @@ public interface NetworkManager {
 
     public boolean canDoFWT();
 
+    public int getStableUDPPort();
+
 }
