@@ -236,6 +236,7 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
+        requestStaticInjection(RemoteFileDesc.class);
                 
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();

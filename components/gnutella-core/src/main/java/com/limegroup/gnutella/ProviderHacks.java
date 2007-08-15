@@ -130,8 +130,6 @@ public class ProviderHacks {
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
     
-    // Requires cleaning up RemoteFileDesc deserialization, or doing something else
-    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
     
     // Cleaned up in all but tests
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
@@ -230,6 +228,8 @@ public class ProviderHacks {
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
+    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
+
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

@@ -29,6 +29,7 @@ import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -198,6 +199,11 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     private static enum RFDProperties {
         PUSH_ADDR, CONNECT_TYPE, LONG_SIZE;
     }
+    
+    @Inject
+    private static PushEndpointFactory globalPushEndpointFactory;
+    
+    private final transient PushEndpointFactory pushEndpointFactory;    
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -374,7 +380,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
-	    
+	    this.pushEndpointFactory = globalPushEndpointFactory;
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -411,7 +417,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 _pushAddr = pe;
             else {
                 try {
-                    _pushAddr = ProviderHacks.getPushEndpointFactory().createPushEndpoint(clientGUID, proxies, PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(_host,_port));
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(clientGUID, proxies, PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(_host,_port));
                 }catch (UnknownHostException uhe) {
                     throw new IllegalArgumentException(uhe);
                 }
@@ -489,7 +495,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 http = (String)propertiesMap.get("_pushAddr");
             if (http != null) {
                 try {
-                    _pushAddr = ProviderHacks.getPushEndpointFactory().createPushEndpoint(http);
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(http);
                     if (!_firewalled) {
                         ErrorService.error(new IllegalStateException(
                                 "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));
