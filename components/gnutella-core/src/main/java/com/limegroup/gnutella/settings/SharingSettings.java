@@ -65,6 +65,12 @@ public class SharingSettings extends LimeProps {
                 DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
     
     /**
+     * Directory for saving songs purchased from LimeWire Store
+     */
+    public static final StringSetting TEMPLATE_FOR_SAVING_LWS_FILES = 
+        (StringSetting)FACTORY.createStringSetting("TEMPLATE_FOR_SAVING_LWS_FILES","").setAlwaysSave(true);
+    
+    /**
      * The directory where incomplete files are stored (downloads in progress).
      */
     public static final FileSetting INCOMPLETE_DIRECTORY =
@@ -245,13 +251,27 @@ public class SharingSettings extends LimeProps {
         DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
     }
     
+    
     /**
      * @return directory of where to save songs purchased from LimeWireStore
      */
     public static final File getSaveLWSDirectory() {
-        return DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+        File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+        if (!f.exists()) f.mkdirs();
+        return f;
+    }
+    
+    public static final void setSaveLWSTemplate(String template) throws IOException { 
+        if(template == null) template = "";
+        TEMPLATE_FOR_SAVING_LWS_FILES.setValue(template);
     }
 
+    /**
+     * @return template of how to store LWS files
+     */
+    public static final String getSaveLWSTemplate() {
+        return TEMPLATE_FOR_SAVING_LWS_FILES.getValue();
+    }
     
     /*********************************************************************/
     

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -19,18 +20,18 @@ public class StoreSaveTemplateProcessorTest extends LimeTestCase {
     }
     
     private final static Map<String,String> SUBSTITUTIONS = new HashMap<String,String>();
-    private static final String ALBUM = "*album*";
-    private static final String ARTIST = "*artist*";
-    private static final String HOME = "*home*";
-    private static final String ALBUM_VAR = "${" + StoreSaveTemplateProcessor.ALBUM_LABLE + "}";
-    private static final String ARTIST_VAR = "${" + StoreSaveTemplateProcessor.ARTIST_LABLE + "}";
-    private static final String HOME_VAR = "${" + StoreSaveTemplateProcessor.HOME_LABLE + "}";
+    private static final String ALBUM       = "*album*";
+    private static final String ARTIST      = "*artist*";
+    private static final String HOME        = "*home*";
+    private static final String ALBUM_VAR   = "${" + StoreSaveTemplateProcessor.ALBUM_LABLE +   "}";
+    private static final String ARTIST_VAR  = "${" + StoreSaveTemplateProcessor.ARTIST_LABLE +  "}";
+    private static final String HOME_VAR    = "${" + StoreSaveTemplateProcessor.HOME_LABLE +    "}";
 
     private static final File OUTDIR = new File(".");
     static {
-        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.ALBUM_LABLE, ALBUM);
-        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.ARTIST_LABLE, ARTIST);
-        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.HOME_LABLE, HOME);
+        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.ALBUM_LABLE,   ALBUM);
+        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.ARTIST_LABLE,  ARTIST);
+        SUBSTITUTIONS.put(StoreSaveTemplateProcessor.HOME_LABLE,    HOME);
     }
     
     public void testNull() {
@@ -76,8 +77,18 @@ public class StoreSaveTemplateProcessorTest extends LimeTestCase {
     public void testHomeSub() {
         runTest(HOME_VAR, new File(OUTDIR,HOME));
     }
-
+    
     private void runTest(final String template, final File want) {
+        //
+        // Put whitespace around the braces
+        //
+        runTestInternal(template.replace("{", "{ "), want);
+        runTestInternal(template.replace("{", " {"), want);
+        runTestInternal(template.replace("}", " }"), want);
+        runTestInternal(template.replace("}", "} "), want);
+    }
+
+    private void runTestInternal(final String template, final File want) {
         try {
             final File have = new StoreSaveTemplateProcessor().getOutputDirectory(template, SUBSTITUTIONS, OUTDIR);
             assertEquals(template + ":" + want + " != " + have, want, have);

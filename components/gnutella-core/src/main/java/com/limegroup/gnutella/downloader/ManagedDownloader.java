@@ -1920,7 +1920,7 @@ public class ManagedDownloader extends AbstractDownloader
 		if (saveFile != null) {
 			return (File)saveFile;
 		}
-        String fileName = getDefaultFileName(); 
+        String fileName = getDefaultFileName();
         return new File(SharingSettings.getSaveDirectory(fileName), fileName);
     }  
     
