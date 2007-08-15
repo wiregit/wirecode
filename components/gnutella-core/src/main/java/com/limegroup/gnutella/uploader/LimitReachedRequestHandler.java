@@ -75,7 +75,7 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         httpHeaderUtils.addProxyHeader(response);
-        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
 
         String errorMsg = ERROR_MESSAGE;
         if (fd != null) {

@@ -53,7 +53,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         uploadEnd = 0;
         containedRangeRequest = false;
         method = null;
-		}
+    }
 		
     @Override
     public void setFileDesc(FileDesc fd) {

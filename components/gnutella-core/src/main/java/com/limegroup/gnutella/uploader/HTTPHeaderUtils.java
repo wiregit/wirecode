@@ -19,8 +19,10 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.http.AltLocTracker;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -107,45 +109,56 @@ public class HTTPHeaderUtils {
      * Adds alternate locations for <code>fd</code> to <code>response</code>
      * if available.
      */
-    public void addAltLocationsHeader(HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) {
-        // write the URN in case the caller wants it
-        URN sha1 = fd.getSHA1Urn();
-        if (sha1 != null) {
-            response
-                    .addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(sha1));
-            Collection<DirectAltLoc> direct = uploader.getAltLocTracker().getNextSetOfAltsToSend();
-            if (direct.size() > 0) {
-                List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
-                final BitNumbers bn = new BitNumbers(direct.size());
-                for(DirectAltLoc al : direct) {
-                    IpPort ipp = al.getHost();
-                    if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
-                        bn.set(ordered.size());
-                    ordered.add(al);
-                }
-                
-                if(!bn.isEmpty()) {
-                    ordered.add(0, new HTTPHeaderValue() {
-                        public String httpStringValue() {
-                            return DirectAltLoc.TLS_IDX + bn.toHexString();
-                        }
-                    });
-                }
-                
-                response.addHeader(HTTPHeaderName.ALT_LOCATION
-                        .create(new HTTPHeaderValueCollection(ordered)));
+    public void addAltLocationsHeader(HttpResponse response, AltLocTracker altLocTracker, AltLocManager altLocManager) {
+        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(altLocTracker.getUrn()));
+        Collection<DirectAltLoc> direct = altLocTracker.getNextSetOfAltsToSend(altLocManager);
+        if (direct.size() > 0) {
+            List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(
+                    direct.size());
+            final BitNumbers bn = new BitNumbers(direct.size());
+            for (DirectAltLoc al : direct) {
+                IpPort ipp = al.getHost();
+                if (ipp instanceof Connectable
+                        && ((Connectable) ipp).isTLSCapable())
+                    bn.set(ordered.size());
+                ordered.add(al);
             }
 
-            if (uploader.getAltLocTracker().wantsFAlts()) {
-                Collection<PushAltLoc> pushes = uploader.getAltLocTracker().getNextSetOfPushAltsToSend();
-                if (pushes.size() > 0) {
-                    response.addHeader(HTTPHeaderName.FALT_LOCATION
-                            .create(new HTTPHeaderValueCollection(pushes)));
-                }
+            if (!bn.isEmpty()) {
+                ordered.add(0, new HTTPHeaderValue() {
+                    public String httpStringValue() {
+                        return DirectAltLoc.TLS_IDX + bn.toHexString();
+                    }
+                });
+            }
+
+            response.addHeader(HTTPHeaderName.ALT_LOCATION
+                    .create(new HTTPHeaderValueCollection(ordered)));
+        }
+
+        if (altLocTracker.wantsFAlts()) {
+            Collection<PushAltLoc> pushes = altLocTracker.getNextSetOfPushAltsToSend(altLocManager);
+            if (pushes.size() > 0) {
+                response.addHeader(HTTPHeaderName.FALT_LOCATION
+                        .create(new HTTPHeaderValueCollection(pushes)));
             }
         }
     }
+
+//    public void addAltLocationsHeaders(HttpResponse response, HTTPUploader uploader, URN urn) {
+//        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(urn));
+//        Collection<? extends AlternateLocation> alts = uploader.getAltLocTracker().getNextSetOfAltsToSend();
+//        if(alts.size() > 0) {
+//            response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+//        }
+//
+//        if (uploader.getAltLocTracker().wantsFAlts) {
+//            alts = getNextSetOfPushAltsToSend();
+//            if (alts.size() > 0) {
+//                response.addHeader(HTTPHeaderName.FALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+//            }
+//        }
+//    }
 
     /**
      * Adds an <code>X-Features</code> header to <code>response</code>.

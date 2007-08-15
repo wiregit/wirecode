@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
@@ -79,7 +78,8 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         super.initialize(downloadReferences);
         if (downloadSHA1 == null) {
             downloadSHA1 = urn;
-            ProviderHacks.getAltLocManager().addListener(downloadSHA1,this);
+            // the listener is removed by ManagedDownloader.finished()
+            altLocManager.addListener(downloadSHA1, this);
         }
     }
     

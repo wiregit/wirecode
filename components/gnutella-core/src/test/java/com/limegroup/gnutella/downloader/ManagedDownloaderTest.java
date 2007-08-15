@@ -1153,7 +1153,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         
         volatile boolean cancelled;
         public MyAltLocFinder() {
-            super(null, ProviderHacks.getAlternateLocationFactory());
+            super(null, ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getAltLocManager(), ProviderHacks.getPushEndpointFactory());
         }
         
         

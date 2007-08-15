@@ -16,11 +16,10 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -32,6 +31,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     private StubConnectionManager stub;
     @SuppressWarnings("all") // DPINJ: textfix
     private ConnectionManager oldCM;
+    private AltLocManager altLocManager;
 
 
     public HTTPHeaderUtilsTest(String name) {
@@ -46,6 +46,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub = new StubConnectionManager();
         stub.proxies = new StrictIpPortSet<Connectable>();
         oldCM = ProviderHacks.getConnectionManager();
+        altLocManager = ProviderHacks.getAltLocManager();
        // PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
     }
     
@@ -57,10 +58,9 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
-        
+
         tracker.setNextSetOfAltsToSend(new ArrayList<DirectAltLoc>());
-        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         assertNull(response.getLastHeader("X-Alt"));
     }
     
@@ -68,10 +68,9 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
-        
+
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "2.3.4.6", "7.3.2.1", "2.1.5.3:6201", "1.2.65.2"));
-        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         assertEquals("1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", response.getLastHeader("X-Alt").getValue());
     }
     
@@ -79,10 +78,9 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
         
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "T2.3.4.6", "T7.3.2.1", "2.1.5.3:6201", "T1.2.65.2"));
-        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         String expected = "tls=68,1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2";
         assertEquals(expected, response.getLastHeader("X-Alt").getValue());
         
@@ -198,12 +196,4 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         }        
     }
     
-    private static class StubFileDesc extends FileDesc {
-        @Override
-        public URN getSHA1Urn() {
-            return HugeTestUtils.SHA1;
-        }
-    }
-
-
 }

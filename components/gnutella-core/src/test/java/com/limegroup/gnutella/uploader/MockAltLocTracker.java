@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -39,17 +40,17 @@ class MockAltLocTracker extends AltLocTracker {
     }
 
     @Override
-    public Collection<DirectAltLoc> getNextSetOfAltsToSend() {
+    public Collection<DirectAltLoc> getNextSetOfAltsToSend(AltLocManager altLocManager) {
         if(nextSetOfAltsToSend == null)
-            return super.getNextSetOfAltsToSend();
+            return super.getNextSetOfAltsToSend(altLocManager);
         else
             return nextSetOfAltsToSend;
     }
 
     @Override
-    public Collection<PushAltLoc> getNextSetOfPushAltsToSend() {
+    public Collection<PushAltLoc> getNextSetOfPushAltsToSend(AltLocManager altLocManager) {
         if(nextSetOfPushAltsToSend == null)
-            return super.getNextSetOfPushAltsToSend();
+            return super.getNextSetOfPushAltsToSend(altLocManager);
         else
             return nextSetOfPushAltsToSend;
     }

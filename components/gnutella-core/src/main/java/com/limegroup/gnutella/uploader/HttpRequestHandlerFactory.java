@@ -8,6 +8,7 @@ public interface HttpRequestHandlerFactory {
 
     public FreeLoaderRequestHandler createFreeLoaderRequestHandler();
 
+    // TODO move LimitReachedRequestHandler into FileRequestHandler
     public LimitReachedRequestHandler createLimitReachedRequestHandler(HTTPUploader uploader);
     
     public PushProxyRequestHandler createPushProxyRequestHandler();

@@ -9,7 +9,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.Function;
 import org.limewire.http.HeaderInterceptor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -21,10 +21,12 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
  */
 public class AltLocHeaderInterceptor implements HeaderInterceptor {
 
-    private HTTPUploader uploader;
+    private final HTTPUploader uploader;
+    private final AltLocManager altLocManager;
 
-    public AltLocHeaderInterceptor(HTTPUploader uploader) {
+    public AltLocHeaderInterceptor(HTTPUploader uploader, AltLocManager altLocManager) {
         this.uploader = uploader;
+        this.altLocManager = altLocManager;
     }
 
     public void process(Header header, HttpContext context)
@@ -65,9 +67,9 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if (isGood)
-                    ProviderHacks.getAltLocManager().add(location, null);
+                    altLocManager.add(location, null);
                 else
-                    ProviderHacks.getAltLocManager().remove(location, null);
+                    altLocManager.remove(location, null);
 
                 tracker.addLocation(location);
                 return null;

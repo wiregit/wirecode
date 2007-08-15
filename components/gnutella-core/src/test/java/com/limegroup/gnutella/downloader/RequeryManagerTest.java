@@ -380,7 +380,7 @@ public class RequeryManagerTest extends LimeTestCase {
         
         volatile boolean cancelled;
         public MyAltLocFinder() {
-            super(null, ProviderHacks.getAlternateLocationFactory());
+            super(null, ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getAltLocManager(), ProviderHacks.getPushEndpointFactory());
         }
         
         

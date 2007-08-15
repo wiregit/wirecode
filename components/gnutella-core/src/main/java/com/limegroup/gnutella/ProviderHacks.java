@@ -117,7 +117,6 @@ public class ProviderHacks {
     public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }    
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
-    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
@@ -230,7 +229,7 @@ public class ProviderHacks {
     public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
     public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return i().getUDPCrawlerPongFactory(); }
     public static DHTManager getDHTManager() { return i().getDhtManager(); }    
-    
+    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }    
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

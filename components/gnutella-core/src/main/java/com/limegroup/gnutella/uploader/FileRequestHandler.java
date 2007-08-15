@@ -24,6 +24,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -63,18 +64,22 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final CreationTimeCache creationTimeCache;
 
     private final FileResponseEntityFactory fileResponseEntityFactory;
+
+    private final AltLocManager altLocManager;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
             FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
-            CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory) {
+            CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
+            AltLocManager altLocManager) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.creationTimeCache = creationTimeCache;
         this.fileResponseEntityFactory = fileResponseEntityFactory;
+        this.altLocManager = altLocManager;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -147,7 +152,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
-        processor.addInterceptor(new AltLocHeaderInterceptor(uploader));
+        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
@@ -269,7 +274,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
         }
 
-        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
@@ -350,7 +355,7 @@ public class FileRequestHandler implements HttpRequestHandler {
      */
     private void handleInvalidRange(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
-        uploader.getAltLocTracker().addAltLocHeaders(response);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
@@ -382,7 +387,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
-        httpHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
 
         if (uploader.isFirstReply()) {
