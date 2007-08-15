@@ -230,7 +230,6 @@ public class ProviderHacks {
     public static UDPHostCacheFactory getUDPHostCacheFactory() { return i().getUDPHostCacheFactory(); }
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
-    public static Provider<DownloadManager> getDownloadManagerFactory() { return i().getDownloadManagerFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

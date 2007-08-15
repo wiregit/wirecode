@@ -188,7 +188,7 @@ public class HeadTest extends LimeTestCase {
         _um = new UploadManagerStub();
         _fm = new FileManagerStub(urns,descs);
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), ProviderHacks.getDownloadManagerFactory());
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
         
         assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
         assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));

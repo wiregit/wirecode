@@ -17,6 +17,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpExecutionContext;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.util.PrivilegedAccessor;
@@ -84,7 +85,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
                         .getCreationTimeCache(), ProviderHacks.getFileResponseEntityFactory(),
                         ProviderHacks.getAltLocManager(),
                         ProviderHacks.getAlternateLocationFactory(),
-                        ProviderHacks.getDownloadManagerFactory());        
+                        Providers.of(ProviderHacks.getDownloadManager()));        
     }
     
     public void testHandleAccept() throws Exception {

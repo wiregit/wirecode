@@ -69,7 +69,7 @@ public class HeadPongTest extends LimeTestCase {
         fileManager = new FileManagerStub();
         uploadManager = new UploadManagerStub();
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), ProviderHacks.getDownloadManagerFactory());
+        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
         
         SSLSettings.TLS_INCOMING.setValue(false);
         ProviderHacks.getAltLocManager().purge();
