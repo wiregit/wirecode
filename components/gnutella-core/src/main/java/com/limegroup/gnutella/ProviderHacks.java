@@ -115,7 +115,6 @@ public class ProviderHacks {
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }  
     public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }    
-    public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
@@ -228,6 +227,8 @@ public class ProviderHacks {
     public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
     public static VendorMessageFactory getVendorMessageFactory() { return i().getVendorMessageFactory(); }
     public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }
+    public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
+    
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

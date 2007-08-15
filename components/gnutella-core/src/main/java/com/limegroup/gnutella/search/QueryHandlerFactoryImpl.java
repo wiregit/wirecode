@@ -2,7 +2,7 @@ package com.limegroup.gnutella.search;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -26,9 +26,12 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
 
     private final QueryRequestFactory queryRequestFactory;
 
+    private final ForMeReplyHandler forMeReplyHandler;
+
     @Inject
-    public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory) {
+    public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory, ForMeReplyHandler forMeReplyHandler) {
         this.queryRequestFactory = queryRequestFactory;
+        this.forMeReplyHandler = forMeReplyHandler;
     }
 
     /* (non-Javadoc)
@@ -49,7 +52,7 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
         return new QueryHandler(
                 query,
                 (int) (QueryHandler.ULTRAPEER_RESULTS * QueryHandler.UP_RESULT_BUMP),
-                ProviderHacks.getForMeReplyHandler(), counter, queryRequestFactory);
+                forMeReplyHandler, counter, queryRequestFactory);
     }
 
     /* (non-Javadoc)
