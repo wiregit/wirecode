@@ -6,17 +6,15 @@ import java.util.StringTokenizer;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPUtils;
 
-/** Useful utilities relating to AlternateLocations. */
-
-// DPINJ: Must make this into an instance class, since it requires an AlternateLocationFactory!!!
+/** 
+ * Provides utility methods relating to {@link AlternateLocation} objects. 
+ */
 public class AltLocUtils {
     
-    private AltLocUtils() {}
-    
+    private AltLocUtils() {}   
     
     /**
      * Parses an http string of alternate locations, passing each parsed
@@ -27,11 +25,11 @@ public class AltLocUtils {
      * @param allowTLS Whether or not a tls=# index is allowed.
      * @param function The closure-like function that each location is passed to.
      */
-    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, 
+    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, AlternateLocationFactory alternateLocationFactory, 
             Function<AlternateLocation, Void> function) {
-        parseAlternateLocations(sha1, locations, allowTLS, function, false);
+        parseAlternateLocations(sha1, locations, allowTLS, alternateLocationFactory, function, false);
     }
-    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, 
+    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS,  AlternateLocationFactory alternateLocationFactory, 
                                                Function<AlternateLocation, Void> function, boolean allowMe) {
         if(locations == null)
             return;
@@ -62,7 +60,7 @@ public class AltLocUtils {
             } 
 
             try {
-                AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(token, sha1, tlsIdx.isSet(idx));
+                AlternateLocation al = alternateLocationFactory.create(token, sha1, tlsIdx.isSet(idx));
                 idx++;
                 
                 assert al.getSHA1Urn().equals(sha1) : "sha1 mismatch!";

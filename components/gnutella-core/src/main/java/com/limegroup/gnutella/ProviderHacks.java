@@ -113,8 +113,7 @@ public class ProviderHacks {
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
-    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }  
-    public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }    
+    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
@@ -230,6 +229,7 @@ public class ProviderHacks {
     public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return i().getUDPCrawlerPongFactory(); }
     public static DHTManager getDHTManager() { return i().getDhtManager(); }    
     public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }    
+    public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

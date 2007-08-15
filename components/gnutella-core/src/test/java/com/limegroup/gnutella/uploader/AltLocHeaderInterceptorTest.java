@@ -65,7 +65,7 @@ public class AltLocHeaderInterceptorTest extends LimeTestCase {
         };
         
         MockHTTPUploader uploader = new MockHTTPUploader();
-        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader, ProviderHacks.getAltLocManager());
+        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader, ProviderHacks.getAltLocManager(), ProviderHacks.getAlternateLocationFactory());
         List<AlternateLocation> addedLocs = ((MockAltLocTracker)uploader.getAltLocTracker()).getAddedLocs();
         
         ProviderHacks.getAltLocManager().addListener(HugeTestUtils.SHA1, listener);

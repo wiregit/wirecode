@@ -925,7 +925,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * @param altHeader the full alternate locations header
 	 */
 	private void readAlternateLocations(String altStr, boolean allowTLS) {
-        AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize());
                 if(_locationsReceived.add(rfd)) {

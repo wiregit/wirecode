@@ -25,6 +25,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -66,13 +67,16 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final FileResponseEntityFactory fileResponseEntityFactory;
 
     private final AltLocManager altLocManager;
+
+    private final AlternateLocationFactory alternateLocationFactory;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
             FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
             CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
-            AltLocManager altLocManager) {
+            AltLocManager altLocManager,
+            AlternateLocationFactory alternateLocationFactory) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -80,6 +84,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.creationTimeCache = creationTimeCache;
         this.fileResponseEntityFactory = fileResponseEntityFactory;
         this.altLocManager = altLocManager;
+        this.alternateLocationFactory = alternateLocationFactory;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -152,7 +157,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
-        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager));
+        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }

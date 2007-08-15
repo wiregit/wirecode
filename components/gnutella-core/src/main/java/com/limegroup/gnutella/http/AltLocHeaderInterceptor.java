@@ -12,6 +12,7 @@ import org.limewire.http.HeaderInterceptor;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
@@ -23,10 +24,12 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
 
     private final HTTPUploader uploader;
     private final AltLocManager altLocManager;
+    private final AlternateLocationFactory alternateLocationFactory;
 
-    public AltLocHeaderInterceptor(HTTPUploader uploader, AltLocManager altLocManager) {
+    public AltLocHeaderInterceptor(HTTPUploader uploader, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory) {
         this.uploader = uploader;
         this.altLocManager = altLocManager;
+        this.alternateLocationFactory = alternateLocationFactory;
     }
 
     public void process(Header header, HttpContext context)
@@ -59,7 +62,7 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
      */
     private void parseAlternateLocations(final AltLocTracker tracker,
             String alternateLocations, final boolean isGood, boolean allowTLS) {
-        AltLocUtils.parseAlternateLocations(tracker.getUrn(), alternateLocations, allowTLS, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(tracker.getUrn(), alternateLocations, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if (location instanceof PushAltLoc)
                     ((PushAltLoc) location).updateProxies(isGood);

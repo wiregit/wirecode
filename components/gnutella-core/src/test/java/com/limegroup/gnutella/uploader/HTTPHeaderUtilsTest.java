@@ -86,7 +86,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         
         // Just make sure that AltLocUtils can parse this.
         final AtomicInteger index = new AtomicInteger(0);
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, expected, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, expected, true, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation argument) {
                 switch(index.getAndIncrement()) {
                 case 0: checkDirect(argument, "1.2.3.4", 5,    false); break;

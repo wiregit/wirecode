@@ -8,12 +8,16 @@ import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
 
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocUtilsTest extends LimeTestCase {
+
+    private AlternateLocationFactory alternateLocationFactory;
+
 
     public AltLocUtilsTest(String name) {
         super(name);
@@ -23,9 +27,16 @@ public class AltLocUtilsTest extends LimeTestCase {
         return buildTestSuite(AltLocUtilsTest.class);
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        this.alternateLocationFactory = ProviderHacks.getAlternateLocationFactory();
+    }
+    
     public void testParseAlternateLocationsNoTLS() throws Exception {
         String data = "1.2.3.4,1.2.3.5,1.2.3.6,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -43,7 +54,7 @@ public class AltLocUtilsTest extends LimeTestCase {
     
     public void testParseAlternateLocationsNoTLSButAllowed() throws Exception {
         String data = "1.2.3.4,1.2.3.5,1.2.3.6,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -61,7 +72,7 @@ public class AltLocUtilsTest extends LimeTestCase {
     
     public void testParseAlternateLocationsTLSNotAllowed() throws Exception {
         String data = "tls=A8,1.2.3.4,1.2.3.5,1.2.3.6,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -79,7 +90,7 @@ public class AltLocUtilsTest extends LimeTestCase {
     
     public void testParseAlternateLocationsTLS() throws Exception {
         String data = "tls=A8,1.2.3.4,1.2.3.5,1.2.3.6,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -97,7 +108,7 @@ public class AltLocUtilsTest extends LimeTestCase {
     
     public void testParseAlternateLocationsSkipsInvalid() throws Exception {
         String data = "abc,1.2.3.4,def,1.2.3.5,1.2.3.6,lalala,1.2.3.7,12.3.4.5.6.7:108,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, false, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -115,7 +126,7 @@ public class AltLocUtilsTest extends LimeTestCase {
     
     public void testParseAlternateLocationsInvalidTurnsOffTLS() throws Exception {
         String data = "tls=FFF,1.2.3.4,1.2.3.5,1.2.3.6,lalala,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -137,7 +148,7 @@ public class AltLocUtilsTest extends LimeTestCase {
         // TLS=EC is meant to apply to the whole set, including 127.0.0.1, but we filter it out
         // before handing it on.
         String data = "tls=EC,1.2.3.4,1.2.3.5,1.2.3.6,127.0.0.1,1.2.3.7,1.2.3.8:101";
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             int i = 0;
             public Void apply(AlternateLocation argument) {
                 switch(i++) {
@@ -165,7 +176,7 @@ public class AltLocUtilsTest extends LimeTestCase {
             // TLS=EC is meant to apply to the whole set, including localhost, but we filter it out
             // before handing it on.
             String data = "tls=EC,1.2.3.4,1.2.3.5,1.2.3.6,8.7.1.2:1234,8.7.1.2:1,1.2.3.8:101";
-            AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, new Function<AlternateLocation, Void>() {
+            AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
                 int i = 0;
                 public Void apply(AlternateLocation argument) {
                     switch(i++) {
