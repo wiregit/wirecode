@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * Once an in-network download finishes, the UpdateHandler is notified.
@@ -12,12 +13,19 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 @Singleton
 public class InNetworkCallback implements DownloadCallback {
     
+    private final UpdateHandler updateHandler;
+
+    @Inject
+    public InNetworkCallback(UpdateHandler updateHandler) {
+        this.updateHandler = updateHandler;
+    }
+    
     public void addDownload(Downloader d) {
     }
 
     public void removeDownload(Downloader d) {
         InNetworkDownloader downloader = (InNetworkDownloader) d;
-        ProviderHacks.getUpdateHandler().inNetworkDownloadFinished(
+        updateHandler.inNetworkDownloadFinished(
                 downloader.getSHA1Urn(),
                 downloader.getState() == DownloadStatus.COMPLETE);
     }

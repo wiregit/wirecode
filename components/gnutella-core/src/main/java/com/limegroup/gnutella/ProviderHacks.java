@@ -121,7 +121,6 @@ public class ProviderHacks {
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static HashTreeNodeManager getHashTreeNodeManager()  { return i().getHashTreeNodeManager(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
-    public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
@@ -232,6 +231,7 @@ public class ProviderHacks {
     public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }
     public static UDPHostCacheFactory getUDPHostCacheFactory() { return i().getUDPHostCacheFactory(); }
     public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
+    public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
         
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      
