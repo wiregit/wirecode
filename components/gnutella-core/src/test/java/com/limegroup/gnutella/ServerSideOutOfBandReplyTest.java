@@ -384,9 +384,10 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         DatagramPacket pack = null;
 
         // install extra message parse since old reply number messages are discarded
-        VendorMessageParser oldParser = VendorMessageFactory.getParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID);
+        VendorMessageFactory factory = ProviderHacks.getVendorMessageFactory();
+        VendorMessageParser oldParser = factory.getParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID);
         try {
-            VendorMessageFactory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, new V2ReplyNumberVendorMessageParser());
+            factory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, new V2ReplyNumberVendorMessageParser());
             
             // raw message without "SO" key, query = "shusheel"
             byte[] rawMessage =  new byte[] { 127, 0, 1, 1, 11, 71, -79, -94, 4, 47, 
@@ -463,7 +464,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             assertNull(qReply.getSecurityToken());
         }
         finally {
-            VendorMessageFactory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, oldParser);
+            factory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, oldParser);
         }
     }
     

@@ -143,7 +143,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 				"_UDPListRequestors",
 				new FixedSizeExpiringSet(200,200));
         UDP_ACCESS.connect(InetAddress.getLocalHost(),PORT);
-        VendorMessageFactory.setParser(VendorMessage.F_CRAWLER_PONG, VendorMessage.F_LIME_VENDOR_ID, 
+        ProviderHacks.getVendorMessageFactory().setParser(VendorMessage.F_CRAWLER_PONG, VendorMessage.F_LIME_VENDOR_ID, 
                 new UDPCrawlerPongParserStub());
 	}
 	

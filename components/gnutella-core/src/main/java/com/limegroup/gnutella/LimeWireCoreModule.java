@@ -104,6 +104,10 @@ import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
+import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.messages.vendor.VendorMessageFactoryImpl;
+import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
+import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.LimeRUDPSettings;
 import com.limegroup.gnutella.rudp.LimeUDPService;
@@ -219,6 +223,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MessageFactory.class).to(MessageFactoryImpl.class);
         bind(MessageReaderFactory.class).to(MessageReaderFactoryImpl.class);
         bind(MessageParserBinder.class).to(MessageParserBinderImpl.class);
+        bind(VendorMessageFactory.class).to(VendorMessageFactoryImpl.class);
+        bind(VendorMessageParserBinder.class).to(VendorMessageParserBinderImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

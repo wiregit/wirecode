@@ -16,12 +16,14 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     private final PingReplyFactory pingReplyFactory;
     private final QueryReplyFactory queryReplyFactory;
     private final QueryRequestFactory queryRequestFactory;
+    private final VendorMessageFactory vendorMessageFactory;
 
     @Inject
-    public MessageParserBinderImpl(PingReplyFactory pingReplyFactory, QueryRequestFactory queryRequestFactory, QueryReplyFactory queryReplyFactory) {
+    public MessageParserBinderImpl(PingReplyFactory pingReplyFactory, QueryRequestFactory queryRequestFactory, QueryReplyFactory queryReplyFactory, VendorMessageFactory vendorMessageFactory) {
         this.pingReplyFactory = pingReplyFactory;
         this.queryRequestFactory = queryRequestFactory;
         this.queryReplyFactory = queryReplyFactory;
+        this.vendorMessageFactory = vendorMessageFactory;
     }
     
     public void bind(MessageFactory messageFactory) {
@@ -145,17 +147,17 @@ public class MessageParserBinderImpl implements MessageParserBinder {
         }
     }
     
-    private static class VendorMessageParser extends GnutellaMessageParser {
+    private class VendorMessageParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
-            return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
+            return vendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
-    private static class VendorMessageStableParser extends GnutellaMessageParser {
+    private class VendorMessageStableParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
-            return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
+            return vendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
 }

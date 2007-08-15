@@ -42,6 +42,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -65,6 +66,8 @@ public class StandardMessageRouter extends MessageRouter {
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
     
     private final Statistics statistics;
+
+    private final ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -95,7 +98,8 @@ public class StandardMessageRouter extends MessageRouter {
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
-            Statistics statistics) {
+            Statistics statistics,
+            ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -107,6 +111,7 @@ public class StandardMessageRouter extends MessageRouter {
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory);
         this.statistics = statistics;
+        this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }
     
     /**
@@ -371,9 +376,8 @@ public class StandardMessageRouter extends MessageRouter {
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
                     ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
-                            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
-                                ProviderHacks
-                                        .getReplyNumberVendorMessageFactory().createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
+                            replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
+                                replyNumberVendorMessageFactory.createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
                     udpService.send(vm, addr, port);
                     return true;
                 }
