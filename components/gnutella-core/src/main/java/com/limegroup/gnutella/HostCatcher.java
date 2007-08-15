@@ -48,6 +48,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -331,7 +332,8 @@ public class HostCatcher {
             Provider<QueryUnicaster> queryUnicaster,
             Provider<IPFilter> ipFilter,
             Provider<MulticastService> multicastService,
-            UniqueHostPinger uniqueHostPinger) {
+            UniqueHostPinger uniqueHostPinger,
+            UDPHostCacheFactory udpHostCacheFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -341,7 +343,8 @@ public class HostCatcher {
         this.ipFilter = ipFilter;
         this.multicastService = multicastService;
         this.uniqueHostPinger = uniqueHostPinger;
-        udpHostCache = new UDPHostCache(uniqueHostPinger);
+        // DPINJ this could also be solved with a named injection to get the UniqHostPinger and not its super class
+        this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
     }
 
     /**

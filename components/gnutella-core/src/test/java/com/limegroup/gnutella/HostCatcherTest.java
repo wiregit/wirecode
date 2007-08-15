@@ -16,6 +16,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -955,7 +956,7 @@ public class HostCatcherTest extends LimeTestCase {
         private boolean expired = false;
         
         public StubUDPBootstrapper() {
-            super(ProviderHacks.getUDPPinger());
+            super(ProviderHacks.getUDPPinger(), Providers.of(ProviderHacks.getMessageRouter()));
         }
         
         public boolean fetchHosts() {

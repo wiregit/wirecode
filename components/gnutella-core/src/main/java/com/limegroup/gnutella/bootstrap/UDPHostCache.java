@@ -17,8 +17,10 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
@@ -76,22 +78,25 @@ public class UDPHostCache {
      * Whether or not the set contains data different than when we last wrote.
      */
     private boolean writeDirty = false;
+
+    private final Provider<MessageRouter> messageRouter;
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    public UDPHostCache(UDPPinger pinger) {
-        this(10 * 60 * 1000,pinger);
+    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter) {
+        this(10 * 60 * 1000, pinger, messageRouter);
     }
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for
      * the given amount of time, in msecs.
      */
-    public UDPHostCache(long expiryTime,UDPPinger pinger) {
+    protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter) {
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
+        this.messageRouter = messageRouter;
     }
     
     /**
@@ -350,8 +355,7 @@ public class UDPHostCache {
                 // OPTIMIZATION: if we've gotten succesful responses from
                 // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
-                    ProviderHacks.getMessageRouter().
-					  unregisterMessageListener(guid, this);
+                    messageRouter.get().unregisterMessageListener(guid, this);
             }
         }
         

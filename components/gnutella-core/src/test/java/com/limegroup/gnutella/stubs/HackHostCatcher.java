@@ -15,7 +15,8 @@ public class HackHostCatcher extends HostCatcher {
                 Providers.of(ProviderHacks.getQueryUnicaster()), Providers
                         .of(ProviderHacks.getIpFilter()), Providers
                         .of(ProviderHacks.getMulticastService()),
-                        ProviderHacks.getUniqueHostPinger());
+                        ProviderHacks.getUniqueHostPinger(),
+                        ProviderHacks.getUDPHostCacheFactory());
     }
 
 }

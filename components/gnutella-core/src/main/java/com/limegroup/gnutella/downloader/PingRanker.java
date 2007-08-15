@@ -21,8 +21,8 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
@@ -86,10 +86,13 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     private final NetworkManager networkManager;
     private final UDPPinger udpPinger;
+
+    private final MessageRouter messageRouter;
     
-    protected PingRanker(NetworkManager networkManager, UDPPinger udpPinger) {
+    protected PingRanker(NetworkManager networkManager, UDPPinger udpPinger, MessageRouter messageRouter) {
         this.networkManager = networkManager; 
         this.udpPinger = udpPinger;
+        this.messageRouter = messageRouter;
         pingedHosts = new TreeMap<IpPort, RemoteFileDesc>(IpPort.COMPARATOR);
         testedLocations = new HashSet<RemoteFileDesc>();
         newHosts = new HashSet<RemoteFileDesc>();
@@ -159,7 +162,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // initialize the guid if we don't have one
         if (myGUID == null && meshHandler != null) {
             myGUID = new GUID(GUID.makeGuid());
-            ProviderHacks.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
+            messageRouter.registerMessageListener(myGUID.bytes(),this);
         }
         
         return ret;
@@ -271,7 +274,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private void pingProxies(RemoteFileDesc rfd) {
         if (networkManager.acceptedIncomingConnection() || 
-                (ProviderHacks.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
+                (networkManager.canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
                 new HeadPing(myGUID,rfd.getSHA1Urn(),
                         new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
@@ -392,7 +395,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     protected synchronized void clearState(){
         if (myGUID != null) {
-            ProviderHacks.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
+            messageRouter.unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
         }
     }

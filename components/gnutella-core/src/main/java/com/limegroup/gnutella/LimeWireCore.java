@@ -25,6 +25,7 @@ import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -639,5 +640,9 @@ public class LimeWireCore {
 
     public UDPCrawlerPongFactory getUDPCrawlerPongFactory() {
         return injector.getInstance(UDPCrawlerPongFactory.class);
+    }
+
+    public UDPHostCacheFactory getUDPHostCacheFactory() {
+        return injector.getInstance(UDPHostCacheFactory.class);
     }
 }

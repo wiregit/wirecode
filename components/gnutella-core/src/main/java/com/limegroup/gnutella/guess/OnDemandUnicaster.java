@@ -18,10 +18,11 @@ import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
@@ -58,10 +59,14 @@ public class OnDemandUnicaster {
     private final QueryRequestFactory queryRequestFactory;
     private final UDPService udpService;
 
+    private final Provider<MessageRouter> messageRouter;
+
     @Inject
-    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter) {
         this.queryRequestFactory = queryRequestFactory;
         this.udpService = udpService;
+        this.messageRouter = messageRouter;
         
         // static initializers are only called once, right?
         _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
@@ -179,7 +184,7 @@ public class OnDemandUnicaster {
         if(LOG.isDebugEnabled())
             LOG.debug("Sending query with GUID: " + qGUID + " for URN: " + urn + " to host: " + ipp);
         
-        ProviderHacks.getMessageRouter().originateQueryGUID(query.getGUID());
+        messageRouter.get().originateQueryGUID(query.getGUID());
         udpService.send(query, ipp.getInetAddress(), ipp.getPort());
     }
 

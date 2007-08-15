@@ -20,7 +20,7 @@ import org.limewire.nio.observer.WriteObserver;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.connection.BasicQueue;
@@ -45,13 +45,16 @@ public class BrowseRequestHandler implements HttpRequestHandler {
     private final HTTPUploadSessionManager sessionManager;
     private final QueryRequestFactory queryRequestFactory;
     private final FileManager fileManager;
+    private final MessageRouter messageRouter;
 
     @Inject
     BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
-            QueryRequestFactory queryRequestFactory, FileManager fileManager) {
+            QueryRequestFactory queryRequestFactory, FileManager fileManager,
+            MessageRouter messageRouter) {
         this.sessionManager = sessionManager;
         this.queryRequestFactory = queryRequestFactory;
         this.fileManager = fileManager;
+        this.messageRouter = messageRouter;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -153,8 +156,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
                 responses.add(iterable.next());
             }
             
-            Iterable<QueryReply> it = ProviderHacks.getMessageRouter()
-                    .responsesToQueryReplies(responses.toArray(new Response[0]), query);
+            Iterable<QueryReply> it = messageRouter.responsesToQueryReplies(
+                    responses.toArray(new Response[0]), query);
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
                 pendingMessageCount++;

@@ -16,6 +16,7 @@ import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
@@ -114,7 +115,6 @@ public class ProviderHacks {
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
-    public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
     public static IncomingConnectionHandler getIncomingConnectionHandler() { return i().getIncomingConnectionHandler(); }
@@ -228,9 +228,11 @@ public class ProviderHacks {
     public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
     public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return i().getUDPCrawlerPongFactory(); }
     public static DHTManager getDHTManager() { return i().getDhtManager(); }    
-    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }    
+    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
     public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }
-    
+    public static UDPHostCacheFactory getUDPHostCacheFactory() { return i().getUDPHostCacheFactory(); }
+    public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
+        
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      
 }

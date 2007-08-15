@@ -46,6 +46,8 @@ import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactoryImpl;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
@@ -228,6 +230,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(VendorMessageFactory.class).to(VendorMessageFactoryImpl.class);
         bind(VendorMessageParserBinder.class).to(VendorMessageParserBinderImpl.class);
         bind(UDPCrawlerPongFactory.class).to(UDPCrawlerPongFactoryImpl.class);
+        bind(UDPHostCacheFactory.class).to(UDPHostCacheFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

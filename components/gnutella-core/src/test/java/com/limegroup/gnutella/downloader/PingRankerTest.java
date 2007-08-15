@@ -69,7 +69,7 @@ public class PingRankerTest extends LimeTestCase {
     public void setUp() throws Exception {
         pinger.messages.clear();
         pinger.hosts.clear();
-        ranker = new PingRanker(ProviderHacks.getNetworkManager(), ProviderHacks.getUDPPinger());
+        ranker = new PingRanker(ProviderHacks.getNetworkManager(), ProviderHacks.getUDPPinger(), ProviderHacks.getMessageRouter());
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
       //  PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
         PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
