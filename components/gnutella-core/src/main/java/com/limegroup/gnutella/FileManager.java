@@ -899,7 +899,6 @@ public abstract class FileManager {
         } catch (IOException e) {
             return;
         }
-        
         if(!directory.exists())
             return;
         
@@ -1275,6 +1274,12 @@ public abstract class FileManager {
      */
     protected void addFileIfShared(File file, List<? extends LimeXMLDocument> metadata, boolean notify,
                                    int revision, FileEventListener callback) {
+        // test the license type to see if it can be shared
+        boolean shareable = isShareable(metadata, file);
+        if( !shareable ) {
+            return;
+        }
+        
         if(LOG.isDebugEnabled())
             LOG.debug("Attempting to share file: " + file);
         if(callback == null)
