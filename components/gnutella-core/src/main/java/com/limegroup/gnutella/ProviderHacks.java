@@ -17,6 +17,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
@@ -113,11 +114,7 @@ public class ProviderHacks {
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
     public static UDPService getUdpService() { return i().getUdpService(); }     
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
-    public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
-    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
-    public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
-    // TODO move down
-    public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
+    public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }      
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     
@@ -236,6 +233,10 @@ public class ProviderHacks {
     public static LimeXMLDocumentFactory getLimeXMLDocumentFactory() { return i().getLimeXMLDocumentFactory(); }
     public static LimeXMLDocumentHelper getLimeXMLDocumentHelper()  { return i().getLimeXMLDocumentHelper(); }
     public static MetaDataReader getMetaDataReader() { return i().getMetaDataReader(); }
-     
+    public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
+    public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
+    public static InstantMessengerFactory getInstantMessengerFactory() { return i().getInstantMessengerFactory(); };
+    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }
+    
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

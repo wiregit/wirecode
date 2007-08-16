@@ -24,7 +24,6 @@ import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
@@ -32,6 +31,7 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * This class implements a simple chat protocol that allows to exchange text
@@ -102,10 +102,12 @@ public class InstantMessenger implements Chatter {
      */
     private boolean stopped;
 
+    private final SocketsManager socketsManager;
+
     /**
      * Constructor for an incoming chat request.
      */
-    public InstantMessenger(Socket socket, ChatManager manager,
+    InstantMessenger(Socket socket, ChatManager manager,
             ActivityCallback callback) {
         if (socket == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
@@ -116,14 +118,15 @@ public class InstantMessenger implements Chatter {
         this.port = socket.getPort();
         this.host = socket.getInetAddress().getHostAddress();
         this.callback = callback;
+        this.socketsManager = null;
         this.outgoing = false;
     }
 
     /**
      * Constructor for an outgoing chat request
      */
-    public InstantMessenger(final String host, final int port,
-            ChatManager manager, ActivityCallback callback) {
+    InstantMessenger(final String host, final int port,
+            ChatManager manager, ActivityCallback callback, SocketsManager socketsManager) {
         if (host == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
         }
@@ -132,6 +135,7 @@ public class InstantMessenger implements Chatter {
         this.port = port;
         this.manager = manager;
         this.callback = callback;
+        this.socketsManager = socketsManager;
         this.outgoing = true;
     }
 
@@ -139,7 +143,7 @@ public class InstantMessenger implements Chatter {
         if (outgoing) {
             try {
                 // DPINJ: Change to using passed-in SocketsManager!!!
-                ProviderHacks.getSocketsManager().connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
+                socketsManager.connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)
                                     throws IOException {

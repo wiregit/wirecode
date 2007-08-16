@@ -29,6 +29,7 @@ import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
@@ -670,4 +671,9 @@ public class LimeWireCore {
     public MetaDataReader getMetaDataReader() {
         return injector.getInstance(MetaDataReader.class);
     }
+
+    public InstantMessengerFactory getInstantMessengerFactory() {
+        return injector.getInstance(InstantMessengerFactory.class);
+    }
+    
 }

@@ -48,6 +48,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
+import com.limegroup.gnutella.chat.InstantMessengerFactory;
+import com.limegroup.gnutella.chat.InstantMessengerFactoryImpl;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
@@ -89,6 +91,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
@@ -243,6 +246,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
         bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
+        bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -252,7 +256,8 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(HashTree.class);
         requestStaticInjection(IncompleteFileManager.class);
         requestStaticInjection(AutoDownloadDetails.class);
-                
+        requestStaticInjection(HttpClientManager.class);
+                        
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
         bind(Statistics.class).asEagerSingleton();

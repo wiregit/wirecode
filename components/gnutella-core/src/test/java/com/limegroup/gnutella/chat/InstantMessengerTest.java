@@ -5,10 +5,12 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -20,6 +22,7 @@ public class InstantMessengerTest extends BaseTestCase {
     private static MyActivityCallback receiver;
     private MyActivityCallback callback;
     private InstantMessenger messenger;
+    private InstantMessengerFactory factory;
     
     public InstantMessengerTest(String name) {
         super(name);
@@ -64,6 +67,11 @@ public class InstantMessengerTest extends BaseTestCase {
         doSettings();
         
         acceptThread.setListeningPort(CHAT_PORT);
+        
+        factory = new InstantMessengerFactoryImpl(
+                Providers.of(ProviderHacks.getChatManager()), 
+                Providers.of((ActivityCallback) callback), 
+                Providers.of(ProviderHacks.getSocketsManager()));
     }
     
     @Override
@@ -80,7 +88,7 @@ public class InstantMessengerTest extends BaseTestCase {
       
     public void testChatThroughAcceptor() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, ProviderHacks.getChatManager(), callback);
+        messenger = factory.createOutgoingInstantMessenger("localhost", CHAT_PORT);
         messenger.start();
         callback.waitForConnect(1000);
         assertTrue(messenger.isConnected());
@@ -92,7 +100,7 @@ public class InstantMessengerTest extends BaseTestCase {
     
     public void testSendHugeMessage() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, ProviderHacks.getChatManager(), callback);
+        messenger = factory.createOutgoingInstantMessenger("localhost", CHAT_PORT);
         messenger.start();
         callback.waitForConnect(1000);
         assertFalse(messenger.send(new String(new char[10000])));

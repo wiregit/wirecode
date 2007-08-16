@@ -10,7 +10,6 @@ import org.limewire.io.IOUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.SpamServices;
@@ -32,16 +31,16 @@ public final class ChatManager implements ConnectionAcceptor {
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final SpamServices spamServices;
     private final Provider<IPFilter> ipFilter;
-    private final Provider<ActivityCallback> activityCallback;
+    private final InstantMessengerFactory instantMessengerFactory;
         
     @Inject
 	public ChatManager(Provider<ConnectionDispatcher> connectionDispatcher,
             SpamServices spamServices, Provider<IPFilter> ipFilter,
-            Provider<ActivityCallback> activityCallback) {
+            InstantMessengerFactory instantMessengerFactory) {
         this.connectionDispatcher = connectionDispatcher;
         this.spamServices = spamServices;
         this.ipFilter = ipFilter;
-        this.activityCallback = activityCallback;
+        this.instantMessengerFactory = instantMessengerFactory;
     }
 
     public void initialize() {
@@ -66,7 +65,7 @@ public final class ChatManager implements ConnectionAcceptor {
             return;
         }
         
-        InstantMessenger im = new InstantMessenger(socket, this, activityCallback.get());
+        InstantMessenger im = instantMessengerFactory.createIncomingInstantMessenger(socket);
         im.start();
 	}
 
@@ -77,7 +76,7 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * the connection has died.
 	 */
 	public Chatter request(String host, int port) {
-        InstantMessenger im = new InstantMessenger(host, port, this, activityCallback.get());
+        InstantMessenger im = instantMessengerFactory.createOutgoingInstantMessenger(host, port);
         return im;
 	}
 

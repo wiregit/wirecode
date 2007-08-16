@@ -70,8 +70,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         // the outgoing chat frame can not be registered with ChatUIManager
         // otherwise the connection will be closed since there can only be
         // one chat frame per host
-        InstantMessenger chat = new InstantMessenger("localhost", CHAT_PORT,
-                ProviderHacks.getChatManager(), ProviderHacks.getActivityCallback());
+        InstantMessenger chat = ProviderHacks.getInstantMessengerFactory().createOutgoingInstantMessenger("localhost", CHAT_PORT);
         outgoing = new ChatFrame(chat);
         chat.start();
         chat.waitForConnect(4000);
