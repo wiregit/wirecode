@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
@@ -12,11 +13,11 @@ public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory 
 
     private final NetworkManager networkManager;
 
-    private final ConnectionManager connectionManager;
+    private final Provider<ConnectionManager> connectionManager;
 
     @Inject
     public HandshakeResponderFactoryImpl(HeadersFactory headersFactory,
-            NetworkManager networkManager, ConnectionManager connectionManager) {
+            NetworkManager networkManager, Provider<ConnectionManager> connectionManager) {
         this.headersFactory = headersFactory;
         this.networkManager = networkManager;
         this.connectionManager = connectionManager;
@@ -30,7 +31,7 @@ public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory 
     public UltrapeerHandshakeResponder createUltrapeerHandshakeResponder(
             String host) {
         return new UltrapeerHandshakeResponder(host, networkManager,
-                headersFactory, connectionManager);
+                headersFactory, connectionManager.get());
     }
 
     /*
@@ -39,7 +40,7 @@ public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory 
      * @see com.limegroup.gnutella.handshaking.HandshakeResponderFactory#createLeafHandshakeResponder(java.lang.String)
      */
     public LeafHandshakeResponder createLeafHandshakeResponder(String host) {
-        return new LeafHandshakeResponder(host, headersFactory, connectionManager);
+        return new LeafHandshakeResponder(host, headersFactory, connectionManager.get());
     }
 
 }
