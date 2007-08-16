@@ -30,6 +30,7 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.store.StoreDescriptor;
 
@@ -261,6 +262,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         //because IFM.purge() is called frequently in DownloadManager.
         
         // First attempt to rename it.
+        final File realOutputDir = SharingSettings.getSaveLWSDirectory(incompleteFile);
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
 
         incompleteFileManager.removeEntry(incompleteFile);
