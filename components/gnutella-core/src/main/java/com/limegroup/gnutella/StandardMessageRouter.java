@@ -35,6 +35,7 @@ import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -99,7 +100,8 @@ public class StandardMessageRouter extends MessageRouter {
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             Statistics statistics,
-            ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory) {
+            ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
+            PingRequestFactory pingRequestFactory) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -109,7 +111,9 @@ public class StandardMessageRouter extends MessageRouter {
                 messageDispatcher, multicastService, queryDispatcher,
                 activityCallback, connectionServices, applicationServices,
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
-                guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory);
+                guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
+                udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory,
+                pingRequestFactory);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }

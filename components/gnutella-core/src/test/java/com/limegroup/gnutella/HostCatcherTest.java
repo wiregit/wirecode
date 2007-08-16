@@ -956,7 +956,7 @@ public class HostCatcherTest extends LimeTestCase {
         private boolean expired = false;
         
         public StubUDPBootstrapper() {
-            super(ProviderHacks.getUDPPinger(), Providers.of(ProviderHacks.getMessageRouter()));
+            super(ProviderHacks.getUDPPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory());
         }
         
         public boolean fetchHosts() {

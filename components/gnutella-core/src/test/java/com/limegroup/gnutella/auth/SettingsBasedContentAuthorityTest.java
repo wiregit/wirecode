@@ -3,12 +3,12 @@ package com.limegroup.gnutella.auth;
 
 import java.util.Random;
 
-import org.limewire.io.IpPort;
-
 import junit.framework.Test;
 
+import org.limewire.io.IpPort;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
  
@@ -69,7 +69,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
 
         Message[] ms = new Message[randoms.length];
         for(int i = 0; i < randoms.length; i++) {
-            ms[i] = new PingRequest((byte)1);
+            ms[i] = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
             auth.send(ms[i]);
         }
         

@@ -22,7 +22,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -103,7 +102,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;
@@ -142,7 +141,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testGoodURNQuery() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;
@@ -189,7 +188,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testQueryWithNoHit() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;

@@ -26,11 +26,6 @@ public final class UDPReplyHandler implements ReplyHandler {
     private final InetSocketAddress addr;
 
 	/**
-	 * Constant for the <tt>UDPService</tt>.
-	 */
-	private static final UDPService UDP_SERVICE = ProviderHacks.getUdpService();
-    
-    /**
      * Used to filter messages that are considered spam.
      * With the introduction of OOB replies, it is important
      * to check UDP replies for spam too.
@@ -39,18 +34,21 @@ public final class UDPReplyHandler implements ReplyHandler {
      * filter for every single UDP message.
      */
     private final SpamFilter personalFilter;
+
+    private final UDPService udpService;
 	
 	/** Creates a new UDPReplyHandler for the given address. */
-	UDPReplyHandler(InetSocketAddress addr, SpamFilter personalFilter) {
-	    if(!NetworkUtils.isValidSocketAddress(addr))
+	UDPReplyHandler(InetSocketAddress addr, SpamFilter personalFilter, UDPService udpService) {
+	    this.udpService = udpService;
+        if(!NetworkUtils.isValidSocketAddress(addr))
 	        throw new IllegalArgumentException("invalid addr: " + addr);
 	       
 		this.addr = addr;
 		this.personalFilter = personalFilter;
 	}
     
-    UDPReplyHandler(InetAddress addr, int port, SpamFilter personalFilter) {
-        this(new InetSocketAddress(addr, port), personalFilter);
+    UDPReplyHandler(InetAddress addr, int port, SpamFilter personalFilter, UDPService udpService) {
+        this(new InetSocketAddress(addr, port), personalFilter, udpService);
     }
     
 	/**
@@ -63,7 +61,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-        UDP_SERVICE.send(pong, addr);
+        udpService.send(pong, addr);
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
@@ -77,7 +75,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-        UDP_SERVICE.send(hit, addr);
+        udpService.send(hit, addr);
 		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
@@ -91,7 +89,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-        UDP_SERVICE.send(request, addr);
+        udpService.send(request, addr);
 		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
@@ -261,11 +259,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * sends the response through udp back to the requesting party
 	 */
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
-		ProviderHacks.getUdpService().send(m, addr);
+		udpService.send(m, addr);
 	}
 	
 	public void reply(Message m) {
-		ProviderHacks.getUdpService().send(m, addr);
+	    udpService.send(m, addr);
 	}
 	
 	public int getPort() {

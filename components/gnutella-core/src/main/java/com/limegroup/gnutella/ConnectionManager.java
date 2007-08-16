@@ -46,6 +46,7 @@ import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -271,6 +272,8 @@ public class ConnectionManager implements ConnectionAcceptor,
     private final Provider<NodeAssigner> nodeAssigner;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionCheckerManager connectionCheckerManager;
+
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
     public ConnectionManager(NetworkManager networkManager,
@@ -285,7 +288,8 @@ public class ConnectionManager implements ConnectionAcceptor,
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
-            ConnectionCheckerManager connectionCheckerManager) {
+            ConnectionCheckerManager connectionCheckerManager,
+            PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;
         this.hostCatcher = hostCatcher;
         this.connectionDispatcher = connectionDispatcher;
@@ -300,6 +304,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         this.nodeAssigner = nodeAssigner;
         this.ipFilter = ipFilter;
         this.connectionCheckerManager = connectionCheckerManager;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
 
@@ -1584,9 +1589,9 @@ public class ConnectionManager implements ConnectionAcceptor,
         //connections.
         PingRequest pr;
         if (getNumInitializedConnections() >= _preferredConnections)
-            pr = new PingRequest((byte)1);
+            pr = pingRequestFactory.createPingRequest((byte)1);
         else
-            pr = new PingRequest((byte)4);
+            pr = pingRequestFactory.createPingRequest((byte)4);
 
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.

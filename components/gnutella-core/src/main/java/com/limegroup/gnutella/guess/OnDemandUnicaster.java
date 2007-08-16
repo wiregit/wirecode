@@ -27,6 +27,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.ClassCNetworks;
@@ -61,12 +62,18 @@ public class OnDemandUnicaster {
 
     private final Provider<MessageRouter> messageRouter;
 
+    private final PingRequestFactory pingRequestFactory;
+
     @Inject
-    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory, UDPService udpService, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<MessageRouter> messageRouter) {
+    public OnDemandUnicaster(QueryRequestFactory queryRequestFactory,
+            UDPService udpService, @Named("backgroundExecutor")
+            ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory) {
         this.queryRequestFactory = queryRequestFactory;
         this.udpService = udpService;
         this.messageRouter = messageRouter;
+        this.pingRequestFactory = pingRequestFactory;
         
         // static initializers are only called once, right?
         _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
@@ -138,7 +145,7 @@ public class OnDemandUnicaster {
                                                        ep.getPort());
             SendLaterBundle bundle = new SendLaterBundle(queryURN);
             _bufferedURNs.put(endpoint, bundle);
-            PingRequest pr = PingRequest.createQueryKeyRequest();
+            PingRequest pr = pingRequestFactory.createQueryKeyRequest();
             udpService.send(pr, ep.getInetAddress(), ep.getPort());
         }
         // ------

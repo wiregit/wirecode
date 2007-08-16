@@ -72,8 +72,7 @@ public class UDPStatusTest extends ClientSideTestCase {
         s.setSoTimeout(1000);
         
         try {
-            PingRequest ping = new PingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(),
-                    (byte)1);
+            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(), (byte)1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ping.write(baos);
             byte []buf = baos.toByteArray();
@@ -101,8 +100,7 @@ public class UDPStatusTest extends ClientSideTestCase {
         s.setSoTimeout(1000);
         
         try {
-            PingRequest ping = new PingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(),
-                    (byte)1);
+            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(), (byte)1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ping.write(baos);
             byte []buf = baos.toByteArray();

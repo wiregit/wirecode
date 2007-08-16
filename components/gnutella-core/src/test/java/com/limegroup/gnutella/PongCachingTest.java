@@ -250,7 +250,7 @@ public final class PongCachingTest extends LimeTestCase {
             .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
-        Message m = new PingRequest((byte)7);
+        Message m = ProviderHacks.getPingRequestFactory().createPingRequest((byte)7);
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();        
         
@@ -307,7 +307,7 @@ public final class PongCachingTest extends LimeTestCase {
 
         //create a ja locale PingRequest
         ApplicationSettings.LANGUAGE.setValue("ja");
-        Message m = new PingRequest((byte)7);
+        Message m = ProviderHacks.getPingRequestFactory().createPingRequest((byte)7);
         assertEquals("locale of ping should be ja",
                      "ja", ((PingRequest)m).getLocale());
 
@@ -351,7 +351,7 @@ public final class PongCachingTest extends LimeTestCase {
 
         //create a sv locale PingRequest
         ApplicationSettings.LANGUAGE.setValue("sv"); 
-        Message m2 = new PingRequest((byte)7);
+        Message m2 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)7);
         assertEquals("locale of ping should be sv",
                      "sv", ((PingRequest)m2).getLocale());
 

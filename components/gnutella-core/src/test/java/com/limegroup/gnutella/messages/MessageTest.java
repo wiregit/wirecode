@@ -21,8 +21,8 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Note: some of Message's code is covered by subclass tests, e.g.,
         //PushRequestTest.
 
-        Message m1=new PingRequest((byte)3);
-        Message m2=new PingRequest((byte)3);
+        Message m1=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
+        Message m2=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
         m2.setPriority(5);
         assertGreaterThan(0, m1.compareTo(m2));
         assertLessThan(0, m2.compareTo(m1));

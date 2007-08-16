@@ -15,7 +15,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -48,7 +47,7 @@ public final class MessageReaderTest extends LimeTestCase {
 	}
 	
 	public void testSingleMessageRead() throws Exception {
-	    Message out = new PingRequest((byte)1);
+	    Message out = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
 	    READER.setReadChannel(channel(buffer(out)));
 	    assertEquals(0, STUB.size());
 	    READER.handleRead();
@@ -59,7 +58,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testReadMultipleMessages() throws Exception {
-        Message out1 = new PingRequest((byte)1);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
         Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
@@ -87,7 +86,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testBadPacketIgnored() throws Exception {
-        Message out1 = new PingRequest((byte)1);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
         Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
@@ -116,7 +115,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testLargeLengthThrows() throws Exception {
-        Message out1 = new PingRequest((byte)1);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
         Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
@@ -151,7 +150,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testSmallLengthThrows() throws Exception {
-        Message out1 = new PingRequest((byte)1);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
         Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,

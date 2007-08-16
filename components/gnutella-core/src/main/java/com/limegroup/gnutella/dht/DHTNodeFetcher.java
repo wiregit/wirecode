@@ -27,7 +27,7 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -92,18 +92,22 @@ public class DHTNodeFetcher {
     private final Provider<HostCatcher> hostCatcher;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<UDPPinger> udpPingerFactory;
+
+    private final PingRequestFactory pingRequestFactory;
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper,
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             ScheduledExecutorService backgroundExecutor,
-            Provider<UDPPinger> udpPingerFactory) {
+            Provider<UDPPinger> udpPingerFactory,
+            PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.hostCatcher = hostCatcher;
         this.backgroundExecutor = backgroundExecutor;
         this.udpPingerFactory = udpPingerFactory;
 
         this.bootstrapper = bootstrapper;
+        this.pingRequestFactory = pingRequestFactory;
     }
     
     /**
@@ -160,7 +164,7 @@ public class DHTNodeFetcher {
         }
         
         lastRequest = now;
-        Message m = PingRequest.createUDPingWithDHTIPPRequest();
+        Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
         MessageListener listener = new UDPPingerRequestListener();
         Cancellable canceller = new UDPPingRankerCanceller();
         
@@ -206,7 +210,7 @@ public class DHTNodeFetcher {
                 LOG.debug("Requesting DHT hosts from host " + hostAddress);
             }
             
-            Message m = PingRequest.createUDPingWithDHTIPPRequest();
+            Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
             
             if(pinger == null) {
                 pinger = udpPingerFactory.get();

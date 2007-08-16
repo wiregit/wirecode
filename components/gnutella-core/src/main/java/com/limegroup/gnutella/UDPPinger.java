@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
@@ -55,14 +55,18 @@ public class UDPPinger {
     private final Provider<MessageRouter> messageRouter;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<UDPService> udpService;
+
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
     public UDPPinger(Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<UDPService> udpService) {
+            Provider<UDPService> udpService,
+            PingRequestFactory pingRequestFactory) {
         this.messageRouter = messageRouter;
         this.backgroundExecutor = backgroundExecutor;
         this.udpService = udpService;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
     /**
@@ -194,7 +198,7 @@ public class UDPPinger {
             return;
     
         if(message == null)
-            message = PingRequest.createUDPPing();
+            message = pingRequestFactory.createUDPPing();
             
         final byte[] messageGUID = message.getGUID();
         

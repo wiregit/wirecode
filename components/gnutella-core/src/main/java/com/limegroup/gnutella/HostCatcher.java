@@ -55,6 +55,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
@@ -322,6 +323,8 @@ public class HostCatcher {
     private final Provider<IPFilter> ipFilter;
     private final Provider<MulticastService> multicastService;
     private final UniqueHostPinger uniqueHostPinger;
+
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
 	public HostCatcher(
@@ -333,7 +336,8 @@ public class HostCatcher {
             Provider<IPFilter> ipFilter,
             Provider<MulticastService> multicastService,
             UniqueHostPinger uniqueHostPinger,
-            UDPHostCacheFactory udpHostCacheFactory) {
+            UDPHostCacheFactory udpHostCacheFactory,
+            PingRequestFactory pingRequestFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -343,6 +347,7 @@ public class HostCatcher {
         this.ipFilter = ipFilter;
         this.multicastService = multicastService;
         this.uniqueHostPinger = uniqueHostPinger;
+        this.pingRequestFactory = pingRequestFactory;
         // DPINJ this could also be solved with a named injection to get the UniqHostPinger and not its super class
         this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
     }
@@ -1554,7 +1559,7 @@ public class HostCatcher {
             if(nextAllowedMulticastTime < now && 
                !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
                 LOG.trace("Fetching via multicast");
-                PingRequest pr = PingRequest.createMulticastPing();
+                PingRequest pr = pingRequestFactory.createMulticastPing();
                 multicastService.get().send(pr);
                 nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
                 return true;

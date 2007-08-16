@@ -35,7 +35,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     //TODO: test other parts of ping!
 
     public void testQueryKeyPing() throws Exception {
-        PingRequest pr = PingRequest.createQueryKeyRequest();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createQueryKeyRequest();
         assertFalse(pr.isQueryKeyRequest()); // hasn't been hopped yet
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
@@ -138,8 +138,8 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
       
         //Test the new constructor for big pings read from the network
       
-        PingRequest bigPing = new PingRequest(GUID.makeGuid(),(byte)7,
-                                              (byte)0,payload);
+        PingRequest bigPing = ProviderHacks.getPingRequestFactory().createPingRequest(GUID.makeGuid(), (byte)7,
+                (byte)0, payload);
         assertEquals(0, bigPing.getHops());
         assertEquals(7, bigPing.getTTL());
         assertEquals("bad length", 16, bigPing.getLength());
@@ -150,7 +150,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         //try a ping which doesn't ask for ip 
         
-        PingRequest noRequest = new PingRequest((byte)1);
+        PingRequest noRequest = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         assertFalse(noRequest.requestsIP());
         
         noRequest.write(baos);
@@ -162,7 +162,8 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         //try a ping without any other ggeps except the ip request
         byte []guid = GUID.makeGuid();
         
-        PingRequest noPayload = new PingRequest(guid,(byte)1,(byte)0);
+        PingRequest noPayload = ProviderHacks.getPingRequestFactory().createPingRequest(guid, (byte)1,
+                (byte)0);
         
         assertFalse(noPayload.requestsIP());
         
@@ -179,7 +180,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         // now try a ping with locale
         String original = ApplicationSettings.LANGUAGE.getValue();
         ApplicationSettings.LANGUAGE.setValue("zz");
-        PingRequest withLocale = new PingRequest((byte)1);
+        PingRequest withLocale = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         ApplicationSettings.LANGUAGE.setValue(original);
         
         withLocale.addIPRequest();
@@ -196,7 +197,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void testUDPPingRequest() {
-        PingRequest pr = PingRequest.createUDPPing();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         
         // Test +UP +TLS
@@ -207,7 +208,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         SSLSettings.TLS_INCOMING.setValue(true);
         assertTrue(ProviderHacks.getConnectionServices().isSupernode());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertFalse(pr.requestsIP());
         byte[] data = pr.getSupportsCachedPongData();
         assertEquals(0x1, data[0] & 0x1);
@@ -216,7 +217,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         // +UP -TLS
         SSLSettings.TLS_INCOMING.setValue(false);
         assertTrue(ProviderHacks.getConnectionServices().isSupernode());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
         assertEquals(0x1, data[0] & 0x1);
@@ -227,7 +228,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         SSLSettings.TLS_INCOMING.setValue(true);
         assertFalse(ProviderHacks.getConnectionServices().isSupernode());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
         assertEquals(0x0, data[0] & 0x1);
@@ -236,14 +237,14 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         // Test -UP -TLS
         SSLSettings.TLS_INCOMING.setValue(false);
         assertFalse(ProviderHacks.getConnectionServices().isSupernode());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertFalse(pr.requestsIP());
         data = pr.getSupportsCachedPongData();
         assertEquals(0x0, data[0] & 0x1);
         assertEquals(0x0, data[0] & 0x2);
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.requestsIP());
     }
     

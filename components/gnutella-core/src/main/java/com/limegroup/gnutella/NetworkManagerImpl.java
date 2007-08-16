@@ -204,4 +204,8 @@ public class NetworkManagerImpl implements NetworkManager {
     public int getStableUDPPort() {
         return udpService.get().getStableUDPPort();
     }
+
+    public GUID getSolicitedGUID() {
+        return udpService.get().getSolicitedGUID();
+    }
 }

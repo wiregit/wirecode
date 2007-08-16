@@ -91,4 +91,5 @@ public interface NetworkManager {
 
     public int getStableUDPPort();
 
+    public GUID getSolicitedGUID();
 }

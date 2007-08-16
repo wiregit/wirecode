@@ -5,7 +5,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -30,7 +29,7 @@ public class GreedyQueryFilterTest extends LimeTestCase {
 	}
     
     public void testLegacy() throws Exception {
-        msg=new PingRequest((byte)5);
+        msg=ProviderHacks.getPingRequestFactory().createPingRequest((byte)5);
         assertTrue(filter.allow(msg));
 
         msg=ProviderHacks.getQueryRequestFactory().createQuery("a",(byte)5);

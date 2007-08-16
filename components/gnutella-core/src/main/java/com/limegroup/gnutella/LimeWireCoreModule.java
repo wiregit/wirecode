@@ -107,6 +107,8 @@ import com.limegroup.gnutella.messages.MessageParserBinder;
 import com.limegroup.gnutella.messages.MessageParserBinderImpl;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.PingRequestFactoryImpl;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -255,6 +257,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
+        bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

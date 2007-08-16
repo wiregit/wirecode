@@ -61,7 +61,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // ban everyone
         ipSetting.setValue(new String[0]);
         TestResponder responder = new TestResponder(null);
-        Message m = PingRequest.createMulticastPing();
+        Message m = ProviderHacks.getPingRequestFactory().createMulticastPing();
         responder.handleMessage(m, addr, h);
         assertNull(responder.msg);
         assertNull(responder.addr);

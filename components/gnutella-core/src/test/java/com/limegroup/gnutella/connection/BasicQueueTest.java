@@ -121,7 +121,7 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private PingRequest p(int ttl) {
-        return new PingRequest((byte)ttl);
+        return ProviderHacks.getPingRequestFactory().createPingRequest((byte)ttl);
     }
     
     private PushRequest s(int port) {

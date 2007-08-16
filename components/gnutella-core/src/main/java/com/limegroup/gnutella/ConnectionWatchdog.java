@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /*
@@ -37,17 +37,21 @@ public final class ConnectionWatchdog {
     private final Provider<MessageRouter> messageRouter;
     private final Provider<ConnectionManager> connectionManager;
     private final ConnectionServices connectionServices;
+
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
     public ConnectionWatchdog(
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter,
             Provider<ConnectionManager> connectionManager,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            PingRequestFactory pingRequestFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.messageRouter = messageRouter;
         this.connectionManager = connectionManager;
         this.connectionServices = connectionServices;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
     /**
@@ -132,7 +136,7 @@ public final class ConnectionWatchdog {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            messageRouter.get().sendPingRequest(new PingRequest((byte)1), c);
+            messageRouter.get().sendPingRequest(pingRequestFactory.createPingRequest((byte)1), c);
         }
         
         backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);

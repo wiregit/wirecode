@@ -27,6 +27,7 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -80,23 +81,28 @@ public class UDPHostCache {
     private boolean writeDirty = false;
 
     private final Provider<MessageRouter> messageRouter;
+
+    private final PingRequestFactory pingRequestFactory;
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter) {
-        this(10 * 60 * 1000, pinger, messageRouter);
+    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory) {
+        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory);
+        
     }
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for
      * the given amount of time, in msecs.
      */
-    protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter) {
+    protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory) {
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
         this.messageRouter = messageRouter;
+        this.pingRequestFactory = pingRequestFactory;
     }
     
     /**
@@ -226,7 +232,7 @@ public class UDPHostCache {
      * Useful as a seperate method for tests to catch the Ping's GUID.
      */
     protected PingRequest getPing() {
-        return PingRequest.createUHCPing();
+        return pingRequestFactory.createUHCPing();
     }
 
     /**

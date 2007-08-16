@@ -465,7 +465,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         private boolean doRealDecrement = false;
         
         public StubCache() {
-            super(EXPIRY_TIME, ProviderHacks.getUniqueHostPinger(), Providers.of(ProviderHacks.getMessageRouter()));
+            super(EXPIRY_TIME, ProviderHacks.getUniqueHostPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory());
         }
         
         protected boolean fetch(Collection hosts) {

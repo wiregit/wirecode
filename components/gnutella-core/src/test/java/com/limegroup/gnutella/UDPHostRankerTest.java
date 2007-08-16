@@ -58,7 +58,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        PingRequest pr = new PingRequest(GUID.makeGuid(), (byte)1);
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest(GUID.makeGuid(), (byte)1);
         UDPPinger pinger = ProviderHacks.getUniqueHostPinger();
         pinger.rank(list, ml, null, pr);
         

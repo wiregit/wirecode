@@ -17,7 +17,8 @@ public class HackConnectionManager extends ConnectionManager {
                         .getConnectionServices(), Providers.of(ProviderHacks
                         .getNodeAssigner()), Providers.of(ProviderHacks
                         .getIpFilter()), ProviderHacks
-                        .getConnectionCheckerManager());
+                        .getConnectionCheckerManager(),
+                        ProviderHacks.getPingRequestFactory());
 
     }
 

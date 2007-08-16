@@ -86,7 +86,7 @@ public class TLSConnectionTest extends LimeTestCase {
         ManagedConnection mc = l.get(0);
         assertTrue(mc.isTLSCapable());
         
-        PingRequest pr = PingRequest.createUDPPing();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         mc.send(pr);
         mc.flush();
         Message readPr = c.receive();
@@ -127,7 +127,7 @@ public class TLSConnectionTest extends LimeTestCase {
         ManagedConnection mc = l.get(0);
         assertTrue(mc.isTLSCapable());
         
-        PingRequest pr = PingRequest.createUDPPing();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         mc.send(pr);
         mc.flush();
         Message readPr = c.receive();

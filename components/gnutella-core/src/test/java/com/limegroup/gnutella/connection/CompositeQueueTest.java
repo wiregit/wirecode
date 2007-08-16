@@ -54,7 +54,7 @@ public class CompositeQueueTest extends LimeTestCase {
 		QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)5));
 
         // send PingRequest with one hop
-        m=new PingRequest((byte)5);
+        m=ProviderHacks.getPingRequestFactory().createPingRequest((byte)5);
         m.hop();
         QUEUE.add(m);
 
@@ -145,7 +145,7 @@ public class CompositeQueueTest extends LimeTestCase {
                                        (byte)8, new byte[10], 0, 5));
                                        
         // send a watchdog ping                                       
-        QUEUE.add(new PingRequest((byte)1));
+        QUEUE.add(ProviderHacks.getPingRequestFactory().createPingRequest((byte)1));
         
         // send Patch message
         QUEUE.add(new PatchTableMessage((short)2, (short)2, 
@@ -354,7 +354,7 @@ public class CompositeQueueTest extends LimeTestCase {
         Message m=null;
 
         // head...tail
-        QUEUE.add(hopped(new PingRequest((byte)4)));
+        QUEUE.add(hopped(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4)));
         QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
         assertInstanceof("didn't recieve queryrequest", QueryRequest.class, QUEUE.removeNext());
         assertInstanceof("didn't recieve pingrequest", PingRequest.class, QUEUE.removeNext());
@@ -362,7 +362,7 @@ public class CompositeQueueTest extends LimeTestCase {
 
         //tail...<wrap>...head
         QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
-        QUEUE.add(hopped(new PingRequest((byte)5)));
+        QUEUE.add(hopped(ProviderHacks.getPingRequestFactory().createPingRequest((byte)5)));
         assertInstanceof("didn't recieve pingrequest", PingRequest.class, QUEUE.removeNext());
         assertInstanceof("didn't recieve queryrequest", QueryRequest.class, QUEUE.removeNext());
         assertNull(QUEUE.removeNext()); // force it to reset the current cycle.
@@ -375,7 +375,7 @@ public class CompositeQueueTest extends LimeTestCase {
         //  PING_REPLY: 
         //  PING: 
         //  OTHER: reset
-        QUEUE.add(new PingRequest((byte)1));
+        QUEUE.add(ProviderHacks.getPingRequestFactory().createPingRequest((byte)1));
         QUEUE.add(ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
                 IP, 0, new Response[0], new byte[16], false));
         QUEUE.add(new ResetTableMessage(1024, (byte)2));

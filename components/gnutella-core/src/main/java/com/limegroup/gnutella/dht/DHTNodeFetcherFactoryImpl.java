@@ -9,6 +9,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 @Singleton
 public class DHTNodeFetcherFactoryImpl implements DHTNodeFetcherFactory {
@@ -17,20 +18,25 @@ public class DHTNodeFetcherFactoryImpl implements DHTNodeFetcherFactory {
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<UDPPinger> udpPingerFactory;
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
     public DHTNodeFetcherFactoryImpl(ConnectionServices connectionServices,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<HostCatcher> hostCatcher,
-            Provider<UDPPinger> udpPingerFactory) {
+            Provider<UDPPinger> udpPingerFactory,
+            PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.backgroundExecutor = backgroundExecutor;
         this.hostCatcher = hostCatcher;
         this.udpPingerFactory = udpPingerFactory;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
     public DHTNodeFetcher createNodeFetcher(DHTBootstrapper dhtBootstrapper) {
-        return new DHTNodeFetcher(dhtBootstrapper, connectionServices, hostCatcher, backgroundExecutor, udpPingerFactory);
+        return new DHTNodeFetcher(dhtBootstrapper, connectionServices,
+                hostCatcher, backgroundExecutor, udpPingerFactory,
+                pingRequestFactory);
     }
 
 }

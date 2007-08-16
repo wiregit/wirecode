@@ -38,7 +38,8 @@ public class HackMessageRouter extends StandardMessageRouter {
                         ProviderHacks.getUDPCrawlerPingHandlerFactory(),
                         ProviderHacks.getAdvancedToggleHandlerFactory(),
                         ProviderHacks.getStatistics(),
-                        ProviderHacks.getReplyNumberVendorMessageFactory()
+                        ProviderHacks.getReplyNumberVendorMessageFactory(),
+                        ProviderHacks.getPingRequestFactory()
 
         );
     }

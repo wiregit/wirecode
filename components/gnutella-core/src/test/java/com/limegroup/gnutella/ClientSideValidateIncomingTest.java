@@ -232,7 +232,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             // now connect back and it should switch on unsolicited
             DatagramSocket s = new DatagramSocket();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PingRequest ping = new PingRequest(cbGuid, (byte)1, (byte)1);
+            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(cbGuid, (byte)1,
+                    (byte)1);
             ping.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
                                                      baos.toByteArray().length,
@@ -308,7 +309,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 // now connect back and it should switch on unsolicited
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                PingRequest ping = new PingRequest(cbGuid, (byte)1, (byte)1);
+                PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(cbGuid,
+                        (byte)1, (byte)1);
                 ping.write(baos);
                 DatagramPacket pack = 
                     new DatagramPacket(baos.toByteArray(), 

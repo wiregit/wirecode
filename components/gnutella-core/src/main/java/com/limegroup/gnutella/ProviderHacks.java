@@ -51,6 +51,7 @@ import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
@@ -241,6 +242,7 @@ public class ProviderHacks {
     public static BTUploaderFactory getBTUploaderFactory() { return i().getBTUploaderFactory(); }
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
+    public static PingRequestFactory getPingRequestFactory() { return i().getPingRequestFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

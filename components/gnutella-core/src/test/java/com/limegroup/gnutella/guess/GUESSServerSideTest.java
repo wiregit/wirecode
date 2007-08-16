@@ -86,7 +86,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // first try to get a AddressSecurityToken....
-        PingRequest pr = PingRequest.createQueryKeyRequest();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createQueryKeyRequest();
         AddressSecurityToken qkToUse = null;
         send(pr, address, Backend.BACKEND_PORT);
         //try {
@@ -101,7 +101,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // send a normal ping, should get a pong....
-        pr = new PingRequest((byte)1);
+        pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         send(pr, address, Backend.BACKEND_PORT);
         //try {
             pRep = (PingReply) receive();

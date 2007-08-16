@@ -166,7 +166,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-        PingRequest pr = new PingRequest((byte)1);
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);

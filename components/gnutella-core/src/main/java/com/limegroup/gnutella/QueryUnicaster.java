@@ -28,6 +28,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -122,17 +123,21 @@ public final class QueryUnicaster {
     private final Provider<MessageRouter> messageRouter;
     private final Provider<UDPService> udpService;
 
+    private final PingRequestFactory pingRequestFactory;
+
 	@Inject
     public QueryUnicaster(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter,
-            Provider<UDPService> udpService) {
+            Provider<UDPService> udpService,
+            PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.messageRouter = messageRouter;
         this.udpService = udpService;
+        this.pingRequestFactory = pingRequestFactory;
         
         _queries = new Hashtable<GUID, QueryBundle>();
         _queryHosts = new LinkedList<GUESSEndpoint>();
@@ -222,7 +227,7 @@ public final class QueryUnicaster {
                 // no query key to use in my query!
                 if (!_queryKeys.containsKey(toQuery)) {
                     // send a AddressSecurityToken Request
-                    PingRequest pr = PingRequest.createQueryKeyRequest();
+                    PingRequest pr = pingRequestFactory.createQueryKeyRequest();
                     udpService.get().send(pr,toQuery.getInetAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
@@ -368,8 +373,8 @@ public final class QueryUnicaster {
                  NetworkUtils.isCloseIP(networkManager.getAddress(),
                                         endpoint.getInetAddress().getAddress())) ) {
 				PingRequest pr = 
-                new PingRequest(udpService.get().getSolicitedGUID().bytes(),
-                                (byte)1, (byte)0);
+                pingRequestFactory.createPingRequest(udpService.get().getSolicitedGUID().bytes(),
+                        (byte)1, (byte)0);
                 udpService.get().send(pr, endpoint.getInetAddress(), 
                                            endpoint.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
@@ -488,7 +493,7 @@ public final class QueryUnicaster {
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
                     PingRequest pr = 
-                    new PingRequest(ConnectionSettings.TTL.getValue());
+                    pingRequestFactory.createPingRequest(ConnectionSettings.TTL.getValue());
                     messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }
@@ -505,7 +510,7 @@ public final class QueryUnicaster {
             // if i haven't pinged him 'recently', then ping him...
             synchronized (_pingList) {
                 if (!_pingList.contains(toReturn)) {
-                    PingRequest pr = new PingRequest((byte)1);
+                    PingRequest pr = pingRequestFactory.createPingRequest((byte)1);
                     InetAddress ip = toReturn.getInetAddress();
                     udpService.get().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);

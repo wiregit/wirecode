@@ -66,6 +66,7 @@ import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
@@ -684,6 +685,10 @@ public class LimeWireCore {
 
     public BTUploaderFactory getBTUploaderFactory() {
         return injector.getInstance(BTUploaderFactory.class);
+    }
+
+    public PingRequestFactory getPingRequestFactory() {
+        return injector.getInstance(PingRequestFactory.class);
     }
     
 }

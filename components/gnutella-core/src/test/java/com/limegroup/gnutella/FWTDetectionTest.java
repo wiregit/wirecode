@@ -417,8 +417,8 @@ public class FWTDetectionTest extends LimeTestCase {
         DatagramSocket sock = new DatagramSocket(20000);
         sock.setSoTimeout(500);
         
-        PingRequest with = new PingRequest((byte)1);
-        PingRequest without = new PingRequest((byte)1);
+        PingRequest with = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        PingRequest without = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         
         with.addIPRequest();
         

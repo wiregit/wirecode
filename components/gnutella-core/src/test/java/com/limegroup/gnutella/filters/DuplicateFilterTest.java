@@ -34,7 +34,7 @@ public class DuplicateFilterTest extends LimeTestCase {
     
     
     public void testGUIDDuplicate() throws Exception {        
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         byte[] guid=pr.getGUID();
         guid[9]++;
 		byte[] payload = { 0, 0, 65 };
@@ -42,7 +42,7 @@ public class DuplicateFilterTest extends LimeTestCase {
             guid, pr.getTTL(), pr.getHops(), payload, Network.UNKNOWN);
         assertTrue(filter.allow(pr));
         assertTrue(!filter.allow(qr));
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         assertTrue(filter.allow(pr)); //since GUIDs are currently random
         assertTrue(!filter.allow(pr));
         
@@ -55,7 +55,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         
         assertTrue(filter.allow(pr));  
         assertTrue(!filter.allow(pr));
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         assertTrue(filter.allow(pr));
         pr.hop(); //hack to get different hops count
         assertTrue(filter.allow(pr));

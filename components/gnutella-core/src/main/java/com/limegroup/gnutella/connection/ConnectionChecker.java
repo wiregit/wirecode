@@ -31,6 +31,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.SocketsManager;
 
 /**
@@ -130,6 +131,8 @@ public final class ConnectionChecker implements Runnable {
     private final SocketsManager socketsManager;
     
     private final AtomicInteger numWorkarounds;
+
+    private final PingRequestFactory pingRequestFactory;
     
     public ConnectionChecker(AtomicInteger numWorkarounds,
             ConnectionServices connectionServices,
@@ -137,7 +140,8 @@ public final class ConnectionChecker implements Runnable {
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
             Provider<HostCatcher> hostCatcher, Provider<UDPService> udpService,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager, 
+            PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.uploadServices = uploadServices;
         this.connectionManager = connectionManager;
@@ -147,6 +151,7 @@ public final class ConnectionChecker implements Runnable {
         this.socketsManager = socketsManager;
         
         this.numWorkarounds = numWorkarounds;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
     /**
@@ -218,7 +223,7 @@ public final class ConnectionChecker implements Runnable {
      * @return if we think that udp traffic is dead
      */
     private boolean udpIsDead() {
-        PingRequest ping = PingRequest.createUDPPing();
+        PingRequest ping = pingRequestFactory.createUDPPing();
         Collection<IpPort> hosts = connectionServices.getPreferencedHosts(false,"en",50);
         UDPPinger myPinger = hostCatcher.get().getPinger();
         UDPChecker checker = new UDPChecker();

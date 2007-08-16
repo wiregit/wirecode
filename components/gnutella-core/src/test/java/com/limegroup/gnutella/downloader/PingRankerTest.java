@@ -518,7 +518,7 @@ public class PingRankerTest extends LimeTestCase {
         public MockPinger() {
             super(Providers.of(ProviderHacks.getMessageRouter()), 
                   ProviderHacks.getBackgroundExecutor(),
-                  Providers.of(ProviderHacks.getUdpService()));
+                  Providers.of(ProviderHacks.getUdpService()), ProviderHacks.getPingRequestFactory());
         }
 
         /**

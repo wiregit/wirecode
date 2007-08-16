@@ -567,7 +567,7 @@ public final class MessageRouterTest extends LimeTestCase {
         
         StubRouter stub = new StubRouter();
         // send a PR that doesn't have SCP in it.
-        PingRequest pr = new PingRequest((byte)1);
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
         assertFalse(pr.requestsDHTIPP());
@@ -589,7 +589,7 @@ public final class MessageRouterTest extends LimeTestCase {
         assertFalse(ProviderHacks.getConnectionServices().isSupernode());
         Collection hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 0, hosts.size());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
         assertTrue(pr.requestsIP());
@@ -606,7 +606,7 @@ public final class MessageRouterTest extends LimeTestCase {
         addFreeLeafSlotHostsClassB(2);
         hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 3, hosts.size());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
         stub.respondToUDPPingRequest(pr, addr, null);
@@ -620,7 +620,7 @@ public final class MessageRouterTest extends LimeTestCase {
         addFreeLeafSlotHostsClassB(20);
         hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
         stub.respondToUDPPingRequest(pr, addr, null);
@@ -641,7 +641,7 @@ public final class MessageRouterTest extends LimeTestCase {
         addFreeUltrapeerSlotHostsClassB(4);
         hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,10);
         assertEquals(hosts.toString(), 4, hosts.size());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
         stub.respondToUDPPingRequest(pr, addr, null);
@@ -657,7 +657,7 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
         hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
-        pr = PingRequest.createUDPPing();
+        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
         stub.respondToUDPPingRequest(pr, addr, null);
@@ -668,7 +668,7 @@ public final class MessageRouterTest extends LimeTestCase {
         ConnectionSettings.NUM_RETURN_PONGS.setValue(original);
         
         // Now try again, without an SCP request, and make sure we got none.
-        pr = new PingRequest((byte)1);
+        pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
         stub.respondToUDPPingRequest(pr, addr, null);
@@ -706,7 +706,7 @@ public final class MessageRouterTest extends LimeTestCase {
         
         Thread.sleep(300);
         //create the request
-        PingRequest pr = PingRequest.createUDPingWithDHTIPPRequest();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPingWithDHTIPPRequest();
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getLocalHost(), 1);
         assertTrue(pr.requestsDHTIPP());
         assertFalse(pr.supportsCachedPongs());
@@ -724,7 +724,7 @@ public final class MessageRouterTest extends LimeTestCase {
         GUID guid = new GUID();
         ProviderHacks.getHostCatcher().clear();
         List<NameValue> l = new LinkedList<NameValue>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
+        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] { PingRequest.SCP_LEAF}));
         l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
         Object[] args = new Object[] {guid.bytes(), (byte)1, l};
         Class[] types = new Class[] {byte[].class, byte.class, List.class}; 

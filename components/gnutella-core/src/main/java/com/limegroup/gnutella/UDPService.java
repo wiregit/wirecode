@@ -37,6 +37,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -165,6 +166,9 @@ public class UDPService implements ReadWriteObserver {
 
     private final MessageFactory messageFactory;
 
+
+    private final PingRequestFactory pingRequestFactory;
+
 	@Inject
     public UDPService(NetworkManager networkManager,
             Provider<MessageDispatcher> messageDispatcher,
@@ -174,7 +178,8 @@ public class UDPService implements ReadWriteObserver {
             Provider<QueryUnicaster> queryUnicaster,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -185,6 +190,7 @@ public class UDPService implements ReadWriteObserver {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.messageFactory = messageFactory;
+        this.pingRequestFactory = pingRequestFactory;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -800,8 +806,8 @@ public class UDPService implements ReadWriteObserver {
             if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;
 
             // good to use the solicited guid
-            PingRequest pr = new PingRequest(getSolicitedGUID().bytes(),
-                                             (byte)1, (byte)0);
+            PingRequest pr = pingRequestFactory.createPingRequest(getSolicitedGUID().bytes(), (byte)1,
+                    (byte)0);
             
             pr.addIPRequest();
             send(pr, ep.getInetAddress(), ep.getPort());

@@ -17,13 +17,19 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     private final QueryReplyFactory queryReplyFactory;
     private final QueryRequestFactory queryRequestFactory;
     private final VendorMessageFactory vendorMessageFactory;
+    private final PingRequestFactory pingRequestFactory;
 
     @Inject
-    public MessageParserBinderImpl(PingReplyFactory pingReplyFactory, QueryRequestFactory queryRequestFactory, QueryReplyFactory queryReplyFactory, VendorMessageFactory vendorMessageFactory) {
+    public MessageParserBinderImpl(PingReplyFactory pingReplyFactory,
+            QueryRequestFactory queryRequestFactory,
+            QueryReplyFactory queryReplyFactory,
+            VendorMessageFactory vendorMessageFactory,
+            PingRequestFactory pingRequestFactory) {
         this.pingReplyFactory = pingReplyFactory;
         this.queryRequestFactory = queryRequestFactory;
         this.queryReplyFactory = queryReplyFactory;
         this.vendorMessageFactory = vendorMessageFactory;
+        this.pingRequestFactory = pingRequestFactory;
     }
     
     public void bind(MessageFactory messageFactory) {
@@ -88,13 +94,15 @@ public class MessageParserBinderImpl implements MessageParserBinder {
                 byte[] payload, Network network) throws BadPacketException;
     }
     
-    private static class PingRequestParser extends GnutellaMessageParser {
+    private class PingRequestParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             if (payload.length > 0) { // Big ping
-                return new PingRequest(guid, ttl, hops, payload);
+                return pingRequestFactory.createPingRequest(guid, ttl,
+                        hops, payload);
             } else {
-                return new PingRequest(guid, ttl, hops);
+                return pingRequestFactory.createPingRequest(guid, ttl,
+                        hops);
             }
         }
     }

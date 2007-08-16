@@ -15,6 +15,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UploadServices;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
@@ -32,6 +33,8 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
     private final Provider<UDPService> udpService;
     private final Provider<HostCatcher> hostCatcher;
     private final SocketsManager socketsManager;
+
+    private final PingRequestFactory pingRequestFactory;
     
     @Inject
     public ConnectionCheckerManagerImpl(ConnectionServices connectionServices,
@@ -39,7 +42,8 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
             UploadServices uploadServices,
             Provider<DownloadManager> downloadManager,
             Provider<UDPService> udpService, Provider<HostCatcher> hostCatcher,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager,
+            PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
         this.uploadServices = uploadServices;
@@ -47,6 +51,7 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
         this.udpService = udpService;
         this.hostCatcher = hostCatcher;
         this.socketsManager = socketsManager;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
     /* (non-Javadoc)
@@ -63,7 +68,7 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
                 currentChecker = new ConnectionChecker(numWorkarounds,
                         connectionServices, uploadServices, connectionManager,
                         downloadManager, hostCatcher, udpService,
-                        socketsManager);
+                        socketsManager, pingRequestFactory);
             }
             checker = currentChecker;
         }

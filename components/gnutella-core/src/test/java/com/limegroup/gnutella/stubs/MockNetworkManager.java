@@ -95,4 +95,8 @@ public class MockNetworkManager implements NetworkManager {
         return 0;
     }
 
+    public GUID getSolicitedGUID() {
+        return null;
+    }
+
 }

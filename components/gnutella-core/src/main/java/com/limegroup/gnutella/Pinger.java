@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.PingPongSettings;
 
 /**
@@ -30,15 +30,19 @@ public final class Pinger implements Runnable {
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
     private final Provider<MessageRouter> messageRouter;
+
+    private final PingRequestFactory pingRequestFactory;
         
     @Inject
     public Pinger(
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
-            Provider<MessageRouter> messageRouter) {
+            Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.messageRouter = messageRouter;
+        this.pingRequestFactory = pingRequestFactory;
     }
 
 
@@ -56,7 +60,7 @@ public final class Pinger implements Runnable {
      */
     public void run() {
         if (connectionServices.isSupernode() && PingPongSettings.PINGS_ACTIVE.getValue()) {
-            messageRouter.get().broadcastPingRequest(new PingRequest((byte) 3));
+            messageRouter.get().broadcastPingRequest(pingRequestFactory.createPingRequest((byte) 3));
         }
     }
 }

@@ -4,7 +4,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -31,7 +30,7 @@ public class RequeryFilterTest extends LimeTestCase {
 	    FilterSettings.FILTER_DUPLICATES.setValue(false);
 	    FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
         SpamFilter filter = ProviderHacks.getSpamFilterFactory().createRouteFilter();
-        assertTrue(filter.allow(new PingRequest((byte)3)));
+        assertTrue(filter.allow(ProviderHacks.getPingRequestFactory().createPingRequest((byte)3)));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));
         assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createRequery("Hel lo")));

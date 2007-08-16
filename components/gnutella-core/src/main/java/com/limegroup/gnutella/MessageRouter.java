@@ -56,6 +56,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -316,6 +317,8 @@ public abstract class MessageRouter {
     private final Provider<InspectionRequestHandler> inspectionRequestHandlerFactory;
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
     private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
+
+    private final PingRequestFactory pingRequestFactory;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -356,7 +359,8 @@ public abstract class MessageRouter {
             UDPReplyHandlerCache udpReplyHandlerCache,
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory) {
+            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
+            PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -388,6 +392,7 @@ public abstract class MessageRouter {
         this.updateHandler = updateHandler;
         this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
         this.advancedToggleHandlerFactory = advancedToggleHandlerFactory;
+        this.pingRequestFactory = pingRequestFactory;
         this.multicastGuidMap = guidMapManager.getMap();
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
@@ -1342,8 +1347,8 @@ public abstract class MessageRouter {
 
         // mutating twice restores the original guid
         UDPService.mutateGUID(guidToUse.bytes(), addrToContact, portToContact);
-        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
-                                         (byte) 0);
+        PingRequest pr = pingRequestFactory.createPingRequest(guidToUse.bytes(), (byte) 1,
+                (byte) 0);
         udpService.send(pr, addrToContact, portToContact);
     }
     

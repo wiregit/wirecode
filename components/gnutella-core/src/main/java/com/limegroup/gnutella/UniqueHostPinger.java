@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 public class UniqueHostPinger extends UDPPinger {
 
@@ -22,8 +23,8 @@ public class UniqueHostPinger extends UDPPinger {
     @Inject
     public UniqueHostPinger(Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<UDPService> udpService) {
-        super(messageRouter, backgroundExecutor, udpService);
+            Provider<UDPService> udpService, PingRequestFactory pingRequestFactory) {
+        super(messageRouter, backgroundExecutor, udpService, pingRequestFactory);
     }    
     
     protected void sendSingleMessage(IpPort host, Message m) {

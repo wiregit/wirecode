@@ -102,7 +102,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         //long initialBytesSent = out.getUncompressedBytesSent();
         long initialBytesRecv = in.getUncompressedBytesReceived();
         
-        pr=new PingRequest((byte)3);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
         out.send(pr);
         
         start=System.currentTimeMillis();        
@@ -193,13 +193,13 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         assertTrue("connection should be open", out.isOpen());
         
         out.close();
-        Message m = new PingRequest((byte)4);
+        Message m = ProviderHacks.getPingRequestFactory().createPingRequest((byte)4);
         m.hop();
         in.send(m);   
         Thread.sleep(500);
-        in.send(new PingRequest((byte)4));
+        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
         Thread.sleep(500);
-        in.send(new PingRequest((byte)4));
+        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
         Thread.sleep(500);
 
         assertTrue("connection should not be open", !in.isOpen());

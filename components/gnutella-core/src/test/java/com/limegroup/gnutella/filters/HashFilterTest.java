@@ -9,7 +9,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -53,6 +52,6 @@ public class HashFilterTest extends LimeTestCase {
     }
     
     public void testOtherMessage() throws Exception {
-        assertTrue(filter.allow(new PingRequest((byte)1)));
+        assertTrue(filter.allow(ProviderHacks.getPingRequestFactory().createPingRequest((byte)1)));
     }
 }
