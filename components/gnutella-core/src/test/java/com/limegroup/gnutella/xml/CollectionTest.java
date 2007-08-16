@@ -46,6 +46,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
         XMLStringUtils.DELIMITER;
     private final String BITRATE_KEY =  KEY_PREFIX + "bitrate" +
         XMLStringUtils.DELIMITER;
+    private LimeXMLReplyCollectionFactory factory;
         
 
     public CollectionTest(String name) {
@@ -73,12 +74,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
         files[1] = new FileDesc(test1, urns, 1);
         urns = calculateAndCacheURN(test2);
         files[2] = new FileDesc(test2, urns, 2);
+        
+        factory = ProviderHacks.getLimeXMLReplyCollectionFactory();
     }
 
     public void testAudio() {
         clearDirectory();
         // test construction
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(audioSchemaURI);
+        LimeXMLReplyCollection collection = factory.createLimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
             collection.initialize(files[i], Collections.EMPTY_LIST);
@@ -119,7 +122,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testVideo() {
         clearDirectory();
         // test construction
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(videoSchemaURI);
+        LimeXMLReplyCollection collection = factory.createLimeXMLReplyCollection(videoSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
             collection.initialize(files[i], Collections.EMPTY_LIST);
@@ -146,7 +149,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public void testMatching() {
         clearDirectory();
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(audioSchemaURI);
+        LimeXMLReplyCollection collection = factory.createLimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
             collection.initialize(files[i], Collections.EMPTY_LIST);
@@ -250,8 +253,8 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
         createFiles();
         populateDirectory();
 
-        LimeXMLReplyCollection audioCollection = new LimeXMLReplyCollection(audioSchemaURI);
-        LimeXMLReplyCollection videoCollection = new LimeXMLReplyCollection(videoSchemaURI);
+        LimeXMLReplyCollection audioCollection = factory.createLimeXMLReplyCollection(audioSchemaURI);
+        LimeXMLReplyCollection videoCollection = factory.createLimeXMLReplyCollection(videoSchemaURI);
         assertEquals(0, audioCollection.getCount());
         assertEquals(0, videoCollection.getCount());
         
@@ -307,7 +310,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
         String dir3 = dir1 + " studio=\"" + keywds[2] + "\"";
 
 
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(videoSchemaURI);
+        LimeXMLReplyCollection collection = factory.createLimeXMLReplyCollection(videoSchemaURI);
         LimeXMLDocument newDoc = new LimeXMLDocument(buildXMLString(dir2));
         LimeXMLDocument newDoc2 = new LimeXMLDocument(buildXMLString(dir3));
         

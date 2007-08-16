@@ -27,8 +27,9 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
@@ -100,18 +101,21 @@ public class LimeXMLReplyCollection {
     public static final int HASH_FAILED  = 11;
     public static final int INCORRECT_FILETYPE = 12;
 
+    private final Provider<FileManager> fileManager;
+
     /**
      * Creates a new LimeXMLReplyCollection.  The reply collection
      * will retain only those XMLDocs that match the given schema URI.
      *
      * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
+     * @param fileManager 
      */
-    public LimeXMLReplyCollection(String URI) {
+    LimeXMLReplyCollection(String URI, String path, Provider<FileManager> fileManager) {
         this.schemaURI = URI;
+        this.fileManager = fileManager;
         this.trieMap = new HashMap<String, StringTrie<List<LimeXMLDocument>>>();
-        this.dataFile = new File(ProviderHacks.getLimeXMLProperties().getXMLDocsDir(),
-                                 LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
+        this.dataFile = new File(path, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap<URN, LimeXMLDocument>();
         this.oldMap = readMapFromDisk();
     }
@@ -626,7 +630,7 @@ public class LimeXMLReplyCollection {
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        ProviderHacks.getFileManager().fileChanged(new File(fileName));
+        fileManager.get().fileChanged(new File(fileName));
         return retVal;
     }
     

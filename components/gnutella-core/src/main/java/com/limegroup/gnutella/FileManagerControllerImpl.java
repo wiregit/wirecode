@@ -19,6 +19,8 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 
 @Singleton
 public class FileManagerControllerImpl implements FileManagerController {
@@ -34,6 +36,7 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<UpdateHandler> updateHandler;
     private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
+    private final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
     
     /**
      * @param urnCache
@@ -53,7 +56,8 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<SimppManager> simppManager,
             Provider<UpdateHandler> updateHandler,
             Provider<ActivityCallback> activityCallback,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
@@ -65,6 +69,7 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.updateHandler = updateHandler;
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
+        this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
     }
     
     /* (non-Javadoc)
@@ -225,4 +230,9 @@ public class FileManagerControllerImpl implements FileManagerController {
         return activityCallback.get().warnAboutSharingSensitiveDirectory(directory);
     }
 
+    public LimeXMLReplyCollection createLimeXMLReplyCollection(String URI) {
+        return limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(URI);
+    }
+
+    
 }

@@ -69,6 +69,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
@@ -225,6 +226,7 @@ public class ProviderHacks {
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
     public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }
+    public static LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() { return i().getLimeXMLReplyCollectionFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

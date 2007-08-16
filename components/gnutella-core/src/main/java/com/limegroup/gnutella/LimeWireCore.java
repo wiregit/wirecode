@@ -88,6 +88,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
@@ -644,5 +645,9 @@ public class LimeWireCore {
 
     public UDPHostCacheFactory getUDPHostCacheFactory() {
         return injector.getInstance(UDPHostCacheFactory.class);
+    }
+
+    public LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() {
+        return injector.getInstance(LimeXMLReplyCollectionFactory.class);
     }
 }

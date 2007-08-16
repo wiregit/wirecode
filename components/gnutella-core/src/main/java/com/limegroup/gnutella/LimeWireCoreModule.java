@@ -129,6 +129,8 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
@@ -232,6 +234,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(VendorMessageParserBinder.class).to(VendorMessageParserBinderImpl.class);
         bind(UDPCrawlerPongFactory.class).to(UDPCrawlerPongFactoryImpl.class);
         bind(UDPHostCacheFactory.class).to(UDPHostCacheFactoryImpl.class);
+        bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

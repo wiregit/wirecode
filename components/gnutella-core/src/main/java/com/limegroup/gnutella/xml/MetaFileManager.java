@@ -260,8 +260,9 @@ public class MetaFileManager extends FileManager {
         String[] schemas = schemaRepository.getAvailableSchemaURIs();
         SchemaReplyCollectionMapper mapper = ProviderHacks
                 .getSchemaReplyCollectionMapper();
-        for (int i = 0; i < schemas.length; i++)
-            mapper.add(schemas[i], new LimeXMLReplyCollection(schemas[i]));
+        for (int i = 0; i < schemas.length; i++) {
+            mapper.add(schemas[i], fileManagerController.createLimeXMLReplyCollection(schemas[i]));
+        }
 
         super.loadStarted(revision);
     }

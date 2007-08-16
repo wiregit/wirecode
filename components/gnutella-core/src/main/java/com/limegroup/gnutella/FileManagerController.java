@@ -9,6 +9,7 @@ import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 
 public interface FileManagerController {
 
@@ -59,4 +60,7 @@ public interface FileManagerController {
     public void scheduleWithFixedDelay(Runnable command, int initialDelay, int delay, TimeUnit unit);
 
     public void setAnnotateEnabled(boolean enabled);
+    
+    public LimeXMLReplyCollection createLimeXMLReplyCollection(String URI);
+    
 }
