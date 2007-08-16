@@ -4,7 +4,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
@@ -45,6 +47,8 @@ public class DownloadReferences {
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<TorrentManager> torrentManager;
+    private final BTUploaderFactory btUploaderFactory;
 
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
@@ -63,7 +67,9 @@ public class DownloadReferences {
             BTContextFactory btContextFactory,
             ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache) {
+            Provider<TigerTreeCache> tigerTreeCache,
+            Provider<TorrentManager> torrentManager,
+            BTUploaderFactory btUploaderFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -86,6 +92,8 @@ public class DownloadReferences {
         this.backgroundExecutor = backgroundExecutor;
         this.messageRouter = messageRouter;
         this.tigerTreeCache = tigerTreeCache;
+        this.torrentManager = torrentManager;
+        this.btUploaderFactory = btUploaderFactory;
     }
     
     public DownloadManager getDownloadManager() {
@@ -175,4 +183,13 @@ public class DownloadReferences {
     public Provider<TigerTreeCache> getTigerTreeCache() {
         return tigerTreeCache;
     }
+    
+    public Provider<TorrentManager> getTorrentManager() {
+        return torrentManager;
+    }
+    
+    public BTUploaderFactory getBtUploaderFactory() {
+        return btUploaderFactory;
+    }
+    
 }

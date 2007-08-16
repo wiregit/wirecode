@@ -31,6 +31,8 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTDownloaderFactoryImpl;
+import com.limegroup.bittorrent.BTUploaderFactory;
+import com.limegroup.bittorrent.BTUploaderFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
 import com.limegroup.bittorrent.TorrentEvent;
@@ -252,6 +254,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
+        bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

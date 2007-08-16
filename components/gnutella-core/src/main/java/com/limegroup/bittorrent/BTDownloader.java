@@ -14,13 +14,13 @@ import org.limewire.collection.NumericBuffer;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
@@ -80,11 +80,17 @@ public class BTDownloader extends AbstractDownloader
     
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
-	
-	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory, SaveLocationManager saveLocationManager) {
+
+    private transient volatile Provider<TorrentManager> torrentManager;
+
+    private transient volatile BTUploaderFactory btUploaderFactory;
+
+	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory, SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager, BTUploaderFactory btUploaderFactory) {
 	    super(saveLocationManager);
 	    
 		_info = info;
+        this.torrentManager = torrentManager;
+        this.btUploaderFactory = btUploaderFactory;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
 		synchronized(this) {
@@ -452,18 +458,17 @@ public class BTDownloader extends AbstractDownloader
         context = downloadReferences.getBTContextFactory().createBTContext(_info);
 	    
         this.manager = downloadReferences.getDownloadManager();
+        this.torrentManager = downloadReferences.getTorrentManager();
+        this.btUploaderFactory = downloadReferences.getBtUploaderFactory();
         ifm = manager.getIncompleteFileManager();
         _torrent = downloadReferences.getManagedTorrentFactory().create(context);
         // DPINJ: make sure the torrentManager in the factory is the same as the one the listener is added to
-        TorrentManager torrentManager = ProviderHacks.getTorrentManager();
-        torrentManager.addEventListener(this);
+        torrentManager.get().addEventListener(this);
         ifm.addTorrentEntry(_info.getURN());
     }
 	
 	public void startDownload() {
-		new BTUploader((ManagedTorrent)_torrent,
-				_info, 
-				ProviderHacks.getTorrentManager());
+		btUploaderFactory.createBTUploader((ManagedTorrent)_torrent, _info);
 		_torrent.start();
 	}
 	
@@ -472,7 +477,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == DownloadStatus.QUEUED && ProviderHacks.getTorrentManager().allowNewTorrent(); 
+		return getState() == DownloadStatus.QUEUED && torrentManager.get().allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {
@@ -503,7 +508,7 @@ public class BTDownloader extends AbstractDownloader
 
 	public synchronized void finish() {
         finished = true;
-		ProviderHacks.getTorrentManager().removeEventListener(this);
+		torrentManager.get().removeEventListener(this);
 		_torrent = new FinishedTorrentDownload(_torrent);
 		_info = null;
 		propertiesMap.remove(METAINFO);

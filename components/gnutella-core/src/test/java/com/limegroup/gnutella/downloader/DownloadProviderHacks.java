@@ -31,7 +31,9 @@ public class DownloadProviderHacks {
                 ProviderHacks.getBTContextFactory(),
                 ProviderHacks.getBackgroundExecutor(),
                 Providers.of(ProviderHacks.getMessageRouter()),
-                Providers.of(ProviderHacks.getTigerTreeCache())
+                Providers.of(ProviderHacks.getTigerTreeCache()),
+                Providers.of(ProviderHacks.getTorrentManager()),
+                ProviderHacks.getBTUploaderFactory()
                 );
     }
 

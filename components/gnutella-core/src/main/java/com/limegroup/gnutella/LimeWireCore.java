@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
+import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
@@ -679,6 +680,10 @@ public class LimeWireCore {
 
     public GnutellaDownloaderFactory getGnutellaDownloaderFactory() {
         return injector.getInstance(GnutellaDownloaderFactory.class);
+    }
+
+    public BTUploaderFactory getBTUploaderFactory() {
+        return injector.getInstance(BTUploaderFactory.class);
     }
     
 }

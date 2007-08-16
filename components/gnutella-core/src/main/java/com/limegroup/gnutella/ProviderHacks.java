@@ -10,6 +10,7 @@ import com.google.inject.Guice;
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTDownloaderFactory;
+import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -113,10 +114,8 @@ public class ProviderHacks {
     
     // Still needed in core...  
     public static UDPService getUdpService() { return i().getUdpService(); }     
-    public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     
     // Requires some factories...
-    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
@@ -239,6 +238,9 @@ public class ProviderHacks {
     public static GnutellaDownloaderFactory getGnutellaDownloaderFactory() { return i().getGnutellaDownloaderFactory(); }
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
-
+    public static BTUploaderFactory getBTUploaderFactory() { return i().getBTUploaderFactory(); }
+    public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
+    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
+    
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

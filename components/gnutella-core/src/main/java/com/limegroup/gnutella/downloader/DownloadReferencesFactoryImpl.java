@@ -7,7 +7,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -51,6 +53,8 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<TorrentManager> torrentManager;
+    private final BTUploaderFactory btUploaderFactory;
     
     @Inject
     public DownloadReferencesFactoryImpl(
@@ -76,7 +80,9 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
             Provider<BTContextFactory> btContextFactory,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache) {
+            Provider<TigerTreeCache> tigerTreeCache, 
+            Provider<TorrentManager> torrentManager, 
+            BTUploaderFactory btUploaderFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -100,6 +106,8 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
         this.backgroundExecutor = backgroundExecutor;
         this.messageRouter = messageRouter;
         this.tigerTreeCache = tigerTreeCache;
+        this.torrentManager = torrentManager;
+        this.btUploaderFactory = btUploaderFactory;
     }
 
     public DownloadReferences create(Downloader downloader) {
@@ -112,7 +120,10 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
                 contentManager.get(), sourceRankerFactory.get(),
                 urnCache.get(), savedFileManager.get(), verifyingFileFactory
                         .get(), diskController.get(), ipFilter.get(),
-                requeryManagerFactory.get(), btContextFactory.get(), backgroundExecutor, messageRouter, tigerTreeCache);
+                requeryManagerFactory.get(), btContextFactory.get(), 
+                backgroundExecutor, messageRouter, tigerTreeCache, torrentManager, 
+                btUploaderFactory
+                );
     }
 
 }
