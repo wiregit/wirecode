@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -31,6 +32,7 @@ import org.limewire.io.UncompressingInputStream;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.ssl.SSLBandwidthTracker;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.setting.StringSetting;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -248,6 +250,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
 
     private final MessageFactory messageFactory;
 
+    private final NetworkManager networkManager;
+
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties that may use TLS.
@@ -263,8 +267,9 @@ public class Connection implements IpPort, Inspectable, Connectable {
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory, NetworkManager networkManager) {
 		this.messageFactory = messageFactory;
+        this.networkManager = networkManager;
         if(host == null)
 			throw new NullPointerException("null host");
 		if(!NetworkUtils.isValidPort(port))
@@ -296,8 +301,9 @@ public class Connection implements IpPort, Inspectable, Connectable {
      */
     Connection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory) {
-		if(socket == null)
+            MessageFactory messageFactory, NetworkManager networkManager) {
+		this.networkManager = networkManager;
+        if(socket == null)
 			throw new NullPointerException("null socket");
         
         //Get the address in dotted-quad format.  It's important not to do a
@@ -548,6 +554,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
             // us traffic from their leaves
             _softMax++;
         }
+        
+        updateAddress(shaker.getReadHeaders());
 
         // wrap the streams with inflater/deflater
         // These calls must be delayed until absolutely necessary (here)
@@ -568,6 +576,45 @@ public class Connection implements IpPort, Inspectable, Connectable {
         }
     }
     
+    /**
+     * Determines if the address should be changed and changes it if
+     * necessary.
+     */
+    private void updateAddress(HandshakeResponse readHeaders) {
+        String ip = readHeaders.getProperty(HeaderNames.REMOTE_IP);
+        if (ip == null) {
+            return;
+        }
+         
+        InetAddress ia = null;
+        try {
+            ia = InetAddress.getByName(ip);
+        } catch(UnknownHostException uhe) {
+            return; // invalid.
+        }
+            
+        // invalid or private, exit
+        if(!NetworkUtils.isValidAddress(ia) ||
+                NetworkUtils.isPrivateAddress(ia))
+            return;
+        
+        // If we're forcing, change that if necessary.
+        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
+            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
+            if(!ip.equals(addr.getValue())) {
+                addr.setValue(ip);
+                networkManager.addressChanged();
+            }
+        }
+        // Otherwise, if our current address is invalid, change.
+        else if(!NetworkUtils.isValidAddress(networkManager.getAddress())) {
+            // will auto-call addressChanged.
+            acceptor.setAddress(ia);
+        }
+        
+        acceptor.setExternalAddress(ia);
+    }
+
     /** Creates the output stream for deflating */
     protected OutputStream createDeflatedOutputStream(OutputStream out) {
         return new CompressingOutputStream(out, _deflater);

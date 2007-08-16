@@ -17,6 +17,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
     private final Provider<Acceptor> acceptor;
     private final MessagesSupportedVendorMessage supportedVendorMessage;
     private final MessageFactory messageFactory;
+    private final NetworkManager networkManager;
     
 
     @Inject
@@ -24,12 +25,13 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
             Provider<SocketsManager> socketsManager,
             Provider<Acceptor> acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory, NetworkManager networkManager) {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.socketsManager = socketsManager;
         this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
         this.messageFactory = messageFactory;
+        this.networkManager = networkManager;
     }
 
     /* (non-Javadoc)
@@ -37,7 +39,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
      */
     public Connection createConnection(Socket socket) {
         return new Connection(socket, capabilitiesVMFactory, acceptor.get(),
-                supportedVendorMessage, messageFactory);
+                supportedVendorMessage, messageFactory, networkManager);
     }
     
     /* (non-Javadoc)
@@ -54,7 +56,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
             ConnectType connectType) {
         return new Connection(host, port, connectType, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage,
-                messageFactory);
+                messageFactory, networkManager);
     }
 
 }

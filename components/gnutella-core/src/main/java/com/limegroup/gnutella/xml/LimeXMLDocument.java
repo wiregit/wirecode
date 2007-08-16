@@ -18,6 +18,7 @@ import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
@@ -103,10 +104,16 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     /** The kind of license this has. */
     private transient LicenseType licenseType = LicenseType.NO_LICENSE;
 
-    private final LicenseFactory licenseFactory;
+    private transient volatile LicenseFactory licenseFactory;
+    
+    @Inject
+    private static LicenseFactory globalLicenseFactory;
 
-    private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
+    private transient volatile Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
 
+    @Inject
+    private static Provider<LimeXMLSchemaRepository> globalLimeXMLSchemaRepository;
+    
     /**
      * Constructs a LimeXMLDocument with the given string.
      */
@@ -206,6 +213,8 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      */
     private void readObject(java.io.ObjectInputStream in)
       throws IOException, ClassNotFoundException {
+        licenseFactory = globalLicenseFactory;
+        limeXMLSchemaRepository = globalLimeXMLSchemaRepository;
         in.defaultReadObject();
         scanFields();
     }

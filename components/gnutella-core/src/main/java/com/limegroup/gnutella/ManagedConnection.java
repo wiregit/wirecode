@@ -345,7 +345,7 @@ public class ManagedConnection extends Connection
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory) {
-        super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory);
+        super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -392,7 +392,7 @@ public class ManagedConnection extends Connection
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory) {
-        super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage, messageFactory);
+        super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;

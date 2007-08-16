@@ -17,7 +17,7 @@ public class CountingConnection extends Connection {
 
 
     public CountingConnection(String host, int port) {
-        super(host, port, ConnectType.PLAIN, ProviderHacks.getCapabilitiesVMFactory(), ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(), ProviderHacks.getMessageFactory());
+        super(host, port, ConnectType.PLAIN, ProviderHacks.getCapabilitiesVMFactory(), ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(), ProviderHacks.getMessageFactory(), ProviderHacks.getNetworkManager());
         countEnabled = true;
     }
 

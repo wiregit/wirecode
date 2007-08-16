@@ -136,6 +136,7 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
@@ -257,6 +258,7 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(IncompleteFileManager.class);
         requestStaticInjection(AutoDownloadDetails.class);
         requestStaticInjection(HttpClientManager.class);
+        requestStaticInjection(LimeXMLDocument.class);
                         
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();

@@ -111,7 +111,6 @@ public class ProviderHacks {
     }
     
     // Still needed in core...
-    public static Acceptor getAcceptor() { return i().getAcceptor(); }    
     public static UDPService getUdpService() { return i().getUdpService(); }     
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     
@@ -237,6 +236,7 @@ public class ProviderHacks {
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
+    public static Acceptor getAcceptor() { return i().getAcceptor(); }    
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }
