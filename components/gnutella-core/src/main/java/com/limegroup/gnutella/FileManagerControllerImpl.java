@@ -27,6 +27,9 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchema;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 @Singleton
 public class FileManagerControllerImpl implements FileManagerController {
@@ -45,6 +48,8 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
     private final MetaDataReader metaDataReader;
+    private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
+    private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
     
     /**
      * @param urnCache
@@ -67,7 +72,9 @@ public class FileManagerControllerImpl implements FileManagerController {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
             LimeXMLDocumentFactory limeXMLDocumentFactory,
-            MetaDataReader metaDataReader) {
+            MetaDataReader metaDataReader,
+            Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
@@ -82,6 +89,8 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.metaDataReader = metaDataReader;
+        this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
     }
     
     /* (non-Javadoc)
@@ -254,6 +263,27 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public LimeXMLDocument readDocument(File file) throws IOException {
         return metaDataReader.readDocument(file);
+    }
+
+    public void add(String schemaURI,
+            LimeXMLReplyCollection replyCollection) {
+        schemaReplyCollectionMapper.get().add(schemaURI, replyCollection);
+    }
+
+    public Collection<LimeXMLReplyCollection> getCollections() {
+        return schemaReplyCollectionMapper.get().getCollections();
+    }
+
+    public LimeXMLReplyCollection getReplyCollection(String schemaURI) {
+        return schemaReplyCollectionMapper.get().getReplyCollection(schemaURI);
+    }
+
+    public String[] getAvailableSchemaURIs() {
+        return limeXMLSchemaRepository.get().getAvailableSchemaURIs();
+    }
+
+    public LimeXMLSchema getSchema(String uri) {
+        return limeXMLSchemaRepository.get().getSchema(uri);
     }
 
 }

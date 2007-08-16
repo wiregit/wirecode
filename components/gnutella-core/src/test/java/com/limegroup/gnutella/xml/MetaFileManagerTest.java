@@ -68,7 +68,9 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
                         .of(ProviderHacks.getUpdateHandler()), Providers
                         .of(ProviderHacks.getActivityCallback()), ProviderHacks
                         .getBackgroundExecutor(), ProviderHacks.getLimeXMLReplyCollectionFactory(), ProviderHacks.getLimeXMLDocumentFactory(),
-                        ProviderHacks.getMetaDataReader()));
+                        ProviderHacks.getMetaDataReader(),
+                        Providers.of(ProviderHacks.getSchemaReplyCollectionMapper()),
+                        Providers.of(ProviderHacks.getLimeXMLSchemaRepository())));
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         factory = ProviderHacks.getLimeXMLDocumentFactory();
     }

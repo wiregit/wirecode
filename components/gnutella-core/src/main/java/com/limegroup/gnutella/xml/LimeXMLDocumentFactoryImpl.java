@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 
@@ -15,36 +16,29 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 public class LimeXMLDocumentFactoryImpl implements LimeXMLDocumentFactory {
 
     private final LicenseFactory licenseFactory;
+    private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
 
     @Inject
-    public LimeXMLDocumentFactoryImpl(LicenseFactory licenseFactory) {
+    public LimeXMLDocumentFactoryImpl(LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
         this.licenseFactory = licenseFactory;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.xml.LimeXMLDocumentFactory#createLimeXMLDocument(java.lang.String)
-     */
     public LimeXMLDocument createLimeXMLDocument(String xml)
             throws SAXException, SchemaNotFoundException, IOException {
-        return new LimeXMLDocument(xml, licenseFactory);
+        return new LimeXMLDocument(xml, licenseFactory, limeXMLSchemaRepository);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.xml.LimeXMLDocumentFactory#createLimeXMLDocument(java.util.Map, java.lang.String, java.lang.String)
-     */
     public LimeXMLDocument createLimeXMLDocument(
             Map<String, String> map, String schemaURI, String keyPrefix)
             throws IOException {
-        return new LimeXMLDocument(map, schemaURI, keyPrefix, licenseFactory);
+        return new LimeXMLDocument(map, schemaURI, keyPrefix, licenseFactory, limeXMLSchemaRepository);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.xml.LimeXMLDocumentFactory#createLimeXMLDocument(java.util.Collection, java.lang.String)
-     */
     public LimeXMLDocument createLimeXMLDocument(
             Collection<? extends Entry<String, String>> nameValueList,
             String schemaURI) {
-        return new LimeXMLDocument(nameValueList, schemaURI, licenseFactory);
+        return new LimeXMLDocument(nameValueList, schemaURI, licenseFactory, limeXMLSchemaRepository);
     }
 
 }

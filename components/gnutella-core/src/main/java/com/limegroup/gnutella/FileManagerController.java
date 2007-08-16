@@ -14,6 +14,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.LimeXMLSchema;
 
 public interface FileManagerController {
 
@@ -71,4 +72,16 @@ public interface FileManagerController {
             String schemaURI);
     
     public LimeXMLDocument readDocument(File file) throws IOException;
+
+    public void add(String string,
+            LimeXMLReplyCollection createLimeXMLReplyCollection);
+
+    public Collection<LimeXMLReplyCollection> getCollections();
+
+    public LimeXMLReplyCollection getReplyCollection(String string);
+
+    public String[] getAvailableSchemaURIs();
+
+    public LimeXMLSchema getSchema(String audioSchema);
+
 }
