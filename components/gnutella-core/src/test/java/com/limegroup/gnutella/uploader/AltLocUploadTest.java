@@ -22,6 +22,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.concurrent.Providers;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.FileDesc;
@@ -1303,7 +1304,7 @@ public class AltLocUploadTest extends LimeTestCase {
         List<HTTPUploader> activeUploads = new ArrayList<HTTPUploader>();
 
         public TestUploadManager() {
-            super(ProviderHacks.getUploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+            super(ProviderHacks.getUploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
         }
 
         public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {

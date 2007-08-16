@@ -11,6 +11,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
+import org.limewire.concurrent.Providers;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -70,7 +71,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         acceptor = new HTTPAcceptor();
-        uploadManager = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+        uploadManager = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
         connectionDispatcher = new ConnectionDispatcher();
         
         fm.startAndWait(4000);

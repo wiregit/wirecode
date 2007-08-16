@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
+import org.limewire.concurrent.Providers;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileDesc;
@@ -95,7 +96,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         httpAcceptor = new HTTPAcceptor();
 
-        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());

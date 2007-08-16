@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -79,7 +80,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static class UploadManagerStub extends HTTPUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
-    		super(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+    		super(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
     	}
 		@Override
 		public synchronized boolean isServiceable() {

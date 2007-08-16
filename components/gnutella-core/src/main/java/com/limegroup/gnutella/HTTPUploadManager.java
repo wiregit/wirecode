@@ -26,8 +26,10 @@ import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -184,15 +186,18 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private volatile boolean started;
     
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+
+    private final Provider<ContentManager> contentManager;
     
     @Inject
-    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory) {
+    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
         }
 
         this.slotManager = slotManager;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
+        this.contentManager = contentManager;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
     }
 
@@ -482,7 +487,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
-        if (!fd.isVerified()) // spawn a validation
+        if (!contentManager.get().isVerified(fd.getSHA1Urn())) // spawn a validation
             fileManager.validate(fd);
 
         URN sha1 = fd.getSHA1Urn();

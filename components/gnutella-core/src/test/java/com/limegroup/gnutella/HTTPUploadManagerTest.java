@@ -6,6 +6,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -65,7 +66,7 @@ public class HTTPUploadManagerTest extends BaseTestCase {
 
         httpAcceptor = new HTTPAcceptor();
 
-        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());

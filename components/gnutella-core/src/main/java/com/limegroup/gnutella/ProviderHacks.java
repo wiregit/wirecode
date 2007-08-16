@@ -120,8 +120,6 @@ public class ProviderHacks {
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     
-    
-    
     // Requires some factories...
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }

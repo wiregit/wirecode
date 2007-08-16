@@ -23,6 +23,7 @@ import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -155,7 +156,7 @@ public class PushUploadTest extends LimeTestCase {
    //     PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
      //           httpAcceptor);
 
-        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
     //    PrivilegedAccessor
     //            .setValue(RouterService.class, "uploadManager", upMan);
 
