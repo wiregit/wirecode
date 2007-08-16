@@ -121,7 +121,6 @@ public class ProviderHacks {
     
     // Needs additional refactoring...
     public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
-    public static ContentManager getContentManager() { return i().getContentManager(); }
     public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
     
     // Cleaned up in all but tests
@@ -237,6 +236,7 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
+    public static ContentManager getContentManager() { return i().getContentManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

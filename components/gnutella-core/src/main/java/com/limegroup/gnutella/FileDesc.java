@@ -403,22 +403,13 @@ public class FileDesc implements StringLookup {
 	}
     
     /**
-     * Determines if this FileDesc has been validated.
-     */
-    public boolean isVerified() {
-        return ProviderHacks.getContentManager().isVerified(SHA1_URN);
-    }
-    
-    /**
      * some factors to consider when deciding if a file fits certain criteria
      * like being rare.
      */
     public String lookup(String key) {
         if (key == null)
             return null;
-        if ("verified".equals(key))
-            return String.valueOf(isVerified());
-        else if ("hits".equals(key))
+        if ("hits".equals(key))
             return String.valueOf(getHitCount());
         else if ("ups".equals(key))
             return String.valueOf(getAttemptedUploads());
