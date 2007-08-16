@@ -71,7 +71,8 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCa
     private static ResumeDownloader newResumeDownloader() {
         // this ResumeDownloader is started from the library, not from restart,
         // that is why the last param to init is false
-        ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
+        ResumeDownloader ret= ProviderHacks.getGnutellaDownloaderFactory().createResumeDownloader(ifm, incompleteFile,
+                name, size);
         DownloadManagerStub dm = new DownloadManagerStub();
         dm.initialize();
         dm.scheduleWaitingPump();

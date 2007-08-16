@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -72,19 +73,20 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
 	 * @param fileName the final file name, can be <code>null</code>
+     * @param saveLocationManager 
 	 *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
-    public MagnetDownloader(IncompleteFileManager ifm,
+    MagnetDownloader(IncompleteFileManager ifm,
 							MagnetOptions magnet,
 							boolean overwrite,
                             File saveDir,
-                            String fileName) throws SaveLocationException {
+                            String fileName, SaveLocationManager saveLocationManager) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
         super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
+			  checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager);
         synchronized(this) {
             propertiesMap.put(MAGNET, magnet);
         }

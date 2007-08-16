@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.io.ObjectInputStream.GetField;
 
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -64,11 +65,11 @@ public class ResumeDownloader extends ManagedDownloader
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedSize(incompleteFile) */
-    public ResumeDownloader(IncompleteFileManager incompleteFileManager,
+    ResumeDownloader(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
                             String name,
-                            long size) {
-        super( new RemoteFileDesc[0], incompleteFileManager, null);
+                            long size, SaveLocationManager saveLocationManager) {
+        super( new RemoteFileDesc[0], incompleteFileManager, null, saveLocationManager);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;

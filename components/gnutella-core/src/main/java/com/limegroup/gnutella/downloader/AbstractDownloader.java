@@ -13,8 +13,8 @@ import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -63,12 +63,17 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 */
 	protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
-	protected AbstractDownloader() {
+	protected volatile transient SaveLocationManager saveLocationManager;
+	
+	protected AbstractDownloader(SaveLocationManager saveLocationManager) {
+	    this.saveLocationManager = saveLocationManager;
+	    
 	    synchronized(this) {
 	        propertiesMap = new HashMap<String, Serializable>();
 	        propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
 	    }
 	}
+	
 	/**
 	 * Sets the inactive priority of this download.
 	 */
@@ -219,7 +224,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 		
 		// check if another existing download is being saved to this download
 		// we ignore the overwrite flag on purpose in this case
-		if (ProviderHacks.getDownloadManager().isSaveLocationTaken(candidateFile)) {
+		if (saveLocationManager.isSaveLocationTaken(candidateFile)) {
 			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
 		}
 	     

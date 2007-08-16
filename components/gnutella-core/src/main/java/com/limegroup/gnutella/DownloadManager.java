@@ -44,6 +44,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
+import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -79,7 +80,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  * serialized.  
  */
 @Singleton
-public class DownloadManager implements BandwidthTracker {
+public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -151,6 +152,7 @@ public class DownloadManager implements BandwidthTracker {
     private final Provider<TorrentManager> torrentManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final BrowseHostHandlerManager browseHostHandlerManager;
+    private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
@@ -162,7 +164,8 @@ public class DownloadManager implements BandwidthTracker {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            BrowseHostHandlerManager browseHostHandlerManager) {
+            BrowseHostHandlerManager browseHostHandlerManager,
+            GnutellaDownloaderFactory gnutellaDownloaderFactory) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
@@ -173,6 +176,7 @@ public class DownloadManager implements BandwidthTracker {
         this.torrentManager = torrentManager;
         this.pushDownloadManager = pushDownloadManager;
         this.browseHostHandlerManager = browseHostHandlerManager;
+        this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -656,8 +660,8 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-            new ManagedDownloader(files, incompleteFileManager, queryGUID,
-								  saveDir, fileName, overwrite);
+            gnutellaDownloaderFactory.createManagedDownloader(files, incompleteFileManager,
+                queryGUID, saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
         
@@ -716,8 +720,8 @@ public class DownloadManager implements BandwidthTracker {
 
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
-            new MagnetDownloader(incompleteFileManager, magnet, 
-					overwrite, saveDir, fileName);
+            gnutellaDownloaderFactory.createMagnetDownloader(incompleteFileManager, magnet,
+                overwrite, saveDir, fileName);
         initializeDownload(downloader);
         return downloader;
     }
@@ -768,7 +772,7 @@ public class DownloadManager implements BandwidthTracker {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
             String name=IncompleteFileManager.getCompletedName(incompleteFile);
             long size= IncompleteFileManager.getCompletedSize(incompleteFile);
-            downloader = new ResumeDownloader(incompleteFileManager,
+            downloader = gnutellaDownloaderFactory.createResumeDownloader(incompleteFileManager,
                                               incompleteFile,
                                               name,
                                               size);
@@ -822,8 +826,8 @@ public class DownloadManager implements BandwidthTracker {
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
-        ManagedDownloader d = 
-            new InNetworkDownloader(incompleteFileManager, info, dir, now);
+        ManagedDownloader d = gnutellaDownloaderFactory.createInNetworkDownloader(
+                incompleteFileManager, info, dir, now);
         initializeDownload(d);
         return d;
     }

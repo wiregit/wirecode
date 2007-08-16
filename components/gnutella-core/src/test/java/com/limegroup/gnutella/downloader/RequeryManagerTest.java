@@ -419,7 +419,7 @@ public class RequeryManagerTest extends LimeTestCase {
         private volatile long stateTime;
                 
         public MyManagedDownloader() throws SaveLocationException {
-            super(new RemoteFileDesc[0], new IncompleteFileManager(), new GUID());
+            super(new RemoteFileDesc[0], new IncompleteFileManager(), new GUID(), ProviderHacks.getDownloadManager());
         }
         
         @Override

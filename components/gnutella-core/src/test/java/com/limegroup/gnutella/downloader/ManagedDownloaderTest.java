@@ -68,6 +68,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     private DownloadManagerStub manager;
     private FileManager fileman;
     private ActivityCallback callback;
+
+    private GnutellaDownloaderFactory gnutellaDownloaderFactory;
 //    private MessageRouter router;
     private static ConnectionManager connectionManager;
 
@@ -111,6 +113,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
     //    PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
         RequeryManager.NO_DELAY = false;
+        
+        gnutellaDownloaderFactory = ProviderHacks.getGnutellaDownloaderFactory();
     }
 
     
@@ -278,7 +282,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
-            new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm, null);
+            gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd },
+                ifm, null);
         downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, fileman, callback));
         requestStart(downloader);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
@@ -341,9 +346,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             ManagedDownloader downloader = null;
             try {
                 downloader=
-                    new ManagedDownloader(
-                            new RemoteFileDesc[] {fakeRFD()},
-                            new IncompleteFileManager(), null);
+                    gnutellaDownloaderFactory.createManagedDownloader(
+                            new RemoteFileDesc[] {fakeRFD()}, new IncompleteFileManager(), null);
                 downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
                                       callback));
@@ -456,9 +460,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             try {
                 LOG.debug("starting downloader");
                 downloader=
-                    new ManagedDownloader(
-                            new RemoteFileDesc[] {fakeRFD()},
-                            new IncompleteFileManager(), null);
+                    gnutellaDownloaderFactory.createManagedDownloader(
+                            new RemoteFileDesc[] {fakeRFD()}, new IncompleteFileManager(), null);
                 downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
                                       callback));
@@ -601,9 +604,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             try {
                 LOG.debug("starting downloader");
                 downloader=
-                    new ManagedDownloader(
-                            new RemoteFileDesc[] {fakeRFD()},
-                            new IncompleteFileManager(), null);
+                    gnutellaDownloaderFactory.createManagedDownloader(
+                            new RemoteFileDesc[] {fakeRFD()}, new IncompleteFileManager(), null);
                 downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                       fileman,
                                       callback));
@@ -747,9 +749,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
             uploader.setSendThexTreeHeader(false);
             uploader.setSendThexTree(false);
             downloader=
-				new ManagedDownloader(
-						new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())},
-                        new IncompleteFileManager(), null);
+				gnutellaDownloaderFactory.createManagedDownloader(
+                        new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())}, new IncompleteFileManager(), null);
             downloader.initialize(DownloadProviderHacks.createDownloadReferences(manager, 
                                   fileman,
                                   callback));
@@ -787,9 +788,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
         File saveDir = createMaximumPathLengthDirectory();
         
         try {
-            new ManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-                    saveDir, "does not matter", false);
+            gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), saveDir, "does not matter", false);
             fail("No exception thrown for dir " + saveDir);
         }
         catch (SaveLocationException sle) {
@@ -823,9 +823,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		}
 		if (noWritePermissionDir != null) {
 			try {
-				new ManagedDownloader(rfds,
-						new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-						noWritePermissionDir, "does not matter", false);
+				gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                        new IncompleteFileManager(), new GUID(GUID.makeGuid()), noWritePermissionDir, "does not matter", false);
 				fail("No exception thrown for dir " + noWritePermissionDir);
 			}
 			catch (SaveLocationException sle) {
@@ -836,9 +835,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		}
         
 		try {
-			new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					new File("/non existent directory"), null, false);
+			gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), new File("/non existent directory"), null, false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -847,9 +845,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 						 sle.getErrorCode());
 		}
 		try {
-			new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					file.getParentFile(), file.getName(), false);
+			gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -859,9 +856,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		}
 		try {
 			// should not throw an exception because of overwrite 
-			new ManagedDownloader(rfds,	new IncompleteFileManager(), 
-					new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(),
-					true); 
+			gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), true); 
 		}
 		catch (SaveLocationException sle) {
 			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
@@ -869,9 +865,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		try {
 			File f = File.createTempFile("notadirectory", "file");
 			f.deleteOnExit();
-			new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					f, null, false);
+			gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), f, null, false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -881,20 +876,18 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
 		}
         // we force filename normalization
         try {
-            new ManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-                    null, "./", false);
-            new ManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-                    null, "../myfile.txt", false);
+            gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, "./", false);
+            gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, "../myfile.txt", false);
         }
         catch (SaveLocationException sle) {
             fail("Should not have thrown" + sle);
         }
 		try {
 			// should not throw an exception
-			new ManagedDownloader(rfds, new IncompleteFileManager(), 
-					new GUID(GUID.makeGuid()), null, null, false);
+			gnutellaDownloaderFactory.createManagedDownloader(rfds,
+                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, null, false);
 		}
 		catch (SaveLocationException sle) {
 			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
@@ -1054,7 +1047,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestC
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
-            super(files, new IncompleteFileManager(), null);
+            super(files, new IncompleteFileManager(), null, ProviderHacks.getDownloadManager());
         }
 
         public QueryRequest newRequery2() throws CantResumeException {

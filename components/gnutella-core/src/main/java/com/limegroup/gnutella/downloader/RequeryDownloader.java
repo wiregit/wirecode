@@ -15,9 +15,9 @@ public class RequeryDownloader extends ManagedDownloader {
     /**
      * DEPRECATED.  Throws an exception on construction.
      */
-    public RequeryDownloader(IncompleteFileManager incompleteFileManager,
+    private RequeryDownloader(IncompleteFileManager incompleteFileManager,
                              AutoDownloadDetails add, GUID queryGUID) {
-        super(new RemoteFileDesc[0], incompleteFileManager, queryGUID);
+        super(new RemoteFileDesc[0], incompleteFileManager, queryGUID, null);
         throw new UnsupportedOperationException("deprecated");
     }
 }

@@ -43,6 +43,7 @@ import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
+import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
@@ -674,6 +675,10 @@ public class LimeWireCore {
 
     public InstantMessengerFactory getInstantMessengerFactory() {
         return injector.getInstance(InstantMessengerFactory.class);
+    }
+
+    public GnutellaDownloaderFactory getGnutellaDownloaderFactory() {
+        return injector.getInstance(GnutellaDownloaderFactory.class);
     }
     
 }

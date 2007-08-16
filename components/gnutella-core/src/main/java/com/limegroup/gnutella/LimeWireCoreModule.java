@@ -76,6 +76,8 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
+import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
+import com.limegroup.gnutella.downloader.GnutellaDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
@@ -248,6 +250,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
         bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
+        bind(SaveLocationManager.class).to(DownloadManager.class);
+        bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

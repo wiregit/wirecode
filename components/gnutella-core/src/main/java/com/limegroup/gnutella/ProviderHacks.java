@@ -30,6 +30,7 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
+import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
@@ -110,7 +111,7 @@ public class ProviderHacks {
         return aReallyLongNameThatYouDontWantToTypeALot;
     }
     
-    // Still needed in core...
+    // Still needed in core...  
     public static UDPService getUdpService() { return i().getUdpService(); }     
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     
@@ -120,7 +121,6 @@ public class ProviderHacks {
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
     // Needs additional refactoring...
-    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
     
     // Cleaned up in all but tests
@@ -236,7 +236,9 @@ public class ProviderHacks {
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
+    public static GnutellaDownloaderFactory getGnutellaDownloaderFactory() { return i().getGnutellaDownloaderFactory(); }
+    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
     public static ContentManager getContentManager() { return i().getContentManager(); }
-    
+
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

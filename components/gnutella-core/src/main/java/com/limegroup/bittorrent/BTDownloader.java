@@ -23,6 +23,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.DownloadReferences;
@@ -80,7 +81,9 @@ public class BTDownloader extends AbstractDownloader
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
 	
-	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory) {
+	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory, SaveLocationManager saveLocationManager) {
+	    super(saveLocationManager);
+	    
 		_info = info;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
@@ -445,6 +448,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 
 	public void initialize(DownloadReferences downloadReferences) {
+	    this.saveLocationManager = downloadReferences.getDownloadManager();
         context = downloadReferences.getBTContextFactory().createBTContext(_info);
 	    
         this.manager = downloadReferences.getDownloadManager();

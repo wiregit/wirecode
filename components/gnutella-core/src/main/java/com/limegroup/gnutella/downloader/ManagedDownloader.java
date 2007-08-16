@@ -50,6 +50,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
@@ -488,11 +489,12 @@ public class ManagedDownloader extends AbstractDownloader
      * useful for WAITING_FOR_USER state.  can be null.
 	 * @throws SaveLocationException
      */
-    public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+    protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
                              GUID originalQueryGUID, File saveDirectory, 
-                             String fileName, boolean overwrite) 
+                             String fileName, boolean overwrite, 
+                             SaveLocationManager saveLocationManager) 
 		throws SaveLocationException {
-		this(files, ifc, originalQueryGUID);
+		this(files, ifc, originalQueryGUID, saveLocationManager);
         
         assert files.length > 0 || fileName != null;
         if (files.length == 0)
@@ -502,7 +504,9 @@ public class ManagedDownloader extends AbstractDownloader
     }
 	
 	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-							 GUID originalQueryGUID) {
+							 GUID originalQueryGUID, SaveLocationManager saveLocationManager) {
+	    super(saveLocationManager);
+	    
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -623,6 +627,7 @@ public class ManagedDownloader extends AbstractDownloader
      * being read from disk, false otherwise.
      */
     public void initialize(DownloadReferences downloadReferences) {
+        this.saveLocationManager = downloadReferences.getDownloadManager();
         this.manager=downloadReferences.getDownloadManager();
 		this.fileManager=downloadReferences.getFileManager();
         this.callback=downloadReferences.getDownloadCallback();
