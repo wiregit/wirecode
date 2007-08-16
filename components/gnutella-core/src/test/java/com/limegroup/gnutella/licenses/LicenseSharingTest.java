@@ -26,9 +26,12 @@ import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 public final class LicenseSharingTest extends ClientSideTestCase {
 
+    LimeXMLDocumentFactory factory;
+    
 	public LicenseSharingTest(String name) {
 		super(name);
 	}
@@ -80,8 +83,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	@Override
 	public void setUp() throws Exception {
 	    super.setUp();
-	    
 	    ProviderHacks.getFileManager().loadSettingsAndWait(4000);
+	    factory = ProviderHacks.getLimeXMLDocumentFactory();
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
@@ -123,13 +126,13 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         // send a query that should hit in the qrt
         // Check CC
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
-        new LimeXMLDocument(richQuery); // make sure it can be constructed.
+        factory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         assertTrue(qrt.contains(query));
         
         // Check Weed
         richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        new LimeXMLDocument(richQuery); // make sure it can be constructed.
+        factory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
         query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         assertTrue(qrt.contains(query));
     }
@@ -139,7 +142,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         setAcceptedIncoming();
 
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
-        new LimeXMLDocument(richQuery);
+        factory.createLimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
@@ -167,7 +170,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         setAcceptedIncoming();
 
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        new LimeXMLDocument(richQuery);
+        factory.createLimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
         testUP[1].send(query);
@@ -199,7 +202,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 		setAcceptedIncoming();
 		
 		String richQuery = "<?xml version=\"1.0\"?><audios><audio title=\"love\" licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        new LimeXMLDocument(richQuery);
+        factory.createLimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
@@ -232,7 +235,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 		setAcceptedIncoming();
 		
 		String richQuery = "<?xml version=\"1.0\"?><audios><audio title=\"love\"/></audios>";
-        new LimeXMLDocument(richQuery);
+        factory.createLimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
         QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);

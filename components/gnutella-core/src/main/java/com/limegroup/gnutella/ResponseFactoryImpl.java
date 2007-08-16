@@ -37,6 +37,7 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
 @Singleton
@@ -61,12 +62,15 @@ public class ResponseFactoryImpl implements ResponseFactory {
     private final CreationTimeCache creationTimeCache;
     private final IPFilter ipFilter;
 
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
-            CreationTimeCache creationTimeCache, IPFilter ipFilter) {
+            CreationTimeCache creationTimeCache, IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
     }
 
     /* (non-Javadoc)
@@ -281,7 +285,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
             values.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, name));
             values.add(new NameValue<String>(LimeXMLNames.AUDIO_BITRATE, bitrate));
             values.add(new NameValue<String>(LimeXMLNames.AUDIO_SECONDS, length));
-            return new LimeXMLDocument(values, LimeXMLNames.AUDIO_SCHEMA);
+            return limeXMLDocumentFactory.createLimeXMLDocument(values,
+                    LimeXMLNames.AUDIO_SCHEMA);
         }
 
         return null;

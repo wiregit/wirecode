@@ -19,12 +19,15 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 @SuppressWarnings("unchecked")
 public class SearchResultHandlerTest extends LimeTestCase {
     
     private static StubCallback callback = new StubCallback();
+    
+    LimeXMLDocumentFactory factory;
 
     public SearchResultHandlerTest(String name) {
         super(name);
@@ -45,13 +48,14 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     public void setUp() throws Exception {
        // PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
+        factory = ProviderHacks.getLimeXMLDocumentFactory();
     }
     
     public void testSecureActionSent() throws Exception {
         SearchResultHandler handler = ProviderHacks.getSearchResultHandler();
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         reply.setSecureStatus(SecureMessage.SECURE);
@@ -69,7 +73,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         assertEquals(0, callback.results.size());
@@ -82,7 +86,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");
@@ -100,7 +104,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");

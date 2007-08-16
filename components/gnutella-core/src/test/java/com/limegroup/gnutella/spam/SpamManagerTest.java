@@ -65,8 +65,8 @@ public class SpamManagerTest extends LimeTestCase {
             urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
             urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
             urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-            doc1 = new LimeXMLDocument(xml1);
-            doc2 = new LimeXMLDocument(xml2);
+            doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
+            doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);
         } catch (Exception bad) {
             fail(bad);
         }

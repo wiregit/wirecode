@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.apache.commons.httpclient.URI;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -175,7 +176,7 @@ public final class WeedLicenseTest extends LimeTestCase {
         try {
             server.setResponseData(xml(true, "A", "B", "Free"));
             setLookupPage("http://127.0.0.1:20181/");
-            License l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 34 vid: 78");
+            License l = ProviderHacks.getLicenseFactory().create("http://www.shmedlic.com/license/3play.aspx cid: 34 vid: 78");
             l.verify(null);
             Thread.sleep(1000);
             assertTrue(l.isVerified());

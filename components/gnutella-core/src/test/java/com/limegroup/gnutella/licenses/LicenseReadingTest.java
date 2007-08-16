@@ -6,11 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.util.CommonUtils;
 
-import junit.framework.Test;
-
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -56,7 +57,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	                 amd.getLicense());
         
 	    
-	    LimeXMLDocument doc = new LimeXMLDocument(nvList, amd.getSchemaURI());
+	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(nvList, amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicense(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
@@ -140,7 +141,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
 	    assertNotNull(amd);
-	    LimeXMLDocument doc = new LimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +

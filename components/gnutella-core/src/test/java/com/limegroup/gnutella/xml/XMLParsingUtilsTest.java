@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.limewire.collection.NameValue;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -120,9 +121,9 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__artist__", "also <malformed"));
         list.add(new NameValue<String>("audios__audio__license__", ">still malformed"));
         list.add(new NameValue<String>("audios__audio__language__", "s\tpace"));
-        list.add(new NameValue<String>("audios__audio__seconds__", "even[ m£r½] c²aîécters"));
+        list.add(new NameValue<String>("audios__audio__seconds__", "even[ mï¿½rï¿½] cï¿½aï¿½ï¿½cters"));
         list.add(new NameValue<String>("audios__audio__bitrate__", "a\u0002\u0003\u0004b"));
-        String xml = new LimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
+        String xml = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
         XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,1);
         assertEquals("http://www.limewire.com/schemas/audio.xsd", r.schemaURI);
         assertEquals("audio", r.type);
@@ -133,7 +134,7 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         assertEquals(result.toString(), "also <malformed", result.get("audios__audio__artist__"));
         assertEquals(result.toString(), ">still malformed", result.get("audios__audio__license__"));
         assertEquals(result.toString(), "s pace", result.get("audios__audio__language__"));
-        assertEquals(result.toString(), "even[ m£r½] c²aîécters", result.get("audios__audio__seconds__"));
+        assertEquals(result.toString(), "even[ mï¿½rï¿½] cï¿½aï¿½ï¿½cters", result.get("audios__audio__seconds__"));
         assertEquals(result.toString(), "a   b", result.get("audios__audio__bitrate__"));
     }
     

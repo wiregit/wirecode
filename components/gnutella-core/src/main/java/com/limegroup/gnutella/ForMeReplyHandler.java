@@ -68,6 +68,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
 
+    private final LimeXMLDocumentHelper limeXMLDocumentHelper;
+
     @Inject
     ForMeReplyHandler(NetworkManager networkManager,
             SecureMessageVerifier secureMessageVerifier,
@@ -77,7 +79,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             Provider<Acceptor> acceptor, Provider<PushManager> pushManager,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ApplicationServices applicationServices,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            LimeXMLDocumentHelper limeXMLDocumentHelper) {
         this.networkManager = networkManager;
         this.secureMessageVerifier = secureMessageVerifier;
         this.connectionManager = connectionManager;
@@ -88,6 +91,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         this.backgroundExecutor = backgroundExecutor;
         this.applicationServices = applicationServices;
         this.connectionServices = connectionServices;
+        this.limeXMLDocumentHelper = limeXMLDocumentHelper;
     	    
 	    //Clear push requests every 30 seconds.
         //DPINJ: move to initializer
@@ -203,7 +207,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             LOG.debug("xmlCollectionString = " + xmlCollectionString);
 
         List<LimeXMLDocument[]> allDocsArray = 
-            LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
+            limeXMLDocumentHelper.getDocuments(xmlCollectionString, 
                                                responsesLength);
         
         for(int i = 0; i < responsesLength; i++) {

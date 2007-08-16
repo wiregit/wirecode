@@ -1135,11 +1135,10 @@ public class FileManagerTest extends LimeTestCase {
     }
     
     public void testGetIndexingIterator() throws Exception {
-        LimeXMLDocument document = new LimeXMLDocument(
-                "<?xml version=\"1.0\"?>"+
-                "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
-                "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
-                "</audios>");
+        LimeXMLDocument document = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument("<?xml version=\"1.0\"?>"+
+        "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
+        "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+        "</audios>");
 
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);

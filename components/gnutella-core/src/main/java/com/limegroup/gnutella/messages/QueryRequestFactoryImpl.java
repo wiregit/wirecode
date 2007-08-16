@@ -16,15 +16,18 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 @Singleton
 public class QueryRequestFactoryImpl implements QueryRequestFactory {
 
     private final NetworkManager networkManager;
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
     @Inject
-    public QueryRequestFactoryImpl(NetworkManager networkManager) {
+    public QueryRequestFactoryImpl(NetworkManager networkManager, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.networkManager = networkManager;
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
     }
 
     /* (non-Javadoc)
@@ -493,7 +496,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createNetworkQuery(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException {
-        return new QueryRequest(guid, ttl, hops, payload, network);
+        return new QueryRequest(guid, ttl, hops, payload, network, limeXMLDocumentFactory);
     }
 
     /**
@@ -677,7 +680,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         return new QueryRequest(guid, ttl, minSpeed, query, richQuery,
                 queryUrns, addressSecurityToken, isFirewalled, network,
                 canReceiveOutOfBandReplies, featureSelector, doNotProxy,
-                metaFlagMask, normalize, networkManager.canDoFWT());
+                metaFlagMask, normalize, networkManager.canDoFWT(), limeXMLDocumentFactory);
     }
 
 }

@@ -1,8 +1,11 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -15,9 +18,12 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
@@ -37,6 +43,8 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
     private final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final MetaDataReader metaDataReader;
     
     /**
      * @param urnCache
@@ -57,7 +65,9 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<UpdateHandler> updateHandler,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory) {
+            LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
+            LimeXMLDocumentFactory limeXMLDocumentFactory,
+            MetaDataReader metaDataReader) {
         this.urnCache = urnCache;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
@@ -70,6 +80,8 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
         this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.metaDataReader = metaDataReader;
     }
     
     /* (non-Javadoc)
@@ -234,5 +246,14 @@ public class FileManagerControllerImpl implements FileManagerController {
         return limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(URI);
     }
 
-    
+    public LimeXMLDocument createLimeXMLDocument(
+            Collection<? extends Entry<String, String>> nameValueList,
+            String schemaURI) {
+        return limeXMLDocumentFactory.createLimeXMLDocument(nameValueList, schemaURI);
+    }
+
+    public LimeXMLDocument readDocument(File file) throws IOException {
+        return metaDataReader.readDocument(file);
+    }
+
 }

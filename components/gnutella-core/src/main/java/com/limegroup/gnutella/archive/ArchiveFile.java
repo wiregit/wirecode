@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.licenses.License;
-import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
@@ -132,7 +132,7 @@ class ArchiveFile {
 		if ( xmlDoc.isLicenseAvailable() ) {
 			final License license = xmlDoc.getLicense();
 			
-			if ( license.getLicenseName() == LicenseFactory.CC_NAME ) {
+			if ( license.getLicenseName() == LicenseFactoryImpl.CC_NAME ) {
 				_licenseUrl = license.getLicenseDeed(null).toString(); 
 				_licenseDeclaration = xmlDoc.getLicenseString();
 			}

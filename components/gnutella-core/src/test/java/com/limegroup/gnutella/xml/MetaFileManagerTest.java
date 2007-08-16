@@ -32,6 +32,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 @SuppressWarnings("unchecked")
 public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest {
 
+    LimeXMLDocumentFactory factory;
+    
+    
     public MetaFileManagerTest(String name) {
         super(name);
     }
@@ -64,9 +67,10 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
                         .of(ProviderHacks.getSimppManager()), Providers
                         .of(ProviderHacks.getUpdateHandler()), Providers
                         .of(ProviderHacks.getActivityCallback()), ProviderHacks
-                        .getBackgroundExecutor(), ProviderHacks.getLimeXMLReplyCollectionFactory()));
+                        .getBackgroundExecutor(), ProviderHacks.getLimeXMLReplyCollectionFactory(), ProviderHacks.getLimeXMLDocumentFactory(),
+                        ProviderHacks.getMetaDataReader()));
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-
+        factory = ProviderHacks.getLimeXMLDocumentFactory();
     }
 	
 	public void testMetaQueriesWithConflictingMatches() throws Exception {
@@ -74,7 +78,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 	    
 	    // test a query where the filename is meaningless but XML matches.
 	    File f1 = createNewNamedTestFile(10, "meaningless");
-	    LimeXMLDocument d1 = new LimeXMLDocument(buildAudioXMLString(
+	    LimeXMLDocument d1 = factory.createLimeXMLDocument(buildAudioXMLString(
 	        "artist=\"Sammy B\" album=\"Jazz in G\""));
 	    List l1 = new ArrayList(); l1.add(d1);
 	    FileManagerEvent result = addIfShared(f1, l1);
@@ -110,7 +114,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         // will work, but a keyword search that included XML will fail for
         // the same.
         File f2 = createNewNamedTestFile(10, "jazz in d");
-        LimeXMLDocument d2 = new LimeXMLDocument(buildAudioXMLString(
+        LimeXMLDocument d2 = factory.createLimeXMLDocument(buildAudioXMLString(
             "album=\"jazz in e\""));
         List l2 = new ArrayList(); l2.add(d2);
         result = addIfShared(f2, l2);
@@ -148,7 +152,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 
         //now test xml metadata in the QRT
         File f2 = createNewNamedTestFile(11, "metadatafile2");
-        LimeXMLDocument newDoc2 = new LimeXMLDocument(buildVideoXMLString(dir2));
+        LimeXMLDocument newDoc2 = factory.createLimeXMLDocument(buildVideoXMLString(dir2));
         List l2 = new ArrayList();
         l2.add(newDoc2);
         
@@ -178,7 +182,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         
         File f1 = createNewNamedTestFile(10, "test_this");
         
-        LimeXMLDocument newDoc1 = new LimeXMLDocument(buildVideoXMLString(dir1));
+        LimeXMLDocument newDoc1 = factory.createLimeXMLDocument(buildVideoXMLString(dir1));
         List l1 = new ArrayList();
         l1.add(newDoc1);
 
@@ -186,7 +190,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         String dir2 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
         File f2 = createNewNamedTestFile(11, "hmm");
 
-        LimeXMLDocument newDoc2 = new LimeXMLDocument(buildVideoXMLString(dir2));
+        LimeXMLDocument newDoc2 = factory.createLimeXMLDocument(buildVideoXMLString(dir2));
         List l2 = new ArrayList();
         l2.add(newDoc2);
 
@@ -195,7 +199,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         File f3 = createNewNamedTestFile(12, "testtesttest");
         
         LimeXMLDocument newDoc3 = 
-            new LimeXMLDocument(buildVideoXMLString(dir3));
+            factory.createLimeXMLDocument(buildVideoXMLString(dir3));
         List l3 = new ArrayList();
         l3.add(newDoc3);
         

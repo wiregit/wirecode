@@ -1,14 +1,18 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 
 public interface FileManagerController {
@@ -63,4 +67,8 @@ public interface FileManagerController {
     
     public LimeXMLReplyCollection createLimeXMLReplyCollection(String URI);
     
+    public LimeXMLDocument createLimeXMLDocument(Collection<? extends Entry<String, String>> nameValueList,
+            String schemaURI);
+    
+    public LimeXMLDocument readDocument(File file) throws IOException;
 }

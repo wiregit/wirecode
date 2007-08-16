@@ -280,7 +280,7 @@ public class I18NSendReceiveTest
             fm.getFileDescForFile(new File(_sharedDir, fname));
         
         LimeXMLDocument newDoc = 
-            new LimeXMLDocument(buildXMLString(xmlstr));
+            ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(buildXMLString(xmlstr));
         
         SchemaReplyCollectionMapper map =
             ProviderHacks.getSchemaReplyCollectionMapper();

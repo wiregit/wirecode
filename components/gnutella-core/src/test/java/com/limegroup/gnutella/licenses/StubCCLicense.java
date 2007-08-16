@@ -38,7 +38,7 @@ class StubCCLicense extends CCLicense {
     }
    
     private static URI getURI(String license) {
-        URI uri = LicenseFactory.getLicenseURI(license);
+        URI uri = LicenseFactoryImpl.getLicenseURI(license);
         if(uri == null)
             return LICENSE_URI;
         else

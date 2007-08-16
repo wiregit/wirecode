@@ -2,11 +2,14 @@ package com.limegroup.gnutella.licenses;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public final class LicenseFactoryTest extends LimeTestCase {
 
+    LicenseFactory factory;
+    
 	public LicenseFactoryTest(String name) {
 		super(name);
 	}
@@ -15,6 +18,11 @@ public final class LicenseFactoryTest extends LimeTestCase {
 		return buildTestSuite(LicenseFactoryTest.class);
 	}
 
+	@Override
+	protected void setUp() throws Exception {
+	    factory = ProviderHacks.getLicenseFactory();
+	}
+	
 	/**
 	 * Runs this test individually.
 	 */
@@ -23,19 +31,19 @@ public final class LicenseFactoryTest extends LimeTestCase {
 	}
 	
 	public void testCreateWithBadLicenses() throws Exception {
-	    License l = LicenseFactory.create(null);
+	    License l = factory.create(null);
 	    assertNull(l);
 	    
-	    l = LicenseFactory.create("no string");
+	    l = factory.create("no string");
 	    assertNull(l);
 	    
-	    l = LicenseFactory.create("http://home.org");
+	    l = factory.create("http://home.org");
 	    assertNull(l);
     }
     
     public void testCreateForBadCCLicenses() throws Exception {
 	    // 'verify at' without location
-	    License l = LicenseFactory.create("verify at");   
+	    License l = factory.create("verify at");   
 	    assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
@@ -43,7 +51,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
 	    // 'verify at' with invalid URI
-	    l = LicenseFactory.create("verify at nowhere");
+	    l = factory.create("verify at nowhere");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
@@ -51,7 +59,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
 	    // no authority in lookup URI
-	    l = LicenseFactory.create("verify at http://");
+	    l = factory.create("verify at http://");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
@@ -59,7 +67,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
 	    // lookup URI isn't the end.
-	    l = LicenseFactory.create("verify at http://life.org is not fair.");
+	    l = factory.create("verify at http://life.org is not fair.");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
@@ -68,21 +76,21 @@ public final class LicenseFactoryTest extends LimeTestCase {
     }
     
     public void testCreateForCCLicenses() throws Exception {
-	    License l = LicenseFactory.create("verify at http://home.org");
+        License l = factory.create("verify at http://home.org");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
-	    l = LicenseFactory.create("verify at http://home.org/path");
+	    l = factory.create("verify at http://home.org/path");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
-	    l = LicenseFactory.create("this license should verify at http://nowhere.com");
+	    l = factory.create("this license should verify at http://nowhere.com");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
@@ -92,36 +100,37 @@ public final class LicenseFactoryTest extends LimeTestCase {
     
     public void testInvalidWeedLicenses() throws Exception {
         // no cid or vid
-	    License l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx");
+	    License l = factory.create("http://www.shmedlic.com/license/3play.aspx");
 	    assertNull(l);
 	    
 	    // no data in cid or vid.
-	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: ");
+	    l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: ");
 	    assertNull(l);
 	    
 	    // no vid.
-	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 098301");
+	    l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: 098301");
 	    assertNull(l);
 	    
 	    // no cid
-	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx vid: 134572");
+	    l = factory.create("http://www.shmedlic.com/license/3play.aspx vid: 134572");
 	    assertNull(l);
 	    
 	    // no data in vid.
-	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 12350975 vid: ");
+	    l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: 12350975 vid: ");
 	    assertNull(l);
 	    
 	    // no data in cid.
-	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: 123509713");
+	    l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: 123509713");
 	    assertNull(l);
 	    
         // garbage before uri
-        l = LicenseFactory.create("garbage http://www.shmedlic.com/license/3play.aspx vid: 1234 cid: 4566");
+        l = factory.create("garbage http://www.shmedlic.com/license/3play.aspx vid: 1234 cid: 4566");
         assertNull(l);
     }
     
     public void testWeedLicenses() {
-        License l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 1 vid: 2");
+
+        License l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: 1 vid: 2");
         assertNotNull(l);
         assertEquals(WeedLicense.class, l.getClass());
         assertFalse(l.isVerified());
@@ -129,7 +138,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertEquals("Weed License", l.getLicenseName());
         assertEquals(l.getLicenseURI().toString(), weedURI("1", "2"));
         
-        l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 00131 vid: 01093722 somethn: else");
+        l = factory.create("http://www.shmedlic.com/license/3play.aspx cid: 00131 vid: 01093722 somethn: else");
         assertNotNull(l);
         assertEquals(WeedLicense.class, l.getClass());
         assertFalse(l.isVerified());
@@ -137,7 +146,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertEquals("Weed License", l.getLicenseName());
         assertEquals(l.getLicenseURI().toString(), weedURI("00131", "01093722"));
         
-        l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx a: b vid: q somethn: else cid: d");
+        l = factory.create("http://www.shmedlic.com/license/3play.aspx a: b vid: q somethn: else cid: d");
         assertNotNull(l);
         assertEquals(WeedLicense.class, l.getClass());
         assertFalse(l.isVerified());
@@ -147,7 +156,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
     }
     
     public void testUnknownLicense() {
-        License l = LicenseFactory.create("licensed: ");
+        License l = factory.create("licensed: ");
         assertNotNull(l);
         assertEquals(UnknownLicense.class, l.getClass());
         assertFalse(l.isVerified());
@@ -155,7 +164,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertEquals("Unknown License", l.getLicenseName());
         assertNull(l.getLicenseURI());
         
-        l = LicenseFactory.create("licensed: DRM");
+        l = factory.create("licensed: DRM");
         assertNotNull(l);
         assertEquals(UnknownLicense.class, l.getClass());
         assertFalse(l.isVerified());
@@ -165,7 +174,7 @@ public final class LicenseFactoryTest extends LimeTestCase {
     }
     
     public void testInvalidUnknownLicenses() {
-        License l = LicenseFactory.create("DRM licensed: ");
+        License l = factory.create("DRM licensed: ");
         assertNull(l);
     }        
     
@@ -188,12 +197,12 @@ public final class LicenseFactoryTest extends LimeTestCase {
         String vf4 = "verify at http://jkl.com";
         
         // Make sure stuff starts off not being valid.
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, null));
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, ""));
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn1, null));
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn1, ""));
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn1, "verify at http://home.org"));
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, "verify at http://home.org"));
+        assertFalse(factory.isVerifiedAndValid(null, null));
+        assertFalse(factory.isVerifiedAndValid(null, ""));
+        assertFalse(factory.isVerifiedAndValid(urn1, null));
+        assertFalse(factory.isVerifiedAndValid(urn1, ""));
+        assertFalse(factory.isVerifiedAndValid(urn1, "verify at http://home.org"));
+        assertFalse(factory.isVerifiedAndValid(null, "verify at http://home.org"));
         
         // Okay, that's out of the way -- now cache some licenses and see if they're valid.
         License l1 = new StubCCLicense(vf1, rdf1);
@@ -216,25 +225,25 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertTrue(l4.isValid(null));
         
         // these are fine.
-        assertTrue(LicenseFactory.isVerifiedAndValid(urn1, vf1));
-        assertTrue(LicenseFactory.isVerifiedAndValid(urn2, vf2));
+        assertTrue(factory.isVerifiedAndValid(urn1, vf1));
+        assertTrue(factory.isVerifiedAndValid(urn2, vf2));
         
         // these are not.
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn3, vf3));
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn4, vf4));
-        assertTrue(LicenseFactory.isVerifiedAndValid(null, vf3));
-        assertTrue(LicenseFactory.isVerifiedAndValid(null, vf4));
+        assertFalse(factory.isVerifiedAndValid(urn3, vf3));
+        assertFalse(factory.isVerifiedAndValid(urn4, vf4));
+        assertTrue(factory.isVerifiedAndValid(null, vf3));
+        assertTrue(factory.isVerifiedAndValid(null, vf4));
         
         // check to make sure that verifying one urn against another page doesn't work
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn2, vf1));
-        assertFalse(LicenseFactory.isVerifiedAndValid(urn1, vf2));
+        assertFalse(factory.isVerifiedAndValid(urn2, vf1));
+        assertFalse(factory.isVerifiedAndValid(urn1, vf2));
         
         // Now that 1, 2, 3, & 4 are verified & cached, retrieving the Licenses should
         // return already-verified & valid licenses.
-        License d1 = LicenseFactory.create(vf1);
-        License d2 = LicenseFactory.create(vf2);
-        License d3 = LicenseFactory.create(vf3);
-        License d4 = LicenseFactory.create(vf4);
+        License d1 = factory.create(vf1);
+        License d2 = factory.create(vf2);
+        License d3 = factory.create(vf3);
+        License d4 = factory.create(vf4);
         assertTrue(d1.isVerified());
         assertTrue(d2.isVerified());
         assertTrue(d3.isVerified());
@@ -260,8 +269,8 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertFalse(l2.isVerified());
         
         // (and they aren't valid)
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, v1));
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, v2));
+        assertFalse(factory.isVerifiedAndValid(null, v1));
+        assertFalse(factory.isVerifiedAndValid(null, v2));
         
         // Verify them.
         l1.verify(null);
@@ -276,16 +285,16 @@ public final class LicenseFactoryTest extends LimeTestCase {
         assertFalse(l2.isValid(null));
         
         // And quick lookups work correctly.
-        assertTrue(LicenseFactory.isVerifiedAndValid(null, v1));
-        assertFalse(LicenseFactory.isVerifiedAndValid(null, v2));
+        assertTrue(factory.isVerifiedAndValid(null, v1));
+        assertFalse(factory.isVerifiedAndValid(null, v2));
         
         // And recreating preserves the prior lookup state.
-        License d1 = LicenseFactory.create(v1);
+        License d1 = factory.create(v1);
         assertTrue(d1.isVerified());
         assertTrue(d1.isValid(null));
 
         // Even if it wasn't valid.
-        License d2 = LicenseFactory.create(v2);
+        License d2 = factory.create(v2);
         assertTrue(d2.isVerified());
         assertFalse(d2.isValid(null));
     }

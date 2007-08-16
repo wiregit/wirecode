@@ -69,6 +69,7 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
+import com.limegroup.gnutella.downloader.AutoDownloadDetails;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
@@ -89,6 +90,8 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.messages.LocalPongInfo;
 import com.limegroup.gnutella.messages.LocalPongInfoImpl;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -130,6 +133,8 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -236,6 +241,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPCrawlerPongFactory.class).to(UDPCrawlerPongFactoryImpl.class);
         bind(UDPHostCacheFactory.class).to(UDPHostCacheFactoryImpl.class);
         bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
+        bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
+        bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -244,6 +251,7 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(RemoteFileDesc.class);
         requestStaticInjection(HashTree.class);
         requestStaticInjection(IncompleteFileManager.class);
+        requestStaticInjection(AutoDownloadDetails.class);
                 
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();

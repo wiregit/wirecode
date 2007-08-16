@@ -31,6 +31,8 @@ import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 /**
@@ -187,7 +189,8 @@ public class QueryRequest extends Message implements Serializable{
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask, boolean normalize,
-                        boolean canDoFWT) {
+                        boolean canDoFWT,
+                        LimeXMLDocumentFactory limeXMLDocumentFactory) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
@@ -264,7 +267,7 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 		    LimeXMLDocument doc = null;
 		    try {
-		        doc = new LimeXMLDocument(richQuery);
+		        doc = limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
             } catch(SAXException ignored) {
             } catch(SchemaNotFoundException ignored) {
             } catch(IOException ignored) {
@@ -390,7 +393,8 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param network the network that this query came from.
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload, Network network) throws BadPacketException {
+    QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload, Network network,
+            LimeXMLDocumentFactory limeXMLDocumentFactory) throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
 		PAYLOAD=payload;
 		
@@ -400,7 +404,7 @@ public class QueryRequest extends Message implements Serializable{
 
 	    LimeXMLDocument tempDoc = null;
 	    try {
-	        tempDoc = new LimeXMLDocument(parser.richQuery);
+	        tempDoc = limeXMLDocumentFactory.createLimeXMLDocument(parser.richQuery);
         } catch(SAXException ignored) {
         } catch(SchemaNotFoundException ignored) {
         } catch(IOException ignored) {

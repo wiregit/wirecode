@@ -103,6 +103,11 @@ public class LimeXMLReplyCollection {
 
     private final Provider<FileManager> fileManager;
 
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+
+
+    private final MetaDataReader metaDataReader;
+
     /**
      * Creates a new LimeXMLReplyCollection.  The reply collection
      * will retain only those XMLDocs that match the given schema URI.
@@ -111,9 +116,12 @@ public class LimeXMLReplyCollection {
      * @param URI This collection's schema URI
      * @param fileManager 
      */
-    LimeXMLReplyCollection(String URI, String path, Provider<FileManager> fileManager) {
+    LimeXMLReplyCollection(String URI, String path, Provider<FileManager> fileManager,
+            LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader) {
         this.schemaURI = URI;
         this.fileManager = fileManager;
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.metaDataReader = metaDataReader;
         this.trieMap = new HashMap<String, StringTrie<List<LimeXMLDocument>>>();
         this.dataFile = new File(path, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap<URN, LimeXMLDocument>();
@@ -223,7 +231,7 @@ public class LimeXMLReplyCollection {
             
         // check to see if it's corrupted and if so, fix it.
         if( AudioMetaData.isCorrupted(doc) ) {
-            doc = AudioMetaData.fixCorruption(doc);
+            doc = AudioMetaData.fixCorruption(doc, limeXMLDocumentFactory);
             mediaFileToDisk(fd, file.getPath(), doc, false);
         }
         
@@ -250,7 +258,7 @@ public class LimeXMLReplyCollection {
         for(Map.Entry<String, String> next : fields.entrySet())
             nameValues.add(new NameValue<String>(next.getKey(), next.getValue()));
         
-        return new LimeXMLDocument(nameValues, newer.getSchemaURI());
+        return limeXMLDocumentFactory.createLimeXMLDocument(nameValues, newer.getSchemaURI());
      }
         
     
@@ -263,7 +271,7 @@ public class LimeXMLReplyCollection {
 	    if(LimeXMLUtils.isSupportedFormatForSchema(file, schemaURI)) {
             try {
                 // Documents with multiple file formats may be the wrong type.
-                LimeXMLDocument document = MetaDataReader.readDocument(file);
+                LimeXMLDocument document = metaDataReader.readDocument(file);
                 if(document.getSchemaURI().equals(schemaURI))
                     return document;
             } catch (IOException ignored) {
@@ -577,7 +585,7 @@ public class LimeXMLReplyCollection {
         MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
         LimeXMLDocument existingDoc = null;
         try {
-            existingDoc = MetaDataReader.readDocument(new File(mp3File));
+            existingDoc = metaDataReader.readDocument(new File(mp3File));
         } catch(IOException e) {
             return null;
         }

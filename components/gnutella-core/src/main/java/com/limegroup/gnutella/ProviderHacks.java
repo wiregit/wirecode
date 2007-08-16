@@ -42,6 +42,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.licenses.LicenseCache;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -56,6 +57,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -68,6 +70,8 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
@@ -228,7 +232,10 @@ public class ProviderHacks {
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }
     public static LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() { return i().getLimeXMLReplyCollectionFactory(); }
     public static FileManager getFileManager() { return i().getFileManager(); }
-    
-    // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
+    public static LicenseFactory getLicenseFactory() { return i().getLicenseFactory(); }
+    public static LimeXMLDocumentFactory getLimeXMLDocumentFactory() { return i().getLimeXMLDocumentFactory(); }
+    public static LimeXMLDocumentHelper getLimeXMLDocumentHelper()  { return i().getLimeXMLDocumentHelper(); }
+    public static MetaDataReader getMetaDataReader() { return i().getMetaDataReader(); }
      
+    // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

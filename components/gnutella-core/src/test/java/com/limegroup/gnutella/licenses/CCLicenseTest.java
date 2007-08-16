@@ -9,6 +9,7 @@ import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -389,7 +390,7 @@ public final class CCLicenseTest extends LimeTestCase {
             server.setResponseData("<html><head>Hi</head><body><--\n"+
                                    RDF_GOOD + "\n--></body></html>");
             
-            License l = LicenseFactory.create("verify at http://127.0.0.1:20181/");
+            License l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:20181/");
             l.verify(null);
             Thread.sleep(1000);
             assertTrue(l.isVerified());
@@ -487,7 +488,7 @@ public final class CCLicenseTest extends LimeTestCase {
         deed3.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
     
         try {
-            License l = LicenseFactory.create("verify at http://127.0.0.1:44444/");
+            License l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:44444/");
             VerificationListener vl = new Listener();
             synchronized(vl) {
                 l.verify(vl);
@@ -540,7 +541,7 @@ public final class CCLicenseTest extends LimeTestCase {
             // The details should already have been cached for 11111 & 22222,
             // and even 33333 (even though it failed 'cause it had the wrong addr).
             
-            l = LicenseFactory.create("verify at http://127.0.0.1:55555/");
+            l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:55555/");
             vl = new Listener();
             synchronized(vl) {
                 l.verify(vl);

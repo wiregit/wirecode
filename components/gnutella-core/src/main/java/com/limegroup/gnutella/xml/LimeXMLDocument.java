@@ -103,11 +103,14 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     /** The kind of license this has. */
     private transient LicenseType licenseType = LicenseType.NO_LICENSE;
 
+    private final LicenseFactory licenseFactory;
+
     /**
      * Constructs a LimeXMLDocument with the given string.
      */
-    public LimeXMLDocument(String xml)
+    LimeXMLDocument(String xml, LicenseFactory licenseFactory)
       throws SAXException, SchemaNotFoundException, IOException {
+        this.licenseFactory = licenseFactory;
         if(xml==null || xml.equals(""))
             throw new SAXException("null or empty string");
 
@@ -134,8 +137,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix) 
+    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix, LicenseFactory licenseFactory) 
       throws IOException {
+        this.licenseFactory = licenseFactory;
         if(map.isEmpty())
             throw new IllegalArgumentException("empty map");
 
@@ -157,8 +161,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */
-    public LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
-                           String schemaURI) {
+    LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
+                           String schemaURI, LicenseFactory licenseFactory) {
+        this.licenseFactory = licenseFactory;
         if(nameValueList.isEmpty())
             throw new IllegalArgumentException("empty list");
 
@@ -395,7 +400,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     public License getLicense() {
         String license = getLicenseString();
         if(license != null)
-            return LicenseFactory.create(license);
+            return licenseFactory.create(license);
         else
             return null;
     }
@@ -621,6 +626,10 @@ public class LimeXMLDocument implements Serializable, StringLookup {
             return getValue(key);
         }
         return null;
+    }
+    
+    public LicenseFactory getLicenseFactory() {
+        return licenseFactory;
     }
 }
 

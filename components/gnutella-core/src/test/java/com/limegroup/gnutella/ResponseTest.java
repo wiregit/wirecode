@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 /**
  * This class tests the Response class.
@@ -97,10 +98,11 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         String xml2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"150\"></audio></audios>";
         
         //create documents.
+        LimeXMLDocumentFactory factory = ProviderHacks.getLimeXMLDocumentFactory();
         LimeXMLDocument d1 = null;
         LimeXMLDocument d2 = null;
-        d1 = new LimeXMLDocument(xml1);
-        d2 = new LimeXMLDocument(xml2);
+        d1 = factory.createLimeXMLDocument(xml1);
+        d2 = factory.createLimeXMLDocument(xml2);
         Response ra = ProviderHacks.getResponseFactory().createResponse(12, 231, "def1.txt", d1);
         Response rb = ProviderHacks.getResponseFactory().createResponse(13, 232, "def2.txt", d2);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());

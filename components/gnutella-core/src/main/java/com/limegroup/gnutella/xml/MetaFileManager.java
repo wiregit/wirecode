@@ -28,7 +28,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.MetaDataReader;
 
 /**
  * This class handles querying shared files with XML data and returning XML data
@@ -136,7 +135,7 @@ public class MetaFileManager extends FileManager {
         List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();
         if (LimeXMLUtils.isEditableFormat(f)) {
             try {
-                LimeXMLDocument diskDoc = MetaDataReader.readDocument(f);
+                LimeXMLDocument diskDoc = fileManagerController.readDocument(f);
                 xmlDocs = resolveWriteableDocs(xmlDocs, diskDoc);
             } catch (IOException e) {
                 // if we were unable to read this document,
@@ -213,7 +212,8 @@ public class MetaFileManager extends FileManager {
                 id3List.add(nameVal);
         }
 
-        audioDoc = new LimeXMLDocument(id3List, LimeXMLNames.AUDIO_SCHEMA);
+        audioDoc = fileManagerController.createLimeXMLDocument(id3List,
+                LimeXMLNames.AUDIO_SCHEMA);
         retList.add(audioDoc);
         return retList;
     }

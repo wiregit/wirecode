@@ -35,7 +35,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -471,7 +471,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         tigerTreeCache.get().persistCache(fileManager.get(), downloadManager.get());
 
-        LicenseFactory.persistCache();
+        LicenseFactoryImpl.persistCache();
         
         contentManager.get().shutdown();
         

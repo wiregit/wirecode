@@ -9,6 +9,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -61,7 +62,7 @@ public class OGGWritingTest extends LimeTestCase {
         assertEquals("Incorrect comment", "allComment",data.getComment());        
         
         // Read existing stuff in file.
-        LimeXMLDocument doc = MetaDataReader.readDocument(TEST_FILE);
+        LimeXMLDocument doc = ProviderHacks.getMetaDataReader().readDocument(TEST_FILE);
         //2. Write data into the file 
         MetaDataEditor editor = MetaDataEditor.getEditorForFile(TEST_FILE.getPath());
         editor.populate(doc);

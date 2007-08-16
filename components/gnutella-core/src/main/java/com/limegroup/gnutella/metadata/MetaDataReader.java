@@ -7,20 +7,28 @@ import java.util.List;
 
 import org.limewire.collection.NameValue;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 /**
  * Utility class that creates a <tt>LimeXMLDocument</tt> from a file.
  */
+@Singleton
 public class MetaDataReader {
 	
-	private MetaDataReader(){}
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+
+    @Inject
+	private MetaDataReader(LimeXMLDocumentFactory limeXMLDocumentFactory){
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;}
 
 	/**
 	 * Generates a LimeXMLDocument from this file, only parsing it if it's the given schemaURI.
 	 */
-	public static LimeXMLDocument readDocument(File file) throws IOException {
+	public LimeXMLDocument readDocument(File file) throws IOException {
 	    MetaData data = MetaData.parse(file);
 		if(data == null)
 		    throw new IOException("unable to parse file");
@@ -33,7 +41,7 @@ public class MetaDataReader {
 		if(ProviderHacks.getLimeXMLSchemaRepository().getSchema(uri) == null)
              throw new IOException("schema: " + uri + " doesn't exist");
 
-		return new LimeXMLDocument(nameValList, uri);
+		return limeXMLDocumentFactory.createLimeXMLDocument(nameValList, uri);
 	}
 	
 	

@@ -57,6 +57,7 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseCache;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -71,6 +72,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -87,6 +89,8 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
@@ -647,7 +651,23 @@ public class LimeWireCore {
         return injector.getInstance(UDPHostCacheFactory.class);
     }
 
-    public LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() {
+	public LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() {
         return injector.getInstance(LimeXMLReplyCollectionFactory.class);
+    }
+
+    public LicenseFactory getLicenseFactory() {
+        return injector.getInstance(LicenseFactory.class);
+    }
+
+    public LimeXMLDocumentFactory getLimeXMLDocumentFactory() {
+        return injector.getInstance(LimeXMLDocumentFactory.class);
+    }
+
+    public LimeXMLDocumentHelper getLimeXMLDocumentHelper() {
+        return injector.getInstance(LimeXMLDocumentHelper.class);
+    }
+
+    public MetaDataReader getMetaDataReader() {
+        return injector.getInstance(MetaDataReader.class);
     }
 }

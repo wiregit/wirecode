@@ -203,7 +203,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     @Inject
     private static PushEndpointFactory globalPushEndpointFactory;
     
-    private final transient PushEndpointFactory pushEndpointFactory;    
+    private transient volatile PushEndpointFactory pushEndpointFactory;    
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -452,6 +452,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 
     private void readObject(ObjectInputStream stream) 
 		throws IOException, ClassNotFoundException {
+        pushEndpointFactory = globalPushEndpointFactory;
         stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
