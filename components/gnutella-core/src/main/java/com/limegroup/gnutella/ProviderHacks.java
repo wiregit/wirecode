@@ -112,6 +112,7 @@ public class ProviderHacks {
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
+    // TODO move down
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
     public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
