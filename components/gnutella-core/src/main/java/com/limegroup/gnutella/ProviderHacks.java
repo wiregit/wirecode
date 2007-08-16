@@ -109,7 +109,6 @@ public class ProviderHacks {
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
     public static UDPService getUdpService() { return i().getUdpService(); }     
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
-    public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
@@ -227,6 +226,7 @@ public class ProviderHacks {
     public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }
     public static LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() { return i().getLimeXMLReplyCollectionFactory(); }
+    public static FileManager getFileManager() { return i().getFileManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

@@ -76,6 +76,7 @@ import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
@@ -242,6 +243,7 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(AddressToken.class);
         requestStaticInjection(RemoteFileDesc.class);
         requestStaticInjection(HashTree.class);
+        requestStaticInjection(IncompleteFileManager.class);
                 
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
