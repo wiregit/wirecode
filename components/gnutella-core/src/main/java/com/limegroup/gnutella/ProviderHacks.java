@@ -106,8 +106,7 @@ public class ProviderHacks {
     
     // Still needed in core...
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
-    public static UDPService getUdpService() { return i().getUdpService(); }    
-    public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }    
+    public static UDPService getUdpService() { return i().getUdpService(); }     
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
@@ -225,7 +224,7 @@ public class ProviderHacks {
     public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
     public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
     public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
-
+    public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
      

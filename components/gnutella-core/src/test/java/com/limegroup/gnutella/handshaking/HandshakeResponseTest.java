@@ -316,7 +316,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	    @SuppressWarnings("all") // DPINJ: textfix
 		TestConnectionManager tcm = new TestConnectionManager();
 	//	PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse();
+		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse(ProviderHacks.getConnectionManager());
 		Properties headers = hr.props();
 		String leaves = headers.getProperty(HeaderNames.LEAVES);
 		String ultrapeers = headers.getProperty(HeaderNames.PEERS);

@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -389,7 +390,7 @@ public class HandshakeResponse {
 	 * @param headers the <tt>Properties</tt> instance containing the headers
 	 *  to send to the node we're rejecting
 	 */
-	static HandshakeResponse createCrawlerResponse() {
+	static HandshakeResponse createCrawlerResponse(ConnectionManager connectionManager) {
 		Properties headers = new Properties();
 		
         // add our user agent
@@ -397,13 +398,11 @@ public class HandshakeResponse {
         headers.put(HeaderNames.X_ULTRAPEER, ""+ProviderHacks.getConnectionServices().isSupernode());
         
 		// add any leaves
-        List<? extends IpPort> leaves =
-            ProviderHacks.getConnectionManager().getInitializedClientConnections();
+        List<? extends IpPort> leaves = connectionManager.getInitializedClientConnections();
 		headers.put(HeaderNames.LEAVES, createEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
-        List<? extends IpPort> ultrapeers = 
-            ProviderHacks.getConnectionManager().getInitializedConnections();
+        List<? extends IpPort> ultrapeers = connectionManager.getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			

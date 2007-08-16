@@ -2,6 +2,7 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -12,6 +13,7 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
 public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
     private final HeadersFactory headersFactory;
+    private final ConnectionManager connectionManager;
     
     /**
      * Creates a new instance of LeafHandshakeResponder
@@ -21,9 +23,11 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    LeafHandshakeResponder(String host, HeadersFactory headersFactory) {
+    LeafHandshakeResponder(String host, HeadersFactory headersFactory, ConnectionManager connectionManager) {
         super(host);
+        
         this.headersFactory = headersFactory;
+        this.connectionManager = connectionManager;
     }
     
     /**
@@ -78,7 +82,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
 		if (hr.isCrawler()) {
 		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
-			return HandshakeResponse.createCrawlerResponse();
+			return HandshakeResponse.createCrawlerResponse(connectionManager);
 		}
 		
         //if not an ultrapeer, reject.
