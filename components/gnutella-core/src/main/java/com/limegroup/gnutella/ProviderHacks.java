@@ -107,14 +107,11 @@ public class ProviderHacks {
     // Still needed in core...
     public static Acceptor getAcceptor() { return i().getAcceptor(); }    
     public static UDPService getUdpService() { return i().getUdpService(); }    
-    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }    
     public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }    
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }  
     public static FileManager getFileManager() { return i().getFileManager(); }
     public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }    
     public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }    
-    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
-    public static ContentManager getContentManager() { return i().getContentManager(); }
     public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
     public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
@@ -125,7 +122,10 @@ public class ProviderHacks {
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
-    
+    // Needs additional refactoring...
+    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
+    public static ContentManager getContentManager() { return i().getContentManager(); }
+    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
     
     // Cleaned up in all but tests
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
