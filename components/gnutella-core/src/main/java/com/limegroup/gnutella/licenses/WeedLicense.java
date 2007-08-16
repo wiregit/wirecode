@@ -52,8 +52,8 @@ class WeedLicense extends AbstractLicense {
     /**
      * Constructs a new WeedLicense.
      */
-    WeedLicense(URI uri) {
-        super(uri);
+    WeedLicense(URI uri, LicenseCache licenseCache) {
+        super(uri, licenseCache);
     }
     
     /** There is no explicit license text for Weed files. */

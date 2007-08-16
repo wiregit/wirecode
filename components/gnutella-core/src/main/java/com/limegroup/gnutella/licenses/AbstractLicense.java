@@ -21,7 +21,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -50,10 +49,13 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     
     /** The last time this license was verified. */
     private long lastVerifiedTime;
+
+    private final LicenseCache licenseCache;
     
     /** Constructs a new AbstractLicense. */
-    AbstractLicense(URI uri) {
+    AbstractLicense(URI uri, LicenseCache licenseCache) {
         this.licenseLocation = uri;
+        this.licenseCache = licenseCache;
     }
     
     public void setLicenseName(String name) { this.licenseName = name; }
@@ -174,7 +176,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
             parseXML(body, true);
             lastVerifiedTime = System.currentTimeMillis();
             verified = VERIFIED;
-            ProviderHacks.getLicenseCache().addVerifiedLicense(AbstractLicense.this);
+            licenseCache.addVerifiedLicense(AbstractLicense.this);
             if(vc != null)
                 vc.licenseVerified(AbstractLicense.this);
         }

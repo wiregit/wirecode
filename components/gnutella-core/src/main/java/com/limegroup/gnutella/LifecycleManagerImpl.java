@@ -35,7 +35,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -107,6 +107,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     @InspectablePrimitive private long startFinishedTime;
 
     private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
+
+    private final Provider<LicenseFactory> licenseFactory;
     
     @Inject
     public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
@@ -142,7 +144,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<ConnectionServices> connectionServices,
             Provider<SpamServices> spamServices,
             Provider<ControlRequestAcceptor> controlRequestAcceptor,
-            Provider<IncomingConnectionHandler> incomingConnectionHandler) { 
+            Provider<IncomingConnectionHandler> incomingConnectionHandler,
+            Provider<LicenseFactory> licenseFactory) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -178,6 +181,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.spamServices = spamServices;
         this.controlRequestAcceptor = controlRequestAcceptor;
         this.incomingConnectionHandler = incomingConnectionHandler;
+        this.licenseFactory = licenseFactory;
     }
     
     /* (non-Javadoc)
@@ -471,7 +475,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         tigerTreeCache.get().persistCache(fileManager.get(), downloadManager.get());
 
-        LicenseFactoryImpl.persistCache();
+        licenseFactory.get().persistCache();
         
         contentManager.get().shutdown();
         

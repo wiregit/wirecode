@@ -29,4 +29,9 @@ public interface LicenseFactory {
      */
     public License create(String licenseString);
 
+    /**
+     * Persists the cache.
+     */
+    public void persistCache();
+
 }

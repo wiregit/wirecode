@@ -7,7 +7,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.WRMXML;
 import com.limegroup.gnutella.metadata.WeedInfo;
@@ -20,7 +19,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
     
     private static final Log LOG = LogFactory.getLog(LicenseFactoryImpl.class);
     
-    private final LicenseCache licenseCache;
+    final LicenseCache licenseCache;
     
     @Inject
     public LicenseFactoryImpl(LicenseCache licenseCache) {
@@ -61,11 +60,11 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         if(license == null) {
             if(isCCLicense(licenseString)) {
                 if(uri != null)
-                    license = new CCLicense(licenseString, uri);
+                    license = new CCLicense(licenseString, uri, licenseCache);
                 else
                     license = new BadCCLicense(licenseString);
             } else if(isWeedLicense(licenseString) && uri != null) {
-                license = new WeedLicense(uri);
+                license = new WeedLicense(uri, licenseCache);
             } else if(isUnknownLicense(licenseString)) {
                 license = new UnknownLicense();
             }
@@ -96,8 +95,8 @@ public final class LicenseFactoryImpl implements LicenseFactory {
     /**
      * Persists the cache.
      */
-    public static void persistCache() {
-        ProviderHacks.getLicenseCache().persistCache();
+    public void persistCache() {
+        licenseCache.persistCache();
     }
     
     /**

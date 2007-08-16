@@ -36,13 +36,16 @@ class CCLicense extends AbstractLicense {
     
     /** The license information for each Work. */
     private Map<URN, Details> allWorks;
+
+    private final LicenseCache licenseCache;
     
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri) {
-        super(uri);
+    CCLicense(String license, URI uri, LicenseCache licenseCache) {
+        super(uri, licenseCache);
         this.license = license;
+        this.licenseCache = licenseCache;
     }
     
     public String getLicense() {
@@ -466,7 +469,7 @@ class CCLicense extends AbstractLicense {
                 
                 String url = details.licenseURL.toExternalForm();
                 // First see if we have cached details.
-                Object data = ProviderHacks.getLicenseCache().getData(url);
+                Object data = licenseCache.getData(url);
                 String body = null;
                 if(data != null && data instanceof String) {
                     if(LOG.isDebugEnabled())
