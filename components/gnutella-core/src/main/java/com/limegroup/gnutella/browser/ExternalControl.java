@@ -191,13 +191,13 @@ public class ExternalControl {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
 				msg = msg != null ? msg : curOpt.toString();
-                MessageService.showError(I18n.marktr("ERROR_BAD_MAGNET_LINK"), msg);
+                MessageService.showError(I18n.marktr("Could not process bad MAGNET link {0}"), msg);
                 return;	
             }
             
             // Warn the user that the link was slightly invalid
             if( msg != null )
-                MessageService.showError(I18n.marktr("ERROR_INVALID_URLS_IN_MAGNET"));
+                MessageService.showError(I18n.marktr("One or more URLs in the MAGNET link were invalid. Your file may not download correctly."));
             
             try {
             	downloadServices.download(curOpt, false);
@@ -208,11 +208,12 @@ public class ExternalControl {
 			catch (SaveLocationException sle) {
 				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
                 MessageService.showError(
-                    "ERROR_ALREADY_EXISTS", sle.getFile().getName());
+                    I18n.marktr("You have already downloaded {0}"), sle.getFile().getName());
 				}
 				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
 					MessageService.showError(
-		                    "ERROR_ALREADY_DOWNLOADING", sle.getFile().getName());	
+		                    I18n
+                                    .marktr("You are already downloading this file to {0}"), sle.getFile().getName());	
 				}
 			}
 		}

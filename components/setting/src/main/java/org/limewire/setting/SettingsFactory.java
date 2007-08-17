@@ -183,7 +183,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
                 }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError(I18n.marktr("ERROR_PROPS_CORRUPTED"));
+                MessageService.showError(I18n.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
             }
         } catch(IOException e) {
             ErrorService.error(e);
