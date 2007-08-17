@@ -263,6 +263,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         
         // First attempt to rename it.
         final File realOutputDir = SharingSettings.getSaveLWSDirectory(incompleteFile);
+        saveFile = new File(realOutputDir, saveFile.getName());
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
 
         incompleteFileManager.removeEntry(incompleteFile);
