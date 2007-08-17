@@ -54,7 +54,6 @@
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
-	<classpathentry kind="lib" path="lib/jars/forms-1.1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
@@ -70,5 +69,7 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar" sourcepath="lib/sources/httpcore-nio-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar" sourcepath="lib/sources/guice-1.0-src.jar"/>
+	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
+	<classpathentry kind="lib" path="lib/jars/forms-1.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
