@@ -5,7 +5,8 @@ uniquify() {
     echo "Uniquifying po files";
     
     for i in *.po; do
-	msguniq --use-first -o $i.uniq -u $i;
+	msguniq -o $i.uniq -u $i;
+#	msguniq --use-first -o $i.uniq -u $i;
     done
 }
 
@@ -52,13 +53,13 @@ propsbundle() {
 makejar() {
     echo "Making jar";
 
-    jar -cuf messages.jar *.class
+    jar -cuf ../jars/messages.jar *.class
 }
 
-#uniquify
-#rename
-#merge
-#generateDefault
-#classbundle
-propsbundle
-#makejar
+uniquify
+rename
+merge
+generateDefault
+classbundle
+#propsbundle
+makejar
