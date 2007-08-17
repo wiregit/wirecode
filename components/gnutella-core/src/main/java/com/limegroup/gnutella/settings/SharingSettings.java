@@ -270,31 +270,38 @@ public class SharingSettings extends LimeProps {
     public static final File getSaveLWSDirectory(File incompleteFile) {
         File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
         final String template = getSaveLWSTemplate();
-        try {
-            final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
-            final Map<String, String> subs = new HashMap<String, String>();
-            String artist = data.getArtist();
-            if (artist == null) {
-                artist = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ARTIST");
-            }
-            String album = data.getAlbum();
-            if (album == null) {
-                album = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ALBUM");
-            }
-            subs.put(StoreSaveTemplateProcessor.ARTIST_LABLE, artist);
-            subs.put(StoreSaveTemplateProcessor.ALBUM_LABLE, album);
-            subs.put(StoreSaveTemplateProcessor.HOME_LABLE, System.getProperty("user.dir"));
-            File outDir = null;
+        
+        // if mp3, try to get meta-data to use template pattern when saving
+        if( incompleteFile.getName().toLowerCase().endsWith("mp3")) {
             try {
-                outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
-            } catch (IllegalTemplateException e) {
-                GUIMediator.showError("STORE_DOWNLOADER_INVALID_TEMPLATE", System.getProperty("line.separator") + e.getMessage());
+                final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
+                final Map<String, String> subs = new HashMap<String, String>();
+                String artist = data.getArtist();
+                if (artist == null) {
+                    artist = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ARTIST");
+                }
+                String album = data.getAlbum();
+                if (album == null) {
+                    album = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ALBUM");
+                }
+                subs.put(StoreSaveTemplateProcessor.ARTIST_LABLE, artist);
+                subs.put(StoreSaveTemplateProcessor.ALBUM_LABLE, album);
+                subs.put(StoreSaveTemplateProcessor.HOME_LABLE, System.getProperty("user.dir"));
+                File outDir = null;
+                try {
+                    outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
+                } catch (IllegalTemplateException e) {
+                    GUIMediator.showError("STORE_DOWNLOADER_INVALID_TEMPLATE", System.getProperty("line.separator") + e.getMessage());
+                }
+                if (outDir != null) f = outDir;
+            } catch (IOException e) { 
+                LOG.error("getSaveLWSDirectory", e);
             }
-            if (outDir != null) f = outDir;
-        } catch (IOException e) { 
-            LOG.error("getSaveLWSDirectory", e);
+            if (!f.exists()) 
+                f.mkdirs();
+            if( !f.isDirectory())
+                f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
         }
-        if (!f.exists()) f.mkdirs();
         return f;
     }
     

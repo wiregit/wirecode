@@ -261,11 +261,21 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         //from the IncompleteFileManager, though this is not strictly necessary
         //because IFM.purge() is called frequently in DownloadManager.
         
-        // First attempt to rename it.
+        // First attempt to get new save location
         final File realOutputDir = SharingSettings.getSaveLWSDirectory(incompleteFile);
+
+        // make sure it is writable
+        if (!FileUtils.setWriteable(realOutputDir)) {
+            reportDiskProblem("could not set file writeable " + 
+                    getSaveFile().getParentFile());
+            return DownloadStatus.DISK_PROBLEM;
+        }
+        // move file to new folder
         saveFile = new File(realOutputDir, saveFile.getName());
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
 
+        //TODO: should we remove it after a success? ths has been downloaded
+        //      succefully but just left in the incomplete folder
         incompleteFileManager.removeEntry(incompleteFile);
         
         // If that didn't work, we're out of luck.
