@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
 	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
-	<classpathentry kind="src" output="lib/messagebundles" path="lib/messagebundles"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
