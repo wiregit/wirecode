@@ -277,7 +277,7 @@ public class SharingSettings extends LimeProps {
             if (artist == null) {
                 artist = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ARTIST");
             }
-            String album = data.getArtist();
+            String album = data.getAlbum();
             if (album == null) {
                 album = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ALBUM");
             }
