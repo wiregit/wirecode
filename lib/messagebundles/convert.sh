@@ -33,12 +33,12 @@ generateDefault() {
 }
 
 classbundle() {
-    echo "Creating class RersourceBundles";
+    echo "Creating class ResourceBundles";
     
     for i in *.po; do
-	msgfmt --java2 -d . -r LimeMessages -l `basename $i | sed -e 's/.po//'` $i;
+		msgfmt --java2 -d . -r org.limewire.i18n.Messages -l `basename $i | sed -e 's/.po//'` $i;
     done
-    msgfmt --java2 -d . -r LimeMessages default.po
+	msgfmt --java2 -d . -r org.limewire.i18n.Messages default.po
 }
 
 propsbundle() {
@@ -53,13 +53,13 @@ propsbundle() {
 makejar() {
     echo "Making jar";
 
-    jar -cuf ../jars/messages.jar *.class
+	jar -cf ../jars/messages.jar org
 }
 
-uniquify
-rename
-merge
-generateDefault
+#uniquify
+#rename
+#merge
+#generateDefault
 classbundle
 #propsbundle
 makejar
