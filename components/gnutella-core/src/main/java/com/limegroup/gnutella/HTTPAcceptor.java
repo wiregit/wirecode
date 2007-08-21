@@ -252,7 +252,7 @@ public class HTTPAcceptor {
      * @param handler the handler that processes the request
      */
     public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
+            final HttpRequestHandler handler) {System.out.println("registerHandler: " + pattern + "," + handler);
         registry.register(pattern, handler);
     }
 

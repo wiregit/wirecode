@@ -45,6 +45,8 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
+import com.limegroup.gnutella.store.server.LWStoreManager;
+import com.limegroup.gnutella.store.server.LWStoreManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -100,6 +102,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ConnectionServices> connectionServices;
     private final Provider<SpamServices> spamServices;
     private final Provider<ControlRequestAcceptor> controlRequestAcceptor;
+    private final Provider<LWStoreManager> lwsManager;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -145,7 +148,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<SpamServices> spamServices,
             Provider<ControlRequestAcceptor> controlRequestAcceptor,
             Provider<IncomingConnectionHandler> incomingConnectionHandler,
-            Provider<LicenseFactory> licenseFactory) { 
+            Provider<LicenseFactory> licenseFactory,
+            Provider<LWStoreManager> lwsManager) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -182,6 +186,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.controlRequestAcceptor = controlRequestAcceptor;
         this.incomingConnectionHandler = incomingConnectionHandler;
         this.licenseFactory = licenseFactory;
+        this.lwsManager = lwsManager;
     }
     
     /* (non-Javadoc)
@@ -403,6 +408,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("START ChatManager");
         chatManager.get().initialize();
         LOG.trace("END ChatManager");
+        
+        LOG.trace("START StoreServer");
+//        httpAcceptor.get().registerHandler("/" + LWStoreManager.PREFIX + "*",  lwsManager.get().getHandler());
+        LOG.trace("END StoreServer");
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

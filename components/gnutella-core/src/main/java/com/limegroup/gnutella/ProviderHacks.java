@@ -67,6 +67,8 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.store.server.LWStoreManager;
+import com.limegroup.gnutella.store.server.LWStoreManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -243,6 +245,7 @@ public class ProviderHacks {
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static PingRequestFactory getPingRequestFactory() { return i().getPingRequestFactory(); }
+    public static LWStoreManager getLWStoreManager() { return i().getLWStoreManager(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

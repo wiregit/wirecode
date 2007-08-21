@@ -181,7 +181,7 @@ public class HTTPAcceptor {
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
-                
+                System.out.println("word:" + word);
                 if (word.equals("GET")) {
                     handleHTTPRequest(_socket);
                 } else if (word.equals("MAGNET")) {
@@ -217,6 +217,7 @@ public class HTTPAcceptor {
 		}
 		str.trim();
 		str = URLDecoder.decode(str);
+                
 		if (str.indexOf("magnet10") > 0) {
 			int loc = 0;
 			if ((loc = str.indexOf(MAGNET_DEFAULT)) > 0) {

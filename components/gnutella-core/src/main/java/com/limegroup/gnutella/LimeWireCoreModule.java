@@ -135,6 +135,8 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.AddressToken;
+import com.limegroup.gnutella.store.server.LWStoreManager;
+import com.limegroup.gnutella.store.server.LWStoreManagerImpl;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
@@ -258,6 +260,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
+        bind(LWStoreManager.class).to(LWStoreManagerImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

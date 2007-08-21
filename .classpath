@@ -31,6 +31,8 @@
 	<classpathentry kind="src" output="components/mojito-ui/build/classes" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
+	<classpathentry kind="src" path="components/storeserver/src/main/java"/>
+	<classpathentry kind="src" path="components/storeserver/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar" sourcepath="lib/sources/commons-httpclient-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
@@ -53,7 +55,6 @@
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
 	<classpathentry kind="lib" path="tests/lib/junit.jar"/>
@@ -70,5 +71,7 @@
 	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar" sourcepath="lib/sources/guice-1.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
+	<classpathentry kind="var" path="JRE_LIB"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.5.0_11/jre/lib/jsse.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

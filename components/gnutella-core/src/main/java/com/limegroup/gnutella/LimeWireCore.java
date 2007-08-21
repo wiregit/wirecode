@@ -85,6 +85,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.store.server.LWStoreManager;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
@@ -689,6 +690,10 @@ public class LimeWireCore {
 
     public PingRequestFactory getPingRequestFactory() {
         return injector.getInstance(PingRequestFactory.class);
+    }
+    
+    public LWStoreManager getLWStoreManager() {
+        return injector.getInstance(LWStoreManager.class);
     }
     
 }
