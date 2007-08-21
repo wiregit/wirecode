@@ -244,7 +244,7 @@ abstract class DispatcherSupport implements Dispatcher {
             /**
              * Register a handler for the command <tt>cmd</tt>, and returns
              * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link StoreManager.Handler} for every
+             * can be only <b>one</b> {@link LWStoreManager.Handler} for every
              * command.
              * 
              * @param cmd String that invokes this listener
@@ -281,7 +281,7 @@ abstract class DispatcherSupport implements Dispatcher {
             /**
              * Register a listener for the command <tt>cmd</tt>, and returns
              * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link StoreManager.Handler} for every
+             * can be only <b>one</b> {@link LWStoreManager.Handler} for every
              * command.
              * 
              * @param cmd String that invokes this listener
