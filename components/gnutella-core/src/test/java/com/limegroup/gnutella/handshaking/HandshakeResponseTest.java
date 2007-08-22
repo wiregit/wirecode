@@ -71,7 +71,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         HostCatcher hc = ProviderHacks.getHostCatcher();
         hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
-        HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS);
+        HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS, ProviderHacks.getConnectionServices());
         assertTrue(hr.hasXTryUltrapeers());
     }
     
@@ -546,12 +546,13 @@ public final class HandshakeResponseTest extends LimeTestCase {
         Properties headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
-        HandshakeResponse hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
+        HandshakeResponse hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"),
+            ProviderHacks.getConnectionServices());
         runUltrapeerHeadersTest(hr);
         
         headers = new Properties();
@@ -559,12 +560,14 @@ public final class HandshakeResponseTest extends LimeTestCase {
         client = HandshakeResponse.createResponse(headers);
         
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
+        hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED,
+                ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"),
+            ProviderHacks.getConnectionServices());
         runUltrapeerHeadersTest(hr);
     }
 
@@ -582,12 +585,12 @@ public final class HandshakeResponseTest extends LimeTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
+            HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"), ProviderHacks.getConnectionServices());
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
@@ -702,16 +705,16 @@ public final class HandshakeResponseTest extends LimeTestCase {
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
         HandshakeResponse hr = 
             HandshakeResponse.createAcceptIncomingResponse(
-                HandshakeResponse.createEmptyResponse(), headers);
+                HandshakeResponse.createEmptyResponse(), headers, ProviderHacks.getConnectionServices());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
 
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            HandshakeResponse.createEmptyResponse(), headers);
+            HandshakeResponse.createEmptyResponse(), headers, ProviderHacks.getConnectionServices());
         assertTrue("should include leaf guidance", hr.hasLeafGuidance());
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            HandshakeResponse.createEmptyResponse(), new Properties());
+            HandshakeResponse.createEmptyResponse(), new Properties(), ProviderHacks.getConnectionServices());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
     }
         

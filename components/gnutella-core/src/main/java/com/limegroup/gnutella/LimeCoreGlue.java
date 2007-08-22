@@ -11,6 +11,7 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -23,12 +24,11 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * This class is the glue that holds LimeWire together.
  * All various components are wired together here.
  */
+@Singleton
 public class LimeCoreGlue {
     
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private static AtomicBoolean installed = new AtomicBoolean(false);
-    
-    private LimeCoreGlue() {}
     
     /** Wires initial pieces together that are required for nearly everything. */
     public static void preinstall() throws InstallFailedException {
@@ -79,7 +79,7 @@ public class LimeCoreGlue {
     }
 
     /** Wires all various components together. */
-    public static void install() {
+    public static void install(final NetworkManager networkManager) {
         // Only install once.
         if(!installed.compareAndSet(false, true))
             return;
@@ -98,11 +98,11 @@ public class LimeCoreGlue {
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
                 // DPINJ: make this work :/
-                return ProviderHacks.getNetworkManager().getAddress();
+                return networkManager.getAddress();
             }
 
             public int getLocalPort() {
-                return ProviderHacks.getNetworkManager().getPort();
+                return networkManager.getPort();
             }
 
             public boolean isLocalAddressPrivate() {

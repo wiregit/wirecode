@@ -220,7 +220,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
             UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
-        LimeCoreGlue.install();
+        LimeCoreGlue.install(ProviderHacks.getNetworkManager());
     }
     
     /**

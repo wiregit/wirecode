@@ -109,7 +109,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
 
     private final Provider<LicenseFactory> licenseFactory;
-    
+
     @Inject
     public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
             Provider<SimppManager> simppManager, Provider<Acceptor> acceptor,
@@ -533,7 +533,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     
     /** Runs all tasks that can be done in the background while the gui inits. */
     private void doBackgroundTasks() {
-        LimeCoreGlue.install(); // ensure glue is set before running tasks.
+        LimeCoreGlue.install(networkManager.get()); // ensure glue is set before running tasks.
         
         //add more while-gui init tasks here
         ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {

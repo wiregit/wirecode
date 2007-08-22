@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -366,8 +366,8 @@ public class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're accepting
      */
-    static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers) {
-        return new HandshakeResponse(addXTryHeader(response, headers));
+    static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers, ConnectionServices connectionServices) {
+        return new HandshakeResponse(addXTryHeader(response, headers, connectionServices));
     }
 
 
@@ -395,7 +395,7 @@ public class HandshakeResponse {
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, LimeWireUtils.getHttpServer());
-        headers.put(HeaderNames.X_ULTRAPEER, ""+ProviderHacks.getConnectionServices().isSupernode());
+        headers.put(HeaderNames.X_ULTRAPEER, Boolean.toString(connectionManager.isSupernode()));
         
 		// add any leaves
         List<? extends IpPort> leaves = connectionManager.getInitializedClientConnections();
@@ -422,9 +422,9 @@ public class HandshakeResponse {
      * @return a <tt>HandshakeResponse</tt> with the appropriate response 
      *  headers
      */
-    static HandshakeResponse createUltrapeerRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status) {
+    static HandshakeResponse createUltrapeerRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, ConnectionServices connectionServices) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
-                                     addXTryHeader(hr, new Properties()));        
+                                     addXTryHeader(hr, new Properties(), connectionServices));        
     }
 
 
@@ -457,9 +457,9 @@ public class HandshakeResponse {
      *  connection and with the specified connection headers
      */
     static HandshakeResponse 
-        createLeafRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status) {
+        createLeafRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, ConnectionServices connectionServices) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
-                                     addXTryHeader(hr, new Properties()));  
+                                     addXTryHeader(hr, new Properties(), connectionServices));  
     }
 
     /**
@@ -562,9 +562,8 @@ public class HandshakeResponse {
      * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
      *  header set according to the incoming headers from the remote host
      */
-    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection<IpPort> hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
-
+    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers, ConnectionServices connectionServices) {
+        Collection<IpPort> hosts = connectionServices.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;
     }

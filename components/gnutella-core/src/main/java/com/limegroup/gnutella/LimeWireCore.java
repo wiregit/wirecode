@@ -700,5 +700,9 @@ public class LimeWireCore {
     public UpdateCollectionFactory getUpdateCollectionFactory() {
         return injector.getInstance(UpdateCollectionFactory.class);
     }
+
+    public LimeCoreGlue getLimeCoreGlue() {
+        return injector.getInstance(LimeCoreGlue.class);
+    }
     
 }

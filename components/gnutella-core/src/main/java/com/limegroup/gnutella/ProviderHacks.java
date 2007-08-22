@@ -115,13 +115,6 @@ public class ProviderHacks {
         return aReallyLongNameThatYouDontWantToTypeALot;
     }
     
-    // Still needed in core...  
-    // Requires some factories...
-    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
-    
-    // Needs additional refactoring...
-    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
-    
     // Cleaned up in all but tests
     public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
     public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
@@ -246,6 +239,9 @@ public class ProviderHacks {
     public static IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() { return i().getIpPortContentAuthorityFactory(); }
     public static UpdateCollectionFactory getUpdateCollectionFactory() { return i().getUpdateCollectionFactory(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
+    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
+    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
+    
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

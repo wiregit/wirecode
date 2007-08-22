@@ -18,10 +18,10 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Provider;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
@@ -83,22 +83,27 @@ public class UDPHostCache {
     private final Provider<MessageRouter> messageRouter;
 
     private final PingRequestFactory pingRequestFactory;
+
+    private final ConnectionServices connectionServices;
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory) {
-        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory);
+    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory,
+            ConnectionServices connectionServices) {
+        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory, connectionServices);
         
     }
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for
      * the given amount of time, in msecs.
+     * @param connectionServices 
      */
     protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory, ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
         this.messageRouter = messageRouter;
@@ -218,7 +223,7 @@ public class UDPHostCache {
             // cancel when connected -- don't send out any more pings
             new Cancellable() {
                 public boolean isCancelled() {
-                    return ProviderHacks.getConnectionServices().isConnected();
+                    return connectionServices.isConnected();
                 }
             },
             getPing()

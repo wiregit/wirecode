@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import java.util.Properties;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -14,6 +15,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
     private final HeadersFactory headersFactory;
     private final ConnectionManager connectionManager;
+    private final ConnectionServices connectionServices;
     
     /**
      * Creates a new instance of LeafHandshakeResponder
@@ -23,11 +25,13 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    LeafHandshakeResponder(String host, HeadersFactory headersFactory, ConnectionManager connectionManager) {
+    LeafHandshakeResponder(String host, HeadersFactory headersFactory, ConnectionManager connectionManager,
+            ConnectionServices connectionServices) {
         super(host);
         
         this.headersFactory = headersFactory;
         this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
     }
     
     /**
@@ -97,7 +101,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         HandshakeStatus status = _manager.allowConnection(hr);
         if (!status.isAcceptable()) {
             HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectIncomingResponse(hr, status);
+            return HandshakeResponse.createLeafRejectIncomingResponse(hr, status, connectionServices);
         } 
 
 		//deflate if we can ...
@@ -108,6 +112,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
-        return HandshakeResponse.createAcceptIncomingResponse(hr, ret);
+        return HandshakeResponse.createAcceptIncomingResponse(hr, ret, connectionServices);
     }
 }

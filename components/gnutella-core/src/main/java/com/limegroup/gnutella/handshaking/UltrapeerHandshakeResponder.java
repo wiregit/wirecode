@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -17,6 +18,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
     private final HeadersFactory headersFactory;
     private final NetworkManager networkManager;
     private final ConnectionManager connectionManager;
+    private final ConnectionServices connectionServices;
     
 	/**
      * Creates a new instance of ClientHandshakeResponder
@@ -26,11 +28,12 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    UltrapeerHandshakeResponder(String host, NetworkManager networkManager, HeadersFactory headersFactory, ConnectionManager connectionManager) {
+    UltrapeerHandshakeResponder(String host, NetworkManager networkManager, HeadersFactory headersFactory, ConnectionManager connectionManager, ConnectionServices connectionServices) {
         super(host);
         this.networkManager = networkManager;
         this.headersFactory = headersFactory;
         this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
     }
     
 	/**
@@ -102,7 +105,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 		if (!status.isAcceptable()) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
-            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response, status);
+            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response, status, connectionServices);
 		}
 		
 		//We do this last, to prevent reject connections from being deflated,
@@ -114,7 +117,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
         // accept the connection, and let the connecting node know about 
         // Ultrapeers that are as many hops away as possible, to avoid 
         // cycles.
-        return HandshakeResponse.createAcceptIncomingResponse(response, ret);
+        return HandshakeResponse.createAcceptIncomingResponse(response, ret, connectionServices);
 	}
     
     /** 
