@@ -29,7 +29,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
      * @param host The host with whom we are handshaking
      */
     UltrapeerHandshakeResponder(String host, NetworkManager networkManager, HeadersFactory headersFactory, ConnectionManager connectionManager, ConnectionServices connectionServices) {
-        super(host);
+        super(host, connectionManager);
         this.networkManager = networkManager;
         this.headersFactory = headersFactory;
         this.connectionManager = connectionManager;

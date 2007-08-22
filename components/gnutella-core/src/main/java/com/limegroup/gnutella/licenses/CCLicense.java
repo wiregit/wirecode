@@ -19,7 +19,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -478,7 +477,7 @@ class CCLicense extends AbstractLicense {
                 } else {
                     body = getBody(url);
                     if(body != null)
-                        ProviderHacks.getLicenseCache().addData(url, body);
+                        licenseCache.addData(url, body);
                     else
                         LOG.debug("Couldn't retrieve license details from url: " + url);
                 }

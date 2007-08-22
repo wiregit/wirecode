@@ -27,7 +27,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      */
     LeafHandshakeResponder(String host, HeadersFactory headersFactory, ConnectionManager connectionManager,
             ConnectionServices connectionServices) {
-        super(host);
+        super(host, connectionManager);
         
         this.headersFactory = headersFactory;
         this.connectionManager = connectionManager;
